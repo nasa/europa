@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="anml" default="run_test">
+	
+  <property environment="env"/>
+  <!-- load overrides -->
+  <property file="${env.HOME}/.ant.properties"/>
+  <property name="javac.debug" value="${env.javac.debug}"/>
+
+  <property name="javac.debuglevel" value="source,lines,vars"/>
+  <property name="src.dir" value="src"/>
+  <property name="test.dir" value="test"/>
+  <property name="build.dir" value="bin/ant"/>
+  <property name="dist.dir" value="dist"/>
+  <property name="lib.dir" value="lib"/>
+	
+  <property name="test.file" value="CrewPlanning-problem-instance.anml"/>
+	
+  <path id="project.classpath">
+    <!--pathelement location="${lib.dir}/antlr-3.0b5.jar"/-->
+    <pathelement location="${lib.dir}/antlr-2.7.7.jar"/>
+    <pathelement location="${lib.dir}/stringtemplate-3.0.jar"/>
+    <pathelement location="${build.dir}/classes"/>
+  </path>
+
+  <target name="init">
+    <tstamp/>
+    <mkdir dir="${build.dir}/classes"/>
+    <mkdir dir="${dist.dir}"/>
+  </target>
+
+
+  <target name="cleanparser">
+    <delete>
+        <fileset dir="${src.dir}/anml">
+   	      <include name="ANML*.smap"/>
+  	      <include name="ANML.tokens"/>
+	      <include name="ANMLLexer.java"/>
+	      <include name="ANMLParser.java"/>
+  	      <include name="ANMLParserTokenTypes.*"/>
+        </fileset>
+    </delete>
+  </target>
+
+  <target name="cleansrc" 
+	description="delete all .class files from the src area">
+    <!-- Delete the class files in the jakarta web apps area -->
+    <delete>
+      <fileset casesensitive="no" defaultexcludes="no" dir="src">
+		<include name="**/*.class"/>
+		<include name="**/*~"/>
+		<include name="**/*.~*"/>
+		<include name="**/*.bak"/>
+      </fileset>
+      <fileset casesensitive="no" defaultexcludes="no" dir=".">
+		<include name="**/*~"/>
+		<include name="**/*.~*"/>
+      </fileset>
+    </delete>
+  </target>
+
+  <target name="clean" depends="cleansrc,cleanparser">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+  </target>
+	
+  <target name="anmlparser">
+        <java classname="antlr.Tool"
+              dir="${src.dir}/anml"
+              fork="true">
+          <arg value="ANML.g" />
+          <classpath refid="project.classpath"/>
+        </java>
+  </target>
+
+  <target name="build" depends="init,anmlparser">
+        <javac debug="${javac.debug}" 
+    	       debuglevel="${javac.debuglevel}" 
+    	       destdir="${build.dir}/classes" 
+    	       srcdir="${src.dir}:${test.dir}">
+          <classpath refid="project.classpath"/>
+        </javac>
+  </target>
+
+  <target name="dist">
+        <jar basedir="${build.dir}/classes" 
+        	jarfile="anml.jar"/>
+  </target>
+
+  <target name="run_test" 
+  	      depends="build">
+  	<java classname="anml.Test" dir="${test.dir}" fork="true">
+	  <classpath refid="project.classpath"/>
+	  <jvmarg value="-Xdebug"/>
+	  <jvmarg value="-Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=n"/>
+      <arg value="${test.file}"/>    	
+	</java>
+  </target>
+	
+</project>

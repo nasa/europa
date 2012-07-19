@@ -1,0 +1,74 @@
+#include "Plasma.nddl"
+
+// Declares a class of the raw types.
+class Foo extends Timeline {
+ int m_0;
+ float m_1;
+ bool m_2;
+ string m_3;
+
+ predicate p0{
+  float arg0;
+ }
+
+ predicate p1{}
+
+ Foo(){
+  m_3 = "String Value";
+ }
+}
+
+class Bar extends Foo {
+ int m_4;
+
+ // Declare predicate to assign value to inherited argument
+ predicate p0{
+  arg0 = 1.0;
+ }
+
+ // Declare predicate to extend arguments of ancestor
+ predicate p1{
+  int arg1 = 1;
+ }
+
+ predicate p2{}
+}
+
+class Baz extends Bar {
+ // Extend predicate defined initially in the root, and ommitted
+ predicate p0{
+  bool arg1;
+ }
+
+ // Extend predicate defined in interim ancestor
+ predicate p1{
+  float arg2;
+ }
+}
+
+class World extends Timeline {
+ Foo m_foo;
+ Foo m_foo2;
+ Bar m_bar;
+ Baz m_baz;
+ predicate initialState{}
+
+ World() {
+  m_foo = new Foo();
+	m_foo2 = new Baz();
+  m_bar = new Bar();
+  m_baz = new Baz();
+ }
+}
+
+World::initialState{
+ any(Foo.p1 p1);
+ any(Bar.p1 p2);
+ any(Bar.p2 p3);
+ any(Baz.p1 p4);
+ any(Baz.p2 p5);
+}
+
+World world = new World();
+close();
+goal(World.initialState g0);

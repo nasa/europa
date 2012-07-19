@@ -1,0 +1,24 @@
+SubDir PLASMA ANML test parser ;
+
+if ! $(PLASMA_READY) {
+
+# make model test parser.
+
+#ModuleMain ANMLParser : Main.cc : ANML ;
+ModuleMain ANML2NDDL : Main.cc : ANML ;
+
+local model ;
+
+for model in
+	empty.anml
+	vartype_decl.anml var_obj_declaration.anml objtype_decl.anml objtype_body_stmt.anml
+	function_declaration.anml predicate_declaration.anml problem_stmt.anml transition_constraint.anml
+	action_def.anml
+	CrewPlanning-problem-instance.anml
+	Rover.anml
+{
+  #RunModuleMain run-anml-tests : ANMLParser : $(model) $(model:S=.dot) ;
+  RunModuleMain run-anml-tests : ANML2NDDL : $(model) $(model:S=.dot) ;
+}
+
+} # PLASMA_READY

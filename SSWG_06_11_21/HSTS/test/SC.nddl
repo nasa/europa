@@ -1,0 +1,45 @@
+// ../ModuleTests/Parser/gnats/SC.ddl
+
+class Te;
+class Te___st;
+
+class Te___st extends Timeline {
+  predicate Problem3C {
+    float z;
+    float a;
+    float b;
+  }
+
+  predicate Problem3C_Int {
+    int z;
+    int a;
+    int b;
+  }
+
+  Te __DDL__object;
+  Te___st(Te object) {
+    __DDL__object = object;
+  }
+}
+
+class Te {
+  Te___st st;
+  Te() {
+    st = new Te___st(this);
+  }
+}
+
+Te___st::Problem3C {
+  sum(z, a, b);
+  eq(z, -120.000);
+  eq(a, [5.00000 +inff]);
+  eq(b, [-inff -5.00000]);
+}
+
+Te___st::Problem3C_Int {
+  sum(z, a, b);
+  eq(z, -120);
+  eq(a, [5 +inf]);
+  eq(b, [-inf -5]);
+}
+

@@ -1,0 +1,34 @@
+#include "Plasma.nddl"
+
+// Declare a base class with one predicate
+class Foo extends Timeline{
+ // Declare a predicate with 1 argument
+ predicate pred1{
+  int arg1;
+ }
+}
+
+// Declare a derived class which adds another predicate
+class Bar extends Foo {
+ predicate pred2{}
+}
+
+
+// Declare a derived class which adds another argument to an inherited predicate
+class Baz extends Foo {
+ predicate pred1{
+  float arg2; // Add an additional parameter
+  eq(arg1, [0 100]); // Constrain inherited parameter to a more restricted domain
+ }
+}
+
+// Allocate objects
+Foo foo = new Foo();
+Bar bar = new Bar();
+Baz baz = new Baz();
+
+// Allocate Tokens
+goal(foo.pred1 t0);
+goal(bar.pred1 t1);
+goal(bar.pred2 t2);
+goal(baz.pred1 t3);

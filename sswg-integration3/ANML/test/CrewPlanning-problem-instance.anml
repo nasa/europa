@@ -1,0 +1,57 @@
+/*
+ * Crew Planning problem instance in ANML
+ *
+ * We'll plan the basic daily routines for 3 crew members over 4 days.
+ * Adding : 
+ *     - regular filter changes
+ *     - medical conferences 
+ *     - some payload operations
+ *
+ */
+ 
+include "CrewPlanning-model.anml"
+
+int start_horizon = 0,
+    end_horizon = 5760; // Plan for 4 days
+
+CrewMember cm1,cm2,cm3;
+
+// Set up daily routines
+CrewPlanner cp1,cp2,cp3;
+fact over all { 
+    cp1.crewMember_ = cm1;
+    cp2.crewMember_ = cm2;
+    cp3.crewMember_ = cm3
+};   
+
+// TODO: we now probably need to be explicit about the state of the world (Crew Members, Filters, Medical Conferences, etc)
+//       at the beginning of the planning horizon
+ 
+// TODO: is this the right way to boostrap the cycle for the CrewPlanner objects?
+goal at 0 { 
+    cp1.state = "in_progress";
+    cp2.state = "in_progress";
+    cp3.state = "in_progress"
+};
+
+// Set up medical conferences
+goal in [0 1440] : crew1.mcs_ = "finished";
+goal in [0 1440] : crew2.mcs_ = "finished";
+goal in [0 1440] : crew2.mcs_ = "finished";
+
+// Set up filter changes
+FilterState spaceshipFilter;
+goal in [0 1440] : spaceshipFilter.state = "changed";
+
+// Set up payload activities;
+// TODO: How do we know who performed each activity in the end?
+goal in [start_horizon end_horizon] : payload_act_completed(1,"Kardio-ODNT",60,1,1440,0,1);
+goal in [start_horizon end_horizon] : payload_act_completed(1,"Cardiolog-2",60,1,1440,1,1);
+goal in [start_horizon end_horizon] : payload_act_completed(1,"Renal Stone Risk",60,1,1440,0,1);
+goal in [start_horizon end_horizon] : payload_act_completed(1,"Public Afffairs Office - 1",60,1,2880,1,0);
+goal in [start_horizon end_horizon] : payload_act_completed(1,"Public Afffairs Office - 1",60,1,5760,2,0);
+
+RPCM rpcm_recovery;
+// recover during the last day
+goal in [4320 5760] : rpcm_recovery.state = "finished";
+

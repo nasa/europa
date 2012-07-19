@@ -1,0 +1,13 @@
+SubDir PLASMA DSA test ;
+
+if ! $(PLASMA_READY) {
+
+ApacheAnt dsa-test : [ FGristFiles build.xml ] Main.java DSA.jar ;
+NddlModel model.1.nddl : System : dsa-test ;
+NddlModel model.2.nddl : System : dsa-test ;
+
+# C++ test Harness
+ModuleMain dsa-module-tests : module-tests.cc dsa-test-module.cc : DSA ;
+RunModuleMain run-dsa-module-tests : dsa-module-tests ;
+
+} # PLASMA_READY

@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# checkcvs: sh script checks for recent cvs checkins
+#   checks for files with U, P, R, M, C update status
+#
+#   Argument: relative location of PLASMA root
+#
+echo "Checking for recent CVS checkins..."
+
+RELDIR=`dirname "$0"`
+cd "$RELDIR"
+CVSSTATS=`cvs -f -q -n update -d -P -A 2> /dev/null | egrep "^[CPRU]" | cut -d" " -f1`
+if [ -n "$CVSSTATS" ]
+then 
+  echo "***************************************"
+  echo "* Warning: Recent CVS checkins found. *"
+  echo "***************************************"
+else
+  echo "No Recent CVS checkins found."
+fi
+exit 0

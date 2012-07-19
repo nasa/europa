@@ -1,0 +1,19 @@
+SubDir PLASMA Solvers base ;
+
+if ! $(PLASMA_READY) {
+
+ModuleBase Solvers
+	:
+	Context.cc
+	Solver.cc
+	FlawManager.cc
+	FlawFilter.cc
+	FlawHandler.cc
+	SolverDecisionPoint.cc
+	SolverUtils.cc
+	ComponentFactory.cc
+	MatchingRule.cc
+	MatchingEngine.cc
+	;
+
+} # PLASMA_READY

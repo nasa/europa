@@ -1,0 +1,7 @@
+SubDir PLASMA Utils component ;
+
+if ! $(PLASMA_READY) {
+
+ModuleComponent Utils ;
+
+} # PLASMA_READY

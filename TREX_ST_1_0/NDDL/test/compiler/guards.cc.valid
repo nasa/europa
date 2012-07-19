@@ -1,0 +1,893 @@
+// guards.nddl
+
+#include "guards.hh"
+#include "NddlUtils.hh"
+
+namespace NDDL {
+  
+  TokenStates TokenStatesBaseDomain(){
+    static TokenStates sl_enum("TokenStates");
+    if (sl_enum.isOpen()) {
+      // Insert values to initialize
+      sl_enum.insert(LabelStr("INACTIVE"));
+      sl_enum.insert(LabelStr("ACTIVE"));
+      sl_enum.insert(LabelStr("MERGED"));
+      sl_enum.insert(LabelStr("REJECTED"));
+      sl_enum.close();
+    }
+    return(sl_enum);
+  }
+  // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Timeline
+  
+  
+  
+  // Plasma.nddl:15 StringData
+  StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "StringData", name, true) {
+  }
+  StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  StringData::StringData(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "StringData", name, true) {}
+  StringData::StringData(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void StringData::handleDefaults(bool autoClose) {
+    if(data.isNoId()){
+      data = addVariable(StringDomain("string"), "data");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  // Plasma.nddl:15 StringData
+  void StringData::constructor(const LabelStr& _data) {
+    data = addVariable(StringDomain(_data, "string"), "data");
+  }
+  
+  // Plasma.nddl:15 StringData
+  class StringDataFactory0: public ConcreteObjectFactory {
+  public:
+    StringDataFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 1);
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
+                                                TypeFactory::baseDomain("string")), 
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to string");
+      check_error(arguments[0]->isSingleton());
+      LabelStr _data((LabelStr)arguments[0]->getSingletonValue());
+      
+      StringDataId instance = (new StringData(planDb, objectType, objectName))->getId();
+      instance->constructor(_data);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  Locations LocationsBaseDomain(){
+    static Locations sl_enum("Locations");
+    if (sl_enum.isOpen()) {
+      // Insert values to initialize
+      sl_enum.insert(LabelStr("Hill"));
+      sl_enum.insert(LabelStr("Rock"));
+      sl_enum.insert(LabelStr("Lander"));
+      sl_enum.close();
+    }
+    return(sl_enum);
+  }
+  
+  StringEnum StringEnumBaseDomain(){
+    static StringEnum sl_enum("StringEnum");
+    if (sl_enum.isOpen()) {
+      // Insert values to initialize
+      sl_enum.insert(LabelStr("ONE"));
+      sl_enum.insert(LabelStr("TWO"));
+      sl_enum.insert(LabelStr("THREE"));
+      sl_enum.close();
+    }
+    return(sl_enum);
+  }
+  
+  
+  // guards.nddl:6 Bar
+  Bar::Bar(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Timeline(planDatabase, "Bar", name, true) {
+  }
+  Bar::Bar(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Timeline(planDatabase, type, name, true) {
+  }
+  Bar::Bar(const ObjectId& parent, const LabelStr& name)
+   : Timeline(parent, "Bar", name, true) {}
+  Bar::Bar(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Timeline(parent, type, name, true) {}
+  // default initialization of member variables
+  void Bar::handleDefaults(bool autoClose) {
+    if(loc.isNoId()){
+      loc = addVariable(LocationsBaseDomain(), "loc");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  // implicit constructor
+  void Bar::constructor() {
+  }
+  
+  
+  // guards.nddl:6 Bar
+  DECLARE_DEFAULT_OBJECT_FACTORY(BarFactory1, Bar);
+  
+  
+  // guards.nddl:8 pred
+  Bar::pred::pred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Bar::pred::pred(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Bar::pred::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // guards.nddl:11 Foo
+  Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Timeline(planDatabase, "Foo", name, true) {
+  }
+  Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Timeline(planDatabase, type, name, true) {
+  }
+  Foo::Foo(const ObjectId& parent, const LabelStr& name)
+   : Timeline(parent, "Foo", name, true) {}
+  Foo::Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Timeline(parent, type, name, true) {}
+  // default initialization of member variables
+  void Foo::handleDefaults(bool autoClose) {
+    if(arg1.isNoId()){
+      arg1 = addVariable(IntervalIntDomain(20,20, "int"), "arg1");
+    }
+    check_error(arg2.isValid(), "object variables must be initialized explicitly");
+    
+    if (autoClose)
+      close();
+  }
+  
+  
+  // guards.nddl:11 Foo
+  void Foo::constructor() {
+    arg2 = addVariable(BarDomain((new Bar(m_id, "arg2"))->getId(), "Bar"), "arg2");
+    Id<Bar>(singleton(arg2))->constructor();
+    Id<Bar>(singleton(arg2))->handleDefaults();
+  }
+  
+  // guards.nddl:11 Foo
+  class FooFactory2: public ConcreteObjectFactory {
+  public:
+    FooFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 0);
+      FooId instance = (new Foo(planDb, objectType, objectName))->getId();
+      instance->constructor();
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  
+  // guards.nddl:19 basicToken
+  Foo::basicToken::basicToken(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Foo::basicToken::basicToken(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Foo::basicToken::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // guards.nddl:20 tokenWithParameters
+  Foo::tokenWithParameters::tokenWithParameters(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Foo::tokenWithParameters::tokenWithParameters(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Foo::tokenWithParameters::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if(int_arg.isNoId()){
+      int_arg = addParameter(IntervalIntDomain("int"), "int_arg");
+    }
+    if(bool_arg.isNoId()){
+      bool_arg = addParameter(BoolDomain("bool"), "bool_arg");
+    }
+    if(float_arg.isNoId()){
+      float_arg = addParameter(IntervalDomain("float"), "float_arg");
+    }
+    if(location_arg.isNoId()){
+      location_arg = addParameter(LocationsBaseDomain(), "location_arg");
+    }
+    if(strEnum_arg.isNoId()){
+      strEnum_arg = addParameter(StringEnumBaseDomain(), "strEnum_arg");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // guards.nddl:28 impliedObjectGuard
+  Foo::impliedObjectGuard::impliedObjectGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Foo::impliedObjectGuard::impliedObjectGuard(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Foo::impliedObjectGuard::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if(allFoo.isNoId()){
+      allFoo = addParameter(ObjectDomain("Foo"), "allFoo");
+      completeObjectParam(Foo, allFoo);
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // guards.nddl:32 impliedLocalVariableGuard
+  Foo::impliedLocalVariableGuard::impliedLocalVariableGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Foo::impliedLocalVariableGuard::impliedLocalVariableGuard(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Foo::impliedLocalVariableGuard::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // guards.nddl:34 singletonGuard
+  Foo::singletonGuard::singletonGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Foo::singletonGuard::singletonGuard(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Foo::singletonGuard::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // guards.nddl:35 mixGuardedWithUnguarded
+  Foo::mixGuardedWithUnguarded::mixGuardedWithUnguarded(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Foo::mixGuardedWithUnguarded::mixGuardedWithUnguarded(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Foo::mixGuardedWithUnguarded::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // guards.nddl:36 localVariableGuard
+  Foo::localVariableGuard::localVariableGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Foo::localVariableGuard::localVariableGuard(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Foo::localVariableGuard::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // guards.nddl:37 multipleNestedGuards
+  Foo::multipleNestedGuards::multipleNestedGuards(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Foo::multipleNestedGuards::multipleNestedGuards(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Foo::multipleNestedGuards::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  // guards.nddl:43 impliedObjectGuard
+  class Foo$impliedObjectGuard$0$0: public RuleInstance {
+  public:
+    Foo$impliedObjectGuard$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  class Foo$impliedObjectGuard$0$0$0: public RuleInstance {
+  public:
+    Foo$impliedObjectGuard$0$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars, const bool positive)
+    : RuleInstance(parent, vars, positive){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$impliedObjectGuard$0, Foo$impliedObjectGuard$0$0, Foo.impliedObjectGuard, "guards.nddl,43");
+  
+  void Foo$impliedObjectGuard$0$0::handleExecute() {
+    objectVar(Bar, bar, false, false);
+    localSlave(basicToken, g1, "meets");
+    sameObject(object, g1);
+    meets(this, g1);
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("allFoo"), std::string("arg1"), false));
+      vars.push_back(ruleVariable(IntervalIntDomain(0, 100, "int")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("object"), std::string("arg1"), false));
+      vars.push_back(varFromObject(std::string("allFoo"), std::string("arg1"), false));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varfromtok(tok(getId(), std::string("g1")), std::string("object.arg1")));
+      vars.push_back(varFromObject(std::string("object"), std::string("arg1"), false));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("object"), std::string("arg2"), false));
+      vars.push_back(var(getId(),std::string("bar")));
+      rule_constraint(eq, vars);
+    }
+    addChildRule(new Foo$impliedObjectGuard$0$0$0(m_id, makeScope(var(getId(),std::string("object"))),true));
+  }
+  void Foo$impliedObjectGuard$0$0$0::handleExecute() {
+    slave(Bar::pred, Bar.pred, t0, LabelStr("any"));
+    constrainObject(object ,arg2,t0);
+  }
+  
+  // guards.nddl:64 impliedLocalVariableGuard
+  class Foo$impliedLocalVariableGuard$1$0: public RuleInstance {
+  public:
+    Foo$impliedLocalVariableGuard$1$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$impliedLocalVariableGuard$1, Foo$impliedLocalVariableGuard$1$0, Foo.impliedLocalVariableGuard, "guards.nddl,64");
+  
+  void Foo$impliedLocalVariableGuard$1$0::handleExecute() {
+    objectVar(Foo, f1, false, false);
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("f1"), std::string("arg1"), false));
+      vars.push_back(ruleVariable(IntervalIntDomain(20,20, "int")));
+      rule_constraint(eq, vars);
+    }
+  }
+  
+  // guards.nddl:70 singletonGuard
+  class Foo$singletonGuard$2$0: public RuleInstance {
+  public:
+    Foo$singletonGuard$2$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  class Foo$singletonGuard$2$0$0: public RuleInstance {
+  public:
+    Foo$singletonGuard$2$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars, const bool positive)
+    : RuleInstance(parent, vars, positive){}
+    void handleExecute();
+  };
+  
+  class Foo$singletonGuard$2$0$0$0: public RuleInstance {
+  public:
+    Foo$singletonGuard$2$0$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars, const bool positive)
+    : RuleInstance(parent, vars, positive){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$singletonGuard$2, Foo$singletonGuard$2$0, Foo.singletonGuard, "guards.nddl,70");
+  
+  void Foo$singletonGuard$2$0::handleExecute() {
+    addChildRule(new Foo$singletonGuard$2$0$0(m_id, makeScope(var(getId(),std::string("object"))),true));
+  }
+  void Foo$singletonGuard$2$0$0::handleExecute() {
+    localSlave(basicToken, g1, "meets");
+    sameObject(object, g1);
+    meets(this, g1);
+    addChildRule(new Foo$singletonGuard$2$0$0$0(m_id, makeScope(varfromtok(tok(getId(), std::string("g1")), std::string("object"))),true));
+  }
+  void Foo$singletonGuard$2$0$0$0::handleExecute() {
+    localSlave(basicToken, g2, "met_by");
+    sameObject(object, g2);
+    met_by(this, g2);
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varfromtok(tok(getId(), std::string("g1")), std::string("duration")));
+      vars.push_back(varfromtok(tok(getId(), std::string("g2")), std::string("duration")));
+      rule_constraint(eq, vars);
+    }
+  }
+  
+  // guards.nddl:80 tokenWithParameters
+  class Foo$tokenWithParameters$3$0: public RuleInstance {
+  public:
+    Foo$tokenWithParameters$3$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  class Foo$tokenWithParameters$3$0$0: public RuleInstance {
+  public:
+    Foo$tokenWithParameters$3$0$0(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
+    void handleExecute();
+  };
+  
+  class Foo$tokenWithParameters$3$0$1: public RuleInstance {
+  public:
+    Foo$tokenWithParameters$3$0$1(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
+    void handleExecute();
+  };
+  
+  class Foo$tokenWithParameters$3$0$2: public RuleInstance {
+  public:
+    Foo$tokenWithParameters$3$0$2(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
+    void handleExecute();
+  };
+  
+  class Foo$tokenWithParameters$3$0$3: public RuleInstance {
+  public:
+    Foo$tokenWithParameters$3$0$3(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
+    void handleExecute();
+  };
+  
+  class Foo$tokenWithParameters$3$0$4: public RuleInstance {
+  public:
+    Foo$tokenWithParameters$3$0$4(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
+    void handleExecute();
+  };
+  
+  class Foo$tokenWithParameters$3$0$5: public RuleInstance {
+  public:
+    Foo$tokenWithParameters$3$0$5(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
+    void handleExecute();
+  };
+  
+  class Foo$tokenWithParameters$3$0$6: public RuleInstance {
+  public:
+    Foo$tokenWithParameters$3$0$6(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
+    void handleExecute();
+  };
+  
+  class Foo$tokenWithParameters$3$0$7: public RuleInstance {
+  public:
+    Foo$tokenWithParameters$3$0$7(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$tokenWithParameters$3, Foo$tokenWithParameters$3$0, Foo.tokenWithParameters, "guards.nddl,80");
+  
+  void Foo$tokenWithParameters$3$0::handleExecute() {
+    addChildRule(new Foo$tokenWithParameters$3$0$0(m_id, var(getId(),std::string("bool_arg")), BoolDomain(true, "bool"), true));
+    addChildRule(new Foo$tokenWithParameters$3$0$1(m_id, var(getId(),std::string("int_arg")), IntervalIntDomain(10,10, "int"), true));
+    addChildRule(new Foo$tokenWithParameters$3$0$2(m_id, var(getId(),std::string("location_arg")), SymbolDomain(LabelStr("Lander"), "Locations"), true));
+    addChildRule(new Foo$tokenWithParameters$3$0$3(m_id, var(getId(),std::string("bool_arg")), BoolDomain("bool"), true));
+    addChildRule(new Foo$tokenWithParameters$3$0$4(m_id, var(getId(),std::string("int_arg")), IntervalDomain(1.3, 2.4, "float"), true));
+    addChildRule(new Foo$tokenWithParameters$3$0$5(m_id, var(getId(),std::string("float_arg")), IntervalIntDomain(1, 9, "int"), true));
+    addChildRule(new Foo$tokenWithParameters$3$0$6(m_id, var(getId(),std::string("location_arg")), SymbolDomain(listFromString("Hill$Lander$",false), "Locations"), true));
+    addChildRule(new Foo$tokenWithParameters$3$0$7(m_id, var(getId(),std::string("strEnum_arg")), SymbolDomain(listFromString("ONE$THREE$",false), "StringEnum"), true));
+  }
+  void Foo$tokenWithParameters$3$0$0::handleExecute() {
+    localSlave(basicToken, t1, "meets");
+    sameObject(object, t1);
+    meets(this, t1);
+  }
+  void Foo$tokenWithParameters$3$0$1::handleExecute() {
+    localSlave(basicToken, t2, "meets");
+    sameObject(object, t2);
+    meets(this, t2);
+  }
+  void Foo$tokenWithParameters$3$0$2::handleExecute() {
+    localSlave(basicToken, t3, "meets");
+    sameObject(object, t3);
+    meets(this, t3);
+  }
+  void Foo$tokenWithParameters$3$0$3::handleExecute() {
+    localSlave(basicToken, t4, "meets");
+    sameObject(object, t4);
+    meets(this, t4);
+  }
+  void Foo$tokenWithParameters$3$0$4::handleExecute() {
+    localSlave(basicToken, t4, "meets");
+    sameObject(object, t4);
+    meets(this, t4);
+  }
+  void Foo$tokenWithParameters$3$0$5::handleExecute() {
+    localSlave(basicToken, t5, "meets");
+    sameObject(object, t5);
+    meets(this, t5);
+  }
+  void Foo$tokenWithParameters$3$0$6::handleExecute() {
+    localSlave(basicToken, t6, "meets");
+    sameObject(object, t6);
+    meets(this, t6);
+  }
+  void Foo$tokenWithParameters$3$0$7::handleExecute() {
+    localSlave(basicToken, t6, "meets");
+    sameObject(object, t6);
+    meets(this, t6);
+  }
+  
+  // guards.nddl:109 tokenWithParameters
+  class Foo$tokenWithParameters$4$0: public RuleInstance {
+  public:
+    Foo$tokenWithParameters$4$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  class Foo$tokenWithParameters$4$0$0: public RuleInstance {
+  public:
+    Foo$tokenWithParameters$4$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars, const bool positive)
+    : RuleInstance(parent, vars, positive){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$tokenWithParameters$4, Foo$tokenWithParameters$4$0, Foo.tokenWithParameters, "guards.nddl,109");
+  
+  void Foo$tokenWithParameters$4$0::handleExecute() {
+    addChildRule(new Foo$tokenWithParameters$4$0$0(m_id, makeScope(var(getId(),std::string("bool_arg"))),true));
+  }
+  void Foo$tokenWithParameters$4$0$0::handleExecute() {
+    localSlave(basicToken, t1, "meets");
+    sameObject(object, t1);
+    meets(this, t1);
+  }
+  
+  // guards.nddl:116 mixGuardedWithUnguarded
+  class Foo$mixGuardedWithUnguarded$5$0: public RuleInstance {
+  public:
+    Foo$mixGuardedWithUnguarded$5$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  class Foo$mixGuardedWithUnguarded$5$0$0: public RuleInstance {
+  public:
+    Foo$mixGuardedWithUnguarded$5$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars, const bool positive)
+    : RuleInstance(parent, vars, positive){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$mixGuardedWithUnguarded$5, Foo$mixGuardedWithUnguarded$5$0, Foo.mixGuardedWithUnguarded, "guards.nddl,116");
+  
+  void Foo$mixGuardedWithUnguarded$5$0::handleExecute() {
+    localSlave(tokenWithParameters, t1, "meets");
+    sameObject(object, t1);
+    meets(this, t1);
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varfromtok(tok(getId(), std::string("t1")), std::string("int_arg")));
+      vars.push_back(ruleVariable(IntervalIntDomain(20,20, "int")));
+      rule_constraint(eq, vars);
+    }
+    addChildRule(new Foo$mixGuardedWithUnguarded$5$0$0(m_id, makeScope(varfromtok(tok(getId(), std::string("t1")), std::string("bool_arg"))),true));
+  }
+  void Foo$mixGuardedWithUnguarded$5$0$0::handleExecute() {
+    localSlave(basicToken, t2, "meets");
+    sameObject(object, t2);
+    meets(this, t2);
+  }
+  
+  // guards.nddl:125 localVariableGuard
+  class Foo$localVariableGuard$6$0: public RuleInstance {
+  public:
+    Foo$localVariableGuard$6$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  class Foo$localVariableGuard$6$0$0: public RuleInstance {
+  public:
+    Foo$localVariableGuard$6$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars, const bool positive)
+    : RuleInstance(parent, vars, positive){}
+    void handleExecute();
+  };
+  
+  class Foo$localVariableGuard$6$0$1: public RuleInstance {
+  public:
+    Foo$localVariableGuard$6$0$1(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
+    void handleExecute();
+  };
+  
+  class Foo$localVariableGuard$6$0$2: public RuleInstance {
+  public:
+    Foo$localVariableGuard$6$0$2(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
+    void handleExecute();
+  };
+  
+  class Foo$localVariableGuard$6$0$3: public RuleInstance {
+  public:
+    Foo$localVariableGuard$6$0$3(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
+    void handleExecute();
+  };
+  
+  class Foo$localVariableGuard$6$0$4: public RuleInstance {
+  public:
+    Foo$localVariableGuard$6$0$4(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars, const bool positive)
+    : RuleInstance(parent, vars, positive){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$localVariableGuard$6, Foo$localVariableGuard$6$0, Foo.localVariableGuard, "guards.nddl,125");
+  
+  void Foo$localVariableGuard$6$0::handleExecute() {
+    localVar(BoolDomain(), b, true);
+    localVar(LocationsBaseDomain(), local_locations, true);
+    objectVar(Foo, f, true, false);
+    addChildRule(new Foo$localVariableGuard$6$0$0(m_id, makeScope(var(getId(),std::string("b"))),true));
+    addChildRule(new Foo$localVariableGuard$6$0$1(m_id, var(getId(),std::string("b")), BoolDomain(false, "bool"), false));
+    addChildRule(new Foo$localVariableGuard$6$0$2(m_id, var(getId(),std::string("b")), BoolDomain(false, "bool"), true));
+    addChildRule(new Foo$localVariableGuard$6$0$3(m_id, var(getId(),std::string("local_locations")), SymbolDomain(LabelStr("Hill"), "Locations"), true));
+    addChildRule(new Foo$localVariableGuard$6$0$4(m_id, makeScope(var(getId(),std::string("f"))),true));
+  }
+  void Foo$localVariableGuard$6$0$0::handleExecute() {
+    localSlave(basicToken, t, "meets");
+    sameObject(object, t);
+    meets(this, t);
+  }
+  void Foo$localVariableGuard$6$0$1::handleExecute() {
+    localSlave(basicToken, t, "meets");
+    sameObject(object, t);
+    meets(this, t);
+  }
+  void Foo$localVariableGuard$6$0$2::handleExecute() {
+    localSlave(basicToken, t, "meets");
+    sameObject(object, t);
+    meets(this, t);
+  }
+  void Foo$localVariableGuard$6$0$3::handleExecute() {
+    localSlave(basicToken, t2, "met_by");
+    sameObject(object, t2);
+    met_by(this, t2);
+  }
+  void Foo$localVariableGuard$6$0$4::handleExecute() {
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("f"), std::string("arg1"), false));
+      vars.push_back(ruleVariable(IntervalIntDomain(20,20, "int")));
+      rule_constraint(eq, vars);
+    }
+  }
+  
+  // guards.nddl:144 multipleNestedGuards
+  class Foo$multipleNestedGuards$7$0: public RuleInstance {
+  public:
+    Foo$multipleNestedGuards$7$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  class Foo$multipleNestedGuards$7$0$0: public RuleInstance {
+  public:
+    Foo$multipleNestedGuards$7$0$0(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
+    void handleExecute();
+  };
+  
+  class Foo$multipleNestedGuards$7$0$0$0: public RuleInstance {
+  public:
+    Foo$multipleNestedGuards$7$0$0$0(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
+    void handleExecute();
+  };
+  
+  class Foo$multipleNestedGuards$7$0$0$0$0: public RuleInstance {
+  public:
+    Foo$multipleNestedGuards$7$0$0$0$0(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$multipleNestedGuards$7, Foo$multipleNestedGuards$7$0, Foo.multipleNestedGuards, "guards.nddl,144");
+  
+  void Foo$multipleNestedGuards$7$0::handleExecute() {
+    localVar(LocationsBaseDomain(), locs, false);
+    localSlave(tokenWithParameters, t1, "any");
+    sameObject(object, t1);
+    addChildRule(new Foo$multipleNestedGuards$7$0$0(m_id, varfromtok(tok(getId(), std::string("t1")), std::string("int_arg")), IntervalIntDomain(10,10, "int"), true));
+  }
+  void Foo$multipleNestedGuards$7$0$0::handleExecute() {
+    localVar(BoolDomain(), OR, true);
+    addChildRule(new Foo$multipleNestedGuards$7$0$0$0(m_id, var(getId(),std::string("OR")), BoolDomain(true, "bool"), true));
+  }
+  void Foo$multipleNestedGuards$7$0$0$0::handleExecute() {
+    localSlave(tokenWithParameters, t2, "meets");
+    sameObject(object, t2);
+    meets(this, t2);
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("locs")));
+      vars.push_back(varfromtok(tok(getId(), std::string("t2")), std::string("location_arg")));
+      rule_constraint(eq, vars);
+    }
+    addChildRule(new Foo$multipleNestedGuards$7$0$0$0$0(m_id, varfromtok(tok(getId(), std::string("t1")), std::string("location_arg")), SymbolDomain(LabelStr("Hill"), "Locations"), true));
+  }
+  void Foo$multipleNestedGuards$7$0$0$0$0::handleExecute() {
+    localSlave(basicToken, t3, "meets");
+    sameObject(object, t3);
+    meets(t2, t3);
+  }
+  
+} // namespace NDDL
+
+
+namespace NDDL {
+  // Boot-strap code to initialize schema
+  extern "C" SchemaId loadSchema(){
+    Id<Schema> id = Schema::instance("guards");
+    id->reset(); // Reset prior data if present. 
+    
+    // Register Constraints
+    // Invoke commands to populate schema with type definitions
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("StringData", "Object");
+    id->addObjectType("Bar", "Timeline");
+    id->addObjectType("Foo", "Timeline");
+    id->addEnum("TokenStates");
+    id->addMember("StringData", "string", "data");
+    id->addEnum("Locations");
+    id->addEnum("StringEnum");
+    id->addMember("Bar", "Locations", "loc");
+    id->addPredicate("Bar.pred");
+    id->addMember("Foo", "int", "arg1");
+    id->addMember("Foo", "Bar", "arg2");
+    id->addPredicate("Foo.basicToken");
+    id->addPredicate("Foo.tokenWithParameters");
+    id->addMember("Foo.tokenWithParameters", "int", "int_arg");
+    id->addMember("Foo.tokenWithParameters", "bool", "bool_arg");
+    id->addMember("Foo.tokenWithParameters", "float", "float_arg");
+    id->addMember("Foo.tokenWithParameters", "Locations", "location_arg");
+    id->addMember("Foo.tokenWithParameters", "StringEnum", "strEnum_arg");
+    id->addPredicate("Foo.impliedObjectGuard");
+    id->addMember("Foo.impliedObjectGuard", "Foo", "allFoo");
+    id->addPredicate("Foo.impliedLocalVariableGuard");
+    id->addPredicate("Foo.singletonGuard");
+    id->addPredicate("Foo.mixGuardedWithUnguarded");
+    id->addPredicate("Foo.localVariableGuard");
+    id->addPredicate("Foo.multipleNestedGuards");
+    id->addValue("TokenStates", LabelStr("INACTIVE"));
+    id->addValue("TokenStates", LabelStr("ACTIVE"));
+    id->addValue("TokenStates", LabelStr("MERGED"));
+    id->addValue("TokenStates", LabelStr("REJECTED"));
+    id->addValue("Locations", LabelStr("Hill"));
+    id->addValue("Locations", LabelStr("Rock"));
+    id->addValue("Locations", LabelStr("Lander"));
+    id->addValue("StringEnum", LabelStr("ONE"));
+    id->addValue("StringEnum", LabelStr("TWO"));
+    id->addValue("StringEnum", LabelStr("THREE"));
+    // Force allocation of model specific type factories
+    // Allocate factories
+    REGISTER_TOKEN_FACTORY(Bar::pred::Factory);
+    REGISTER_TOKEN_FACTORY(Foo::basicToken::Factory);
+    REGISTER_TOKEN_FACTORY(Foo::tokenWithParameters::Factory);
+    REGISTER_TOKEN_FACTORY(Foo::impliedObjectGuard::Factory);
+    REGISTER_TOKEN_FACTORY(Foo::impliedLocalVariableGuard::Factory);
+    REGISTER_TOKEN_FACTORY(Foo::singletonGuard::Factory);
+    REGISTER_TOKEN_FACTORY(Foo::mixGuardedWithUnguarded::Factory);
+    REGISTER_TOKEN_FACTORY(Foo::localVariableGuard::Factory);
+    REGISTER_TOKEN_FACTORY(Foo::multipleNestedGuards::Factory);
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(TokenStates, TokenStatesBaseDomain());
+    REGISTER_TYPE_FACTORY(Timeline, ObjectDomain("Timeline"));
+    REGISTER_TYPE_FACTORY(StringData, ObjectDomain("StringData"));
+    REGISTER_OBJECT_FACTORY(StringDataFactory0, StringData:string);
+    REGISTER_TYPE_FACTORY(Locations, LocationsBaseDomain());
+    REGISTER_TYPE_FACTORY(StringEnum, StringEnumBaseDomain());
+    REGISTER_TYPE_FACTORY(Bar, ObjectDomain("Bar"));
+    REGISTER_OBJECT_FACTORY(BarFactory1, Bar);
+    REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
+    REGISTER_OBJECT_FACTORY(FooFactory2, Foo);
+    // Allocate rules
+    new Rule$Foo$multipleNestedGuards$7();
+    new Rule$Foo$tokenWithParameters$3();
+    new Rule$Foo$tokenWithParameters$4();
+    new Rule$Foo$impliedObjectGuard$0();
+    new Rule$Foo$mixGuardedWithUnguarded$5();
+    new Rule$Foo$localVariableGuard$6();
+    new Rule$Foo$impliedLocalVariableGuard$1();
+    new Rule$Foo$singletonGuard$2();
+    return id;
+  }
+  
+}

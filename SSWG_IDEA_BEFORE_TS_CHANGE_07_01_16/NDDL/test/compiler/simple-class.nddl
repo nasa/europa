@@ -1,0 +1,67 @@
+#include "Plasma.nddl"
+
+enum Locations {Hill, Rock, Lander};
+typedef string {'A1', 'B1', 'Martian City'} Strings;
+typedef int {1, 10, 35, 100 } Speeds;
+typedef float {1.9, 2.67, 3.78} Frequencies;
+
+// Declares a class of the raw types (and Enumerations), but uses the default constructor
+class Foo {
+ // once we allowed class-scoped enums
+
+ int m_0;
+ float m_1;
+ bool m_2;
+ string m_3;
+ Locations m_4;
+ Speeds m_5;
+ Frequencies m_6;
+ // once m_7 was a class-scoped enum
+ Strings m_8;
+ Foo(){
+  m_3 = "This string must be initialized";
+ }
+
+ Foo(int _m_0, float _m_1){
+  m_0 = _m_0;
+  m_1 = _m_1;
+  // Forces failure: m_1 = 10;
+  m_2 = false;
+  m_3 = "This still must be set!";
+  m_4 = Hill;
+  m_5 = 100;
+  m_6 = 3.78;
+  m_8 = 'Martian City';
+ }
+}
+
+// Declares mandatory world class, with constructor with no arguments.
+class World extends Timeline {
+ int m_0;
+ int m_1;
+ Foo m_foo1;
+ Foo m_foo2;
+
+ predicate initialState{}
+ predicate Hill{}
+
+ World(){
+  m_foo1 = new Foo();
+  m_foo2 = new Foo();
+ }
+}
+
+World::initialState{
+ neq(Hill, Locations.Rock);
+ meets(World.Hill h);
+}
+
+World w = new World();
+Foo f0 = new Foo();
+Foo f1 = new Foo(10, 1234.98);
+close();
+
+rejectable(World.initialState g0);
+g0.reject();
+
+goal(World.initialState g1);

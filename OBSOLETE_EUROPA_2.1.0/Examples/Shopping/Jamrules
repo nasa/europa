@@ -1,0 +1,7 @@
+{
+  local SUBDIR = $(Shopping) ;
+  local PLASMA = $(PLASMA_HOME) ;
+  include [ FDirName $(PLASMA_HOME) Jamrules ] ;
+  include [ FDirName $(SUBDIR) Jamfile ] ;
+  Shopping_READY = TRUE ;
+}

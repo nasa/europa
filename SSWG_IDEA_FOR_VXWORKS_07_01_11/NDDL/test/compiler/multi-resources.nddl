@@ -1,0 +1,69 @@
+#include "Plasma.nddl"
+
+class Battery extends Resource {
+ Battery(float ic, float ll_min, float ll_max){
+  super(ic, ll_min, ll_max);
+ }
+}
+
+class SolarPanel extends Resource {
+ SolarPanel(float ic, float ll_min, float ll_max){
+  super(ic, ll_min, ll_max);
+ }
+}
+
+enum Locations {Here, There, Everywhere};
+
+class Rover extends Timeline {
+ predicate Drive{
+  Locations from, to;
+  float expected_energy_used;
+ }
+}
+
+Rover::Drive{
+ neq(from, to);
+ meets(Battery.change battery);
+
+ // Compiler BUG not to trap error on name usage
+ eq(battery.quantity, expected_energy_used);
+}
+
+class World extends Timeline {
+ SolarPanel solarPanel;
+ Battery mainBattery;
+ Battery reserveBattery;
+ Rover rover;
+
+ predicate initialState{}
+
+ World(){
+  solarPanel = new SolarPanel(10.0, 0.0, 30.0);
+  mainBattery = new Battery(1000.0, 100.0, 1200.0);
+  reserveBattery = new Battery(1000.0, 100.0, 1200.0);
+  rover = new Rover();
+ }
+}
+
+World::initialState{
+ // First drive
+ any(Rover.Drive a);
+ eq(a.from, Here);
+ eq(a.to, There);
+
+ // Second drive occurs later
+ any(Rover.Drive b);
+ eq(b.from, There);
+ eq(b.to, Everywhere);
+
+ // First drive first!
+ leq(a.end, b.start);
+
+ any(Battery.change tx);
+ eq(tx.quantity, 4);
+}
+
+World world = new World();
+close();
+goal(World.initialState g0);
+goal(Rover.Drive g1);

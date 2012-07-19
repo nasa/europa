@@ -1,0 +1,50 @@
+<Heuristics-HSTS
+xmlns="HSTS"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="Heuristics-HSTS.xsd">
+
+<Defaults>
+ <DefaultPriorityPref>low</DefaultPriorityPref>
+ <DefaultCompatibility>
+   <Priority>10</Priority>
+   <PredicateSpec>
+     <PredicateName>Commands.TakeSample</PredicateName>
+     <PredicateParameters/>
+   </PredicateSpec>
+ </DefaultCompatibility>
+ <DefaultToken>
+   <Priority>500.0</Priority>
+   <DecisionPreference>
+     <StateOrder>
+        <State>merge</State>
+        <Order>early</Order>
+     </StateOrder>
+     <StateOrder>
+        <State>activate</State>
+        <Order>early</Order>
+     </StateOrder>
+     <State>reject</State>
+   </DecisionPreference>
+ </DefaultToken>
+ <DefaultConstrainedVariable>
+   <Priority>5</Priority>
+   <ValueOrder>descending</ValueOrder>
+ </DefaultConstrainedVariable>
+</Defaults>
+
+<VariableSpecification>
+<ConstrainedVariable>
+  <Priority>50</Priority>
+  <VariableSpec>
+    <Name>rock</Name>
+  </VariableSpec>
+  <PredicateSpec>
+  <PredicateName>Commands.TakeSample</PredicateName>
+  <PredicateParameters/>
+  </PredicateSpec>
+</ConstrainedVariable>
+</VariableSpecification>
+
+<TokenSpecification/>
+
+</Heuristics-HSTS>

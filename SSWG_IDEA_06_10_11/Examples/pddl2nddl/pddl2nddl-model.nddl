@@ -1,0 +1,74 @@
+#include "../../NDDL/base/Plasma.nddl" 
+#include "../../NDDL/base/PlannerConfig.nddl"
+
+/////// STATE VARIABLES ////////
+
+class Var1 {
+  predicate at_truck1_postoffice1{};
+}
+
+class Var0 {
+  predicate at_pkg1_postoffice1{};
+  predicate in_pkg1_truck1{};
+}
+
+/////// ACTIONS  ////////
+
+////////
+
+class unload_truck_pkg1_truck1_postoffice1 {
+    predicate executing{};
+    predicate not_executing{};
+}
+
+unload_truck_pkg1_truck1_postoffice1::executing{
+    meets(not_executing);
+    met_by(not_executing);
+
+    contained_by(Var0.in_pkg1_truck1);
+    contained_by(Var1.at_truck1_postoffice1);
+
+    meets(Var0.at_pkg1_postoffice1);
+}
+
+unload_truck_pkg1_truck1_postoffice1::not_executing{
+
+}
+
+////////
+
+class load_truck_pkg1_truck1_postoffice1 {
+    predicate executing{};
+    predicate not_executing{};
+}
+
+load_truck_pkg1_truck1_postoffice1::executing{
+    meets(not_executing);
+    met_by(not_executing);
+
+    contained_by(Var0.at_pkg1_postoffice1);
+    contained_by(Var1.at_truck1_postoffice1);
+
+    meets(Var0.in_pkg1_truck1);
+}
+
+load_truck_pkg1_truck1_postoffice1::not_executing{
+
+}
+
+////////
+
+/////// CONDITIONS ON STATES  ////////
+
+Var1::at_truck1_postoffice1{
+   // WARNING! no actions assert this effect
+};
+
+Var0::at_pkg1_postoffice1{
+    met_by(unload_truck_pkg1_truck1_postoffice1.executing);
+};
+
+Var0::in_pkg1_truck1{
+    met_by(load_truck_pkg1_truck1_postoffice1.executing);
+};
+

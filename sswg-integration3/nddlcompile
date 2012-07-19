@@ -1,0 +1,10 @@
+#!/bin/bash
+NDDL=`dirname "$0"`/NDDL/base
+if [ -n $JAVA ]; then
+  if [ -n $JAVA_HOME ]; then
+    JAVA=$JAVA_HOME/bin/java;
+  else
+    JAVA=java;
+  fi;
+fi
+$JAVA -cp $NDDL/libraries/nanoxml.jar:$NDDL/libraries/antlr.jar:$NDDL/jars/nddl.jar nddl.NddlCompiler "$@"

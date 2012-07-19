@@ -1,0 +1,397 @@
+typedef int {1, 2, 3} intEnum;
+typedef int [1 10] intRange;
+typedef float {1.2, 3.0, 4.5} floatEnum;
+typedef float [1.2 4.0] floatRange1;
+typedef float [2.0 4.2] floatRange2;
+typedef float [2.3 4.5] floatRange3;
+enum userValueType1 {USR_115, USR_230}
+enum userValueType2 {USR_116, USR_231}
+enum userValueType3 {USR_117, USR_232}
+enum userValueType4 {USR_118, USR_233}
+
+class Class1;  class Class2;  class Class3;  class Class4;  class Class5;
+class Class6;  class Class7;  class Class8;  class Class9;  class Class10;
+class Class11; class Class12; class Class13; class Class14; class Class15;
+class Class16; class Class17; class Class18; class Class19; class Class20;
+class Class21; class Class22; class Class23; class Class24; class Class25;
+class Class26; class Class27; class Class28;
+
+class SuperClass {
+}
+
+class SubClass
+extends SuperClass
+{
+    // fundamental numeric types
+            int INT_SINGLE1 = 7;
+    private    int INT_SINGLE2 = 7;
+    public    int INT_SINGLE3 = 7;
+            int INT_SET1 = {1,2,3};
+    private    int INT_SET2 = {1,2,3};
+    public    int INT_SET3 = {1,2,3};
+            int INT_RANGE1 = [8 10];
+    private    int INT_RANGE2 = [8 10];
+    public    int INT_RANGE3 = [8 10];
+            float FLOAT_SINGLE1 = 3.4;
+    private    float FLOAT_SINGLE2 = 3.4;
+    public    float FLOAT_SINGLE3 = 3.4;
+            float FLOAT_SET1 = {1.2,2.0,4.3};
+    private    float FLOAT_SET2 = {1.0,1.2,2.3};
+    public    float FLOAT_SET3 = {1.2,2.3,3.0};
+            float FLOAT_RANGE1 = [3.0 45.5];
+    private    float FLOAT_RANGE2 = [3.0 45.5];
+    public    float FLOAT_RANGE3 = [3.0 45.5];
+            float FLOAT_RANGE4 = [4.5 10.];
+    private    float FLOAT_RANGE5 = [4.5 10.];
+    public    float FLOAT_RANGE6 = [4.5 10.];
+            float FLOAT_RANGE7 = [1. 4.3];
+    private    float FLOAT_RANGE8 = [1. 4.3];
+    public    float FLOAT_RANGE9 = [1. 4.3];
+
+    // fundamental string type
+            string STRING1 = "Sojourner";
+    private    string STRING2 = "Sojourner";
+    public    string STRING3 = "Sojourner";
+
+    // user numeric types
+            intEnum INT_ENUM_SINGLE1 = 1;
+    private    intEnum INT_ENUM_SINGLE2 = 1;
+    public    intEnum INT_ENUM_SINGLE3 = 1;
+            intRange INT_RANGE_SINGLE1 = 4;
+    private    intRange INT_RANGE_SINGLE2 = 4;
+    public    intRange INT_RANGE_SINGLE3 = 4;
+            floatEnum FLOAT_ENUM_SINGLE1 = 1.2;
+    private    floatEnum FLOAT_ENUM_SINGLE2 = 1.2;
+    public    floatEnum FLOAT_ENUM_SINGLE3 = 1.2;
+            floatEnum FLOAT_ENUM_SINGLE4 = 3;
+    private    floatEnum FLOAT_ENUM_SINGLE5 = 3;
+    public    floatEnum FLOAT_ENUM_SINGLE6 = 3;
+            floatRange1 FLOAT_RANGE_SINGLE1 = 3.2;
+    private    floatRange1 FLOAT_RANGE_SINGLE2 = 3.2;
+    private floatRange1 FLOAT_RANGE_SINGLE3 = 3.2;
+            floatRange1 FLOAT_RANGE_SINGLE4 = 2;
+    private    floatRange1 FLOAT_RANGE_SINGLE5 = 2;
+    private floatRange1 FLOAT_RANGE_SINGLE6 = 2;
+
+    // user symbolic types
+            userValueType1 ID1 = USR_115;
+    private    userValueType1 ID2 = USR_115;
+    public    userValueType1 ID3 = USR_115;
+            userValueType1 ID4 = USR_115;
+    private    userValueType1 ID5 = USR_115;
+    public    userValueType1 ID6 = USR_115;
+    
+    // object types
+    
+    // empty implicit null constructor definition
+            Class1 object01 = new Class1();
+    private    Class1 object02 = new Class1();
+    public    Class1 object03 = new Class1();
+    
+    // empty explicit null constructor definition
+            Class2 object04 = new Class2();
+    private    Class2 object05 = new Class2();
+    public    Class2 object06 = new Class2();
+    
+    // single argument constructor definitions
+    // includes do-nothing constructor and initialization of fields
+            Class3 object07 = new Class3(5);
+    private    Class3 object08 = new Class3(5);
+    public    Class3 object09 = new Class3(5);
+            Class4 object10 = new Class4(5);
+    private    Class4 object11 = new Class4(5);
+    public    Class4 object12 = new Class4(5);
+            Class5 object13 = new Class5(6);
+    private    Class5 object14 = new Class5(6);
+    public    Class5 object15 = new Class5(6);
+            Class5 object16 = new Class5(6.2);
+    private    Class5 object17 = new Class5(6.2);
+    public    Class5 object18 = new Class5(6.2);
+            Class6 object19 = new Class6(7);
+    private    Class6 object20 = new Class6(7);
+    public    Class6 object21 = new Class6(7);
+            Class6 object22 = new Class6(7.2);
+    private    Class6 object23 = new Class6(7.2);
+    public    Class6 object24 = new Class6(7.2);
+            Class7 object25 = new Class7("one");
+    private    Class7 object26 = new Class7("one");
+    public    Class7 object27 = new Class7("one");
+            Class8 object28 = new Class8("two");
+    private    Class8 object29 = new Class8("two");
+    public    Class8 object30 = new Class8("two");
+            Class9 object31 = new Class9(USR_115);
+    private    Class9 object32 = new Class9(USR_115);
+    public    Class9 object33 = new Class9(USR_115);
+            Class9 object34 = new Class9(USR_115);
+    private    Class9 object35 = new Class9(USR_115);
+    public    Class9 object36 = new Class9(USR_115);
+            Class10 object37 = new Class10(USR_115);
+    private    Class10 object38 = new Class10(USR_115);
+    public    Class10 object39 = new Class10(USR_115);
+            Class10 object40 = new Class10(USR_115);
+    private    Class10 object41 = new Class10(USR_115);
+    public    Class10 object42 = new Class10(USR_115);
+    
+    // null constructor definitions with initialization of fields
+            Class11 object43 = new Class11();
+    private    Class11 object44 = new Class11();
+    public    Class11 object45 = new Class11();
+            Class12 object46 = new Class12();
+    private    Class12 object47 = new Class12();
+    public    Class12 object48 = new Class12();
+            Class13 object49 = new Class13();
+    private    Class13 object50 = new Class13();
+    public    Class13 object51 = new Class13();
+            Class14 object52 = new Class14();
+    private    Class14 object53 = new Class14();
+    public    Class14 object54 = new Class14();
+            Class15 object55 = new Class15();
+    private    Class15 object56 = new Class15();
+    public    Class15 object57 = new Class15();
+            Class16 object58 = new Class16();
+    private    Class16 object59 = new Class16();
+    public    Class16 object60 = new Class16();
+
+    // default initializers for constructors
+    // includes do-nothing constructor and initialization of fields
+            Class17 object61 = new Class17();
+    private    Class17 object62 = new Class17();
+    public    Class17 object63 = new Class17();
+            Class17 object64 = new Class17(5);
+    private    Class17 object65 = new Class17(5);
+    public    Class17 object66 = new Class17(5);
+            Class18 object67 = new Class18();
+    private    Class18 object68 = new Class18();
+    public    Class18 object69 = new Class18();
+            Class18 object70 = new Class18(5);
+    private    Class18 object71 = new Class18(5);
+    public    Class18 object72 = new Class18(5);
+            Class19 object73 = new Class19();
+    private    Class19 object74 = new Class19();
+    public    Class19 object75 = new Class19();
+            Class19 object76 = new Class19(6);
+    private    Class19 object77 = new Class19(6);
+    public    Class19 object78 = new Class19(6);
+            Class19 object79 = new Class19(6.2);
+    private    Class19 object79a = new Class19(6.2);
+    public    Class19 object79b = new Class19(6.2);
+            Class20 object80 = new Class20();
+    private    Class20 object81 = new Class20();
+    public    Class20 object82 = new Class20();
+            Class20 object83 = new Class20(7);
+    private    Class20 object84 = new Class20(7);
+    public    Class20 object85 = new Class20(7);
+            Class20 object86 = new Class20(7.2);
+    private    Class20 object87 = new Class20(7.2);
+    public    Class20 object88 = new Class20(7.2);
+            Class21 object89 = new Class21();
+    private    Class21 object90 = new Class21();
+    public    Class21 object91 = new Class21();
+            Class21 object92 = new Class21("one");
+    private    Class21 object93 = new Class21("one");
+    public    Class21 object94 = new Class21("one");
+            Class22 object95 = new Class22("two");
+    private    Class22 object96 = new Class22("two");
+    public    Class22 object97 = new Class22("two");
+            Class23 object98 = new Class23();
+    private    Class23 object99 = new Class23();
+    public    Class23 object100 = new Class23();
+            Class23 object101 = new Class23(USR_115);
+    private    Class23 object102 = new Class23(USR_115);
+    public    Class23 object103 = new Class23(USR_115);
+            Class23 object104 = new Class23(USR_115);
+    private    Class23 object105 = new Class23(USR_115);
+    public    Class23 object106 = new Class23(USR_115);
+            Class24 object107 = new Class24();
+    private    Class24 object108 = new Class24();
+    public    Class24 object109 = new Class24();
+            Class24 object110 = new Class24(USR_115);
+    private    Class24 object111 = new Class24(USR_115);
+    public    Class24 object112 = new Class24(USR_115);
+            Class24 object113 = new Class24(USR_115);
+    private    Class24 object114 = new Class24(USR_115);
+    public    Class24 object115 = new Class24(USR_115);
+    
+}
+
+// empty implicit null constructor definition
+
+class Class1 {
+}
+
+// empty explicit null constructor definition
+
+class Class2 {
+    Class2() {
+    }
+}
+
+// single argument constructor definitions
+// includes do-nothing constructor and initialization of fields
+
+class Class3 {
+    Class3(int x) {
+    }
+}
+
+class Class4 {
+    int y;
+    Class4(int x) {
+        y = x;
+    }
+}
+
+class Class5 {
+    Class5(float x) {
+    }
+}
+
+class Class6 {
+    float y;
+    Class6(float x) {
+        y = x;
+    }
+}
+
+class Class7 {
+    Class7(string x) {
+    }
+}
+
+class Class8 {
+    string y;
+    Class8(string x) {
+        y = x;
+    }
+}
+
+class Class9 {
+    Class9(userValueType1 x) {
+    }
+}
+
+class Class10 {
+    userValueType1 y;
+    Class10(userValueType1 x) {
+        y = x;
+    }
+}
+
+// null constructor definitions with initialization of fields
+
+class Class11 {
+    int x;
+    Class11 () {
+        x = 3;
+    }
+}
+
+class Class12 {
+    float x;
+    Class12 () {
+        x = 4;
+    }
+}
+
+class Class13 {
+    float x;
+    Class12 () {
+        x = 4.4;
+    }
+}
+
+class Class14 {
+    string x;
+    Class14 () {
+        x = "something";
+    }
+}
+
+class Class15 {
+    userValueType1 x;
+    Class15 () {
+        x = USR_115;
+    }
+}
+
+class Class16 {
+    userValueType1 x;
+    Class16 () {
+        x = USR_115;
+    }
+}
+
+// default initializers for constructors
+// includes do-nothing constructor and initialization of fields
+
+class Class17 {
+    Class17(int x = 3) {
+    }
+}
+
+class Class18 {
+    int y;
+    Class18(int x = 4) {
+        y = x;
+    }
+}
+
+class Class19 {
+    Class19(float x = 5.5) {
+    }
+}
+
+class Class20 {
+    float y;
+    Class20(float x = 5.5) {
+        y = x;
+    }
+}
+
+class Class21 {
+    Class21(float x = 6) {
+    }
+}
+
+class Class22 {
+    float y;
+    Class22(float x = 6) {
+        y = x;
+    }
+}
+
+class Class23 {
+    Class23(string x = "some string") {
+    }
+}
+
+class Class24 {
+    string y;
+    Class24(string x = "some string") {
+        y = x;
+    }
+}
+
+class Class25 {
+    Class25(userValueType1 x = USR_115) {
+    }
+}
+
+class Class26 {
+    userValueType1 y;
+    Class26(userValueType1 x = USR_115) {
+        y = x;
+    }
+}
+
+class Class27 {
+    Class27(userValueType1 x = USR_115) {
+    }
+}
+
+class Class28 {
+    userValueType1 y;
+    Class28(userValueType1 x = USR_115) {
+        y = x;
+    }
+}

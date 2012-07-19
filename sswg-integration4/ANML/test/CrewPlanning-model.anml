@@ -1,0 +1,244 @@
+/*
+ * @author Javier Barreiro
+ * @brief Crew Planning model for SAVH demo. translation from NDDL into ANML
+ */
+ 
+// Time unit is minutes throughout the model
+
+vartype PositiveInt       : int [0 +inf];
+vartype TDRS              : PositiveInt; // Communication Channels
+vartype ExerciseEquipment : PositiveInt; 
+vartype PRACapacity       : PositiveInt; // Max number of Physically Restraining activities  
+
+vartype ProcessState : enum {"in_progress","finished"};
+vartype FilterState  : enum {"changing","changed"};
+vartype FastingState : enum {"fasting","not_fasting"}; 
+
+/* 
+ * Class and actions to keep track of fasting window
+ * this would be better handled through a state constraint        
+ */
+objtype FastingWindow
+{
+    FastingState state_;
+
+    transition state_ { 
+        "fasting"     -> "not_fasting" ; 
+        "not_fasting" -> "fasting" 
+    };    
+      
+    action not_fasting() 
+    {
+        change over all { state_  = "fasting" -> "not_fasting" -> "fasting" };
+    }
+}
+ 
+// TODO: if we put it inside CrewMember, does that mean we have to specify a CrewMember when we set up a goal?
+predicate payload_act_completed(        
+    int id,
+    string desc,
+    int length,
+    int priority, 
+    int dueDate,
+    int usesComms,
+    int isPhysicallyRestraining);
+    
+    
+// TODO: This still follows a nddl pattern where the action will cause some subgoaling in the future
+// see CrewMember.change_filter, CrewMember.medical_conference and CrewPlanner.daily_routine
+// This pattern won't work in ANML since subgoaling can only be caused by conditions in the past
+    
+objtype CrewMember
+{
+    FastingWindow fw_;
+    ProcessState mcs_;  // Medical Conference state
+    // TODO: add a variable to keep track of activities performed since this isn't a NDDL timeline
+
+    action pre_sleep() 
+    { 
+        duration 120;    
+        
+        // pre_sleep includes dinner
+        change over all { fw_.state_ = "fasting" -> "not_fasting" -> "fasting" }; 
+    }
+    
+    action sleep() 
+    { 
+        duration 480;    
+    }
+    
+    action post_sleep() 
+    { 
+        duration 180;    
+
+        // post_sleep includes breakfast
+        change over all { fw_.state_ = "fasting" -> "not_fasting" -> "fasting" }; 
+    }
+    
+    action dpc() 
+    { 
+        duration 15;    
+    }
+    
+    action meal() 
+    { 
+        duration 60;    
+        
+        // keep separation between meals >= 4 hrs
+        condition over [start-240 start] { fw_.state_ = "fasting" };  
+        change over all { fw_.state_ = "fasting" -> "not_fasting" -> "fasting" };
+    }
+    
+    action exercise() 
+    { 
+        duration 60;    
+
+        // Can't excercise within an hour of finishing a meal
+        condition over [start-60 start] { fw_.state_ = "fasting" };
+
+        change over all { uses(ExerciseEquipment,1) }; 
+    } 
+    
+    action change_filter(FilterState fs) 
+    {         
+        duration 60;    
+
+        change over all { fs = "changed" -> "changing" -> "changed" };
+        
+        // make sure next filter change happens within the next 24 to 48 hours
+        effect in [end+1440 end+2880] { fs = "changing" };
+        effect over all { fw_.state_ = "fasting" }; 
+    }    
+    
+    action medical_conference() 
+    { 
+        duration 60;    
+        change over all { mcs_ = "finished" -> "in_progress" -> "finished" };
+        
+        // make sure next medical conference happens within the next 24 to 48 hours
+        effect in [end+1440 end+2880] { mcs_ = "in_progress" };
+    }
+  
+    action payload_activity (
+        int id,
+        string desc,
+        int length,
+        int priority, 
+        int dueDate,
+        int usesComms,
+        TDRS comms,
+        int isPhysicallyRestraining,
+        PRACapacity praCapacity) 
+    {    
+        duration length; 
+           
+        lt(0,start); // Is this still necessary to force into planning window? 
+        lt(end,dueDate);
+             
+        // TODO: why are we forced to use temporal qualifiers in the when clause here?        
+        change when { at start { usesComms = 1 } } { over all { uses(comms,1) } };
+        change when { at start { isPhysicallyRestraining = 1 } }  { over all { uses(praCapacity,1) } };
+        
+        effect at end { payload_act_completed(id,desc,length,priority,dueDate,usesComms,isPhysicallyRestraining) };
+    }
+    
+    // RPCM R&R Actions
+    action remove_sleep_station() 
+    { 
+        duration 60;    
+    }
+    
+    action reconfigure_thermal_loops(int loopCnt)
+    {  
+        duration 60;    
+    }
+    
+    action remove_power_source() 
+    { 
+        duration 60;    
+    }
+    
+    action replace_rpcm() 
+    { 
+        duration 60;    
+    }
+    
+    action place_power_source() 
+    { 
+        duration 60;    
+    }
+    
+    action assemble_sleep_station() 
+    { 
+        duration 60;    
+    }        
+}
+
+objtype CrewPlanner
+{
+    CrewMember crewMember_;    
+    ProcessState state_;
+    
+    action daily_routine() 
+    {
+        duration 1440;    
+
+        change over all { state_ = "finished" -> "in_progress" -> "finished" };
+        
+        decomposition {
+          contains all ordered(
+            crewMember_.post_sleep()   : post_sleep,
+            crewMember_.dpc()          : dpc,
+            unordered(
+              crewMember_.meal()       : meal,
+              crewMember_.exercise()   : exercise
+            ),
+            crewMember_.pre_sleep()    : pre_sleep,
+            crewMember_.sleep()        : sleep
+          );
+            
+          // Start the day with post_sleep and finish with sleep
+          eq(start,post_sleep.start);
+          eq(end,sleep.end);                
+        };       
+        
+        // setup the next daily routine
+        effect at end+1 { state_ = "in_progress" };          
+    }
+}
+
+objtype RPCM
+{
+    ProcessState state_;
+    
+    action perform() 
+    {
+        change over all { state_ = "finished" -> "in_progress" -> "finished" };
+        
+        decomposition {
+          
+          contains [start end] 
+            exists (CrewMember c1,c2,c3,c4,c5,c6,c7)
+            ordered ( // Steps 1-4 before steps 4-7
+
+              ordered( 
+                unordered(
+ 		          c1.reconfigure_thermal_loops(1) : step1, // Reconfigure thermal loops as single loop		        
+	    	      c2.remove_sleep_station()       : step2
+	    	    ),
+		        c3.remove_power_source()          : step3,
+     	        c4.replace_rpcm()                 : step4		      
+		      ),
+		    
+		      ordered(  
+    	        c5.place_power_source()           : step5,
+		        unordered(  
+		          c6.assemble_sleep_station()     : step6,
+  		          c7.reconfigure_thermal_loops(2) : step7 // Reconfigure thermal loops as redundant loops
+		        )
+		      )  
+          );          
+        };
+    }            
+}
+ 

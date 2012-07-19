@@ -1,0 +1,5 @@
+class Instrument{
+   predicate TakeSample{
+   Location rock; 
+   leq(10, duration); // duration of TakeSample is between 0 and 10 time units
+}

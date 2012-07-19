@@ -1,0 +1,18 @@
+SubDir PLASMA documentation ;
+
+if ! $(Documentation_INCLUDED) {
+Documentation_INCLUDED = TRUE ;
+
+rule Doxygen 
+{
+}
+
+actions Doxygen {
+  rm -rf html ;
+  doxygen $(2) ;
+}
+
+Doxygen documentation : doxygen.cfg ;
+
+
+} # Documentation_INCLUDED

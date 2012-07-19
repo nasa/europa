@@ -1,0 +1,27 @@
+/**
+ * This test validates that we correctly enforce variable pruning and that we correctly handle
+ * variable decisions with no choices, which may arise out of prning heuritixs.
+ */
+#include "PlannerTestConfig.nddl"
+#include "Plasma.nddl"
+
+enum Location { Hill, Rock, Lander }
+
+class A extends Timeline {
+  predicate pred {
+   Location location;
+   eq(duration, 5);
+  }
+}
+
+A::pred{
+ meets (pred p);
+ eq(location, p.location);
+}
+
+PlannerTestConfig world = new PlannerTestConfig(0, 10, 6, 4);
+A a = new A();
+close();
+rejectable(a.pred pred);
+neq(pred.location, Hill);
+pred.start.specify(0);

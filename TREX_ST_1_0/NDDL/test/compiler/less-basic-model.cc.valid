@@ -1,0 +1,673 @@
+// less-basic-model.nddl
+
+#include "less-basic-model.hh"
+#include "NddlUtils.hh"
+
+namespace NDDL {
+  
+  TokenStates TokenStatesBaseDomain(){
+    static TokenStates sl_enum("TokenStates");
+    if (sl_enum.isOpen()) {
+      // Insert values to initialize
+      sl_enum.insert(LabelStr("INACTIVE"));
+      sl_enum.insert(LabelStr("ACTIVE"));
+      sl_enum.insert(LabelStr("MERGED"));
+      sl_enum.insert(LabelStr("REJECTED"));
+      sl_enum.close();
+    }
+    return(sl_enum);
+  }
+  // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Timeline
+  
+  
+  
+  // Plasma.nddl:15 StringData
+  StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "StringData", name, true) {
+  }
+  StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  StringData::StringData(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "StringData", name, true) {}
+  StringData::StringData(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void StringData::handleDefaults(bool autoClose) {
+    if(data.isNoId()){
+      data = addVariable(StringDomain("string"), "data");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  // Plasma.nddl:15 StringData
+  void StringData::constructor(const LabelStr& _data) {
+    data = addVariable(StringDomain(_data, "string"), "data");
+  }
+  
+  // Plasma.nddl:15 StringData
+  class StringDataFactory0: public ConcreteObjectFactory {
+  public:
+    StringDataFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 1);
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
+                                                TypeFactory::baseDomain("string")), 
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to string");
+      check_error(arguments[0]->isSingleton());
+      LabelStr _data((LabelStr)arguments[0]->getSingletonValue());
+      
+      StringDataId instance = (new StringData(planDb, objectType, objectName))->getId();
+      instance->constructor(_data);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  Locations LocationsBaseDomain(){
+    static Locations sl_enum("Locations");
+    if (sl_enum.isOpen()) {
+      // Insert values to initialize
+      sl_enum.insert(LabelStr("Hill"));
+      sl_enum.insert(LabelStr("Rock"));
+      sl_enum.insert(LabelStr("Lander"));
+      sl_enum.close();
+    }
+    return(sl_enum);
+  }
+  
+  
+  // less-basic-model.nddl:7 Rover
+  Rover::Rover(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Timeline(planDatabase, "Rover", name, true) {
+  }
+  Rover::Rover(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Timeline(planDatabase, type, name, true) {
+  }
+  Rover::Rover(const ObjectId& parent, const LabelStr& name)
+   : Timeline(parent, "Rover", name, true) {}
+  Rover::Rover(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Timeline(parent, type, name, true) {}
+  // default initialization of member variables
+  void Rover::handleDefaults(bool autoClose) {
+    check_error(m_camera.isValid(), "object variables must be initialized explicitly");
+    
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // less-basic-model.nddl:9 At
+  Rover::At::At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Rover::At::At(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Rover::At::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if(m_location.isNoId()){
+      m_location = addParameter(LocationsBaseDomain(), "m_location");
+    }
+    if (autoClose)
+      close();
+    
+    // Post parameter constraints
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("duration")));
+      vars.push_back(predicateVariable(IntervalIntDomain(1,1, "int")));
+      token_constraint(eq, vars);
+    }
+  }
+  
+  
+  
+  // less-basic-model.nddl:14 Going
+  Rover::Going::Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Rover::Going::Going(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Rover::Going::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if(m_from.isNoId()){
+      m_from = addParameter(LocationsBaseDomain(), "m_from");
+    }
+    if(m_to.isNoId()){
+      m_to = addParameter(LocationsBaseDomain(), "m_to");
+    }
+    if (autoClose)
+      close();
+    
+    // Post parameter constraints
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("duration")));
+      vars.push_back(predicateVariable(IntervalIntDomain(4,4, "int")));
+      token_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("m_from")));
+      vars.push_back(var(getId(),std::string("m_to")));
+      token_constraint(neq, vars);
+    }
+  }
+  
+  
+  // less-basic-model.nddl:7 Rover
+  void Rover::constructor() {
+    m_camera = addVariable(CameraDomain((new Camera(m_id, "m_camera"))->getId(), "Camera"), "m_camera");
+    Id<Camera>(singleton(m_camera))->constructor();
+    Id<Camera>(singleton(m_camera))->handleDefaults();
+  }
+  
+  // less-basic-model.nddl:7 Rover
+  class RoverFactory1: public ConcreteObjectFactory {
+  public:
+    RoverFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 0);
+      RoverId instance = (new Rover(planDb, objectType, objectName))->getId();
+      instance->constructor();
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  // less-basic-model.nddl:25 At
+  class Rover$At$0$0: public RuleInstance {
+  public:
+    Rover$At$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$Rover$At$0, Rover$At$0$0, Rover.At, "less-basic-model.nddl,25");
+  
+  void Rover$At$0$0::handleExecute() {
+    localSlave(Going, to, "meets");
+    sameObject(object, to);
+    meets(this, to);
+    localSlave(Going, from, "met_by");
+    sameObject(object, from);
+    met_by(this, from);
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varfromtok(tok(getId(), std::string("to")), std::string("m_from")));
+      vars.push_back(var(getId(),std::string("m_location")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varfromtok(tok(getId(), std::string("from")), std::string("m_to")));
+      vars.push_back(var(getId(),std::string("m_location")));
+      rule_constraint(eq, vars);
+    }
+  }
+  
+  // less-basic-model.nddl:33 Going
+  class Rover$Going$1$0: public RuleInstance {
+  public:
+    Rover$Going$1$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$Rover$Going$1, Rover$Going$1$0, Rover.Going, "less-basic-model.nddl,33");
+  
+  void Rover$Going$1$0::handleExecute() {
+    localSlave(At, from, "met_by");
+    sameObject(object, from);
+    met_by(this, from);
+    localSlave(At, to, "meets");
+    sameObject(object, to);
+    meets(this, to);
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("m_from")));
+      vars.push_back(var(getId(),std::string("m_to")));
+      rule_constraint(neq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("m_from")));
+      vars.push_back(varfromtok(tok(getId(), std::string("from")), std::string("m_location")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("m_to")));
+      vars.push_back(varfromtok(tok(getId(), std::string("to")), std::string("m_location")));
+      rule_constraint(eq, vars);
+    }
+  }
+  
+  
+  // less-basic-model.nddl:41 Camera
+  Camera::Camera(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Timeline(planDatabase, "Camera", name, true) {
+  }
+  Camera::Camera(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Timeline(planDatabase, type, name, true) {
+  }
+  Camera::Camera(const ObjectId& parent, const LabelStr& name)
+   : Timeline(parent, "Camera", name, true) {}
+  Camera::Camera(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Timeline(parent, type, name, true) {}
+  // default initialization of member variables
+  void Camera::handleDefaults(bool autoClose) {
+    if (autoClose)
+      close();
+  }
+  
+  // implicit constructor
+  void Camera::constructor() {
+  }
+  
+  
+  // less-basic-model.nddl:41 Camera
+  DECLARE_DEFAULT_OBJECT_FACTORY(CameraFactory2, Camera);
+  
+  
+  // less-basic-model.nddl:42 On
+  Camera::On::On(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Camera::On::On(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Camera::On::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+    
+    // Post parameter constraints
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("duration")));
+      vars.push_back(predicateVariable(IntervalIntDomain(1, 2, "int")));
+      token_constraint(eq, vars);
+    }
+  }
+  
+  
+  
+  // less-basic-model.nddl:45 Off
+  Camera::Off::Off(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Camera::Off::Off(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Camera::Off::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+    
+    // Post parameter constraints
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("duration")));
+      vars.push_back(predicateVariable(IntervalIntDomain(1, +inf, "int")));
+      token_constraint(eq, vars);
+    }
+  }
+  
+  
+  
+  // less-basic-model.nddl:48 TakingPicture
+  Camera::TakingPicture::TakingPicture(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Camera::TakingPicture::TakingPicture(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Camera::TakingPicture::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if(m_loc.isNoId()){
+      m_loc = addParameter(LocationsBaseDomain(), "m_loc");
+    }
+    if (autoClose)
+      close();
+    
+    // Post parameter constraints
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("duration")));
+      vars.push_back(predicateVariable(IntervalIntDomain(1,1, "int")));
+      token_constraint(eq, vars);
+    }
+  }
+  
+  
+  // less-basic-model.nddl:54 On
+  class Camera$On$2$0: public RuleInstance {
+  public:
+    Camera$On$2$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$Camera$On$2, Camera$On$2$0, Camera.On, "less-basic-model.nddl,54");
+  
+  void Camera$On$2$0::handleExecute() {
+    localSlave(TakingPicture, t, "meets");
+    sameObject(object, t);
+    meets(this, t);
+    localSlave(Off, n, "meets");
+    sameObject(object, n);
+    meets(this, n);
+    localSlave(Off, o, "met_by");
+    sameObject(object, o);
+    met_by(this, o);
+  }
+  
+  // less-basic-model.nddl:60 Off
+  class Camera$Off$3$0: public RuleInstance {
+  public:
+    Camera$Off$3$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$Camera$Off$3, Camera$Off$3$0, Camera.Off, "less-basic-model.nddl,60");
+  
+  void Camera$Off$3$0::handleExecute() {
+    localSlave(On, o, "meets");
+    sameObject(object, o);
+    meets(this, o);
+  }
+  
+  // less-basic-model.nddl:64 TakingPicture
+  class Camera$TakingPicture$4$0: public RuleInstance {
+  public:
+    Camera$TakingPicture$4$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$Camera$TakingPicture$4, Camera$TakingPicture$4$0, Camera.TakingPicture, "less-basic-model.nddl,64");
+  
+  void Camera$TakingPicture$4$0::handleExecute() {
+    localSlave(On, o, "met_by");
+    sameObject(object, o);
+    met_by(this, o);
+    slave(Rover::At, Rover.At, a, LabelStr("contained_by"));
+    contained_by(this, a);
+    localSlave(On, n, "meets");
+    sameObject(object, n);
+    meets(this, n);
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("m_loc")));
+      vars.push_back(varfromtok(tok(getId(), std::string("a")), std::string("m_location")));
+      rule_constraint(eq, vars);
+    }
+  }
+  
+  
+  // less-basic-model.nddl:72 World
+  World::World(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Timeline(planDatabase, "World", name, true) {
+  }
+  World::World(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Timeline(planDatabase, type, name, true) {
+  }
+  World::World(const ObjectId& parent, const LabelStr& name)
+   : Timeline(parent, "World", name, true) {}
+  World::World(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Timeline(parent, type, name, true) {}
+  // default initialization of member variables
+  void World::handleDefaults(bool autoClose) {
+    if(m_horizonStart.isNoId()){
+      m_horizonStart = addVariable(IntervalIntDomain("int"), "m_horizonStart");
+    }
+    if(m_horizonEnd.isNoId()){
+      m_horizonEnd = addVariable(IntervalIntDomain("int"), "m_horizonEnd");
+    }
+    check_error(m_rover.isValid(), "object variables must be initialized explicitly");
+    
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // less-basic-model.nddl:78 initialState
+  World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  World::initialState::initialState(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void World::initialState::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  // less-basic-model.nddl:72 World
+  void World::constructor() {
+    m_horizonStart = addVariable(IntervalIntDomain(10, 10, "int"), "m_horizonStart");
+    m_horizonEnd = addVariable(IntervalIntDomain(100, 100, "int"), "m_horizonEnd");
+    m_rover = addVariable(RoverDomain((new Rover(m_id, "m_rover"))->getId(), "Rover"), "m_rover");
+    Id<Rover>(singleton(m_rover))->constructor();
+    Id<Rover>(singleton(m_rover))->handleDefaults();
+  }
+  
+  // less-basic-model.nddl:72 World
+  class WorldFactory3: public ConcreteObjectFactory {
+  public:
+    WorldFactory3(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 0);
+      WorldId instance = (new World(planDb, objectType, objectName))->getId();
+      instance->constructor();
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  // less-basic-model.nddl:87 initialState
+  class World$initialState$5$0: public RuleInstance {
+  public:
+    World$initialState$5$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$5, World$initialState$5$0, World.initialState, "less-basic-model.nddl,87");
+  
+  void World$initialState$5$0::handleExecute() {
+    slave(Rover::At, Rover.At, a, LabelStr("contains"));
+    contains(this, a);
+    slave(Rover::At, Rover.At, b, LabelStr("contains"));
+    contains(this, b);
+    slave(Camera::Off, Camera.Off, o, LabelStr("contains"));
+    contains(this, o);
+    slave(Camera::Off, Camera.Off, f, LabelStr("contains"));
+    contains(this, f);
+    slave(Camera::On, Camera.On, g, LabelStr("contains"));
+    contains(this, g);
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("object"), std::string("m_horizonStart"), false));
+      vars.push_back(var(getId(),std::string("start")));
+      rule_constraint(leq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("end")));
+      vars.push_back(varFromObject(std::string("object"), std::string("m_horizonEnd"), false));
+      rule_constraint(leq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varfromtok(tok(getId(), std::string("a")), std::string("m_location")));
+      vars.push_back(ruleVariable(SymbolDomain(LabelStr("Lander"), "Locations")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varfromtok(tok(getId(), std::string("a")), std::string("start")));
+      vars.push_back(ruleVariable(IntervalIntDomain(10,10, "int")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varfromtok(tok(getId(), std::string("b")), std::string("m_location")));
+      vars.push_back(ruleVariable(SymbolDomain(LabelStr("Rock"), "Locations")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varfromtok(tok(getId(), std::string("b")), std::string("end")));
+      vars.push_back(ruleVariable(IntervalIntDomain(100,100, "int")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varfromtok(tok(getId(), std::string("a")), std::string("end")));
+      vars.push_back(varfromtok(tok(getId(), std::string("b")), std::string("start")));
+      rule_constraint(leq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varfromtok(tok(getId(), std::string("o")), std::string("start")));
+      vars.push_back(ruleVariable(IntervalIntDomain(10,10, "int")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varfromtok(tok(getId(), std::string("f")), std::string("end")));
+      vars.push_back(ruleVariable(IntervalIntDomain(100,100, "int")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varfromtok(tok(getId(), std::string("o")), std::string("end")));
+      vars.push_back(varfromtok(tok(getId(), std::string("f")), std::string("start")));
+      rule_constraint(leq, vars);
+    }
+  }
+  
+} // namespace NDDL
+
+
+namespace NDDL {
+  // Boot-strap code to initialize schema
+  extern "C" SchemaId loadSchema(){
+    Id<Schema> id = Schema::instance("less-basic-model");
+    id->reset(); // Reset prior data if present. 
+    
+    // Register Constraints
+    // Invoke commands to populate schema with type definitions
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("StringData", "Object");
+    id->addObjectType("Rover", "Timeline");
+    id->addObjectType("Camera", "Timeline");
+    id->addObjectType("World", "Timeline");
+    id->addEnum("TokenStates");
+    id->addMember("StringData", "string", "data");
+    id->addEnum("Locations");
+    id->addMember("Rover", "Camera", "m_camera");
+    id->addPredicate("Rover.At");
+    id->addMember("Rover.At", "Locations", "m_location");
+    id->addPredicate("Rover.Going");
+    id->addMember("Rover.Going", "Locations", "m_from");
+    id->addMember("Rover.Going", "Locations", "m_to");
+    id->addPredicate("Camera.On");
+    id->addPredicate("Camera.Off");
+    id->addPredicate("Camera.TakingPicture");
+    id->addMember("Camera.TakingPicture", "Locations", "m_loc");
+    id->addMember("World", "int", "m_horizonStart");
+    id->addMember("World", "int", "m_horizonEnd");
+    id->addMember("World", "Rover", "m_rover");
+    id->addPredicate("World.initialState");
+    id->addValue("TokenStates", LabelStr("INACTIVE"));
+    id->addValue("TokenStates", LabelStr("ACTIVE"));
+    id->addValue("TokenStates", LabelStr("MERGED"));
+    id->addValue("TokenStates", LabelStr("REJECTED"));
+    id->addValue("Locations", LabelStr("Hill"));
+    id->addValue("Locations", LabelStr("Rock"));
+    id->addValue("Locations", LabelStr("Lander"));
+    // Force allocation of model specific type factories
+    // Allocate factories
+    REGISTER_TOKEN_FACTORY(Rover::At::Factory);
+    REGISTER_TOKEN_FACTORY(Rover::Going::Factory);
+    REGISTER_TOKEN_FACTORY(Camera::On::Factory);
+    REGISTER_TOKEN_FACTORY(Camera::Off::Factory);
+    REGISTER_TOKEN_FACTORY(Camera::TakingPicture::Factory);
+    REGISTER_TOKEN_FACTORY(World::initialState::Factory);
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(TokenStates, TokenStatesBaseDomain());
+    REGISTER_TYPE_FACTORY(Timeline, ObjectDomain("Timeline"));
+    REGISTER_TYPE_FACTORY(StringData, ObjectDomain("StringData"));
+    REGISTER_OBJECT_FACTORY(StringDataFactory0, StringData:string);
+    REGISTER_TYPE_FACTORY(Locations, LocationsBaseDomain());
+    REGISTER_TYPE_FACTORY(Rover, ObjectDomain("Rover"));
+    REGISTER_OBJECT_FACTORY(RoverFactory1, Rover);
+    REGISTER_TYPE_FACTORY(Camera, ObjectDomain("Camera"));
+    REGISTER_OBJECT_FACTORY(CameraFactory2, Camera);
+    REGISTER_TYPE_FACTORY(World, ObjectDomain("World"));
+    REGISTER_OBJECT_FACTORY(WorldFactory3, World);
+    // Allocate rules
+    new Rule$Camera$TakingPicture$4();
+    new Rule$World$initialState$5();
+    new Rule$Rover$Going$1();
+    new Rule$Rover$At$0();
+    new Rule$Camera$Off$3();
+    new Rule$Camera$On$2();
+    return id;
+  }
+  
+}

@@ -1,0 +1,15 @@
+SubDir PLASMA Utils ;
+
+if ! $(PLASMA_READY) {
+
+Module Utils : TinyXml ;
+
+ModuleFiles Utils : CommonDefs.cc ;
+
+ModuleLibraries Utils : $(DLOPEN_LIBRARY) ;
+
+SubInclude PLASMA Utils base ;
+SubInclude PLASMA Utils component ;
+SubInclude PLASMA Utils test ;
+
+} # PLASMA_READY

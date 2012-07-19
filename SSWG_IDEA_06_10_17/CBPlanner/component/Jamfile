@@ -1,0 +1,20 @@
+SubDir PLASMA CBPlanner component ;
+
+if ! $(PLASMA_READY) {
+
+SubDirC++Flags -Wno-unknown-pragmas -DTIXML_USE_STL ;
+
+ModuleComponent CBPlanner
+	:
+	ConstrainedVariableDecisionPoint.cc
+	DynamicInfiniteRealCondition.cc
+	HorizonCondition.cc
+	ObjectDecisionPoint.cc
+	MasterMustBeInserted.cc
+	TemporalVariableFilter.cc
+	TokenDecisionPoint.cc
+	PartialPlanWriter.cc
+	;
+
+} # PLASMA_READY
+

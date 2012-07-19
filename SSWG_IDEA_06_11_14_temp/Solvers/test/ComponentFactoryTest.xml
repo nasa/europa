@@ -1,0 +1,7 @@
+<root name="BasicTest" scope="B">
+ <child component="A"/>
+ <child component="B"/>
+ <child component="C"/>
+ <child component="D"/>
+ <child component="E"/>
+</root>

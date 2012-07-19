@@ -1,0 +1,28 @@
+<Heuristics-HSTS xmlns = "HSTS"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="Heuristics-HSTS.xsd">
+<Defaults>
+ <DefaultPriorityPref>high</DefaultPriorityPref>
+ <DefaultCompatibility>
+ </DefaultCompatibility>
+ <DefaultToken>
+  <Priority>0</Priority>
+  <DecisionPreference>
+   <State>merge</State>
+   <State>activate</State>
+   <State>reject</State>
+  </DecisionPreference>
+ </DefaultToken>
+ <DefaultConstrainedVariable>
+  <Priority>0</Priority>
+  <ValueOrder>ascending</ValueOrder>
+ </DefaultConstrainedVariable>
+</Defaults>
+
+<VariableSpecification>
+</VariableSpecification>
+
+<TokenSpecification>
+</TokenSpecification>
+
+</Heuristics-HSTS>

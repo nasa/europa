@@ -1,0 +1,84 @@
+SubDir PLASMA ;
+
+if ! $(PLASMA_READY) {
+
+if SHARED in $(LIBRARIES) { 
+  if PROFILE in $(VARIANTS) {
+    Exit Cannot build PROFILE and SHARED ;
+  }
+  if CUSTOM in $(VARIANTS) && $(PROFILE) {
+    Exit Cannot build PROFILE and SHARED ;
+  }
+}
+
+PLANWORKS_COMPONENTS = $(PLASMA)/MasterController.cc $(PLASMA)/SingleSolverController.cc ;
+
+Depends plasma-all : all ;
+
+Module plasma : all System ;
+
+Depends run-tests : tests ;
+
+Depends run-all-tests : run-checkin-tests ;
+Depends run-all-tests : run-all-module-tests ; 
+Depends run-all-tests : run-examples-tests ;
+Depends run-all-tests : run-nddl-tests ;
+Depends run-all-tests : run-hsts-planner-tests ;
+
+Depends run-checkin-tests : check-svn-changes ;
+Depends run-checkin-tests : run-tests ;
+Depends run-checkin-tests : run-nddl-planner-tests ;
+Depends run-checkin-tests : run-makefile-tests ;
+
+Depends run-makefile-tests : check-makefile ;
+
+# install tests designed for off site customers to check system is installed without svn update
+Depends run-install-tests : run-tests ;
+
+NOCARE run-all-tests run-tests run-checkin-tests run-nddl-tests run-nddl-planner-tests tests run-hsts-planner-tests ;
+
+SubInclude PLASMA TinyXml ;
+if ! ( "Antlr" in $(NO) ) {
+  SubInclude PLASMA Antlr ;
+}
+SubInclude PLASMA Utils ;
+SubInclude PLASMA ConstraintEngine ;
+if ! ( "docs" in $(NO) ) {
+  SubInclude PLASMA documentation ;
+}
+SubInclude PLASMA PlanDatabase ;
+SubInclude PLASMA RulesEngine ;
+SubInclude PLASMA TemporalNetwork ;
+if ! ( "Resources" in $(NO) ) {
+  SubInclude PLASMA Resource ;
+  SubInclude PLASMA ANML ;
+}
+SubInclude PLASMA NDDL ;
+SubInclude PLASMA Solvers ;
+SubInclude PLASMA System ;
+if ! ( "Examples" in $(NO) ) {
+  SubInclude PLASMA Examples ;
+}
+#SubInclude PLASMA DSA ;
+
+PSUI_HOME ?= [ FDirName .. PlanWorks PSUI ] ;
+
+Depends lib : PSEngine.jar ;
+Depends lib : PSUI.jar ;
+Depends PSUI.jar : $(PSUI_HOME) ;
+Depends PSUI.jar : PSEngine.jar ;
+ApacheAnt PSUI.jar :
+  $(PSUI_HOME)/build.xml : dist ;
+
+LOCATE on PSUI.jar = [ FDirName lib ] ;
+
+RemoveBinaries clean-all ;
+Depends clean-all : clean clean-nddl-xml clean-system-xml ;
+
+ExecuteSO check-svn-changes : checksvn : $(PLASMA) ;
+
+if ! ( "Resources" in $(NO) ) {
+  ExecuteSO check-makefile : checkmakeproject : $(PLASMA) ;
+}
+
+} # PLASMA_READY

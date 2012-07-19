@@ -1,0 +1,17 @@
+SubDir PLASMA PlanDatabase component ;
+
+if ! $(PLASMA_READY) {
+
+SubDirC++Flags -Wno-unknown-pragmas -DTIXML_USE_STL ;
+
+ModuleComponent PlanDatabase
+	:
+	PlanDatabaseWriter.cc
+	DbClientTransactionLog.cc
+	DbClientTransactionPlayer.cc
+	EventToken.cc
+	IntervalToken.cc
+	Timeline.cc
+	;
+
+} # PLASMA_READY

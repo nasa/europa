@@ -1,0 +1,213 @@
+#include "Plasma.nddl"
+#include "PlannerConfig.nddl"
+#include "Resources.nddl"
+
+// Note that this example is described in detail in a Tutorial that can be
+// found on the project's documentation wiki.
+
+// --------------------------------------------------
+// CLASS DEFINITIONS
+// --------------------------------------------------
+  
+class Location {
+   string name;
+   int x;
+   int y;
+  
+   Location(string _name, int _x, int _y){ 
+     name = _name;
+     x = _x;
+     y = _y;
+   }
+}
+
+class Path {
+  string name;
+  Location from;
+  Location to;
+  float cost;
+
+  Path(string _name, Location _from, Location _to, float _cost){
+    name = _name;
+    from = _from;
+    to = _to; 
+    cost = _cost;
+   } 
+}
+
+class Battery extends Resource {
+  Battery(float ic, float ll_min, float ll_max){ 
+    super(ic, ll_min, ll_max);
+  }
+}
+
+class Navigator 
+{
+    predicate At{
+      Location location;
+    }
+ 
+    predicate Going{
+      Location from;
+      Location to;
+      neq(from, to); // prevents rover from going from a location straight back to that location.
+    }
+}
+
+class Instrument{
+  predicate TakeSample{
+    Location rock; 
+    leq(10, duration); // duration of TakeSample is between 0 and 10 time units
+  }
+
+  predicate Place{
+    Location rock;
+    eq([3 12], duration); // duration of Place is between 3 and 12 time units
+  }
+
+  predicate Stow{
+    eq([2 6], duration); // duration of Stow is between 2 and 6 time units
+  }
+  
+  predicate Unstow{
+    eq([2 6], duration); // duration of Unstow is between 2 and 6 time units
+  }
+
+  predicate Stowed{}
+}
+
+
+class Commands{
+   predicate TakeSample{ 
+     Location rock; 
+     eq(duration, [20 25]); // restrict the token's duration to between 20 and 25 time units
+   }
+   
+   predicate PhoneHome{} 
+   predicate PhoneLander{} 
+}
+
+class Rover {
+  Commands commands;
+  Navigator navigator;
+  Instrument instrument;
+  Battery mainBattery;
+
+  Rover(Battery r){
+    commands = new Commands();
+    navigator = new Navigator();
+    instrument = new Instrument();
+    mainBattery = r;
+  }
+}
+
+
+// --------------------------------------------------
+// PREDICATE DEFINITIONS
+// --------------------------------------------------
+
+Navigator::At{ 
+  met_by(object.Going from);
+  eq(from.to, location); // next Going token starts at this location
+  meets(object.Going to); 
+  eq(to.from, location); // prevous Going token ends at this location
+}
+
+
+Navigator::Going{ 
+  met_by(object.At _from); 
+  eq(_from.location, from);
+  meets(object.At _to);
+  eq(_to.location, to);
+  
+  Path p;
+  eq(p.from, from);
+  eq(p.to, to);
+  
+  starts(Battery.change tx);
+  eq(tx.quantity, p.cost);
+}
+
+
+
+Commands::TakeSample{ 
+  contains(Instrument.TakeSample a); 
+  eq(a.rock, rock); 
+  Rover rovers;
+  
+  bool OR;
+
+  if(OR == false){ 
+    meets(object.PhoneHome t0);
+  }
+  if(OR == true){
+    meets(object.PhoneLander t1);
+  } 
+}
+
+Commands::PhoneHome{ 
+  starts(Battery.change tx); 
+  eq(tx.quantity, -600); // consume battery power
+}
+
+Commands::PhoneLander{ 
+  starts(Battery.change tx); 
+  eq(tx.quantity, -20); // consume battery power
+}
+
+
+Instrument::TakeSample{
+  contained_by(Navigator.At at); 
+  eq(at.location, rock); 
+  Rover rovers; 
+
+  met_by(Place b);
+  eq(b.rock, rock);
+
+  meets(Stow c);
+
+  starts(Battery.change tx);
+  eq(tx.quantity, -120); // consume battery power
+} 
+
+Instrument::Place{
+  contained_by(Navigator.At at);
+  eq(at.location, rock); 
+  Rover rovers;
+
+  meets(TakeSample a);
+  eq(a.rock, rock);
+  met_by(Unstow b);
+
+  starts(Battery.change tx);
+  eq(tx.quantity, -20); // consume battery power
+} 
+
+Instrument::Unstow{
+  contained_by(Navigator.At at);
+  Rover rovers;
+
+  meets(Place a);
+  met_by(Stowed b);
+
+  starts(Battery.change tx); 
+  eq(tx.quantity, -20); // consume battery power
+}
+
+
+Instrument::Stow{ 
+  contained_by(Navigator.At at);
+  Rover rovers; 
+
+  meets(Stowed a);
+  met_by(TakeSample b);
+
+  starts(Battery.change tx);
+  eq(tx.quantity, -20);  // consume batter power
+}
+
+Instrument::Stowed{
+  met_by(Stow a);
+  meets(Unstow b);
+} 
+

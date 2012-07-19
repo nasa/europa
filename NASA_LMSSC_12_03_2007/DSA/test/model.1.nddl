@@ -1,0 +1,13 @@
+#include "Constraints.nddl"
+#include "Plasma.nddl"
+
+class Foo extends Timeline {
+	predicate p{}
+}
+
+new Foo();
+close();
+
+rejectable(Foo.p g);
+g.start = 1;
+g.end = 20;

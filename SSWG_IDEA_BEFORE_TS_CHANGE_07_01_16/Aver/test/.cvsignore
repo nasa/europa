@@ -1,0 +1,9 @@
+aver-test-model.cc
+aver-test-model.hh
+aver-test-model.xml
+modtest.xml
+*rt
+*.so
+*.o
+RUN_*
+

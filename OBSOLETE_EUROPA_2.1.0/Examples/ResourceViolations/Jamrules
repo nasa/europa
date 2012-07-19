@@ -1,0 +1,7 @@
+{
+  local SUBDIR = $(ResourceViolations) ;
+  local PLASMA = $(PLASMA_HOME) ;
+  include [ FDirName $(PLASMA_HOME) Jamrules ] ;
+  include [ FDirName $(SUBDIR) Jamfile ] ;
+  ResourceViolations_READY = TRUE ;
+}

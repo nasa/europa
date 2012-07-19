@@ -1,0 +1,37 @@
+int x;
+int y;
+
+// test declaring single facts
+fact at start { x = 5; }
+
+// test declaring bodies of facts
+fact {
+	at end - 5         { x = 5; };
+	over [0 5]         { x = 5; };
+	in [1 6]           { x = 5; };
+	in [2 7] dur 5     { x = 5; };
+	after start        { x = 5; };
+	after start dur 20 { x = 5; };
+	before end         { x = 6; };
+	before end dur 3   { x = 5; };
+	contains [5 10]    { x = 5; };
+	when { at start { x = 5; } } { at end { x = 6; } };
+	from start { at end { x = 6; } }
+}
+
+goal at end { x = 6; }
+
+goal {
+	at end - 5         { x = 5; };
+	over [0 5]         { x = 5; };
+	in [1 6]           { x = 5; };
+	in [2 7] dur 5     { x = 5; };
+	after start        { x = 5; };
+	after start dur 20 { x = 5; };
+	before end         { x = 5; };
+	before end dur 3   { x = 5; };
+	contains [5 10]    { x = 5; };
+	when { at start { x = 5; } } { at end { x = 6; } };
+	from start { at end { x = 6; } }
+}
+// goals

@@ -1,0 +1,20 @@
+SubDir NDDLHelloWorld ;
+
+if ! $(NDDLHelloWorld_READY) {
+ # Declare a library for PlanWorks Control
+
+ ModuleSharedLibrary NDDLHelloWorldController 
+     : /home/tsmith/svn/PLASMA/ControllerStub.cc /home/tsmith/svn/PLASMA/MasterController.cc /home/tsmith/svn/PLASMA/SingleSolverController.cc 
+     : System : NDDLHelloWorldController ;
+
+ # Create a build target to run a problem
+ RunNDDLProblem NDDLHelloWorld : NDDLHelloWorld-initial-state.nddl : NDDLHelloWorld-planner : PlannerConfig.xml ;
+
+ # Create a build target for the planner executable with the given model.
+ NddlMain NDDLHelloWorld-planner : NDDLHelloWorld-Main.cc : NDDLHelloWorld-model.nddl : System : NDDLHelloWorld-planner ;
+
+ # Create a build target for the planner shared library with model.
+ ModuleSharedLibrary NDDLHelloWorld : NDDLHelloWorld-model.o : System : NDDLHelloWorld ;
+
+ Depends all : NDDLHelloWorld NDDLHelloWorldController ;
+} # NDDLHelloWorld_READY
