@@ -1,0 +1,25 @@
+// Include built-in class definitions.
+#include "Plasma.nddl"
+
+// Declare a simple class hierarchy, derived from built-in class Object
+class Foo {}
+
+class Bar extends Foo {}
+
+class Baz extends Foo {}
+
+class Bing extends Baz {}
+
+// Now allocate objects of different types.
+Foo foo1 = new Foo();
+Bar bar1 = new Bar();
+Baz baz1 = new Baz();
+Bing bing1 = new Bing();
+
+// Now allocate variables that will be populated with all instances of their declared types.
+Object allObjects;
+Timeline allTimelines;
+Foo allFoo;
+Bar allBar;
+Baz allBaz;
+Bing allBing;

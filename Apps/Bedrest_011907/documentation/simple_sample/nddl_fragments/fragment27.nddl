@@ -1,0 +1,3 @@
+goal(Navigator.At initialPosition);
+eq(initialPosition.start, world.m_horizonStart);
+eq(initialPosition.location, lander);

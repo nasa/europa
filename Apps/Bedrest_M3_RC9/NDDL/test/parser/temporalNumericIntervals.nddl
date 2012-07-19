@@ -1,0 +1,27 @@
+class tempNumIntervals {
+    predicate Go {
+    }
+    predicate Stop {
+    }
+}
+
+tempNumIntervals::Go {
+    before (Stop s);
+    temporaldistance(this.end, [4 5], s.start);
+    after (Stop s2);
+    temporaldistance(s2.end, [2 1], this.start);
+    contains (tempNumIntervals.Stop s3);
+    temporaldistance(this.start, [2 3], s3.start);
+    temporaldistance(s3.end, [3 4], this.end);
+}
+
+tempNumIntervals::Stop {
+    any (Stop s);
+    this before s;
+    temporaldistance(this.end, [4 5], s.start);
+    s after this;
+    temporaldistance(this.end, [2 1], s.start);
+    this contains s;
+    temporaldistance(this.start, [2 3], s.start);
+    temporaldistance(s.end, [3 4], this.end);
+}

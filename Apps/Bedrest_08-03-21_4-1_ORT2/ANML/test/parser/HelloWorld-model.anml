@@ -1,0 +1,28 @@
+/*
+ * @author Javier Barreiro
+ * @brief HelloWorld model, generates a sequence of helloWorld activities of duration 10
+ */
+
+objtype YourObject
+{
+    action helloWorld()
+    {
+        duration 10;        
+        condition over [start-10 start] { helloWorld(); }; // met by another HelloWorld action        
+    }
+}
+
+/* Original NDDL version:
+
+class YourObject 
+{
+    predicate helloWorld{}
+}
+
+YourObject::helloWorld
+{
+    eq(duration, 10);
+    meets (object.helloWorld);
+    met_by(object.helloWorld);
+}
+*/

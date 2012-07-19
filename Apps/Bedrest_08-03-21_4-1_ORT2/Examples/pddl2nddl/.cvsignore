@@ -1,0 +1,9 @@
+*.so
+*.o
+RUN*
+pddl2nddl*.cc
+pddl2nddl*.hh
+pddl2nddl*.xml
+*rt
+*_o
+*_g

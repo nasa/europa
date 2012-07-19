@@ -1,0 +1,25 @@
+/**
+ * This test validates that we are correctly controlling the state choices for
+ * a token through the heuristic. The problem is set up so that:
+ * 1. If merging is attempted the system will crash. Cannot place temporal constrants on the same timepoints.
+ * 2. Activation will be tried but will fail since there is no room to place it.
+ * 3. Rejection will be permitted as an option.
+ */
+#include "PlannerTestConfig.nddl"
+#include "Plasma.nddl"
+
+class A extends Timeline {
+  predicate pred {
+   eq(duration, 10);
+  }
+}
+
+A::pred{
+ equals (pred p);
+}
+
+PlannerTestConfig world = new PlannerTestConfig(0, 10, 4, 2);
+A a = new A();
+close();
+rejectable(a.pred pred);
+pred.start.specify(0);

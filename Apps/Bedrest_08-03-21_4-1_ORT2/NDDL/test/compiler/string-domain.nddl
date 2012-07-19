@@ -1,0 +1,18 @@
+#include "Plasma.nddl"
+
+class TestData extends StringData {
+}
+
+class Foo extends Timeline {
+  predicate Bar {
+    TestData test;
+  }
+}
+
+Foo foo = new Foo();
+
+TestData data1 = new TestData("foo!");
+
+goal(Foo.Bar testGoal);
+testGoal.test.specify(data1);
+

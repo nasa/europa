@@ -1,0 +1,27 @@
+#include "Plasma.nddl"
+#include "Resources.nddl"
+
+class IntermediateReusable extends Reusable {
+  IntermediateReusable(float c, float ll_min) {
+    super(c, ll_min);
+  }
+}
+
+class Project {
+//   IntermediateReusable m_programmerPool;
+  
+//   Project() {
+//     m_programmerPool = new IntermediateReusable(5.0, 0.0);
+//   }
+
+  predicate task {
+    float numProgrammers = [0.0 +inff];
+  }
+}
+
+Project::task {
+  any(IntermediateReusable.uses tx);
+  eq(tx.start, start);
+  eq(tx.end, end);
+  eq(tx.quantity, numProgrammers);
+}

@@ -1,0 +1,21 @@
+SubDir PLASMA DSA test ;
+
+if ! $(PLASMA_READY) {
+
+# JNI tests can only run when libraries are SHARED
+if $(LIBRARIES) = SHARED {
+	for variant in $(VARIANTS) {
+		local vsuffix = [ FVariantName "" : $(variant) ] ;
+		NddlModel model.1.nddl : System : dsa-module-tests ;
+		NddlModel model.2.nddl : System : dsa-module-tests ;
+		Depends run-dsa-module-tests : dsa-module-tests ;
+		ApacheAnt run-dsa-module-tests : [ FGristFiles build.xml ] Main.java DSA.jar [ FModuleSharedLibraryName DSA : $(variant) ] : -DPLASMA.variant.suffix=$(vsuffix) ;
+	}
+}
+
+# C++ test Harness
+ModuleMain dsa-module-tests : module-tests.cc dsa-test-module.cc : DSA ;
+RunModuleMain run-dsa-module-tests : dsa-module-tests ;
+LocalDepends tests : run-dsa-module-tests ;
+
+} # PLASMA_READY

@@ -1,0 +1,36 @@
+///////////////////////////////////////////////////////////
+// Declare a simple class to initialize planner data.
+// Author: Conor McGann
+// Date: July, 2004
+///////////////////////////////////////////////////////////
+
+class PlannerConfig {
+ // Horizon information
+ int m_horizonStart;
+ int m_horizonEnd;
+
+ // Inputs to the planner
+ int m_maxPlannerSteps;
+ int m_maxPlannerDepth;
+
+ PlannerConfig(int start, int end, int maxPlannerSteps, int maxPlannerDepth){
+  m_horizonStart = start;
+  m_horizonEnd = end;
+  m_maxPlannerSteps = maxPlannerSteps;
+  m_maxPlannerDepth = maxPlannerDepth;
+ }
+
+ PlannerConfig(int start, int end, int maxPlannerSteps){
+  m_horizonStart = start;
+  m_horizonEnd = end;
+  m_maxPlannerSteps = maxPlannerSteps;
+  m_maxPlannerDepth = +inf;
+ }
+
+ PlannerConfig(){
+  m_horizonStart = 0;
+  m_horizonEnd = 100;
+  m_maxPlannerSteps = 200;
+  m_maxPlannerDepth = +inf;
+ }
+}

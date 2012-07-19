@@ -1,0 +1,10 @@
+SubDir PLASMA HeuristicsEngine ;
+
+if ! $(PLASMA_READY) {
+
+Module HeuristicsEngine : PlanDatabase TinyXml ;
+
+SubInclude PLASMA HeuristicsEngine base ;
+SubInclude PLASMA HeuristicsEngine test ;
+
+} # PLASMA_READY

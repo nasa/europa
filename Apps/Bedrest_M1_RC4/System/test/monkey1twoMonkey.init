@@ -1,0 +1,18 @@
+Debug 1
+[ 0 200 ]
+
+Object_Timelines Monkey_Class Monkey1 (
+        Location_SV (At (Rock) ... At (Rock))
+        Altitude_SV (LOW() ... HIGH())
+        Banana_SV (NOT_HAVE_BANANA() ... HAVE_BANANA()))
+
+Object_Timelines Monkey_Class Fred (
+        Location_SV (At (*) ... )
+        Altitude_SV (LOW() ... )
+        Banana_SV (NOT_HAVE_BANANA() ... GRABBING_BANANA()))
+
+; This should always be rejected
+Rejectable_Token 10.0 Monkey_Class Banana_SV ([0 200] HAVE_BANANA(Fred) [0 200])
+
+; This should always merge with Monkey1's existing HAVE_BANANA()
+Rejectable_Token 5.0 Monkey_Class Banana_SV ([0 200] HAVE_BANANA(*) [0 200])

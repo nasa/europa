@@ -1,0 +1,10 @@
+Instrument::Unstow{
+  contained_by(Navigator.At at);
+  Rover rovers;
+
+  meets(Place a);
+  met_by(Stowed b);
+
+  starts(Battery.change tx); 
+  eq(tx.quantity, -20); // consume battery power
+}
