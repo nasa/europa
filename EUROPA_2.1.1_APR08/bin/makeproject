@@ -1,0 +1,71 @@
+#!/usr/bin/python
+import re
+import sys
+import os
+import stat
+
+#
+# Author: Matthew E. Boyce
+# Purpose: To copy the directory tree of templatized project files
+#          which are used to start a new PLASMA project.
+
+if os.environ.has_key("EUROPA_HOME"):
+  europaHome = os.environ["EUROPA_HOME"]
+else:
+  print "Error: EUROPA_HOME is not defined"
+  sys.exit(1)
+
+projectName = sys.argv[1]
+projectSource = os.path.join(europaHome, "bin", ".makeproject")
+configDir = os.path.join(europaHome, "config")
+
+if len(sys.argv) > 2:
+  projectDest = os.path.join(sys.argv[2], projectName)
+else:
+  projectDest = os.path.join(europaHome, "..", projectName)
+
+if os.path.exists(projectDest):
+  print "Error: " + projectDest + " already exists!"
+  sys.exit(1)
+
+def detemplate (string, isFilename):
+  toret = string
+  if isFilename:
+    toret = re.sub("Template", projectName, toret)
+    toret = re.sub("TEMPLATE", projectName.upper(), toret)
+    toret = re.sub("template", projectName.lower(), toret)
+  else:
+    toret = re.sub("%%Project%%", projectName, toret)
+    toret = re.sub("%%PROJECT%%", projectName.upper(), toret)
+    toret = re.sub("%%project%%", projectName.lower(), toret)
+  return toret
+
+def copytemplate (source, dest, isDir):
+  if isDir:
+    os.makedirs(dest, 0755)
+  else:
+    destfile = open(dest, "w")
+    for line in open(source, "r").readlines():
+      destfile.write(detemplate(line, False))
+
+def copytree (sourcedir, destdir):
+  ignore = ['.svn']
+  names = os.listdir(sourcedir)
+  for name in names:
+    if (name in ignore):
+        continue
+    source = os.path.join(sourcedir, name)
+    dest = os.path.join(destdir, detemplate(name, True))
+    try:
+      st = os.lstat(source)
+    except os.error:
+      continue
+    if stat.S_ISDIR(st.st_mode):
+      copytemplate(source, dest, True)
+      copytree (source, dest)
+    else:
+      copytemplate(source, dest, False)
+
+os.makedirs(projectDest, 0755)
+copytree(projectSource, projectDest)
+copytree(configDir, projectDest)

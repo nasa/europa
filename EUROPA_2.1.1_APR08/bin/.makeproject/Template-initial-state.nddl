@@ -1,0 +1,17 @@
+#include "%%Project%%-model.nddl"
+
+// Create a planner configuration instance in PLASMA.
+// Horizon Start, Horizon End, MaxPlannerSteps, MaxPlannerDepth
+PlannerConfig plannerConfiguration = new PlannerConfig(0, 100, 500, +inf);
+
+// Sample object
+YourObject object = new YourObject();
+
+// Close the the PLASMA Database - no more objects can be created.
+close();
+
+// place your goals here.
+goal(YourObject.helloWorld initialToken);
+initialToken.start.specify(0); // Starts at beginning of the horizon
+
+// The planner should take it form here!

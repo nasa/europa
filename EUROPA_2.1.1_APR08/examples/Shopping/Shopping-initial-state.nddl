@@ -1,0 +1,58 @@
+#include "Shopping-model.nddl"
+
+
+// Create a planner configuration instance in PLASMA.
+// Horizon Start, Horizon End, MaxPlannerSteps, MaxPlannerDepth
+PlannerConfig plannerConfiguration = new PlannerConfig(0, 100, 500, +inf);
+
+// Allocate instances
+Location Home = new Location("Home");
+Location SuperMarket = new Location("SuperMarket");
+Location HardwareStore = new Location("HardwareStore");
+
+Product Banana = new Product("Banana");
+Product Milk = new Product("Milk");
+Product Drill = new Product("Drill");
+
+ProductLocation bananaLocation = new ProductLocation(SuperMarket, Banana);
+ProductLocation milkLocation = new ProductLocation(SuperMarket, Milk);
+ProductLocation drillLocation = new ProductLocation(HardwareStore, Drill);
+
+Agent agent = new Agent();
+
+// Indicate that the database is closed - no new objects can be created
+close();
+
+
+// Goal token for starting at home at the beginning
+// (alternatively require it to precede all Buy tokens)
+goal(agent.timeline.At start);
+start.loc.specify(Home);
+//start.start.specify(0);
+
+// Goal tokens for all purhases
+goal(agent.Buy buy1);
+goal(agent.Buy buy2);
+goal(agent.Buy buy3);
+
+buy1.product.specify(Milk);
+buy2.product.specify(Banana);
+buy3.product.specify(Drill);
+
+// Goal token for ending at home after all purchases
+goal(agent.timeline.At finish);
+finish.loc.specify(Home);
+
+buy1 after start;
+buy2 after start;
+buy3 after start;
+
+buy1 before finish;
+buy2 before finish;
+buy3 before finish;
+
+// Force things to happen within our horizon:
+leq(plannerConfiguration.m_horizonStart, start.start);
+leq(finish.end, plannerConfiguration.m_horizonEnd);
+
+// The planner should take it form here!

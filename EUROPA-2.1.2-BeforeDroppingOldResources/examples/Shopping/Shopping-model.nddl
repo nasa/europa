@@ -1,0 +1,95 @@
+#include "Plasma.nddl"
+#include "PlannerConfig.nddl"
+
+
+// Classes for Locations (Home, SuperMarket, etc.), Products (Banana, etc.) and
+// ProductLocations (Banana can be found at SuperMarket, for example)
+class Location {  
+  string name;
+  Location(string _name){
+    name = _name;
+  }
+}
+
+class Product { 
+  string name;
+  Product(string _name) {
+    name = _name;
+  }
+}
+
+class ProductLocation {
+  Location location;
+  Product product;
+  
+  ProductLocation(Location _location, Product _product){
+    location = _location;
+    product = _product;
+  }
+}
+
+// Use built-in Timeline functionality to enforce that an agent:
+// a) Can't be at more than one place at a time.
+// b) Can't Go more than one place at a time.
+// c) Can't Go somewhere and be At somewhere at the same time.
+class AgentTimeline extends Timeline{
+  predicate At {
+    Location loc;
+  }
+
+  predicate Go {
+    Location from;
+    Location to;
+  }
+}
+
+// In addition to a timeline, the agent can buy things.  Note that Buy can
+// (must, in fact) be simultaneous with an At token and the Buy predicate
+// therefore cannot be defined as part of the AgentTimeline.
+class Agent {
+  AgentTimeline timeline;
+
+  Agent() {
+    timeline = new AgentTimeline();
+  }
+
+  predicate Buy {
+    Product product;
+  }
+}
+
+
+// Define the rules for our three predicates:
+
+AgentTimeline::At {
+  met_by(Go prevGo);
+  eq(loc, prevGo.to);
+  meets(Go nextGo);
+  eq(loc, nextGo.from);
+
+}
+
+AgentTimeline::Go {
+  met_by(At originToken);
+  eq(from, originToken.loc);
+  meets(At destinationToken);
+  eq(to, destinationToken.loc);
+
+}
+
+Agent::Buy {
+
+  // initialized to all locations
+  ProductLocation possibleStores;
+
+  // limit possibleStores variables to ones that provide what we need to buy
+  eq(product, possibleStores.product); 
+
+  // We must be At a location during our Buy, and that location must have the
+  // product we want available:
+  contained_by(object.timeline.At currLocation);
+  eq(currLocation.loc, possibleStores.location);
+
+  // A Buy takes 10 time units
+  eq(10, duration);
+}

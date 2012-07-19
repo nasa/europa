@@ -1,0 +1,127 @@
+// subtype-extension.nddl
+
+#include "Db.hh"
+#include "NddlUtils.hh"
+/** Custom Include Files **/
+
+namespace NDDL {
+
+  class UnaryResource;
+  typedef Id<UnaryResource> UnaryResourceId;
+  typedef ObjectDomain UnaryResourceDomain;
+  
+  class StringData;
+  typedef Id<StringData> StringDataId;
+  typedef ObjectDomain StringDataDomain;
+  
+  class Base;
+  typedef Id<Base> BaseId;
+  typedef ObjectDomain BaseDomain;
+  
+  class Derived;
+  typedef Id<Derived> DerivedId;
+  typedef ObjectDomain DerivedDomain;
+  
+  
+  
+  // Plasma.nddl:10 TokenStates
+  typedef SymbolDomain TokenStates;
+  TokenStates TokenStatesBaseDomain();
+  // SKIPPING DECLARATION FOR BUILT-IN CLASS Timeline
+  
+  // SKIPPING DECLARATION FOR BUILT-IN CLASS Resource
+  
+  // SKIPPING DECLARATION FOR BUILT-IN CLASS Reservoir
+  
+  // SKIPPING DECLARATION FOR BUILT-IN CLASS Reusable
+  
+  // SKIPPING DECLARATION FOR BUILT-IN CLASS Unary
+  
+  
+  // Plasma.nddl:187 UnaryResource
+  class UnaryResource : public Timeline {
+  public:
+    UnaryResource(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    UnaryResource(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    UnaryResource(const ObjectId& parent, const LabelStr& name);
+    UnaryResource(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    virtual void constructor(); // default constructoror
+    
+    class uses;
+    typedef Id<uses> usesId;
+    
+    // Plasma.nddl:188 uses
+    class uses : public NddlToken {
+    public:
+      uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      uses(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(UnaryResource::uses, UnaryResource.uses);
+      
+    };
+  };
+  
+  // Plasma.nddl:197 StringData
+  class StringData : public Object {
+  public:
+    StringData(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    StringData(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    StringData(const ObjectId& parent, const LabelStr& name);
+    StringData(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId data; // SchemaWriter::declareVariable
+    
+    // Plasma.nddl:197 StringData
+    virtual void constructor(const LabelStr& _data);
+  };
+  
+  // subtype-extension.nddl:9 Base
+  class Base : public Timeline {
+  public:
+    Base(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Base(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Base(const ObjectId& parent, const LabelStr& name);
+    Base(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    virtual void constructor(); // default constructoror
+    
+    class P;
+    typedef Id<P> PId;
+    
+    // subtype-extension.nddl:10 P
+    class P : public NddlToken {
+    public:
+      P(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      P(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Base::P, Base.P);
+      
+    };
+  };
+  
+  // subtype-extension.nddl:19 Derived
+  class Derived : public Base {
+  public:
+    Derived(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Derived(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Derived(const ObjectId& parent, const LabelStr& name);
+    Derived(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    class P;
+    typedef Id<P> PId;
+    
+    // subtype-extension.nddl:20 P
+    class P : public Base::P {
+    public:
+      P(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      P(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Derived::P, Derived.P);
+      
+      ConstrainedVariableId i; // SchemaWriter::declareVariable
+    };
+  };
+} // End NDDL namespace

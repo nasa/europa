@@ -1,0 +1,76 @@
+#include "Plasma.nddl"
+
+// Simple class and predicates
+enum Locations {Hill, Rock, Lander};
+
+class World;
+
+class Foo extends Timeline { 
+ int m_0 = 5;
+ string m_1 = "Hello"; // Default allocation
+
+ predicate pred1{
+  Locations m_0 = Hill;
+  int m_1 = [1 10];
+  float m_2 = 1.267;
+  bool m_3;
+  World m_4;
+ }
+
+ Foo(){
+  m_0 = 8; // Over-ride default allocation
+ }
+
+ Foo(string s){
+  m_1 = s; // Over-ride the default allocation
+ }
+
+}
+
+Foo::pred1{
+ meets (pred1 p1);
+ met_by (pred1 p2);
+}
+
+class Bar extends Foo {
+ predicate pred1{
+  // CMG: ERROR HERE - won't accept specification to an interval for built in duration 
+  duration = [2 100];
+  // CMG: ERROR HERE - it thinks it is adding a parameter
+  m_3 = true;  
+ }
+}
+
+// Declares mandatory world class, with constructor with no arguments.
+class World extends Timeline {
+ Foo m_foo1;
+ Bar m_bar1;
+ predicate initialState{}
+
+ World(){
+  m_foo1 = new Foo();
+  m_bar1 = new Bar();
+ }
+}
+
+World::initialState
+{
+ any(Foo.pred1 a);
+ any(Bar.pred1 b);
+}
+
+World world = new World();
+close();
+goal(World.initialState g0);
+
+goal(Foo.pred1 g1);
+g1.m_0.specify(Hill);
+g1.m_1.specify(10);
+g1.m_2.specify(1.267);
+g1.m_3.specify(false);
+g1.m_4.specify(world);
+
+rejectable(Foo.pred1 g2);
+g2.reject();
+g2.cancel();
+g2.activate();

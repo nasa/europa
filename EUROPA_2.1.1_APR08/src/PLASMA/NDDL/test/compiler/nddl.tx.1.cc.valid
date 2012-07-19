@@ -1,0 +1,284 @@
+// nddl.tx.1.nddl
+
+#include "nddl.tx.1.hh"
+#include "NddlUtils.hh"
+
+namespace NDDL {
+  
+  TokenStates TokenStatesBaseDomain(){
+    static TokenStates sl_enum("TokenStates");
+    if (sl_enum.isOpen()) {
+      // Insert values to initialize
+      sl_enum.insert(LabelStr("INACTIVE"));
+      sl_enum.insert(LabelStr("ACTIVE"));
+      sl_enum.insert(LabelStr("MERGED"));
+      sl_enum.insert(LabelStr("REJECTED"));
+      sl_enum.close();
+    }
+    return(sl_enum);
+  }
+  // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Timeline
+  
+  
+  
+  // StringData.nddl:5 StringData
+  StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "StringData", name, true) {
+  }
+  StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  StringData::StringData(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "StringData", name, true) {}
+  StringData::StringData(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void StringData::handleDefaults(bool autoClose) {
+    if(data.isNoId()){
+      data = addVariable(StringDomain("string"), "data");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  // StringData.nddl:5 StringData
+  void StringData::constructor(const LabelStr& _data) {
+    data = addVariable(StringDomain(_data, "string"), "data");
+  }
+  
+  // StringData.nddl:5 StringData
+  class StringDataFactory0: public ConcreteObjectFactory {
+  public:
+    StringDataFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 1);
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
+                                                TypeFactory::baseDomain("string")), 
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to string");
+      check_error(arguments[0]->isSingleton());
+      LabelStr _data((LabelStr)arguments[0]->getSingletonValue());
+      
+      StringDataId instance = (new StringData(planDb, objectType, objectName))->getId();
+      instance->constructor(_data);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  
+  // nddl.tx.1.nddl:5 Foo
+  Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Timeline(planDatabase, "Foo", name, true) {
+  }
+  Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Timeline(planDatabase, type, name, true) {
+  }
+  Foo::Foo(const ObjectId& parent, const LabelStr& name)
+   : Timeline(parent, "Foo", name, true) {}
+  Foo::Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Timeline(parent, type, name, true) {}
+  // default initialization of member variables
+  void Foo::handleDefaults(bool autoClose) {
+    if (autoClose)
+      close();
+  }
+  
+  // implicit constructor
+  void Foo::constructor() {
+  }
+  
+  
+  // nddl.tx.1.nddl:5 Foo
+  DECLARE_DEFAULT_OBJECT_FACTORY(FooFactory1, Foo);
+  
+  
+  // nddl.tx.1.nddl:6 pred0
+  Foo::pred0::pred0(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Foo::pred0::pred0(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Foo::pred0::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // nddl.tx.1.nddl:7 pred1
+  Foo::pred1::pred1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Foo::pred1::pred1(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Foo::pred1::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // nddl.tx.1.nddl:8 pred2
+  Foo::pred2::pred2(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Foo::pred2::pred2(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Foo::pred2::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // nddl.tx.1.nddl:9 pred3
+  Foo::pred3::pred3(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Foo::pred3::pred3(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Foo::pred3::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // nddl.tx.1.nddl:10 pred4
+  Foo::pred4::pred4(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Foo::pred4::pred4(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Foo::pred4::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // nddl.tx.1.nddl:11 pred5
+  Foo::pred5::pred5(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Foo::pred5::pred5(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Foo::pred5::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // nddl.tx.1.nddl:12 pred6
+  Foo::pred6::pred6(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Foo::pred6::pred6(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Foo::pred6::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+} // namespace NDDL
+
+
+namespace NDDL {
+  // Boot-strap code to initialize schema
+  extern "C" SchemaId loadSchema(){
+    Id<Schema> id = Schema::instance("nddl.tx.1");
+    // Register Constraints
+    // Invoke commands to populate schema with type definitions
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("StringData", "Object");
+    id->addObjectType("Foo", "Timeline");
+    id->addEnum("TokenStates");
+    id->addMember("StringData", "string", "data");
+    id->addPredicate("Foo.pred0");
+    id->addPredicate("Foo.pred1");
+    id->addPredicate("Foo.pred2");
+    id->addPredicate("Foo.pred3");
+    id->addPredicate("Foo.pred4");
+    id->addPredicate("Foo.pred5");
+    id->addPredicate("Foo.pred6");
+    id->addValue("TokenStates", LabelStr("INACTIVE"));
+    id->addValue("TokenStates", LabelStr("ACTIVE"));
+    id->addValue("TokenStates", LabelStr("MERGED"));
+    id->addValue("TokenStates", LabelStr("REJECTED"));
+    // Force allocation of model specific type factories
+    // Allocate factories
+    REGISTER_TOKEN_FACTORY(Foo::pred0::Factory);
+    REGISTER_TOKEN_FACTORY(Foo::pred1::Factory);
+    REGISTER_TOKEN_FACTORY(Foo::pred2::Factory);
+    REGISTER_TOKEN_FACTORY(Foo::pred3::Factory);
+    REGISTER_TOKEN_FACTORY(Foo::pred4::Factory);
+    REGISTER_TOKEN_FACTORY(Foo::pred5::Factory);
+    REGISTER_TOKEN_FACTORY(Foo::pred6::Factory);
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(TokenStates, TokenStatesBaseDomain());
+    REGISTER_TYPE_FACTORY(Timeline, ObjectDomain("Timeline"));
+    REGISTER_TYPE_FACTORY(StringData, ObjectDomain("StringData"));
+    REGISTER_OBJECT_FACTORY(StringDataFactory0, StringData:string);
+    REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
+    REGISTER_OBJECT_FACTORY(FooFactory1, Foo);
+    // Allocate rules
+    return id;
+  }
+  
+}

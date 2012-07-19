@@ -1,0 +1,21 @@
+SubDir PLASMA ANML base ;
+
+if ! $(PLASMA_READY) {
+
+ AntlrGrammar ANML : antlr/ANML.g antlr/ANML.tree.g ;
+ # special rule for grammar with odd name.
+ local sources.a2n = [ FGristFiles ANML2NDDL.cpp ] ; 
+ local headers.a2n = [ FGristFiles ANML2NDDLTokenTypes.hpp ANML2NDDLTokenTypes.txt ] ; 
+ AntlrTreeTool $(sources.a2n) $(headers.a2n) : antlr/ANML2NDDL.tree.g ;
+ Includes $(sources.a2n) : $(headers.a2n) ;
+
+ ModuleBase ANML
+	 :
+	 ANMLLexer.cpp
+	 ANMLParser.cpp
+	 #ANMLTreeParser.cpp
+	 ANML2NDDL.cpp
+	 ANMLTranslator.cc
+	 ;
+
+} # PLASMA_READY

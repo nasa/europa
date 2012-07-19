@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<project name="NDDL" default="nddl" basedir=".">
+	<description>
+  New Domain Definition Language
+	</description>
+	
+	<target name="init">
+		<exec executable="uname" outputproperty="uname.o">
+			<arg value="-o"/>
+		</exec>
+		<condition property="os.isCygwin">
+			<equals arg1="${uname.o}" arg2="Cygwin"/>
+		</condition>
+		<property environment="env"/>
+	</target>
+
+	<target name="cygwin-init" depends="init" if="os.isCygwin">
+		<exec executable="cygpath" outputproperty="plasma.dir">
+			<arg value="--windows"/>
+			<arg value="${env.PLASMA_HOME}"/>
+		</exec>
+	</target>
+
+	<target name="init-final" depends="init,cygwin-init">
+		<property name="plasma.dir" value="${env.PLASMA_HOME}"/>
+	
+		<property name="grammars" location="antlr"/>
+		<property name="src" location="java"/>
+		<property name="class" location="classes"/>
+		<property name="cache" location=".cache"/>
+		<property name="dist" location="${plasma.dir}/build/lib"/>
+		<property name="libraries" location="${plasma.dir}/ext/lib"/>
+
+		<fileset dir="${libraries}" id="nddl.libfiles">
+			<include name="antlr.jar"/>
+			<include name="nanoxml.jar"/>
+			<include name="java-getopt.jar"/>
+		</fileset>
+
+		<path id="nddl.classpath">
+			<fileset refid="nddl.libfiles"/>
+		</path>
+	</target>
+
+	<target name="antlr"
+	        description="Generate java sources from ANTLR grammars" depends="init-final">
+		<antlr target="${grammars}/nddl.g" outputdirectory="${src}/nddl" traceParser="ON">
+			<classpath refid="nddl.classpath"/>
+		</antlr>
+		<antlr target="${grammars}/nddl.tree.g" outputdirectory="${src}/nddl" trace="ON">
+			<classpath refid="nddl.classpath"/>
+		</antlr>
+	</target>
+
+	<target name="compile" depends="antlr"
+	        description="Builds all sources in ${src}">
+		<tstamp/>
+		<mkdir dir="${class}"/>
+		<mkdir dir="${cache}"/>
+		<depend srcdir="${src}" destdir="${class}" cache="${cache}" closure="yes"/>
+		<javac classpathref="nddl.classpath" source="1.4" debug="on" optimize="on" srcdir="${src}" destdir="${class}"/>
+	</target>
+	
+	<target name="nddl" depends="compile"
+	        description="Creates nddl.jar containing both nddl and its libraries">
+		<mkdir dir="${cache}/unjar"/>
+		<unjar dest="${cache}/unjar">
+			<fileset refid="nddl.libfiles"/>
+		</unjar>
+		<delete dir="${cache}/unjar/META-INF"/>
+
+		<mkdir dir="${dist}"/>
+		<jar jarfile="${dist}/nddl.jar">
+			<fileset dir="${class}"/>
+			<fileset dir="${cache}/unjar"/>
+			<manifest>
+				<attribute name="Main-Class" value="nddl.Nddl"/>
+			</manifest>
+		</jar>
+		<touch file="${dist}/nddl.jar"/>
+	</target>
+
+	<target name="libnddl" depends="compile"
+	        description="Creates nddl.jar containing nddl without support libraries">
+		<mkdir dir="${dist}"/>
+		<jar jarfile="${dist}/nddl.jar">
+			<fileset dir="${class}"/>
+			<manifest>
+				<attribute name="Main-Class" value="nddl.Nddl"/>
+				<attribute name="Class-Path" value="antlr.jar java-getopt.jar nanoxml.jar"/>
+			</manifest>
+		</jar>
+		<touch file="${dist}/nddl.jar"/>
+	</target>
+
+	<target name="clean"
+	        description="Remove all generated files and directories" depends="init-final">
+		<delete dir="${cache}"/>
+		<delete dir="${class}"/>
+		<delete file="${dist}/nddl.jar"/>
+		<delete file="${src}/nddl/NddlLexer.java"/>
+		<delete file="${src}/nddl/NddlParser.java"/>
+		<delete file="${src}/nddl/NddlTreeParser.java"/>
+		<delete file="${src}/nddl/NddlTokenTypes.java"/>
+		<delete file="${src}/nddl/NddlTokenTypes.txt"/>
+		<delete file="${src}/nddl/NddlTreeParserTokenTypes.java"/>
+		<delete file="${src}/nddl/NddlTreeParserTokenTypes.txt"/>
+	</target>
+
+</project>

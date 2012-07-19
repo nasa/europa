@@ -1,0 +1,287 @@
+// Rover-model-translation.nddl
+
+enum StowStateEnum {stowing,stowed,unstowing,unstowed};
+
+class StowState extends Timeline
+{
+    setValue {StowStateEnum value;}
+}
+
+StowState::setValue {}
+
+class StowStateCopier 
+{
+    copy { StowState lhs; StowState rhs; }
+}
+
+StowStateCopier::copy 
+{
+    contained_by(lhs.setValue lhsValue);
+    contained_by(rhs.setValue rhsValue);
+    
+    eq(lhsValue.value,rhsValue.value);
+}
+
+class Location extends Timeline
+{
+    setValue {string name; int x; int y;}
+}
+
+Location::setValue {}
+
+class LocationCopier
+{
+    copy { Location lhs; Location rhs;}
+}
+
+LocationCopier::copy 
+{
+    contained_by(lhs.setValue lhsValue);
+    contained_by(rhs.setValue rhsValue);
+    
+    eq(lhsValue.name,rhsValue.name);
+    eq(lhsValue.x,rhsValue.x);
+    eq(lhsValue.y,rhsValue.y);
+}
+
+class Path extends Timeline
+{
+    predicate setValue {string name; Location origin; Location dest; double cost};
+}
+
+Path::setValue {}
+
+class PathCopier
+{
+    predicate copy { Path lhs; Path rhs; }
+}
+
+Path::copy 
+{
+    contained_by(lhs.setValue lhsValue);
+    contained_by(rhs.setValue rhsValue);
+    
+    eq(lhsValue.name,rhsValue.name);
+    eq(lhsValue.origin,rhsValue.origin);
+    eq(lhsValue.dest,rhsValue.dest);
+    eq(lhsValue.cost,rhsValue.cost);
+}
+
+
+// in ANML : vartype Battery : int [0 50];
+// Given its use, we must infer that Battery is a resource
+class Battery extends Reusable
+{
+    Battery()
+    {
+        // Capacity, Lower limit
+        super(50.0,0.0);
+    }
+}
+
+class Instrument 
+{
+	StowState state_;
+
+    predicate TakeSample {Location rock;}
+    predicate TakeSample_decomposition1 {Location rock;}
+    
+    predicate Sample     {Location rock;}
+    predicate Place      {Location rock;}
+    predicate Stow       {} 
+    predicate Unstow     {}
+}
+
+Instrument::TakeSample
+{
+     contains(object.TakeSample_decomposition1 decomposition1);
+     eq(decomposition1.rock,rock);
+     // in general, we'd add temporal constraints here
+     // since the temporal qualifier is "contains all", we don't need constraints
+}
+
+Instrument::TakeSample_decomposition1() 
+{
+    contains(object.Unstow step1);
+    contains(object.Place step2);
+    eq(step2.rock,rock);
+    contains(object.Sample step3);
+    eq(step3.rock,rock);
+    contains(object.Stow step4);
+
+    precedes(step1,step2);
+    precedes(step2,step3);
+    precedes(step3,step4);        
+}
+
+Instrument::Sample
+{
+	eq(duration,10);
+}
+
+Instrument::Place
+{
+	eq(duration,3);
+}
+
+Instrument::Stow 
+{
+	eq(duration,2);
+
+    // change over all { state_ = "unstowed" -> "stowing" -> "stowed" };
+    // TODO: this may cause holes in state_'s timeline. live with it for now
+    met_by(object.state_.setValue sv1);
+    eq(sv1.value,unstowed);
+
+    contained_by(object.state_.setValue sv2);
+    eq(sv2.value,stowing);
+
+    meets(object.state_.setValue sv3);
+    eq(sv3.value,stowed);
+}
+
+Instrument::Unstow 
+{
+	eq(duration,2);
+
+    // change over all { state_ = "stowed" -> "unstowing" -> "unstowed" };
+    met_by(object.state_.setValue sv1);
+    eq(sv1.value,stowed);
+
+    contained_by(object.state_.setValue sv2);
+    eq(sv2.value,unstowing);
+
+    meets(object.state_.setValue sv3);
+    eq(sv3.value,unstowed);        
+}
+
+class Rover 
+{
+    Battery battery_;
+    Instrument instrument_;
+    Location location_;
+    
+    Rover()
+    {
+        battery_ = new Battery();
+        instrument_ = new Instrument();
+        location_ = new Location();
+    }
+    
+    predicate Go { Location origin; Location dest; }
+
+    predicate locationEQ { Location value; }
+    
+    predicate TakeSample { Location rock; }
+    predicate TakeSample_decomposition1 { Location rock; }
+    predicate TakeSample_decomposition1_step2 { Location rock; }
+    
+    predicate PhoneHome {}
+    predicate PhoneLander {}
+}
+      
+
+Rover::Go()
+{
+	neq(from,to);
+		
+	// assert existence of path from origin to dest
+	Path p;
+    eq(p.origin, origin);
+    eq(p.dest, dest);
+
+    eq(duration,p.cost); 
+       
+    //condition at start { location_ = origin; };
+    object.locationEQ cond1;
+    eq(cond1.value,origin);
+    leq(cond1.start,start);
+    leq(start,cond1.end);
+	    	    
+	//effect at end { location_ = dest; };
+	object.locationEQ effect1;
+    eq(effect1.value,dest);
+    leq(effect1.start,start);
+    leq(start,effect1.end);
+		
+	// change over all { uses(battery_, p.cost); };
+    equals(battery_.uses b);
+    eq(b.quantity, -p.cost);     
+}
+
+// TODO: when variables are set to constant values a disjunction should be generated
+// constant values should be tried first :
+// if (constValue == 1) {}
+// else if (constValue == 3) {}
+// ...
+// else if (value) { try generic version like here}
+Rover::locationEQ
+{
+    contained_by(LocationCopier.copy copier);
+    eq(copier.lhs, object.location_);
+    eq(copy.value,value);
+    
+    // Normally a disjunction would be generated here, considering all the actions that include this
+    // in their effects. In this case, there is only one option    
+    int or1 = [1 1];
+    
+    if (or1 == 1) {
+        // TODO: met_by only works if the action says "effect at end", operator needs to be generated
+        // based on temporal qualifier for the effect in the action
+        met_by(object.Go action1);
+        eq(action1.to,value); // TODO: figuring out which variables map to which may be non-trivial
+    }
+}
+
+Rover::TakeSample
+{
+    eq(duration,20);
+	    
+	//condition over all { location_ = rock; };
+    contained(object.locationEQ cond1);
+    eq(cond1.value,rock);
+
+   	contains(TakeSample_decomposition1 decomp1);
+   	eq(decomp1.rock,rock);   	
+}
+
+Rover::TakeSample_decomposition1
+{
+    contains(object.instrument_.TakeSample step1);
+    eq(step1.rock,rock);
+	
+    contains(object.decomposition1_step2 step2);
+    
+    precedes(step1,step2);
+}
+
+Rover::TakeSample_decomposition1_step2
+{
+	int or1 = [1 2];
+	
+	if (or1 == 1) {
+        contains(object.PhoneLander step1);
+    }
+    if (or1 == 2) {
+        contains(object.PhoneHome step2);
+    }    
+}
+	
+Rover::PhoneHome 
+{
+    eq(duration,10);
+
+    //change over all { uses(battery_, 600); };
+    equals(battery_.uses b);
+    eq(b.quantity, -600.0);     
+}
+
+Rover::PhoneLander
+{
+    eq(duration,5);
+    
+    //change over all { uses(battery_, 20); };
+    equals(battery_.uses b);
+    eq(b.quantity, -20.0);     
+}
+

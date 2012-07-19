@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file is placed by the makeproject script in new projects -->
+<project name="%%Project%%" default="run" basedir=".">
+  <description>%%Project%% -- A EUROPA PSDesktop Project</description>
+
+  <property environment="env"/>
+  <!-- load overrides from build.properties file -->
+  <property file="build.properties"/>
+
+  <property name="europa.dir"   value="${env.EUROPA_HOME}"/>
+  <property name="psui.lib.dir" value="${europa.dir}/lib/PSUI"/>
+
+  <property name="debug"  value="true"/>
+  <property name="deprecation"  value="true"/>
+  <property name="dist" value="build/lib"/>    
+
+  <path id="psui.class.path">
+    <pathelement location="${europa.dir}/lib/PSUI.jar"/>
+  </path>
+
+  <target name="init">
+    <tstamp/>
+    <mkdir dir="${class.dir}"/>
+    <mkdir dir="${swig.src.dir}"/>
+  </target>
+
+  <property name="java.src.dir" value="java"/> 
+  <property name="swig.src.dir" value="build/swig/%%Project%%/"/>
+  <property name="class.dir"     value="build/classes"/> 
+
+  <!-- Create .jar to include any custom Java and swig-wrapped C++ -->
+  <target name="%%Project%%" depends="compile">
+     <mkdir dir="${dist}"/>  				<!-- if necessary -->
+     <jar jarfile="${dist}/%%Project%%.jar">
+       <fileset dir="${class.dir}"/>
+     </jar>
+     <touch file="${dist}/%%Project%%.jar"/>
+  </target>
+
+  <target name="clean" description="delete the 'classes' directory trees" >
+    <delete dir="${class.dir}"/>
+  </target>
+
+  <target name="compile" depends="init" description="compile 'src' tree into 'classes' tree" >
+  <!-- Compile any swig-wrapped custom C++ code -->
+   <javac srcdir="${swig.src.dir}" 
+           destdir="${class.dir}" 
+    	   debug="${debug}" 
+    	   deprecation="${deprecation}">
+	  <classpath refid="psui.class.path"/>
+    </javac>
+  <!-- Compile Main.java and any custom java code -->
+    <javac srcdir="${java.src.dir}" 
+           destdir="${class.dir}" 
+    	   debug="${debug}" 
+    	   deprecation="${deprecation}">
+	  <classpath refid="psui.class.path"/>
+    </javac>
+  </target>
+	
+  <!-- project,project.dir,project.mode and project.bsh.script are read from build.properties -->
+  <target name="run" depends="compile" description="build and run">
+    <echo message="Running ${project} project"/>
+    <java classname="${project}.Main" dir="${project.dir}" fork="yes">
+      <jvmarg value="-Xms256m"/>
+      <jvmarg value="-Xmx2048m"/>
+      <arg value="${project.mode}"/>
+      <arg value="${project.bsh.script}"/>
+      <classpath>
+      <path refid="psui.class.path"/>
+      <pathelement location="${class.dir}"/>
+       </classpath>
+    </java>
+  </target>
+</project>

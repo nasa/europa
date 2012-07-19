@@ -1,0 +1,22 @@
+SubDir PLASMA Solvers component ;
+
+if ! $(PLASMA_READY) {
+
+SubDirC++Flags -Wno-unknown-pragmas ;
+
+ModuleComponent Solvers
+	:
+	PSSolversImpl.cc
+	ValueSource.cc
+	UnboundVariableDecisionPoint.cc
+	UnboundVariableManager.cc
+	OpenConditionDecisionPoint.cc
+	OpenConditionManager.cc
+	Filters.cc
+	ThreatDecisionPoint.cc
+	ThreatManager.cc
+        SolverPartialPlanWriter.cc
+	HSTSDecisionPoints.cc
+	;
+	
+} # PLASMA_READY

@@ -1,0 +1,56 @@
+// gnats-2537.nddl
+
+#include "Db.hh"
+#include "NddlUtils.hh"
+/** Custom Include Files **/
+
+namespace NDDL {
+
+  class Foo;
+  typedef Id<Foo> FooId;
+  typedef ObjectDomain FooDomain;
+  
+  class Region;
+  typedef Id<Region> RegionId;
+  typedef ObjectDomain RegionDomain;
+  
+  
+  
+  // gnats-2537.nddl:5 Location
+  typedef SymbolDomain Location;
+  Location LocationBaseDomain();
+  
+  // gnats-2537.nddl:7 Foo
+  class Foo : public Object {
+  public:
+    Foo(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Foo(const ObjectId& parent, const LabelStr& name);
+    Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    virtual void constructor(); // default constructoror
+    
+  };
+  
+  // gnats-2537.nddl:9 Region
+  class Region : public Object {
+  public:
+    Region(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Region(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Region(const ObjectId& parent, const LabelStr& name);
+    Region(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId location; // SchemaWriter::declareVariable
+    ConstrainedVariableId foo; // SchemaWriter::declareVariable
+    
+    // gnats-2537.nddl:9 Region
+    virtual void constructor();
+    
+    // gnats-2537.nddl:9 Region
+    virtual void constructor(const FooId& _foo);
+    
+    // gnats-2537.nddl:9 Region
+    virtual void constructor(const LabelStr& loc);
+  };
+} // End NDDL namespace

@@ -1,0 +1,29 @@
+SubDir PLASMA System base ;
+
+if ! $(PLASMA_READY) {
+
+SubDirC++Flags -Wno-unknown-pragmas ;
+
+if "Resources" in $(NO) {
+  SubDirC++Flags -DNO_RESOURCES ;
+}
+
+#SubDirHdrs $(PLASMA_HOME) src PLASMA Log4cpp $(log4cpp.versionDir) include ;
+SubDirHdrs $(log4cpp.includeDir) ;
+
+ModuleBase System 
+	: 
+	EuropaEngine.cc
+	PSEngineImpl.cc
+	;
+
+SwigJava PSEngine.i : psengine : swig/psengine : cpp : TinyXml Utils ConstraintEngine PlanDatabase RulesEngine NDDL TemporalNetwork Solvers System : PSEngine ;
+
+ModuleBaseSwig System : [ FSwigWrapperName PSEngine.i : cpp ] ;
+
+LOCATE on PSEngine.jar = [ FDirName $(PLASMA_BUILD) lib ] ;
+
+Depends lib : PSEngine.jar ;
+Depends build-modules : PSEngine.jar ;
+
+} # PLASMA_READY

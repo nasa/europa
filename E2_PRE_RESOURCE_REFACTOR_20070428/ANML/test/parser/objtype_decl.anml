@@ -1,0 +1,13 @@
+objtype EmptyStruct
+{
+}
+
+objtype SimpleStruct
+{
+	int a;
+}
+
+objtype ExtendedStruct : SimpleStruct
+{
+	int b;
+}

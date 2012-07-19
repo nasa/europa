@@ -1,0 +1,31 @@
+<Solver name="DefaultTestSolver">
+  <FlawFilter component="HorizonFilter" policy="PartiallyContained"/>
+
+  <SAVHThreatManager order="most,earliest,lower" defaultPriority="2">
+    <FlawHandler component="SAVHThreatHandler" filter="both" />
+  </SAVHThreatManager>
+
+  <ThreatManager defaultPriority="1">
+    <FlawHandler component="StandardThreatHandler"/>
+    <FlawFilter class-match="Reusable"/>
+    <FlawFilter class-match="CapacityResource"/>
+  </ThreatManager>
+
+  <!-- activate everything first -->
+  <OpenConditionManager defaultPriority="1">
+    <FlawHandler component="StandardOpenConditionHandler"/>
+  </OpenConditionManager>
+
+  <UnboundVariableManager defaultPriority="2">
+    <FlawFilter var-match="start"/>
+    <FlawFilter var-match="end"/>
+    <FlawFilter var-match="duration"/>
+    <!--FlawFilter class-match="Resource" var-match="time"/>
+    <FlawFilter class-match="Resource" var-match="quantity"/>
+    <FlawFilter class-match="Reservoir" var-match="time"/>
+    <FlawFilter class-match="Reservoir" var-match="quantity"/>
+    <FlawFilter class-match="Reusable" var-match="quantity"/-->
+    <FlawFilter component="InfiniteDynamicFilter"/>
+    <FlawHandler component="StandardVariableHandler"/>
+  </UnboundVariableManager>
+</Solver>

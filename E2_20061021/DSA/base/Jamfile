@@ -1,0 +1,39 @@
+SubDir PLASMA DSA base ;
+
+if ! $(PLASMA_READY) {
+
+ModuleBase DSA : DSA.cc ;
+
+MakeLocate DSA.jar : [ FDirName $(SUBDIR) .. .. lib ] ;
+
+ApacheAnt JNI.h : [ FGristFiles build.xml ] : createJNI ;
+
+Depends JNI.h : dsa/JNI.java ;
+
+ApacheAnt DSA.jar : 
+	[ FGristFiles build.xml ]
+	dsa/DSA.java
+	dsa/JNI.java
+	dsa/Entity.java
+	dsa/Component.java
+	dsa/Attribute.java
+	dsa/Slot.java
+	dsa/Token.java
+	dsa/TokenImpl.java
+	dsa/Action.java
+	dsa/ActionImpl.java
+	dsa/Proposition.java
+	dsa/Parameter.java
+	dsa/Violation.java
+	dsa/InvalidSourceException.java
+	dsa/InvalidSinkException.java
+	dsa/PlanNotSavedException.java
+	dsa/NoActivePlanException.java
+	dsa/InvalidKeyException.java
+	nddl.jar :
+	DSA
+;
+
+Depends DSA.jar : nddl.jar ;
+	
+} # PLASMA_READY

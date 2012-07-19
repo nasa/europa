@@ -1,0 +1,201 @@
+// plasma-base.nddl
+
+#include "plasma-base.hh"
+#include "NddlUtils.hh"
+
+namespace NDDL {
+  
+  TokenStates TokenStatesBaseDomain(){
+    static TokenStates sl_enum("TokenStates");
+    if (sl_enum.isOpen()) {
+      // Insert values to initialize
+      sl_enum.insert(LabelStr("INACTIVE"));
+      sl_enum.insert(LabelStr("ACTIVE"));
+      sl_enum.insert(LabelStr("MERGED"));
+      sl_enum.insert(LabelStr("REJECTED"));
+      sl_enum.close();
+    }
+    return(sl_enum);
+  }
+  // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Timeline
+  
+  
+  
+  // StringData.nddl:5 StringData
+  StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "StringData", name, true) {
+  }
+  StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  StringData::StringData(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "StringData", name, true) {}
+  StringData::StringData(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void StringData::handleDefaults(bool autoClose) {
+    if(data.isNoId()){
+      data = addVariable(StringDomain("string"), "data");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  // StringData.nddl:5 StringData
+  void StringData::constructor(const LabelStr& _data) {
+    data = addVariable(StringDomain(_data, "string"), "data");
+  }
+  
+  // StringData.nddl:5 StringData
+  class StringDataFactory0: public ConcreteObjectFactory {
+  public:
+    StringDataFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 1);
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
+                                                TypeFactory::baseDomain("string")), 
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to string");
+      check_error(arguments[0]->isSingleton());
+      LabelStr _data((LabelStr)arguments[0]->getSingletonValue());
+      
+      StringDataId instance = (new StringData(planDb, objectType, objectName))->getId();
+      instance->constructor(_data);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  
+  // plasma-base.nddl:8 BaseTimeline
+  BaseTimeline::BaseTimeline(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Timeline(planDatabase, "BaseTimeline", name, true) {
+  }
+  BaseTimeline::BaseTimeline(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Timeline(planDatabase, type, name, true) {
+  }
+  BaseTimeline::BaseTimeline(const ObjectId& parent, const LabelStr& name)
+   : Timeline(parent, "BaseTimeline", name, true) {}
+  BaseTimeline::BaseTimeline(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Timeline(parent, type, name, true) {}
+  // default initialization of member variables
+  void BaseTimeline::handleDefaults(bool autoClose) {
+    if (autoClose)
+      close();
+  }
+  
+  // implicit constructor
+  void BaseTimeline::constructor() {
+  }
+  
+  
+  // plasma-base.nddl:8 BaseTimeline
+  DECLARE_DEFAULT_OBJECT_FACTORY(BaseTimelineFactory1, BaseTimeline);
+  
+  
+  // plasma-base.nddl:9 p0
+  BaseTimeline::p0::p0(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  BaseTimeline::p0::p0(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void BaseTimeline::p0::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // plasma-base.nddl:12 World
+  World::World(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "World", name, true) {
+  }
+  World::World(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  World::World(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "World", name, true) {}
+  World::World(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void World::handleDefaults(bool autoClose) {
+    check_error(_o1.isValid(), "object variables must be initialized explicitly");
+    
+    if (autoClose)
+      close();
+  }
+  
+  
+  // plasma-base.nddl:12 World
+  void World::constructor() {
+    _o1 = addVariable(BaseTimelineDomain((new BaseTimeline(m_id, "_o1"))->getId(), "BaseTimeline"), "_o1");
+    Id<BaseTimeline>(singleton(_o1))->constructor();
+    Id<BaseTimeline>(singleton(_o1))->handleDefaults();
+  }
+  
+  // plasma-base.nddl:12 World
+  class WorldFactory2: public ConcreteObjectFactory {
+  public:
+    WorldFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 0);
+      WorldId instance = (new World(planDb, objectType, objectName))->getId();
+      instance->constructor();
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+} // namespace NDDL
+
+
+namespace NDDL {
+  // Boot-strap code to initialize schema
+  extern "C" SchemaId loadSchema(){
+    Id<Schema> id = Schema::instance("plasma-base");
+    // Register Constraints
+    // Invoke commands to populate schema with type definitions
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("StringData", "Object");
+    id->addObjectType("BaseTimeline", "Timeline");
+    id->addObjectType("World", "Object");
+    id->addEnum("TokenStates");
+    id->addMember("StringData", "string", "data");
+    id->addPredicate("BaseTimeline.p0");
+    id->addMember("World", "BaseTimeline", "_o1");
+    id->addValue("TokenStates", LabelStr("INACTIVE"));
+    id->addValue("TokenStates", LabelStr("ACTIVE"));
+    id->addValue("TokenStates", LabelStr("MERGED"));
+    id->addValue("TokenStates", LabelStr("REJECTED"));
+    // Force allocation of model specific type factories
+    // Allocate factories
+    REGISTER_TOKEN_FACTORY(BaseTimeline::p0::Factory);
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(TokenStates, TokenStatesBaseDomain());
+    REGISTER_TYPE_FACTORY(Timeline, ObjectDomain("Timeline"));
+    REGISTER_TYPE_FACTORY(StringData, ObjectDomain("StringData"));
+    REGISTER_OBJECT_FACTORY(StringDataFactory0, StringData:string);
+    REGISTER_TYPE_FACTORY(BaseTimeline, ObjectDomain("BaseTimeline"));
+    REGISTER_OBJECT_FACTORY(BaseTimelineFactory1, BaseTimeline);
+    REGISTER_TYPE_FACTORY(World, ObjectDomain("World"));
+    REGISTER_OBJECT_FACTORY(WorldFactory2, World);
+    // Allocate rules
+    return id;
+  }
+  
+}

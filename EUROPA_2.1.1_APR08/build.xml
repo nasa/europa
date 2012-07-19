@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="PLASMA" default="dist" basedir=".">
+
+  <description>PLASMA</description>
+
+  <target name="init">
+    <exec executable="uname" outputproperty="uname.o">
+      <arg value="-o"/>
+    </exec>
+    <condition property="os.isCygwin">
+      <equals arg1="${uname.o}" arg2="Cygwin"/>
+    </condition>
+
+    <!-- load overrides -->
+    <property file="${user.home}/.ant.plasma.properties"/>
+  </target>
+
+  <target name="cygwin-init" depends="init" if="os.isCygwin">
+    <exec executable="cygpath" outputproperty="local.env.PLASMA_HOME">
+      <arg value="--unix"/>
+      <arg value="--absolute"/>
+      <arg value="${basedir}"/>
+    </exec>
+    <property name="jam.libraries" value="STATIC"/>
+    <property name="jam.misc" value="-sOS=CYGWIN"/>
+  </target>
+
+  <target name="init-final" depends="init,cygwin-init">
+    <property name="local.env.PLASMA_HOME" value="${basedir}"/>
+    <property name="dir.plasma" value="${basedir}"/>
+    <property name="dir.src" value="src/PLASMA"/>
+    <property name="dir.planworks" value="../PlanWorks"/>
+    <property name="dir.dist" value="dist"/>
+    <property name="dir.dist.base" location="${dir.dist}/europa"/>
+    <property name="file.europa_dist" value="europa.zip"/>
+    <property name="jam.libraries" value="SHARED"/>
+    <property name="jam.variant" value="DEV"/>
+    <property name="jam.opts" value="${jam.misc} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries}"/>
+  </target>
+
+  <target name="clean" depends="init-final">
+    <delete dir="${dir.dist}"/>
+    <exec executable="jam" dir="${dir.src}">
+      <arg line="clean-all"/>
+      <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
+    </exec>
+  </target>
+
+  <target name="build" depends="init-final">
+    <exec executable="jam" dir="${dir.src}">
+      <arg line="${jam.opts} build"/>
+      <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
+    </exec>
+  </target>
+
+  <target name="test" depends="init-final">
+    <exec executable="jam" dir="${dir.src}">
+      <arg line="${jam.opts} run-all-tests"/>
+      <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
+    </exec>
+  </target>
+
+  <!-- This target assumes that PLASMA and PlanWorks have already been built so that all the products are in place -->
+  <target name="dist" description="Creates the binary distribution and packages it up into ${dir.dist}/${file.plasma_dist}" depends="init-final">
+    <antcall target="build"/>
+    <antcall target="build">
+      <param name="jam.opts" value="${jam.misc} -sVARIANTS=OPTIMIZED -sLIBRARIES=${jam.libraries}"/>
+    </antcall>
+    <!-- Create the distribution directory  -->
+    <mkdir dir="${dir.dist}"/>
+    <mkdir dir="${dir.dist.base}/bin"/>
+
+    <copy todir="${dir.dist.base}/bin">
+      <!-- TODO: copy scripts to run PlanWorks and PSDesktop -->
+      <!-- TODO: modify makeproject so that it can work with makefile, PSEngine and binary release -->
+      <fileset dir="${dir.plasma}/bin"/>
+    </copy>
+    <!-- ant doesn't preserve permissions -->
+    <chmod perm="+x">
+      <fileset dir="${dir.dist.base}/bin"/>
+    </chmod>
+
+    <copy todir="${dir.dist.base}/lib">
+      <fileset dir="${dir.plasma}/build/lib"/>
+      <!-- TODO: copy PlanWorks libraries -->
+    </copy>
+
+    <!-- TODO: put all this libs into PSUI.jar -->
+    <copy todir="${dir.dist.base}/lib/PSUI">
+      <fileset dir="${dir.src}/System/component/PSUI/lib"/>
+    </copy>
+
+    <copy todir="${dir.dist.base}/include" flatten="true" includeEmptyDirs="false">
+      <fileset file="${dir.src}">
+        <include name="**/PS*.hh"/>
+        <exclude name="**/PS*Impl.hh"/>
+      </fileset>
+      <fileset dir="${dir.src}/NDDL/base">
+        <include name="*.nddl"/>
+      </fileset>
+      <fileset dir="${dir.src}/Resource/component/NDDL">
+        <include name="*.nddl"/>
+      </fileset>
+    </copy>
+    <copy todir="${dir.dist.base}/include/jam" flatten="true" includeEmptyDirs="false">
+      <fileset file="${dir.src}">
+        <include name="**/*Rules"/>
+      </fileset>
+    </copy>
+    <copy todir="${dir.dist.base}/include/PLASMA" flatten="true">
+      <fileset dir="${dir.src}">
+        <include name="**/*.hh"/>
+        <include name="**/*.h"/>
+        <exclude name="**/test/**"/>
+      </fileset>
+    </copy>
+
+    <copy todir="${dir.dist.base}/config">
+      <!-- TODO: include path in NDDL.cfg needs to support layout of binary release -->
+      <fileset dir="${dir.plasma}/config"/>
+    </copy>
+
+    <!-- Finally, zip everything up -->
+    <zip destfile="${dir.dist}/${file.europa_dist}" basedir="${dir.dist.base}"/>
+  </target>
+</project>

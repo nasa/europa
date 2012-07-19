@@ -1,0 +1,27 @@
+SubDir PLASMA System base ;
+
+if ! $(PLASMA_READY) {
+
+SubDirC++Flags -Wno-unknown-pragmas ;
+
+if "Resources" in $(NO) {
+  SubDirC++Flags -DNO_RESOURCES ;
+}
+
+ModuleBase System 
+	: 
+	EngineBase.cc
+	PSEngineImpl.cc
+	StandardAssembly.cc
+	;
+
+SwigJava PSEngine.i : psengine : swig/psengine : cpp : TinyXml Utils ConstraintEngine PlanDatabase RulesEngine NDDL TemporalNetwork Solvers System : PSEngine ;
+
+ModuleBaseSwig System : [ FSwigWrapperName PSEngine.i : cpp ] ;
+
+LOCATE on PSEngine.jar = [ FDirName $(PLASMA_BUILD) lib ] ;
+
+Depends lib : PSEngine.jar ;
+Depends build-modules : PSEngine.jar ;
+
+} # PLASMA_READY

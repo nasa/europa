@@ -1,0 +1,55 @@
+/**
+ * Demonstrates migration of proxy relation constraints when mergiong sub-goals.
+ * Note that the planner cannot find a plan if the at sub-goals are introduced in an
+ * alternate order. I have not fully analyzed the cause of this but there seems to be a
+ * directional bias in the model or else the search is incomplete.
+ */
+#include "PlannerTestConfig.nddl"
+
+enum Location {Hill, Rock, Lander};
+
+class Path {
+ Location from;
+ Location to;
+ Path(Location _from, Location _to){
+  from = _from;
+  to = _to;
+ }
+}
+
+class Foo extends Timeline {
+ predicate at{
+  Location loc;
+ }
+
+ predicate going{}
+}
+
+Foo::at{
+ meets(object.going);
+ met_by(object.going);
+}
+
+Foo::going{
+ met_by(object.at prev);
+ meets(object.at next);
+ Path p;
+ eq(p.from, prev.loc);
+ eq(p.to, next.loc);
+}
+
+PlannerTestConfig world = new PlannerTestConfig(0, 10, 13, 13);
+Path p1 = new Path(Lander, Hill);
+Path p2 = new Path(Hill, Rock);
+Foo foo = new Foo();
+close();
+
+goal(foo.at g0);
+g0.loc.specify(Lander);
+g0.start.specify(0);
+
+goal(foo.at g1);
+g1.loc.specify(Rock);
+g1.end.specify(10);
+
+g0 before g1;

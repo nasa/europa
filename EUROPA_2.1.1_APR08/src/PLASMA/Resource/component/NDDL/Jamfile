@@ -1,0 +1,11 @@
+SubDir PLASMA Resource component NDDL ;
+
+if ! $(PLASMA_READY) {
+   Module Resource : NDDL RulesEngine ;
+   
+   ModuleComponent Resource 
+       : 
+       NddlResource.cc 
+       TransactionInterpreterResources.cc 
+       ;
+}

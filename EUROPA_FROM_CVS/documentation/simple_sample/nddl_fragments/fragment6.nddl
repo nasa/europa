@@ -1,0 +1,6 @@
+Navigator::At{ 
+   met_by(object.Going from);
+   eq(from.to, location); // next Going token starts at this location
+   meets(object.Going to); 
+   eq(to.from, location); // prevous Going token ends at this location
+}

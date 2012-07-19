@@ -1,0 +1,20 @@
+SubDir PLASMA System component ;
+
+if ! $(PLASMA_READY) {
+
+if ( "Resources" in $(NO) ) {
+  SubDirC++Flags -DNO_RESOURCES ;
+}
+
+ModuleComponent System	: SolverAssembly.cc MasterController.cc SingleSolverController.cc ;
+
+PSUI_HOME ?= [ FDirName $(PLASMA_HOME) src PLASMA System component PSUI ] ;
+
+Depends PSUI.jar : PSEngine.jar ;
+ApacheAnt PSUI.jar : PSUI/build.xml : dist ;
+LOCATE on PSUI.jar = [ FDirName $(PLASMA_BUILD) lib ] ;
+
+Depends lib : PSUI.jar ;
+Depends build-modules : PSUI.jar ;
+
+} # PLASMA_READY

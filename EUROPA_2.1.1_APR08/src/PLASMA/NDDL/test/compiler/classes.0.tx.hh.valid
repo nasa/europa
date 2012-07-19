@@ -1,0 +1,81 @@
+#include "Db.hh"
+#include "NddlUtils.hh"
+/** Custom Include Files **/
+
+namespace NDDL {
+
+// classes.0.tx.nddl
+
+  class StringData;
+  typedef Id<StringData> StringDataId;
+  typedef ObjectDomain StringDataDomain;
+  
+  class Location;
+  typedef Id<Location> LocationId;
+  typedef ObjectDomain LocationDomain;
+  
+  class Path;
+  typedef Id<Path> PathId;
+  typedef ObjectDomain PathDomain;
+  
+  
+  
+  // Core.nddl:8 TokenStates
+  typedef SymbolDomain TokenStates;
+  TokenStates TokenStatesBaseDomain();
+  // SKIPPING DECLARATION FOR BUILT-IN CLASS Timeline
+  
+  
+  // StringData.nddl:5 StringData
+  class StringData : public Object {
+  public:
+    StringData(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    StringData(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    StringData(const ObjectId& parent, const LabelStr& name);
+    StringData(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId data; // SchemaWriter::declareVariable
+    
+    // StringData.nddl:5 StringData
+    virtual void constructor(const LabelStr& _data);
+  };
+  
+  // classes.0.nddl:5 Location
+  class Location : public Object {
+  public:
+    Location(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Location(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Location(const ObjectId& parent, const LabelStr& name);
+    Location(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId name; // SchemaWriter::declareVariable
+    
+    // classes.0.nddl:5 Location
+    virtual void constructor(const LabelStr& _name);
+  };
+  
+  // classes.0.nddl:13 Path
+  class Path : public Object {
+  public:
+    Path(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Path(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Path(const ObjectId& parent, const LabelStr& name);
+    Path(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId from; // SchemaWriter::declareVariable
+    ConstrainedVariableId to; // SchemaWriter::declareVariable
+    ConstrainedVariableId cost; // SchemaWriter::declareVariable
+    
+    // classes.0.nddl:13 Path
+    virtual void constructor(const LocationId& _from, const LocationId& _to);
+    
+    // classes.0.nddl:13 Path
+    virtual void constructor(const LocationId& loc);
+    
+    // classes.0.nddl:13 Path
+    virtual void constructor(const LocationId& _from, const LocationId& _to, float _cost);
+  };
+} // End NDDL namespace

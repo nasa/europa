@@ -1,0 +1,12 @@
+SubDir PLASMA Resource ;
+
+if ! $(PLASMA_READY) {
+
+Module Resource : ConstraintEngine TemporalNetwork PlanDatabase Utils ;
+
+SubInclude PLASMA Resource base ;
+SubInclude PLASMA Resource component ;
+SubInclude PLASMA Resource documentation ;
+SubInclude PLASMA Resource test ;
+
+} # PLASMA_READY

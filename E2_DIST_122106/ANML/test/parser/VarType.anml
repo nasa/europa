@@ -1,0 +1,21 @@
+vartype BoolAlias          : bool;
+vartype BoolAliasAlias     : BoolAlias;
+
+vartype IntAlias           : int;
+vartype IntAliasAlias      : IntAlias;
+vartype PositiveInt        : int [0 +inf];
+vartype PositiveIntAlias   : PositiveInt; 
+
+vartype FloatAlias         : float;
+vartype FloatAliasAlias    : FloatAlias;
+vartype PositiveFloat      : float [0.0 +inf];
+vartype PositiveFloatAlias : PositiveFloat; 
+
+vartype StringAlias        : string;
+vartype StringAliasAlias   : StringAlias;
+
+vartype EnumExample        : enum { "string1", "string2", "string3" };
+vartype EnumExampleAlias   : EnumExample;
+
+vartype VectorExample      : vector (int a, float b);
+vartype VectorExampleAlias : VectorExample;

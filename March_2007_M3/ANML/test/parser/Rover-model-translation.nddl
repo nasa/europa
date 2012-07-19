@@ -1,0 +1,239 @@
+// Rover-model-translation.nddl
+
+enum StowStateEnum { 'stowing', 'stowed', 'unstowing', 'unstowed' };
+
+class StowState extends Timeline
+{
+    copy { StowState rhs; }
+    setValue {StowStateEnum value;}
+}
+
+StowState::copy {}
+StowState::setValue {}
+
+class Location extends Timeline
+{
+    copy { Location rhs; }
+    setValue {string name; int x; int y;}
+}
+
+Location::copy {}
+Location::setValue {}
+
+class Path extends Timeline
+{
+    predicate copy { Path rhs; }
+    predicate setValue {string name; Location from; Location to; double cost};
+}
+
+Path::copy {}
+Path::setValue {}
+
+// in ANML : vartype Battery : int [0 50];
+// Given its use, we must infer that Battery is a resource
+class Battery extends Reusable
+{
+    Battery()
+    {
+        // Capacity, Lower limit
+        super(50.0,0.0);
+    }
+}
+
+class Instrument 
+{
+	StowState state_;
+
+    predicate TakeSample {Location rock;}
+    predicate TakeSample_decomposition1 {Location rock;}
+    
+    predicate Sample     {Location rock;}
+    predicate Place      {Location rock;}
+    predicate Stow       {} 
+    predicate Unstow     {}
+}
+
+Instrument::TakeSample
+{
+     contains(object.TakeSample_decomposition1 decomposition1);
+     eq(decomposition1.rock,rock);
+     // in general, we'd add temporal constraints here
+     // since the temporal qualifier is "contains all", we don't need constraints
+}
+
+Instrument::TakeSample_decomposition1() 
+{
+    contains(object.Unstow step1);
+    contains(object.Place step2);
+    eq(step2.rock,rock);
+    contains(object.Sample step3);
+    eq(step3.rock,rock);
+    contains(object.Stow step4);
+
+    precedes(step1,step2);
+    precedes(step2,step3);
+    precedes(step3,step4);        
+}
+
+Instrument::Sample
+{
+	eq(duration,10);
+}
+
+Instrument::Place
+{
+	eq(duration,3);
+}
+
+// TODO: that if the instrument is already Stowed/Unstowed??
+Instrument::Stow 
+{
+	eq(duration,2);
+
+    // change over all { state_ = "unstowed" -> "stowing" -> "stowed" };
+    // TODO: this may cause holes in state_'s timeline. live with it for now
+    met_by(object.state_.setValue sv1);
+    eq(sv1.value,'unstowed');
+
+    contained_by(object.state_.setValue sv2);
+    eq(sv2.value,'stowing');
+
+    meets(object.state_.setValue sv3);
+    eq(sv3.value,'stowed');
+}
+
+Instrument::Unstow 
+{
+	eq(duration,2);
+
+    // change over all { state_ = "stowed" -> "unstowing" -> "unstowed" };
+    met_by(object.state_.setValue sv1);
+    eq(sv1.value,'stowed');
+
+    contained_by(object.state_.setValue sv2);
+    eq(sv2.value,'unstowing');
+
+    meets(object.state_.setValue sv3);
+    eq(sv3.value,'unstowed');        
+}
+
+class Rover 
+{
+    Battery battery_;
+    Instrument instrument_;
+    Location location_;
+    
+    Rover()
+    {
+        battery_ = new Battery();
+        instrument_ = new Instrument();
+        location_ = new Location();
+    }
+    
+    predicate Go { Locations from; Location to; }
+
+    predicate locationEQ { Location value; }
+    
+    predicate TakeSample { Location rock; }
+    predicate TakeSample_decomposition1 { Location rock; }
+    predicate TakeSample_decomposition1_step2 { Location rock; }
+    
+    predicate PhoneHome {}
+    predicate PhoneLander {}
+}
+      
+
+Rover::Go()
+{
+	neq(from,to);
+		
+	// assert existence of path from from to to
+	Path p;
+    eq(p.from, from);
+    eq(p.to, to);
+
+    eq(duration,p.cost); 
+       
+    //condition at start { location_ = from; };
+    object.locationEQ cond1;
+    eq(cond1.value,from);
+    leq(cond1.start,start);
+    leq(start,cond1.end);
+	    	    
+	//effect at end { location_ = to; };
+	object.locationEQ effect1;
+    eq(effect1.value,to);
+    leq(effect1.start,start);
+    leq(start,effect1.end);
+		
+	// change over all { uses(battery_, p.cost); };
+    equals(battery_.uses b);
+    eq(b.quantity, -p.cost);     
+}
+
+Rover::locationEQ
+{
+    contained_by(object.location_.copy copy);
+    eq(copy.value,value);
+    
+    // TODO: shouldn't this be conditional??, if we already have a fact, this subgoal will be generated anyway.
+    // Normally a disjunction would be generated here, in this case, there is only one option
+    // TODO: met_by only works if the action says "effect at end", operator needs to be generated
+    // based on temporal qualifier for the effect in the action
+    met_by(object.Go action1);
+    eq(action1.to,value); // TODO: figuring out which variables map to which may be non-trivial
+}
+
+Rover::TakeSample
+{
+    duration [20 25];
+	    
+	//condition over all { location_ = rock; };
+    contained(object.locationEQ cond1);
+    eq(cond1.value,rock);
+
+   	contains(TakeSample_decomposition1 decomp1);
+   	eq(decomp1.rock,rock);   	
+}
+
+Rover::TakeSample_decomposition1
+{
+    contains(object.instrument_.TakeSample step1);
+    eq(step1.rock,rock);
+	
+    contains(object.decomposition1_step2 step2);
+    
+    precedes(step1,step2);
+}
+
+Rover::TakeSample_decomposition1_step2
+{
+	bool or1;
+	
+	if (or1 == 1) {
+        contains(object.PhoneLander step1);
+    }
+    if (or1 == 2) {
+        contains(object.PhoneHome step2);
+    }    
+}
+	
+// TODO: when should we prefer to PhoneHome over PhoneLander?
+Rover::PhoneHome 
+{
+    eq(duration,10);
+
+    //change over all { uses(battery_, 600); };
+    equals(battery_.uses b);
+    eq(b.quantity, -600.0);     
+}
+
+Rover::PhoneLander
+{
+    eq(duration,5);
+    
+    //change over all { uses(battery_, 20); };
+    equals(battery_.uses b);
+    eq(b.quantity, -20.0);     
+}
+

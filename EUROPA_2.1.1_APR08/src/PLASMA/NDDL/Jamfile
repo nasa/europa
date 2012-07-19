@@ -1,0 +1,14 @@
+SubDir PLASMA NDDL ;
+
+if ! $(PLASMA_READY) {
+
+Module NDDL : RulesEngine TemporalNetwork ;
+
+SubInclude PLASMA NDDL base ;
+SubInclude PLASMA NDDL component ;
+
+ModuleFiles NDDL : ModuleNddl.cc ;
+
+SubInclude PLASMA NDDL test ;
+
+} # PLASMA_READY

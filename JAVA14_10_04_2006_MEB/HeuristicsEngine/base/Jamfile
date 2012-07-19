@@ -1,0 +1,13 @@
+SubDir PLASMA HeuristicsEngine base ;
+
+if ! $(PLASMA_READY) {
+
+ModuleBase HeuristicsEngine
+	:
+	HeuristicsEngine.cc
+	Heuristic.cc
+	HeuristicInstance.cc
+	HeuristicsReader.cc
+	;
+
+} # PLASMA_READY

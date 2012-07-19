@@ -1,0 +1,24 @@
+SubDir PLASMA Resource base ;
+
+if ! $(PLASMA_READY) {
+
+ModuleBase Resource
+	:
+	PSResource.cc
+	SAVH_Resource.cc
+	Resource.cc
+	Transaction.cc
+	Instant.cc
+	ResourceProblem.cc
+	ResourcePropagator.cc
+	ResourceConstraint.cc
+
+	SAVH_Instant.cc
+	SAVH_FVDetector.cc
+	SAVH_Profile.cc
+	SAVH_ProfilePropagator.cc
+	SAVH_ResourceTokenRelation.cc
+	SAVH_Transaction.cc
+	;
+
+} # PLASMA_READY

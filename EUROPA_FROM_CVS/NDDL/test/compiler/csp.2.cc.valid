@@ -1,0 +1,56 @@
+// csp.2.nddl
+
+#include "csp.2.hh"
+#include "NddlUtils.hh"
+
+namespace NDDL {
+  
+  
+  // csp.2.nddl:4 Foo
+  Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "Foo", name, true) {
+  }
+  Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  Foo::Foo(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "Foo", name, true) {}
+  Foo::Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void Foo::handleDefaults(bool autoClose) {
+    if (autoClose)
+      close();
+  }
+  
+  // implicit constructor
+  void Foo::constructor() {
+  }
+  
+  
+  // csp.2.nddl:4 Foo
+  DECLARE_DEFAULT_OBJECT_FACTORY(FooFactory0, Foo);
+  
+} // namespace NDDL
+
+
+namespace NDDL {
+  // Boot-strap code to initialize schema
+  extern "C" SchemaId loadSchema(){
+    Id<Schema> id = Schema::instance("csp.2");
+    id->reset(); // Reset prior data if present. 
+    
+    // Register Constraints
+    // Invoke commands to populate schema with type definitions
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("Foo", "Object");
+    // Force allocation of model specific type factories
+    // Allocate factories
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
+    REGISTER_OBJECT_FACTORY(FooFactory0, Foo);
+    // Allocate rules
+    return id;
+  }
+  
+}

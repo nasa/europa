@@ -1,0 +1,109 @@
+// Rover-model.anml
+
+vartype Location  : vector (string name, int x, int y);
+vartype Path      : vector (string name, Location origin, Location dest, float cost);
+vartype StowState : string { "stowing", "stowed", "unstowing", "unstowed" };
+vartype Battery   : float [0.0 100.0];
+
+objtype Instrument 
+{
+	StowState state_;
+
+	action TakeSample(Location rock) 
+	{
+		decomposition over all ordered (
+			Unstow(),
+			Place(rock),
+			Sample(rock),
+			Stow()
+		);
+	}
+
+	action Sample(Location rock) 
+	{
+		duration 10;
+	}
+
+	action Place(Location rock) 
+	{
+		duration 3;
+	}
+
+	action Stow() 
+	{
+		duration 2;
+        change over all { state_ = "unstowed" -> "stowing" -> "stowed" };
+	}
+
+	action Unstow() 
+	{
+		duration 2;
+        change over all { state_ = "stowed" -> "unstowing" -> "unstowed" };
+	}
+}
+
+objtype Rover 
+{
+    Battery battery_;
+    Instrument instrument_;
+    Location location_;
+
+	action Go(Location origin, Location dest) 
+	{
+	    variables (
+	        Path p, // there needs to be a path from origin to dest
+	        int act_dur
+	    ); 
+	    
+	    condition at start { location_ = origin; };
+	      
+	    condition over all {
+ 		    constraint neq(origin.name, dest.name);
+		
+            constraint eq(p.origin.name, origin.name);
+	        constraint eq(p.dest.name, dest.name);
+	        
+            // TODO: compute duration based on distance? for now just equal to cost?
+            //act_dur = end; //end-start;
+            //constraint eq(act_dur,p.cost); 	        
+        };
+        	    	    
+		effect at end { location_ = dest; };
+		
+		change over all { uses(battery_, p.cost); };
+	}
+
+    action TakeSample(Location rock) 
+    {
+	    duration 20;
+	    
+		condition over all { location_ = rock; };
+
+    	decomposition { 
+          contains all 
+	        ordered(
+		        instrument_.TakeSample(rock),
+	            or(PhoneLander(),
+		           PhoneHome())
+	        );
+	    };
+	}
+	
+	// TODO: PhoneHome is longer and more costly than PhoneLander
+	// the model is probably missing a condition under which we'd
+	// prefer to PhoneHome over PhoneLander
+	// Maybe if the Lander isn't answering?
+	
+    action PhoneHome() 
+    {
+        duration 10;
+        change over all { uses(battery_, 600); };
+    }
+
+    action PhoneLander() 
+    {
+        duration 5;
+    	change over all { uses(battery_, 20); };
+    }
+}
+

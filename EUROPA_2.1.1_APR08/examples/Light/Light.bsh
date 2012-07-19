@@ -1,0 +1,29 @@
+// Light.bsh
+
+// This program uses BeanShell to exercise EUROPA through its Java API
+// desktop and psengine are objects initialized and exposed by the PSDesktop class to make it easy for users to create scripts to debug their models
+
+import psengine.*;
+
+// Load the model and the problem :
+String nddlModel = bsh.cwd+"/Light-initial-state.nddl";
+psengine.executeScript("nddl",nddlModel,true/*isFile*/);
+
+// Create a solver
+solver = desktop.makeSolver(
+    "PlannerConfig.xml" // config
+	, 0                 // startHorizon
+	, 100               // endHorizon
+);
+
+// This will display a dialog that allows the user to run the solver interactively
+desktop.makeSolverDialog(solver);
+
+// call showPlan() after you've run the solver to see the resulting plan
+
+void showPlan()
+{
+    PSObjectList l = psengine.getObjectsByType("Object");    	 
+    for (int i=0;i<l.size();i++) 
+    	desktop.showTokens(l.get(i));
+}

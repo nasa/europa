@@ -1,0 +1,26 @@
+SubDir UBO ;
+
+if ! $(UBO_READY) && ! $(PLASMA_READY) {
+ # Declare a library for PlanWorks Control
+
+ ModuleSharedLibrary UBOController 
+     : ControllerStub.cc 
+     : System : UBOController ;
+
+ # Create a build target to run a problem
+ RunNDDLProblem UBO : UBO-initial-state.nddl : UBO-planner : PlannerConfig.xml ;
+
+ # Create a build target for the planner executable with the given model.
+ NddlMain UBO-planner : UBO-Main.cc : UBO-model.nddl : System : UBO-planner ;
+
+ # Create a build target for the planner shared library with model.
+ ModuleSharedLibrary UBO : UBO-model.o : System : UBO ;
+
+ NOTFILE UBO UBOController ; 
+
+ # Only let all run project if we're in this directory:
+ if $(SUBDIR) = . { 
+    Depends all : UBO UBOController ;
+ } 
+ Depends run-UBO-tests : UBO UBOController ;
+} # UBO_READY

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="PSUI" default="run" basedir=".">
+  <description>PSUI</description>
+
+  <target name="init">
+    <tstamp/>
+    <exec executable="uname" outputproperty="uname.o">
+      <arg value="-o"/>
+    </exec>
+    <condition property="os.isCygwin">
+      <equals arg1="${uname.o}" arg2="Cygwin"/>
+    </condition>
+    <property environment="env"/>
+  </target>
+
+  <target name="cygwin-init" depends="init" if="os.isCygwin">
+    <exec executable="cygpath" outputproperty="plasma.dir">
+      <arg value="--windows"/>
+      <arg value="${env.PLASMA_HOME}"/>
+    </exec>
+  </target>
+
+  <target name="init-final" depends="init,cygwin-init">
+    <property name="plasma.dir" value="${env.PLASMA_HOME}"/>
+    <property file="${user.home}/.ant.psui.properties"/>
+
+    <property name="src.dir"     value="src"/>
+    <property name="build.dir"   value="build"/>
+    <property name="lib.dir"     value="lib"/>
+
+    <property name="project"        value="NDDLHelloWorld"/>
+    <property name="project.dir"    value="${user.home}/workspace/${project}"/>
+    <!-- project.mode = o for optimized, g for debug -->
+    <property name="project.mode" value="o"/>
+    <property name="project.bsh.script" value="${project}.bsh"/>
+
+    <property name="debug"  value="true"/>
+    <property name="deprecation"  value="true"/>
+
+    <mkdir dir="${build.dir}"/>
+
+    <fileset dir="${lib.dir}" id="psui.libfiles">
+      <include name="nanoxml/nanoxml.jar"/>
+      <include name="jfreechart/jcommon-1.0.5.jar"/>
+      <include name="jfreechart/jfreechart-1.0.2.jar"/>
+      <include name="egantt/egantt-core.jar"/>
+      <include name="egantt/egantt-ext.jar"/>
+      <include name="egantt/egantt-resources.jar"/>
+      <include name="beanshell/bsh-2.0b4.jar"/>
+      <include name="junit/junit-4.1.jar"/>
+      <include name="josql/JoSQL-1.9.jar"/>
+      <include name="josql/gentlyWEB-utils-1.1.jar"/>
+    </fileset>
+
+    <fileset dir="${plasma.dir}/build/lib" id="plasma.libfiles">
+      <include name="PSEngine.jar"/>
+      <include name="nddl.jar"/>
+    </fileset>
+
+    <path id="psui.classpath">
+      <fileset refid="psui.libfiles"/>
+      <fileset refid="plasma.libfiles"/>
+    </path>
+
+  </target>
+
+  <target name="clean" description="delete the 'classes' directory tree">
+    <delete dir="${build.dir}"/>
+    <delete file="${plasma.dir}/build/lib/PSUI.jar"/>
+  </target>
+
+  <target name="compile" depends="init-final" description="compile 'src' tree into 'classes' tree">
+    <javac srcdir="${src.dir}"
+           destdir="${build.dir}"
+           debug="${debug}"
+           deprecation="${deprecation}">
+      <classpath refid="psui.classpath"/>
+    </javac>
+  </target>
+ 
+  <target name="check-jar-uptodate"> 
+    <uptodate property="uptodate.jar" targetfile="${plasma.dir}/build/lib/PSUI.jar" >
+      <srcfiles dir="${build.dir}"/>
+      <srcfiles refid="psui.libfiles"/>
+      <srcfiles refid="plasma.libfiles"/>
+   </uptodate>  	
+  </target>
+	
+  <target name="unjar-libs" depends="check-jar-uptodate" unless="uptodate.jar">
+    <unjar dest="${build.dir}" overwrite="false">
+      <fileset refid="psui.libfiles"/>
+      <fileset refid="plasma.libfiles"/>
+    </unjar>
+    <delete dir="${build.dir}/META-INF"/>
+  </target>
+	
+  <target name="dist" depends="compile,unjar-libs">
+    <mkdir dir="${build.dir}"/>
+    <jar jarfile="${plasma.dir}/build/lib/PSUI.jar" basedir="${build.dir}"/>
+  </target>
+
+  <target name="run" depends="compile" description="build and run">
+    <echo message="Running ${project} project"/>
+    <java classname="org.ops.ui.PSDesktop" dir="${project.dir}" fork="yes">
+      <jvmarg value="-Xms256m"/>
+      <jvmarg value="-Xmx2048m"/>
+      <arg value="${project.mode}"/>
+      <arg value="${project.bsh.script}"/>
+      <classpath>
+        <path refid="psui.classpath"/>
+        <pathelement location="${build.dir}"/>
+      </classpath>
+    </java>
+  </target>
+</project>

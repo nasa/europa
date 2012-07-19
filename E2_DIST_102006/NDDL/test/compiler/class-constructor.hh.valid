@@ -1,0 +1,179 @@
+// class-constructor.nddl
+
+#include "Db.hh"
+#include "NddlUtils.hh"
+/** Custom Include Files **/
+
+namespace NDDL {
+
+  class Foo;
+  typedef Id<Foo> FooId;
+  typedef ObjectDomain FooDomain;
+  
+  class Bar;
+  typedef Id<Bar> BarId;
+  typedef ObjectDomain BarDomain;
+  
+  class Baz;
+  typedef Id<Baz> BazId;
+  typedef ObjectDomain BazDomain;
+  
+  class Bat;
+  typedef Id<Bat> BatId;
+  typedef ObjectDomain BatDomain;
+  
+  class Bing;
+  typedef Id<Bing> BingId;
+  typedef ObjectDomain BingDomain;
+  
+  class Bang;
+  typedef Id<Bang> BangId;
+  typedef ObjectDomain BangDomain;
+  
+  class Baluga;
+  typedef Id<Baluga> BalugaId;
+  typedef ObjectDomain BalugaDomain;
+  
+  class World;
+  typedef Id<World> WorldId;
+  typedef ObjectDomain WorldDomain;
+  
+  
+  
+  // class-constructor.nddl:5 Locations
+  typedef SymbolDomain Locations;
+  Locations LocationsBaseDomain();
+  
+  // class-constructor.nddl:9 Foo
+  class Foo : public Object {
+  public:
+    Foo(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Foo(const ObjectId& parent, const LabelStr& name);
+    Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId m_0; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_1; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_2; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_3; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_4; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_5; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_6; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_7; // SchemaWriter::declareVariable
+    
+    // class-constructor.nddl:9 Foo
+    virtual void constructor(const WorldId& w);
+    
+    // class-constructor.nddl:9 Foo
+    virtual void constructor(const WorldId& w, int a, bool b, const LabelStr& c, const LabelStr& loc);
+    
+    // class-constructor.nddl:9 Foo
+    virtual void constructor(const WorldId& w, int a, bool b);
+  };
+  
+  // class-constructor.nddl:49 Bar
+  class Bar : public Foo {
+  public:
+    Bar(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Bar(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Bar(const ObjectId& parent, const LabelStr& name);
+    Bar(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId m_8; // SchemaWriter::declareVariable
+    
+    // class-constructor.nddl:49 Bar
+    virtual void constructor(float m8, const WorldId& w);
+  };
+  
+  // class-constructor.nddl:57 Baz
+  class Baz : public Object {
+  public:
+    Baz(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Baz(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Baz(const ObjectId& parent, const LabelStr& name);
+    Baz(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId m_foo; // SchemaWriter::declareVariable
+    
+    // class-constructor.nddl:57 Baz
+    virtual void constructor(const FooId& _foo);
+  };
+  
+  // class-constructor.nddl:71 Bat
+  class Bat : public Object {
+  public:
+    Bat(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Bat(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Bat(const ObjectId& parent, const LabelStr& name);
+    Bat(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId m_baz; // SchemaWriter::declareVariable
+    
+    // class-constructor.nddl:71 Bat
+    virtual void constructor(const FooId& _foo);
+  };
+  
+  // class-constructor.nddl:80 Bing
+  class Bing : public Object {
+  public:
+    Bing(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Bing(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Bing(const ObjectId& parent, const LabelStr& name);
+    Bing(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    virtual void constructor(); // default constructoror
+    
+  };
+  
+  // class-constructor.nddl:81 Bang
+  class Bang : public Bing {
+  public:
+    Bang(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Bang(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Bang(const ObjectId& parent, const LabelStr& name);
+    Bang(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+  };
+  
+  // class-constructor.nddl:83 Baluga
+  class Baluga : public Object {
+  public:
+    Baluga(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Baluga(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Baluga(const ObjectId& parent, const LabelStr& name);
+    Baluga(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId location; // SchemaWriter::declareVariable
+    
+    // class-constructor.nddl:83 Baluga
+    virtual void constructor(const LabelStr& loc);
+  };
+  
+  // class-constructor.nddl:90 World
+  class World : public Object {
+  public:
+    World(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    World(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    World(const ObjectId& parent, const LabelStr& name);
+    World(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId m_str1; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_foo1; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_foo2; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_foo3; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_foo4; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_baz1; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_bat1; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_int1; // SchemaWriter::declareVariable
+    
+    // class-constructor.nddl:90 World
+    virtual void constructor();
+  };
+} // End NDDL namespace

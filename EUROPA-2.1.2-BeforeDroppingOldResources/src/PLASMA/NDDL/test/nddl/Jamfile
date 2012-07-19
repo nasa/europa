@@ -1,0 +1,73 @@
+SubDir PLASMA NDDL test nddl ;
+
+if ! $(PLASMA_READY) {
+
+ModuleNamedObjects NddlMain : NddlMain.cc : NDDL ;
+ModuleMain NddlMain : NddlMain.o : NDDL ;
+LocalDepends tests : run-nddl-tests ;
+
+# TODO: enable these tests asap
+# Some of these are only failed by the nddl-xml interpreter, not by the nddl interpreter.
+local failing_tests =
+  csp.1.nddl 
+  csp.2.nddl
+  guards.nddl  
+  inheritance.0.nddl 
+  simple-class.nddl 
+  simple-rules.nddl 
+  ;
+
+local nddl_tests =   
+  class-constructor.nddl  
+  composition.0.nddl  
+  constraint-test.nddl
+  classes.0.tx.nddl       
+  classes.1.tx.nddl   
+  classes.2.tx.nddl
+  csp.0.nddl 
+  existential.nddl        
+  foreach.nddl
+  foreach-exec.nddl   
+  globals.nddl            
+  gnats-2537.nddl 
+  gnats_2830.nddl 
+  gnats-3100.nddl 
+  gnats_3140.nddl 
+  gnats-3231.nddl 
+  gnats-3248.nddl
+  inheritance.1.nddl 
+  inheritance.2.nddl
+  interval-constants.nddl
+  less-basic-model.nddl   
+  multidot.nddl       
+  nddl.tx.nddl 
+  nddl.tx.0.nddl 
+  nddl.tx.1.nddl 
+  nddl.tx.2.nddl
+  no-world.nddl 
+  plasma-base.nddl        
+  simple-predicate.nddl 
+  string-domain.nddl  
+  subclass.nddl
+  subtype-extension.nddl 
+  ;
+
+local model ;
+for model in $(nddl_tests)
+{
+  local exe = $(model:S=) ;
+  local xml = $(model:S=.xml) ;
+  
+  NddlParser $(xml) : $(model) ;
+  
+  RunModuleMain NddlMain-xml-$(exe) : NddlMain : $(xml) nddl-xml ;
+  Depends run-$(exe) : $(xml) NddlMain-xml-$(exe) ;
+  Depends run-nddl-tests : run-$(exe) ;  
+  Clean clean-generated-xml : $(xml) ;
+  
+  RunModuleMain NddlMain-$(exe) : NddlMain : $(model) nddl ;
+  Depends run-$(exe) : [ FGristFiles $(model) ] NddlMain-$(exe) ;
+  Depends run-nddl-tests : run-$(exe) ;  
+}
+
+} # PLASMA_READY

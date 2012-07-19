@@ -1,0 +1,335 @@
+// subtype-extension.nddl
+
+#include "subtype-extension.hh"
+#include "NddlUtils.hh"
+
+namespace NDDL {
+  
+  TokenStates TokenStatesBaseDomain(){
+    static TokenStates sl_enum("TokenStates");
+    if (sl_enum.isOpen()) {
+      // Insert values to initialize
+      sl_enum.insert(LabelStr("INACTIVE"));
+      sl_enum.insert(LabelStr("ACTIVE"));
+      sl_enum.insert(LabelStr("MERGED"));
+      sl_enum.insert(LabelStr("REJECTED"));
+      sl_enum.close();
+    }
+    return(sl_enum);
+  }
+  // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Timeline
+  
+  // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Resource
+  
+  // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Reservoir
+  
+  // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Reusable
+  
+  // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Unary
+  
+  
+  
+  // Plasma.nddl:187 UnaryResource
+  UnaryResource::UnaryResource(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Timeline(planDatabase, "UnaryResource", name, true) {
+  }
+  UnaryResource::UnaryResource(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Timeline(planDatabase, type, name, true) {
+  }
+  UnaryResource::UnaryResource(const ObjectId& parent, const LabelStr& name)
+   : Timeline(parent, "UnaryResource", name, true) {}
+  UnaryResource::UnaryResource(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Timeline(parent, type, name, true) {}
+  // default initialization of member variables
+  void UnaryResource::handleDefaults(bool autoClose) {
+    if (autoClose)
+      close();
+  }
+  
+  // implicit constructor
+  void UnaryResource::constructor() {
+  }
+  
+  
+  // Plasma.nddl:187 UnaryResource
+  DECLARE_DEFAULT_OBJECT_FACTORY(UnaryResourceFactory0, UnaryResource);
+  
+  
+  // Plasma.nddl:188 uses
+  UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  UnaryResource::uses::uses(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void UnaryResource::uses::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+    
+    // Post parameter constraints
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("state")));
+      vars.push_back(predicateVariable(SymbolDomain(LabelStr("ACTIVE"), "TokenStates")));
+      token_constraint(eq, vars);
+    }
+  }
+  
+  
+  
+  // Plasma.nddl:197 StringData
+  StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "StringData", name, true) {
+  }
+  StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  StringData::StringData(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "StringData", name, true) {}
+  StringData::StringData(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void StringData::handleDefaults(bool autoClose) {
+    if(data.isNoId()){
+      data = addVariable(StringDomain("string"), "data");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  // Plasma.nddl:197 StringData
+  void StringData::constructor(const LabelStr& _data) {
+    data = addVariable(StringDomain(_data, "string"), "data");
+  }
+  
+  // Plasma.nddl:197 StringData
+  class StringDataFactory1: public ConcreteObjectFactory {
+  public:
+    StringDataFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 1);
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
+                                                TypeFactory::baseDomain("string")), 
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to string");
+      check_error(arguments[0]->isSingleton());
+      LabelStr _data((LabelStr)arguments[0]->getSingletonValue());
+      
+      StringDataId instance = (new StringData(planDb, objectType, objectName))->getId();
+      instance->constructor(_data);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  
+  // subtype-extension.nddl:9 Base
+  Base::Base(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Timeline(planDatabase, "Base", name, true) {
+  }
+  Base::Base(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Timeline(planDatabase, type, name, true) {
+  }
+  Base::Base(const ObjectId& parent, const LabelStr& name)
+   : Timeline(parent, "Base", name, true) {}
+  Base::Base(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Timeline(parent, type, name, true) {}
+  // default initialization of member variables
+  void Base::handleDefaults(bool autoClose) {
+    if (autoClose)
+      close();
+  }
+  
+  // implicit constructor
+  void Base::constructor() {
+  }
+  
+  
+  // subtype-extension.nddl:9 Base
+  DECLARE_DEFAULT_OBJECT_FACTORY(BaseFactory2, Base);
+  
+  
+  // subtype-extension.nddl:10 P
+  Base::P::P(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Base::P::P(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Base::P::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  // subtype-extension.nddl:13 P
+  class Base$P$0$0: public RuleInstance {
+  public:
+    Base$P$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$Base$P$0, Base$P$0$0, Base.P, "subtype-extension.nddl,13");
+  
+  void Base$P$0$0::handleExecute() {
+    localSlave(P, slave0, "met_by");
+    sameObject(object, slave0);
+    met_by(this, slave0);
+    localSlave(P, slave1, "meets");
+    sameObject(object, slave1);
+    meets(this, slave1);
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("duration")));
+      vars.push_back(ruleVariable(IntervalIntDomain(10,10, "int")));
+      rule_constraint(eq, vars);
+    }
+  }
+  
+  
+  // subtype-extension.nddl:19 Derived
+  Derived::Derived(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Base(planDatabase, "Derived", name) {
+  }
+  Derived::Derived(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Base(planDatabase, type, name) {
+  }
+  Derived::Derived(const ObjectId& parent, const LabelStr& name)
+   : Base(parent, "Derived", name) {}
+  Derived::Derived(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Base(parent, type, name) {}
+  // default initialization of member variables
+  void Derived::handleDefaults(bool autoClose) {
+    Base::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  // subtype-extension.nddl:19 Derived
+  DECLARE_DEFAULT_OBJECT_FACTORY(DerivedFactory3, Derived);
+  
+  
+  // subtype-extension.nddl:20 P
+  Derived::P::P(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : Base::P(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Derived::P::P(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : Base::P(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Derived::P::handleDefaults(bool autoClose) {
+    Base::P::handleDefaults(false);
+    if(i.isNoId()){
+      i = addParameter(IntervalIntDomain("int"), "i");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+} // namespace NDDL
+
+
+namespace NDDL {
+  // Boot-strap code to initialize schema
+  extern "C" SchemaId loadSchema(){
+    Id<Schema> id = Schema::instance("subtype-extension");
+    id->reset(); // Reset prior data if present. 
+    
+    // Register Constraints
+    // Invoke commands to populate schema with type definitions
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("Resource", "Object");
+    id->addObjectType("Reservoir", "Object");
+    id->addObjectType("Reusable", "Object");
+    id->addObjectType("Unary", "Object");
+    id->addObjectType("UnaryResource", "Timeline");
+    id->addObjectType("StringData", "Object");
+    id->addObjectType("Base", "Timeline");
+    id->addObjectType("Derived", "Base");
+    id->addEnum("TokenStates");
+    id->addMember("Resource", "float", "initialCapacity");
+    id->addMember("Resource", "float", "levelLimitMin");
+    id->addMember("Resource", "float", "levelLimitMax");
+    id->addMember("Resource", "float", "productionRateMax");
+    id->addMember("Resource", "float", "productionMax");
+    id->addMember("Resource", "float", "consumptionRateMax");
+    id->addMember("Resource", "float", "consumptionMax");
+    id->addPredicate("Resource.change");
+    id->addMember("Resource.change", "float", "quantity");
+    id->addMember("Reservoir", "float", "initialCapacity");
+    id->addMember("Reservoir", "float", "levelLimitMin");
+    id->addMember("Reservoir", "float", "levelLimitMax");
+    id->addMember("Reservoir", "float", "productionRateMax");
+    id->addMember("Reservoir", "float", "productionMax");
+    id->addMember("Reservoir", "float", "consumptionRateMax");
+    id->addMember("Reservoir", "float", "consumptionMax");
+    id->addPredicate("Reservoir.produce");
+    id->addMember("Reservoir.produce", "float", "quantity");
+    id->addPredicate("Reservoir.consume");
+    id->addMember("Reservoir.consume", "float", "quantity");
+    id->addMember("Reusable", "float", "capacity");
+    id->addMember("Reusable", "float", "levelLimitMin");
+    id->addMember("Reusable", "float", "consumptionMax");
+    id->addMember("Reusable", "float", "consumptionRateMax");
+    id->addPredicate("Reusable.uses");
+    id->addMember("Reusable.uses", "float", "quantity");
+    id->addMember("Unary", "float", "consumptionMax");
+    id->addPredicate("Unary.use");
+    id->addPredicate("UnaryResource.uses");
+    id->addMember("StringData", "string", "data");
+    id->addPredicate("Base.P");
+    id->addPredicate("Derived.P");
+    id->addMember("Derived.P", "int", "i");
+    id->addValue("TokenStates", LabelStr("INACTIVE"));
+    id->addValue("TokenStates", LabelStr("ACTIVE"));
+    id->addValue("TokenStates", LabelStr("MERGED"));
+    id->addValue("TokenStates", LabelStr("REJECTED"));
+    // Force allocation of model specific type factories
+    // Allocate factories
+    REGISTER_TOKEN_FACTORY(UnaryResource::uses::Factory);
+    REGISTER_TOKEN_FACTORY(Base::P::Factory);
+    REGISTER_TOKEN_FACTORY(Derived::P::Factory);
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(TokenStates, TokenStatesBaseDomain());
+    REGISTER_TYPE_FACTORY(Timeline, ObjectDomain("Timeline"));
+    REGISTER_TYPE_FACTORY(Resource, ObjectDomain("Resource"));
+    REGISTER_TYPE_FACTORY(Reservoir, ObjectDomain("Reservoir"));
+    REGISTER_TYPE_FACTORY(Reusable, ObjectDomain("Reusable"));
+    REGISTER_TYPE_FACTORY(Unary, ObjectDomain("Unary"));
+    REGISTER_TYPE_FACTORY(UnaryResource, ObjectDomain("UnaryResource"));
+    REGISTER_OBJECT_FACTORY(UnaryResourceFactory0, UnaryResource);
+    REGISTER_TYPE_FACTORY(StringData, ObjectDomain("StringData"));
+    REGISTER_OBJECT_FACTORY(StringDataFactory1, StringData:string);
+    REGISTER_TYPE_FACTORY(Base, ObjectDomain("Base"));
+    REGISTER_OBJECT_FACTORY(BaseFactory2, Base);
+    REGISTER_TYPE_FACTORY(Derived, ObjectDomain("Derived"));
+    REGISTER_OBJECT_FACTORY(DerivedFactory3, Derived);
+    // Allocate rules
+    new Rule$Base$P$0();
+    return id;
+  }
+  
+}
