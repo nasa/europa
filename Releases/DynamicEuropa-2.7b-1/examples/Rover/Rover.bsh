@@ -1,0 +1,60 @@
+String project="Rover";
+
+import java.awt.BorderLayout;
+import org.ops.ui.main.swing.PSDesktop;
+import org.ops.ui.mouse.swing.*;
+import org.ops.ui.gantt.swing.*;
+import org.ops.ui.rchart.swing.*;
+import psengine.*;
+import Rover.*;
+
+int month = GregorianCalendar.SEPTEMBER, day = 11; 
+GregorianCalendar start = new GregorianCalendar(2006,month,day,0,0);
+GregorianCalendar end = new GregorianCalendar(2006,month,day,2,0);
+
+
+// desktop.makeNddlConsole();
+
+void showResourceProfiles()
+{
+    resourceFrame = desktop.makeResourcesFrame("Battery",start);
+    resourceFrame.setLocation(0,180);
+    resourceFrame.setSize(500,300);	
+}
+
+void setupDesktop()
+    throws Exception
+{
+    ActionDetailsPanel dp = (ActionDetailsPanel)desktop.makeDetailsFrame().getContentPane().getComponent(0);
+
+    JInternalFrame ganttFrame = desktop.makeResourceGanttFrame("Object",start,end);
+    ganttFrame.setLocation(0,0);
+    ganttFrame.setSize(700,300);
+    PSGantt gantt = (PSGantt)ganttFrame.getContentPane().getComponent(0);
+    gantt.addMouseListener(dp);         
+
+    showResourceProfiles();
+}
+
+horizonStart = 0;
+horizonEnd = 1000;
+maxSteps = 200;
+config = "PlannerConfig.xml";
+
+try {
+	problemFile = project+"-initial-state.nddl";
+	//problemFile = project+"-nostrips-initial-state.nddl";
+    errors = psengine.executeScript("nddl",bsh.cwd+"/"+problemFile,true/*isFile*/);
+	if (!errors.equals(""))
+		throw new RuntimeException("Failed loading model:"+errors);
+
+    PSSolver solver = psengine.createSolver(config);
+    solver.configure(horizonStart,horizonEnd);
+    solverDialog = desktop.makeSolverDialog(solver);
+}    
+catch (Exception e) {
+    e.printStackTrace();
+}
+   
+//setupDesktop();
+

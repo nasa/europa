@@ -1,0 +1,14 @@
+SubDir PLASMA RulesEngine ;
+
+if ! $(PLASMA_READY) {
+
+Module RulesEngine : PlanDatabase ;
+
+SubInclude PLASMA RulesEngine base ;
+SubInclude PLASMA RulesEngine component ;
+
+ModuleFiles RulesEngine : ModuleRulesEngine.cc ;
+
+SubInclude PLASMA RulesEngine test ;
+
+} # PLASMA_READY

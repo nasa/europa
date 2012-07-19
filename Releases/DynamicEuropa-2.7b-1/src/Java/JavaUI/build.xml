@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="EuropaJavaUI" default="build.swing" basedir=".">
+
+	<property environment="env" />
+	<!--
+	This module requires the C++ libs and PSEngine.jar 
+	It expects to find those under $PLASMA_HOME/build/lib
+	-->
+	<property name="plasma.dir" value="${env.PLASMA_HOME}" />
+	<echo message="Building Java UI"/>
+	<echo message="plasma.dir = ${plasma.dir}"/>
+	<property name="psengine.jar.path" value="${plasma.dir}/build/lib"/>
+
+	<property file="${basedir}/build.properties" />
+	<property file="${basedir}/plugin.properties" />
+	<property name="srcdir" value="${basedir}/source" />
+	<property name="site.source" value="${basedir}/site.source" />
+	<property name="basename" value="org.ops.ui.europaplugin" />
+	<property name="swingname" value="org.ops.ui.europaswing" />
+
+	<property name="build.dir" value="${plasma.dir}/build/JavaUI"/>
+	<property name="tempdir" value="${build.dir}/build.temp" />
+	<property name="test.temp" value="${build.dir}/test.temp" />
+	<property name="test.report" value="${build.dir}/test.report" />
+	<!-- Build directory to place swing jars into -->
+	<property name="swing.out.dir" value="${plasma.dir}/build/lib" />
+	<!-- Output directory for the  update site -->
+	<property name="eclipse.out.dir" value="${plasma.dir}/build/eclipse" />
+
+	<property name="swing.out.jar" value="${swing.out.dir}/PSUISwing.jar"/>
+
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+		<classpath>
+			<pathelement location="${plasma.dir}/ext/ant/ant-contrib-1.0b3.jar"/>
+		</classpath>
+	</taskdef>
+	
+	<!-- Libs used by JavaUI. Referenced for compilation and tests -->
+	<fileset id="javaui.ext.libs" dir="lib">
+		<include name="*.jar" />
+		<include name="egantt/*.jar"/>
+	</fileset>
+
+	<path id="javaui.libs">
+		<fileset refid="javaui.ext.libs" />
+		<pathelement location="${psengine.jar.path}/PSEngine.jar" />
+	</path>
+
+	<target name="init" description="Get proper slash and Eclipse location for the platform. Needed to get to Eclipse jars">
+		<if>
+			<equals arg1="${file.separator}" arg2="/" />
+			<then>
+				<property name="safe.slash" value="/" />
+			</then>
+		</if>
+		<property name="safe.slash" value="\\" />
+		<!-- For some reason, ant.core.lib is set even when eclipse.home is not -->
+		<propertyregex property="eclipse.home" input="${ant.core.lib}" regexp="(.*)${safe.slash}plugins${safe.slash}.*" replace="\1" />
+	</target>
+
+	<target name="clean.temp" description="Delete temp build directory">
+		<delete dir="${tempdir}" />
+		<delete dir="${test.temp}" />
+	</target>
+
+	<target name="clean.all" description="Delete dist and temp directories" depends="clean.temp">
+		<delete dir="${eclipse.out.dir}" />
+		<delete dir="${test.report}" />
+	</target>
+
+	<target name="compile.model" depends="init" description="Compile model files">
+		<path id="compile.classpath">
+			<path refid="javaui.libs"/>
+		</path>
+		<!-- compile the source code -->
+		<mkdir dir="${tempdir}" />
+		<javac destdir="${tempdir}" srcdir="${srcdir}" includeAntRuntime="no">
+			<classpath refid="compile.classpath" />
+			<include name="**/model/**" />
+		</javac>
+		<!-- Copy necessary resources -->
+		<copy todir="${tempdir}" failonerror="true" overwrite="false">
+			<fileset dir="${srcdir}">
+				<include name="**/model/**" />
+				<exclude name="**/*.java" />
+				<exclude name="**/package.htm*" />
+				<exclude name="**/unittesting/*" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="compile.swing" depends="compile.model" description="Compile Swing half">
+		<path id="compile.classpath">
+			<path refid="javaui.libs" />
+			<pathelement location="${tempdir}"/>
+		</path>
+		<!-- compile the source code -->
+		<javac destdir="${tempdir}" srcdir="${srcdir}" includeAntRuntime="no">
+			<classpath refid="compile.classpath" />
+			<exclude name="**/swt/**" />
+		</javac>
+		<!-- Copy necessary resources -->
+		<copy todir="${tempdir}" failonerror="true" overwrite="false">
+			<fileset dir="${srcdir}">
+				<include name="**/swing/**" />
+				<exclude name="**/*.java" />
+				<exclude name="**/package.htm*" />
+				<exclude name="**/unittesting/*" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="check-jar-uptodate">
+		<uptodate property="uptodateJar" targetfile="${swing.out.jar}" >
+			<srcfiles dir="${tempdir}"/>
+			<srcfiles refid="javaui.ext.libs"/>
+		</uptodate>
+	</target>
+	
+	<target name="unjar-libs" depends="check-jar-uptodate" unless="uptodateJar">
+		<unjar dest="${tempdir}">
+			<fileset refid="javaui.ext.libs"/>
+		</unjar>
+	</target>
+	
+	<target name="build.swing" depends="compile.swing,unjar-libs" description="Create Swing JAR">
+		<mkdir dir="${swing.out.dir}" />
+		<jar destfile="${swing.out.jar}" basedir="${tempdir}" manifest="${basedir}/META-INF/MANIFEST.SWING">
+			<exclude name="**/swt/*" />
+			<exclude name="**/unittesting/*" />
+		</jar>
+	</target>
+
+	<target name="test" description="Run model unittests" depends="init,clean.temp,compile.model">
+		<!-- Copy test files to the target dir -->
+		<echo message="ANT_HOME=${ant.home} version=${ant.version} lib=${ant.library.dir}"/>
+		
+		<copy todir="${tempdir}">
+			<fileset dir="${srcdir}">
+				<include name="**/*.nddl" />
+			</fileset>
+		</copy>
+
+		<mkdir dir="${test.temp}" />
+		<junit failureproperty="testfailed" fork="true" maxmemory="500M" dir="${test.temp}">
+			<env key="PLASMA_HOME" value="${plasma.dir}" />
+			<env key="${ld.path.key}" value="${ld.path.value}" />
+			<jvmarg value="-ea" />
+			<classpath>
+				<path refid="javaui.libs" />
+				<pathelement location="${tempdir}" />
+			</classpath>
+			<formatter type="xml" />
+			<batchtest todir="${test.temp}">
+				<fileset dir="${srcdir}">
+					<include name="**/unittesting/*Test.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+
+		<delete dir="${test.report}" />
+		<mkdir dir="${test.report}" />
+		<junitreport todir="${test.report}">
+			<fileset dir="${test.temp}">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="${test.report}" />
+		</junitreport>
+
+		<echo message="HTML test report generated in: ${test.report}" level="info" />
+
+		<fail if="testfailed" />
+	</target>
+	
+
+	<property name="project"        value="NDDLHelloWorld"/>
+	<property name="project.dir"    value="${user.home}/workspace/${project}"/>
+	<!-- project.mode = o for optimized, g for debug -->
+	<property name="project.mode" value="o"/>
+	<property name="project.bsh.script" value="${project}.bsh"/>
+	<property name="debug"  value="true"/>
+	<property name="deprecation"  value="true"/>
+	
+	<target name="run.swing" depends="compile.swing" description="build and run">
+		<echo message="Running ${project} project"/>
+		<java classname="org.ops.ui.main.swing.PSDesktop" dir="${project.dir}" fork="yes">
+			<jvmarg value="-Xms256m"/>
+			<jvmarg value="-Xmx2048m"/>
+ 			<arg value="${project.mode}"/>
+			<arg value="${project.bsh.script}"/>
+			<classpath>
+				<path refid="javaui.libs"/>
+				<pathelement location="${tempdir}"/>
+			</classpath>
+		</java>
+	</target>
+	
+	<!-- eclipse targets start here -->
+	
+	<target name="compile.swt" depends="compile.model" description="Compile all source code into temp directory">
+		<fileset id="eclipse.plugins" dir="${eclipse.home}/plugins">
+			<include name="*.jar" />
+		</fileset>
+		<echo message="Eclipse HOME = ${eclipse.home}" />
+		<path id="compile.classpath">
+			<fileset refid="eclipse.plugins" />
+			<path refid="javaui.libs" />
+			<pathelement location="${tempdir}" />
+		</path>
+		<!-- compile the source code -->
+		<javac destdir="${tempdir}" srcdir="${srcdir}" includeAntRuntime="no">
+			<classpath refid="compile.classpath" />
+			<include name="**/swt/**" />
+		</javac>
+		<!-- Copy necessary resources -->
+		<copy todir="${tempdir}" failonerror="true" overwrite="false">
+			<fileset dir="${srcdir}">
+				<include name="**/swt/**" />
+				<exclude name="**/*.java" />
+				<exclude name="**/package.htm*" />
+				<exclude name="**/unittesting/*" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="copy.support" description="Copy supporting files into temp dir">
+		<copy todir="${tempdir}" failonerror="true" overwrite="false">
+			<fileset dir="${basedir}">
+				<include name="plugin.xml" />
+				<include name="plugin.properties" />
+				<include name="META-INF/MANIFEST.MF" />
+				<include name="icons/" />
+				<include name="lib/*.jar" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="build.feature" description="Create jar for the Eclipse feature">
+		<copy todir="${tempdir}">
+			<fileset dir="${site.source}">
+				<include name="feature.xml" />
+			</fileset>
+		</copy>
+		<replaceregexp file="${tempdir}/feature.xml" match="VERSION" replace="${bundle.version}" byline="true" />
+		<mkdir dir="${eclipse.out.dir}/features" />
+		<jar destfile="${eclipse.out.dir}/features/${basename}_${bundle.version}.jar" basedir="${tempdir}">
+			<include name="feature.xml" />
+		</jar>
+	</target>
+
+	<target name="build.update.jar" depends="compile.swt, copy.support" description="Build the plug-in jar for an update site.">
+		<mkdir dir="${eclipse.out.dir}/plugins" />
+		<replaceregexp file="${tempdir}/META-INF/MANIFEST.MF" match="0\.0\.0\.0" replace="${bundle.version}" byline="true" />
+		<jar destfile="${eclipse.out.dir}/plugins/${basename}_${bundle.version}.jar" basedir="${tempdir}" manifest="${tempdir}/META-INF/MANIFEST.MF">
+			<exclude name="**/swing/*" />
+			<exclude name="**/swing" />
+			<exclude name="**/unittesting/*" />
+		</jar>
+	</target>
+
+	<!-- TODO: why are we building swing for the elcipse site? -->
+	<target name="build.site" depends="clean.all, build.update.jar, build.swing, build.feature" description="Prepare exportable update site">
+		<delete dir="${tempdir}" />
+		<copy todir="${eclipse.out.dir}">
+			<fileset dir="${site.source}">
+				<include name="index.html" />
+				<include name="site.xml" />
+				<include name="web/*" />
+			</fileset>
+		</copy>
+		<replaceregexp file="${eclipse.out.dir}/site.xml" match="VERSION" replace="${bundle.version}" byline="true" />
+		<delete dir="${build.dir}" />
+	</target>
+	
+</project>

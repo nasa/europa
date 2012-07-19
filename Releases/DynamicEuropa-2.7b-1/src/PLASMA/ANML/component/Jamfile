@@ -1,0 +1,11 @@
+SubDir PLASMA ANML component ;
+
+if ! $(PLASMA_READY) {
+
+  ModuleComponent ANML
+	: 
+	AnmlInterpreter.cc
+	AnmlTestEngine.cc
+	;
+
+} # PLASMA_READY

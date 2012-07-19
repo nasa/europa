@@ -1,0 +1,26 @@
+#include "Mini-crew.nddl"
+#include "PlannerConfig.nddl";
+
+PlannerConfig plannerConfiguration = new PlannerConfig(0, 100, 100000);
+
+CrewMember crew = new CrewMember();
+
+close();
+
+goal(CrewMember.Activity act1);
+goal(CrewMember.Activity act2);
+
+leq(plannerConfiguration.m_horizonStart, act1.start);
+leq(plannerConfiguration.m_horizonStart, act2.start);
+leq(act1.end, plannerConfiguration.m_horizonEnd);
+leq(act2.end, plannerConfiguration.m_horizonEnd);
+
+act1 before act2;
+
+leq(act1.start, act2.start);
+leq(act2.start, act1.end);
+
+eq(act1.state, ACTIVE);
+eq(act2.state, ACTIVE);
+
+

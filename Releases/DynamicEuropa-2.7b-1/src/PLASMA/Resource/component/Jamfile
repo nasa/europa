@@ -1,0 +1,29 @@
+SubDir PLASMA Resource component ;
+
+if ! $(PLASMA_READY) {
+
+ModuleComponent Resource
+		:
+		TimetableProfile.cc
+		Node.cc 
+		Edge.cc 
+		Graph.cc 
+		MaxFlow.cc 
+		Types.cc
+		FlowProfile.cc
+		IncrementalFlowProfile.cc
+		GroundedProfile.cc
+        InstantTokens.cc
+		Reservoir.cc
+		DurativeTokens.cc
+		Reusable.cc
+		GenericFVDetector.cc
+        OpenWorldFVDetector.cc
+        ClosedWorldFVDetector.cc
+        GroundedFVDetector.cc
+		;
+
+SubInclude PLASMA Resource component NDDL ;
+SubInclude PLASMA Resource component Solvers ;
+
+} # PLASMA_READY
