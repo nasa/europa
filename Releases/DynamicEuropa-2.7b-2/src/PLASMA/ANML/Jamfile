@@ -1,0 +1,19 @@
+SubDir PLASMA ANML ;
+
+if ! $(PLASMA_READY) {
+
+Module ANML : NDDL ;
+ModuleLibraries ANML : antlr3c ;
+
+if $(ANTLR_HOME) {
+   C++FLAGS += -I$(ANTLR_HOME)/include ; 
+   LINKFLAGS += -Wl,-rpath,$(ANTLR_HOME)/lib -L$(ANTLR_HOME)/lib ;
+}
+
+SubInclude PLASMA ANML base ;
+SubInclude PLASMA ANML component ;
+SubInclude PLASMA ANML test ;
+
+ModuleFiles ANML : ModuleAnml.cc ;
+
+} # PLASMA_READY
