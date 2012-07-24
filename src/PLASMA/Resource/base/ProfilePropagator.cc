@@ -108,7 +108,7 @@ namespace EUROPA {
 	class BatchModeListener : public ConstraintEngineListener
 	{
 	public:
-		BatchModeListener(const ConstraintEngineId& constraintEngine, PropagatorId propagator)
+		BatchModeListener(const ConstraintEngineId& constraintEngine, ProfilePropagator* propagator)
 		: ConstraintEngineListener(constraintEngine)
 		, m_propagator(propagator)
 		{
