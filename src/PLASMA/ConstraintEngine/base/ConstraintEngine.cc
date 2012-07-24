@@ -853,6 +853,7 @@ namespace EUROPA
     addLinkedVarsForRelaxation(variable, relaxationAgenda, relaxationAgenda.end(),
 			       visitedVariables);
 
+    // TODO JRB: should only compute transitive closure for variables that actually change after relaxation
     for(std::list<ConstrainedVariableId>::iterator it = relaxationAgenda.begin();
 	it != relaxationAgenda.end(); ++it) {
       std::list<ConstrainedVariableId>::iterator next = it;
@@ -861,18 +862,18 @@ namespace EUROPA
     }
 
     for(std::list<ConstrainedVariableId>::iterator it = relaxationAgenda.begin();
-	it != relaxationAgenda.end(); ++it) {
-      const ConstrainedVariableId& id(*it);
-      checkError(id.isValid(), "Invalid ID in relax");
-      if(getVariables().find(id) != getVariables().end() &&
-	 id->lastRelaxed() < m_cycleCount) {
-	debugMsg("ConstraintEngine:relaxed",
-		 "Relaxing " << id->toLongString());
-	id->updateLastRelaxed(m_cycleCount);
-	id->relax();
-	if(!m_relaxingViolation)
-	  m_violationMgr->handleRelax(id);
-      }
+    		it != relaxationAgenda.end(); ++it) {
+    	const ConstrainedVariableId& id(*it);
+    	checkError(id.isValid(), "Invalid ID in relax");
+    	if(getVariables().find(id) != getVariables().end() &&
+    			id->lastRelaxed() < m_cycleCount) {
+    		debugMsg("ConstraintEngine:relaxed",
+    				"Relaxing " << id->toLongString());
+    		id->updateLastRelaxed(m_cycleCount);
+    		id->relax();
+    		if(!m_relaxingViolation)
+    			m_violationMgr->handleRelax(id);
+    	}
     }
     m_relaxing = false;
   }
@@ -1094,30 +1095,32 @@ namespace EUROPA
 						   std::list<ConstrainedVariableId>& dest,
 						   std::list<ConstrainedVariableId>::iterator pos,
 						   ConstrainedVariableSet& visitedVars) {
-    int count = 0;
-    for(ConstraintList::const_iterator cIt = var->m_constraints.begin();
-	cIt != var->m_constraints.end(); ++cIt) {
-      const ConstraintId& constr = cIt->first;
-      if(constr->isActive()) {
-	const std::vector<ConstrainedVariableId>& scope = constr->getModifiedVariables(var);
-	for(std::vector<ConstrainedVariableId>::const_iterator vIt = scope.begin();
-	    vIt != scope.end(); ++vIt) {
-	  const ConstrainedVariableId& id = *vIt;
-	  if(visitedVars.find(id) == visitedVars.end() && id->lastRelaxed() < m_cycleCount) {
-	    debugMsg("ConstraintEngine:relaxed",
-		     "Cycle: " << m_cycleCount << " From " << var->getName().toString() <<
-		     "(" << var->getKey() << "), through constraint " <<
-		     constr->getName().toString() << "(" << constr->getKey() <<
-		     "), adding " << id->getName().toString() << "(" << id->getKey() <<
-		     ") to the relaxation agenda.");
-	    visitedVars.insert(id);
-	    dest.insert(pos, id);
-	    ++count;
+	  int count = 0;
+	  for(ConstraintList::const_iterator cIt = var->m_constraints.begin();
+			  cIt != var->m_constraints.end(); ++cIt) {
+		  const ConstraintId& constr = cIt->first;
+		  if(constr->isActive()) {
+			  const std::vector<ConstrainedVariableId>& scope = constr->getModifiedVariables(var);
+			  for(std::vector<ConstrainedVariableId>::const_iterator vIt = scope.begin();
+					  vIt != scope.end(); ++vIt) {
+				  const ConstrainedVariableId& id = *vIt;
+
+				  // If a var is specified, relaxation won't change it, so don't add it to the agenda
+				  if((!id->isSpecified()) && (visitedVars.find(id) == visitedVars.end()) && (id->lastRelaxed() < m_cycleCount)) {
+					  debugMsg("ConstraintEngine:relaxed",
+							  "Cycle: " << m_cycleCount << " From " << var->getName().toString() <<
+							  "(" << var->getKey() << "), through constraint " <<
+							  constr->getName().toString() << "(" << constr->getKey() <<
+							  "), adding " << id->getName().toString() << "(" << id->getKey() <<
+							  ") to the relaxation agenda.");
+					  visitedVars.insert(id);
+					  dest.insert(pos, id);
+					  ++count;
+				  }
+			  }
+		  }
 	  }
-	}
-      }
-    }
-    return count;
+	  return count;
   }
 
   ConstrainedVariableId
