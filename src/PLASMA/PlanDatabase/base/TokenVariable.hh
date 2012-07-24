@@ -205,7 +205,7 @@ namespace EUROPA{
       Variable<DomainType>::reset(*(this->m_integratedBaseDomain));
     //this->m_derivedDomain->reset(*(this->m_integratedBaseDomain));
     else{
-      // The integrated base domain refelxts the updated domain which includes the original base domain and this there is
+      // The integrated base domain reflects the updated domain which includes the original base domain and this there is
       // no reason to relax twice.
       //this->m_derivedDomain->relax(*(this->m_baseDomain));
       this->m_derivedDomain->relax(*(this->m_integratedBaseDomain));
@@ -282,16 +282,8 @@ namespace EUROPA{
   void TokenVariable<DomainType>::relax() {
     Variable<DomainType>::relax();
 
-    // Construct the relaxation domain based on the integrated base domain and the specified value. We do this to avoid introducing a restriction after
-    // first relaxing. There is code in the constraint engine that assumes that we do not impose restrictiosn during relaxation. Moreover, we shouldn't as
-    // we open up the possibility that restriction and relaxation are interleaved. Thus, we structure this to compute the target domain to relax to and then
-    // relax to that in one go.
-    Domain* dom = m_integratedBaseDomain->copy();
-    if(this->isSpecified())
-      dom->set(this->getSpecifiedValue());
-
-    this->m_derivedDomain->relax(*dom);
-    delete dom;
+    if(!(this->isSpecified()))
+    	this->m_derivedDomain->relax(*m_integratedBaseDomain);
   }
 
 }
