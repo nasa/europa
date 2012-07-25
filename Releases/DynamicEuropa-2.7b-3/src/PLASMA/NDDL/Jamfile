@@ -1,0 +1,20 @@
+SubDir PLASMA NDDL ;
+
+if ! $(PLASMA_READY) {
+
+Module NDDL : RulesEngine TemporalNetwork ;
+ModuleLibraries NDDL : antlr3c ;
+
+if $(ANTLR_HOME) {
+   C++FLAGS += -I$(ANTLR_HOME)/include ; 
+   LINKFLAGS += -Wl,-rpath,$(ANTLR_HOME)/lib -L$(ANTLR_HOME)/lib ;
+}
+
+SubInclude PLASMA NDDL base ;
+SubInclude PLASMA NDDL component ;
+
+ModuleFiles NDDL : ModuleNddl.cc ;
+
+SubInclude PLASMA NDDL test ;
+
+} # PLASMA_READY

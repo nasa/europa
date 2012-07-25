@@ -1,0 +1,29 @@
+// Test type_decl rule (and subrules)
+
+type BoolAlias          < bool ;
+type BoolAliasAlias     < BoolAlias;
+
+type IntAlias           < int;
+type IntAliasAlias      < IntAlias;
+type PositiveInt        < int [1 infty];
+
+type PositiveIntAlias   < PositiveInt; 
+// TODO: can't say +infinity or -infinity in grammar
+//type NegativeInt        < int [-infty -1];
+type NegativeIntAlias   < NegativeInt; 
+
+//type HexDigit           < int [0x0 0xF];
+
+type FloatAlias         < float;
+type FloatAliasAlias    < FloatAlias;
+type PositiveFloat      < float [0.0 inff];
+type PositiveFloatAlias < PositiveFloat; 
+
+type StringAlias        < string;
+type StringAliasAlias   < StringAlias;
+
+type EnumExample        < string { "string1", "string2", "string3" };
+type EnumExampleAlias   < EnumExample;
+
+type VectorExample      := vector (int a, float b);
+type VectorExampleAlias < VectorExample;

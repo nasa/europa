@@ -1,0 +1,429 @@
+Objects *************************
+	Goal:goalTower*************************
+		Tokens *************************
+				[4, 149]
+				Goal.GoalAchieved()
+				Key=514  Master=NONE
+				[5, 150]
+		End Tokens *********************
+		Variables *************************
+			goalTower.firstBlock=Block:CLOSED{goalTower.firstBlock(11)}
+			goalTower.secondBlock=Block:CLOSED{goalTower.secondBlock(29)}
+			goalTower.thirdBlock=Block:CLOSED{goalTower.thirdBlock(47)}
+			goalTower.operatorTL=Operator:CLOSED{goalTower.operatorTL(64)}
+			goalTower.armTL=Arm:CLOSED{goalTower.armTL(67)}
+		End Variables *********************
+	End Goal:goalTower*************************
+	Block:goalTower.firstBlock*************************
+		Variables *************************
+			goalTower.firstBlock.theGoal=Goal:CLOSED{goalTower(8)}
+			goalTower.firstBlock.blockBottom=Bottom:CLOSED{goalTower.firstBlock.blockBottom(16)}
+			goalTower.firstBlock.blockTop=Top:CLOSED{goalTower.firstBlock.blockTop(22)}
+		End Variables *********************
+	End Block:goalTower.firstBlock*************************
+	Bottom:goalTower.firstBlock.blockBottom*************************
+		Tokens *************************
+				{0}
+				Bottom.OnTable(theBlock=Block:CLOSED{goalTower.firstBlock(11)})
+				Key=95  Master=NONE
+					Merged Key=555 from Operator.PickUp(260)[2, 147] --> [3, 148]
+				[3, 148]
+				[3, 148]
+				Bottom.Holding(theBlock=Block:CLOSED{goalTower.firstBlock(11)})
+				Key=574  Master=260 Operator.PickUp(260)[2, 147] --> [3, 148]
+					Merged Key=3654 from Operator.Stack(3185)[3, 148] --> [4, 149]
+				[4, 149]
+				[4, 149]
+				Bottom.On(blockUnder=Block:CLOSED{goalTower.secondBlock(29)}theBlock=Block:CLOSED{goalTower.firstBlock(11)})
+				Key=3117  Master=514 towerFinallyDone(514)[4, 149] --> [5, 150]
+					Merged Key=3673 from Operator.Stack(3185)[3, 148] --> [4, 149]
+				[5, +inf]
+		End Tokens *********************
+		Variables *************************
+			goalTower.firstBlock.blockBottom.wholeBlock=Block:CLOSED{goalTower.firstBlock(11)}
+		End Variables *********************
+	End Bottom:goalTower.firstBlock.blockBottom*************************
+	Top:goalTower.firstBlock.blockTop*************************
+		Tokens *************************
+				{0}
+				Top.Clear(theBlock=Block:CLOSED{goalTower.firstBlock(11)})
+				Key=71  Master=NONE
+					Merged Key=591 from Operator.PickUp(260)[2, 147] --> [3, 148]
+				[3, 148]
+				[3, 148]
+				Top.NotClear(theBlock=Block:CLOSED{goalTower.firstBlock(11)})
+				Key=610  Master=260 Operator.PickUp(260)[2, 147] --> [3, 148]
+				[4, 149]
+				[4, 149]
+				Top.Clear(theBlock=Block:CLOSED{goalTower.firstBlock(11)})
+				Key=3728  Master=3185 Operator.Stack(3185)[3, 148] --> [4, 149]
+				[5, +inf]
+		End Tokens *********************
+		Variables *************************
+			goalTower.firstBlock.blockTop.wholeBlock=Block:CLOSED{goalTower.firstBlock(11)}
+		End Variables *********************
+	End Top:goalTower.firstBlock.blockTop*************************
+	Block:goalTower.secondBlock*************************
+		Variables *************************
+			goalTower.secondBlock.theGoal=Goal:CLOSED{goalTower(8)}
+			goalTower.secondBlock.blockBottom=Bottom:CLOSED{goalTower.secondBlock.blockBottom(34)}
+			goalTower.secondBlock.blockTop=Top:CLOSED{goalTower.secondBlock.blockTop(40)}
+		End Variables *********************
+	End Block:goalTower.secondBlock*************************
+	Bottom:goalTower.secondBlock.blockBottom*************************
+		Tokens *************************
+				{0}
+				Bottom.OnTable(theBlock=Block:CLOSED{goalTower.secondBlock(29)})
+				Key=137  Master=NONE
+					Merged Key=678 from Operator.PickUp(345)[0, 145] --> [1, 146]
+				[1, 146]
+				[1, 146]
+				Bottom.Holding(theBlock=Block:CLOSED{goalTower.secondBlock(29)})
+				Key=697  Master=345 Operator.PickUp(345)[0, 145] --> [1, 146]
+					Merged Key=3787 from Operator.Stack(3303)[1, 146] --> [2, 147]
+				[2, 147]
+				[2, 147]
+				Bottom.On(blockUnder=Block:CLOSED{goalTower.thirdBlock(47)}theBlock=Block:CLOSED{goalTower.secondBlock(29)})
+				Key=3142  Master=514 towerFinallyDone(514)[4, 149] --> [5, 150]
+					Merged Key=3806 from Operator.Stack(3303)[1, 146] --> [2, 147]
+				[5, +inf]
+		End Tokens *********************
+		Variables *************************
+			goalTower.secondBlock.blockBottom.wholeBlock=Block:CLOSED{goalTower.secondBlock(29)}
+		End Variables *********************
+	End Bottom:goalTower.secondBlock.blockBottom*************************
+	Top:goalTower.secondBlock.blockTop*************************
+		Tokens *************************
+				{0}
+				Top.Clear(theBlock=Block:CLOSED{goalTower.secondBlock(29)})
+				Key=116  Master=NONE
+					Merged Key=714 from Operator.PickUp(345)[0, 145] --> [1, 146]
+				[1, 146]
+				[1, 146]
+				Top.NotClear(theBlock=Block:CLOSED{goalTower.secondBlock(29)})
+				Key=733  Master=345 Operator.PickUp(345)[0, 145] --> [1, 146]
+				[2, 147]
+				[2, 147]
+				Top.Clear(theBlock=Block:CLOSED{goalTower.secondBlock(29)})
+				Key=3692  Master=3185 Operator.Stack(3185)[3, 148] --> [4, 149]
+					Merged Key=3861 from Operator.Stack(3303)[1, 146] --> [2, 147]
+				[4, 149]
+				[4, 149]
+				Top.NotClear(theBlock=Block:CLOSED{goalTower.secondBlock(29)})
+				Key=3711  Master=3185 Operator.Stack(3185)[3, 148] --> [4, 149]
+				[5, +inf]
+		End Tokens *********************
+		Variables *************************
+			goalTower.secondBlock.blockTop.wholeBlock=Block:CLOSED{goalTower.secondBlock(29)}
+		End Variables *********************
+	End Top:goalTower.secondBlock.blockTop*************************
+	Block:goalTower.thirdBlock*************************
+		Variables *************************
+			goalTower.thirdBlock.theGoal=Goal:CLOSED{goalTower(8)}
+			goalTower.thirdBlock.blockBottom=Bottom:CLOSED{goalTower.thirdBlock.blockBottom(52)}
+			goalTower.thirdBlock.blockTop=Top:CLOSED{goalTower.thirdBlock.blockTop(58)}
+		End Variables *********************
+	End Block:goalTower.thirdBlock*************************
+	Bottom:goalTower.thirdBlock.blockBottom*************************
+		Tokens *************************
+				{0}
+				Bottom.OnTable(theBlock=Block:CLOSED{goalTower.thirdBlock(47)})
+				Key=179  Master=NONE
+				[1, +inf]
+		End Tokens *********************
+		Variables *************************
+			goalTower.thirdBlock.blockBottom.wholeBlock=Block:CLOSED{goalTower.thirdBlock(47)}
+		End Variables *********************
+	End Bottom:goalTower.thirdBlock.blockBottom*************************
+	Top:goalTower.thirdBlock.blockTop*************************
+		Tokens *************************
+				{0}
+				Top.Clear(theBlock=Block:CLOSED{goalTower.thirdBlock(47)})
+				Key=158  Master=NONE
+					Merged Key=3825 from Operator.Stack(3303)[1, 146] --> [2, 147]
+				[2, 147]
+				[2, 147]
+				Top.NotClear(theBlock=Block:CLOSED{goalTower.thirdBlock(47)})
+				Key=3844  Master=3303 Operator.Stack(3303)[1, 146] --> [2, 147]
+				[3, +inf]
+		End Tokens *********************
+		Variables *************************
+			goalTower.thirdBlock.blockTop.wholeBlock=Block:CLOSED{goalTower.thirdBlock(47)}
+		End Variables *********************
+	End Top:goalTower.thirdBlock.blockTop*************************
+	Operator:goalTower.operatorTL*************************
+		Tokens *************************
+				[0, 145]
+				Operator.PickUp(blockPickedUp=Block:CLOSED{goalTower.secondBlock(29)})
+				Key=345  Master=137 bottom2InitiallyOnTable(137){0} --> [1, 146]
+					Merged Key=473 from armInitiallyEmpty(198){0} --> [1, 146]
+					Merged Key=3409 from Bottom.Holding(697)[1, 146] --> [2, 147]
+					Merged Key=3495 from Arm.ArmBusy(767)[1, 146] --> [2, 147]
+					Merged Key=4864 from top2InitiallyClear(116){0} --> [1, 146]
+					Merged Key=5557 from Top.NotClear(733)[1, 146] --> [2, 147]
+				[1, 146]
+				[1, 146]
+				Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.secondBlock(29)}blockStackBelow=Block:CLOSED{goalTower.thirdBlock(47)})
+				Key=3303  Master=627 Arm.ArmEmpty(627)[2, 147] --> [3, 148]
+					Merged Key=3389 from Bottom.Holding(697)[1, 146] --> [2, 147]
+					Merged Key=3449 from Top.NotClear(733)[1, 146] --> [2, 147]
+					Merged Key=3513 from Arm.ArmBusy(767)[1, 146] --> [2, 147]
+					Merged Key=3623 from Bottom.On(3142)[2, 147] --> [5, +inf]
+					Merged Key=3970 from Top.Clear(3692)[2, 147] --> [4, 149]
+					Merged Key=4890 from top3InitiallyClear(158){0} --> [2, 147]
+					Merged Key=5660 from Top.NotClear(3844)[2, 147] --> [3, +inf]
+				[2, 147]
+				[2, 147]
+				Operator.PickUp(blockPickedUp=Block:CLOSED{goalTower.firstBlock(11)})
+				Key=260  Master=95 bottom1InitiallyOnTable(95){0} --> [3, 148]
+					Merged Key=3205 from Bottom.Holding(574)[3, 148] --> [4, 149]
+					Merged Key=3285 from Arm.ArmEmpty(627)[2, 147] --> [3, 148]
+					Merged Key=3332 from Arm.ArmBusy(644)[3, 148] --> [4, 149]
+					Merged Key=4531 from top1InitiallyClear(71){0} --> [3, 148]
+					Merged Key=5224 from Top.NotClear(610)[3, 148] --> [4, 149]
+				[3, 148]
+				[3, 148]
+				Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.firstBlock(11)}blockStackBelow=Block:CLOSED{goalTower.secondBlock(29)})
+				Key=3185  Master=574 Bottom.Holding(574)[3, 148] --> [4, 149]
+					Merged Key=3245 from Top.NotClear(610)[3, 148] --> [4, 149]
+					Merged Key=3350 from Arm.ArmBusy(644)[3, 148] --> [4, 149]
+					Merged Key=3568 from Bottom.On(3117)[4, 149] --> [5, +inf]
+					Merged Key=4062 from Top.Clear(3728)[4, 149] --> [5, +inf]
+					Merged Key=4112 from Arm.ArmEmpty(3745)[4, 149] --> [5, +inf]
+					Merged Key=5583 from Top.Clear(3692)[2, 147] --> [4, 149]
+					Merged Key=5610 from Top.NotClear(3711)[4, 149] --> [5, +inf]
+				[4, 149]
+		End Tokens *********************
+	End Operator:goalTower.operatorTL*************************
+	Arm:goalTower.armTL*************************
+		Tokens *************************
+				{0}
+				Arm.ArmEmpty()
+				Key=198  Master=NONE
+					Merged Key=750 from Operator.PickUp(345)[0, 145] --> [1, 146]
+				[1, 146]
+				[1, 146]
+				Arm.ArmBusy()
+				Key=767  Master=345 Operator.PickUp(345)[0, 145] --> [1, 146]
+				[2, 147]
+				[2, 147]
+				Arm.ArmEmpty()
+				Key=627  Master=260 Operator.PickUp(260)[2, 147] --> [3, 148]
+					Merged Key=3878 from Operator.Stack(3303)[1, 146] --> [2, 147]
+				[3, 148]
+				[3, 148]
+				Arm.ArmBusy()
+				Key=644  Master=260 Operator.PickUp(260)[2, 147] --> [3, 148]
+				[4, 149]
+				[4, 149]
+				Arm.ArmEmpty()
+				Key=3745  Master=3185 Operator.Stack(3185)[3, 148] --> [4, 149]
+				[5, +inf]
+		End Tokens *********************
+	End Arm:goalTower.armTL*************************
+Global Variables*************************
+	horizonEnd=int:CLOSED[150, 150]
+	goalTower=Goal:CLOSED{goalTower(8)}
+Merged Tokens: *************************
+		[0, 149]
+		Operator.PickUp(blockPickedUp=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)})
+		Key=473  Master=198 armInitiallyEmpty(198){0} --> [1, 146]
+		[1, 150]
+		[-inf, 149]
+		Bottom.OnTable(theBlock=Block:CLOSED{goalTower.firstBlock(11)})
+		Key=555  Master=260 Operator.PickUp(260)[2, 147] --> [3, 148]
+		[2, +inf]
+		[-inf, 149]
+		Top.Clear(theBlock=Block:CLOSED{goalTower.firstBlock(11)})
+		Key=591  Master=260 Operator.PickUp(260)[2, 147] --> [3, 148]
+		[2, +inf]
+		[-inf, 148]
+		Bottom.OnTable(theBlock=Block:CLOSED{goalTower.secondBlock(29)})
+		Key=678  Master=345 Operator.PickUp(345)[0, 145] --> [1, 146]
+		[1, +inf]
+		[-inf, 148]
+		Top.Clear(theBlock=Block:CLOSED{goalTower.secondBlock(29)})
+		Key=714  Master=345 Operator.PickUp(345)[0, 145] --> [1, 146]
+		[1, +inf]
+		[-inf, 148]
+		Arm.ArmEmpty()
+		Key=750  Master=345 Operator.PickUp(345)[0, 145] --> [1, 146]
+		[1, +inf]
+		[2, 147]
+		Operator.PickUp(blockPickedUp=Block:CLOSED{goalTower.firstBlock(11)})
+		Key=3205  Master=574 Bottom.Holding(574)[3, 148] --> [4, 149]
+		[3, 148]
+		[3, 148]
+		Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.firstBlock(11)}blockStackBelow=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)})
+		Key=3245  Master=610 Top.NotClear(610)[3, 148] --> [4, 149]
+		[4, 149]
+		[2, 147]
+		Operator.PickUp(blockPickedUp=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)})
+		Key=3285  Master=627 Arm.ArmEmpty(627)[2, 147] --> [3, 148]
+		[3, 148]
+		[2, 147]
+		Operator.PickUp(blockPickedUp=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)})
+		Key=3332  Master=644 Arm.ArmBusy(644)[3, 148] --> [4, 149]
+		[3, 148]
+		[3, 148]
+		Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)}blockStackBelow=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)})
+		Key=3350  Master=644 Arm.ArmBusy(644)[3, 148] --> [4, 149]
+		[4, 149]
+		[1, 148]
+		Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.secondBlock(29)}blockStackBelow=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)})
+		Key=3389  Master=697 Bottom.Holding(697)[1, 146] --> [2, 147]
+		[2, 149]
+		[0, 145]
+		Operator.PickUp(blockPickedUp=Block:CLOSED{goalTower.secondBlock(29)})
+		Key=3409  Master=697 Bottom.Holding(697)[1, 146] --> [2, 147]
+		[1, 146]
+		[1, 147]
+		Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.secondBlock(29)}blockStackBelow=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)})
+		Key=3449  Master=733 Top.NotClear(733)[1, 146] --> [2, 147]
+		[2, 148]
+		[0, 145]
+		Operator.PickUp(blockPickedUp=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)})
+		Key=3495  Master=767 Arm.ArmBusy(767)[1, 146] --> [2, 147]
+		[1, 146]
+		[1, 146]
+		Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)}blockStackBelow=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)})
+		Key=3513  Master=767 Arm.ArmBusy(767)[1, 146] --> [2, 147]
+		[2, 147]
+		[3, 148]
+		Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.firstBlock(11)}blockStackBelow=Block:CLOSED{goalTower.secondBlock(29)})
+		Key=3568  Master=3117 Bottom.On(3117)[4, 149] --> [5, +inf]
+		[4, 149]
+		[1, 148]
+		Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.secondBlock(29)}blockStackBelow=Block:CLOSED{goalTower.thirdBlock(47)})
+		Key=3623  Master=3142 Bottom.On(3142)[2, 147] --> [5, +inf]
+		[2, 149]
+		[-inf, 148]
+		Bottom.Holding(theBlock=Block:CLOSED{goalTower.firstBlock(11)})
+		Key=3654  Master=3185 Operator.Stack(3185)[3, 148] --> [4, 149]
+		[4, +inf]
+		[4, 149]
+		Bottom.On(blockUnder=Block:CLOSED{goalTower.secondBlock(29)}theBlock=Block:CLOSED{goalTower.firstBlock(11)})
+		Key=3673  Master=3185 Operator.Stack(3185)[3, 148] --> [4, 149]
+		[5, +inf]
+		[-inf, 146]
+		Bottom.Holding(theBlock=Block:CLOSED{goalTower.secondBlock(29)})
+		Key=3787  Master=3303 Operator.Stack(3303)[1, 146] --> [2, 147]
+		[2, +inf]
+		[2, 147]
+		Bottom.On(blockUnder=Block:CLOSED{goalTower.thirdBlock(47)}theBlock=Block:CLOSED{goalTower.secondBlock(29)})
+		Key=3806  Master=3303 Operator.Stack(3303)[1, 146] --> [2, 147]
+		[3, +inf]
+		[-inf, 146]
+		Top.Clear(theBlock=Block:CLOSED{goalTower.thirdBlock(47)})
+		Key=3825  Master=3303 Operator.Stack(3303)[1, 146] --> [2, 147]
+		[2, +inf]
+		[2, 147]
+		Top.Clear(theBlock=Block:CLOSED{goalTower.secondBlock(29)})
+		Key=3861  Master=3303 Operator.Stack(3303)[1, 146] --> [2, 147]
+		[3, +inf]
+		[2, 147]
+		Arm.ArmEmpty()
+		Key=3878  Master=3303 Operator.Stack(3303)[1, 146] --> [2, 147]
+		[3, +inf]
+		[1, 146]
+		Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.secondBlock(29)}blockStackBelow=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)})
+		Key=3970  Master=3692 Top.Clear(3692)[2, 147] --> [4, 149]
+		[2, 147]
+		[3, 148]
+		Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.firstBlock(11)}blockStackBelow=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)})
+		Key=4062  Master=3728 Top.Clear(3728)[4, 149] --> [5, +inf]
+		[4, 149]
+		[3, 148]
+		Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)}blockStackBelow=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)})
+		Key=4112  Master=3745 Arm.ArmEmpty(3745)[4, 149] --> [5, +inf]
+		[4, 149]
+		[2, 147]
+		Operator.PickUp(blockPickedUp=Block:CLOSED{goalTower.firstBlock(11)})
+		Key=4531  Master=71 top1InitiallyClear(71){0} --> [3, 148]
+		[3, 148]
+		[0, 145]
+		Operator.PickUp(blockPickedUp=Block:CLOSED{goalTower.secondBlock(29)})
+		Key=4864  Master=116 top2InitiallyClear(116){0} --> [1, 146]
+		[1, 146]
+		[1, 146]
+		Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)}blockStackBelow=Block:CLOSED{goalTower.thirdBlock(47)})
+		Key=4890  Master=158 top3InitiallyClear(158){0} --> [2, 147]
+		[2, 147]
+		[2, 147]
+		Operator.PickUp(blockPickedUp=Block:CLOSED{goalTower.firstBlock(11)})
+		Key=5224  Master=610 Top.NotClear(610)[3, 148] --> [4, 149]
+		[3, 148]
+		[0, 145]
+		Operator.PickUp(blockPickedUp=Block:CLOSED{goalTower.secondBlock(29)})
+		Key=5557  Master=733 Top.NotClear(733)[1, 146] --> [2, 147]
+		[1, 146]
+		[3, 148]
+		Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)}blockStackBelow=Block:CLOSED{goalTower.secondBlock(29)})
+		Key=5583  Master=3692 Top.Clear(3692)[2, 147] --> [4, 149]
+		[4, 149]
+		[3, 148]
+		Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)}blockStackBelow=Block:CLOSED{goalTower.secondBlock(29)})
+		Key=5610  Master=3711 Top.NotClear(3711)[4, 149] --> [5, +inf]
+		[4, 149]
+		[1, 146]
+		Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)}blockStackBelow=Block:CLOSED{goalTower.thirdBlock(47)})
+		Key=5660  Master=3844 Top.NotClear(3844)[2, 147] --> [3, +inf]
+		[2, 147]
+Inactive Tokens: *************************
+		{-1}
+		Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.firstBlock(11)}blockStackBelow=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)})
+		Key=234  Master=71 top1InitiallyClear(71){0} --> [3, 148]
+		{0}
+		{-1}
+		Operator.PutDown(blockPutDown=Block:CLOSED{goalTower.firstBlock(11)})
+		Key=281  Master=95 bottom1InitiallyOnTable(95){0} --> [3, 148]
+		{0}
+		{-1}
+		Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.secondBlock(29)}blockStackBelow=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)})
+		Key=319  Master=116 top2InitiallyClear(116){0} --> [1, 146]
+		{0}
+		{-1}
+		Operator.PutDown(blockPutDown=Block:CLOSED{goalTower.secondBlock(29)})
+		Key=366  Master=137 bottom2InitiallyOnTable(137){0} --> [1, 146]
+		{0}
+		{-1}
+		Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.thirdBlock(47)}blockStackBelow=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)})
+		Key=404  Master=158 top3InitiallyClear(158){0} --> [2, 147]
+		{0}
+		[0, +inf]
+		Operator.PickUp(blockPickedUp=Block:CLOSED{goalTower.thirdBlock(47)})
+		Key=430  Master=179 bottom3InitiallyOnTable(179){0} --> [1, +inf]
+		[1, +inf]
+		{-1}
+		Operator.PutDown(blockPutDown=Block:CLOSED{goalTower.thirdBlock(47)})
+		Key=451  Master=179 bottom3InitiallyOnTable(179){0} --> [1, +inf]
+		{0}
+		{-1}
+		Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)}blockStackBelow=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)})
+		Key=493  Master=198 armInitiallyEmpty(198){0} --> [1, 146]
+		{0}
+		[4, +inf]
+		Operator.Unstack(blockUnstackAbove=Block:CLOSED{goalTower.firstBlock(11)}blockUnstackBelow=Block:CLOSED{goalTower.secondBlock(29)})
+		Key=3547  Master=3117 Bottom.On(3117)[4, 149] --> [5, +inf]
+		[5, +inf]
+		[4, +inf]
+		Operator.Unstack(blockUnstackAbove=Block:CLOSED{goalTower.secondBlock(29)}blockUnstackBelow=Block:CLOSED{goalTower.thirdBlock(47)})
+		Key=3602  Master=3142 Bottom.On(3142)[2, 147] --> [5, +inf]
+		[5, +inf]
+		[4, +inf]
+		Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.secondBlock(29)}blockStackBelow=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)})
+		Key=4006  Master=3711 Top.NotClear(3711)[4, 149] --> [5, +inf]
+		[5, +inf]
+		[4, +inf]
+		Operator.PickUp(blockPickedUp=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)})
+		Key=4094  Master=3745 Arm.ArmEmpty(3745)[4, 149] --> [5, +inf]
+		[5, +inf]
+		[2, +inf]
+		Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.thirdBlock(47)}blockStackBelow=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)})
+		Key=4167  Master=3844 Top.NotClear(3844)[2, 147] --> [3, +inf]
+		[3, +inf]
+		[4, +inf]
+		Operator.Stack(blockStackAbove=Block:CLOSED{goalTower.firstBlock(11),goalTower.secondBlock(29),goalTower.thirdBlock(47)}blockStackBelow=Block:CLOSED{goalTower.firstBlock(11)})
+		Key=5637  Master=3728 Top.Clear(3728)[4, 149] --> [5, +inf]
+		[5, +inf]
+
