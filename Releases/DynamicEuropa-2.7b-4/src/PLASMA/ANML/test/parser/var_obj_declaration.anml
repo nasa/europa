@@ -1,0 +1,18 @@
+var bool a := true;
+var bool b := flase, c := true;
+
+// TODO: +/-infinity isn't supported in the grammar
+//var int [0 +inf] d;
+//var float [0.0 +inf] e := +inf, f := 54;
+var int [0 500] d;
+var float [0.0 100.0] e := 100, f := 54;
+
+var string g := "foo";
+
+var int {3, 6, 4, 2} aEnum := 3;
+
+type VectorType := vector (int i, float j, string k);
+var  VectorType aVector;
+
+type Foo < float [0.0 1000];
+var Foo m := 1.5;

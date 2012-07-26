@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.ops.ui.europaplugin.feature"
+      label="Europa Plugin"
+      version="VERSION"
+      provider-name="Europa team">
+
+   <description>
+      This is an Eclipse plug-in. It requires (but does not include) Europa
+http://code.google.com/p/europa-pso/
+The plug-in includes an editor for NDDL files and means to execute NDDL models.
+   </description>
+
+   <copyright>
+      (C) 2009-2010, Tatiana Kichkaylo with thanks to Europa team
+   </copyright>
+
+   <license url="http://www.eclipse.org/legal/epl-v10.html">
+      Eclipse Public License - v 1.0
+   </license>
+
+   <url>
+      <update label="Europa plugin update site" url="http://come.back.later"/>
+      <discovery label="Europa plugin discovery site" url="http://come.back.later"/>
+   </url>
+
+   <requires>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.ui.editors"/>
+      <import plugin="org.eclipse.ui.views" version="3.3.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.debug.ui"/>
+      <import plugin="org.eclipse.ui.console"/>
+      <import plugin="org.eclipse.draw2d"/>
+   </requires>
+
+   <plugin
+         id="org.ops.ui.europaplugin"
+         download-size="1"
+         install-size="1"
+         version="VERSION"
+         unpack="false"/>
+
+</feature>
