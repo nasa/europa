@@ -37,6 +37,10 @@ namespace EUROPA
 		   int argIndex, 
 		   const DomainListener::ChangeType& changeType);
 
+    // This constraint doesn't modify any variables through inference
+    virtual const std::vector<ConstrainedVariableId>& getModifiedVariables(const ConstrainedVariableId& variable) const;
+    virtual const std::vector<ConstrainedVariableId>& getModifiedVariables() const;
+
   private:
     void handleDiscard();
     void notifyAdditions();

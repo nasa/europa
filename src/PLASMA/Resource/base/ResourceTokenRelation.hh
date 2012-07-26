@@ -38,6 +38,10 @@ namespace EUROPA {
       ResourceId getResource() const;
       std::pair<eint,Resource::ProblemType> getViolationInfo() const;
 
+      // This constraint doesn't modify any variables through inference
+      virtual const std::vector<ConstrainedVariableId>& getModifiedVariables(const ConstrainedVariableId& variable) const;
+      virtual const std::vector<ConstrainedVariableId>& getModifiedVariables() const;
+
     protected:
       virtual void notifyViolated(Resource::ProblemType problem, const InstantId inst);
       virtual void notifyNoLongerViolated();

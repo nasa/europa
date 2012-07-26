@@ -161,4 +161,16 @@ namespace EUROPA {
 	{
 		return std::pair<eint,Resource::ProblemType>(m_violationTime,m_violationProblem);
 	}
+
+	const std::vector<ConstrainedVariableId>& ResourceTokenRelation::getModifiedVariables(const ConstrainedVariableId& variable) const
+	{
+		static std::vector<ConstrainedVariableId> s_emptyScope;
+		return s_emptyScope;
+	}
+
+	const std::vector<ConstrainedVariableId>& ResourceTokenRelation::getModifiedVariables() const
+	{
+		static std::vector<ConstrainedVariableId> s_emptyScope;
+		return s_emptyScope;
+	}
 }

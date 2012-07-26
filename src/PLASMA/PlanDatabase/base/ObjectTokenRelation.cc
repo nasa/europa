@@ -166,4 +166,18 @@ namespace EUROPA {
 	++it;
 	}*/
   }
+
+  const std::vector<ConstrainedVariableId>& ObjectTokenRelation::getModifiedVariables(const ConstrainedVariableId& variable) const
+  {
+	  static std::vector<ConstrainedVariableId> s_emptyScope;
+	  return s_emptyScope;
+  }
+
+  const std::vector<ConstrainedVariableId>& ObjectTokenRelation::getModifiedVariables() const
+  {
+	  static std::vector<ConstrainedVariableId> s_emptyScope;
+	  return s_emptyScope;
+  }
+
+
 }
