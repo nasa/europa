@@ -385,10 +385,15 @@ namespace EUROPA {
 
   void ConstrainedVariable::open() {
     check_error(internal_baseDomain().isClosed());
+
+    bool needReset = internal_baseDomain().isSingleton();
+
     internal_baseDomain().open();
     if(getCurrentDomain().isClosed())
       getCurrentDomain().open();
 
+    if (needReset)
+    	reset();
   }
 
   void ConstrainedVariable::touch() {

@@ -116,21 +116,18 @@ namespace EUROPA {
     : ConstrainedVariable(constraintEngine, internal, canBeSpecified, name, parent, index),
     m_baseDomain(static_cast<DomainType*>(baseDomain.copy())),
     m_derivedDomain(static_cast<DomainType*>(baseDomain.copy())) {
-    debugMsg("Variable:Variable", "Name " << name.toString());
+
+	debugMsg("Variable:Variable", "Name " << name.toString());
     debugMsg("Variable:Variable", "Base Domain = " << baseDomain.toString());
-    if(baseDomain.isSingleton())
-    {
-    	debugMsg("Variable:Variable", "Base domain singleton; " << baseDomain.getSingletonValue());
-    }
-
-
 
     // Note that we permit the domain to be empty initially
     m_derivedDomain->setListener(m_listener);
 
-    // Don't propagate set operations on dynamic or empty domains.
-    if (baseDomain.isOpen() || baseDomain.isEmpty())
-      return;
+    if(m_baseDomain->isSingleton()) {
+    	debugMsg("Variable:Variable", "Base domain singleton; " << m_baseDomain->getSingletonValue());
+    	if (m_baseDomain->isClosed() && !m_baseDomain->isEmpty())
+    	    internalSpecify(m_baseDomain->getSingletonValue());
+    }
   }
 
   template<class DomainType>

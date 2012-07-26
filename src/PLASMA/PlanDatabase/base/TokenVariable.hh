@@ -93,6 +93,10 @@ namespace EUROPA{
       m_parentToken(parent){
     check_error(m_parentToken.isValid());
     check_error(this->getIndex() >= 0);
+    if (this->isSpecified()) {
+    	m_isLocallySpecified = true;
+    	m_localSpecifiedValue = baseDomain.getSingletonValue();
+    }
   }
 
   template <class DomainType>
