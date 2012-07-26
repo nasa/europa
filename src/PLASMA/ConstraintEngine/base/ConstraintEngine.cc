@@ -854,14 +854,12 @@ namespace EUROPA
 			       visitedVariables);
 
     // TODO JRB: should only compute transitive closure for variables that actually change after relaxation
-    /*
     for(std::list<ConstrainedVariableId>::iterator it = relaxationAgenda.begin();
 	it != relaxationAgenda.end(); ++it) {
       std::list<ConstrainedVariableId>::iterator next = it;
       ++next;
       addLinkedVarsForRelaxation(*it, relaxationAgenda, next, visitedVariables);
     }
-	*/
 
     for(std::list<ConstrainedVariableId>::iterator it = relaxationAgenda.begin();
     		it != relaxationAgenda.end(); ++it) {
