@@ -221,32 +221,9 @@ namespace EUROPA{
      */
     void addVariable(const ConstrainedVariableId& var, const LabelStr& name);
 
-    template<class DomainType>
-    ConstrainedVariableId addVariable( const DomainType& baseDomain,
+    ConstrainedVariableId addVariable( const Domain& baseDomain,
 				       bool canBeSpecified,
-				       const LabelStr& name){
-      // If there is already a name-value pair for retrieving a variable by name,
-      // we erase it. Though we do not erase the actual variable stored in the list since it still
-      // has to be cleaned up when the rule instance is undone. This is done reluctantly, since it
-      // is based on assumptions that there will be no child rules. This is all required to support the
-      // looping construct used to implement the 'foreach' semantics. Therefore, we overwrite the old
-      // value with the new value.
-      if(!getVariable(name).isNoId())
-        m_variablesByName.erase(name.getKey());
-
-      ConstrainedVariableId localVariable = (new Variable<DomainType>(m_planDb->getConstraintEngine(),
-                                                                      baseDomain,
-                                                                      false, // TODO: Maybe true?
-                                                                      canBeSpecified,
-                                                                      name,
-                                                                      m_id))->getId();
-      // Only allowed add a variable for an executed rule instance
-      check_error(isExecuted());
-
-      m_variables.push_back(localVariable);
-      addVariable(localVariable, name);
-      return localVariable;
-    }
+				       const LabelStr& name);
 
     void addConstraint(const LabelStr& name, const std::vector<ConstrainedVariableId>& scope);
     void addChildRule(RuleInstance* instance);

@@ -808,6 +808,9 @@ namespace EUROPA
     getViolationMgr().addEmptyVariable(variable);
     debugMsg("ConstraintEngine:emptied","Emptied var:" << variable->toLongString()
 	     << " parent:" << (variable->parent().isNoId() ? "NULL" : variable->parent()->toString()));
+    if (variable->getCurrentPropagatingConstraint().isId()) {
+    	debugMsg("ConstraintEngine:emptied","Var emptied by constraint:"<< variable->getCurrentPropagatingConstraint()->toLongString());
+    }
     //check_error(m_relaxed == false);
     check_error(m_relaxed.empty());
     getViolationMgr().handleEmpty(variable);
@@ -1163,6 +1166,7 @@ namespace EUROPA
       if (shouldAutoPropagate())
           propagate();
 
+      debugMsg("ConstraintEngine:createConstraint","Created Constraint:" << constraint->toLongString());
       return(constraint);
   }
 
