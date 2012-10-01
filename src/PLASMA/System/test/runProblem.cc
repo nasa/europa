@@ -8,6 +8,7 @@
 #include "PlanDatabaseWriter.hh"
 #include "DbClientTransactionLog.hh"
 #include "EuropaEngine.hh"
+#include "NddlInterpreter.hh"
 
 #ifdef __BEOS__
 void __assert_fail(const char *__assertion,
@@ -72,12 +73,13 @@ bool runPlanner(const char* modelFile,
   if(replayRequired)
     txLog = (new DbClientTransactionLog(engine.getPlanDatabase()->getClient()))->getId();
 
-  assert(engine.plan(modelFile,plannerConfig,language));
+  try {
+    assert(engine.plan(modelFile,plannerConfig,language));
 
-  debugMsg("Main:runPlanner", "Found a plan at depth "
-	   << engine.getDepthReached() << " after " << engine.getTotalNodesSearched());
+    debugMsg("Main:runPlanner", "Found a plan at depth "
+             << engine.getDepthReached() << " after " << engine.getTotalNodesSearched());
 
-  if(replayRequired) {
+    if(replayRequired) {
       engine.write(std::cout);
       std::string s1 = PlanDatabaseWriter::toString(engine.getPlanDatabase(), false);
       std::ofstream out(TestEngine::TX_LOG());
@@ -85,9 +87,18 @@ bool runPlanner(const char* modelFile,
       out.close();
       replay(s1, txLog,language);
       std::cout << engine.getPlanDatabase()->toString();///
-  }
+    }
 
-  debugMsg("IdTypeCounts", dumpIdTable("after"));
+    debugMsg("IdTypeCounts", dumpIdTable("after"));
+  }
+  catch(PSLanguageExceptionList errors) {
+    for(int i = 0; i < errors.getExceptionCount(); ++i) {
+      const PSLanguageException& error = errors.getException(i);
+      std::cout << error.getFileName() << ":" << error.getLine() << ":" <<
+          error.getOffset() << ":  " << error.getMessage() << std::endl;
+    }
+    return false;
+  }
 
   return true;
 }

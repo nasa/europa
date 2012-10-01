@@ -158,9 +158,13 @@ namespace EUROPA {
     if(m_guardDomain != 0) { // Case of explicit guard on a single variable
       debugMsg("RuleInstance:test", "Case of explicit guard on a single variable");
       checkError(guards.size() == 1, "Explicit guard on one variable only");
-      bool result = (guards[0]->lastDomain().isSubsetOf(*m_guardDomain) ^ !m_isPositive);
-      //guards[0]->lastDomain().isSingleton() &&
-      //(m_guardDomain->isMember(guards[0]->lastDomain().getSingletonValue()) ^ !m_isPositive);
+      bool result = false;
+      if(guards[0]->lastDomain().isSingleton()) {
+        result = (m_guardDomain->isMember(guards[0]->lastDomain().getSingletonValue()) == m_isPositive);
+      }
+      else {
+        result = !(guards[0]->lastDomain().intersects(*m_guardDomain) || m_isPositive);
+      }
 
       debugMsg("RuleInstance:test", "variable " << guards[0]->toLongString()
 	       << " guard domain " << *m_guardDomain
@@ -206,12 +210,12 @@ namespace EUROPA {
 
   void RuleInstance::execute() {
     check_error(!isExecuted(), "Cannot execute a rule if already executed.");
-    debugMsg("RuleInstance:execute", "Executing:" << m_rule->getName().toString());
+    debugMsg("RuleInstance:execute", "Executing:" << m_rule->toString());
     m_isExecuted = true;
     handleExecute();
     m_rulesEngine->notifyExecuted(getId());
     debugMsg("europa:model", ruleExecutionContext());
-    debugMsg("RuleInstance:execute", "Executed:" << m_rule->getName().toString());
+    debugMsg("RuleInstance:execute", "Executed:" << m_rule->toString());
   }
 
   /**
