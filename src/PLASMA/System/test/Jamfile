@@ -84,6 +84,7 @@ rule RunPlannerProblem {
 # PLANNER SYSTEM TESTS
 #
 local testmodels = 
+      backtrack-test.nddl
       basic-model-transaction.nddl 
       basic-types.nddl 
       constrain-transaction.nddl
