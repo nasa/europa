@@ -37,6 +37,7 @@ namespace EUROPA {
 
   	  virtual bool handleEmpty(ConstrainedVariableId v) = 0;
   	  virtual bool handleRelax(ConstrainedVariableId v) = 0;
+      virtual void handleRemoved(ConstraintId c) = 0;
       virtual bool canContinuePropagation() = 0;
 
   	  virtual bool isViolated(ConstraintId c) const = 0;
@@ -526,8 +527,8 @@ namespace EUROPA {
     /**
      * @brief Allow ViolationMgr to inform us of updates we should publish
      */
-    void notifyViolationAdded(ConstraintId variable);
-    void notifyViolationRemoved(ConstraintId variable);
+    void notifyViolationAdded(ConstraintId constraint);
+    void notifyViolationRemoved(ConstraintId constraint);
 
 
     // debug methods

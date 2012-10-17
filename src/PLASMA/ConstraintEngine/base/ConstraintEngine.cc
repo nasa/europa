@@ -35,6 +35,7 @@ namespace EUROPA
 
     virtual bool handleEmpty(ConstrainedVariableId v);
     virtual bool handleRelax(ConstrainedVariableId v);
+    virtual void handleRemoved(ConstraintId c);
     virtual bool canContinuePropagation();
 
     virtual bool isViolated(ConstraintId c) const;
@@ -172,6 +173,16 @@ namespace EUROPA
     return true;
   }
 
+  void ViolationMgrImpl::handleRemoved(ConstraintId c)
+  {
+	  ConstraintSet::iterator it = m_violatedConstraints.find(c);
+	  if (it != m_violatedConstraints.end()) {
+		  debugMsg("ConstraintEngine:ViolationMgr", "Removing deleted constraint from violated set : " << c->toLongString());
+		  m_violatedConstraints.erase(it);
+		  m_ce.notifyViolationRemoved(c); // tell constraint engine to publish
+	  }
+  }
+
   bool ViolationMgrImpl::isEmpty(ConstrainedVariableId v) const
   {
     return m_emptyVariables.find(v) != m_emptyVariables.end();
@@ -200,30 +211,21 @@ namespace EUROPA
 
     m_relaxing = true;
 
-    //Relax of a variable can lead to the rules engine retracting variables. This in turn can
-    //result in a call to clear the empty variables. Thus, the commented code will fail because
-    //the underlying collection has been modified. Variable removal begins by discarding variables
-    //and leaving them in a discarded state. The underlying memory will not be deallocated until
-    //garbage collection occurs. The loop below is robust to variable removal.
+    // Relaxation of a variable can lead to the rules engine retracting variables.
+    // This in turn can result in a call to clear the empty variables.
+    // Thus, set iterators can't be used as they'll fail if the underlying collection is modified while itrerating over it.
+    // The loop below is robust to variable removal.
+    // Variable removal begins by discarding variables and leaving them in a discarded state.
+    // The underlying memory will not be deallocated until garbage collection occurs.
     while(!m_emptyVariables.empty()) {
-      ConstrainedVariableId v = *(m_emptyVariables.begin());
-      if (!v->isDiscarded()) {
-	check_error(!v.isNoId(),"Tried to relax ConstrainedVariableId::noId()");
-	v->relax();
-	debugMsg("ConstraintEngine:ViolationMgr", "Relaxed empty variable : " << v->toLongString());
-      }
-      m_emptyVariables.erase(v);
+    	ConstrainedVariableId v = *(m_emptyVariables.begin());
+    	if (!v->isDiscarded()) {
+    		check_error(!v.isNoId(),"Tried to relax ConstrainedVariableId::noId()");
+    		v->relax();
+    		debugMsg("ConstraintEngine:ViolationMgr", "Relaxed empty variable : " << v->toLongString());
+    	}
+    	m_emptyVariables.erase(v);
     }
-
-    //Commented because of above issue.
-    /*for(ConstrainedVariableSet::const_iterator it = m_emptyVariables.begin();
-	it != m_emptyVariables.end();++it) {
-      ConstrainedVariableId v = *it;
-      check_error(!v.isNoId(),"Tried to relax ConstrainedVariableId::noId()");
-      v->relax();
-      debugMsg("ConstraintEngine:ViolationMgr", "Relaxed empty variable : " << v->toLongString());
-    }
-    m_emptyVariables.clear();*/
 
     m_relaxing = false;
   }
@@ -495,16 +497,17 @@ namespace EUROPA
 
     // If the constraint is inactive, there is no need to relax. So just worry if it is actually active
     if(constraint->isActive()){
-      debugMsg("ConstraintEngine:remove:Constraint",
-               "Propagating relaxations for " << constraint->getName().toString() << "(" << constraint->getKey() << ")");
-      //const std::vector<ConstrainedVariableId>& scope = constraint->getScope();
-      const std::vector<ConstrainedVariableId>& scope = constraint->getModifiedVariables();
-      for(std::vector<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it){
-	ConstrainedVariableId id(*it);
-	if(!id->isDiscarded() && id->lastRelaxed() < m_cycleCount)
-	  id->relax();
-      }
+    	debugMsg("ConstraintEngine:remove:Constraint",
+    			"Propagating relaxations for " << constraint->getName().toString() << "(" << constraint->getKey() << ")");
+
+    	const std::vector<ConstrainedVariableId>& scope = constraint->getModifiedVariables();
+    	for(std::vector<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it){
+    		ConstrainedVariableId id(*it);
+    		if(!id->isDiscarded() && id->lastRelaxed() < m_cycleCount)
+    			id->relax();
+    	}
     }
+    getViolationMgr().handleRemoved(constraint);
 
     publish(notifyRemoved(constraint));
     debugMsg("ConstraintEngine:remove:Constraint",
@@ -1054,14 +1057,14 @@ namespace EUROPA
   }
 
 
-  void ConstraintEngine::notifyViolationAdded(ConstraintId variable)
+  void ConstraintEngine::notifyViolationAdded(ConstraintId constraint)
   {
-	  publish(notifyViolationAdded(variable));
+	  publish(notifyViolationAdded(constraint));
   }
 
-  void ConstraintEngine::notifyViolationRemoved(ConstraintId variable)
+  void ConstraintEngine::notifyViolationRemoved(ConstraintId constraint)
   {
-	  publish(notifyViolationRemoved(variable));
+	  publish(notifyViolationRemoved(constraint));
   }
 
   bool ConstraintEngine::isViolated(ConstraintId c) const
