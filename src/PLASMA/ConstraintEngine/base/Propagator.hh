@@ -13,6 +13,11 @@
 #include "LabelStr.hh"
 
 namespace EUROPA {
+
+   // Built-in priorities
+   #define SYSTEM_PRIORITY 10
+   #define USER_PRIORITY 100
+
   /**
    * @class Propagator
    * @brief A mechanism for extendible, maintanable propagation event (i.e. agenda)  management
@@ -63,6 +68,8 @@ namespace EUROPA {
      */
     const PropagatorId& getId() const;
 
+    int getPriority() const;
+
   protected:
     friend class ConstraintEngine; /**< Grant access so protected members can be used to enforce collaboration model
                                       without exposing details publically. */
@@ -71,13 +78,12 @@ namespace EUROPA {
      * @brief Constructor guarantees the Propagator belongs to exactly one ConstraintEngine
      * @param constraintEngine The engine to place it in. Must be a valid id.
      */
-    Propagator(const LabelStr& name, const ConstraintEngineId& constraintEngine);
+    Propagator(const LabelStr& name, const ConstraintEngineId& constraintEngine, int priority=USER_PRIORITY);
 
     /**
      * @brief Destructor - will remove the Propagator from the ConstraintEngine.
      */
     virtual ~Propagator();
-
 
     /**
      * @brief Constraint may be added to the Propagator by the ConstraintEngine.
@@ -180,6 +186,19 @@ namespace EUROPA {
     const LabelStr m_name;
     const ConstraintEngineId& m_constraintEngine; /**< The ConstraintEngine to which this Propagator belongs. Must be valid. */
     bool m_enabled; /**< Indicates if the propagator is enabled or not */
+    int m_priority;
+  };
+
+  class PropagatorComparator
+  {
+  public:
+	  bool operator()(const PropagatorId& x, const PropagatorId& y) const
+	  {
+		  if (x->getPriority() == y->getPriority())
+			  return x->getKey() < y->getKey();
+
+		  return (x->getPriority() < y->getPriority());
+	  }
   };
 }
 #endif

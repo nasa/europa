@@ -52,15 +52,9 @@ namespace EUROPA {
     if(getRuleInstance().isNoId())
       return true;
 
-    debugMsg("RuleVariableListener:canIgnore", "Checking canIgnore for guard listener for rule " <<
-	     getRuleInstance()->getRule()->getName() << " from source " << getRuleInstance()->getRule()->getName());
-    // If a Reset has occurred, and the rule has been fired, we may have to do something right now
-//     if(getRuleInstance()->isExecuted() &&
-//        (changeType == DomainListener::RESET || changeType == DomainListener::RELAXED) &&
-//        !getRuleInstance()->test(getScope())){
-//       getRuleInstance()->undo();
-//       return true;
-//     }
+    debugMsg("RuleVariableListener:canIgnore",
+    		"Checking canIgnore for guard listener for rule " << getRuleInstance()->getRule()->getName().toString() <<
+    		" from source " << (m_sourceConstraint.isId() ? m_sourceConstraint->getName().toString() : "NULL"));
 
     return false;
   }
@@ -96,7 +90,7 @@ namespace EUROPA {
 //     // Fire if appropriate
 //     if(!getRuleInstance()->isExecuted() &&  getRuleInstance()->test(getScope()))
 //       getRuleInstance()->prepareExecute();
-//     else if(getRuleInstance()->isExecuted() && 
+//     else if(getRuleInstance()->isExecuted() &&
     getRuleInstance()->prepare();
   }
 

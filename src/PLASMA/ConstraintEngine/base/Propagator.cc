@@ -5,8 +5,14 @@
 
 namespace EUROPA
 {
-  Propagator::Propagator(const LabelStr& name, const ConstraintEngineId& constraintEngine)
-    : Entity(), m_id(this), m_name(name), m_constraintEngine(constraintEngine), m_enabled(true){
+  Propagator::Propagator(const LabelStr& name, const ConstraintEngineId& constraintEngine, int priority)
+  	  : Entity()
+  	  , m_id(this)
+  	  , m_name(name)
+  	  , m_constraintEngine(constraintEngine)
+  	  , m_enabled(true)
+  	  , m_priority(priority)
+  {
     check_error(!m_constraintEngine.isNoId() && m_constraintEngine.isValid());
     m_constraintEngine->add(m_id);
   }
@@ -15,6 +21,8 @@ namespace EUROPA
     discard(false);
     m_id.remove();
   }
+
+  int Propagator::getPriority() const { return m_priority; }
 
   const PropagatorId& Propagator::getId() const {return m_id;}
 

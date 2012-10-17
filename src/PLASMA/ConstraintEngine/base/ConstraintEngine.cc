@@ -378,7 +378,7 @@ namespace EUROPA
     }
 
     // Always delete the propagators when we purge
-    for(std::list<PropagatorId>::const_iterator it = m_propagators.begin(); it != m_propagators.end(); ++it){
+    for(PropagatorSet::const_iterator it = m_propagators.begin(); it != m_propagators.end(); ++it){
       PropagatorId prop = *it;
       check_error(prop.isValid());
       prop->decRefCount();
@@ -520,10 +520,11 @@ namespace EUROPA
       it->second->discard();
       m_propagatorsByName.erase(it);
     }
-    m_propagators.push_back(propagator);
+    size_t before = m_propagators.size();
+    m_propagators.insert(propagator);
     m_propagatorsByName.insert(std::make_pair(propagator->getName().getKey(), propagator));
 
-    debugMsg("ConstraintEngine:add:Propagator",  propagator->getName().toString());
+    debugMsg("ConstraintEngine:add:Propagator",  propagator->getName().toString() << "cntBefore="<<before<<" cntAfter="<<m_propagators.size());
   }
 
 
@@ -577,7 +578,7 @@ namespace EUROPA
     check_error(!Entity::isPurging());
     check_error(var.isValid() && !var->isActive());
 
-    for(std::list<PropagatorId>::const_iterator it = m_propagators.begin(); it != m_propagators.end(); ++it){
+    for(PropagatorSet::const_iterator it = m_propagators.begin(); it != m_propagators.end(); ++it){
       PropagatorId propagator = *it;
       propagator->handleVariableDeactivated(var);
     }
@@ -592,7 +593,7 @@ namespace EUROPA
     check_error(!Entity::isPurging());
     check_error(var.isValid() && var->isActive());
 
-    for(std::list<PropagatorId>::const_iterator it = m_propagators.begin(); it != m_propagators.end(); ++it){
+    for(PropagatorSet::const_iterator it = m_propagators.begin(); it != m_propagators.end(); ++it){
       PropagatorId propagator = *it;
       propagator->handleVariableActivated(var);
     }
@@ -603,12 +604,12 @@ namespace EUROPA
 	     var->getName().toString() << "(" << var->getKey() << ")");
   }
 
-  std::string ConstraintEngine::dumpPropagatorState(const std::list<PropagatorId>& propagators) const
+  std::string ConstraintEngine::dumpPropagatorState(const PropagatorSet& propagators) const
   {
     std::ostringstream os;
 
     os << std::endl;
-    for(std::list<PropagatorId>::const_iterator it = propagators.begin(); it != propagators.end(); ++it){
+    for(PropagatorSet::const_iterator it = propagators.begin(); it != propagators.end(); ++it){
       PropagatorId propagator = *it;
       os << propagator->getName().toString() << "(";
 
@@ -927,7 +928,7 @@ namespace EUROPA
   }
 
   PropagatorId ConstraintEngine::getNextPropagator() const{
-    for(std::list<PropagatorId>::const_iterator it = m_propagators.begin(); it != m_propagators.end(); ++it){
+    for(PropagatorSet::const_iterator it = m_propagators.begin(); it != m_propagators.end(); ++it){
       PropagatorId propagator = *it;
       if(propagator->isEnabled() && propagator->updateRequired())
 	return propagator;

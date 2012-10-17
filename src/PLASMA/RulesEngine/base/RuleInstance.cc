@@ -252,7 +252,7 @@ namespace EUROPA {
 	// In the event that a slave persists, as cann occur when the master is removed through termination, then the constraints among
 	// remaining slaves should also be retained
 	if(connectedToToken(constraint, m_token)){
-	  debugMsg("RuleInstance:undo", "Removing connected constraint " << constraint->toString());
+	  debugMsg("RuleInstance:undo", "Removing connected constraint " << constraint->toLongString());
 	  constraint->discard();
 	}
 	else // If we are not removing the constraint, we must remove the dependency on it

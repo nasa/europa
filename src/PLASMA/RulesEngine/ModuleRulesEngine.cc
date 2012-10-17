@@ -6,6 +6,7 @@
 #include "RulesEngine.hh"
 #include "RuleVariableListener.hh"
 #include "Constraints.hh"
+#include "Propagators.hh"
 
 namespace EUROPA {
 
@@ -33,6 +34,10 @@ namespace EUROPA {
       engine->addComponent("RuleSchema",rs);
       RulesEngine* re = new RulesEngine(rs->getId(),pdb->getId());
       engine->addComponent("RulesEngine",re);
+
+      // Allocate an instance of Default Propagator to handle rule related constraint propagation.
+      // Will be cleaned up automatically by the ConstraintEngine
+      new DefaultPropagator("RulesEngine", pdb->getConstraintEngine(), SYSTEM_PRIORITY);
 
       CESchema* ces = (CESchema*)engine->getComponent("CESchema");
       REGISTER_SYSTEM_CONSTRAINT(ces,ProxyVariableRelation, "proxyRelation", "Default");

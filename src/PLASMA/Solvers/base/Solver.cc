@@ -245,7 +245,8 @@ namespace EUROPA {
 
     bool Solver::conflictLevelOk()
     {
-      return m_db->getConstraintEngine()->getViolation() == m_baseConflictLevel;
+    	// after backtracking conflict level may go down as violations are cleared.
+      return m_db->getConstraintEngine()->getViolation() <= m_baseConflictLevel;
     }
 
     /**

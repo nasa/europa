@@ -16,8 +16,11 @@
 
 namespace EUROPA {
 
-  DefaultPropagator::DefaultPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine)
-    : Propagator(name, constraintEngine), m_activeConstraint(0){}
+  DefaultPropagator::DefaultPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine, int priority)
+  	  : Propagator(name, constraintEngine, priority)
+  	  , m_activeConstraint(0)
+  {
+  }
 
   void DefaultPropagator::handleConstraintAdded(const ConstraintId& constraint){
     debugMsg("DefaultPropagator:handleConstraintAdded", "Adding to the agenda: " << constraint->getName().toString() << "(" << constraint->getKey() << ")");

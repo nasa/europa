@@ -18,7 +18,7 @@ namespace EUROPA {
   class DefaultPropagator: public Propagator
   {
   public:
-    DefaultPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine);
+    DefaultPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine, int priority=USER_PRIORITY);
     virtual void execute();
     virtual bool updateRequired() const;
   protected:

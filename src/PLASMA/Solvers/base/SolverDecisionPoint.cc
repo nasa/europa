@@ -38,6 +38,7 @@ namespace EUROPA {
       checkError(isExecuted(), "Cannot undo if not executed already:" << toString());
       handleUndo();
       m_isExecuted = false;
+      debugMsg("DecisionPoint:undo", "Finished Undoing current decision.");
     }
 
     bool DecisionPoint::cut() const {return m_maxChoices > 0 && m_counter >= m_maxChoices;}

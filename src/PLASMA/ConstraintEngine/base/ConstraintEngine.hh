@@ -17,6 +17,7 @@
 #include "ConstraintEngineListener.hh"
 #include "Entity.hh"
 #include "Engine.hh"
+#include "Propagator.hh"
 
 #include <set>
 #include <map>
@@ -55,6 +56,8 @@ namespace EUROPA {
   	   friend class ConstraintEngine;
   };
 
+  typedef std::set<PropagatorId,PropagatorComparator> PropagatorSet;
+  
   /**
    * @class ConstraintEngine
    * @brief Base Class from which specific Constraint Engine Framework Instances can be derived.
@@ -528,7 +531,7 @@ namespace EUROPA {
 
 
     // debug methods
-    std::string dumpPropagatorState(const std::list<PropagatorId>& propagators) const;
+    std::string dumpPropagatorState(const PropagatorSet& propagators) const;
 
     int addLinkedVarsForRelaxation(const ConstrainedVariableId& var,
 				   std::list<ConstrainedVariableId>& dest,
@@ -539,7 +542,7 @@ namespace EUROPA {
     ConstraintEngineId m_id;
     ConstrainedVariableSet m_variables; /*!< The set of all variables under the control of the ConstraintEngine. */
     ConstraintSet m_constraints; /*!< The set of all constraints. */
-    std::list<PropagatorId> m_propagators; /*!< The list of all propagators.
+    PropagatorSet m_propagators; /*!< The list of all propagators.
 					     Position in the list indicates execution priority. This
 					     is determined by the order of construction. */
     std::map<edouble, PropagatorId> m_propagatorsByName; /*!< Support configuration and lookup by name. */

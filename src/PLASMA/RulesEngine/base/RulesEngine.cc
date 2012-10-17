@@ -6,13 +6,11 @@
 #include "RuleInstance.hh"
 #include "Token.hh"
 #include "ConstraintEngine.hh"
-#include "Propagators.hh"
 #include "Utils.hh"
 #include "RuleVariableListener.hh"
 #include "ProxyVariableRelation.hh"
 #include "ConstraintType.hh"
 #include <list>
-
 #include <algorithm>
 
 namespace EUROPA{
@@ -54,10 +52,6 @@ namespace EUROPA{
   {
     m_planDbListener = (new DbRuleEngineConnector(m_planDb, m_id))->getId();
     m_callback = (new RulesEngineCallback(m_planDb->getConstraintEngine(), m_id))->getId();
-    // Allocate an instance of Default Propagator to handle the rule related  contraint propagation.
-    // Will be cleaned up automatically by the ConstraintEngine
-    new DefaultPropagator("RulesEngine", m_planDb->getConstraintEngine());
-
     check_error(m_planDb->getTokens().empty());
   }
 
