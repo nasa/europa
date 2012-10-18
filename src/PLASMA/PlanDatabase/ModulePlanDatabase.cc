@@ -9,6 +9,7 @@
 #include "Timeline.hh"
 #include "Token.hh"
 #include "Methods.hh"
+#include "Propagators.hh"
 
 namespace EUROPA {
 
@@ -61,9 +62,12 @@ namespace EUROPA {
   {
       ConstraintEngine* ce = (ConstraintEngine*)engine->getComponent("ConstraintEngine");
       CESchema* ceSchema = (CESchema*)engine->getComponent("CESchema");
-      REGISTER_SYSTEM_CONSTRAINT(ceSchema,CommonAncestorConstraint, "commonAncestor", "Default");
-      REGISTER_SYSTEM_CONSTRAINT(ceSchema,HasAncestorConstraint, "hasAncestor", "Default");
-      REGISTER_SYSTEM_CONSTRAINT(ceSchema,ObjectTokenRelation, "ObjectTokenRelation", "Default");
+
+      new DefaultPropagator("PlanDatabaseSystemPropagator", ce->getId(), SYSTEM_PRIORITY);
+      REGISTER_SYSTEM_CONSTRAINT(ceSchema,ObjectTokenRelation, "ObjectTokenRelation", "PlanDatabaseSystemPropagator");
+
+      REGISTER_CONSTRAINT(ceSchema,CommonAncestorConstraint, "commonAncestor", "Default");
+      REGISTER_CONSTRAINT(ceSchema,HasAncestorConstraint, "hasAncestor", "Default");
 
       Schema* schema = new Schema("EngineSchema",ceSchema->getId()); // TODO: use engine name
       schema->registerEnum("TokenStates",StateDomain());

@@ -601,7 +601,7 @@ namespace EUROPA{
     // is not dynamically created.
     Id<ObjectTokenRelation> objectTokenRelation =
       (new ObjectTokenRelation("ObjectTokenRelation",
-			       "Default",
+			       "PlanDatabaseSystemPropagator",
 			       m_planDatabase->getConstraintEngine(),
 			       makeScope(m_state, m_object)))->getId();
 
