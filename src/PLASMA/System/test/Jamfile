@@ -85,6 +85,7 @@ rule RunPlannerProblem {
 #
 local testmodels = 
       backtrack-test.nddl
+      merge-with-open-domain.nddl
       basic-model-transaction.nddl 
       basic-types.nddl 
       constrain-transaction.nddl
