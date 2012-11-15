@@ -258,8 +258,8 @@ namespace EUROPA {
 
       checkError(!m_exhausted, "Cannot be exhausted when about to commence a step." << sl_counter);
 
-      debugMsg("Solver:step", "Conflict level prior to propagation: " << m_baseConflictLevel);
       m_baseConflictLevel = m_db->getConstraintEngine()->getViolation();
+      debugMsg("Solver:step", "Conflict level prior to propagation: " << m_baseConflictLevel);
       m_db->getClient()->propagate();
       debugMsg("Solver:step", "Conflict level after propagation: " << m_db->getConstraintEngine()->getViolation());
 
