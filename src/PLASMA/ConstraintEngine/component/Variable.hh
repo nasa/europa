@@ -195,13 +195,12 @@ namespace EUROPA {
   void Variable<DomainType>::handleRestrictBaseDomain(const Domain& newBaseDomain) {
     check_error(validate());
 
-    // For thh case of the open domain, we will assign values. Also will assign closure. For the case
+    // For the case of the open domain, we will assign values. Also will assign closure. For the case
     // of a closed domain, just do intersection. In the event there is no restriction, we do nothing further.
     if(m_baseDomain->isOpen()){
       (*m_baseDomain) = newBaseDomain;
       if(newBaseDomain.isClosed())
-	m_baseDomain->close();
-      return;
+    	  m_baseDomain->close();
     }
     else if(!m_baseDomain->intersect(newBaseDomain))
       return;
