@@ -18,7 +18,8 @@ Test::Predicate {
     neq(qforce_backtrack, 3);
   }
   else {
-    met_by(object.Predicate p);
+    any(object.Predicate p);
+    p.end <= this.start;
     neq(p.qforce_backtrack, qforce_backtrack);
     eq(p.qforce_backtrack, 3);
   }
@@ -33,4 +34,4 @@ close();
 goal(test.Predicate p);
 p.start = 0;
 p.end = 50;
-p.first = true;
+p.first = false;
