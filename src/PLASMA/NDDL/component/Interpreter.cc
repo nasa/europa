@@ -1998,12 +1998,13 @@ namespace EUROPA {
   {
       DataRef lhs;
 
+      std::string varNameStr = m_lhs->toString();
+      const char* varName = varNameStr.c_str(); // TODO: this is a hack!
+
       ConstrainedVariableId thisVar = context.getVar("this");
       // TODO: modify interpreted object constructor to add vars upfront so that this if stmt isn't necessary
       if (thisVar.isId()) {
           ObjectId object = Entity::getTypedEntity<Object>(thisVar->derivedDomain().getSingletonValue());
-          std::string varNameStr = m_lhs->toString();
-          const char* varName = varNameStr.c_str(); // TODO: this is a hack!
           check_error(object->getVariable(varName) == ConstrainedVariableId::noId());
           ConstrainedVariableId rhsValue = m_rhs->eval(context).getValue();
           const Domain& domain = rhsValue->derivedDomain();
@@ -2026,6 +2027,7 @@ namespace EUROPA {
                   // TODO: this behavior seems more reasonable, specially to support violation reporting
                   // lhs.getValue()->getCurrentDomain().equate(rhs.getValue()->getCurrentDomain());
               }
+              debugMsg("Interpreter:InterpretedToken","Restricted base domain for token/rule variable:" << varName << " to " << rhs.getValue()->lastDomain().toString());
           }
       }
 

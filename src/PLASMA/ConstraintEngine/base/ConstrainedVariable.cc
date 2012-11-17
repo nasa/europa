@@ -652,7 +652,7 @@ namespace EUROPA {
   	// Used to be toString, but the above is shorter and more user-friendly
   	std::string ConstrainedVariable::toLongString() const{
   		std::stringstream sstr;
-  		sstr << Entity::toString() << (specifiedFlag() ? " (S) " : "") << " DERIVED=" << lastDomain().toString();
+  		sstr << Entity::toString() << (specifiedFlag() ? " (S) " : "") << " DERIVED=" << lastDomain().toString() << " BASE=" << baseDomain().toString();
   		return sstr.str();
   	}
 }
