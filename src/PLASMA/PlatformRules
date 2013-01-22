@@ -12,6 +12,8 @@ POSITION_INDEPENDENT_CODE_FLAG ?= -fPIC ;
 # LINKER_PASSTHROUGH_FLAG = Flag to pass an argument through to the linker
 LINKER_PASSTHROUGH_FLAG ?= -Wl, ;
 
+OS = $(OS:U) ;
+
 # SHARED_FLAG = Flag to generate shared library
 if $(OS) = MACOSX {
   SHARED_FLAG ?= -fno-common -dynamiclib ;
