@@ -1,0 +1,37 @@
+#include "Plasma.nddl"
+#include "PlannerConfig.nddl"
+
+class Test extends Timeline {
+  predicate Predicate {
+    string parameter; parameter = "foo";
+    bool first;
+    int qforce_backtrack; qforce_backtrack = [2 4];
+  }
+}
+
+Test::Predicate {
+  if(first == true) {
+    meets(object.Predicate p);
+    eq(p.first, false);
+    eq(p.state, ACTIVE);
+    neq(p.qforce_backtrack, qforce_backtrack);
+    neq(qforce_backtrack, 3);
+  }
+  else {
+    any(object.Predicate p);
+    p.end <= this.start;
+    neq(p.qforce_backtrack, qforce_backtrack);
+    eq(p.qforce_backtrack, 3);
+  }
+}
+
+PlannerConfig world = new PlannerConfig(0, 100, 500);
+
+Test test = new Test();
+
+close();
+
+goal(test.Predicate p);
+p.start = 0;
+p.end = 50;
+p.first = false;

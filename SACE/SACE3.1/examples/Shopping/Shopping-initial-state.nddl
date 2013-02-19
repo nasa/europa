@@ -1,0 +1,54 @@
+#include "Shopping-model.nddl"
+
+// Planning Horizon
+int horizonStart = 0;
+int horizonEnd = 100;
+
+// Allocate instances
+Location Home = new Location("Home");
+Location SuperMarket = new Location("SuperMarket");
+Location HardwareStore = new Location("HardwareStore");
+
+Product Banana = new Product("Banana");
+Product Milk = new Product("Milk");
+Product Drill = new Product("Drill");
+
+ProductLocation bananaLocation = new ProductLocation(SuperMarket, Banana);
+ProductLocation milkLocation = new ProductLocation(SuperMarket, Milk);
+ProductLocation drillLocation = new ProductLocation(HardwareStore, Drill);
+
+Agent agent = new Agent();
+
+// Indicate that the database is closed - no new objects can be created
+close();
+
+// We start the day at Home:
+fact(agent.location.At atHomeForBreakfast);
+atHomeForBreakfast.loc.specify(Home);
+
+// Goals for all of the agent's needs, buy if needed
+goal(agent.Own gotMilk);
+gotMilk.product.specify(Milk);
+goal(agent.Own gotBanana);
+gotBanana.product.specify(Banana);
+goal(agent.Own gotDrill);
+gotDrill.product.specify(Drill);
+
+// Make sure agent is home for dinner
+goal(agent.location.At atHomeForDinner);
+atHomeForDinner.loc.specify(Home);
+
+// Agent has all day to satisfy goals:
+gotMilk after atHomeForBreakfast;
+gotMilk before atHomeForDinner;
+
+gotBanana after atHomeForBreakfast;
+gotBanana before atHomeForDinner;
+
+gotDrill after atHomeForBreakfast;
+gotDrill before atHomeForDinner;
+
+// Force things to happen within our planning horizon:
+leq(horizonStart, atHomeForBreakfast.start);
+leq(atHomeForDinner.end, horizonEnd);
+

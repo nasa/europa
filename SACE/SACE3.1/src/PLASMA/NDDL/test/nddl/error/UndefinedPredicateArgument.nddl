@@ -1,0 +1,11 @@
+
+class foo
+{
+    predicate bar {int x;}
+}
+
+foo::bar
+{
+    eq(x,5);
+    eq(y,6);
+}

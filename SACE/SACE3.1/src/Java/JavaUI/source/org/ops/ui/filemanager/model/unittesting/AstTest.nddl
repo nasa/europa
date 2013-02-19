@@ -1,0 +1,31 @@
+#include "Plasma.nddl"
+
+enum Case1 {case11, case12, case13};
+
+class SomeClass extends Timeline
+{
+    predicate aPredicate  { duration=1; }
+}
+
+class AnotherClass extends Timeline
+{
+    SomeClass someVar;
+
+    AnotherClass(SomeClass b)
+    {
+        someVar = b;
+    }
+    predicate bPredicate  {}
+}
+
+AnotherClass::bPredicate {
+   met_by(someVar.aPredicate);
+}
+
+// Problem instance
+SomeClass inner = new SomeClass();
+AnotherClass outer = new AnotherClass(inner);
+
+fact(outer.bPredicate initialCondition);
+eq(initialCondition.start,0);
+goal(outer.bPredicate goal1);

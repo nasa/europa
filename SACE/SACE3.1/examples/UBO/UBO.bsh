@@ -1,0 +1,228 @@
+// UBO.bsh
+
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Vector;
+import javax.swing.JInternalFrame;
+import psengine.*;
+import UBO.*;
+import org.ops.ui.utils.Utilities;
+import org.ops.ui.main.swing.PSDesktop;
+import org.ops.ui.mouse.swing.*;
+import org.ops.ui.gantt.swing.*;
+import org.ops.ui.rchart.swing.*;
+import org.ops.ui.solver.swing.*;
+import java.util.List;
+import java.util.regex.*;
+
+int month = GregorianCalendar.SEPTEMBER, day = 11; 
+GregorianCalendar start = new GregorianCalendar(2006,month,day,0,0);
+GregorianCalendar end = new GregorianCalendar(2006,month,day,1,30);
+
+
+void initPSEngine()
+{
+	cwd = bsh.cwd;
+    String nddlModel = cwd+"/UBO-initial-state.nddl";
+    errors = psengine.executeScript("nddl",nddlModel,true/*isFile*/);
+	if (!errors.equals(""))
+		throw new RuntimeException("Failed loading model:"+errors);
+}
+
+void showResourceProfiles()
+{
+    resourceFrame = desktop.makeResourcesFrame("CapacityResource",start);
+    resourceFrame.setLocation(0,180);
+    resourceFrame.setSize(500,300);	
+}
+
+void setupDesktop()
+    throws Exception
+{
+    ActionDetailsPanel dp = (ActionDetailsPanel)desktop.makeDetailsFrame().getContentPane().getComponent(0);
+    ActionViolationsPanel vp = (ActionViolationsPanel)desktop.makeViolationsFrame().getContentPane().getComponent(0);
+
+    JInternalFrame ganttFrame = desktop.makeResourceGanttFrame("ActivityTimeline",start,end);
+    ganttFrame.setLocation(0,0);
+    ganttFrame.setSize(700,300);
+    PSGantt gantt = (PSGantt)ganttFrame.getContentPane().getComponent(0);
+    gantt.addMouseListener(dp);    
+    gantt.addMouseListener(vp);  
+    
+    //desktop.showTokens(psengine.getObjectsByType("ActivityTimeline").get(0));
+    showResourceProfiles();    
+}
+
+
+UBOSolverListener listener;
+
+void showHistory()
+{
+    String[] fields1 = {"toString"};
+    desktop.makeTableFrame("Decision History",listener.getDecisionHistory(),fields1);
+    String[] fields2 = {"StepNumber","RemainingTreeSize","CurrentTree","CurrentPlan"};
+    desktop.makeTableFrame("Plan History",listener.getPlanHistory(),fields2);
+}
+
+IFlatIRelaxSolver runIFIR(long timeout,int bound, boolean usePSResources)
+{
+	s = new IFlatIRelaxSolver();
+	s.solve(psengine,timeout,bound,usePSResources);
+	//RCPSPUtil.ground(s.getActivities());
+	v = psengine.getVariableByName("maxDuration");
+	v.specifyValue(PSVarValue.getInstance(bound));
+	
+	return s;
+}
+
+void undoIFIR(IFlatIRelaxSolver s)
+{
+	RCPSPUtil.undoGround(s.getActivities());
+    s.undoSolve();    
+}
+
+void showResourceTokens()
+{
+  qry = "select key,toString from psengine.PSToken where name like 'Capacity%'";
+  desktop.makeTableFrame("Resource Tokens",Utilities.SWIGList(psengine.getTokens()), qry);	
+}
+
+void printProfile(PSResource r)
+{
+	PSResourceProfile prof = r.getLevels();
+	PSTimePointList times = prof.getTimes();
+	for (int i=0; i<times.size(); i++) {
+		int time = times.get(i);
+		print(times.get(i)+" ["+prof.getLowerBound(time)+","+prof.getUpperBound(time)+"]");
+	}
+}
+
+//main()
+
+horizonStart = 0;
+horizonEnd = 1000;
+maxSteps = 1000;
+config = "PlannerConfig.xml";
+PSSolver solver;
+
+try {
+    initPSEngine();
+    solver = psengine.createSolver(config);
+    solver.configure(horizonStart,horizonEnd);
+    solverDialog = desktop.makeSolverDialog(solver);
+
+	// Run built-in solver to activate ActivityTimeline::act tokens used for gantt display
+    // Priorities are set up in PlannerConfig.xml to make sure that happens first
+    // TODO: hardcoded 24 steps, it'll only work for problem with 11 activities
+
+    System.out.println("Starting...");
+    
+    for (int i=0;i<24;i++)
+    	solver.step();
+
+    listener = new UBOSolverListener();
+    //solverDialog.addListener(listener);
+}    
+catch (Exception e) {
+  	System.err.println("Failed Initializing : "+e.getMessage());
+}
+
+String getViolations(psengine.PSToken activity)
+{
+	// TODO: get Violations only for the specified activity
+	if (psengine.getViolation() == 0)
+		return "OK";
+	
+	StringBuffer buf = new StringBuffer();
+	violations = psengine.getViolationExpl();
+	for (int i=0;i<violations.size();i++) {
+		System.out.println("Violations["+i+"]="+violations.get(i));
+		buf.append(violations.get(i).toString()).append("\n");
+	}
+	
+	return buf.toString();
+}
+
+// This will only work if temporal constraints are using the DefaultPropagator instead of the TemporalPropagator
+List wif(psengine.PSToken activity, int startTime, int endTime)
+{
+	List retval = new ArrayList();
+	
+	PSVariable s = activity.getStart();
+	PSVariable e = activity.getEnd();
+	PSVariable d = activity.getDuration();
+	int duration = d.getSingletonValue().asInt();
+		
+	for (int i=startTime; i<=endTime; i++) {
+		Object[] values = new Object[2];
+		
+		
+		int newEnd = i+duration;
+
+		psengine.setAutoPropagation(false);
+		s.specifyValue(PSVarValue.getInstance(i));
+		e.specifyValue(PSVarValue.getInstance(newEnd));
+		psengine.setAutoPropagation(true);
+		
+		values[0] = i;
+		values[1] = getViolations(activity);
+		print("time="+i+" violations="+values[1]);
+		
+		retval.add(values);
+	}
+	s.reset();
+	e.reset();
+	psengine.propagate();
+		
+	return retval;
+}
+
+
+String printWif(List wifInfo)
+{
+	StringBuffer buf = new StringBuffer();
+	
+	for (Object o : wifInfo) {
+		Object[] values = (Object[])o;
+		buf.append("time: ").append(values[0].toString())
+		   .append(" {")
+		   .append(values[1].toString())
+		   .append("}\n");
+	}
+		
+	return buf.toString();
+}
+
+// best makespan is 46 for solution {1<4}{2<5}{3<1}{3<4}{5<6}{5<9}{6<8}{7<5}{7<6}{7<8}{7<10}
+
+void loadSolution(String solution)
+{
+	Pattern p = Pattern.compile("\\d+<\\d+");
+	Matcher m = p.matcher(solution);
+	
+	while (m.find()) {
+		//System.out.println("Found:"+m.group());
+		StringTokenizer tok = new StringTokenizer(m.group(),"<");
+		String first = tok.nextToken();
+		String second = tok.nextToken();
+		//print("("+first+","+second+")\n");
+		nddl = "precedes(activity"+first+".end,activity"+second+".start);";
+		psengine.executeScript("nddl",nddl,false/*isFile*/);
+	}
+	
+	s = new IFlatIRelaxSolver();
+	s.solve(psengine,10,1000,false);
+	RCPSPUtil.ground(s.getActivities());
+}
+
+//ifirSolver = runIFIR(60000/*timeout*/,47/*bound*/,false/*usePSResources*/);
+
+/*
+loadSolution("{1<4}{2<5}{3<1}{3<4}{5<6}{5<9}{6<8}{7<5}{7<6}{7<8}{7<10}");
+tok = psengine.getTokens().get(3);
+wif(tok,1,5);
+setupDesktop();
+howHistory();
+undoIFIR(ifirSolver);
+*/
+

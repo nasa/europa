@@ -1,0 +1,36 @@
+#include "Plasma.nddl"
+#include "PlannerConfig.nddl"
+
+class Test extends Timeline {
+  predicate Predicate {
+    
+  }
+}
+
+Test::Predicate {
+  bool cond;
+  bool transition;
+  bool turn_before;
+  // cond = true;
+  eq(cond, true);
+  //turn_before = true;
+  eq(turn_before, true);
+  if(cond == true) {
+    if(transition == true) {
+      eq(turn_before, true);
+    }
+    if(transition == false) {
+      eq(turn_before, false);
+    }
+  }
+}
+
+PlannerConfig world = new PlannerConfig(0, 100, 500);
+
+Test test = new Test();
+
+close();
+
+goal(test.Predicate p);
+p.start = 5;
+p.end = 10;
