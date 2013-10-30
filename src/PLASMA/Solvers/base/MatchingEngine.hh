@@ -103,8 +103,6 @@ namespace EUROPA {
 		   const std::multimap<edouble, MatchingRuleId>& rules,
 		   std::vector<MatchingRuleId>& results);
 
-      std::string rulesToString(const std::multimap<edouble, MatchingRuleId>& rules);
-
       /**
        * @brief Utility to handle the recursive triggering for a class and its super class.
        */
@@ -120,6 +118,7 @@ namespace EUROPA {
       std::multimap<edouble, MatchingRuleId> m_rulesByMasterObjectType;
       std::multimap<edouble, MatchingRuleId> m_rulesByMasterPredicate;
       std::multimap<edouble, MatchingRuleId> m_rulesByMasterRelation;
+      std::multimap<edouble, MatchingRuleId> m_rulesByTokenName;
 
       unsigned int m_cycleCount; /*!< Used to reset all rule firing data. Updated on each call to match. */
       std::set<MatchingRuleId> m_rules; /*!< The set of all rules. */

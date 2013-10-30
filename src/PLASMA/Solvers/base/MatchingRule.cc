@@ -18,6 +18,7 @@ namespace EUROPA {
       : Component(configData), 
         m_objectType(WILD_CARD()), m_predicate(WILD_CARD()), m_variable(WILD_CARD()), 
         m_masterObjectType(WILD_CARD()), m_masterPredicate(WILD_CARD()), m_masterRelation(WILD_CARD()),
+        m_tokenName(WILD_CARD()),
         m_staticFilterCount(0), m_lastCycle(0), m_hitCount(0) {
 
       std::string expr;
@@ -68,12 +69,18 @@ namespace EUROPA {
         m_staticFilterCount++;
       }
 
+      if(configData.Attribute("tokenName") != NULL){
+        m_tokenName = configData.Attribute("tokenName");
+        m_staticFilterCount++;
+      }
+
       expr = expr + m_objectType.toString() + "." +
         m_predicate.toString() + "." +
         m_variable.toString() + "." +
         m_masterRelation.toString() + "." +
         m_masterObjectType.toString() + "." +
-        m_masterPredicate.toString();
+        m_masterPredicate.toString(); //+ "." +
+        //m_tokenName.toString(); // TODO: add this and fix regresion tests
 
       setExpression(expr);
     }
@@ -131,5 +138,8 @@ namespace EUROPA {
 
     const LabelStr& MatchingRule::masterRelationFilter() const { return m_masterRelation; }
 
+    bool MatchingRule::filteredByTokenName() const{ return m_tokenName != WILD_CARD(); }
+
+    const LabelStr& MatchingRule::tokenNameFilter() const { return m_tokenName; }
   }
 }

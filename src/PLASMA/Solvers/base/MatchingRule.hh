@@ -64,6 +64,10 @@ namespace EUROPA {
 
       const LabelStr& masterRelationFilter() const;
 
+      bool filteredByTokenName() const;
+
+      const LabelStr& tokenNameFilter() const;
+
       ContextId getContext() {return m_context;}
       void setContext(ContextId ctx) {m_context = ctx;}
     protected:
@@ -80,6 +84,7 @@ namespace EUROPA {
       LabelStr m_masterObjectType;
       LabelStr m_masterPredicate;
       LabelStr m_masterRelation;
+      LabelStr m_tokenName;
       unsigned int m_staticFilterCount; /*!< Count of the number of static filters on this rule */
       unsigned int m_lastCycle; /*!< The last MatchingEngine cycle */
       unsigned int m_hitCount; /*!< Count of hits in the current matching cycle */

@@ -51,7 +51,7 @@ namespace EUROPA {
     MatchingEngineId& MatchingEngine::getId() { return m_id; }
 
     void MatchingEngine::registerRule(const MatchingRuleId& rule){
-      checkError(m_rules.find(rule) == m_rules.end(), rule->toString() << " already regisered.");
+      checkError(m_rules.find(rule) == m_rules.end(), rule->toString() << " already registered.");
       debugMsg("MatchingEngine:registerRule", rule->toString());
 
       m_rules.insert(rule);
@@ -68,12 +68,16 @@ namespace EUROPA {
       addFilter(rule->objectTypeFilter(), rule, m_rulesByObjectType);
       addFilter(rule->predicateFilter(), rule, m_rulesByPredicate);
       addFilter(rule->variableFilter(), rule, m_rulesByVariable);
+      addFilter(rule->masterObjectTypeFilter(), rule, m_rulesByMasterObjectType);
+      addFilter(rule->masterPredicateFilter(), rule, m_rulesByMasterPredicate);
+      addFilter(rule->tokenNameFilter(), rule, m_rulesByTokenName);
 
       if(rule->filteredByMasterRelation()){
         static const LabelStr BEFORE("before");
         static const LabelStr AFTER("after");
         static const LabelStr MEETS("meets");
         static const LabelStr MET_BY("met_by");
+
         const LabelStr& relation = rule->masterRelationFilter();
         addFilter(relation, rule, m_rulesByMasterRelation);
 
@@ -83,10 +87,6 @@ namespace EUROPA {
         else if(relation == AFTER)
           addFilter(MET_BY, rule, m_rulesByMasterRelation);
       }
-
-      addFilter(rule->masterObjectTypeFilter(), rule, m_rulesByMasterObjectType);
-
-      addFilter(rule->masterPredicateFilter(), rule, m_rulesByMasterPredicate);
     }
 
     void MatchingEngine::addFilter(const LabelStr& label, const MatchingRuleId& rule, 
@@ -147,6 +147,56 @@ namespace EUROPA {
       return m_rules.size();
     }
 
+    std::string rulesToString(const std::multimap<edouble, MatchingRuleId>& rules) {
+      std::stringstream str;
+      edouble current = -1.0;
+      for(std::multimap<edouble, MatchingRuleId>::const_iterator it = rules.begin(); it != rules.end(); ++it) {
+        if(it->first != current) {
+          current = it->first;
+          str << "'" << LabelStr(current).toString() << "':" << std::endl;
+        }
+        str << "  " <<it->second->toString() << std::endl;
+      }
+      return str.str();
+    }
+
+    bool matches(MatchingRuleId rule, edouble value, edouble key)
+    {
+    	if (rule->filteredByTokenName()) {
+    		LabelStr valueLbl(value);
+    		LabelStr keyLbl(key);
+    		bool result = keyLbl.toString().find(valueLbl.toString()) != std::string::npos;
+    		debugMsg("MatchingEngine:tokenName", "result=" << result << " key=" << keyLbl.toString() << " value=" << valueLbl.toString());
+    		return result;
+    	}
+    	else
+    		return value==key;
+    }
+
+    void triggerTokenByName(const LabelStr& lbl,
+                            const std::multimap<edouble, MatchingRuleId>& rules,
+                            std::vector<MatchingRuleId>& results)
+    {
+    	debugMsg("MatchingEngine:trigger", "Searching with label " << lbl.toString());
+    	debugMsg("MatchingEngine:verboseTrigger", "Searching in " << std::endl << rulesToString(rules));
+    	unsigned int addedCount = 0;
+    	edouble key = lbl.getKey();
+    	std::multimap<edouble, MatchingRuleId>::const_iterator it = rules.begin();
+    	while(it != rules.end()) {
+    		if (matches(it->second,it->first,key)) {
+    			MatchingRuleId rule = it->second;
+    			if(rule->fire()) {
+    				results.push_back(rule);
+    				addedCount++;
+    			}
+    		}
+    		++it;
+    	}
+
+    	debugMsg("MatchingEngine:trigger",
+    			"Found " << results.size() << " matches for " << lbl.toString() << " so far.  Added " << addedCount);
+    }
+
     /**
      * @brief todo. Fire for all cases
      */
@@ -156,6 +206,11 @@ namespace EUROPA {
       LabelStr unqualifiedName = token->getUnqualifiedPredicateName();
       debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for predicate " << unqualifiedName.toString());
       trigger(unqualifiedName, m_rulesByPredicate, results);
+
+      // Fire for tokenName
+      LabelStr tokenName = token->getName();
+      debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for tokenName " << tokenName.toString());
+      triggerTokenByName(tokenName, m_rulesByTokenName, results);
 
       SchemaId schema = token->getPlanDatabase()->getSchema();
 
@@ -189,7 +244,7 @@ namespace EUROPA {
       unsigned int addedCount = 0;
       edouble key = lbl.getKey();
       std::multimap<edouble, MatchingRuleId>::const_iterator it = rules.find(key);
-      while(it != rules.end() && it->first == key){
+      while(it != rules.end() && it->first==key) {
         MatchingRuleId rule = it->second;
         if(rule->fire()) {
           results.push_back(rule);
@@ -211,19 +266,6 @@ namespace EUROPA {
       }
     }
 
-    std::string MatchingEngine::rulesToString(const std::multimap<edouble, MatchingRuleId>& rules) {
-      std::stringstream str;
-      edouble current = -1.0; 
-      for(std::multimap<edouble, MatchingRuleId>::const_iterator it = rules.begin(); it != rules.end(); ++it) {
-        if(it->first != current) {
-          current = it->first;
-          str << "'" << LabelStr(current).toString() << "':" << std::endl;
-        }
-        str << "  " <<it->second->toString() << std::endl;
-      }
-      return str.str();
-    }
-    
     std::map<edouble, MatchFinderId>& MatchingEngine::getEntityMatchers() 
     { 
         MatchFinderMgr* mfm = (MatchFinderMgr*)m_engine->getComponent("MatchFinderMgr");        
