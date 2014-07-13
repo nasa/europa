@@ -1,0 +1,20 @@
+include(EuropaModule)
+set(internal_dependencies NDDL RulesEngine Solvers TemporalNetwork PlanDatabase ConstraintEngine Utils TinyXml)
+set(internal_components Solvers NDDL)
+set(root_sources ModuleResource.cc)
+set(base_sources FVDetector.cc Instant.cc PSResource.cc Profile.cc ProfilePropagator.cc Resource.cc ResourceTokenRelation.cc Transaction.cc)
+set(component_sources ClosedWorldFVDetector.cc DurativeTokens.cc Edge.cc FlowProfile.cc GenericFVDetector.cc Graph.cc GroundedFVDetector.cc GroundedProfile.cc IncrementalFlowProfile.cc InstantTokens.cc MaxFlow.cc Node.cc OpenWorldFVDetector.cc Reservoir.cc Reusable.cc TimetableProfile.cc Types.cc NDDL/InterpreterResources.cc NDDL/NddlResource.cc Solvers/ResourceMatching.cc Solvers/ResourceThreatDecisionPoint.cc Solvers/ResourceThreatManager.cc)
+set(test_sources module-tests.cc rs-flow-test-module.cc rs-test-module.cc)
+
+common_module_prepends("${base_sources}" "${component_sources}" "${test_sources}" base_sources component_sources test_sources)
+
+declare_module(Resource "${root_sources}" "${base_sources}" "${component_sources}" "${test_sources}" "${internal_dependencies}" "${internal_components}")
+
+file(GLOB test_nddl test/*.nddl)
+file(GLOB test_cfg test/*.cfg)
+file(COPY ${test_nddl} DESTINATION .)
+file(COPY ${test_cfg} DESTINATION .)
+file(GLOB nddl_core ${CMAKE_CURRENT_SOURCE_DIR}/../NDDL/base/*.nddl)
+file(COPY ${nddl_core} DESTINATION .)
+file(GLOB nddl_resource ${CMAKE_CURRENT_SOURCE_DIR}/component/NDDL/*.nddl)
+file(COPY ${nddl_resource} DESTINATION .)

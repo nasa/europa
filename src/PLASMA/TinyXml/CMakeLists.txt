@@ -1,0 +1,15 @@
+#set(TinyXmlLib "TinyXml${EUROPA_SUFFIX}")
+#add_subdirectory(base)
+#add_subdirectory(test)
+include(EuropaModule)
+set(internal_dependencies "")
+#consider globs?
+set(root_sources "")
+#set(base_sources tinystr.cpp tinyxml.cpp tinyxmlerror.cpp tinyxmlparser.cpp)
+set(base_sources tinyxml.cpp tinyxmlerror.cpp tinyxmlparser.cpp)
+set(component_sources "")
+set(test_sources xmltest.cpp)
+common_module_prepends("${base_sources}" "${component_sources}" "${test_sources}" base_sources component_sources test_sources)
+
+add_definitions(-DTIXML_USE_STL=1)
+declare_module(TinyXml "${root_sources}" "${base_sources}" "${component_sources}" "${test_sources}" "${internal_dependencies}" "")

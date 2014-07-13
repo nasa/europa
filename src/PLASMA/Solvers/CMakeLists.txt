@@ -1,0 +1,19 @@
+include(EuropaModule)
+set(internal_dependencies NDDL RulesEngine TemporalNetwork PlanDatabase ConstraintEngine Utils TinyXml)
+set(root_sources ModuleSolvers.cc)
+set(base_sources ComponentFactory.cc Context.cc FlawFilter.cc FlawHandler.cc FlawManager.cc MatchingEngine.cc MatchingRule.cc Solver.cc SolverDecisionPoint.cc SolverUtils.cc)
+set(component_sources Filters.cc HSTSDecisionPoints.cc OpenConditionDecisionPoint.cc OpenConditionManager.cc PSSolversImpl.cc ThreatDecisionPoint.cc ThreatManager.cc UnboundVariableDecisionPoint.cc UnboundVariableManager.cc ValueSource.cc)
+set(test_sources module-tests.cc solvers-test-module.cc)
+
+common_module_prepends("${base_sources}" "${component_sources}" "${test_sources}" base_sources component_sources test_sources)
+
+declare_module(Solvers "${root_sources}" "${base_sources}" "${component_sources}" "${test_sources}" "${internal_dependencies}" "")
+
+file(GLOB test_nddl test/*.nddl)
+file(GLOB test_xml test/*.xml)
+file(GLOB test_config test/*.cfg)
+file(COPY ${test_nddl} DESTINATION .)
+file(COPY ${test_xml} DESTINATION .)
+file(COPY ${test_config} DESTINATION .)
+file(GLOB nddl_core ${CMAKE_CURRENT_SOURCE_DIR}/../NDDL/base/*.nddl)
+file(COPY ${nddl_core} DESTINATION .)
