@@ -147,7 +147,7 @@ namespace EUROPA
 		std::map<std::string,std::string>::iterator next;
 		for (it=m_properties.begin() ; it != m_properties.end(); it++ )
 		{
-			if(!component_nm.compare((*it).first.substr(0,(*it).first.find(".")))==0 && (*it).first.length()>0)
+                  if(!(component_nm.compare((*it).first.substr(0,(*it).first.find(".")))==0 && (*it).first.length()>0))
 			{
 				component_nm = (*it).first.substr(0,(*it).first.find("."));
 				elePtr = new TiXmlElement(COMPONENT);
@@ -160,7 +160,8 @@ namespace EUROPA
 				value = (*it).second;
 				textPtr = new TiXmlText(value.c_str());
 				propPtr->LinkEndChild(textPtr);
-			}else if(component_nm.compare((*it).first.substr(0,(*it).first.find(".")))==0 && (*it).first.length()>0)
+                        }
+                  else
 			{
 				propPtr = new TiXmlElement(PROPERTY);
 				elePtr->LinkEndChild(propPtr);

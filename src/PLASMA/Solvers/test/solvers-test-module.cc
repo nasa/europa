@@ -1,5 +1,5 @@
 #include "solvers-test-module.hh"
-#include "Nddl.hh"
+//#include "Nddl.hh"
 #include "Solver.hh"
 #include "ComponentFactory.hh"
 #include "Constraint.hh"
@@ -301,7 +301,7 @@ private:
 
     // test R3
     {
-      TokenId token = db->getClient()->createToken("D.predicateF", false);
+      TokenId token = db->getClient()->createToken("D.predicateF", NULL, false);
       std::vector<MatchingRuleId> rules;
       me.getMatches(token, rules);
       CPPUNIT_ASSERT_MESSAGE(toString(rules.size()), rules.size() == 2);
@@ -311,7 +311,7 @@ private:
 
     // test R4
     {
-      TokenId token = db->getClient()->createToken("D.predicateC", false);
+      TokenId token = db->getClient()->createToken("D.predicateC", NULL, false);
       std::vector<MatchingRuleId> rules;
       me.getMatches(token->getVariable("arg6"), rules);
       CPPUNIT_ASSERT_MESSAGE(toString(rules.size()), rules.size() == 2);
@@ -321,7 +321,7 @@ private:
 
     // test R5 & R6
     {
-      TokenId token = db->getClient()->createToken("C.predicateC", false);
+      TokenId token = db->getClient()->createToken("C.predicateC", NULL, false);
       std::vector<MatchingRuleId> rules;
       me.getMatches(token, rules);
       CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getUnqualifiedPredicateName().toString(), rules.size() == 3);
@@ -332,7 +332,7 @@ private:
 
     // test R6
     {
-      TokenId token = db->getClient()->createToken("C.predicateA", false);
+      TokenId token = db->getClient()->createToken("C.predicateA", NULL, false);
       std::vector<MatchingRuleId> rules;
       me.getMatches(token, rules);
       CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getUnqualifiedPredicateName().toString(), rules.size() == 2);
@@ -342,7 +342,7 @@ private:
 
     // test R7
     {
-      TokenId token = db->getClient()->createToken("D.predicateF", false);
+      TokenId token = db->getClient()->createToken("D.predicateF", NULL, false);
       token->activate();
       TokenId E_predicateC = *(token->slaves().begin());
       std::vector<MatchingRuleId> rules;
@@ -354,7 +354,7 @@ private:
 
     // test R7a
     {
-      TokenId token = db->getClient()->createToken("E.predicateC", false);
+      TokenId token = db->getClient()->createToken("E.predicateC", NULL, false);
       std::vector<MatchingRuleId> rules;
       me.getMatches(ConstrainedVariableId(token->duration()), rules);
       CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getPredicateName().toString(), rules.size() == 2);
@@ -364,7 +364,7 @@ private:
 
     // test R8
     {
-      TokenId token = db->getClient()->createToken("B.predicateC", false);
+      TokenId token = db->getClient()->createToken("B.predicateC", NULL, false);
       token->activate();
       TokenId E_predicateC = *(token->slaves().begin());
       std::vector<MatchingRuleId> rules;
@@ -377,7 +377,7 @@ private:
 
     // test R*, R9 and R10
     {
-      TokenId token = db->getClient()->createToken("D.predicateG", false);
+      TokenId token = db->getClient()->createToken("D.predicateG", NULL, false);
       token->activate();
       TokenId E_predicateC = *(token->slaves().begin());
 
@@ -565,7 +565,7 @@ private:
 
     // test H3
     {
-      TokenId token = db->getClient()->createToken("D.predicateG", false);
+      TokenId token = db->getClient()->createToken("D.predicateG", NULL, false);
       token->activate();
       TokenId E_predicateC = *(token->slaves().begin());
       std::vector<MatchingRuleId> rules;
@@ -594,7 +594,7 @@ private:
 
     // test H0
     {
-      TokenId token = db->getClient()->createToken("D.predicateG", false);
+      TokenId token = db->getClient()->createToken("D.predicateG", NULL, false);
       std::vector<MatchingRuleId> rules;
       me.getMatches(token, rules);
       CPPUNIT_ASSERT_MESSAGE(toString(rules.size()), rules.size() == 1);
@@ -614,7 +614,7 @@ private:
 
     // test H1
     {
-      TokenId token = db->getClient()->createToken("C.predicateA", false);
+      TokenId token = db->getClient()->createToken("C.predicateA", NULL, false);
       std::vector<MatchingRuleId> rules;
       me.getMatches(token, rules);
       CPPUNIT_ASSERT_MESSAGE(toString(rules.size()), rules.size() == 1);
@@ -626,7 +626,7 @@ private:
 
     // test H2
     {
-      TokenId token = db->getClient()->createToken("B.predicateC", false);
+      TokenId token = db->getClient()->createToken("B.predicateC", NULL, false);
       {
         std::vector<MatchingRuleId> rules;
         me.getMatches(token, rules);
@@ -680,7 +680,7 @@ private:
 
     // test basic flaw filtering and default handler access
     {
-      TokenId token = db->getClient()->createToken("D.predicateG", false);
+      TokenId token = db->getClient()->createToken("D.predicateG", NULL, false);
       db->getConstraintEngine()->propagate();
       // Initially the token is in scope and the variable is not
       CPPUNIT_ASSERT(solver.inScope(token));
@@ -734,7 +734,7 @@ private:
 
     // Now handle a case with increasingly restrictive filters
     {
-      TokenId master = db->getClient()->createToken("D.predicateF", false);
+      TokenId master = db->getClient()->createToken("D.predicateF", NULL, false);
       db->getConstraintEngine()->propagate();
       master->activate();
       TokenId slave = master->getSlave(1);

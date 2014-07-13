@@ -190,7 +190,8 @@ namespace EUROPA {
     // int domainType = domain.getType(); // Unused; see below.
 
     // Iterate over, restricting domain as we go.
-    for (std::set<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it) {
+    for (std::set<ConstrainedVariableId>::const_iterator it = scope.begin(); 
+         it != scope.end(); ++it) {
       Domain& currentDomain = EqualConstraint::getCurrentDomain(*it);
 
       // This next check is incorrect: could be false when they can be
@@ -213,8 +214,11 @@ namespace EUROPA {
       // What if the domains are (numeric) [-Inf Inf] and (integer) [0 1] ?
       // This would appear to incorrectly provoke an inconsistency in that case.
       // --wedgingt@ptolemy.arc.nasa.gov 2004 Apr 22
-      if (currentDomain.isFinite() != isFinite ||
-          domain.intersect(currentDomain) && domain.isEmpty()) {
+      //
+      //I don't even know what this is supposed to express.  It seems wrong in every case.
+      //I'm adding parens here in the most sensible-ish place to quiet a warning. ~MJI
+      if ((currentDomain.isFinite() != isFinite ||
+           domain.intersect(currentDomain)) && domain.isEmpty()) {
         currentDomain.empty();
         return;
       }

@@ -57,7 +57,7 @@ const LabelStr& ObjectType::getName() const
     return m_name;
 }
 
-const std::string ObjectType::getNameString() const {
+const std::string& ObjectType::getNameString() const {
 	return m_name.toString();
 }
 
@@ -66,7 +66,7 @@ const ObjectTypeId& ObjectType::getParent() const
     return m_parent;
 }
 
-const std::string ObjectType::getParentName() const {
+const std::string& ObjectType::getParentName() const {
 	if (m_parent.isNoId())
 		  return "";
 	return m_parent->getNameString();

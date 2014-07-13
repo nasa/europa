@@ -12,6 +12,8 @@
 #include "DomainListener.hh"
 #include <math.h>
 #include <cmath>
+#include <algorithm>
+#include <iterator>
 
 
 namespace EUROPA {
@@ -239,20 +241,22 @@ namespace EUROPA {
   }
 
   bool EnumeratedDomain::isMember(edouble value) const {
-	  if (m_values.empty())
-		  return false;
-	  std::set<edouble>::const_iterator it = m_values.lower_bound(value);
-	  // If we get a hit - the entry >= value
-	  if (it != m_values.end()) {
-		  edouble elem = *it;
-		  // Try fast compare first, then epsilon safe version
-		  if (value == elem || compareEqual(value, elem))
-			  return true;
-		  --it;
-		  // Before giving up, see if prior position is within epsilon
-		  return it != m_values.end() && compareEqual(value, *it);
-	  }
-	  return false;
+    if (m_values.empty())
+      return false;
+    std::set<edouble>::const_iterator it = m_values.lower_bound(value);
+    // If we get a hit - the entry >= value
+    if (it != m_values.end()) {
+      edouble elem = *it;
+      // Try fast compare first, then epsilon safe version
+      if (value == elem || compareEqual(value, elem))
+        return true;
+      if(it != m_values.begin()) {
+        --it;
+        // Before giving up, see if prior position is within epsilon
+        return it != m_values.end() && compareEqual(value, *it);
+      }
+    }
+    return false;
   }
 
 
@@ -968,11 +972,20 @@ namespace EUROPA {
       notifyChange(DomainListener::EMPTIED);
   }
 
+namespace {
+std::list<edouble> convert(const std::list<LabelStr>& values) {
+  std::list<edouble> retval;
+  std::transform(values.begin(), values.end(), std::back_inserter(retval), std::mem_fun_ref(&LabelStr::getKey));
+  return retval;
+}
+}
+
   StringDomain::StringDomain(const DataTypeId& dt) : EnumeratedDomain(dt) {}
   StringDomain::StringDomain(edouble value, const DataTypeId& dt) : EnumeratedDomain(dt,value) {}
   StringDomain::StringDomain(double value, const DataTypeId& dt) : EnumeratedDomain(dt,value) {}
   StringDomain::StringDomain(const std::string& value, const DataTypeId& dt) : EnumeratedDomain(dt,LabelStr(value)) {}
   StringDomain::StringDomain(const std::list<edouble>& values, const DataTypeId& dt) : EnumeratedDomain(dt,values) {}
+StringDomain::StringDomain(const std::list<LabelStr>& values, const DataTypeId& dt) : EnumeratedDomain(dt, convert(values)) {}
 
   StringDomain::StringDomain(const Domain& org) : EnumeratedDomain(org) {}
 

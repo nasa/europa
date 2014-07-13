@@ -431,7 +431,7 @@ namespace EUROPA {
       IntervalIntDomain dom1;
       CPPUNIT_ASSERT(dom1.translateNumber(2.8, false) == 2);
       CPPUNIT_ASSERT(dom1.translateNumber(2.8, true) == 3);
-      CPPUNIT_ASSERT(dom1.translateNumber(PLUS_INFINITY - 0.2, false) == PLUS_INFINITY);
+      CPPUNIT_ASSERT(dom1.translateNumber((PLUS_INFINITY - 0.2), false) == PLUS_INFINITY);
       CPPUNIT_ASSERT(dom1.translateNumber(PLUS_INFINITY - 0.2, true) == PLUS_INFINITY);
       CPPUNIT_ASSERT(dom1.translateNumber(PLUS_INFINITY - 0.2, false) == (PLUS_INFINITY - 1));
       CPPUNIT_ASSERT(dom1.translateNumber(PLUS_INFINITY - 0.2, false) == PLUS_INFINITY - 1);

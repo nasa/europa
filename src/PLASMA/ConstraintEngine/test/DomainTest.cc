@@ -66,214 +66,214 @@ static void outerLoopForTestEquate() {
 }
 
 static void testLabelSetEqualityPerformance(const ConstraintEngineId& ce) {
-  std::list<EUROPA::LabelStr> values;
-  values.push_back(EUROPA::LabelStr("V0"));
-  values.push_back(EUROPA::LabelStr("V1"));
-  values.push_back(EUROPA::LabelStr("V2"));
-  values.push_back(EUROPA::LabelStr("V3"));
-  values.push_back(EUROPA::LabelStr("V4"));
-  values.push_back(EUROPA::LabelStr("V5"));
-  values.push_back(EUROPA::LabelStr("V6"));
-  values.push_back(EUROPA::LabelStr("V7"));
-  values.push_back(EUROPA::LabelStr("V8"));
-  values.push_back(EUROPA::LabelStr("V9"));
-  LabelSet labelSet(values);
+  // std::list<EUROPA::LabelStr> values;
+  // values.push_back(EUROPA::LabelStr("V0"));
+  // values.push_back(EUROPA::LabelStr("V1"));
+  // values.push_back(EUROPA::LabelStr("V2"));
+  // values.push_back(EUROPA::LabelStr("V3"));
+  // values.push_back(EUROPA::LabelStr("V4"));
+  // values.push_back(EUROPA::LabelStr("V5"));
+  // values.push_back(EUROPA::LabelStr("V6"));
+  // values.push_back(EUROPA::LabelStr("V7"));
+  // values.push_back(EUROPA::LabelStr("V8"));
+  // values.push_back(EUROPA::LabelStr("V9"));
+  // LabelSet labelSet(values);
 
 
-  Variable<LabelSet> v0(ce, labelSet);
-  Variable<LabelSet> v1(ce, labelSet);
-  Variable<LabelSet> v2(ce, labelSet);
-  Variable<LabelSet> v3(ce, labelSet);
-  Variable<LabelSet> v4(ce, labelSet);
-  Variable<LabelSet> v5(ce, labelSet);
-  Variable<LabelSet> v6(ce, labelSet);
-  Variable<LabelSet> v7(ce, labelSet);
-  Variable<LabelSet> v8(ce, labelSet);
-  Variable<LabelSet> v9(ce, labelSet);
+  // Variable<LabelSet> v0(ce, labelSet);
+  // Variable<LabelSet> v1(ce, labelSet);
+  // Variable<LabelSet> v2(ce, labelSet);
+  // Variable<LabelSet> v3(ce, labelSet);
+  // Variable<LabelSet> v4(ce, labelSet);
+  // Variable<LabelSet> v5(ce, labelSet);
+  // Variable<LabelSet> v6(ce, labelSet);
+  // Variable<LabelSet> v7(ce, labelSet);
+  // Variable<LabelSet> v8(ce, labelSet);
+  // Variable<LabelSet> v9(ce, labelSet);
 
-  std::vector<ConstrainedVariableId> variables;
+  // std::vector<ConstrainedVariableId> variables;
 
-  variables.push_back(v0.getId());
-  variables.push_back(v1.getId());
-  EqualConstraint c0(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
+  // variables.push_back(v0.getId());
+  // variables.push_back(v1.getId());
+  // EqualConstraint c0(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
-  variables.clear();
-  variables.push_back(v1.getId());
-  variables.push_back(v2.getId());
-  EqualConstraint c1(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
+  // variables.clear();
+  // variables.push_back(v1.getId());
+  // variables.push_back(v2.getId());
+  // EqualConstraint c1(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
-  variables.clear();
-  variables.push_back(v2.getId());
-  variables.push_back(v3.getId());
-  EqualConstraint c2(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
+  // variables.clear();
+  // variables.push_back(v2.getId());
+  // variables.push_back(v3.getId());
+  // EqualConstraint c2(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
-  variables.clear();
-  variables.push_back(v3.getId());
-  variables.push_back(v4.getId());
-  EqualConstraint c3(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
+  // variables.clear();
+  // variables.push_back(v3.getId());
+  // variables.push_back(v4.getId());
+  // EqualConstraint c3(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
-  variables.clear();
-  variables.push_back(v4.getId());
-  variables.push_back(v5.getId());
-  EqualConstraint c4(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
+  // variables.clear();
+  // variables.push_back(v4.getId());
+  // variables.push_back(v5.getId());
+  // EqualConstraint c4(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
-  variables.clear();
-  variables.push_back(v5.getId());
-  variables.push_back(v6.getId());
-  EqualConstraint c5(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
+  // variables.clear();
+  // variables.push_back(v5.getId());
+  // variables.push_back(v6.getId());
+  // EqualConstraint c5(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
-  variables.clear();
-  variables.push_back(v6.getId());
-  variables.push_back(v7.getId());
-  EqualConstraint c6(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
+  // variables.clear();
+  // variables.push_back(v6.getId());
+  // variables.push_back(v7.getId());
+  // EqualConstraint c6(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
-  variables.clear();
-  variables.push_back(v7.getId());
-  variables.push_back(v8.getId());
-  EqualConstraint c7(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
+  // variables.clear();
+  // variables.push_back(v7.getId());
+  // variables.push_back(v8.getId());
+  // EqualConstraint c7(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
-  variables.clear();
-  variables.push_back(v8.getId());
-  variables.push_back(v9.getId());
-  EqualConstraint c8(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
+  // variables.clear();
+  // variables.push_back(v8.getId());
+  // variables.push_back(v9.getId());
+  // EqualConstraint c8(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
-  variables.clear();
-  variables.push_back(v0.getId());
-  variables.push_back(v1.getId());
-  variables.push_back(v2.getId());
-  variables.push_back(v3.getId());
-  variables.push_back(v4.getId());
-  variables.push_back(v5.getId());
-  variables.push_back(v6.getId());
-  variables.push_back(v7.getId());
-  variables.push_back(v8.getId());
-  variables.push_back(v9.getId());
+  // variables.clear();
+  // variables.push_back(v0.getId());
+  // variables.push_back(v1.getId());
+  // variables.push_back(v2.getId());
+  // variables.push_back(v3.getId());
+  // variables.push_back(v4.getId());
+  // variables.push_back(v5.getId());
+  // variables.push_back(v6.getId());
+  // variables.push_back(v7.getId());
+  // variables.push_back(v8.getId());
+  // variables.push_back(v9.getId());
 
-  Variable<LabelSet>*  p_v0 = (Variable<LabelSet>*) v0.getId();
+  // Variable<LabelSet>*  p_v0 = (Variable<LabelSet>*) v0.getId();
 
 
-  for(int i = 10; i > 2; i--){
-    values.pop_back();
-    LabelSet newDomain(values);
-    Variable<LabelSet>*  p_v = (Variable<LabelSet>*) variables[i-1];
-    p_v->specify(newDomain);
-    ce->propagate();
-    CPPUNIT_ASSERT(ce->constraintConsistent());
-    CPPUNIT_ASSERT(p_v0->getDerivedDomain().getSize() == i-1);
-  }
+  // for(int i = 10; i > 2; i--){
+  //   values.pop_back();
+  //   LabelSet newDomain(values);
+  //   Variable<LabelSet>*  p_v = (Variable<LabelSet>*) variables[i-1];
+  //   p_v->specify(newDomain);
+  //   ce->propagate();
+  //   CPPUNIT_ASSERT(ce->constraintConsistent());
+  //   CPPUNIT_ASSERT(p_v0->getDerivedDomain().getSize() == i-1);
+  // }
 }
 
 static void outerLoopLabelSetEqualConstraint(bool useEquivalenceClasses) {
-  ConstraintEngine ce;
+  // ConstraintEngine ce;
 
-  if (useEquivalenceClasses)
-    new EqualityConstraintPropagator(LabelStr("Equal"), ce.getId());
-  else
-    new DefaultPropagator(LabelStr("Equal"), ce.getId());
+  // if (useEquivalenceClasses)
+  //   new EqualityConstraintPropagator(LabelStr("Equal"), ce.getId());
+  // else
+  //   new DefaultPropagator(LabelStr("Equal"), ce.getId());
 
-  for (int i = 0; i < 1000; i++)
-    testLabelSetEqualityPerformance(ce.getId());
+  // for (int i = 0; i < 1000; i++)
+  //   testLabelSetEqualityPerformance(ce.getId());
 }
 
 static void testIntervalEqualityPerformance(const ConstraintEngineId& ce) {
-  IntervalIntDomain intSort(-1000, 1000);
-  Variable<IntervalIntDomain> v0(ce, intSort);
-  Variable<IntervalIntDomain> v1(ce, intSort);
-  Variable<IntervalIntDomain> v2(ce, intSort);
-  Variable<IntervalIntDomain> v3(ce, intSort);
-  Variable<IntervalIntDomain> v4(ce, intSort);
-  Variable<IntervalIntDomain> v5(ce, intSort);
-  Variable<IntervalIntDomain> v6(ce, intSort);
-  Variable<IntervalIntDomain> v7(ce, intSort);
-  Variable<IntervalIntDomain> v8(ce, intSort);
-  Variable<IntervalIntDomain> v9(ce, intSort);
+  // IntervalIntDomain intSort(-1000, 1000);
+  // Variable<IntervalIntDomain> v0(ce, intSort);
+  // Variable<IntervalIntDomain> v1(ce, intSort);
+  // Variable<IntervalIntDomain> v2(ce, intSort);
+  // Variable<IntervalIntDomain> v3(ce, intSort);
+  // Variable<IntervalIntDomain> v4(ce, intSort);
+  // Variable<IntervalIntDomain> v5(ce, intSort);
+  // Variable<IntervalIntDomain> v6(ce, intSort);
+  // Variable<IntervalIntDomain> v7(ce, intSort);
+  // Variable<IntervalIntDomain> v8(ce, intSort);
+  // Variable<IntervalIntDomain> v9(ce, intSort);
 
-  std::vector<ConstrainedVariableId> variables;
+  // std::vector<ConstrainedVariableId> variables;
 
-  variables.push_back(v0.getId());
-  variables.push_back(v1.getId());
-  EqualConstraint c0(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
+  // variables.push_back(v0.getId());
+  // variables.push_back(v1.getId());
+  // EqualConstraint c0(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
-  variables.clear();
-  variables.push_back(v1.getId());
-  variables.push_back(v2.getId());
-  EqualConstraint c1(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
+  // variables.clear();
+  // variables.push_back(v1.getId());
+  // variables.push_back(v2.getId());
+  // EqualConstraint c1(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
-  variables.clear();
-  variables.push_back(v2.getId());
-  variables.push_back(v3.getId());
-  EqualConstraint c2(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
+  // variables.clear();
+  // variables.push_back(v2.getId());
+  // variables.push_back(v3.getId());
+  // EqualConstraint c2(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
-  variables.clear();
-  variables.push_back(v3.getId());
-  variables.push_back(v4.getId());
-  EqualConstraint c3(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
+  // variables.clear();
+  // variables.push_back(v3.getId());
+  // variables.push_back(v4.getId());
+  // EqualConstraint c3(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
-  variables.clear();
-  variables.push_back(v4.getId());
-  variables.push_back(v5.getId());
-  EqualConstraint c4(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
+  // variables.clear();
+  // variables.push_back(v4.getId());
+  // variables.push_back(v5.getId());
+  // EqualConstraint c4(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
-  variables.clear();
-  variables.push_back(v5.getId());
-  variables.push_back(v6.getId());
-  EqualConstraint c5(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
+  // variables.clear();
+  // variables.push_back(v5.getId());
+  // variables.push_back(v6.getId());
+  // EqualConstraint c5(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
-  variables.clear();
-  variables.push_back(v6.getId());
-  variables.push_back(v7.getId());
-  EqualConstraint c6(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
+  // variables.clear();
+  // variables.push_back(v6.getId());
+  // variables.push_back(v7.getId());
+  // EqualConstraint c6(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
-  variables.clear();
-  variables.push_back(v7.getId());
-  variables.push_back(v8.getId());
-  EqualConstraint c7(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
+  // variables.clear();
+  // variables.push_back(v7.getId());
+  // variables.push_back(v8.getId());
+  // EqualConstraint c7(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
-  variables.clear();
-  variables.push_back(v8.getId());
-  variables.push_back(v9.getId());
-  EqualConstraint c8(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
+  // variables.clear();
+  // variables.push_back(v8.getId());
+  // variables.push_back(v9.getId());
+  // EqualConstraint c8(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
-  variables.clear();
-  variables.push_back(v0.getId());
-  variables.push_back(v1.getId());
-  variables.push_back(v2.getId());
-  variables.push_back(v3.getId());
-  variables.push_back(v4.getId());
-  variables.push_back(v5.getId());
-  variables.push_back(v6.getId());
-  variables.push_back(v7.getId());
-  variables.push_back(v8.getId());
-  variables.push_back(v9.getId());
+  // variables.clear();
+  // variables.push_back(v0.getId());
+  // variables.push_back(v1.getId());
+  // variables.push_back(v2.getId());
+  // variables.push_back(v3.getId());
+  // variables.push_back(v4.getId());
+  // variables.push_back(v5.getId());
+  // variables.push_back(v6.getId());
+  // variables.push_back(v7.getId());
+  // variables.push_back(v8.getId());
+  // variables.push_back(v9.getId());
 
-  Variable<IntervalIntDomain>*  p_v0 = (Variable<IntervalIntDomain>*) v0.getId();
+  // Variable<IntervalIntDomain>*  p_v0 = (Variable<IntervalIntDomain>*) v0.getId();
 
-  int lb = -1000;
-  int ub = 1000;
+  // int lb = -1000;
+  // int ub = 1000;
 
-  for (int i = 10; i > 2; i--) {
-    lb += 100;
-    ub -= 100;
-    IntervalIntDomain newDomain(lb, ub);
-    Variable<IntervalIntDomain>* p_v = (Variable<IntervalIntDomain>*) variables[i-1];
-    p_v->specify(newDomain);
-    ce->propagate();
-    CPPUNIT_ASSERT(ce->constraintConsistent());
-    CPPUNIT_ASSERT(p_v0->getDerivedDomain().getUpperBound() == ub);
-    CPPUNIT_ASSERT(p_v0->getDerivedDomain().getLowerBound() == lb);
-  }
+  // for (int i = 10; i > 2; i--) {
+  //   lb += 100;
+  //   ub -= 100;
+  //   IntervalIntDomain newDomain(lb, ub);
+  //   Variable<IntervalIntDomain>* p_v = (Variable<IntervalIntDomain>*) variables[i-1];
+  //   p_v->specify(newDomain);
+  //   ce->propagate();
+  //   CPPUNIT_ASSERT(ce->constraintConsistent());
+  //   CPPUNIT_ASSERT(p_v0->getDerivedDomain().getUpperBound() == ub);
+  //   CPPUNIT_ASSERT(p_v0->getDerivedDomain().getLowerBound() == lb);
+  // }
 }
 
 static void outerLoopIntervalEqualConstraint(bool useEquivalenceClasses) {
-  ConstraintEngine ce;
+  // ConstraintEngine ce;
 
-  if (useEquivalenceClasses)
-    new EqualityConstraintPropagator(LabelStr("Equal"), ce.getId());
-  else
-    new DefaultPropagator(LabelStr("Equal"), ce.getId());
+  // if (useEquivalenceClasses)
+  //   new EqualityConstraintPropagator(LabelStr("Equal"), ce.getId());
+  // else
+  //   new DefaultPropagator(LabelStr("Equal"), ce.getId());
 
-  for (int i = 0; i < 1000; i++)
-    testIntervalEqualityPerformance(ce.getId());
+  // for (int i = 0; i < 1000; i++)
+  //   testIntervalEqualityPerformance(ce.getId());
 }
 
 int main() {

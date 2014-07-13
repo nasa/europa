@@ -16,6 +16,8 @@
 #  if (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4))
 #    if (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)
 #      include <backward/hash_fun.h>
+#    elif (__GNUC__ == 4 && __GNUC_MINOR__ == 2 && __GNUC_PATCHLEVEL__ == 1)
+#      include <ext/__hash>
 #    else
 #      include <ext/hash_fun.h>
 #    endif

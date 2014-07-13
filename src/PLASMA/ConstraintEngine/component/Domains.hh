@@ -573,6 +573,7 @@ namespace EUROPA {
     StringDomain(double value, const DataTypeId& dt = StringDT::instance());
     StringDomain(const std::string& value, const DataTypeId& dt = StringDT::instance());
     StringDomain(const std::list<edouble>& values, const DataTypeId& dt = StringDT::instance());
+    StringDomain(const std::list<LabelStr>& values, const DataTypeId& dt = StringDT::instance());
     StringDomain(const Domain& org);
 
     virtual StringDomain *copy() const;

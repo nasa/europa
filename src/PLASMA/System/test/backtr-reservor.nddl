@@ -12,7 +12,7 @@
 
 
 //*****************************************************************
-class Battery extends Resource {
+class Battery extends Reservoir {
    Battery( float ic, float ll_min, float ll_max,
 			float prod_max, float prod_Rmax, float cons_max, float cons_Rmax) {
       super(ic, ll_min, ll_max, prod_max, prod_Rmax, cons_max, cons_Rmax );

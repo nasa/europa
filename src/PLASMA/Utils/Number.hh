@@ -42,10 +42,10 @@
  * Pre-declarations.
  */
 
-#define MAX_COPY max
-#define MIN_COPY min
-#undef min
-#undef max
+// #define MAX_COPY max
+// #define MIN_COPY min
+// #undef min
+// #undef max
 
 namespace EUROPA {
   class eint;
@@ -98,11 +98,14 @@ namespace std {
     static const bool is_iec559 = false;
     static const bool is_bounded = true;
     static const bool is_modulo = false;
+#if 0
 #ifdef _MSC_VER
     static const bool traps = numeric_limits<long>::traps;
 #else
     static const bool traps = __glibcxx_integral_traps;
 #endif //_MSC_VER
+#endif //0
+    static const bool traps = numeric_limits<long>::traps;
     static const bool tinyness_before = false;
     static const float_round_style round_style = round_toward_zero;
 
@@ -159,11 +162,14 @@ namespace std {
     static const bool is_iec559 = has_infinity && has_quiet_NaN && has_denorm == denorm_present;
     static const bool is_bounded = true;
     static const bool is_modulo = false;
+#if 0
 #ifdef _MSC_VER
     static const bool traps = numeric_limits<float>::traps;
 #else
     static const bool traps = __glibcxx_integral_traps;
 #endif //_MSC_VER
+#endif //0
+    static const bool traps = numeric_limits<double>::traps;
     static const bool tinyness_before = numeric_limits<double>::tinyness_before;
     static const float_round_style round_style = round_to_nearest;
 
@@ -447,12 +453,20 @@ namespace EUROPA {
     inline eint operator++(int) {handle_inf_unary(eint, m_v); return eint(m_v++, true);}
     inline eint operator--() {handle_inf_unary(eint, m_v); return eint(--m_v, true);}
     inline eint operator--(int) {handle_inf_unary(eint, m_v); return eint(m_v--, true);}
+    inline eint operator+(const int o) const {handle_inf_add(eint, m_v, o); op(eint, m_v, +, o);}
+    inline eint operator+(const unsigned long o) const {handle_inf_add(eint, m_v, o); op(eint, m_v, +, o);}
     inline eint operator+(const basis_type o) const {handle_inf_add(eint, m_v, o); op(eint, m_v, +, o);}
     inline eint operator+(const eint o) const {return operator+(o.m_v);}
+    inline eint operator-(const int o) const {handle_inf_sub(eint, m_v, o); op(eint, m_v, -, o);}
+    inline eint operator-(const unsigned long o) const {handle_inf_sub(eint, m_v, o); op(eint, m_v, -, o);}
     inline eint operator-(const basis_type o) const {handle_inf_sub(eint, m_v, o); op(eint, m_v, -, o);}
     inline eint operator-(const eint o) const {return operator-(o.m_v);}
+    inline eint operator*(const int o) const {handle_inf_mul(eint, m_v, o); op(eint, m_v, *, o);}
+    inline eint operator*(const unsigned long o) const {handle_inf_mul(eint, m_v, o); op(eint, m_v, *, o);}
     inline eint operator*(const basis_type o) const {handle_inf_mul(eint, m_v, o); op(eint, m_v, *, o);}
     inline eint operator*(const eint o) const {return operator*(o.m_v);}
+    inline eint operator/(const int o) const {handle_inf_div(eint, m_v, o); op(eint, m_v, /, o);}
+    inline eint operator/(const unsigned long o) const {handle_inf_mul(eint, m_v, o); op(eint, m_v, *, o);}
     inline eint operator/(const basis_type o) const {handle_inf_div(eint, m_v, o); op(eint, m_v, /, o);}
     inline eint operator/(const eint o) const {return operator/(o.m_v);}
 
@@ -494,6 +508,10 @@ namespace EUROPA {
     inline edouble operator-(const edouble o) const;
     inline edouble operator*(const edouble o) const;
     inline edouble operator/(const edouble o) const;
+    inline edouble operator+(const double o) const;
+    inline edouble operator-(const double o) const;
+    inline edouble operator*(const double o) const;
+    inline edouble operator/(const double o) const;
     inline bool operator<(const double o) const;
     inline bool operator<(const edouble o) const;
     inline bool operator<=(const double o) const;
@@ -666,6 +684,10 @@ namespace EUROPA {
   edouble eint::operator-(const edouble o) const {handle_inf_sub(edouble, m_v, o.m_v); op(edouble, (double)m_v, -, o.m_v);}
   edouble eint::operator*(const edouble o) const {handle_inf_mul(edouble, m_v, o.m_v); op(edouble, (double)m_v, *, o.m_v);}
   edouble eint::operator/(const edouble o) const {handle_inf_div(edouble, m_v, o.m_v); op(edouble, (double)m_v, /, o.m_v);}
+  edouble eint::operator+(const double o) const {handle_inf_add(edouble, m_v, o); op(edouble, (double)m_v, +, o);}
+  edouble eint::operator-(const double o) const {handle_inf_sub(edouble, m_v, o); op(edouble, (double)m_v, -, o);}
+  edouble eint::operator*(const double o) const {handle_inf_mul(edouble, m_v, o); op(edouble, (double)m_v, *, o);}
+  edouble eint::operator/(const double o) const {handle_inf_div(edouble, m_v, o); op(edouble, (double)m_v, /, o);}
   bool eint::operator<(const edouble o) const {return m_v < o.m_v;}
   bool eint::operator<=(const edouble o) const {return m_v <= o.m_v;}
   bool eint::operator==(const edouble o) const {return m_v == o.m_v;}
@@ -791,7 +813,7 @@ namespace __gnu_cxx
 }
 #endif //_MSC_VER
 
-#define min MIN_COPY
-#define max MAX_COPY
+// #define min MIN_COPY
+// #define max MAX_COPY
 
 #endif /* _H_Number */

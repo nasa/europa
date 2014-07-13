@@ -1914,8 +1914,11 @@ private:
     std::vector< std::vector<IntervalTokenId> > tokens;
 
     // Add parameters to schema
-    for(int i=0;i< UNIFIED; i++)
-      schema->addMember(LabelStr(DEFAULT_PREDICATE), IntDT::NAME(), LabelStr("P" + i).c_str());
+    for(int i=0;i< UNIFIED; i++) {
+      std::stringstream str;
+      str << "P" << i;
+      schema->addMember(LabelStr(DEFAULT_PREDICATE), IntDT::NAME(), LabelStr(str.str()).c_str());
+    }
 
     for (int i=0; i < NUMTOKS; i++) {
       std::vector<IntervalTokenId> tmp;
@@ -1928,8 +1931,11 @@ private:
                                                IntervalIntDomain(0, 220),
                                                IntervalIntDomain(1, 110),
                                                Token::noObject(), false))->getId();
-        for (int k=0; k < NUMPARAMS; k++)
-          t->addParameter(IntervalIntDomain(500+j,1000), LabelStr("P" + k).c_str());
+        for (int k=0; k < NUMPARAMS; k++) {
+          std::stringstream str;
+          str << "P" << k;
+          t->addParameter(IntervalIntDomain(500+j,1000), LabelStr(str.str()).c_str());
+        }
         t->close();
         tmp.push_back(t);
       }
@@ -4313,24 +4319,30 @@ public:
     ConstrainedVariableSet allVars = s_ce->getVariables();
     ConstrainedVariableSet::iterator varIter = allVars.begin();
     ConstrainedVariableId g_int2, g_float2, g_location2;
-    for ( ; varIter != allVars.end(); varIter++)
-      if ((*varIter)->getName() == LabelStr("g_int"))
+    for ( ; varIter != allVars.end(); varIter++) {
+      if ((*varIter)->getName() == LabelStr("g_int")) {
         if (sg_int.isNoId())
           sg_int = *varIter;
         else
           g_int2 = *varIter;
-      else
-        if ((*varIter)->getName() == LabelStr("g_float"))
+      }
+      else {
+        if ((*varIter)->getName() == LabelStr("g_float")) {
           if (sg_float.isNoId())
             sg_float = *varIter;
           else
             g_float2 = *varIter;
-        else
-          if ((*varIter)->getName() == LabelStr("g_location"))
+        }
+        else {
+          if ((*varIter)->getName() == LabelStr("g_location")) {
             if (sg_location.isNoId())
               sg_location = *varIter;
             else
               g_location2 = *varIter;
+          }
+        }
+      }
+    }
 
     CPPUNIT_ASSERT(!sg_int.isNoId() && sg_int.isValid());
     CPPUNIT_ASSERT(sg_int->lastDomain() == IntervalIntDomain());
@@ -5081,7 +5093,7 @@ public:
     TokenId three, four;
     tokens.erase(one);
     tokens.erase(two);
-    three = *(--tokens.rbegin());
+    three = *(++tokens.rbegin());
     tokens.erase(three);
     four = *(tokens.rbegin());
     CPPUNIT_ASSERT(three->getObject()->derivedDomain().isSingleton());

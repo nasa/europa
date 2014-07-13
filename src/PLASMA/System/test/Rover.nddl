@@ -1,6 +1,6 @@
 #include "Resources.nddl"
 
-class Battery extends Resource {
+class Battery extends Reservoir {
   Battery(float ic, float ll_min, float ll_max){
    super(ic, ll_min, ll_max, 0.0, 0.0, -inff, -inff);
   }
@@ -67,7 +67,7 @@ Navigator::Going{
  eq(p.to, to);
 
  // Pull juice from the battery. Should be based on path length.
- starts(Battery.change tx);
+ starts(Battery.consume tx);
  eq(tx.quantity, p.cost);
 }
 
@@ -108,7 +108,7 @@ Instrument::TakeSample{
  // Succeded by stowing the instrument
  meets(Stow c);
 
- starts(Battery.change tx);
+ starts(Battery.consume tx);
  eq(tx.quantity, -120);
 }
 
@@ -122,7 +122,7 @@ Instrument::Place{
  eq(a.rock, rock);
  met_by(Unstow b);
 
- starts(Battery.change tx);
+ starts(Battery.consume tx);
  eq(tx.quantity, -20);
 }
 
@@ -134,7 +134,7 @@ Instrument::Unstow{
  meets(Place a);
  met_by(Stowed b);
 
- starts(Battery.change tx);
+ starts(Battery.consume tx);
  eq(tx.quantity, -20);
 }
 
@@ -146,7 +146,7 @@ Instrument::Stow{
  meets(Stowed a);
  met_by(TakeSample b);
 
- starts(Battery.change tx);
+ starts(Battery.consume tx);
  eq(tx.quantity, -20);
 }
 
@@ -191,12 +191,12 @@ Commands::TakeSample{
 }
 
 Commands::PhoneHome{
- starts(Battery.change tx);
+ starts(Battery.consume tx);
  eq(tx.quantity, -600);
 }
 
 Commands::PhoneLander{
- starts(Battery.change tx);
+ starts(Battery.consume tx);
  eq(tx.quantity, -20);
 }
 

@@ -225,7 +225,7 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
      */
     template <class X>
     inline bool equals(const Id<X>& org) const{
-      return (operator eint()) == (org.operator eint());
+      return (this->operator eint()) == (org.operator eint());
     }
 
     /**

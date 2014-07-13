@@ -5,7 +5,7 @@ enum Data {CHAMPIMAGE, MOSSBAUER, OPPSCI};
 
 class Rover;
 
-class Energy extends Resource {
+class Energy extends Reservoir {
   Energy(float ic, float ll_min, float ll_max) {
     super(ic, ll_min, ll_max);
   } 

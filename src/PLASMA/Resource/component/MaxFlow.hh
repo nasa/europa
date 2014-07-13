@@ -103,7 +103,7 @@ namespace EUROPA
 #ifdef _MSC_VER
         typedef map< Node*, EdgeList::const_iterator > Node2EdgeListIteratorMap;
 #else
-        typedef hash_map< Node*, EdgeList::const_iterator, NodeHash > Node2EdgeListIteratorMap;
+      typedef hash_src::hash_map< Node*, EdgeList::const_iterator, NodeHash > Node2EdgeListIteratorMap;
 #endif //_MSC_VER
 
         Node2EdgeListIteratorMap m_CurrentOutEdgeOnNode;

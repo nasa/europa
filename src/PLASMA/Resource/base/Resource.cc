@@ -16,9 +16,17 @@
 #ifdef _MSC_VER
 #  include <functional>
    using std::select2nd;
+#elif __clang__
+#  include <functional>
+template<typename Pair>
+struct select2nd : public std::unary_function<Pair, typename Pair::second_type> {
+  const typename Pair::second_type& operator()(const Pair& x) const {return x.second;}
+};
 #else
+#include <functional>
+//TODO: find out when select2nd got moved and where
 #  include <ext/functional>
-   using __gnu_cxx::select2nd;
+  using __gnu_cxx::select2nd;
 #endif //_MSC_VER
 
 namespace EUROPA {

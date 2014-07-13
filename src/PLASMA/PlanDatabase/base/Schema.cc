@@ -511,7 +511,7 @@ namespace EUROPA {
     MarshalString( tmpStr, tmp );
     check_error(paramIndex < getParameterCount(predicate), tmp);
 #else
-    check_error(paramIndex < getParameterCount(predicate), paramIndex + " is not a valid index");
+    checkError(paramIndex < getParameterCount(predicate), paramIndex << " is not a valid index");
 #endif
     // First see if we get a hit for the parentType
     std::map<edouble, NameValueVector>::const_iterator membershipRelation_it =

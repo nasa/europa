@@ -11,11 +11,11 @@
 
 #ifdef _MSC_VER
 #  include <map>
-   using std::map;
-   using namespace stdext;
+using std::map;
+namespace hash_src = stdext;
 #else
 #  include "hash_map.hh"
-   using namespace __gnu_cxx;
+namespace hash_src = __gnu_cxx;
 #endif //_MSC_VER
 
 #include <algorithm>
@@ -70,7 +70,7 @@ namespace EUROPA
   public:
     size_t operator()(Node* n) const
     {
-      hash<long> H;
+      hash_src::hash<long> H;
       return H( (long) n);
     }
   };
@@ -84,7 +84,7 @@ namespace EUROPA
   public:
     size_t operator()(Edge* n) const
     {
-      hash<long> H;
+      hash_src::hash<long> H;
       return H( (long) n );
     }
     
@@ -99,7 +99,7 @@ namespace EUROPA
   public:
     size_t operator()(TransactionId n) const
     {
-      hash<long> H;
+      hash_src::hash<long> H;
       return H( (long) ( (Transaction*) n ) );
     }
     
@@ -114,13 +114,13 @@ namespace EUROPA
   typedef map< Edge*, edouble > Edge2DoubleMap;
   typedef map< TransactionId, InstantId > TransactionId2InstantId;
 #else
-  typedef hash_map< Node*, bool, NodeHash > Node2Bool;
-  typedef hash_map< Node*, eint, NodeHash > Node2Int;
-  typedef hash_map< Node*, eint, NodeHash > Node2Long;
-  typedef hash_map< Node*, edouble, NodeHash > Node2Double;
+typedef hash_src::hash_map< Node*, bool, NodeHash > Node2Bool;
+typedef hash_src::hash_map< Node*, eint, NodeHash > Node2Int;
+typedef hash_src::hash_map< Node*, eint, NodeHash > Node2Long;
+typedef hash_src::hash_map< Node*, edouble, NodeHash > Node2Double;
 
-  typedef hash_map< Edge*, edouble, EdgeHash > Edge2DoubleMap;
-  typedef hash_map< TransactionId, InstantId, TransactionIdHash > TransactionId2InstantId;
+typedef hash_src::hash_map< Edge*, edouble, EdgeHash > Edge2DoubleMap;
+typedef hash_src::hash_map< TransactionId, InstantId, TransactionIdHash > TransactionId2InstantId;
 #endif
 
   std::ostream& operator<<( std::ostream& os, const EdgeIdentity& fei ) ;

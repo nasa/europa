@@ -31,8 +31,8 @@ typedef Id<ObjectFactory> ObjectFactoryId;
 class PSObjectType {
 public:
 	  virtual ~PSObjectType() {}
-	  virtual const std::string getNameString() const = 0;
-	  virtual const std::string getParentName() const = 0;
+	  virtual const std::string& getNameString() const = 0;
+	  virtual const std::string& getParentName() const = 0;
 	  virtual PSList<std::string> getMemberNames() const = 0;
 	  virtual PSDataType* getMemberTypeRef(const std::string& name) const = 0;
           virtual PSList<PSTokenType*> getPredicates() const = 0;
@@ -70,8 +70,8 @@ public:
     void purgeAll(); // TODO: make protected after Schema API is fixed
 
     // From PSObjectType
-	virtual const std::string getNameString() const;
-	virtual const std::string getParentName() const;
+	virtual const std::string& getNameString() const;
+	virtual const std::string& getParentName() const;
 	virtual PSList<std::string> getMemberNames() const;
 	virtual PSDataType* getMemberTypeRef(const std::string& name) const;
 	virtual PSList<PSTokenType*> getPredicates() const;

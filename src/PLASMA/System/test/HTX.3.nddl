@@ -19,7 +19,7 @@ A::pred{
  eq(location, p.location);
 }
 
-PlannerTestConfig world = new PlannerTestConfig(0, 10, 6, 1);
+PlannerTestConfig world = new PlannerTestConfig(0, 10, 6, 4);
 A a = new A();
 close();
 rejectable(a.pred pred);
