@@ -15,6 +15,8 @@
 #include "NodeIterator.hh"
 #include "EdgeIterator.hh"
 
+#include <boost/unordered_map.hpp>
+
 #ifndef LONG_MAX
 // Would prefer to declare a static const variable, but that would be
 // bad style inside a header, so there's another 'ifndef LONG_MAX'
@@ -103,7 +105,7 @@ namespace EUROPA
 #ifdef _MSC_VER
         typedef map< Node*, EdgeList::const_iterator > Node2EdgeListIteratorMap;
 #else
-      typedef hash_src::hash_map< Node*, EdgeList::const_iterator, NodeHash > Node2EdgeListIteratorMap;
+      typedef boost::unordered_map< Node*, EdgeList::const_iterator, NodeHash > Node2EdgeListIteratorMap;
 #endif //_MSC_VER
 
         Node2EdgeListIteratorMap m_CurrentOutEdgeOnNode;

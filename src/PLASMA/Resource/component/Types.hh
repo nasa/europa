@@ -9,14 +9,15 @@
  * @ingroup Resource
  */
 
-#ifdef _MSC_VER
-#  include <map>
-using std::map;
-namespace hash_src = stdext;
-#else
-#  include "hash_map.hh"
-namespace hash_src = __gnu_cxx;
-#endif //_MSC_VER
+// #ifdef _MSC_VER
+// #  include <map>
+// using std::map;
+// namespace hash_src = stdext;
+// #elif __clang__
+// #  include "hash_map.hh"
+// namespace hash_src = __gnu_cxx;
+// #endif //_MSC_VER
+#include <boost/unordered_map.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -70,7 +71,7 @@ namespace EUROPA
   public:
     size_t operator()(Node* n) const
     {
-      hash_src::hash<long> H;
+      boost::hash<long> H;
       return H( (long) n);
     }
   };
@@ -84,7 +85,7 @@ namespace EUROPA
   public:
     size_t operator()(Edge* n) const
     {
-      hash_src::hash<long> H;
+      boost::hash<long> H;
       return H( (long) n );
     }
     
@@ -99,12 +100,13 @@ namespace EUROPA
   public:
     size_t operator()(TransactionId n) const
     {
-      hash_src::hash<long> H;
+      boost::hash<long> H;
       return H( (long) ( (Transaction*) n ) );
     }
     
   };
 
+//TODO: Do we need to keep this _MSC_VER branch?
 #ifdef _MSC_VER
   typedef map< Node*, bool > Node2Bool;
   typedef map< Node*, eint > Node2Int;
@@ -114,13 +116,13 @@ namespace EUROPA
   typedef map< Edge*, edouble > Edge2DoubleMap;
   typedef map< TransactionId, InstantId > TransactionId2InstantId;
 #else
-typedef hash_src::hash_map< Node*, bool, NodeHash > Node2Bool;
-typedef hash_src::hash_map< Node*, eint, NodeHash > Node2Int;
-typedef hash_src::hash_map< Node*, eint, NodeHash > Node2Long;
-typedef hash_src::hash_map< Node*, edouble, NodeHash > Node2Double;
+typedef boost::unordered_map< Node*, bool, NodeHash > Node2Bool;
+typedef boost::unordered_map< Node*, eint, NodeHash > Node2Int;
+typedef boost::unordered_map< Node*, eint, NodeHash > Node2Long;
+typedef boost::unordered_map< Node*, edouble, NodeHash > Node2Double;
 
-typedef hash_src::hash_map< Edge*, edouble, EdgeHash > Edge2DoubleMap;
-typedef hash_src::hash_map< TransactionId, InstantId, TransactionIdHash > TransactionId2InstantId;
+typedef boost::unordered_map< Edge*, edouble, EdgeHash > Edge2DoubleMap;
+typedef boost::unordered_map< TransactionId, InstantId, TransactionIdHash > TransactionId2InstantId;
 #endif
 
   std::ostream& operator<<( std::ostream& os, const EdgeIdentity& fei ) ;

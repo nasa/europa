@@ -176,7 +176,7 @@ namespace EUROPA {
       }
       virtual std::string toString() const {
         check_error(ALWAYS_FAIL, "This used to be a pure virtual method.");
-        return false;
+        return "";
       }
       virtual ChoiceComparator* copy() const = 0;
     private:

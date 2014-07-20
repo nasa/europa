@@ -290,8 +290,11 @@ namespace EUROPA {
         return;
       }
 
-      if(m_maxSteps <= getStepCount() - m_stepCountFloor || m_maxDepth < getDepth() - m_depthFloor){
-        debugMsg("Solver:step", "Timeout!  Max steps: " << m_maxSteps << " step (above floor) " << getStepCount() - m_stepCountFloor <<
+      if(m_maxSteps <= getStepCount() - m_stepCountFloor || 
+         m_maxDepth < getDepth() - m_depthFloor){
+        debugMsg("Solver:step", 
+                 "Timeout!  Max steps: " << m_maxSteps << " step (above floor) " << 
+                 getStepCount() - m_stepCountFloor <<
                  " Max depth: " << m_maxDepth << " depth (above floor) " << getDepth() - m_depthFloor);
 
         publish(notifyTimedOut,);

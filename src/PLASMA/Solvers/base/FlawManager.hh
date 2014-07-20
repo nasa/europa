@@ -16,11 +16,13 @@
 #include "FlawHandler.hh"
 #include "hash_map.hh"
 
+#if 0
 #ifdef _MSC_VER
   using namespace stdext;
 #else
   using namespace __gnu_cxx;
 #endif //_MSC_VER
+#endif //0
 
 namespace EUROPA {
   namespace SOLVERS {

@@ -412,7 +412,7 @@ namespace EUROPA
 #ifdef _MSC_VER
       typedef std::map< TransactionId, IntIntPair > TransactionId2IntIntPair;
 #else
-      typedef hash_src::hash_map< TransactionId, IntIntPair, TransactionIdHash > TransactionId2IntIntPair;
+      typedef boost::unordered_map< TransactionId, IntIntPair, TransactionIdHash > TransactionId2IntIntPair;
 #endif //_MSC_VER
 
       TransactionId2IntIntPair m_previousTimeBounds;
