@@ -5,10 +5,10 @@
 #include <cassert>
 #include <cmath>
 #include <istream>
-#include <ostream>
 #include <limits>
+#include <ostream>
 #include <stdexcept>
-#include "hash_map.hh"
+#include <boost/unordered_map.hpp>
 
 #ifdef _MSC_VER
 #  if ( LONG_MAX > INT_MAX)
@@ -52,18 +52,16 @@ namespace EUROPA {
   class edouble;
 }
 
-#ifndef _MSC_VER
-namespace __gnu_cxx
-{
-  template<> struct hash<EUROPA::edouble> {
-    inline size_t operator()(EUROPA::edouble __x) const;
-  };
+namespace boost {
 
-  template<> struct hash<EUROPA::eint> {
-    inline size_t operator()(EUROPA::eint __x) const;
-  };
+template<> struct hash<EUROPA::edouble> {
+  inline size_t operator()(EUROPA::edouble __x) const;
+};
+
+template<> struct hash<EUROPA::eint> {
+  inline size_t operator()(EUROPA::eint __x) const;
+};
 }
-#endif // _MSC_VER
 
 namespace std {
   template<>
@@ -536,10 +534,10 @@ namespace EUROPA {
     
     friend class edouble;
 
+    friend struct boost::hash<eint>;
 #ifdef _MSC_VER
     friend struct std::numeric_limits<eint>;
 #else
-    friend class __gnu_cxx::hash<eint>;
     friend class std::numeric_limits<eint>;
 #endif //_MSC_VER
   
@@ -641,10 +639,10 @@ namespace EUROPA {
     friend edouble::basis_type cast_basis(const edouble e);
   private:
     friend class eint;
+    friend struct boost::hash<edouble>;
 #ifdef _MSC_VER
     friend struct std::numeric_limits<edouble>;
 #else
-    friend class __gnu_cxx::hash<edouble>;
     friend class std::numeric_limits<edouble>;
 #endif //_MSC_VER
 
@@ -803,15 +801,12 @@ namespace std {
 
 }
 
-#ifndef _MSC_VER
-namespace __gnu_cxx
-{
+namespace boost {
   //I'm not entirely sure this is safe, but it's worked so far.  Maybe this should be changed to
   //*((size_t*)&(__x.m_v))
   size_t hash<EUROPA::edouble>::operator()(EUROPA::edouble __x) const {return (size_t) (__x.m_v);}
   size_t hash<EUROPA::eint>::operator()(EUROPA::eint __x) const {return (size_t) (long) (__x.m_v);}
 }
-#endif //_MSC_VER
 
 // #define min MIN_COPY
 // #define max MAX_COPY

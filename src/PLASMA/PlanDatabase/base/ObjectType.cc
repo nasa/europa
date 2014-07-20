@@ -67,9 +67,10 @@ const ObjectTypeId& ObjectType::getParent() const
 }
 
 const std::string& ObjectType::getParentName() const {
-	if (m_parent.isNoId())
-		  return "";
-	return m_parent->getNameString();
+  static std::string empty_string;
+  if (m_parent.isNoId())
+    return empty_string;
+  return m_parent->getNameString();
 }
 
 const std::map<std::string,DataTypeId>& ObjectType::getMembers() const

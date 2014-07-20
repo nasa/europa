@@ -12,11 +12,15 @@
  * @date April, 2005
  * @brief Provides implementation for FlawManager
  */
+#if 0
 #ifdef _MSC_VER
-  using stdext::hash_map;
+using stdext::hash_map;
+#elif defined(__clang__)
+typedef HASH_NS::unordered_map hash_map;
 #else
-  using __gnu_cxx::hash_map;
+using HASH_NS::hash_map;
 #endif //_MSC_VER
+#endif //0
 
 namespace EUROPA {
   namespace SOLVERS {
