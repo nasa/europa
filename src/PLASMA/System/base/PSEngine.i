@@ -194,6 +194,17 @@ namespace EUROPA {
     void clear();
   };
 
+  template<class T>
+  class PSList<T*> {
+  public:
+    PSList();
+    int size() const;
+    T* get(int idx);
+    void push_back(T* const value);
+    void remove(T* const value);
+    void clear();
+  };
+
   %template(PSObjectList) PSList<PSObject*>;
   %template(PSTokenList) PSList<PSToken*>;
   %template(PSVariableList) PSList<PSVariable*>;
