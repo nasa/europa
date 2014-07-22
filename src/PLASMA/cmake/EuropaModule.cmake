@@ -249,4 +249,8 @@ macro(declare_module name root_srcs base_srcs component_srcs test_srcs module_de
       COMMAND ${testname})
   endif()
 
+  #install EXPORT?
+  install(TARGETS ${libname} DESTINATION ${EUROPA_ROOT}/dist/europa)
+  install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION ${EUROPA_ROOT}/dist/europa
+    FILES_MATCHING PATTERN "*.hh")
 endmacro(declare_module)

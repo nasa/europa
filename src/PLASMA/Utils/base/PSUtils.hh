@@ -32,6 +32,29 @@ namespace EUROPA {
       std::vector<T> m_elements;
   };
 
+template <typename T>
+class PSList<T*> {
+    public:
+      int size() const { return m_elements.size(); }
+      T* get(int idx) { return m_elements[idx]; }
+      const T* get(int idx) const { return m_elements[idx]; }
+      void remove(int idx) {m_elements.erase(std::advance(m_elements.begin(), idx));}
+      void remove(T* const value)
+      {
+        typename std::vector<T*>::iterator it =
+        std::find(m_elements.begin(), m_elements.end(), value);
+        if(it != m_elements.end())
+	    m_elements.erase(it);
+      }
+      void push_back(T* const value) {m_elements.push_back(value);}
+    void clear() {m_elements.clear();}
+      bool operator==(const PSList<T>& other) const {
+    	  return m_elements == other.m_elements;
+      }
+    protected:
+      std::vector<T*> m_elements;
+};
+
   typedef int PSEntityKey;
 
   class PSEntity

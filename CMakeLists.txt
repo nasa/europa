@@ -8,4 +8,6 @@ enable_testing()
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 option(SHARED "Build shared libraries" TRUE)
 set(BUILD_SHARED_LIBS ${SHARED})
+set(EUROPA_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+
 add_subdirectory(src)
