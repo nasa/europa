@@ -3,6 +3,8 @@ if(${APPLE})
 else(${APPLE})
   find_package(JNI REQUIRED)  
 endif(${APPLE})
+set(ANTLR_FIND_REQUIRED TRUE)
+include(FindANTLR)
 
 
 include(EuropaModule)
@@ -17,6 +19,7 @@ set(CMAKE_SWIG_OUTDIR "${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine"
 set_source_files_properties(base/PSEngine.i PROPERTIES CPLUSPLUS ON)
 set_source_files_properties(base/PSEngine.i PROPERTIES SWIG_FLAGS "-package;psengine;-includeall")
 
+include_directories(${ANTLR_INCLUDE_DIR})
 include_directories(${JNI_INCLUDE_DIRS})
 swig_add_module(PSEngine java base/PSEngine.i)
 foreach(dep ${internal_dependencies})
