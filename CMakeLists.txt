@@ -14,11 +14,14 @@ set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 #Options to support: 
 # * optimized/not
 option(OPTIMIZE "Build optimized" FALSE)
-
 # * shared/not
 option(SHARED "Build shared libraries" TRUE)
 set(BUILD_SHARED_LIBS ${SHARED})
 # * 64/32-bit
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+ set(SIXTYFOUR TRUE)
+endif(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+option(SIXTYFOUR "Build for 64-bit" ${SIXTYFOUR})
 # * modules?
 
 set(EUROPA_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
