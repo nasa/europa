@@ -1,5 +1,10 @@
 find_package(Java REQUIRED)
-include(UseJava)
+include(UseJava RESULT_VARIABLE java_included)
+if(NOT java_included)
+  message(FATAL_ERROR "Failed to include UseJava")
+else()
+  message(STATUS "Found UseJava: ${java_included}")
+endif(NOT java_included)
 
 #set(CMAKE_JAVA_TARGET_OUTPUT_DIR ${)
 #set(CMAKE_JAVA_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/generated;${CMAKE_CURRENT_SOURCE_DIR}/src;${CMAKE_JAVA_INCLUDE_PATH})
@@ -40,13 +45,13 @@ add_jar(PSEngineGenerated
   generated/psengine/PSVarValue.java
   generated/psengine/PSVariable.java
   generated/psengine/PSVariableList.java
-  generated/psengine/SWIGTYPE_p_p_EUROPA__PSConstraint.java
-  generated/psengine/SWIGTYPE_p_p_EUROPA__PSDataType.java
-  generated/psengine/SWIGTYPE_p_p_EUROPA__PSObject.java
-  generated/psengine/SWIGTYPE_p_p_EUROPA__PSObjectType.java
-  generated/psengine/SWIGTYPE_p_p_EUROPA__PSToken.java
-  generated/psengine/SWIGTYPE_p_p_EUROPA__PSTokenType.java
-  generated/psengine/SWIGTYPE_p_p_EUROPA__PSVariable.java
+  # generated/psengine/SWIGTYPE_p_p_EUROPA__PSConstraint.java
+  # generated/psengine/SWIGTYPE_p_p_EUROPA__PSDataType.java
+  # generated/psengine/SWIGTYPE_p_p_EUROPA__PSObject.java
+  # generated/psengine/SWIGTYPE_p_p_EUROPA__PSObjectType.java
+  # generated/psengine/SWIGTYPE_p_p_EUROPA__PSToken.java
+  # generated/psengine/SWIGTYPE_p_p_EUROPA__PSTokenType.java
+  # generated/psengine/SWIGTYPE_p_p_EUROPA__PSVariable.java
   generated/psengine/StringErrorStream.java
   generated/psengine/EngineConfig.java
   # src/psengine/PSUtil.java 

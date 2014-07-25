@@ -1,4 +1,6 @@
 include(EuropaModule)
+set(ANTLR_FIND_REQUIRED TRUE)
+include(FindANTLR)
 
 set(anml_parser_sources ANML.tokens ANMLLexer.cpp ANMLLexer.h ANMLParser.cpp ANMLParser.h)
 
@@ -20,8 +22,9 @@ common_module_prepends("${base_sources}" "${component_sources}" "${test_sources}
 
 declare_module(ANML "${root_sources}" "${base_sources}" "${component_sources}" "${test_sources}" "${internal_dependencies}" "")
 #setup ANTLR link/headers?
-target_link_libraries("ANML${EUROPA_SUFFIX}" antlr3c)
-target_link_libraries("ANML-test${EUROPA_SUFFIX}" antlr3c)
+append_target_property("ANML${EUROPA_SUFFIX}" INCLUDE_DIRECTORIES ";${ANTLR_INCLUDE_DIR}")
+target_link_libraries("ANML${EUROPA_SUFFIX}" ${ANTLR_LIBRARIES})
+target_link_libraries("ANML-test${EUROPA_SUFFIX}" ${ANTLR_LIBRARIES})
 #file(COPY test/ErrorCheckingTests.txt DESTINATION .)
 #file(COPY test/anml DESTINATION .)
 #file(COPY test/parser DESTINATION .)

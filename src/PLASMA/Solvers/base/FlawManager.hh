@@ -14,7 +14,6 @@
 #include "DomainListener.hh"
 #include "MatchingEngine.hh"
 #include "FlawHandler.hh"
-#include "hash_map.hh"
 
 #if 0
 #ifdef _MSC_VER
