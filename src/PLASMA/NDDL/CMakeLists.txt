@@ -19,7 +19,7 @@ add_custom_command(OUTPUT ${nddl_tree_sources}
   DEPENDS antlr/NDDL3Tree.g)
 
 
-set(internal_dependencies RulesEngine TemporalNetwork PlanDatabase ConstraintEngine Utils TinyXml)
+set(internal_dependencies RulesEngine PlanDatabase TemporalNetwork)
 set(root_sources ModuleNddl.cc)
 set(base_sources ${nddl_parser_sources} ${nddl_tree_sources} NddlRules.cc NddlToken.cc NddlUtils.cc)
 set(component_sources Interpreter.cc NddlInterpreter.cc NddlTestEngine.cc)

@@ -1,4 +1,3 @@
-message(STATUS "${CMAKE_ROOT}")
 cmake_minimum_required(VERSION 2.8.8)
 if((CMAKE_MAJOR_VERSION GREATER 3) OR (CMAKE_MAJOR_VERSION EQUAL 3))
   if(COMMAND cmake_policy)
@@ -12,8 +11,16 @@ project(Europa2 CXX Java)
 add_definitions(-DTIXML_USE_STL=1)
 enable_testing()
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
+#Options to support: 
+# * optimized/not
+option(OPTIMIZE "Build optimized" FALSE)
+
+# * shared/not
 option(SHARED "Build shared libraries" TRUE)
 set(BUILD_SHARED_LIBS ${SHARED})
+# * 64/32-bit
+# * modules?
+
 set(EUROPA_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 set(CppUnit_FIND_QUIETLY TRUE)
 add_subdirectory(src)
