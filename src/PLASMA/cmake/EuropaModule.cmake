@@ -224,13 +224,24 @@ macro(declare_module name root_srcs base_srcs component_srcs test_srcs module_de
   set(libname "${name}${EUROPA_SUFFIX}")
   set(testname ${name}-test${EUROPA_SUFFIX})
 
+  set(full_dependencies ${module_dependencies})
+  foreach(mod ${module_dependencies})
+    list(APPEND full_dependencies ${${mod}_FULL_DEPENDENCIES})
+  endforeach(mod)
+  if(full_dependencies)
+    list(REMOVE_DUPLICATES full_dependencies)
+  endif(full_dependencies)
+  set(${name}_FULL_DEPENDENCIES ${full_dependencies} PARENT_SCOPE)
+  
+
   add_library(${libname} ${root_srcs} ${base_srcs} ${component_srcs})
   add_common_local_include_deps(${libname})
   foreach(dep ${module_components})
     append_target_property(${libname} INCLUDE_DIRECTORIES ";${CMAKE_CURRENT_SOURCE_DIR}/component/${dep}")
   endforeach(dep)
 
-  add_common_module_deps(${libname} "${module_dependencies}")
+  #add_common_module_deps(${libname} "${module_dependencies}")
+  add_common_module_deps(${libname} "${full_dependencies}")
 
   #why did I end up having to do all this?
   if(test_srcs OR (NOT ("${test_srcs}" STREQUAL "" OR test_srcs MATCHES "^$")))
@@ -239,7 +250,8 @@ macro(declare_module name root_srcs base_srcs component_srcs test_srcs module_de
     append_target_property(${testname} INCLUDE_DIRECTORIES ";${CppUnit_INCLUDE_DIRS}")
     add_common_local_include_deps(${testname})
     
-    add_common_module_deps(${testname} "${module_dependencies}")
+    #add_common_module_deps(${testname} "${module_dependencies}")
+    add_common_module_deps(${testname} "${full_dependencies}")
     foreach(dep ${module_components})
       append_target_property(${testname} INCLUDE_DIRECTORIES ";${CMAKE_CURRENT_SOURCE_DIR}/component/${dep}")
     endforeach(dep)

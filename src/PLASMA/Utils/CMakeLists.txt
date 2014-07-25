@@ -13,6 +13,7 @@ declare_module(Utils "${root_sources}" "${base_sources}" "${component_sources}" 
 
 file(GLOB test_inputs test/*.xml test/*.dtd test/*.cfg)
 file(COPY ${test_inputs} DESTINATION .)
+
 #how do I handle the dlopen and pthreads link requirements?  do I need to?
 find_library(libdl_library dl libdl ltdl libltdl)
 target_link_libraries("Utils${EUROPA_SUFFIX}" ${libdl_library})

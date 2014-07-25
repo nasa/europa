@@ -1,6 +1,6 @@
 include(EuropaModule)
-#no way to make these transitive yet
-set(internal_dependencies ConstraintEngine Utils TinyXml)
+#set(internal_dependencies ConstraintEngine Utils TinyXml)
+set(internal_dependencies ConstraintEngine)
 set(root_sources ModulePlanDatabase.cc)
 set(base_sources CommonAncestorConstraint.cc DbClient.cc DefaultTemporalAdvisor.cc HasAncestorConstraint.cc MergeMemento.cc Method.cc Object.cc ObjectTokenRelation.cc ObjectType.cc PDBInterpreter.cc PSPlanDatabaseListener.cc PlanDatabase.cc PlanDatabaseListener.cc PlanDatabaseWriter.cc Schema.cc StackMemento.cc Token.cc TokenFactory.cc TokenType.cc TokenTypeMgr.cc UnifyMemento.cc)
 set(component_sources DbClientTransactionLog.cc DbClientTransactionPlayer.cc EventToken.cc IntervalToken.cc Methods.cc Timeline.cc)

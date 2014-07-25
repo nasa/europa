@@ -1,5 +1,6 @@
 include(EuropaModule)
-set(internal_dependencies Utils TinyXml)
+#set(internal_dependencies Utils TinyXml)
+set(internal_dependencies Utils)
 set(root_sources ModuleConstraintEngine.cc)
 set(base_sources CESchema.cc DataType.cc CFunction.cc Domain.cc ConstrainedVariable.cc DomainListener.cc Constraint.cc PSConstraintEngineListener.cc ConstraintEngine.cc PSVarValue.cc ConstraintEngineListener.cc Propagator.cc ConstraintType.cc VariableChangeListener.cc)
 set(component_sources Constraints.cc EquivalenceClassCollection.cc DataTypes.cc Propagators.cc Domains.cc)

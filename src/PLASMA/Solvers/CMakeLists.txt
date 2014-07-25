@@ -1,5 +1,6 @@
 include(EuropaModule)
-set(internal_dependencies NDDL RulesEngine TemporalNetwork PlanDatabase ConstraintEngine Utils TinyXml)
+#set(internal_dependencies NDDL RulesEngine TemporalNetwork PlanDatabase ConstraintEngine Utils TinyXml)
+set(internal_dependencies NDDL RulesEngine TemporalNetwork PlanDatabase)
 set(root_sources ModuleSolvers.cc)
 set(base_sources ComponentFactory.cc Context.cc FlawFilter.cc FlawHandler.cc FlawManager.cc MatchingEngine.cc MatchingRule.cc Solver.cc SolverDecisionPoint.cc SolverUtils.cc)
 set(component_sources Filters.cc HSTSDecisionPoints.cc OpenConditionDecisionPoint.cc OpenConditionManager.cc PSSolversImpl.cc ThreatDecisionPoint.cc ThreatManager.cc UnboundVariableDecisionPoint.cc UnboundVariableManager.cc ValueSource.cc)
