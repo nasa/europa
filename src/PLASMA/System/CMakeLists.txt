@@ -30,7 +30,14 @@ set(CMAKE_SWIG_OUTDIR "${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine"
 
 set_source_files_properties(base/PSEngine.i PROPERTIES CPLUSPLUS ON)
 set_source_files_properties(base/PSEngine.i PROPERTIES SWIG_FLAGS "-package;psengine;-includeall")
-set_source_files_properties(
+find_package(Java REQUIRED)
+include(UseJava RESULT_VARIABLE java_included)
+if(NOT java_included)
+  message(FATAL_ERROR "Failed to include UseJava")
+endif(NOT java_included)
+
+add_jar(PSEngineGenerated
+  SOURCES
   ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSConstraint.java
   ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSConstraintEngineListener.java
   ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSConstraintList.java
@@ -68,7 +75,7 @@ set_source_files_properties(
   ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSVariableList.java
   ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/StringErrorStream.java
   ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/EngineConfig.java
-  PROPERTIES GENERATED TRUE)
+  OUTPUT_DIR ${CMAKE_SOURCE_DIR}/src/java/PSEngine)
 
 include_directories(${ANTLR_INCLUDE_DIR})
 include_directories(${JNI_INCLUDE_DIRS})
@@ -80,6 +87,6 @@ foreach(dep ${internal_dependencies})
 endforeach(dep)
 add_common_module_include_dep(PSEngine System)
 target_link_libraries(PSEngine "System${EUROPA_SUFFIX}")
-
+add_dependencies(PSEngineGenerated PSEngine)
 
 add_subdirectory(test)

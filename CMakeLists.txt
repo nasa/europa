@@ -26,5 +26,12 @@ option(SIXTYFOUR "Build for 64-bit" ${SIXTYFOUR})
 
 set(EUROPA_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 set(CppUnit_FIND_QUIETLY TRUE)
+
+if(OPTIMIZE)
+  set(EUROPA_SUFFIX "_o")
+else()
+  set(EUROPA_SUFFIX "_g")
+endif(OPTIMIZE)
+
 add_subdirectory(src)
 install(EXPORT Europa2 DESTINATION ${EUROPA_ROOT}/dist/europa)
