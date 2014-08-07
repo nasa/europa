@@ -51,10 +51,14 @@ bool solve(const char* plannerConfig,
 
         PSEngine* engine = PSEngine::makeInstance();
         engine->start();
-		#ifndef USE_EUROPA_DLL
-				engine->addModule((new Module%%Project%%()));
-		#endif                
-		engine->executeScript("nddl",nddlFile,true/*isFile*/);
+#ifndef USE_EUROPA_DLL
+        engine->addModule((new Module%%Project%%()));
+#endif                
+        std::string errors = engine->executeScript("nddl",nddlFile,true/*isFile*/);
+        if(!errors.empty()) {
+          std::cout << errors << std::endl;
+          return false;
+        }
 
         PSSolver* solver = engine->createSolver(plannerConfig);
         runSolver(solver,startHorizon,endHorizon,maxSteps);
