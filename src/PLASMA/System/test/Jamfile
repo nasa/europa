@@ -102,6 +102,7 @@ local testmodels =
       rejection.nddl 
       rules.0.tx.nddl 
       subtype-extension.tx.nddl 
+      smallerInconsistency-initial-state.nddl
       ;
 
 if ! ( "Resources" in $(NO) ) {

@@ -12,6 +12,7 @@
     <FlawFilter var-match="start"/>
     <FlawFilter var-match="end"/>
     <FlawFilter var-match="duration"/>
+    <FlawFilter var-match="object"/>
     <FlawFilter component="InfiniteDynamicFilter"/>
     <FlawFilter component="ParentMustBeInsertedFilter"/>
     <FlawManager component="Min"/>

@@ -50,12 +50,15 @@ namespace EUROPA{
     /**
      * @brief Constructor to construct a rule instance from a parent. Must have a guard!
      */
-    RuleInstance(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& guards);
+    RuleInstance(const RuleInstanceId& parent, 
+                 const std::vector<ConstrainedVariableId>& guards);
 
     /**
      * @brief Constructor to construct a rule instance from a parent. Must have a guard!
      */
-    RuleInstance(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& guards, const bool positive);
+    RuleInstance(const RuleInstanceId& parent, 
+                 const std::vector<ConstrainedVariableId>& guards, 
+                 const bool positive);
 
     /**
      * @brief Constructor to construct a rule instance from a parent. Must have a guard!
@@ -74,7 +77,14 @@ namespace EUROPA{
 		 * @param positive Flag to indicate whether the test is positive or not.
      */
     RuleInstance(const RuleInstanceId& parent,
-		 const ConstrainedVariableId& guard, const Domain& domain, const bool positive);
+		 const ConstrainedVariableId& guard, const Domain& domain, 
+                 const bool positive);
+
+    RuleInstance(const RuleInstanceId& parent,
+                 const ConstrainedVariableId& var,
+                 const Domain& domain,
+                 const bool positive,
+                 const std::vector<ConstrainedVariableId>& guardComponents);
 
     /**
      * Destructor
@@ -252,6 +262,10 @@ namespace EUROPA{
      * only be called from constructor.
      */
     void setGuard(const ConstrainedVariableId& guard, const Domain& domain);
+    
+    void setGuard(const ConstrainedVariableId& guad, const Domain& domain, 
+                  const std::vector<ConstrainedVariableId>& guardComponents);
+                  
 
 
     /**

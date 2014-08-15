@@ -190,7 +190,7 @@ namespace EUROPA {
 
       virtual DataRef eval(EvalContext& context) const;
       virtual std::string toString() const;
-
+    virtual const std::vector<Expr*>& getArgs() const {return m_argExprs;}
   protected:
       MethodId m_method;
       Expr* m_varExpr;
@@ -370,9 +370,13 @@ namespace EUROPA {
 
         virtual void checkType();
 
+    virtual const std::vector<CExpr*>& getArgs() const {return m_args;}
+
     protected:
         CFunctionId m_func;
         std::vector<CExpr*> m_args;
+   private:
+    CExprFunction() : m_func(), m_args() {}
   };
 
   class CExprValue : public CExpr
@@ -421,6 +425,9 @@ namespace EUROPA {
         virtual bool isSingletonOptimizable();
 
         virtual void checkType();
+
+    virtual const CExpr* getLhs() const {return m_lhs;}
+    virtual const CExpr* getRhs() const {return m_rhs;}
 
     protected:
         std::string m_operator;
@@ -507,6 +514,13 @@ namespace EUROPA {
                                 const ConstrainedVariableId& var,
                                 const Domain& domain,
                                 const bool positive,
+                                const std::vector<Expr*>& body);
+
+        InterpretedRuleInstance(const RuleInstanceId& parent,
+                                const ConstrainedVariableId& var,
+                                const Domain& domain,
+                                const bool positive,
+                                const std::vector<ConstrainedVariableId>& guardComponents,
                                 const std::vector<Expr*>& body);
 
         InterpretedRuleInstance(const RuleInstanceId& parent,
@@ -614,8 +628,8 @@ namespace EUROPA {
       virtual ~ExprIfGuard();
 
       const std::string& getOperator();
-      Expr* getLhs();
-      Expr* getRhs();
+      Expr* getLhs() const;
+      Expr* getRhs() const;
 
       virtual DataRef eval(EvalContext& context) const;
       virtual std::string toString() const;
@@ -664,6 +678,8 @@ namespace EUROPA {
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const = 0;
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const = 0;
   };
+
+void getVariableReferences(const Expr* expr, EvalContext& ctx, std::vector<ConstrainedVariableId>& dest);
 
 }
 

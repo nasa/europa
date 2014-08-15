@@ -15,68 +15,97 @@
 
 namespace EUROPA {
 
-  RuleInstance::RuleInstance(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
-    : m_id(this), m_rule(rule), m_token(token), m_planDb(planDb), m_rulesEngine(), m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
-    check_error(rule.isValid(), "Parent must be a valid rule id.");
-    check_error(isValid());
-    commonInit();
-  }
+RuleInstance::RuleInstance(const RuleId& rule, const TokenId& token, 
+                           const PlanDatabaseId& planDb)
+    : m_id(this), m_rule(rule), m_token(token), m_planDb(planDb), m_rulesEngine(), 
+      m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
+  check_error(rule.isValid(), "Parent must be a valid rule id.");
+  check_error(isValid());
+  commonInit();
+}
 
-  RuleInstance::RuleInstance(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb,
-			     const std::vector<ConstrainedVariableId>& guards)
-    : m_id(this), m_rule(rule), m_token(token), m_planDb(planDb), m_rulesEngine(), m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
-    check_error(isValid());
-    setGuard(guards);
-    commonInit();
-  }
+RuleInstance::RuleInstance(const RuleId& rule, const TokenId& token, 
+                           const PlanDatabaseId& planDb,
+                           const std::vector<ConstrainedVariableId>& guards)
+    : m_id(this), m_rule(rule), m_token(token), m_planDb(planDb), m_rulesEngine(),
+      m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
+  check_error(isValid());
+  setGuard(guards);
+  commonInit();
+}
 
-  RuleInstance::RuleInstance(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb,
-			     const ConstrainedVariableId& guard, const Domain& domain)
-    : m_id(this), m_rule(rule), m_token(token), m_planDb(planDb), m_rulesEngine(), m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
-    check_error(isValid());
-    setGuard(guard, domain);
-    commonInit();
-  }
+RuleInstance::RuleInstance(const RuleId& rule, const TokenId& token,
+                           const PlanDatabaseId& planDb,
+                           const ConstrainedVariableId& guard, const Domain& domain)
+    : m_id(this), m_rule(rule), m_token(token), m_planDb(planDb), m_rulesEngine(),
+      m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
+  check_error(isValid());
+  setGuard(guard, domain);
+  commonInit();
+}
+
+/**
+ * @brief Constructor refers to parent for tokens, and variables that are accessible in its scope.
+ */
+RuleInstance::RuleInstance(const RuleInstanceId& parent, 
+                           const std::vector<ConstrainedVariableId>& guards)
+    : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
+      m_planDb(parent->getPlanDatabase()),m_rulesEngine() , m_parent(parent), 
+      m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
+  check_error(isValid());
+  setGuard(guards);
+}
+
+/**
+ * @brief Constructor refers to parent for tokens, and variables that are accessible in its scope.
+ */
+RuleInstance::RuleInstance(const RuleInstanceId& parent, 
+                           const std::vector<ConstrainedVariableId>& guards, 
+                           const bool positive)
+    : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
+      m_planDb(parent->getPlanDatabase()),m_rulesEngine() , m_parent(parent), 
+      m_guardDomain(0), m_isExecuted(false), m_isPositive(positive){
+  check_error(isValid());
+  setGuard(guards);
+}
+
+/**
+ * @brief Constructor refers to parent for tokens, and variables that are accessible in its scope.
+ */
+RuleInstance::RuleInstance(const RuleInstanceId& parent,
+                           const ConstrainedVariableId& guard, const Domain& domain)
+    : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
+      m_planDb(parent->getPlanDatabase()), m_rulesEngine(), m_parent(parent),
+      m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
+  check_error(isValid());
+  setGuard(guard, domain);
+}
 
   /**
    * @brief Constructor refers to parent for tokens, and variables that are accessible in its scope.
    */
-  RuleInstance::RuleInstance(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& guards)
+RuleInstance::RuleInstance(const RuleInstanceId& parent, 
+                           const ConstrainedVariableId& guard,
+                           const Domain& domain, const bool positive)
     : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
-    m_planDb(parent->getPlanDatabase()),m_rulesEngine() , m_parent(parent), m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
-    check_error(isValid());
-    setGuard(guards);
-  }
+      m_planDb(parent->getPlanDatabase()), m_rulesEngine(), m_parent(parent), 
+      m_guardDomain(0), m_isExecuted(false), m_isPositive(positive){
+  check_error(isValid());
+  setGuard(guard, domain);
+}
 
-  /**
-   * @brief Constructor refers to parent for tokens, and variables that are accessible in its scope.
-   */
-  RuleInstance::RuleInstance(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& guards, const bool positive)
+RuleInstance::RuleInstance(const RuleInstanceId& parent, 
+                           const ConstrainedVariableId& guard,
+                           const Domain& domain, const bool positive,
+                           const std::vector<ConstrainedVariableId>& guardComponents)
     : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
-    m_planDb(parent->getPlanDatabase()),m_rulesEngine() , m_parent(parent), m_guardDomain(0), m_isExecuted(false), m_isPositive(positive){
-    check_error(isValid());
-    setGuard(guards);
-  }
+      m_planDb(parent->getPlanDatabase()), m_rulesEngine(), m_parent(parent), 
+      m_guardDomain(0), m_isExecuted(false), m_isPositive(positive){
+  check_error(isValid());
+  setGuard(guard, domain, guardComponents);
+}
 
-  /**
-   * @brief Constructor refers to parent for tokens, and variables that are accessible in its scope.
-   */
-  RuleInstance::RuleInstance(const RuleInstanceId& parent, const ConstrainedVariableId& guard, const Domain& domain)
-    : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
-    m_planDb(parent->getPlanDatabase()), m_rulesEngine(), m_parent(parent), m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
-    check_error(isValid());
-    setGuard(guard, domain);
-  }
 
-  /**
-   * @brief Constructor refers to parent for tokens, and variables that are accessible in its scope.
-   */
-  RuleInstance::RuleInstance(const RuleInstanceId& parent, const ConstrainedVariableId& guard, const Domain& domain, const bool positive)
-    : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
-    m_planDb(parent->getPlanDatabase()), m_rulesEngine(), m_parent(parent), m_guardDomain(0), m_isExecuted(false), m_isPositive(positive){
-    check_error(isValid());
-    setGuard(guard, domain);
-  }
 
   /**
    * @brief Clean up all the allocated elements
@@ -154,11 +183,21 @@ namespace EUROPA {
    */
   bool RuleInstance::test(const std::vector<ConstrainedVariableId>& guards) const {
     checkError(m_rule.isValid(), m_rule);
-    debugMsg("RuleInstance:test", "Testing rule " << toString() << " for " << m_rule->getName().toString() << " from " << m_rule->getSource().toString());
+    debugMsg("RuleInstance:test",
+             "Testing rule " << toString() << " for " << m_rule->getName().toString() <<
+             " from " << m_rule->getSource().toString());
+
     if(m_guardDomain != 0) { // Case of explicit guard on a single variable
       debugMsg("RuleInstance:test", "Case of explicit guard on a single variable");
-      checkError(guards.size() == 1, "Explicit guard on one variable only");
+      // checkError(guards.size() == 1, "Explicit guard on one variable only");
       bool result = false;
+      //+ 1 here because the first variable may be the one created implicitly for some
+      //testEQ or similar constraint and therefore may not be available to the planner
+      for(std::vector<ConstrainedVariableId>::const_iterator it = guards.begin() + 1; 
+          it != guards.end(); ++it) {
+        if(!((*it)->isSpecified() || (*it)->baseDomain().isSingleton()))
+          return false;
+      }
       if(guards[0]->lastDomain().isSingleton()) {
         result = (m_guardDomain->isMember(guards[0]->lastDomain().getSingletonValue()) == m_isPositive);
       }
@@ -185,7 +224,7 @@ namespace EUROPA {
 
       debugMsg("RuleInstance:test", "checking  " << counter << " argument:" << guard->toString());
 
-      if(!guard->lastDomain().isSingleton()){
+      if(!(guard->isSpecified() || guard->baseDomain().isSingleton())){
         debugMsg("RuleInstance:test", "argument " << counter << " is not specified " << guard->baseDomain().toString());
 	return false;
       }
@@ -294,7 +333,7 @@ namespace EUROPA {
 	if(var->parent() == m_id)
 	  var->discard();
 
-	checkError(var.isValid(), var << " should still be va;id after a discard.");
+	checkError(var.isValid(), var << " should still be valid after a discard.");
       }
       m_variables.clear();
       m_isExecuted = false;
@@ -321,6 +360,23 @@ namespace EUROPA {
     m_guardListener->addDependent(this);
     debugMsg("RuleInstance:setGuard", "Added guard: " << m_guardListener->toLongString());
   }
+
+void RuleInstance::setGuard(const ConstrainedVariableId& guard, const Domain& domain,
+                            const std::vector<ConstrainedVariableId>& guardComponents){
+  check_error(m_guards.empty());
+  check_error(guard.isValid());
+  m_guards.push_back(guard);
+  m_guards.insert(m_guards.end(), guardComponents.begin(), guardComponents.end());
+  checkError(Domain::canBeCompared(guard->baseDomain(), domain),
+             "Failed attempt to compare " << 
+             guard->baseDomain().getTypeName().toString()  << " with " <<
+             domain.getTypeName().toString());
+  m_guardDomain = domain.copy();
+  m_guardListener = (new RuleVariableListener(m_planDb->getConstraintEngine(), m_id, 
+                                              m_guards))->getId();
+  m_guardListener->addDependent(this);
+  debugMsg("RuleInstance:setGuard", "Added guard: " << m_guardListener->toLongString());
+}
 
   TokenId RuleInstance::addSlave(Token* slave){
     m_slaves.push_back(slave->getId());
@@ -732,4 +788,5 @@ namespace EUROPA {
         return true;
     return false;
   }
+
 }
