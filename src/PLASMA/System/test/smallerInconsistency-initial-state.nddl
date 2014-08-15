@@ -1,0 +1,19 @@
+#include "smallerInconsistency-model.nddl"
+#include "PlannerConfig.nddl"
+// Sample object
+YourObject object = new YourObject();
+PlannerConfig plannerConfig = new PlannerConfig(0, 1, 100, 100);
+// Close the the PLASMA Database - no more objects can be created.
+close();
+
+// place your goals here.
+goal(YourObject.helloWorld initialToken);
+initialToken.start.specify(0); // Starts at beginning of the horizon
+initialToken.end.specify(1);
+initialToken.activate();
+object.constrain(initialToken, initialToken);
+
+// The planner should take it form here!
+initialToken.guard.specify(true);
+initialToken.guard.reset();
+initialToken.guard.specify(false);

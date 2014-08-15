@@ -67,7 +67,7 @@ namespace EUROPA {
 
         virtual DataRef eval(EvalContext& context) const;
         void addChild(Expr* child);
-        const std::vector<Expr*>& getChildren();
+        const std::vector<Expr*>& getChildren() const;
 
         virtual std::string toString() const;
 

@@ -775,13 +775,15 @@ namespace EUROPA {
     if(!isMember(value))
       empty();
     else {
-      bool changed = (m_lb != value || m_ub != value);
-      if(changed == true){
+      //TODO: possibly add a "specify" to domains that publishes rather than 
+      //forcing this method to publish all the time
+      // bool changed = (m_lb != value || m_ub != value);
+      // if(changed == true){
 	m_lb = value;
 	m_ub = value;
 
 	notifyChange(DomainListener::SET_TO_SINGLETON);
-      }
+      // }
     }
   }
 

@@ -27,6 +27,8 @@
 
 #include "NddlRules.hh"
 #include "NddlUtils.hh"
+#include <typeinfo>
+#include <iterator>
 
 namespace EUROPA {
 
@@ -370,6 +372,13 @@ namespace EUROPA {
     : m_func(func)
     , m_args(args)
   {
+    checkError(func.isValid(), "Constructed with invalid function pointer.");
+    for(std::vector<CExpr*>::const_iterator it = m_args.begin(); 
+        it != m_args.end(); ++it) {
+      checkError((*it) != NULL, "Constructed CFunction " << func->getName() << 
+                 " with a null argument at position " << 
+                 std::distance<std::vector<CExpr*>::const_iterator>(m_args.begin(), it));
+    }
   }
 
   void CExprFunction::checkType()
@@ -401,8 +410,10 @@ namespace EUROPA {
   std::string CExprFunction::toString() const
   {
       std::string args = "";
-      for (unsigned int i = 0; i < m_args.size(); i++)
-          args += m_args[i]->toString() + std::string("_");
+      for (unsigned int i = 0; i < m_args.size(); i++) {
+        checkError(m_args[i] != NULL, "??");
+        args += m_args[i]->toString() + std::string("_");
+      }
 
       return m_func->getName().toString() + "__" + args + "_";
   }
@@ -1068,8 +1079,8 @@ namespace EUROPA {
   }
 
   const std::string& ExprIfGuard::getOperator() { return m_op; }
-  Expr* ExprIfGuard::getLhs() { return m_lhs; }
-  Expr* ExprIfGuard::getRhs() { return m_rhs; }
+  Expr* ExprIfGuard::getLhs() const { return m_lhs; }
+  Expr* ExprIfGuard::getRhs() const { return m_rhs; }
 
   DataRef ExprIfGuard::eval(EvalContext& context) const
   {
@@ -1120,42 +1131,50 @@ namespace EUROPA {
 
     if (m_guard->getRhs() != NULL) {
       DataRef rhs = m_guard->getRhs()->eval(context);
-      context.getRuleInstance()->addChildRule(
-					      new InterpretedRuleInstance(
-									  context.getRuleInstance()->getId(),
-									  lhs.getValue(),
-									  rhs.getValue()->lastDomain(),
-									  isOpEquals,
-									  m_ifBody
-									  )
-					      );
-
+      std::vector<ConstrainedVariableId> vars;
+      getVariableReferences(m_guard, context, vars);
+      InterpretedRuleInstance* iri = 
+          new InterpretedRuleInstance(context.getRuleInstance()->getId(),
+                                      lhs.getValue(),
+                                      rhs.getValue()->lastDomain(),
+                                      isOpEquals,
+                                      vars,
+                                      m_ifBody);
+      context.getRuleInstance()->addChildRule(iri);
+      
       if (m_elseBody.size() > 0) {
-          context.getRuleInstance()->addChildRule(
-                              new InterpretedRuleInstance(
-                                          context.getRuleInstance()->getId(),
-                                          lhs.getValue(),
-                                          rhs.getValue()->lastDomain(),
-                                          !isOpEquals,
-                                          m_elseBody
-                                          )
-                              );
+        InterpretedRuleInstance* elseBody =
+            new InterpretedRuleInstance(
+                context.getRuleInstance()->getId(),
+                lhs.getValue(),
+                rhs.getValue()->lastDomain(),
+                !isOpEquals,
+                vars,
+                m_elseBody);
+        context.getRuleInstance()->addChildRule(elseBody);
       }
 
-      debugMsg("Interpreter:InterpretedRule","Evaluated IF " << m_guard->toString());
+      debugMsg("Interpreter:InterpretedRule","Evaluated simple IF " << m_guard->toString());
     }
     else {
+      // std::vector<ConstrainedVariableId> vars;
+      // getVariableReferences(m_guard, context, vars);
+      // condDebugMsg(!vars.empty(), "Interpreter:evalIf",
+      //              "For " << toString() << ", have the following variables: ");
+      // for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
+      //     ++it) {
+      //   debugMsg("Interpreter:evalIf", (*it)->toLongString());
+      // }
+      checkRuntimeError(ALWAYS_FAILS, "Didn't expect to get here.")
       context.getRuleInstance()->addChildRule(
-					      new InterpretedRuleInstance(
-									  context.getRuleInstance()->getId(),
-									  makeScope(lhs.getValue()),
-									  isOpEquals,
-									  m_ifBody
-									  )
-					      );
+          new InterpretedRuleInstance(
+              context.getRuleInstance()->getId(),
+              makeScope(lhs.getValue()),
+              isOpEquals,
+              m_ifBody));
 
       check_runtime_error(m_elseBody.size()==0, "Can't have else body for singleton guard");
-      debugMsg("Interpreter:InterpretedRule","Evaluated IF " << m_guard->toString());
+      debugMsg("Interpreter:InterpretedRule","Evaluated mult-var IF " << m_guard->toString());
     }
 
     return DataRef::null;
@@ -1509,6 +1528,17 @@ namespace EUROPA {
 						   const bool positive,
 						   const std::vector<Expr*>& body)
     : RuleInstance(parent,var,domain,positive)
+    , m_body(body)
+  {
+  }
+
+InterpretedRuleInstance::InterpretedRuleInstance(const RuleInstanceId& parent,
+                                                 const ConstrainedVariableId& var,
+                                                 const Domain& domain,
+                                                 const bool positive,
+                                                 const std::vector<ConstrainedVariableId>& guardComponents,
+                                                 const std::vector<Expr*>& body)
+    : RuleInstance(parent,var,domain,positive, guardComponents)
     , m_body(body)
   {
   }
@@ -2412,6 +2442,90 @@ namespace EUROPA {
 
       return os.str();
   }
+
+void getVariableReferences(const Expr* expr, EvalContext& ctx, 
+                           std::vector<ConstrainedVariableId>& dest) {
+  checkError(expr != NULL, "Weird.  Expression pointer is null.");
+  debugMsg("getVariableReferences", "Getting refs from " << expr->toString());
+  if(dynamic_cast<const ExprList*>(expr) != NULL) {
+    const ExprList* e = dynamic_cast<const ExprList*>(expr);
+    for(std::vector<Expr*>::const_iterator it = e->getChildren().begin();
+        it != e->getChildren().end(); ++it) {
+      getVariableReferences(*it, ctx, dest);
+    }
+  }
+  //ExprNoop -> nothing
+  //What to do about ExprConstructorSuperCall?
+  else if(dynamic_cast<const ExprConstant*>(expr) != NULL) {
+    //we may want to grab these after all, but for now, do nothing
+  }
+  //ExprVarDeclaration -> ?
+  else if(dynamic_cast<const ExprVarRef*>(expr) != NULL) {
+    dest.push_back(dynamic_cast<const ExprVarRef*>(expr)->eval(ctx).getValue());
+  }
+  //ExprVarRef -> ?
+  //ExprAssignment -> ?
+  else if(dynamic_cast<const ExprConstraint*>(expr) != NULL) {
+    const ExprConstraint* e = dynamic_cast<const ExprConstraint*>(expr);
+    for(std::vector<Expr*>::const_iterator it = e->getArgs().begin();
+        it != e->getArgs().end(); ++it) {
+      getVariableReferences(*it, ctx, dest);
+    }
+  }
+  //ExprTypedef -> nothing
+  //ExprEnumdef -> nothing
+  //ExprObjectTypeDeclaration -> nothing
+  //ExprObjectTypeDefinition -> nothing
+  //ExprRuleTypeDefinition -> nothing
+  else if(dynamic_cast<const ExprMethodCall*>(expr) != NULL) {
+    const ExprMethodCall* e = dynamic_cast<const ExprMethodCall*>(expr);
+    for(std::vector<Expr*>::const_iterator it = e->getArgs().begin();
+        it != e->getArgs().end(); ++it) {
+      getVariableReferences(*it, ctx, dest);
+    }
+  }
+  //ExprVariableMethod -> ?
+  //ExprObjectMethod -> ?
+  //ExprTokenMethod -> ?
+  //ExprNewObject -> ?
+  //ExprProblemStatement -> ?
+  //ExprRelation -> ?
+  else if(dynamic_cast<const CExpr*>(expr) != NULL) {
+    if(dynamic_cast<const CExprFunction*>(expr) != NULL) {
+      const CExprFunction* e = dynamic_cast<const CExprFunction*>(expr);
+      for(std::vector<CExpr*>::const_iterator it = e->getArgs().begin();
+          it != e->getArgs().end(); ++it) {
+        getVariableReferences(*it, ctx, dest);
+      }
+    }
+    else if(dynamic_cast<const CExprValue*>(expr) != NULL) {
+      //not sure this is right
+      dest.push_back(dynamic_cast<const CExprValue*>(expr)->eval(ctx).getValue());
+    }
+    else if(dynamic_cast<const CExprBinary*>(expr) != NULL) {
+      const CExprBinary* e = dynamic_cast<const CExprBinary*>(expr);
+      getVariableReferences(e->getLhs(), ctx, dest);
+      getVariableReferences(e->getRhs(), ctx, dest);
+    }
+    else {
+      checkRuntimeError(ALWAYS_FAIL, 
+                        "getVariableReferences doesn't know how to with this subclass" <<
+                        " of CExpr " <<
+                        expr->toString() << " <" << typeid(expr).name() << ">");
+    }
+  }
+  //RuleExpr -> ?
+  else if(dynamic_cast<const ExprIfGuard*>(expr) != NULL) {
+    const ExprIfGuard* e = dynamic_cast<const ExprIfGuard*>(expr);
+    getVariableReferences(e->getLhs(), ctx, dest);
+    getVariableReferences(e->getRhs(), ctx, dest);
+  }
+  else {
+    checkRuntimeError(ALWAYS_FAIL, 
+                      "getVariableReferences doesn't know how to with this " <<
+                      expr->toString() << " <" << typeid(expr).name() << ">");
+  }
+}
 
 }
 

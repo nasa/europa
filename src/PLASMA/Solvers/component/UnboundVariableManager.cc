@@ -58,9 +58,13 @@ namespace EUROPA {
 	return true;
 
       // We also exclude singletons 
-      if(var->lastDomain().isSingleton()){
-	debugMsg("UnboundVariableManager:dynamicMatch",  "Excluding " << var->getKey() << " as a singleton.");
-	return true;
+      // if(var->lastDomain().isSingleton()){
+      //   debugMsg("UnboundVariableManager:dynamicMatch",  "Excluding " << var->getKey() << " as a singleton.");
+      //   return true;
+      // }
+      if(var->isSpecified()) {
+        debugMsg("UnboundVariableManager:dynamicMatch",  "Excluding " << var->getKey() << " as already specified.");
+        return true;
       }
 
       // Finally, we exlude if the bounds are not finite
@@ -79,12 +83,11 @@ namespace EUROPA {
       debugMsg("UnboundVariableManager:updateFlaw", var->toLongString());
       m_flawCandidates.erase(var);
 
-      if(variableOfNonActiveToken(var) || !var->canBeSpecified() || var->isSpecified() || var->isSingleton() || staticMatch(var)){
+      if(variableOfNonActiveToken(var) || !var->canBeSpecified() || var->isSpecified() || staticMatch(var)){
         debugMsg("UnboundVariableManager:updateFlaw", "Excluding  " << var->toLongString());
         condDebugMsg(variableOfNonActiveToken(var), "UnboundVariableManager:updateFlaw", "Parent is not active.");
         condDebugMsg(!var->canBeSpecified(), "UnboundVariableManager:updateFlaw", "Variable can't be specified.");
         condDebugMsg(var->isSpecified(), "UnboundVariableManager:updateFlaw", "Variable is already specified.");
-        condDebugMsg(var->isSingleton(), "UnboundVariableManager:updateFlaw", "Variable is already singleton.");
         return;
       }
 

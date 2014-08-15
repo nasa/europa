@@ -129,18 +129,19 @@ namespace EUROPA {
 
   ExprList::~ExprList()
   {
-      for (unsigned int i=0;i<m_children.size();i++)
-          delete m_children[i];
+    for(std::vector<Expr*>::iterator it = m_children.begin(); it != m_children.end();
+        ++it)
+      delete *it;
   }
 
-  const std::vector<Expr*>& ExprList::getChildren() { return m_children; }
+  const std::vector<Expr*>& ExprList::getChildren() const { return m_children; }
 
   DataRef ExprList::eval(EvalContext& context) const
   {
       DataRef result;
-
-      for (unsigned int i=0;i<m_children.size();i++)
-          result = m_children[i]->eval(context);
+      for(std::vector<Expr*>::const_iterator it = m_children.begin(); 
+          it != m_children.end(); ++it)
+        result = (*it)->eval(context);
 
       return result;
   }
@@ -154,8 +155,9 @@ namespace EUROPA {
   {
       std::ostringstream os;
 
-      for (unsigned int i=0;i<m_children.size();i++)
-          os << m_children[i]->toString() << std::endl;
+      for(std::vector<Expr*>::const_iterator it = m_children.begin(); 
+          it != m_children.end(); ++it)
+        os << (*it)->toString() << std::endl;
 
       return os.str();
   }
