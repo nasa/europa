@@ -12,38 +12,17 @@ namespace EUROPA {
     return(os);
   }
 
-  DomainComparator* DomainComparator::s_instance = NULL;
-
   /**
    * @brief Constructor overwrites prior static instance, effecting a last-writer wins policy
    * for establishing the shared allocator.
    */
   DomainComparator::DomainComparator(){
-    // Assign instance to current value
-    s_instance = this;
   }
 
   /**
    * @brief On destruction, if the static instance is this object, then set it to null.
    */
   DomainComparator::~DomainComparator(){
-    if(s_instance == this)
-      s_instance = NULL;
-  }
-
-  const DomainComparator& DomainComparator::getComparator(){
-    if(s_instance == NULL)
-      new DomainComparator();
-    return *s_instance;
-  }
-
-  void  DomainComparator::setComparator(DomainComparator* comparator) {
-    //check_error(s_instance == NULL, "The comparator can only be set when it is currently null");
-    s_instance = comparator;
-  }
-
-  bool DomainComparator::comparatorIsNull() {
-    return s_instance == NULL;
   }
 
   /**
@@ -168,7 +147,7 @@ namespace EUROPA {
     debugMsg("Domain:canBeCompared", "type of domx " << domx.getTypeName().toString() << " type of domy " << domy.getTypeName().toString());
     debugMsg("Domain:canBeCompared", domx.toString());
     debugMsg("Domain:canBeCompared", domy.toString());
-    bool result = DomainComparator::getComparator().canCompare(domx, domy);
+    bool result = domx.getDataType()->canBeCompared(domy.getDataType());
     debugMsg("Domain:canBeCompared", "returning " << result);
     return result;
   }

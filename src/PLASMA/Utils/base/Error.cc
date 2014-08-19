@@ -22,6 +22,7 @@
 /* Contains the rest of this file */
 
 #include "Error.hh"
+#include "Mutex.hh"
 
 #ifdef __BEOS__
 #include <OS.h>
@@ -32,6 +33,9 @@ bool Error::s_throw = false;
 bool Error::s_printErrors = true;
 bool Error::s_printWarnings = true;
 
+namespace {
+pthread_mutex_t outputMutex = PTHREAD_MUTEX_INITIALIZER;
+}
 Error::Error(const std::string& condition, const std::string& file, const int& line)
   : m_condition(condition), m_file(file), m_line(line), m_type("Error") {
   if (s_os == 0)
@@ -82,6 +86,7 @@ void Error::display() {
     return;
   std::cout.flush();
   std::cerr.flush();
+  EUROPA::MutexGrabber grabber(outputMutex);
   getStream() << '\n' << m_file << ':' << m_line << ": Error: " << m_condition << " is false";
   if (!m_msg.empty())
     getStream() << "\n\t" << m_msg;
@@ -93,6 +98,7 @@ void Error::printWarning(const std::string& msg,
                          const int& line) {
   if (!displayWarnings())
     return;
+  EUROPA::MutexGrabber grabber(outputMutex);
   getStream() << file << ':' << line << ": Warning: " << msg << std::endl;
 }
 

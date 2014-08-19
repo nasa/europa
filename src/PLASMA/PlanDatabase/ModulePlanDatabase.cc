@@ -13,11 +13,6 @@
 
 namespace EUROPA {
 
-  static bool & planDatabaseInitialized() {
-    static bool sl_alreadyDone(false);
-    return sl_alreadyDone;
-  }
-
   ModulePlanDatabase::ModulePlanDatabase()
       : Module("PlanDatabase")
   {
@@ -30,15 +25,10 @@ namespace EUROPA {
 
   void ModulePlanDatabase::initialize()
   {
-      if(planDatabaseInitialized())
-    	  return;
-
-	  planDatabaseInitialized() = true;
   }
 
   void ModulePlanDatabase::uninitialize()
   {
-	  planDatabaseInitialized() = false;
   }
 
   class NddlXmlTxnInterpreter : public LanguageInterpreter

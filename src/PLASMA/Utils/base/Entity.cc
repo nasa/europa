@@ -1,51 +1,161 @@
 #include "Entity.hh"
 #include "Debug.hh"
+#include "Mutex.hh"
+
 #include <sstream>
+#include <tr1/functional>
 
 namespace EUROPA {
+class EntityInternals {
+ public:
+  EntityInternals(): m_entitiesByKey(), m_discardedEntities(), m_purgeStatus(false), 
+                     m_gcActive(false), m_gcRequired(false), m_key(0) {}
 
-  Entity::Entity(): m_key(allocateKey()), m_refCount(1), m_discarded(false){
-    entitiesByKey().insert(std::make_pair(m_key, (unsigned long int) this));
-    check_error(!isPurging());
-    debugMsg("Entity:Entity", "Allocating " << m_key);
+  eint allocateKey(const Entity* const e){
+    eint retval = m_key++;
+    m_entitiesByKey.insert(std::make_pair(retval, 
+                                          reinterpret_cast<unsigned long int>(e)));
+    return retval;
   }
-
-  Entity::~Entity(){
-    checkError(gcActive() || ! gcRequired(), m_key << " deleted outside of gabage collection when prohibited from doing so.");
-    discardedEntities().erase(this);
-    discard(false);
+  
+  void erase(const eint key) {
+    m_entitiesByKey.erase(key);
   }
-
-  void Entity::handleDiscard(){
-    if(!Entity::isPurging()){
-
-      // Notify dependents
-      for(std::set<Entity*>::const_iterator it = m_dependents.begin(); it != m_dependents.end(); ++it){
-	Entity* entity = *it;
-	entity->notifyDiscarded(this);
-      }
-
-      m_dependents.clear();
-
-      check_error(m_externalEntity.isNoId() || m_externalEntity.isValid());
-      // If this entity has been integrated with an external entity, then delete the external
-      // entity.
-      if(!m_externalEntity.isNoId())
-	m_externalEntity->discard();
-
-      debugMsg("Entity:discard", "Deallocating " << m_key);
-
-      condDebugMsg(!canBeDeleted(), "Entity:warning",
-		   "(" << getKey() << ") being deleted with " << m_refCount << " outstanding references.");
+  EntityId getEntity(const eint key) const {
+    EntityId entity;
+    std::map<eint, unsigned long int>::const_iterator it = m_entitiesByKey.find(key);
+    if(it != m_entitiesByKey.end())
+      entity = static_cast<EntityId>(it->second);
+    return entity;
+  }
+  void getEntities(std::set<EntityId>& resultSet) const {
+    for(std::map<eint, unsigned long int>::const_iterator it = m_entitiesByKey.begin();
+	it != m_entitiesByKey.end();
+	++it){
+      resultSet.insert(static_cast<EntityId>(it->second));
     }
-    entitiesByKey().erase(m_key);
+
   }
+  void purgeStarted() {
+    check_error(!m_purgeStatus);
+    m_purgeStatus = true;
+  }
+  void purgeEnded() {
+    check_error(m_purgeStatus);
+    m_purgeStatus = false;
+  }
+  bool isPurging() const {
+    return m_purgeStatus;
+  }
+  bool isPooled(Entity* e) const {
+    return m_discardedEntities.find(e) != m_discardedEntities.end();
+  }
+  bool gcActive() const {return m_gcActive;}
+  unsigned int garbageCollect() {
+    // Flag activation of garbage collector
+    m_gcActive = true;
+    
+    unsigned int count(0);
+    while(!m_discardedEntities.empty()){
+      std::set<Entity*>::iterator it = m_discardedEntities.begin();
+      Entity* entity = *it;
+      m_discardedEntities.erase(entity);
+      checkError(isPurging() || entity->canBeDeleted(),
+		 "Key:" << entity->getKey() << " RefCount:" << entity->refCount());
+      debugMsg("Entity:garbageCollect",
+               "Garbage collecting entity " << entity->getEntityName() << "(" << 
+               entity->getKey() << ")");
+      delete (Entity*) entity;
+      count++;
+    }
+
+    // Flag completion of garbage collector
+    m_gcActive = false;
+
+    return count;
+
+  }
+  bool gcRequired() const {return m_gcRequired;}
+  void discard(Entity* e) {
+    m_discardedEntities.erase(e);
+  }
+  void pool(Entity* e) {
+    m_discardedEntities.insert(e);
+  }
+ private:
+  EntityInternals(const EntityInternals& o);
+
+  std::map<eint, unsigned long int> m_entitiesByKey;
+  std::set<Entity*> m_discardedEntities;
+  bool m_purgeStatus, m_gcActive, m_gcRequired;
+  int m_key;
+};
 
 
-  const std::string& Entity::getEntityType() const {
-	  static const std::string ENTITY_STR("Entity");
-	  return ENTITY_STR;
+namespace {
+static EntityInternals entityInternals;
+static pthread_mutex_t entityMutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
+
+typedef std::pair<MutexGrabber, std::tr1::reference_wrapper<EntityInternals> >
+internals_accessor;
+internals_accessor internals() {
+  MutexGrabber grabber(entityMutex);
+  return std::make_pair<MutexGrabber,
+                        std::tr1::reference_wrapper<EntityInternals> >(grabber, 
+                                                                       std::tr1::ref(entityInternals));
+}
+}
+
+
+Entity::Entity(): m_key(0), m_refCount(1), m_discarded(false){
+  internals_accessor i(internals());
+  m_key = i.second.get().allocateKey(this);
+  check_error(!i.second.get().isPurging());
+  debugMsg("Entity:Entity", "Allocating " << m_key);
+}
+
+Entity::~Entity(){
+  internals_accessor i = internals();
+  checkError(i.second.get().gcActive() || !i.second.get().gcRequired(), 
+             m_key << " deleted outside of gabage collection when prohibited from " <<
+             "doing so.");
+  i.second.get().discard(this);
+  discard(false);
+}
+
+void Entity::handleDiscard(){
+  internals_accessor i = internals();
+  if(!i.second.get().isPurging()){
+    //explicitly releasing the mutex here because these notifications may cause
+    //client code to get executed
+    i.first.release();
+    // Notify dependents
+    for(std::set<Entity*>::const_iterator it = m_dependents.begin(); it != m_dependents.end(); ++it){
+      Entity* entity = *it;
+      entity->notifyDiscarded(this);
+    }
+    
+    m_dependents.clear();
+    
+    check_error(m_externalEntity.isNoId() || m_externalEntity.isValid());
+    // If this entity has been integrated with an external entity, then delete the external
+    // entity.
+    if(!m_externalEntity.isNoId())
+      m_externalEntity->discard();
+    
+    debugMsg("Entity:discard", "Deallocating " << m_key);
+    
+    condDebugMsg(!canBeDeleted(), "Entity:warning",
+                 "(" << getKey() << ") being deleted with " << m_refCount << " outstanding references.");
   }
+  i.second.get().erase(m_key);
+}
+
+
+const std::string& Entity::getEntityType() const {
+  static const std::string ENTITY_STR("Entity");
+  return ENTITY_STR;
+}
 
   std::string Entity::toString() const
   {
@@ -72,20 +182,12 @@ namespace EUROPA {
 
   bool Entity::canBeCompared(const EntityId&) const{ return true;}
 
-  EntityId Entity::getEntity(eint key){
-    EntityId entity;
-    std::map<eint, unsigned long int>::const_iterator it = entitiesByKey().find(key);
-    if(it != entitiesByKey().end())
-      entity = (EntityId) it->second;
-    return entity;
+  EntityId Entity::getEntity(const eint key){
+    return internals().second.get().getEntity(key);
   }
 
   void Entity::getEntities(std::set<EntityId>& resultSet){
-    for(std::map<eint, unsigned long int>::const_iterator it = entitiesByKey().begin();
-	it != entitiesByKey().end();
-	++it){
-      resultSet.insert((EntityId) it->second);
-    }
+    return internals().second.get().getEntities(resultSet);
   }
 
   void Entity::setExternalEntity(const EntityId& externalEntity){
@@ -111,33 +213,21 @@ namespace EUROPA {
     return m_externalEntity;
   }
 
-  std::map<eint, unsigned long int>& Entity::entitiesByKey(){
-    static std::map<eint, unsigned long int> sl_entitiesByKey;
-    return sl_entitiesByKey;
-  }
-
   const PSEntity* Entity::getExternalPSEntity() const {
     return (const PSEntity*) getExternalEntity();
   }
 
   void Entity::purgeStarted(){
-    check_error(!isPurging());
-    getPurgeStatus() = true;
+    internals().second.get().purgeStarted();
   }
 
-  void Entity::purgeEnded(){
-    check_error(isPurging());
-    getPurgeStatus() = false;
-  }
+void Entity::purgeEnded(){
+  internals().second.get().purgeEnded();
+}
 
-  bool Entity::isPurging(){
-    return getPurgeStatus();
-  }
-
-  bool& Entity::getPurgeStatus(){
-    static bool sl_isPurging(false);
-    return sl_isPurging;
-  }
+bool Entity::isPurging(){
+  return internals().second.get().isPurging();
+}
 
   unsigned int Entity::refCount() const { return m_refCount; }
 
@@ -171,7 +261,7 @@ namespace EUROPA {
     handleDiscard();
 
     if(pool)
-      discardedEntities().insert(this);
+      internals().second.get().pool(this);
   }
 
   bool Entity::isDiscarded() const {
@@ -189,54 +279,10 @@ namespace EUROPA {
   void Entity::notifyDiscarded(const Entity* entity) {}
 
   bool Entity::isPooled(Entity* entity) {
-    std::set<Entity*>& entities = discardedEntities();
-    return entities.find(entity) != entities.end();
+    return internals().second.get().isPooled(entity);
   }
 
   unsigned int Entity::garbageCollect(){
-    // Flag activation of garbage collector
-    gcActive() = true;
-
-    std::set<Entity*>& entities = discardedEntities();
-    unsigned int count(0);
-    while(!entities.empty()){
-      std::set<Entity*>::iterator it = entities.begin();
-      Entity* entity = *it;
-      entities.erase(entity);
-      checkError(isPurging() || entity->canBeDeleted(),
-		 "Key:" << entity->getKey() << " RefCount:" << entity->refCount());
-      debugMsg("Entity:garbageCollect", "Garbage collecting entity " << entity->getEntityName() << "(" << entity->getKey() << ")");
-      delete (Entity*) entity;
-      count++;
-    }
-
-    // Flag completion of garbage collector
-    gcActive() = false;
-
-    return count;
+    return internals().second.get().garbageCollect();
   }
-
-  bool& Entity::gcActive(){
-    static bool sl_val(false);
-    return sl_val;
-  }
-
-  bool& Entity::gcRequired(){
-    static bool sl_val(false);
-    return sl_val;
-  }
-
-  std::set<Entity*>& Entity::discardedEntities(){
-    static std::set<Entity*> sl_instance;
-    return sl_instance;
-  }
-
-  eint Entity::allocateKey(){
-    static eint sl_key(0);
-    sl_key++;
-    return sl_key;
-  }
-
-
-
 }

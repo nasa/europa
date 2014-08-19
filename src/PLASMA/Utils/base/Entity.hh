@@ -8,6 +8,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <tr1/functional>
 
 #include "PSUtils.hh"
 
@@ -165,10 +166,6 @@ namespace EUROPA{
      */
     static unsigned int garbageCollect();
 
-    /**
-     * @brief Configure system to require garbage collection
-     */
-    static bool& gcRequired();
 
   protected:
     Entity();
@@ -182,28 +179,16 @@ namespace EUROPA{
 
   private:
 
-	  
-    static eint allocateKey();
-
-	  
-    /**
-     * @brief Internal variable indicating if garbage collection is active
-     */
-    static bool& gcActive();
-
     /**
      * @brief Subclasses should over-ride this to handle special data structure management.
      */
     virtual void notifyDiscarded(const Entity* entity);
 
-    const eint m_key;
+    eint m_key;
     
     unsigned int m_refCount;
     bool m_discarded;
     std::set<Entity*> m_dependents;
-    static std::map<eint, unsigned long int>& entitiesByKey();
-    static std::set<Entity*>& discardedEntities();
-    static bool& getPurgeStatus();
   };
 
   /**

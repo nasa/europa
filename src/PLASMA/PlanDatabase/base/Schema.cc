@@ -87,7 +87,7 @@ namespace EUROPA {
     if(isObjectType(domx.getTypeName()) || isObjectType(domy.getTypeName()))
       return(isObjectType(domx.getTypeName()) && isObjectType(domy.getTypeName()));
 
-    return DomainComparator::canCompare(domx, domy);
+    return domx.getDataType()->canBeCompared(domy.getDataType());
   }
 
   void Schema::reset(){

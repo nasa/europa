@@ -126,8 +126,8 @@ namespace EUROPA{
 								     inferred to be equivalent. This changes when constraints are added or removed. */
     bool m_requiresUpdate; /**< Indicates of we must recompute all graps. True of a constraint has been removed. Made false by recomputing. */
 
-    static int s_nextCycle; /**< Monotonically increasing counter used to ensure we do not visit nodes more than once when recomputing a graph.*/
-    static int s_nextGraph; /**< Monotnically increasing counter used to allocate new graph keys when the need arises to recompute a graph. The
+    int m_nextCycle; /**< Monotonically increasing counter used to ensure we do not visit nodes more than once when recomputing a graph.*/
+    int m_nextGraph; /**< Monotnically increasing counter used to allocate new graph keys when the need arises to recompute a graph. The
 			      cases are when a constraint addition occurs, thus allowing for the possibility of graph merging, or a constraint
 			      removal occurs allowing for the possibility of graph splitting. */
   };
