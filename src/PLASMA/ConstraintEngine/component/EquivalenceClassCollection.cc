@@ -53,7 +53,7 @@ namespace EUROPA{
     n1->addNeighbour(n2);
     n2->addNeighbour(n1);
     if(!recomputeIfNecessary()){ // Most commonly this will be true, meaning no full reprop was required.
-      s_nextCycle++;
+      m_nextCycle++;
       recomputeSingleGraph(n1);
     }
   }
@@ -118,13 +118,13 @@ namespace EUROPA{
     m_requiresUpdate = false;
 
     // Increment the cycle count to force all nodes to be tested again.
-    s_nextCycle++;
+    m_nextCycle++;
 
     // Iterate over all nodes
     for(std::map<ConstrainedVariableId, ConstraintNodeId>::iterator it = m_nodesByVar.begin(); it != m_nodesByVar.end(); ++it){
       const ConstraintNodeId& node = it->second;
       check_error(node.isValid());
-      if(!node->hasBeenUpdated(s_nextCycle)) // means we have a new graph to build.
+      if(!node->hasBeenUpdated(m_nextCycle)) // means we have a new graph to build.
 	recomputeSingleGraph(node);
     }
 
@@ -132,18 +132,18 @@ namespace EUROPA{
   }
 
   void EquivalenceClassCollection::recomputeSingleGraph(const ConstraintNodeId& node){
-    s_nextGraph++;
+    m_nextGraph++;
     // Initialize new graph with an empty set and obtain the reference to fill it up
     std::set<ConstrainedVariableId> emptySet;
     std::map<int, std::set<ConstrainedVariableId> >::iterator  newGraphEntry =
-      m_graphsByKey.insert(std::pair<int, std::set<ConstrainedVariableId> >(s_nextGraph, emptySet)).first;
+      m_graphsByKey.insert(std::pair<int, std::set<ConstrainedVariableId> >(m_nextGraph, emptySet)).first;
 
-    check_error(newGraphEntry->first == s_nextGraph);
+    check_error(newGraphEntry->first == m_nextGraph);
     std::set<ConstrainedVariableId>& newGraph = newGraphEntry->second;
 
     // Now fill it up
     std::set<int> graphKeysToRemove;
-    node->update(s_nextCycle, newGraph, s_nextGraph, graphKeysToRemove);
+    node->update(m_nextCycle, newGraph, m_nextGraph, graphKeysToRemove);
     check_error(graphKeysToRemove.size() <= 2);
     for(std::set<int>::iterator it = graphKeysToRemove.begin(); it != graphKeysToRemove.end(); ++it)
       m_graphsByKey.erase(*it);
@@ -175,6 +175,4 @@ namespace EUROPA{
     return true;
   }
 
-  int EquivalenceClassCollection::s_nextCycle(0);
-  int EquivalenceClassCollection::s_nextGraph(0);
 }

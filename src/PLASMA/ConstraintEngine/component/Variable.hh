@@ -146,20 +146,24 @@ namespace EUROPA {
   const DomainType& Variable<DomainType>::getDerivedDomain() {
     if (!getConstraintEngine()->isPropagating() && pending())
       update();
+    
+    if(provenInconsistent())
+      m_derivedDomain->empty();
+    return *m_derivedDomain;
 
-    if (!provenInconsistent())
-      return(*m_derivedDomain);
+    // if (!provenInconsistent())
+    //   return(*m_derivedDomain);
 
-    static bool sl_initialized = false;
-    static DomainType* sl_emptyDomain = 0;
-    if (!sl_initialized) {
-      sl_emptyDomain = static_cast<DomainType*>(m_derivedDomain->copy());
-      if (sl_emptyDomain->isOpen())
-        sl_emptyDomain->close();
-      sl_emptyDomain->empty();
-      sl_initialized = true;
-    }
-    return(*sl_emptyDomain);
+    // static bool sl_initialized = false;
+    // static DomainType* sl_emptyDomain = 0;
+    // if (!sl_initialized) {
+    //   sl_emptyDomain = static_cast<DomainType*>(m_derivedDomain->copy());
+    //   if (sl_emptyDomain->isOpen())
+    //     sl_emptyDomain->close();
+    //   sl_emptyDomain->empty();
+    //   sl_initialized = true;
+    // }
+    // return(*sl_emptyDomain);
   }
 
   template<class DomainType>

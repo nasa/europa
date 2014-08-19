@@ -26,7 +26,7 @@ class UtilitiesTest {
 public:
   static bool test() {
     std::string tokenizedString("A$B$C$D$");
-    const std::list<edouble>& tokens = listFromString(tokenizedString, false);
+    const std::list<edouble> tokens = listFromString(tokenizedString, false);
     CPPUNIT_ASSERT(tokens.size() == 4);
     std::string newString;
     for(std::list<edouble>::const_iterator it = tokens.begin(); it != tokens.end(); ++it){
@@ -36,7 +36,7 @@ public:
     CPPUNIT_ASSERT(newString == tokenizedString);
 
     std::string numberStr("1$2.45$3.04$-8.9$");
-    const std::list<edouble>& numbers= listFromString(numberStr, true);
+    const std::list<edouble> numbers= listFromString(numberStr, true);
     edouble sum = 0;
 
     for(std::list<edouble>::const_iterator it = numbers.begin(); it != numbers.end(); ++it){

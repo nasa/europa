@@ -11,22 +11,20 @@
 namespace NDDL {
 
   /**
-   * @brief Strip out values delimited in the string. Return by ref to avoid
-   * unnecessary copying.
+   * @brief Strip out values delimited in the string.
    */
-  const std::list<edouble>& listFromString(const std::string& str, bool isNumeric){
+  std::list<edouble> listFromString(const std::string& str, bool isNumeric){
     static const std::string sl_delimiter("$");
-    static std::list<edouble> sl_values;
-    sl_values.clear();
+    std::list<edouble> values;
     std::vector<std::string> tokens;
     tokenize(str, tokens, sl_delimiter);
     for(std::vector<std::string>::const_iterator it = tokens.begin(); it != tokens.end(); ++it){
       if(isNumeric)
-	sl_values.push_back(toValue<edouble>(*it));
+	values.push_back(toValue<edouble>(*it));
       else
-	sl_values.push_back(LabelStr(*it));
+	values.push_back(LabelStr(*it));
     }
-    return sl_values;
+    return values;
   }
 
   TokenId allocateOnSameObject(const TokenId& master, const LabelStr& predicateSuffix, const LabelStr& relationToMaster){

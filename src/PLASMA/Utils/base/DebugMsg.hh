@@ -162,8 +162,7 @@ private:
    * @note Should only be called from static member functions.
    */
   DebugMessage(const std::string& file, const int& line,
-               const std::string& marker,
-               const bool& enabled = DebugMessage::allEnabled());
+               const std::string& marker);
 
   /**
    * @class DebugPattern Debug.hh
@@ -192,6 +191,13 @@ private:
       : m_file(f), m_pattern(m) {
     }
 
+    DebugPattern(const DebugPattern& o) : m_file(o.m_file), m_pattern(o.m_pattern) {}
+
+    DebugPattern& operator=(const DebugPattern& o) {
+      const_cast<std::string&>(m_file) = o.m_file;
+      const_cast<std::string&>(m_pattern) = o.m_pattern;
+      return *this;
+    }
     /**
      * @brief The source file(s) that matches the pattern.
      */
@@ -215,6 +221,7 @@ private:
   }
 
 public:
+  class DebugInternals;
 
   /**
     @brief Create a new DebugMessage.  Should only be called from the
@@ -270,7 +277,7 @@ public:
   /**
     @brief Get list of all debug known messages.
    */
-  static const std::list<DebugMessage*>& getAllMsgs();
+  static std::list<DebugMessage*> getAllMsgs();
 
   /**
     @brief Enable all debug messages, including ones not yet created.
@@ -416,7 +423,6 @@ public:
   }
 
 private:
-
   /**
     @brief The pointer to the stream being used.
     @note Has to be a pointer because some C++ compiler
@@ -425,22 +431,6 @@ private:
   inline static oSptr& streamPtr() {
     static oSptr s_debugStream = &(std::cerr);
     return(s_debugStream);
-  }
-
-  /**
-    @brief List of pointers to all debug messages.
-  */
-  static std::list<DebugMessage*>& allMsgs() {
-    static std::list<DebugMessage*> s_msgs;
-    return(s_msgs);
-  }
-
-  /**
-    @brief List of all enabled debug patterns.
-  */
-  static std::list<DebugPattern>& enabledPatterns() {
-    static std::list<DebugPattern> s_patterns;
-    return(s_patterns);
   }
 
   /**

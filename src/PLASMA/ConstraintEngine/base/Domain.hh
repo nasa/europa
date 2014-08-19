@@ -70,28 +70,10 @@ namespace EUROPA {
     virtual ~DomainComparator();
 
     /**
-     * @brief Retrieve the singleton comparator
-     */
-    static const DomainComparator& getComparator();
-
-    /**
      * @brief Tests if domains can be compared.
      */
     virtual bool canCompare(const Domain& domx, const Domain& domy) const;
 
-    /**
-     * @brief Set the comparator to be used. Can only be set if it is currently null.
-     */
-    static void setComparator(DomainComparator* comparator);
-
-    /**
-     * @brief return true iff comparator is null. False otherwise.
-     */
-    bool comparatorIsNull();
-
-
-  private:
-    static DomainComparator* s_instance; /*!< Access pointer location. Enforces singleton pattern */
   };
 
   ostream& operator<<(ostream& os, const Domain& dom);

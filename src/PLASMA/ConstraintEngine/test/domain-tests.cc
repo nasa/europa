@@ -1257,7 +1257,7 @@ namespace EUROPA {
       EUROPA_runTest(testIntersection);
       EUROPA_runTest(testSubset);
       EUROPA_runTest(testIntDomain);
-      EUROPA_runTest(testDomainComparatorConfiguration);
+      // EUROPA_runTest(testDomainComparatorConfiguration);
       EUROPA_runTest(testCopying);
       EUROPA_runTest(testSymbolicVsNumeric);
       return(true);

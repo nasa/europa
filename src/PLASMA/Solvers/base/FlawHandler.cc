@@ -19,11 +19,10 @@ namespace EUROPA {
   namespace SOLVERS {
 
 
-    TiXmlElement* FlawHandler::s_element = NULL;
 
     FlawHandler::FlawHandler(const TiXmlElement& configData):
-      MatchingRule(static_cast<const TiXmlElement&>(*(makeConfigData(configData)))),
-      m_configData(s_element),
+        MatchingRule(configData),
+        m_configData(makeConfigData(configData)),
       m_guards(readGuards(configData, false)),
       m_masterGuards(readGuards(configData, true)){
 
@@ -58,22 +57,22 @@ namespace EUROPA {
       checkError(strcmp(configData.Value(), "FlawHandler") == 0, "Invalid Tag of " << configData.Value());
       checkError(configData.Parent() != NULL, "Must have a parent to get the default properties.");
 
-      s_element = static_cast<TiXmlElement*>(configData.Clone());
+      TiXmlElement* element = static_cast<TiXmlElement*>(configData.Clone());
       TiXmlElement* parent = (TiXmlElement*) configData.Parent();
 
-      if(s_element->Attribute("priority") == NULL){
+      if(element->Attribute("priority") == NULL){
         if(parent->Attribute("defaultPriority") != NULL)
-          s_element->SetAttribute("priority", parent->Attribute("defaultPriority"));
+          element->SetAttribute("priority", parent->Attribute("defaultPriority"));
         else
-          s_element->SetAttribute("priority", "99999");
+          element->SetAttribute("priority", "99999");
       }
 
-      if(s_element->Attribute("maxChoices") == NULL){
+      if(element->Attribute("maxChoices") == NULL){
 	// Set a default of 0 which implies no cut to be applied
-        s_element->SetAttribute("maxChoices", "0");
+        element->SetAttribute("maxChoices", "0");
       }
 
-      return s_element;
+      return element;
     }
   
     FlawHandler::~FlawHandler(){

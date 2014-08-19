@@ -27,10 +27,9 @@ namespace NDDL {
 #define predicateVariable(domain) allocateVariable(getPlanDatabase()->getConstraintEngine(), m_pseudoVariables, domain, getId())
 
   /**
-   * @brief Function to detokenize a delimited list into a list. List is an internal static
-   * and is reset each time.
+   * @brief Function to detokenize a delimited list into a list.
    */
-  const std::list<edouble>& listFromString(const std::string& str, bool isNumeric);
+  std::list<edouble> listFromString(const std::string& str, bool isNumeric);
 
   /**
    * @brief Function to allocate a token on the same object as the master

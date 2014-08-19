@@ -200,8 +200,6 @@ namespace EUROPA {
 
       static TiXmlElement* makeConfigData(const TiXmlElement& configData);
 
-      static TiXmlElement* s_element; /*!< Temporary holder for copied elements */
-
       const PlanDatabaseId& getPlanDatabase(const ConstrainedVariableId& tokenVar);
 
       PlanDatabaseId m_db;
