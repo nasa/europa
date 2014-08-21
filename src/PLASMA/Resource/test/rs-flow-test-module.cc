@@ -1442,21 +1442,26 @@ private:
   static bool testReusableDetector() {
     RESOURCE_DEFAULT_SETUP(ce, db, false);
 
-    Reusable res(db.getId(), LabelStr("Reusable"), LabelStr("res1"), LabelStr("ClosedWorldFVDetector"), LabelStr("IncrementalFlowProfile"),
-		       1, 1, 0);
+    Reusable res(db.getId(), LabelStr("Reusable"), LabelStr("res1"), 
+                 LabelStr("ClosedWorldFVDetector"), LabelStr("IncrementalFlowProfile"),
+                 1, 1, 0);
 
     //create a token that violates the limit (i.e. consumes 2)
-    ReusableToken tok1(db.getId(), LabelStr("Reusable.uses"), IntervalIntDomain(1), IntervalIntDomain(10),
-			     IntervalIntDomain(9), IntervalDomain(2));
+    ReusableToken tok1(db.getId(), LabelStr("Reusable.uses"), 
+                       IntervalIntDomain(1), IntervalIntDomain(10),
+                       IntervalIntDomain(9), IntervalDomain(2));
     CPPUNIT_ASSERT(!ce.propagate());
     tok1.discard(false);
 
     //create a token that doesn't
-    ReusableToken tok2(db.getId(), LabelStr("Reusable.uses"), IntervalIntDomain(1, 3), IntervalIntDomain(10, 12), IntervalIntDomain(9),
+    ReusableToken tok2(db.getId(), LabelStr("Reusable.uses"), 
+                       IntervalIntDomain(1, 3), IntervalIntDomain(10, 12),
+                       IntervalIntDomain(9),
 		       IntervalDomain(1));
     CPPUNIT_ASSERT(ce.propagate());
-    //create a token that doesn't, but must start during the previous token, causing a violation
-    ReusableToken tok3(db.getId(), LabelStr("Reusable.uses"), IntervalIntDomain(9), IntervalIntDomain(11), IntervalIntDomain(2),
+        //create a token that doesn't, but must start during the previous token, causing a violation
+    ReusableToken tok3(db.getId(), LabelStr("Reusable.uses"), IntervalIntDomain(9),
+                       IntervalIntDomain(11), IntervalIntDomain(2),
 		       IntervalDomain(1));
     CPPUNIT_ASSERT(!ce.propagate());
     tok3.discard(false);
