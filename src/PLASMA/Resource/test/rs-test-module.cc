@@ -1130,6 +1130,8 @@ class ResourceTest {
 public:
   static bool test() {
     EUROPA_runTest(testReservoir);
+    EUROPA_runTest(testFlowReservoirWithConsumptionParameterSpecification);
+    EUROPA_runTest(testIncrementalFlowProfileIssue71);
     EUROPA_runTest(testReusable);
     EUROPA_runTest(testReservoirRemove);
     EUROPA_runTest(testDanglingTransaction);
@@ -1137,15 +1139,98 @@ public:
   }
 private:
 
+  static bool testIncrementalFlowProfileIssue71() {
+    RESOURCE_DEFAULT_SETUP(ce, db, false);
+    Reservoir res1(db.getId(), LabelStr("Reservoir"), LabelStr("Battery1"), 
+                   LabelStr("ClosedWorldFVDetector"), LabelStr("IncrementalFlowProfile"),
+                   0, 0, 0, 1000);
+    ProducerToken p1(db.getId(), LabelStr("Reservoir.produce"),
+                     IntervalIntDomain(10, PLUS_INFINITY),
+                     IntervalDomain(1000.0));
+    ConsumerToken c1(db.getId(), LabelStr("Reservoir.consume"),
+                     // IntervalIntDomain(120010, PLUS_INFINITY),
+                     IntervalIntDomain(),
+                     IntervalDomain(1000.0));
+    ConsumerToken c2(db.getId(), LabelStr("Reservoir.consume"),
+                     IntervalIntDomain(960000, PLUS_INFINITY),
+                     IntervalDomain(1.0));
+    ProducerToken p2(db.getId(), LabelStr("Reservoir.produce"),
+                     // IntervalIntDomain(961200, PLUS_INFINITY),
+                     IntervalIntDomain(),
+                     IntervalDomain(1.0));
+
+
+    ConstrainedVariableId d1 = 
+        db.getClient()->createVariable("int", IntervalIntDomain(120000), "d1");
+    db.getClient()->createConstraint("temporalDistance",
+                                     makeScope(p1.getTime(), d1, c1.getTime()));
+
+    ConstrainedVariableId d2 = 
+        db.getClient()->createVariable("int", IntervalIntDomain(1200), "d2");
+    db.getClient()->createConstraint("temporalDistance",
+                                     makeScope(c2.getTime(), d2, p2.getTime()));
+
+    CPPUNIT_ASSERT(ce.propagate());
+    
+    std::vector<InstantId> instants;
+    res1.getFlawedInstants(instants);
+    CPPUNIT_ASSERT(instants.size() == 2);
+    CPPUNIT_ASSERT(instants[0]->getTime() == 960000);
+    CPPUNIT_ASSERT(instants[1]->getTime() == 961200);
+    return true;
+  }
+
+  static bool testFlowReservoirWithConsumptionParameterSpecification() {
+    RESOURCE_DEFAULT_SETUP(ce, db, false);
+    Reservoir res1(db.getId(), LabelStr("Reservoir"), LabelStr("Battery1"), 
+                   LabelStr("OpenWorldFVDetector"), LabelStr("IncrementalFlowProfile"),
+                   0, 0, 0, 1000);
+
+    ConsumerToken c1(db.getId(), LabelStr("Reservoir.consume"), 
+                     IntervalIntDomain(10),
+                     IntervalDomain(5, 10));
+    ConsumerToken c2(db.getId(), LabelStr("Reservoir.consume"), 
+                     IntervalIntDomain(20),
+                     IntervalDomain(5, 10));
+    res1.constrain(c1.getId(), c1.getId());
+    res1.constrain(c1.getId(), c2.getId());
+    CPPUNIT_ASSERT(ce.propagate());
+    ProfileIterator it1(res1.getProfile());
+    CPPUNIT_ASSERT(!it1.done());
+    CPPUNIT_ASSERT(it1.getTime() == 10);
+    CPPUNIT_ASSERT(it1.getUpperBound() == -5.0);
+    CPPUNIT_ASSERT(it1.getLowerBound() == -10.0);
+    CPPUNIT_ASSERT(it1.next());
+    CPPUNIT_ASSERT(it1.getTime() == 20);
+    CPPUNIT_ASSERT(it1.getUpperBound() == -10.0);
+    CPPUNIT_ASSERT(it1.getLowerBound() == -20.0);
+
+    c1.getQuantity()->specify(5.0);
+    CPPUNIT_ASSERT(ce.propagate());
+    ProfileIterator it2(res1.getProfile());
+    CPPUNIT_ASSERT(!it2.done());
+    CPPUNIT_ASSERT(it2.getTime() == 10);
+    CPPUNIT_ASSERT(it2.getUpperBound() == -5.0);
+    CPPUNIT_ASSERT(it2.getLowerBound() == -5.0);
+    CPPUNIT_ASSERT(it2.next());
+    CPPUNIT_ASSERT(it2.getTime() == 20);
+    CPPUNIT_ASSERT(it2.getUpperBound() == -10.0);
+    CPPUNIT_ASSERT(it2.getLowerBound() == -15.0);
+    return true;
+  }
+
   static bool testReservoir() {
     RESOURCE_DEFAULT_SETUP(ce, db, false);
 
-    Reservoir res1(db.getId(), LabelStr("Reservoir"), LabelStr("Battery1"), LabelStr("OpenWorldFVDetector"), LabelStr("TimetableProfile"),
-			 10, 10, 0, 1000);
-    Reservoir res2(db.getId(), LabelStr("Reservoir"), LabelStr("Battery2"), LabelStr("OpenWorldFVDetector"), LabelStr("TimetableProfile"),
-			 10, 10, 0, 1000);
+    Reservoir res1(db.getId(), LabelStr("Reservoir"), LabelStr("Battery1"), 
+                   LabelStr("OpenWorldFVDetector"), LabelStr("TimetableProfile"),
+                   10, 10, 0, 1000);
+    Reservoir res2(db.getId(), LabelStr("Reservoir"), LabelStr("Battery2"), 
+                   LabelStr("OpenWorldFVDetector"), LabelStr("TimetableProfile"),
+                   10, 10, 0, 1000);
 
-    ConsumerToken consumer(db.getId(), LabelStr("Reservoir.consume"), IntervalIntDomain(10),
+    ConsumerToken consumer(db.getId(), LabelStr("Reservoir.consume"), 
+                           IntervalIntDomain(10),
 			   IntervalDomain(5));
 
     ProfileIterator it1(res1.getProfile());
