@@ -1,6 +1,13 @@
 <Solver name="DefaultTestSolver">
   <FlawFilter component="HorizonFilter" policy="PartiallyContained"/>
 
+  <ResourceThreatManager defaultPriority="0">
+    <FlawHandler class-match="Reservoir" component="ResourceThreatHandler"/>
+    <FlawHandler class-match="Reusable" component="ResourceThreatHandler"/>
+    <FlawHandler class-match="CBReusable" component="ResourceThreatHandler"/>
+    <FlawHandler class-match="Unary" component="ResourceThreatHandler"/>
+  </ResourceThreatManager>
+
   <ThreatManager defaultPriority="0">
     <FlawHandler component="StandardThreatHandler"/>
     <FlawFilter class-match="Reservoir"/>
