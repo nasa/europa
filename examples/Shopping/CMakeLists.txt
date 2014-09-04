@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.8)
-set(PROJECT Light)
+set(PROJECT Shopping)
 
 project(${PROJECT})
 include($ENV{EUROPA_HOME}/Europa2.cmake)
@@ -60,12 +60,12 @@ add_jar(${PROJECT}Jar
   SOURCES
   ${PROJECT}.java
   ${PROJECT}JNI.java
-  ${CMAKE_CURRENT_SOURCE_DIR}/java/Light/Main.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/java/Shopping/Main.java
   INCLUDE_JARS 
   $ENV{EUROPA_HOME}/PSEngine.jar
   $ENV{EUROPA_HOME}/PSUISwing.jar
   OUTPUT_NAME ${PROJECT}
-  ENTRY_POINT Light/Main
+  ENTRY_POINT Shopping/Main
   )
 
 add_dependencies(${PROJECT}Jar ${PROJECT}${EUROPA_SUFFIX})

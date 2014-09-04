@@ -266,8 +266,60 @@ macro(declare_module name root_srcs base_srcs component_srcs test_srcs module_de
     TARGETS ${libname} 
     EXPORT Europa2
     DESTINATION ${EUROPA_ROOT}/dist/europa 
+    #TODO: figure out why this isn't working
     #INCLUDES DESTINATION ${EUROPA_ROOT}/dist/europa/${name}
     )
+  #file(GLOB_RECURSE headers ${CMAKE_CURRENT_SOURCE_DIR} *.hh)
+  #message(STATUS "Headers: ${headers}")
   install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION ${EUROPA_ROOT}/dist/europa
-    FILES_MATCHING PATTERN "*.hh")
+    FILES_MATCHING PATTERN "*.hh" PATTERN "*.h")
 endmacro(declare_module)
+
+function(unjar target jar dest_dir classes)
+  execute_process(
+    COMMAND ${Java_JAR_EXECUTABLE} tf ${jar}
+    OUTPUT_VARIABLE jar_files_str
+    RESULT_VARIABLE rv)
+  string(REPLACE "\n" ";" jar_files_ndir ${jar_files_str})
+  
+
+  set(jar_files "")
+  set(class_files "")
+  foreach(f ${jar_files_ndir})
+    # set(fname "${dest_dir}/${f}")
+    set(fname "${f}")
+    list(APPEND jar_files ${fname})
+    string(REGEX MATCH ".class$" classfile ${fname})
+    #message(STATUS "File ${fname}")
+    if(classfile)
+      #message(STATUS "Class!")
+      string(REPLACE "\$" "\$\$" fname ${fname})
+      list(APPEND class_files ${fname})
+    endif(classfile)
+  endforeach(f)
+  set(classes ${class_files} PARENT_SCOPE)
+  #message(STATUS "Classes: ${classes}")
+  list(LENGTH class_files class_count)
+  if(class_count GREATER 0)
+    add_custom_command(OUTPUT ${class_files}
+      COMMAND ${Java_JAR_EXECUTABLE}
+      xf ${jar};
+      #touch ${target}
+      WORKING_DIRECTORY ${dest_dir}
+      )
+    else()
+    add_custom_command(OUTPUT ${jar_files}
+      COMMAND ${Java_JAR_EXECUTABLE}
+      xf ${jar};
+      touch ${target}
+      WORKING_DIRECTORY ${dest_dir}
+      )
+    endif(class_count GREATER 0)
+
+  # set(all_classes "")
+  # foreach(f ${class_files})
+    # string(REPLACE "\$" "\$\$" g ${f})
+    #list(APPEND all_classes ${g})
+  #endforeach(f)
+  #set(classes ${all_classes} PARENT_SCOPE)
+endfunction(unjar)

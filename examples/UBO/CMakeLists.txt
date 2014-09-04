@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.8)
-set(PROJECT Light)
+set(PROJECT UBO)
 
 project(${PROJECT})
 include($ENV{EUROPA_HOME}/Europa2.cmake)
@@ -60,12 +60,29 @@ add_jar(${PROJECT}Jar
   SOURCES
   ${PROJECT}.java
   ${PROJECT}JNI.java
-  ${CMAKE_CURRENT_SOURCE_DIR}/java/Light/Main.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/java/UBO/ExhaustiveSolver.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/java/UBO/HybridSolver.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/java/UBO/IFlatIRelaxSolver.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/java/UBO/Main.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/java/UBO/PSResourceWrapper.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/java/UBO/PlanHistoryEntry.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/java/UBO/Precedence.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/java/UBO/RCPSPResource.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/java/UBO/RCPSPSolver.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/java/UBO/RCPSPSolverBase.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/java/UBO/RCPSPUtil.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/java/UBO/Resource.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/java/UBO/ResourceBase.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/java/UBO/ResourceProfile.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/java/UBO/ResourceViolationInfo.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/java/UBO/SolDistExhaustiveSolver.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/java/UBO/UBOSolverListener.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/java/UBO/Main.java
   INCLUDE_JARS 
   $ENV{EUROPA_HOME}/PSEngine.jar
   $ENV{EUROPA_HOME}/PSUISwing.jar
   OUTPUT_NAME ${PROJECT}
-  ENTRY_POINT Light/Main
+  ENTRY_POINT UBO/Main
   )
 
 add_dependencies(${PROJECT}Jar ${PROJECT}${EUROPA_SUFFIX})

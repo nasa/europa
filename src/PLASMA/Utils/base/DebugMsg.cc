@@ -7,12 +7,15 @@
 
 #ifndef NO_DEBUG_MESSAGE_SUPPORT
 
+#include "europa-config.h"
+
 #include <fstream>
 #include <algorithm>
 #include <functional>
-#include <tr1/functional>
 #include <utility>
 #include <vector>
+
+#include <boost/ref.hpp>
 
 #include "DebugMsg.hh"
 #include "Mutex.hh"
@@ -138,17 +141,21 @@ class DebugMessage::DebugInternals {
 namespace {
 
 static DebugMessage::DebugInternals debugInternals;
+#ifdef __APPLE__
+static pthread_mutex_t debugMutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER;
+#else
 static pthread_mutex_t debugMutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
+#endif
 
 typedef std::pair<EUROPA::MutexGrabber, 
-                  std::tr1::reference_wrapper<DebugMessage::DebugInternals> >
+                  boost::reference_wrapper<DebugMessage::DebugInternals> >
 internals_accessor;
 
 internals_accessor internals() {
   EUROPA::MutexGrabber grabber(debugMutex);
   return std::make_pair<EUROPA::MutexGrabber,
-                        std::tr1::reference_wrapper<DebugMessage::DebugInternals> >(grabber,
-                                                                                    std::tr1::ref(debugInternals));
+                        boost::reference_wrapper<DebugMessage::DebugInternals> >(grabber,
+                                                                                    boost::ref(debugInternals));
 }
 
 }

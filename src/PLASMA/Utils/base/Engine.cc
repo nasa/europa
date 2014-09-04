@@ -298,8 +298,8 @@ namespace EUROPA
 		checkRuntimeError(libHandle != NULL,
 				"Error opening module " << moduleFileName << ": " << p_dlerror());
 
-		ModuleId (*fcn_module)();
-		fcn_module = (ModuleId (*)()) p_dlsym(libHandle, "initializeModule");
+		Module* (*fcn_module)();
+		fcn_module = (Module* (*)()) p_dlsym(libHandle, "initializeModule");
 		checkError(fcn_module != NULL,
 				"Error locating symbol 'initializeModule' in " << moduleFileName << ": " <<
 				p_dlerror());
@@ -308,14 +308,14 @@ namespace EUROPA
 		checkRuntimeError(libHandle != NULL,
 				"Error opening module " << moduleFileName << ": " << dlerror());
 
-		ModuleId (*fcn_module)();
-		fcn_module = (ModuleId (*)()) dlsym(libHandle, "initializeModule");
+		Module* (*fcn_module)();
+		fcn_module = (Module* (*)()) dlsym(libHandle, "initializeModule");
 		checkError(fcn_module != NULL,
 				"Error locating symbol 'initializeModule' in " << moduleFileName << ": " <<
 				dlerror());
 	#endif
 
-		ModuleId module = (*fcn_module)();
+		ModuleId module = (*fcn_module)()->getId();
 		addModule(module);
 	}
 
