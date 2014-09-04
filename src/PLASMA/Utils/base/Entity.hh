@@ -8,7 +8,6 @@
 #include <set>
 #include <string>
 #include <vector>
-#include <tr1/functional>
 
 #include "PSUtils.hh"
 

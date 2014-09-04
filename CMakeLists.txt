@@ -35,3 +35,6 @@ endif(OPTIMIZE)
 
 add_subdirectory(src)
 install(EXPORT Europa2 DESTINATION ${EUROPA_ROOT}/dist/europa)
+install(DIRECTORY ${EUROPA_ROOT}/bin DESTINATION ${EUROPA_ROOT}/dist/europa)
+install(DIRECTORY ${EUROPA_ROOT}/config DESTINATION ${EUROPA_ROOT}/dist/europa)
+install(DIRECTORY ${EUROPA_ROOT}/bin/.makeproject DESTINATION ${EUROPA_ROOT}/dist/bin)

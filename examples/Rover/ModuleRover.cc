@@ -10,9 +10,9 @@ namespace EUROPA {
 // static C init method to get handle when loading module as shared library
 extern "C"
 {
-	ModuleId initializeModule()
+	Module* initializeModule()
 	{
-          return (new ModuleRover())->getId();
+          return new ModuleRover();
 	}
 }
 

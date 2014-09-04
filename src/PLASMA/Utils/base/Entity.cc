@@ -3,7 +3,8 @@
 #include "Mutex.hh"
 
 #include <sstream>
-#include <tr1/functional>
+
+#include <boost/ref.hpp>
 
 namespace EUROPA {
 class EntityInternals {
@@ -94,15 +95,19 @@ class EntityInternals {
 
 namespace {
 static EntityInternals entityInternals;
+#ifdef __APPLE__
+static pthread_mutex_t entityMutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER;
+#else
 static pthread_mutex_t entityMutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
+#endif
 
-typedef std::pair<MutexGrabber, std::tr1::reference_wrapper<EntityInternals> >
+typedef std::pair<MutexGrabber, boost::reference_wrapper<EntityInternals> >
 internals_accessor;
 internals_accessor internals() {
   MutexGrabber grabber(entityMutex);
   return std::make_pair<MutexGrabber,
-                        std::tr1::reference_wrapper<EntityInternals> >(grabber, 
-                                                                       std::tr1::ref(entityInternals));
+                        boost::reference_wrapper<EntityInternals> >(grabber, 
+                                                                       boost::ref(entityInternals));
 }
 }
 

@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Vector;
 import psengine.util.LibraryLoader;
+import psengine.PSObjectList;
 
 public class PSUtil
 {

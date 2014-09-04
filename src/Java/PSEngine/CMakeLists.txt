@@ -52,8 +52,45 @@ add_jar(PSEngineJar
   src/psengine/PSUtil.java 
   src/psengine/util/LibraryLoader.java 
   src/psengine/util/SimpleTimer.java 
-  INCLUDE_JARS
-  PSEngineGenerated.jar
+  generated/psengine/EngineConfig.java
+  generated/psengine/PSConstraint.java
+  generated/psengine/PSConstraintEngineListener.java
+  generated/psengine/PSConstraintList.java
+  generated/psengine/PSDataType.java
+  generated/psengine/PSDataTypeList.java
+  generated/psengine/PSEngine.java
+  generated/psengine/PSEngineInterface.java
+  generated/psengine/PSEngineInterfaceJNI.java
+  generated/psengine/PSEntity.java
+  generated/psengine/PSException.java
+  generated/psengine/PSIntList.java
+  generated/psengine/PSLanguageException.java
+  generated/psengine/PSLanguageExceptionList.java
+  generated/psengine/PSObject.java
+  generated/psengine/PSObjectList.java
+  generated/psengine/PSObjectType.java
+  generated/psengine/PSObjectTypeList.java
+  generated/psengine/PSPlanDatabaseClient.java
+  generated/psengine/PSPlanDatabaseListener.java
+  generated/psengine/PSResource.java
+  generated/psengine/PSResourceProfile.java
+  generated/psengine/PSSchema.java
+  generated/psengine/PSSolver.java
+  generated/psengine/PSStringList.java
+  generated/psengine/PSTimePointList.java
+  generated/psengine/PSToken.java
+  generated/psengine/PSTokenList.java
+  generated/psengine/PSTokenState.java
+  generated/psengine/PSTokenType.java
+  generated/psengine/PSTokenTypeList.java
+  generated/psengine/PSValueList.java
+  generated/psengine/PSVarType.java
+  generated/psengine/PSVarValue.java
+  generated/psengine/PSVariable.java
+  generated/psengine/PSVariableList.java
+  generated/psengine/StringErrorStream.java
+  # INCLUDE_JARS
+  # PSEngineGenerated.jar
   OUTPUT_NAME
   PSEngine)
 add_dependencies(PSEngineJar PSEngineGenerated)

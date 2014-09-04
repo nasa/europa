@@ -1,3 +1,9 @@
+include(CheckIncludeFileCXX)
+check_include_file_cxx(tr1/functional HAVE_TR1_FUNCTIONAL)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/europa-config.h.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/europa-config.h")
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
 include(EuropaModule)
 set(internal_dependencies TinyXml)
 set(root_sources CommonDefs.cc)
@@ -17,3 +23,6 @@ file(COPY ${test_inputs} DESTINATION .)
 #how do I handle the dlopen and pthreads link requirements?  do I need to?
 find_library(libdl_library dl libdl ltdl libltdl)
 target_link_libraries("Utils${EUROPA_SUFFIX}" ${libdl_library})
+
+
+
