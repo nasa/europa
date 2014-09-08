@@ -1216,6 +1216,19 @@ private:
     CPPUNIT_ASSERT(it2.getTime() == 20);
     CPPUNIT_ASSERT(it2.getUpperBound() == -10.0);
     CPPUNIT_ASSERT(it2.getLowerBound() == -15.0);
+
+    c1.getQuantity()->specify(7.0);
+    CPPUNIT_ASSERT(ce.propagate());
+    ProfileIterator it3(res1.getProfile());
+    CPPUNIT_ASSERT(!it3.done());
+    CPPUNIT_ASSERT(it3.getTime() == 10);
+    CPPUNIT_ASSERT(it3.getUpperBound() == -7.0);
+    CPPUNIT_ASSERT(it3.getLowerBound() == -7.0);
+    CPPUNIT_ASSERT(it3.next());
+    CPPUNIT_ASSERT(it3.getTime() == 20);
+    CPPUNIT_ASSERT(it3.getUpperBound() == -12.0);
+    CPPUNIT_ASSERT(it3.getLowerBound() == -17.0);
+
     return true;
   }
 
@@ -1471,323 +1484,330 @@ private:
 		return true;
 	}
 
-	static bool testResourceThreatDecisionPoint() {
+  static bool testResourceThreatDecisionPoint() {
 
-		RESOURCE_DEFAULT_SETUP(ceObj, dbObj, false);
+    RESOURCE_DEFAULT_SETUP(ceObj, dbObj, false);
 
-		PlanDatabaseId db = dbObj.getId();
-		ConstraintEngineId ce = ceObj.getId();
-		DbClientId client = db->getClient();
+    PlanDatabaseId db = dbObj.getId();
+    ConstraintEngineId ce = ceObj.getId();
+    DbClientId client = db->getClient();
 
-		Reusable reusable(db, "Reusable", "myReusable", "ClosedWorldFVDetector", "IncrementalFlowProfile", 1, 1, 0);
+    Reusable reusable(db, "Reusable", "myReusable", "ClosedWorldFVDetector",
+                      "IncrementalFlowProfile", 1, 1, 0);
 
-		ReusableToken tok1(db, "Reusable.uses", IntervalIntDomain(1, 3), IntervalIntDomain(10, 12), IntervalIntDomain(1, PLUS_INFINITY),
-				IntervalDomain(1.0, 1.0), "myReusable");
+    ReusableToken tok1(db, "Reusable.uses", 
+                       IntervalIntDomain(1, 3), IntervalIntDomain(10, 12),
+                       IntervalIntDomain(1, PLUS_INFINITY),
+                       IntervalDomain(1.0, 1.0), "myReusable");
 
-		ReusableToken tok2(db, "Reusable.uses", IntervalIntDomain(11, 13), IntervalIntDomain(15, 17), IntervalIntDomain(1, PLUS_INFINITY),
-				IntervalDomain(1.0, 1.0), "myReusable");
+    ReusableToken tok2(db, "Reusable.uses", 
+                       IntervalIntDomain(11, 13), IntervalIntDomain(15, 17),
+                       IntervalIntDomain(1, PLUS_INFINITY),
+                       IntervalDomain(1.0, 1.0), "myReusable");
 
-		ReusableToken tok3(db, "Reusable.uses", IntervalIntDomain(11, 16), IntervalIntDomain(18, 19), IntervalIntDomain(1, PLUS_INFINITY),
-				IntervalDomain(1.0, 1.0), "myReusable");
+    ReusableToken tok3(db, "Reusable.uses", 
+                       IntervalIntDomain(11, 16), IntervalIntDomain(18, 19), 
+                       IntervalIntDomain(1, PLUS_INFINITY),
+                       IntervalDomain(1.0, 1.0), "myReusable");
 
-		CPPUNIT_ASSERT(ce->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
 
-		CPPUNIT_ASSERT(reusable.hasTokensToOrder());
-		std::vector<InstantId> flawedInstants;
-		reusable.getFlawedInstants(flawedInstants);
-		CPPUNIT_ASSERT(flawedInstants.size() == 5);
-		CPPUNIT_ASSERT(flawedInstants[0]->getTime() == 11);
+    CPPUNIT_ASSERT(reusable.hasTokensToOrder());
+    std::vector<InstantId> flawedInstants;
+    reusable.getFlawedInstants(flawedInstants);
+    CPPUNIT_ASSERT(flawedInstants.size() == 5);
+    CPPUNIT_ASSERT(flawedInstants[0]->getTime() == 11);
 
-		TiXmlElement dummy("");
-		ResourceThreatDecisionPoint dp1(client, flawedInstants[0], dummy);
+    TiXmlElement dummy("");
+    ResourceThreatDecisionPoint dp1(client, flawedInstants[0], dummy);
 
-		dp1.initialize();
+    dp1.initialize();
 
-		CPPUNIT_ASSERT(dp1.getChoices().size() == 8);
+    CPPUNIT_ASSERT(dp1.getChoices().size() == 8);
 
-		std::string noFilter = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"none\"/>";
-		TiXmlElement* noFilterXml = initXml(noFilter);
-		ResourceThreatDecisionPoint dp2(client, flawedInstants[0], *noFilterXml);
-		dp2.initialize();
-		CPPUNIT_ASSERT(dp2.getChoices().size() == 8);
+    std::string noFilter = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"none\"/>";
+    TiXmlElement* noFilterXml = initXml(noFilter);
+    ResourceThreatDecisionPoint dp2(client, flawedInstants[0], *noFilterXml);
+    dp2.initialize();
+    CPPUNIT_ASSERT(dp2.getChoices().size() == 8);
 
-		std::string predFilter = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"predecessorNot\"/>";
-		TiXmlElement* predFilterXml = initXml(predFilter);
-		ResourceThreatDecisionPoint dp3(client, flawedInstants[0], *predFilterXml);
-		dp3.initialize();
-		CPPUNIT_ASSERT(dp3.getChoices().size() == 3);
-		CPPUNIT_ASSERT(dp3.getChoices()[0].first->time() == tok1.end());
-		CPPUNIT_ASSERT(dp3.getChoices()[0].second->time() == tok2.start());
-		CPPUNIT_ASSERT(dp3.getChoices()[1].first->time() == tok1.end());
-		CPPUNIT_ASSERT(dp3.getChoices()[1].second->time() == tok3.start());
-		CPPUNIT_ASSERT(dp3.getChoices()[2].first->time() == tok2.end());
-		CPPUNIT_ASSERT(dp3.getChoices()[2].second->time() == tok3.start());
+    std::string predFilter = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"predecessorNot\"/>";
+    TiXmlElement* predFilterXml = initXml(predFilter);
+    ResourceThreatDecisionPoint dp3(client, flawedInstants[0], *predFilterXml);
+    dp3.initialize();
+    CPPUNIT_ASSERT(dp3.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp3.getChoices()[0].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp3.getChoices()[0].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp3.getChoices()[1].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp3.getChoices()[1].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp3.getChoices()[2].first->time() == tok2.end());
+    CPPUNIT_ASSERT(dp3.getChoices()[2].second->time() == tok3.start());
 
-		std::string sucFilter = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"successor\"/>";
-		TiXmlElement* sucFilterXml = initXml(sucFilter);
-		ResourceThreatDecisionPoint dp4(client, flawedInstants[0], *sucFilterXml);
-		dp4.initialize();
-		CPPUNIT_ASSERT(dp4.getChoices().size() == 5);
-		CPPUNIT_ASSERT(dp4.getChoices()[0].first->time() == tok1.end());
-		CPPUNIT_ASSERT(dp4.getChoices()[0].second->time() == tok2.start());
-		CPPUNIT_ASSERT(dp4.getChoices()[1].first->time() == tok1.end());
-		CPPUNIT_ASSERT(dp4.getChoices()[1].second->time() == tok3.start());
-		CPPUNIT_ASSERT(dp4.getChoices()[2].first->time() == tok2.start());
-		CPPUNIT_ASSERT(dp4.getChoices()[2].second->time() == tok3.start());
-		CPPUNIT_ASSERT(dp4.getChoices()[3].first->time() == tok2.end());
-		CPPUNIT_ASSERT(dp4.getChoices()[3].second->time() == tok3.start());
-		CPPUNIT_ASSERT(dp4.getChoices()[4].first->time() == tok3.start());
-		CPPUNIT_ASSERT(dp4.getChoices()[4].second->time() == tok2.start());
+    std::string sucFilter = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"successor\"/>";
+    TiXmlElement* sucFilterXml = initXml(sucFilter);
+    ResourceThreatDecisionPoint dp4(client, flawedInstants[0], *sucFilterXml);
+    dp4.initialize();
+    CPPUNIT_ASSERT(dp4.getChoices().size() == 5);
+    CPPUNIT_ASSERT(dp4.getChoices()[0].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp4.getChoices()[0].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp4.getChoices()[1].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp4.getChoices()[1].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp4.getChoices()[2].first->time() == tok2.start());
+    CPPUNIT_ASSERT(dp4.getChoices()[2].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp4.getChoices()[3].first->time() == tok2.end());
+    CPPUNIT_ASSERT(dp4.getChoices()[3].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp4.getChoices()[4].first->time() == tok3.start());
+    CPPUNIT_ASSERT(dp4.getChoices()[4].second->time() == tok2.start());
 
-		std::string bothFilter = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\"/>";
-		TiXmlElement* bothFilterXml = initXml(bothFilter);
-		ResourceThreatDecisionPoint dp5(client, flawedInstants[0], *bothFilterXml);
-		dp5.initialize();
-		CPPUNIT_ASSERT(dp5.getChoices().size() == 3);
-		CPPUNIT_ASSERT(dp5.getChoices()[0].first->time() == tok1.end());
-		CPPUNIT_ASSERT(dp5.getChoices()[0].second->time() == tok2.start());
-		CPPUNIT_ASSERT(dp5.getChoices()[1].first->time() == tok1.end());
-		CPPUNIT_ASSERT(dp5.getChoices()[1].second->time() == tok3.start());
-		CPPUNIT_ASSERT(dp5.getChoices()[2].first->time() == tok2.end());
-		CPPUNIT_ASSERT(dp5.getChoices()[2].second->time() == tok3.start());
+    std::string bothFilter = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\"/>";
+    TiXmlElement* bothFilterXml = initXml(bothFilter);
+    ResourceThreatDecisionPoint dp5(client, flawedInstants[0], *bothFilterXml);
+    dp5.initialize();
+    CPPUNIT_ASSERT(dp5.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp5.getChoices()[0].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp5.getChoices()[0].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp5.getChoices()[1].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp5.getChoices()[1].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp5.getChoices()[2].first->time() == tok2.end());
+    CPPUNIT_ASSERT(dp5.getChoices()[2].second->time() == tok3.start());
 
-		//the combination of ascendingKeyPredecessor and ascendingKeySuccessor have already been tested by now
+    //the combination of ascendingKeyPredecessor and ascendingKeySuccessor have already been tested by now
 
-		std::string earliestPred = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" order=\"earliestPredecessor\"/>";
-		TiXmlElement* earliestPredXml = initXml(earliestPred);
-		ResourceThreatDecisionPoint dp6(client, flawedInstants[0], *earliestPredXml);
-		dp6.initialize();
-		CPPUNIT_ASSERT(dp6.getChoices().size() == 3);
-		CPPUNIT_ASSERT(dp6.getChoices()[0].first->time() == tok1.end());
-		CPPUNIT_ASSERT(dp6.getChoices()[0].second->time() == tok2.start());
-		CPPUNIT_ASSERT(dp6.getChoices()[1].first->time() == tok1.end());
-		CPPUNIT_ASSERT(dp6.getChoices()[1].second->time() == tok3.start());
-		CPPUNIT_ASSERT(dp6.getChoices()[2].first->time() == tok2.end());
-		CPPUNIT_ASSERT(dp6.getChoices()[2].second->time() == tok3.start());
+    std::string earliestPred = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" order=\"earliestPredecessor\"/>";
+    TiXmlElement* earliestPredXml = initXml(earliestPred);
+    ResourceThreatDecisionPoint dp6(client, flawedInstants[0], *earliestPredXml);
+    dp6.initialize();
+    CPPUNIT_ASSERT(dp6.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp6.getChoices()[0].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp6.getChoices()[0].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp6.getChoices()[1].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp6.getChoices()[1].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp6.getChoices()[2].first->time() == tok2.end());
+    CPPUNIT_ASSERT(dp6.getChoices()[2].second->time() == tok3.start());
 
-		std::string latestPred = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" order=\"latestPredecessor\"/>";
-		TiXmlElement* latestPredXml = initXml(latestPred);
-		ResourceThreatDecisionPoint dp7(client, flawedInstants[0], *latestPredXml);
-		dp7.initialize();
-		CPPUNIT_ASSERT(dp7.getChoices().size() == 3);
-		CPPUNIT_ASSERT(dp7.getChoices()[0].first->time() == tok2.end());
-		CPPUNIT_ASSERT(dp7.getChoices()[0].second->time() == tok3.start());
-		CPPUNIT_ASSERT(dp7.getChoices()[1].first->time() == tok1.end());
-		CPPUNIT_ASSERT(dp7.getChoices()[1].second->time() == tok2.start());
-		CPPUNIT_ASSERT(dp7.getChoices()[2].first->time() == tok1.end());
-		CPPUNIT_ASSERT(dp7.getChoices()[2].second->time() == tok3.start());
-
-
-		std::string longestPred = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"successor\" order=\"longestPredecessor\"/>";
-		TiXmlElement* longestPredXml = initXml(longestPred);
-		ResourceThreatDecisionPoint dp8(client, flawedInstants[0], *longestPredXml);
-		dp8.initialize();
-		CPPUNIT_ASSERT(dp8.getChoices().size() == 5);
-		CPPUNIT_ASSERT(dp8.getChoices()[0].first->time() == tok3.start());
-
-
-		std::string shortestPred = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" order=\"shortestPredecessor\"/>";
-		TiXmlElement* shortestPredXml = initXml(shortestPred);
-		ResourceThreatDecisionPoint dp9(client, flawedInstants[0], *shortestPredXml);
-		dp9.initialize();
-		CPPUNIT_ASSERT(dp9.getChoices().size() == 3);
-		CPPUNIT_ASSERT(dp9.getChoices()[0].first->time() == tok2.start() ||
-				dp9.getChoices()[0].first->time() == tok1.end());
-
-		std::string descendingKeyPred = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" order=\"descendingKeyPredecessor\"/>";
-		TiXmlElement* descendingKeyPredXml = initXml(descendingKeyPred);
-		ResourceThreatDecisionPoint dp10(client, flawedInstants[0], *descendingKeyPredXml);
-		dp10.initialize();
-		CPPUNIT_ASSERT(dp10.getChoices().size() == 3);
-		CPPUNIT_ASSERT(dp10.getChoices()[0].first->time() == tok2.end());
-		CPPUNIT_ASSERT(dp10.getChoices()[1].first->time() == tok1.end());
+    std::string latestPred = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" order=\"latestPredecessor\"/>";
+    TiXmlElement* latestPredXml = initXml(latestPred);
+    ResourceThreatDecisionPoint dp7(client, flawedInstants[0], *latestPredXml);
+    dp7.initialize();
+    CPPUNIT_ASSERT(dp7.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp7.getChoices()[0].first->time() == tok2.end());
+    CPPUNIT_ASSERT(dp7.getChoices()[0].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp7.getChoices()[1].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp7.getChoices()[1].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp7.getChoices()[2].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp7.getChoices()[2].second->time() == tok3.start());
 
 
-		std::string earliestSucc = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" order=\"earliestSuccessor\"/>";
-		TiXmlElement* earliestSuccXml = initXml(earliestSucc);
-		ResourceThreatDecisionPoint dp11(client, flawedInstants[0], *earliestSuccXml);
-		dp11.initialize();
-		CPPUNIT_ASSERT(dp11.getChoices().size() == 3);
-		CPPUNIT_ASSERT(dp11.getChoices()[0].second->time() == tok2.start() ||
-				dp11.getChoices()[0].second->time() == tok3.start());
-
-		std::string latestSucc = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" order=\"latestSuccessor\"/>";
-		TiXmlElement* latestSuccXml = initXml(latestSucc);
-		ResourceThreatDecisionPoint dp12(client, flawedInstants[0], *latestSuccXml);
-		dp12.initialize();
-		CPPUNIT_ASSERT(dp12.getChoices().size() == 3);
-		CPPUNIT_ASSERT(dp12.getChoices()[0].second->time() == tok3.start());
-		CPPUNIT_ASSERT(dp12.getChoices()[1].second->time() == tok3.start());
-		CPPUNIT_ASSERT(dp12.getChoices()[2].second->time() == tok2.start());
+    std::string longestPred = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"successor\" order=\"longestPredecessor\"/>";
+    TiXmlElement* longestPredXml = initXml(longestPred);
+    ResourceThreatDecisionPoint dp8(client, flawedInstants[0], *longestPredXml);
+    dp8.initialize();
+    CPPUNIT_ASSERT(dp8.getChoices().size() == 5);
+    CPPUNIT_ASSERT(dp8.getChoices()[0].first->time() == tok3.start());
 
 
-		std::string longestSucc = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" order=\"longestSuccessor\"/>";
-		TiXmlElement* longestSuccXml = initXml(longestSucc);
-		ResourceThreatDecisionPoint dp13(client, flawedInstants[0], *longestSuccXml);
-		dp13.initialize();
-		CPPUNIT_ASSERT(dp13.getChoices().size() == 3);
-		CPPUNIT_ASSERT(dp13.getChoices()[0].second->time() == tok3.start());
-		CPPUNIT_ASSERT(dp13.getChoices()[1].second->time() == tok3.start());
-		CPPUNIT_ASSERT(dp13.getChoices()[2].second->time() == tok2.start());
+    std::string shortestPred = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" order=\"shortestPredecessor\"/>";
+    TiXmlElement* shortestPredXml = initXml(shortestPred);
+    ResourceThreatDecisionPoint dp9(client, flawedInstants[0], *shortestPredXml);
+    dp9.initialize();
+    CPPUNIT_ASSERT(dp9.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp9.getChoices()[0].first->time() == tok2.start() ||
+                   dp9.getChoices()[0].first->time() == tok1.end());
 
-		std::string shortestSucc = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" order=\"shortestSuccessor\"/>";
-		TiXmlElement* shortestSuccXml = initXml(shortestSucc);
-		ResourceThreatDecisionPoint dp14(client, flawedInstants[0], *shortestSuccXml);
-		dp14.initialize();
-		CPPUNIT_ASSERT(dp14.getChoices().size() == 3);
-		CPPUNIT_ASSERT(dp14.getChoices()[0].second->time() == tok2.start());
-		CPPUNIT_ASSERT(dp14.getChoices()[1].second->time() == tok3.start());
-		CPPUNIT_ASSERT(dp14.getChoices()[2].second->time() == tok3.start());
-
-		std::string descendingKeySucc = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" order=\"descendingKeySuccessor\"/>";
-		TiXmlElement* descendingKeySuccXml = initXml(descendingKeySucc);
-		ResourceThreatDecisionPoint dp15(client, flawedInstants[0], *descendingKeySuccXml);
-		dp15.initialize();
-		CPPUNIT_ASSERT(dp15.getChoices().size() == 3);
-		CPPUNIT_ASSERT(dp15.getChoices()[0].second->time() == tok3.start());
-		CPPUNIT_ASSERT(dp15.getChoices()[1].second->time() == tok3.start());
-		CPPUNIT_ASSERT(dp15.getChoices()[2].second->time() == tok2.start());
+    std::string descendingKeyPred = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" order=\"descendingKeyPredecessor\"/>";
+    TiXmlElement* descendingKeyPredXml = initXml(descendingKeyPred);
+    ResourceThreatDecisionPoint dp10(client, flawedInstants[0], *descendingKeyPredXml);
+    dp10.initialize();
+    CPPUNIT_ASSERT(dp10.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp10.getChoices()[0].first->time() == tok2.end());
+    CPPUNIT_ASSERT(dp10.getChoices()[1].first->time() == tok1.end());
 
 
-		std::string ascendingKeySucc = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" order=\"ascendingKeySuccessor\"/>";
-		TiXmlElement* ascendingKeySuccXml = initXml(ascendingKeySucc);
-		ResourceThreatDecisionPoint dp16(client, flawedInstants[0], *ascendingKeySuccXml);
-		dp16.initialize();
-		CPPUNIT_ASSERT(dp16.getChoices().size() == 3);
-		CPPUNIT_ASSERT(dp16.getChoices()[0].second->time() == tok2.start());
-		CPPUNIT_ASSERT(dp16.getChoices()[1].second->time() == tok3.start());
-		CPPUNIT_ASSERT(dp16.getChoices()[2].second->time() == tok3.start());
+    std::string earliestSucc = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" order=\"earliestSuccessor\"/>";
+    TiXmlElement* earliestSuccXml = initXml(earliestSucc);
+    ResourceThreatDecisionPoint dp11(client, flawedInstants[0], *earliestSuccXml);
+    dp11.initialize();
+    CPPUNIT_ASSERT(dp11.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp11.getChoices()[0].second->time() == tok2.start() ||
+                   dp11.getChoices()[0].second->time() == tok3.start());
+
+    std::string latestSucc = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" order=\"latestSuccessor\"/>";
+    TiXmlElement* latestSuccXml = initXml(latestSucc);
+    ResourceThreatDecisionPoint dp12(client, flawedInstants[0], *latestSuccXml);
+    dp12.initialize();
+    CPPUNIT_ASSERT(dp12.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp12.getChoices()[0].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp12.getChoices()[1].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp12.getChoices()[2].second->time() == tok2.start());
 
 
-		std::string leastImpact = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"successor\" order=\"leastImpact,earliestPredecessor,shortestSuccessor\"/>";
-		TiXmlElement* leastImpactXml = initXml(leastImpact);
-		ResourceThreatDecisionPoint dp17(client, flawedInstants[0], *leastImpactXml);
-		dp17.initialize();
-		CPPUNIT_ASSERT(dp17.getChoices().size() == 5);
-		CPPUNIT_ASSERT(dp17.getChoices()[0].first->time() == tok1.end());
-		CPPUNIT_ASSERT(dp17.getChoices()[0].second->time() == tok2.start());
-		CPPUNIT_ASSERT(dp17.getChoices()[1].first->time() == tok1.end());
-		CPPUNIT_ASSERT(dp17.getChoices()[1].second->time() == tok3.start());
-		CPPUNIT_ASSERT(dp17.getChoices()[2].first->time() == tok2.start());
-		CPPUNIT_ASSERT(dp17.getChoices()[2].second->time() == tok3.start());
-		CPPUNIT_ASSERT(dp17.getChoices()[3].first->time() == tok3.start());
-		CPPUNIT_ASSERT(dp17.getChoices()[3].second->time() == tok2.start());
-		CPPUNIT_ASSERT(dp17.getChoices()[4].first->time() == tok2.end());
-		CPPUNIT_ASSERT(dp17.getChoices()[4].second->time() == tok3.start());
+    std::string longestSucc = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" order=\"longestSuccessor\"/>";
+    TiXmlElement* longestSuccXml = initXml(longestSucc);
+    ResourceThreatDecisionPoint dp13(client, flawedInstants[0], *longestSuccXml);
+    dp13.initialize();
+    CPPUNIT_ASSERT(dp13.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp13.getChoices()[0].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp13.getChoices()[1].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp13.getChoices()[2].second->time() == tok2.start());
 
-		std::string precedesOnly = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" constraint=\"precedesOnly\"/>";
-		TiXmlElement* precedesOnlyXml = initXml(precedesOnly);
-		ResourceThreatDecisionPoint dp18(client, flawedInstants[0], *precedesOnlyXml);
-		dp18.initialize();
-		ConstraintNameListener* nameListener = new ConstraintNameListener(dp18.getChoices()[0].first->time());
-		dp18.execute();
-		ce->propagate();
-		CPPUNIT_ASSERT(nameListener->getName() == LabelStr("precedes"));
-		dp18.undo();
-		delete (ConstrainedVariableListener*) nameListener;
-		ce->propagate();
-		nameListener = new ConstraintNameListener(dp18.getChoices()[1].first->time());
-		dp18.execute();
-		ce->propagate();
-		CPPUNIT_ASSERT(nameListener->getName() == LabelStr("precedes"));
-		dp18.undo();
-		ce->propagate();
-		delete (ConstrainedVariableListener*) nameListener;
+    std::string shortestSucc = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" order=\"shortestSuccessor\"/>";
+    TiXmlElement* shortestSuccXml = initXml(shortestSucc);
+    ResourceThreatDecisionPoint dp14(client, flawedInstants[0], *shortestSuccXml);
+    dp14.initialize();
+    CPPUNIT_ASSERT(dp14.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp14.getChoices()[0].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp14.getChoices()[1].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp14.getChoices()[2].second->time() == tok3.start());
 
-		std::string concurrentOnly = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" constraint=\"concurrentOnly\"/>";
-		TiXmlElement* concurrentOnlyXml = initXml(concurrentOnly);
-		ResourceThreatDecisionPoint dp19(client, flawedInstants[0], *concurrentOnlyXml);
-		dp19.initialize();
-		nameListener = new ConstraintNameListener(dp19.getChoices()[0].first->time());
-		dp19.execute();
-		ce->propagate();
-		CPPUNIT_ASSERT(nameListener->getName() == LabelStr("concurrent"));
-		dp19.undo();
-		delete (ConstrainedVariableListener*) nameListener;
-		ce->propagate();
-		nameListener = new ConstraintNameListener(dp19.getChoices()[1].first->time());
-		dp19.execute();
-		ce->propagate();
-		CPPUNIT_ASSERT(nameListener->getName() == LabelStr("concurrent"));
-		dp19.undo();
-		ce->propagate();
-		delete (ConstrainedVariableListener*) nameListener;
+    std::string descendingKeySucc = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" order=\"descendingKeySuccessor\"/>";
+    TiXmlElement* descendingKeySuccXml = initXml(descendingKeySucc);
+    ResourceThreatDecisionPoint dp15(client, flawedInstants[0], *descendingKeySuccXml);
+    dp15.initialize();
+    CPPUNIT_ASSERT(dp15.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp15.getChoices()[0].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp15.getChoices()[1].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp15.getChoices()[2].second->time() == tok2.start());
 
-		//pair first has already been implicitly tested and constraint first is necessary to make this easy anyway, so it'll get tested as well.
 
-		std::string precedesFirst = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" constraint=\"precedesFirst\" iterate=\"constraintFirst\"/>";
-		TiXmlElement* precedesFirstXml = initXml(precedesFirst);
-		ResourceThreatDecisionPoint dp20(client, flawedInstants[0], *precedesFirstXml);
-		dp20.initialize();
-		nameListener = new ConstraintNameListener(dp20.getChoices()[0].first->time());
-		dp20.execute();
-		ce->propagate();
-		CPPUNIT_ASSERT(nameListener->getName() == LabelStr("precedes"));
-		dp20.undo();
-		ce->propagate();
-		dp20.execute();
-		ce->propagate();
-		CPPUNIT_ASSERT(nameListener->getName() == LabelStr("concurrent"));
-		dp20.undo();
-		ce->propagate();
-		delete (ConstrainedVariableListener*) nameListener;
-		//step once more to test creating a constraint on the next choice
-		nameListener = new ConstraintNameListener(dp20.getChoices()[1].first->time());
-		dp20.execute();
-		ce->propagate();
-		CPPUNIT_ASSERT(nameListener->getName() == LabelStr("precedes"));
-		dp20.undo();
-		ce->propagate();
-		delete nameListener;
+    std::string ascendingKeySucc = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" order=\"ascendingKeySuccessor\"/>";
+    TiXmlElement* ascendingKeySuccXml = initXml(ascendingKeySucc);
+    ResourceThreatDecisionPoint dp16(client, flawedInstants[0], *ascendingKeySuccXml);
+    dp16.initialize();
+    CPPUNIT_ASSERT(dp16.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp16.getChoices()[0].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp16.getChoices()[1].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp16.getChoices()[2].second->time() == tok3.start());
 
-		std::string concurrentFirst = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" constraint=\"concurrentFirst\" iterate=\"constraintFirst\"/>";
-		TiXmlElement* concurrentFirstXml = initXml(concurrentFirst);
-		ResourceThreatDecisionPoint dp21(client, flawedInstants[0], *concurrentFirstXml);
-		dp21.initialize();
-		nameListener = new ConstraintNameListener(dp21.getChoices()[0].first->time());
-		dp21.execute();
-		ce->propagate();
-		CPPUNIT_ASSERT(nameListener->getName() == LabelStr("concurrent"));
-		dp21.undo();
-		ce->propagate();
-		dp21.execute();
-		ce->propagate();
-		CPPUNIT_ASSERT(nameListener->getName() == LabelStr("precedes"));
-		dp21.undo();
-		ce->propagate();
-		delete (ConstrainedVariableListener*) nameListener;
-		//step once more to test creating a constraint on the next choice
-		nameListener = new ConstraintNameListener(dp21.getChoices()[1].first->time());
-		dp21.execute();
-		ce->propagate();
-		CPPUNIT_ASSERT(nameListener->getName() == LabelStr("concurrent"));
-		dp21.undo();
-		ce->propagate();
-		delete nameListener;
 
-		delete concurrentFirstXml;
-		delete precedesFirstXml;
-		delete concurrentOnlyXml;
-		delete precedesOnlyXml;
-		delete leastImpactXml;
-		delete ascendingKeySuccXml;
-		delete descendingKeySuccXml;
-		delete shortestSuccXml;
-		delete longestSuccXml;
-		delete latestSuccXml;
-		delete earliestSuccXml;
-		delete descendingKeyPredXml;
-		delete shortestPredXml;
-		delete longestPredXml;
-		delete latestPredXml;
-		delete earliestPredXml;
-		delete bothFilterXml;
-		delete sucFilterXml;
-		delete predFilterXml;
-		delete noFilterXml;
+    std::string leastImpact = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"successor\" order=\"leastImpact,earliestPredecessor,shortestSuccessor\"/>";
+    TiXmlElement* leastImpactXml = initXml(leastImpact);
+    ResourceThreatDecisionPoint dp17(client, flawedInstants[0], *leastImpactXml);
+    dp17.initialize();
+    CPPUNIT_ASSERT(dp17.getChoices().size() == 5);
+    CPPUNIT_ASSERT(dp17.getChoices()[0].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp17.getChoices()[0].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp17.getChoices()[1].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp17.getChoices()[1].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp17.getChoices()[2].first->time() == tok2.start());
+    CPPUNIT_ASSERT(dp17.getChoices()[2].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp17.getChoices()[3].first->time() == tok3.start());
+    CPPUNIT_ASSERT(dp17.getChoices()[3].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp17.getChoices()[4].first->time() == tok2.end());
+    CPPUNIT_ASSERT(dp17.getChoices()[4].second->time() == tok3.start());
 
-		return true;
-	}
+    std::string precedesOnly = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" constraint=\"precedesOnly\"/>";
+    TiXmlElement* precedesOnlyXml = initXml(precedesOnly);
+    ResourceThreatDecisionPoint dp18(client, flawedInstants[0], *precedesOnlyXml);
+    dp18.initialize();
+    ConstraintNameListener* nameListener = new ConstraintNameListener(dp18.getChoices()[0].first->time());
+    dp18.execute();
+    ce->propagate();
+    CPPUNIT_ASSERT(nameListener->getName() == LabelStr("precedes"));
+    dp18.undo();
+    delete (ConstrainedVariableListener*) nameListener;
+    ce->propagate();
+    nameListener = new ConstraintNameListener(dp18.getChoices()[1].first->time());
+    dp18.execute();
+    ce->propagate();
+    CPPUNIT_ASSERT(nameListener->getName() == LabelStr("precedes"));
+    dp18.undo();
+    ce->propagate();
+    delete (ConstrainedVariableListener*) nameListener;
+
+    std::string concurrentOnly = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" constraint=\"concurrentOnly\"/>";
+    TiXmlElement* concurrentOnlyXml = initXml(concurrentOnly);
+    ResourceThreatDecisionPoint dp19(client, flawedInstants[0], *concurrentOnlyXml);
+    dp19.initialize();
+    nameListener = new ConstraintNameListener(dp19.getChoices()[0].first->time());
+    dp19.execute();
+    ce->propagate();
+    CPPUNIT_ASSERT(nameListener->getName() == LabelStr("concurrent"));
+    dp19.undo();
+    delete (ConstrainedVariableListener*) nameListener;
+    ce->propagate();
+    nameListener = new ConstraintNameListener(dp19.getChoices()[1].first->time());
+    dp19.execute();
+    ce->propagate();
+    CPPUNIT_ASSERT(nameListener->getName() == LabelStr("concurrent"));
+    dp19.undo();
+    ce->propagate();
+    delete (ConstrainedVariableListener*) nameListener;
+
+    //pair first has already been implicitly tested and constraint first is necessary to make this easy anyway, so it'll get tested as well.
+
+    std::string precedesFirst = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" constraint=\"precedesFirst\" iterate=\"constraintFirst\"/>";
+    TiXmlElement* precedesFirstXml = initXml(precedesFirst);
+    ResourceThreatDecisionPoint dp20(client, flawedInstants[0], *precedesFirstXml);
+    dp20.initialize();
+    nameListener = new ConstraintNameListener(dp20.getChoices()[0].first->time());
+    dp20.execute();
+    ce->propagate();
+    CPPUNIT_ASSERT(nameListener->getName() == LabelStr("precedes"));
+    dp20.undo();
+    ce->propagate();
+    dp20.execute();
+    ce->propagate();
+    CPPUNIT_ASSERT(nameListener->getName() == LabelStr("concurrent"));
+    dp20.undo();
+    ce->propagate();
+    delete (ConstrainedVariableListener*) nameListener;
+    //step once more to test creating a constraint on the next choice
+    nameListener = new ConstraintNameListener(dp20.getChoices()[1].first->time());
+    dp20.execute();
+    ce->propagate();
+    CPPUNIT_ASSERT(nameListener->getName() == LabelStr("precedes"));
+    dp20.undo();
+    ce->propagate();
+    delete nameListener;
+
+    std::string concurrentFirst = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" constraint=\"concurrentFirst\" iterate=\"constraintFirst\"/>";
+    TiXmlElement* concurrentFirstXml = initXml(concurrentFirst);
+    ResourceThreatDecisionPoint dp21(client, flawedInstants[0], *concurrentFirstXml);
+    dp21.initialize();
+    nameListener = new ConstraintNameListener(dp21.getChoices()[0].first->time());
+    dp21.execute();
+    ce->propagate();
+    CPPUNIT_ASSERT(nameListener->getName() == LabelStr("concurrent"));
+    dp21.undo();
+    ce->propagate();
+    dp21.execute();
+    ce->propagate();
+    CPPUNIT_ASSERT(nameListener->getName() == LabelStr("precedes"));
+    dp21.undo();
+    ce->propagate();
+    delete (ConstrainedVariableListener*) nameListener;
+    //step once more to test creating a constraint on the next choice
+    nameListener = new ConstraintNameListener(dp21.getChoices()[1].first->time());
+    dp21.execute();
+    ce->propagate();
+    CPPUNIT_ASSERT(nameListener->getName() == LabelStr("concurrent"));
+    dp21.undo();
+    ce->propagate();
+    delete nameListener;
+
+    delete concurrentFirstXml;
+    delete precedesFirstXml;
+    delete concurrentOnlyXml;
+    delete precedesOnlyXml;
+    delete leastImpactXml;
+    delete ascendingKeySuccXml;
+    delete descendingKeySuccXml;
+    delete shortestSuccXml;
+    delete longestSuccXml;
+    delete latestSuccXml;
+    delete earliestSuccXml;
+    delete descendingKeyPredXml;
+    delete shortestPredXml;
+    delete longestPredXml;
+    delete latestPredXml;
+    delete earliestPredXml;
+    delete bothFilterXml;
+    delete sucFilterXml;
+    delete predFilterXml;
+    delete noFilterXml;
+
+    return true;
+  }
 
 
 	static bool testResourceThreatManager() {

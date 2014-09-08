@@ -7,7 +7,7 @@
 
 #ifndef NO_DEBUG_MESSAGE_SUPPORT
 
-#include "europa-config.h"
+// #include "europa-config.h"
 
 #include <fstream>
 #include <algorithm>

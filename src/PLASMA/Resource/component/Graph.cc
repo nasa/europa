@@ -58,7 +58,7 @@ namespace EUROPA
 	  node = new Node( identity );
 
 	  graphDebug("Created node "
-		     << *node );
+		     << *node << " initially " << (enabled ? "enabled" : "disabled"));
 
 	  m_Nodes[ identity ] = node;
 	}
@@ -135,6 +135,7 @@ namespace EUROPA
 
     void Graph::setDisabled()
     {
+      graphDebug("Disabling whole graph.")
       NodeIdentity2Node::iterator ite = m_Nodes.begin();
       NodeIdentity2Node::iterator end = m_Nodes.end();
 

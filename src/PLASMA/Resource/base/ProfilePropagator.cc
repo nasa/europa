@@ -83,8 +83,13 @@ namespace EUROPA {
     	  if( !getConstraintEngine()->provenInconsistent()
     			  &&
     			  profile->needsRecompute()) {
-    		  debugMsg("ProfilePropagator:execute", "Recomputing profile " << profile->getResource()->getName().toString());
-    		  profile->recompute();
+            condDebugMsg(profile->getResource() != ResourceId::noId(),
+                         "ProfilePropagator:execute", 
+                         "Recomputing profile " << profile->getResource()->getName().toString());
+            condDebugMsg(profile->getResource() == ResourceId::noId(),
+                         "ProfilePropagator:execute", 
+                         "Recomputing profile " << profile);
+            profile->recompute();
     	  }
       }
 

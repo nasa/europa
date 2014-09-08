@@ -17,6 +17,7 @@
 #include "ThreatDecisionPoint.hh"
 #include "ResourceThreatManager.hh"
 #include "Reusable.hh"
+#include "BoostFlowProfile.hh"
 
 namespace EUROPA {
 
@@ -103,8 +104,10 @@ namespace EUROPA {
       FactoryMgr* pfm = new FactoryMgr();
       engine->addComponent("ProfileFactoryMgr",pfm);
       REGISTER_PROFILE(pfm,TimetableProfile, TimetableProfile );
-      REGISTER_PROFILE(pfm,FlowProfile, FlowProfile);
-      REGISTER_PROFILE(pfm,IncrementalFlowProfile, IncrementalFlowProfile );
+      REGISTER_PROFILE(pfm, BoostFlowProfile, FlowProfile);
+      REGISTER_PROFILE(pfm, BoostFlowProfile, IncrementalFlowProfile);
+      // REGISTER_PROFILE(pfm,FlowProfile, FlowProfile);
+      // REGISTER_PROFILE(pfm,IncrementalFlowProfile, IncrementalFlowProfile );
       REGISTER_PROFILE(pfm,GroundedProfile, GroundedProfile );
 
       // Solver

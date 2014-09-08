@@ -218,6 +218,7 @@ namespace EUROPA {
       virtual void postHandleRecompute(const eint& endTime, const std::pair<edouble,edouble>& endDiff);
       /**
        * @brief Initialize a recomputation with level data from the given Instant.
+       * This function is expected to re-compute the levels for the given instant!
        */
       virtual void initRecompute(InstantId inst) = 0;
 
