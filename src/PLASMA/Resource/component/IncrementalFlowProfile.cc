@@ -25,6 +25,7 @@
 #include "TemporalAdvisor.hh"
 #include "Utils.hh"
 #include "Variable.hh"
+#include "FlowProfileGraph.hh"
 
 namespace EUROPA
 {
@@ -64,7 +65,7 @@ namespace EUROPA
           m_upperClosedLevel = getInitCapacityUb();
         }
 
-      initializeGraphs();
+      initializeGraphs<FlowProfileGraphImpl>();
 
       std::set<TransactionId> enabledLower;
       std::set<TransactionId> enabledUpper;
@@ -204,7 +205,7 @@ namespace EUROPA
 
       debugMsg("IncrementalFlowProfile::initRecompute","");
 
-      initializeGraphs();
+      initializeGraphs<FlowProfileGraphImpl>();
 
       // initial level
       m_lowerClosedLevel = getInitCapacityLb();
@@ -333,208 +334,228 @@ namespace EUROPA
       recomputeLevels( inst, lowerLevel, upperLevel );
     }
 
-    void IncrementalFlowProfile::recomputeLevels( InstantId inst, edouble lowerLevel, edouble upperLevel )
+void IncrementalFlowProfile::recomputeLevels( InstantId inst, edouble lowerLevel, 
+                                              edouble upperLevel )
+{
+  //        static int counter = 0;
+  //        counter++;
+
+  //        debugMsg("Performance::recomputeLevels", "Invocation counter = " << counter );
+
+  debugMsg("IncrementalFlowProfile::recomputeLevels","Instant ("
+           << inst->getId() << ") at time "
+           << inst->getTime() << " start levels ["
+           << lowerLevel << ","
+           << upperLevel << "]");
+
+  bool expansion = enableOrderings( inst );
+
+  {
+    if( expansion )
     {
-      //        static int counter = 0;
-      //        counter++;
-
-      //        debugMsg("Performance::recomputeLevels", "Invocation counter = " << counter );
-
-      debugMsg("IncrementalFlowProfile::recomputeLevels","Instant ("
-               << inst->getId() << ") at time "
-               << inst->getTime() << " start levels ["
-               << lowerLevel << ","
-               << upperLevel << "]");
-
-      bool expansion = enableOrderings( inst );
-
+      if( m_recalculateLowerLevel )
       {
-        if( expansion )
-          {
-            if( m_recalculateLowerLevel )
-              {
-                edouble delta = m_lowerLevelGraph->disableReachableResidualGraph( m_lowerLevelContribution, inst );
+        edouble delta =
+            m_lowerLevelGraph->disableReachableResidualGraph(m_lowerLevelContribution, 
+                                                             inst );
 
-                debugMsg("IncrementalFlowProfile::recomputeLevels","Expansion leads to delta lower level of "
-                         << delta );
+        debugMsg("IncrementalFlowProfile::recomputeLevels",
+                 "Expansion leads to delta lower level of " << delta );
 
-                lowerLevel += delta;
-              }
-
-            if( m_recalculateUpperLevel )
-              {
-                edouble delta = m_upperLevelGraph->disableReachableResidualGraph( m_upperLevelContribution, inst );
-
-                debugMsg("IncrementalFlowProfile::recomputeLevels","Expansion leads to delta upper level of "
-                         << delta );
-
-                upperLevel += delta;
-              }
-          }
+        lowerLevel += delta;
       }
 
-      const std::set<TransactionId>& endingTransactions = inst->getEndingTransactions();
-
-      bool contraction = false;
-
+      if( m_recalculateUpperLevel )
       {
-        std::set<TransactionId>::const_iterator ite = endingTransactions.begin();
-        std::set<TransactionId>::const_iterator end = endingTransactions.end();
+        edouble delta = 
+            m_upperLevelGraph->disableReachableResidualGraph( m_upperLevelContribution,
+                                                              inst );
 
-        for( ; ite != end; ++ite )
+        debugMsg("IncrementalFlowProfile::recomputeLevels",
+                 "Expansion leads to delta upper level of " << delta );
+
+        upperLevel += delta;
+      }
+    }
+  }
+
+  const std::set<TransactionId>& endingTransactions = inst->getEndingTransactions();
+
+  bool contraction = false;
+
+  {
+    std::set<TransactionId>::const_iterator ite = endingTransactions.begin();
+    std::set<TransactionId>::const_iterator end = endingTransactions.end();
+
+    for( ; ite != end; ++ite )
+    {
+      const TransactionId& ended = (*ite);
+
+      if( m_recalculateLowerLevel )
+      {
+        bool enteredClosedSet = false;
+
+        // if it is still enabled it is not yet contributing to the level
+        if( m_lowerLevelGraph->isEnabled( ended ) )
+        {
+          debugMsg("IncrementalFlowProfile::recomputeLevels",
+                   "Contracting from lower graph transaction ("
+                   << ended->getId() << ") "
+                   << ended->time()->toString() << " "
+                   << ended->quantity()->toString() );
+
+          enteredClosedSet = true;
+          contraction = true;
+          m_lowerLevelGraph->pushFlow( ended );
+          m_lowerLevelGraph->disable( ended );
+        }
+        else if( ended->time()->lastDomain().isSingleton() )
+        {
+          debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
+                   << ended->getId() << ") straight from open to closed set");
+
+          enteredClosedSet = true;
+        }
+
+        if( enteredClosedSet )
+        {
+          debugMsg("IncrementalFlowProfile:recomputeLevels","Transaction "
+                   << ended << " starts contributing at "
+                   << inst->getTime() << " lower level true");
+
+          m_lowerLevelContribution[ ended ] = inst;
+
+          if( ended->isConsumer() )
           {
-            const TransactionId& ended = (*ite);
+            lowerLevel -= ended->quantity()->lastDomain().getUpperBound();
 
-            if( m_recalculateLowerLevel )
-              {
-                bool enteredClosedSet = false;
-
-                // if it is still enabled it is not yet contributing to the level
-                if( m_lowerLevelGraph->isEnabled( ended ) )
-                  {
-                    debugMsg("IncrementalFlowProfile::recomputeLevels","Contracting from lower graph transaction ("
-                             << ended->getId() << ") "
-                             << ended->time()->toString() << " "
-                             << ended->quantity()->toString() );
-
-                    enteredClosedSet = true;
-                    contraction = true;
-                    m_lowerLevelGraph->pushFlow( ended );
-                    m_lowerLevelGraph->disable( ended );
-                  }
-                else if( ended->time()->lastDomain().isSingleton() )
-                  {
-                    debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
-                             << ended->getId() << ") straight from open to closed set");
-
-                    enteredClosedSet = true;
-                  }
-
-                if( enteredClosedSet )
-                  {
-		    debugMsg("IncrementalFlowProfile:recomputeLevels","Transaction "
-			     << ended << " starts contributing at "
-			     << inst->getTime() << " lower level true");
-
-                    m_lowerLevelContribution[ ended ] = inst;
-
-                    if( ended->isConsumer() )
-                      {
-                        lowerLevel -= ended->quantity()->lastDomain().getUpperBound();
-
-			debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
-                                 << ended->getId() << ") decreases lower level by "
-                                 << ended->quantity()->lastDomain().getUpperBound() << " (new level "
-                                 << lowerLevel << ")");
-                      }
-                    else
-                      {
-                        lowerLevel += ended->quantity()->lastDomain().getLowerBound();
-
-
-                        debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
-                                 << ended->getId() << ") increases lower level by "
-                                 << ended->quantity()->lastDomain().getLowerBound() << " (new level "
-                                 << lowerLevel << ")");
-                      }
-                  }
-              }
-
-            if( m_recalculateUpperLevel )
-              {
-                bool enteredClosedSet = false;
-
-                if( m_upperLevelGraph->isEnabled( ended ) )
-                  {
-                    debugMsg("IncrementalFlowProfile::recomputeLevels","Contracting from upper graph transaction ("
-                             << ended->getId() << ") "
-                             << ended->time()->toString() << " "
-                             << ended->quantity()->toString() );
-
-                    enteredClosedSet = true;
-                    contraction = true;
-                    m_upperLevelGraph->pushFlow( ended );
-                    m_upperLevelGraph->disable( ended );
-                  }
-                else if( ended->time()->lastDomain().isSingleton() )
-                  {
-                    debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
-                             << ended->getId() << ") straight from open to closed set");
-
-                    enteredClosedSet = true;
-                  }
-
-                if( enteredClosedSet )
-                  {
-		    debugMsg("IncrementalFlowProfile:recomputeLevels","Transaction "
-			     << ended << " starts contributing at "
-			     << inst->getTime() << " lower level false");
-
-                    m_upperLevelContribution[ ended ] = inst;
-
-                    if( ended->isConsumer() )
-                      {
-                        upperLevel -= ended->quantity()->lastDomain().getLowerBound();
-
-                        debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
-                                 << ended->getId() << ") decreases upper level by "
-                                 << ended->quantity()->lastDomain().getLowerBound() << " (new level "
-                                 << upperLevel << ")");
-                      }
-                    else
-                      {
-                        upperLevel += ended->quantity()->lastDomain().getUpperBound();
-
-                        debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
-                                 << ended->getId() << ") increases upper level by "
-                                 << ended->quantity()->lastDomain().getUpperBound() << " (new level "
-                                 << upperLevel << ")");		      }
-                  }
-              }
+            debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
+                     << ended->getId() << ") decreases lower level by "
+                     << ended->quantity()->lastDomain().getUpperBound() << 
+                     " (new level "
+                     << lowerLevel << ")");
           }
-
-        if( contraction )
+          else
           {
-            if( m_recalculateLowerLevel )
-              {
-                m_lowerLevelGraph->restoreFlow();
+            lowerLevel += ended->quantity()->lastDomain().getLowerBound();
 
-                edouble delta = m_lowerLevelGraph->disableReachableResidualGraph( m_lowerLevelContribution, inst );
 
-                debugMsg("IncrementalFlowProfile::recomputeLevels","Contraction leads to delta lower level of "
-                         << delta );
-
-                lowerLevel += delta;
-              }
-
-            if( m_recalculateUpperLevel )
-              {
-                m_upperLevelGraph->restoreFlow();
-
-                edouble delta = m_upperLevelGraph->disableReachableResidualGraph( m_upperLevelContribution, inst );
-
-                debugMsg("IncrementalFlowProfile::recomputeLevels","Contraction leads to delta upper level of "
-                         << delta );
-
-                upperLevel += delta;
-              }
+            debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
+                     << ended->getId() << ") increases lower level by "
+                     << ended->quantity()->lastDomain().getLowerBound() << 
+                     " (new level "
+                     << lowerLevel << ")");
           }
+        }
       }
 
+      if( m_recalculateUpperLevel )
+      {
+        bool enteredClosedSet = false;
 
-      debugMsg("IncrementalFlowProfile::recomputeLevels","Computed levels for instance at time "
-               << inst->getTime() << "["
-               << lowerLevel << ","
-               << upperLevel << "]");
+        if( m_upperLevelGraph->isEnabled( ended ) )
+        {
+          debugMsg("IncrementalFlowProfile::recomputeLevels",
+                   "Contracting from upper graph transaction ("
+                   << ended->getId() << ") "
+                   << ended->time()->toString() << " "
+                   << ended->quantity()->toString() );
 
-      debugMsg("IncrementalFlowProfile::calculatedLevels","Computed levels for instance at time "
-               << inst->getTime() << "["
-               << lowerLevel << ","
-               << upperLevel << "]");
+          enteredClosedSet = true;
+          contraction = true;
+          m_upperLevelGraph->pushFlow( ended );
+          m_upperLevelGraph->disable( ended );
+        }
+        else if( ended->time()->lastDomain().isSingleton() )
+        {
+          debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
+                   << ended->getId() << ") straight from open to closed set");
 
-      inst->update( lowerLevel, lowerLevel, upperLevel, upperLevel,
-                    0, 0, 0, 0,
-                    0, 0, 0, 0,
-                    0, 0, 0, 0 );          }
+          enteredClosedSet = true;
+        }
+
+        if( enteredClosedSet )
+        {
+          debugMsg("IncrementalFlowProfile:recomputeLevels","Transaction "
+                   << ended << " starts contributing at "
+                   << inst->getTime() << " lower level false");
+
+          m_upperLevelContribution[ ended ] = inst;
+
+          if( ended->isConsumer() )
+          {
+            upperLevel -= ended->quantity()->lastDomain().getLowerBound();
+
+            debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
+                     << ended->getId() << ") decreases upper level by "
+                     << ended->quantity()->lastDomain().getLowerBound() << 
+                     " (new level "
+                     << upperLevel << ")");
+          }
+          else
+          {
+            upperLevel += ended->quantity()->lastDomain().getUpperBound();
+
+            debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
+                     << ended->getId() << ") increases upper level by "
+                     << ended->quantity()->lastDomain().getUpperBound() << 
+                     " (new level "
+                     << upperLevel << ")");		      }
+        }
+      }
+    }
+
+    if( contraction )
+    {
+      if( m_recalculateLowerLevel )
+      {
+        m_lowerLevelGraph->restoreFlow();
+
+        edouble delta = 
+            m_lowerLevelGraph->disableReachableResidualGraph( m_lowerLevelContribution,
+                                                              inst );
+
+        debugMsg("IncrementalFlowProfile::recomputeLevels",
+                 "Contraction leads to delta lower level of "
+                 << delta );
+
+        lowerLevel += delta;
+      }
+
+      if( m_recalculateUpperLevel )
+      {
+        m_upperLevelGraph->restoreFlow();
+
+        edouble delta =
+            m_upperLevelGraph->disableReachableResidualGraph( m_upperLevelContribution,
+                                                              inst );
+
+        debugMsg("IncrementalFlowProfile::recomputeLevels",
+                 "Contraction leads to delta upper level of "
+                 << delta );
+
+        upperLevel += delta;
+      }
+    }
+  }
+
+
+  debugMsg("IncrementalFlowProfile::recomputeLevels",
+           "Computed levels for instance at time "
+           << inst->getTime() << "["
+           << lowerLevel << ","
+           << upperLevel << "]");
+
+  debugMsg("IncrementalFlowProfile::calculatedLevels",
+           "Computed levels for instance at time "
+           << inst->getTime() << "["
+           << lowerLevel << ","
+           << upperLevel << "]");
+
+  inst->update( lowerLevel, lowerLevel, upperLevel, upperLevel,
+                0, 0, 0, 0,
+                0, 0, 0, 0,
+                0, 0, 0, 0 );          
+}
 
 }

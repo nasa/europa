@@ -30,7 +30,7 @@
 #include "Instant.hh"
 #include "Transaction.hh"
 
-//#define TRACE_GRAPH 1
+#define TRACE_GRAPH 1
 
 #ifdef TRACE_GRAPH
 

@@ -11,6 +11,8 @@ ModuleComponent Resource
 		MaxFlow.cc 
 		Types.cc
 		FlowProfile.cc
+		FlowProfileGraph.cc
+		BoostFlowProfileGraph.cc
 		IncrementalFlowProfile.cc
 		GroundedProfile.cc
         InstantTokens.cc

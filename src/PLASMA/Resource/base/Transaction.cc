@@ -15,6 +15,8 @@ namespace EUROPA {
           , m_isConsumer(isConsumer)
           , m_owner(owner)
       {
+        checkRuntimeError(quantity->lastDomain().getLowerBound() >= 0.0,
+                          "All transactions require positive quantity variables.");
       }
 
       Transaction::~Transaction()

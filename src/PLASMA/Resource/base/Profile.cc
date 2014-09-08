@@ -481,84 +481,89 @@ namespace EUROPA {
         handleRecompute();
     }
 
-    void Profile::handleRecompute()
-    {
-    	checkError(m_recomputeInterval.isValid(),
-    			"Attempted to recompute levels over an invalid interval.");
-    	condDebugMsg(m_recomputeInterval->done(), "Profile:recompute", "No instants over which to recompute.");
-    	debugMsg("Profile:handleRecompute","Invoked");
-    	debugMsg("Profile:recompute:prePrint", std::endl << toString());
+void Profile::handleRecompute() {
+  checkError(m_recomputeInterval.isValid(),
+             "Attempted to recompute levels over an invalid interval.");
+  condDebugMsg(m_recomputeInterval->done(), "Profile:recompute", "No instants over which to recompute.");
+  debugMsg("Profile:handleRecompute","Invoked");
+  debugMsg("Profile:recompute:prePrint", std::endl << toString());
 
-    	eint endTime = MINUS_INFINITY;
-    	std::pair<edouble,edouble> endDiff(0.0,0.0);
+  eint endTime = MINUS_INFINITY;
+  std::pair<edouble,edouble> endDiff(0.0,0.0);
 
-    	if(!m_recomputeInterval->done()) {
-    		InstantId prev = InstantId::noId();
-    		bool violation = false;
-    		endTime = m_recomputeInterval->getEndTime();
+  if(!m_recomputeInterval->done()) {
+    InstantId prev = InstantId::noId();
+    bool violation = false;
+    endTime = m_recomputeInterval->getEndTime();
 
-    		//if there is no preceding instant, do a clean init
-    		if(m_recomputeInterval->getInstant()->getTime() == m_instants.begin()->first) {
-    			initRecompute();
-    			m_detector->initialize();
-    		}
-    		else {
-    			InstantId inst = m_recomputeInterval->getInstant();
-
-    			if (inst->getTime() == endTime) {
-    				endDiff.first = inst->getLowerLevel();
-    				endDiff.second = inst->getUpperLevel();
-    			}
-
-    			initRecompute(inst);
-    			m_detector->initialize(inst);
-
-    			if (inst->getTime() == endTime) {
-    				endDiff.first = inst->getLowerLevel() - endDiff.first;
-    				endDiff.second = inst->getUpperLevel() - endDiff.second;
-    			}
-
-    			// initRecompute(inst) above also recomputes the levels for the inst, so move forward:
-    			violation = m_detector->detect(inst);
-
-    			prev = inst;
-    			m_recomputeInterval->next();
-    		}
-
-    		while(!m_recomputeInterval->done()
-    				&&
-    				!violation ) {
-    			InstantId inst = m_recomputeInterval->getInstant();
-
-    			if (inst->getTime() == endTime) {
-    				endDiff.first = inst->getLowerLevel();
-    				endDiff.second = inst->getUpperLevel();
-    			}
-
-    			debugMsg("Profile:recompute", "Recomputing levels at instant " << inst->getTime());
-    			check_error(inst.isValid());
-    			recomputeLevels( prev, inst);
-
-    			if (inst->getTime() == endTime) {
-    				endDiff.first = inst->getLowerLevel() - endDiff.first;
-    				endDiff.second = inst->getUpperLevel() - endDiff.second;
-    			}
-
-    			violation = m_detector->detect(inst);
-
-    			prev = inst;
-    			m_recomputeInterval->next();
-    		}
-    	}
-
-    	debugMsg("Profile:recompute:postPrint", std::endl << toString());
-    	debugMsg("Profile:handleRecompute", "Deleting profile iterator " << m_recomputeInterval->getId() );
-    	delete (ProfileIterator*) m_recomputeInterval;
-    	m_recomputeInterval = ProfileIteratorId::noId();
-    	m_needsRecompute = false;
-
-    	postHandleRecompute(endTime,endDiff);
+    //if there is no preceding instant, do a clean init
+    if(m_recomputeInterval->getInstant()->getTime() == m_instants.begin()->first) {
+      initRecompute();
+      m_detector->initialize();
     }
+    else {
+      InstantId inst = m_recomputeInterval->getInstant();
+
+      if (inst->getTime() == endTime) {
+        endDiff.first = inst->getLowerLevel();
+        endDiff.second = inst->getUpperLevel();
+      }
+
+      initRecompute(inst);
+      m_detector->initialize(inst);
+
+      if (inst->getTime() == endTime) {
+        endDiff.first = inst->getLowerLevel() - endDiff.first;
+        endDiff.second = inst->getUpperLevel() - endDiff.second;
+      }
+
+      std::map<eint, InstantId>::iterator it = getGreatestInstant(inst->getTime() - 1);
+      if(it != m_instants.end()) {
+        prev = it->second;
+      }
+
+      // initRecompute(inst) above also recomputes the levels for the inst, so move forward:
+      // violation = m_detector->detect(inst);
+
+
+      // prev = inst;
+      // m_recomputeInterval->next();
+    }
+
+    while(!m_recomputeInterval->done()
+          &&
+          !violation ) {
+      InstantId inst = m_recomputeInterval->getInstant();
+
+      if (inst->getTime() == endTime) {
+        endDiff.first = inst->getLowerLevel();
+        endDiff.second = inst->getUpperLevel();
+      }
+
+      debugMsg("Profile:recompute", "Recomputing levels at instant " << inst->getTime());
+      check_error(inst.isValid());
+      recomputeLevels( prev, inst);
+
+      if (inst->getTime() == endTime) {
+        endDiff.first = inst->getLowerLevel() - endDiff.first;
+        endDiff.second = inst->getUpperLevel() - endDiff.second;
+      }
+
+      violation = m_detector->detect(inst);
+
+      prev = inst;
+      m_recomputeInterval->next();
+    }
+  }
+
+  debugMsg("Profile:recompute:postPrint", std::endl << toString());
+  debugMsg("Profile:handleRecompute", "Deleting profile iterator " << m_recomputeInterval->getId() );
+  delete (ProfileIterator*) m_recomputeInterval;
+  m_recomputeInterval = ProfileIteratorId::noId();
+  m_needsRecompute = false;
+
+  postHandleRecompute(endTime,endDiff);
+}
 
     void Profile::postHandleRecompute(const eint& endTime, const std::pair<edouble,edouble>& endDiff)
     {
@@ -709,12 +714,12 @@ namespace EUROPA {
 
     edouble Profile::getInitCapacityLb() const
     {
-		return 0.0;
+      return 0.0;
     }
 
     edouble Profile::getInitCapacityUb() const
     {
-		return 0.0;
+      return 0.0;
     }
 
     ProfileIterator::ProfileIterator(const ProfileId prof, const eint startTime, const eint endTime)

@@ -26,461 +26,484 @@
 
 namespace EUROPA
 {
-    /**
-     * @brief
-     */
-    class MaximumFlowAlgorithm
-    {
-      public:
-        /**
-         * @brief
-         */
-        MaximumFlowAlgorithm( Graph* g, Node* source, Node* sink  );
-        /**
-         * @brief
-         */
-        Graph* getGraph() const { return m_Graph; }
-        /**
-         * @brief
-         */
-        Node* getSource() const { return m_Source; }
-        /**
-         * @brief
-         */
-        Node* getSink() const { return m_Sink; }
-        /**
-         * @brief
-         */
-        inline void execute( bool reset = true );
-        /**
-         * @brief
-         */
-        void print( std::ostream& os ) const;
-        /**
-         * @brief
-         */
-        inline edouble getMaxFlow() const;
-        /**
-         * @brief
-         */
-        inline edouble getFlow( Edge* edge ) const;
-        /**
-         * @brief
-         */
-        inline void pushFlowBack( Node* node );
-        /**
-         * @brief
-         */
-        inline edouble getResidual( Edge* edge ) const;
-      private:
-        /**
-         * @brief
-         */
-        inline void disCharge( Node* node );
-        /**
-         * @brief
-         */
-        inline void initializePre( bool reset = true );
-        /**
-         * @brief
-         */
-        inline bool isAdmissible( Edge* edge );
-        /**
-         * @brief
-         */
-        inline void push( Edge* edge );
-        /**
-         * @brief
-         */
-        inline void reLabel( Node* n );
-        /**
-         * @brief
-         */
-        inline Node* getNextInList();
-        /**
-         * @brief
-         */
-        inline void resetToFront();
+/**
+ * @brief
+ */
+class MaximumFlowAlgorithm
+{
+ public:
+  /**
+   * @brief
+   */
+  MaximumFlowAlgorithm( Graph* g, Node* source, Node* sink  );
+  /**
+   * @brief
+   */
+  Graph* getGraph() const { return m_Graph; }
+  /**
+   * @brief
+   */
+  Node* getSource() const { return m_Source; }
+  /**
+   * @brief
+   */
+  Node* getSink() const { return m_Sink; }
+  /**
+   * @brief
+   */
+  inline void execute( bool reset = true );
+  /**
+   * @brief
+   */
+  void print( std::ostream& os ) const;
+  /**
+   * @brief
+   */
+  inline edouble getMaxFlow() const;
+  /**
+   * @brief
+   */
+  inline edouble getFlow( Edge* edge ) const;
+  /**
+   * @brief
+   */
+  inline void pushFlowBack( Node* node );
+  /**
+   * @brief
+   */
+  inline edouble getResidual( Edge* edge ) const;
+ private:
 
-#ifdef _MSC_VER
-        typedef map< Node*, EdgeList::const_iterator > Node2EdgeListIteratorMap;
-#else
-      typedef boost::unordered_map< Node*, EdgeList::const_iterator, NodeHash > Node2EdgeListIteratorMap;
-#endif //_MSC_VER
+  eint distanceOnNode(Node* n) const;
+  //inline edouble flow(Edge* e) const;
+  edouble getExcess(Node* n) const;
+  EdgeList::const_iterator currentOutEdgeOnNode(Node* n) const;
+  EdgeList::const_iterator endOutEdgeOnNode(Node* n) const;
+   /**
+    * @brief
+    */
+   inline void disCharge( Node* node );
+   /**
+    * @brief
+    */ 
+   inline void initializePre( bool reset = true );
+   /**
+    * @brief
+    */
+   inline bool isAdmissible( Edge* edge ) const;
+   /**
+    * @brief
+    */
+   inline void push( Edge* edge );
+   /**
+    * @brief
+    */
+   inline void reLabel( Node* n );
+   /**
+    * @brief
+    */
+   inline Node* getNextInList();
+   /**
+    * @brief
+    */
+   inline void resetToFront();
 
-        Node2EdgeListIteratorMap m_CurrentOutEdgeOnNode;
-        Node2EdgeListIteratorMap m_EndOutEdgeOnNode;
+ #ifdef _MSC_VER
+   typedef map< Node*, EdgeList::const_iterator > Node2EdgeListIteratorMap;
+ #else
+   typedef boost::unordered_map< Node*, EdgeList::const_iterator, NodeHash > Node2EdgeListIteratorMap;
+ #endif //_MSC_VER
 
-        Node2Double m_ExcessOnNode;
-        Node2Long m_DistanceOnNode;
-        Edge2DoubleMap m_OnEdge;
+   Node2EdgeListIteratorMap m_CurrentOutEdgeOnNode;
+   Node2EdgeListIteratorMap m_EndOutEdgeOnNode;
 
-        NodeList m_Nodes;
-        Graph* m_Graph;
-        Node* m_Source;
-        Node* m_Sink;
+   Node2Double m_ExcessOnNode;
+   Node2Long m_DistanceOnNode;
+   Edge2DoubleMap m_OnEdge;
 
-        NodeList::iterator m_NodeListIterator;
-    };
+   NodeList m_Nodes;
+   Graph* m_Graph;
+   Node* m_Source;
+   Node* m_Sink;
 
-    edouble MaximumFlowAlgorithm::getMaxFlow() const
-    {
-      if( m_ExcessOnNode.find(  m_Sink ) == m_ExcessOnNode.end() )
-        return 0.0;
+   NodeList::iterator m_NodeListIterator;
+ };
 
-      return m_ExcessOnNode.find(  m_Sink )->second;
-    }
+ edouble MaximumFlowAlgorithm::getMaxFlow() const
+ {
+   if( m_ExcessOnNode.find(  m_Sink ) == m_ExcessOnNode.end() )
+     return 0.0;
 
-    edouble MaximumFlowAlgorithm::getFlow( Edge* edge  ) const
-    {
-      return m_OnEdge.find( edge )->second;
-    }
+   return m_ExcessOnNode.find(  m_Sink )->second;
+ }
 
-    edouble MaximumFlowAlgorithm::getResidual( Edge* edge ) const
-    {
-      return edge->getCapacity() - getFlow( edge );
-    }
+ edouble MaximumFlowAlgorithm::getFlow( Edge* edge  ) const
+ {
+   Edge2DoubleMap::const_iterator it = m_OnEdge.find(edge);
+   checkError(it != m_OnEdge.end(), "Failed to find flow for edge " << *edge);
+   return it->second;
+ }
+
+ edouble MaximumFlowAlgorithm::getResidual( Edge* edge ) const
+ {
+   return edge->getCapacity() - getFlow( edge );
+ }
 
 
-    Node* MaximumFlowAlgorithm::getNextInList()
-    {
-      Node* node = 0;
+ Node* MaximumFlowAlgorithm::getNextInList()
+ {
+   Node* node = NULL;
 
-      if( m_NodeListIterator == m_Nodes.end() )
-      {
-        m_NodeListIterator = m_Nodes.begin();
-      }
-      else
-      {
-        ++m_NodeListIterator;
-      }
+   if( m_NodeListIterator == m_Nodes.end() )
+   {
+     m_NodeListIterator = m_Nodes.begin();
+   }
+   else
+   {
+     ++m_NodeListIterator;
+   }
 
-      NodeList::iterator end = m_Nodes.end();
+   NodeList::iterator end = m_Nodes.end();
 
-      while( m_NodeListIterator != end &&
+   while( m_NodeListIterator != end &&
           !(*m_NodeListIterator)->isEnabled() )
-      {
-        ++m_NodeListIterator;
-      }
+   {
+     ++m_NodeListIterator;
+   }
 
-      if( m_NodeListIterator != end )
-        node = *m_NodeListIterator;
+   if( m_NodeListIterator != end )
+     node = *m_NodeListIterator;
 
-      return node;
-    }
+   return node;
+ }
 
-    void MaximumFlowAlgorithm::resetToFront()
-    {
-      if( m_NodeListIterator != m_Nodes.end() )
-      {
-        Node* n = (*m_NodeListIterator);
-        m_Nodes.erase( m_NodeListIterator );
-        m_Nodes.push_front( n );
+ void MaximumFlowAlgorithm::resetToFront()
+ {
+   if( m_NodeListIterator != m_Nodes.end() )
+   {
+     Node* n = (*m_NodeListIterator);
+     m_Nodes.erase( m_NodeListIterator );
+     m_Nodes.push_front( n );
 
-        m_NodeListIterator = m_Nodes.end();
-      }
-    }
+     m_NodeListIterator = m_Nodes.end();
+   }
+ }
 
 
-    void MaximumFlowAlgorithm::execute( bool reset )
-    {
-      graphDebug("Start execute, reset is " << std::boolalpha << reset );
+ void MaximumFlowAlgorithm::execute( bool reset )
+ {
+   graphDebug("Start execute, reset is " << std::boolalpha << reset );
 
-      initializePre( reset );
+   initializePre( reset );
 
-      Node* n = getNextInList();
+   Node* n = getNextInList();
 
-      while( n != 0 )
-      {
-        eint oldDistance = m_DistanceOnNode[ n ];
+   while( n != NULL )
+   {
+     eint oldDistance = distanceOnNode( n );
 
-        disCharge( n );
+     disCharge( n );
 
-        if( m_DistanceOnNode[ n ] > oldDistance )
+     if( distanceOnNode( n ) > oldDistance )
+     {
+       resetToFront();
+     }
+
+     n = getNextInList();
+   }
+
+   graphDebug("End execute, max flow: "
+              << getMaxFlow() );
+ }
+
+ void MaximumFlowAlgorithm::initializePre( bool reset )
+ {
+   graphDebug("Start initializePre " << this);
+
+   checkError( m_Source->isEnabled(),"Source '" << *m_Source << "' is not enabled.");
+   checkError( m_Sink->isEnabled(),"Sink '" << *m_Sink << "' is not enabled." );
+
+   if( reset )
+   {
+     m_CurrentOutEdgeOnNode.clear();
+     m_EndOutEdgeOnNode.clear();
+     m_DistanceOnNode.clear();
+     m_ExcessOnNode.clear();
+
+     m_OnEdge.clear();
+
+     m_Nodes.clear();
+   }
+
+   const NodeIdentity2Node& nodes = m_Graph->getNodes();
+
+   NodeIdentity2Node::const_iterator nIte = nodes.begin();
+   NodeIdentity2Node::const_iterator nEnd = nodes.end();
+
+   for( ; nIte != nEnd; ++nIte )
+   {
+     Node* node = (*nIte).second;
+
+     graphDebug("Initializing node "
+                << *node << " of " << nodes.size());
+
+     if( node->isEnabled() )
+     {
+       m_CurrentOutEdgeOnNode[ node ] = node->getOutEdges().begin();
+       m_EndOutEdgeOnNode[ node ] = node->getOutEdges().end();
+
+       while( m_CurrentOutEdgeOnNode[ node ] != m_EndOutEdgeOnNode[ node ] && 
+              !(*m_CurrentOutEdgeOnNode[ node ])->getTarget()->isEnabled() )
+         ++m_CurrentOutEdgeOnNode[ node ];
+
+       if( reset )
+       {
+         if( node != m_Source && node != m_Sink )
+           m_Nodes.push_back( node );
+
+         graphDebug("Setting distance and excess for node "
+                    << *node << " to 1 and 0.0");
+
+         m_DistanceOnNode[ node ] = 1;
+         m_ExcessOnNode[ node ] = 0.0;
+
+         const EdgeList& outEdges = node->getOutEdges();
+
+        EdgeList::const_iterator fIte = outEdges.begin();
+        EdgeList::const_iterator fEnd = outEdges.end();
+
+        for( ; fIte != fEnd; ++fIte )
         {
-          resetToFront();
-        }
+          Edge* edge = *fIte;
 
-        n = getNextInList();
-      }
-
-      graphDebug("End execute, max flow: "
-          << getMaxFlow() );
-    }
-
-    void MaximumFlowAlgorithm::initializePre( bool reset )
-    {
-      graphDebug("Start initializePre");
-
-      checkError( m_Source->isEnabled(),"Source '" << *m_Source << "' is not enabled.");
-      checkError( m_Sink->isEnabled(),"Sink '" << *m_Sink << "' is not enabled." );
-
-      if( reset )
-      {
-        m_CurrentOutEdgeOnNode.clear();
-        m_EndOutEdgeOnNode.clear();
-        m_DistanceOnNode.clear();
-        m_ExcessOnNode.clear();
-
-        m_OnEdge.clear();
-
-        m_Nodes.clear();
-      }
-
-      const NodeIdentity2Node& nodes = m_Graph->getNodes();
-
-      NodeIdentity2Node::const_iterator nIte = nodes.begin();
-      NodeIdentity2Node::const_iterator nEnd = nodes.end();
-
-      for( ; nIte != nEnd; ++nIte )
-      {
-        Node* node = (*nIte).second;
-
-        graphDebug("Initializing node "
-            << *node );
-
-        if( node->isEnabled() )
-        {
-          m_CurrentOutEdgeOnNode[ node ] = node->getOutEdges().begin();
-          m_EndOutEdgeOnNode[ node ] = node->getOutEdges().end();
-
-          while( m_CurrentOutEdgeOnNode[ node ] != m_EndOutEdgeOnNode[ node ] && !(*m_CurrentOutEdgeOnNode[ node ])->getTarget()->isEnabled() )
-            ++m_CurrentOutEdgeOnNode[ node ];
-
-          if( reset )
+          if( edge->isEnabled() )
           {
-            if( node != m_Source && node != m_Sink )
-              m_Nodes.push_back( node );
+            graphDebug("Initializing flow on edge "
+                       << *edge << " to be 0");
 
-            graphDebug("Setting distance and excess for node "
-                << *node << " to 1 and 0.0");
+            m_OnEdge[ edge ] = 0.0;
 
-            m_DistanceOnNode[ node ] = 1;
-            m_ExcessOnNode[ node ] = 0.0;
+            checkError( 0 !=  m_Graph->getEdge( edge->getTarget(), edge->getSource() )
+                        &&
+                        m_Graph->getEdge( edge->getTarget(), edge->getSource() )->isEnabled(),
+                        "No (enabled) reverse edge for edge '" << *edge << "'");
 
-            const EdgeList& outEdges = node->getOutEdges();
-
-            EdgeList::const_iterator fIte = outEdges.begin();
-            EdgeList::const_iterator fEnd = outEdges.end();
-
-            for( ; fIte != fEnd; ++fIte )
-            {
-              Edge* edge = *fIte;
-
-              if( edge->isEnabled() )
-              {
-                graphDebug("Initializing flow on edge "
-                    << *edge << " to be 0");
-
-                m_OnEdge[ edge ] = 0.0;
-
-                checkError( 0 !=  m_Graph->getEdge( edge->getTarget(), edge->getSource() )
-                    &&
-                    m_Graph->getEdge( edge->getTarget(), edge->getSource() )->isEnabled(),
-                    "No (enabled) reverse edge for edge '" << *edge << "'");
-
-                m_OnEdge[ m_Graph->getEdge( edge->getTarget(), edge->getSource() ) ] = 0.0;
-              }
-            }
+            m_OnEdge[ m_Graph->getEdge( edge->getTarget(), edge->getSource() ) ] = 0.0;
           }
         }
       }
-
-      m_DistanceOnNode[ m_Sink ] = 0;
-      m_DistanceOnNode[ m_Source ] = (long) m_Nodes.size();
-
-      m_NodeListIterator = m_Nodes.end();
-
-      EdgeOutIterator edgeOutIte( *m_Source );
-
-      for( ; edgeOutIte.ok(); ++edgeOutIte )
-      {
-        Edge* edge = *edgeOutIte;
-
-        // check edge is enabled
-
-        edouble flow = m_OnEdge[ edge ];
-        edouble residual = edge->getCapacity() - flow;
-
-        graphDebug("Initializing flow from source "
-            << *m_Source << " for edge "
-            << *edge << ", flow is "
-            << flow << " residual is "
-            << residual );
-
-        if( residual != 0 )
-        {
-          m_OnEdge[ edge ] = flow + residual;
-          m_OnEdge[ m_Graph->getEdge( edge->getTarget(), edge->getSource() ) ] = - (flow + residual);
-
-
-          Node* target = edge->getTarget();
-
-          edouble excess = m_ExcessOnNode[ target ];
-
-          m_ExcessOnNode[ target ] = excess + residual;
-
-          graphDebug("Initializing flow on edge "
-              << *edge << " to be "
-              << m_OnEdge[ edge ] << " (reverse flow "
-              << m_OnEdge[ m_Graph->getEdge( edge->getTarget(), edge->getSource() ) ] << ") and excess on node "
-              << *target << " to be "
-              << m_ExcessOnNode[ target ] );
-
-        }
-      }
-
-      graphDebug("End initializePre");
     }
+  }
 
-    void MaximumFlowAlgorithm::disCharge( Node* node )
+  m_DistanceOnNode[ m_Sink ] = 0;
+  m_DistanceOnNode[ m_Source ] = (long) m_Nodes.size();
+
+  m_NodeListIterator = m_Nodes.end();
+
+  EdgeOutIterator edgeOutIte( *m_Source );
+
+  for( ; edgeOutIte.ok(); ++edgeOutIte )
+  {
+    Edge* edge = *edgeOutIte;
+
+    // check edge is enabled
+
+    edouble flow = getFlow(edge);
+    edouble residual = edge->getCapacity() - flow;
+
+    graphDebug("Initializing flow from source "
+               << *m_Source << " for edge "
+               << *edge << ", flow is "
+               << flow << " residual is "
+               << residual );
+
+    if( residual != 0 )
     {
-      checkError( 0 != node, "Node is null, null is not allowed as input");
-      checkError( node->isEnabled(), "Node '" << *node << "' not enabled.");
-
-      graphDebug("Discharge invoked for node "
-          << *node << " witch excess "
-          << m_ExcessOnNode[ node ] );
-
-      while( m_ExcessOnNode[ node ] != 0 )
-      {
-        Edge* edge = 0;
-
-        EdgeList::const_iterator ite = m_CurrentOutEdgeOnNode[ node ];
-
-        if( ite != m_EndOutEdgeOnNode[ node ] )
-          edge = (*ite);
-
-        assert( edge != 0 );
-
-        if( isAdmissible( edge ) )
-        {
-          push( edge );
-        }
-        else
-        {
-          reLabel( node );
-
-          ++ite;
-
-          if( ite == m_EndOutEdgeOnNode[ node ] )
-          {
-            ite = node->getOutEdges().begin();
-          }
-
-          m_CurrentOutEdgeOnNode[node] = ite;
-        }
-      }
-
-    }
-
-    bool MaximumFlowAlgorithm::isAdmissible( Edge* edge )
-    {
-      graphDebug("Checking edge "
-          << *edge << " if admissable, flow is "
-          << m_OnEdge[ edge ] << " distance of source is "
-          << m_DistanceOnNode[ edge->getSource() ] << " distance of target is "
-          << m_DistanceOnNode[ edge->getTarget() ] );
+      m_OnEdge[ edge ] = flow + residual;
+      m_OnEdge[ m_Graph->getEdge( edge->getTarget(), edge->getSource() ) ] = - (flow + residual);
 
 
-      return ( m_OnEdge[ edge ] < edge->getCapacity() )
-        &&
-        ( m_DistanceOnNode[ edge->getSource() ] ==  m_DistanceOnNode[ edge->getTarget() ] + 1 );
-    }
-
-    void MaximumFlowAlgorithm::pushFlowBack( Node* node )
-    {
-      EdgeInIterator ite( *node );
-
-      for( ; ite.ok(); ++ite )
-      {
-        Edge* edge = *ite;
-
-        Node* source = edge->getSource();
-
-        edouble flow_pushed_back = getFlow( edge );
-
-        if( flow_pushed_back > 0 && edge->getCapacity() != 0 )
-        {
-          m_ExcessOnNode[ source ] = m_ExcessOnNode[ source ] + flow_pushed_back;
-          m_OnEdge[ edge ] = 0.0;
-          m_OnEdge[ m_Graph->getEdge( edge->getTarget(), edge->getSource() ) ] = 0.0;
-        }
-      }
-    }
-
-    void MaximumFlowAlgorithm::push( Edge* edge )
-    {
-      Node* source = edge->getSource();
       Node* target = edge->getTarget();
 
-      edouble excess = m_ExcessOnNode[ source ];
-      edouble residual = edge->getCapacity() - m_OnEdge[ edge ];
+      edouble excess = getExcess(target);
 
-      assert( residual >= 0 );
+      m_ExcessOnNode[ target ] = excess + residual;
 
-      edouble delta = (excess > residual ) ? residual : excess;
-
-      edouble newFlow = m_OnEdge[ edge ] + delta;
-      m_OnEdge[ edge ] = newFlow;
-      m_OnEdge[ m_Graph->getEdge( edge->getTarget(), edge->getSource() ) ] = - newFlow;
-
-      m_ExcessOnNode[ target ] = m_ExcessOnNode[ target ] + delta;
-      m_ExcessOnNode[ source ] = m_ExcessOnNode[ source ] - delta;
-
-      graphDebug("Pushed flow "
-          << delta << " on edge "
-          << *edge << " makes excess on node "
-          << *source << " "
-          << m_ExcessOnNode[ source ] << " and on "
-          << *target << " "
-          << m_ExcessOnNode[ target ] );
-
+      graphDebug("Initializing flow on edge "
+                 << *edge << " to be "
+                 << getFlow(edge) << " (reverse flow "
+                 << getFlow(m_Graph->getEdge( edge->getTarget(), edge->getSource() )) <<
+                 ") and excess on node "
+                 << *target << " to be "
+                 << getExcess(target) );
 
     }
+  }
 
-    void MaximumFlowAlgorithm::reLabel( Node* n )
+  graphDebug("End initializePre");
+}
+
+void MaximumFlowAlgorithm::disCharge( Node* node )
+{
+  checkError( 0 != node, "Node is null, null is not allowed as input");
+  checkError( node->isEnabled(), "Node '" << *node << "' not enabled.");
+
+  graphDebug("Discharge invoked for node "
+             << *node << " witch excess "
+             << getExcess(node) );
+
+  while( getExcess(node) != 0 )
+  {
+    Edge* edge = NULL;
+
+    EdgeList::const_iterator ite = currentOutEdgeOnNode(node);
+
+    if( ite != endOutEdgeOnNode(node) )
+      edge = (*ite);
+
+    assert( edge != NULL );
+
+    if( isAdmissible( edge ) )
     {
-      graphDebug("Relabel node "
-          << *n );
+      push( edge );
+    }
+    else
+    {
+      reLabel( node );
 
-      eint minLabel = std::numeric_limits<eint>::max();
+      ++ite;
 
-      EdgeOutIterator edgeOutIte( *n );
-
-      for( ; edgeOutIte.ok(); ++edgeOutIte )
+      if( ite == endOutEdgeOnNode(node) )
       {
-        Edge* edge = *edgeOutIte;
-
-        Node* target = edge->getTarget();
-
-        graphDebug("Relabel node "
-                   << *n << " checking edge "
-                   << *edge << " to relabel, flow on edge is "
-                   << m_OnEdge[ edge ] );
-        //m_OnEdge[ edge ] < edge->getCapacity()
-        if( getResidual( edge ) > 0  )
-        {
-          eint label = m_DistanceOnNode[ target ];
-
-          if( minLabel >= label )
-          {
-            graphDebug("Node "
-                << *target << " is labeled with label "
-                << label );
-
-            minLabel = label;
-          }
-        }
+        ite = node->getOutEdges().begin();
       }
 
-      //at this point all distance-labels for the connected nodes are smaller or equal to node n
-      m_DistanceOnNode[ n ] = minLabel + 1;
+      while(ite != endOutEdgeOnNode(node) && !(*ite)->getTarget()->isEnabled())
+        ++ite;
 
-      graphDebug("(Re)labeled node "
-          << *n << " to have distance "
-          << m_DistanceOnNode[ n ] );
+      m_CurrentOutEdgeOnNode[node] = ite;
     }
+  }
+
+}
+
+bool MaximumFlowAlgorithm::isAdmissible( Edge* edge ) const
+{
+  Edge2DoubleMap::const_iterator flowIt = m_OnEdge.find(edge);
+  Node2Long::const_iterator sourceDistanceIt = 
+      m_DistanceOnNode.find(edge->getSource());
+  Node2Long::const_iterator targetDistanceIt =
+      m_DistanceOnNode.find(edge->getTarget());
+  checkError(flowIt != m_OnEdge.end(), 
+             "Failed to find flow for " << *edge);
+  checkError(sourceDistanceIt != m_DistanceOnNode.end(),
+             "Failed to find distance for source node " << *(edge->getSource()));
+  checkError(targetDistanceIt != m_DistanceOnNode.end(),
+             "Failed to find distance for target node " << *(edge->getTarget()));
+  graphDebug("Checking edge "
+             << *edge << " if admissable, flow is "
+             << flowIt->second << " distance of source is "
+             << sourceDistanceIt->second << " distance of target is "
+             << targetDistanceIt->second);
+
+
+  return (flowIt->second < edge->getCapacity()) &&
+      (sourceDistanceIt->second == targetDistanceIt->second + 1);
+}
+
+void MaximumFlowAlgorithm::pushFlowBack( Node* node )
+{
+  EdgeInIterator ite( *node );
+
+  for( ; ite.ok(); ++ite )
+  {
+    Edge* edge = *ite;
+
+    Node* source = edge->getSource();
+
+    edouble flow_pushed_back = getFlow( edge );
+
+    if( flow_pushed_back > 0 && edge->getCapacity() != 0 )
+    {
+      m_ExcessOnNode[ source ] = getExcess(source) + flow_pushed_back;
+      m_OnEdge[ edge ] = 0.0;
+      m_OnEdge[ m_Graph->getEdge( edge->getTarget(), edge->getSource() ) ] = 0.0;
+    }
+  }
+}
+
+void MaximumFlowAlgorithm::push( Edge* edge )
+{
+  Node* source = edge->getSource();
+  Node* target = edge->getTarget();
+
+  edouble excess = getExcess(source);
+  edouble residual = edge->getCapacity() - getFlow(edge);
+
+  assert( residual >= 0 );
+
+  edouble delta = (excess > residual ) ? residual : excess;
+
+  edouble newFlow = getFlow(edge) + delta;
+  m_OnEdge[ edge ] = newFlow;
+  m_OnEdge[ m_Graph->getEdge( edge->getTarget(), edge->getSource() ) ] = - newFlow;
+
+  m_ExcessOnNode[ target ] = getExcess(target) + delta;
+  m_ExcessOnNode[ source ] = getExcess(source) - delta;
+
+  graphDebug("Pushed flow "
+             << delta << " on edge "
+             << *edge << " makes excess on node "
+             << *source << " "
+             << getExcess(source) << " and on "
+             << *target << " "
+             << getExcess(target) );
+
+
+}
+
+void MaximumFlowAlgorithm::reLabel( Node* n )
+{
+  graphDebug("Relabel node "
+             << *n );
+
+  eint minLabel = std::numeric_limits<eint>::max();
+
+  EdgeOutIterator edgeOutIte( *n );
+
+  for( ; edgeOutIte.ok(); ++edgeOutIte )
+  {
+    Edge* edge = *edgeOutIte;
+
+    Node* target = edge->getTarget();
+
+    graphDebug("Relabel node "
+               << *n << " checking edge "
+               << *edge << " to relabel, flow on edge is "
+               << getFlow(edge) );
+    //m_OnEdge[ edge ] < edge->getCapacity()
+    if( getResidual( edge ) > 0  )
+    {
+      eint label = distanceOnNode( target );
+
+      if( minLabel >= label )
+      {
+        graphDebug("Node "
+                   << *target << " is labeled with label "
+                   << label );
+
+        minLabel = label;
+      }
+    }
+  }
+
+  //at this point all distance-labels for the connected nodes are smaller or equal to node n
+  m_DistanceOnNode[ n ] = minLabel + 1;
+
+  graphDebug("(Re)labeled node "
+             << *n << " to have distance "
+             << distanceOnNode( n ) );
+}
 }
 
 #endif //MAXIMUM_FLOW_ALGORITHM_HEADER_FILE_
