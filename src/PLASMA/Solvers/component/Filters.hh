@@ -110,11 +110,6 @@ namespace EUROPA {
 	return sl_policies;
       }
 
-      /**
-       * @brief uses a singleton horizon that is regularly adjusted.
-       */
-      static IntervalIntDomain& getHorizon();
-
     private:
 
       LabelStr m_policy;
@@ -129,7 +124,7 @@ namespace EUROPA {
       HorizonVariableFilter(const TiXmlElement& configData);
       bool test(const EntityId& entity);
       std::string toString() const;
-
+      void setContext(ContextId ctx);
     private:
       HorizonFilter m_horizonFilter;
     };

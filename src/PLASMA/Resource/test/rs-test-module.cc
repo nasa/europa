@@ -26,6 +26,7 @@
 #include "Debug.hh"
 
 #include "ThreatDecisionPoint.hh"
+#include "Context.hh"
 #include "Profile.hh"
 #include "FlowProfile.hh"
 #include "IncrementalFlowProfile.hh"
@@ -50,6 +51,8 @@
 #include <iostream>
 #include <string>
 #include <list>
+
+#include <boost/shared_ptr.hpp>
 
 using namespace EUROPA;
 
@@ -170,7 +173,6 @@ public:
   virtual PSResourceProfile* getVDLevelProfile() { return NULL; }
 };
 
-
 class DummyResource : public Resource {
 public:
   DummyResource(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name,
@@ -206,6 +208,28 @@ private:
   void notifyDeleted(const InstantId inst) {}
   void notifyNoLongerFlawed(const InstantId inst){}
 };
+
+class BareTransactionDeleter {
+ public:
+  BareTransactionDeleter(Profile& profile) : m_profile(&profile), m_res(NULL) {}
+  BareTransactionDeleter(DummyResource& res) : m_profile(NULL), m_res(&res) {}
+  void operator()(Transaction* t) {
+    if(m_profile != NULL) {
+      std::cout << "Removing " << t->getId() << " from a profile" << std::endl;
+      m_profile->removeTransaction(t->getId());
+    }
+    if(m_res != NULL) {
+      std::cout << "Removing " << t->getId() << " from a resource" << std::endl;
+      m_res->removeTransaction(t->getId());
+    }
+    delete t;
+  }
+ private:
+  Profile* m_profile;
+  DummyResource* m_res;
+};
+
+typedef boost::shared_ptr<Transaction> TransactionPtr;
 /**
    add tests for getClosedTransactions and getPendingTransactions!
  */
@@ -293,6 +317,7 @@ private:
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(ResourceId::noId());
     DummyProfile profile(db.getId(), detector.getId());
+    BareTransactionDeleter deleter(profile);
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 0));
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(10, 10));
@@ -303,23 +328,23 @@ private:
 
     std::set<int> times;
 
-    Transaction trans1(t1.getId(), quantity.getId(), false);
-    Transaction trans2(t2.getId(), quantity.getId(), false); //distinct cases
-    Transaction trans3(t3.getId(), quantity.getId(), false); //overlap on left side.  both trans1 and trans2 should appear at time 0
-    Transaction trans4(t4.getId(), quantity.getId(), false); //overlap in the middle.  should have trans3 and trans4 at time 1 and only trans4 at time 4
-    Transaction trans5(t5.getId(), quantity.getId(), false); //overlap on right side.  both trans 4 and trans5 should appear at time 4
+    TransactionPtr trans1(new Transaction(t1.getId(), quantity.getId(), false), deleter);
+    TransactionPtr trans2(new Transaction(t2.getId(), quantity.getId(), false), deleter); //distinct cases
+    TransactionPtr trans3(new Transaction(t3.getId(), quantity.getId(), false), deleter); //overlap on left side.  both trans1 and trans2 should appear at time 0
+    TransactionPtr trans4(new Transaction(t4.getId(), quantity.getId(), false), deleter); //overlap in the middle.  should have trans3 and trans4 at time 1 and only trans4 at time 4
+    TransactionPtr trans5(new Transaction(t5.getId(), quantity.getId(), false), deleter); //overlap on right side.  both trans 4 and trans5 should appear at time 4
 
-    profile.addTransaction(trans1.getId());
+    profile.addTransaction(trans1->getId());
     times.insert(0);
     ProfileIterator prof1(profile.getId());
     CPPUNIT_ASSERT(checkTimes(times, prof1));
 
-    profile.addTransaction(trans2.getId());
+    profile.addTransaction(trans2->getId());
     times.insert(10);
     ProfileIterator prof2(profile.getId());
     CPPUNIT_ASSERT(checkTimes(times, prof2));
 
-    profile.addTransaction(trans3.getId());
+    profile.addTransaction(trans3->getId());
     times.insert(3);
     ProfileIterator prof3(profile.getId());
     CPPUNIT_ASSERT(checkTimes(times, prof3));
@@ -327,7 +352,7 @@ private:
     CPPUNIT_ASSERT(!oCheck1.done());
     CPPUNIT_ASSERT(oCheck1.getInstant()->getTransactions().size() == 2);
 
-    profile.addTransaction(trans4.getId());
+    profile.addTransaction(trans4->getId());
     times.insert(1);
     times.insert(4);
     ProfileIterator prof4(profile.getId());
@@ -336,7 +361,7 @@ private:
     CPPUNIT_ASSERT(!oCheck2.done());
     CPPUNIT_ASSERT(oCheck2.getInstant()->getTransactions().size() == 2);
 
-    profile.addTransaction(trans5.getId());
+    profile.addTransaction(trans5->getId());
     times.insert(6);
     ProfileIterator prof5(profile.getId());
     CPPUNIT_ASSERT(checkTimes(times, prof5));
@@ -344,7 +369,7 @@ private:
     CPPUNIT_ASSERT(!oCheck3.done());
     CPPUNIT_ASSERT(oCheck3.getInstant()->getTransactions().size() == 2);
 
-    profile.removeTransaction(trans4.getId());
+    profile.removeTransaction(trans4->getId());
     times.erase(1);
     ProfileIterator prof6(profile.getId());
     CPPUNIT_ASSERT(checkTimes(times, prof6));
@@ -353,16 +378,16 @@ private:
     ProfileIterator oCheck5(profile.getId(), 4, 4);
     CPPUNIT_ASSERT(oCheck5.getInstant()->getTransactions().size() == 1);
 
-    profile.removeTransaction(trans1.getId());
-    profile.removeTransaction(trans2.getId());
+    profile.removeTransaction(trans1->getId());
+    profile.removeTransaction(trans2->getId());
     times.erase(10);
     ProfileIterator prof7(profile.getId());
     CPPUNIT_ASSERT(checkTimes(times, prof7));
     ProfileIterator oCheck6(profile.getId(), 0, 0);
     CPPUNIT_ASSERT(oCheck6.getInstant()->getTransactions().size() == 1);
 
-    profile.removeTransaction(trans3.getId());
-    profile.removeTransaction(trans5.getId());
+    profile.removeTransaction(trans3->getId());
+    profile.removeTransaction(trans5->getId());
 
     ProfileIterator prof8(profile.getId());
     CPPUNIT_ASSERT(prof8.done());
@@ -374,6 +399,7 @@ private:
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(ResourceId::noId());
     DummyProfile profile(db.getId(), detector.getId());
+    BareTransactionDeleter deleter(profile);
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 0));
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(10, 10));
@@ -387,17 +413,17 @@ private:
     times.insert(3); times.insert(4);
     times.insert(6); times.insert(10);
 
-    Transaction trans1(t1.getId(), quantity.getId(), false);
-    Transaction trans2(t2.getId(), quantity.getId(), false);
-    Transaction trans3(t3.getId(), quantity.getId(), false);
-    Transaction trans4(t4.getId(), quantity.getId(), false);
-    Transaction trans5(t5.getId(), quantity.getId(), false);
+    TransactionPtr trans1(new Transaction(t1.getId(), quantity.getId(), false), deleter);
+    TransactionPtr trans2(new Transaction(t2.getId(), quantity.getId(), false), deleter);
+    TransactionPtr trans3(new Transaction(t3.getId(), quantity.getId(), false), deleter);
+    TransactionPtr trans4(new Transaction(t4.getId(), quantity.getId(), false), deleter);
+    TransactionPtr trans5(new Transaction(t5.getId(), quantity.getId(), false), deleter);
 
-    profile.addTransaction(trans1.getId());
-    profile.addTransaction(trans2.getId());
-    profile.addTransaction(trans3.getId());
-    profile.addTransaction(trans4.getId());
-    profile.addTransaction(trans5.getId());
+    profile.addTransaction(trans1->getId());
+    profile.addTransaction(trans2->getId());
+    profile.addTransaction(trans3->getId());
+    profile.addTransaction(trans4->getId());
+    profile.addTransaction(trans5->getId());
 
     ProfileIterator baseTest(profile.getId());
     CPPUNIT_ASSERT(checkTimes(times, baseTest));
@@ -410,8 +436,8 @@ private:
     CPPUNIT_ASSERT(checkTimes(times, prof1));
     ProfileIterator oCheck1(profile.getId(), 2, 2);
     CPPUNIT_ASSERT(oCheck1.getInstant()->getTransactions().size() == 2);
-    CPPUNIT_ASSERT(oCheck1.getInstant()->getTransactions().find(trans3.getId()) != oCheck1.getInstant()->getTransactions().end());
-    CPPUNIT_ASSERT(oCheck1.getInstant()->getTransactions().find(trans4.getId()) != oCheck1.getInstant()->getTransactions().end());
+    CPPUNIT_ASSERT(oCheck1.getInstant()->getTransactions().find(trans3->getId()) != oCheck1.getInstant()->getTransactions().end());
+    CPPUNIT_ASSERT(oCheck1.getInstant()->getTransactions().find(trans4->getId()) != oCheck1.getInstant()->getTransactions().end());
     ProfileIterator oCheck1_1(profile.getId(), 3, 3);
     CPPUNIT_ASSERT(oCheck1_1.done());
 
@@ -449,44 +475,45 @@ private:
 
     DummyDetector detector(ResourceId::noId());
     TimetableProfile r(db.getId(), detector.getId());
+    BareTransactionDeleter deleter(r);
 
 //     Variable<IntervalIntDomain> t0(ce.getId(), IntervalIntDomain(MINUS_INFINITY, MINUS_INFINITY));
 //     Variable<IntervalDomain> q0(ce.getId(), IntervalDomain(0, 0));
-//     Transaction trans0(t0.getId(), q0.getId(), false);
-//     r.addTransaction(trans0.getId());
+//     TransactionPtr trans0(new Transaction(t0.getId(), q0.getId(), false), deleter);
+//     r.addTransaction(trans0->getId());
 
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 0);
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, HORIZON_END));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(45, 45));
-    Transaction trans1(t1.getId(), q1.getId(), false);
-    r.addTransaction(trans1.getId());
+    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false), deleter);
+    r.addTransaction(trans1->getId());
     CPPUNIT_ASSERT(ce.propagate());
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*1));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 1000 * 45);
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(1, HORIZON_END));
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(35, 35));
-    Transaction trans2(t2.getId(), q2.getId(), false);
-    r.addTransaction(trans2.getId());
+    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), false), deleter);
+    r.addTransaction(trans2->getId());
     CPPUNIT_ASSERT(ce.propagate());
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*2));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1*45 + 80*999));
 
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(2, HORIZON_END));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(20, 20));
-    Transaction trans3(t3.getId(), q3.getId(), false);
-    r.addTransaction(trans3.getId());
+    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), false), deleter);
+    r.addTransaction(trans3->getId());
     CPPUNIT_ASSERT(ce.propagate());
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*3));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1*45 + 1*80 + 998*100));
 
-    trans2.time()->restrictBaseDomain(IntervalIntDomain(1, trans2.time()->lastDomain().getUpperBound()));
+    trans2->time()->restrictBaseDomain(IntervalIntDomain(1, trans2->time()->lastDomain().getUpperBound()));
     CPPUNIT_ASSERT(ce.propagate());
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*3));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1*45 + 1*80 + 998*100));
 
-    trans2.time()->restrictBaseDomain(IntervalIntDomain(2, trans2.time()->lastDomain().getUpperBound()));
+    trans2->time()->restrictBaseDomain(IntervalIntDomain(2, trans2->time()->lastDomain().getUpperBound()));
     CPPUNIT_ASSERT(ce.propagate());
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*3 + 3*3));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (2*45 + 998*100));
@@ -502,68 +529,69 @@ private:
 
     DummyDetector detector(ResourceId::noId());
     TimetableProfile r(db.getId(), detector.getId());
+    BareTransactionDeleter deleter(r);
 
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == 0);
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(4, 6));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
-    Transaction trans1(t1.getId(), q1.getId(), false);
-    r.addTransaction(trans1.getId());
+    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false), deleter);
+    r.addTransaction(trans1->getId());
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*1));
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(-4, 10));
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
-    Transaction trans2(t2.getId(), q2.getId(), false);
-    r.addTransaction(trans2.getId());
+    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), false), deleter);
+    r.addTransaction(trans2->getId());
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*2 + 3*2 + 4*1));
 
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(1, 3));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
-    Transaction trans3(t3.getId(), q3.getId(), false);
-    r.addTransaction(trans3.getId());
+    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), false), deleter);
+    r.addTransaction(trans3->getId());
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1));
 
     Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(1, 2));
     Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
-    Transaction trans4(t4.getId(), q4.getId(), false);
-    r.addTransaction(trans4.getId());
+    TransactionPtr trans4(new Transaction(t4.getId(), q4.getId(), false), deleter);
+    r.addTransaction(trans4->getId());
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1));
 
     Variable<IntervalIntDomain> t5(ce.getId(), IntervalIntDomain(3, 7));
     Variable<IntervalDomain> q5(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
-    Transaction trans5(t5.getId(), q5.getId(), false);
-    r.addTransaction(trans5.getId());
+    TransactionPtr trans5(new Transaction(t5.getId(), q5.getId(), false), deleter);
+    r.addTransaction(trans5->getId());
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1));
 
     Variable<IntervalIntDomain> t6(ce.getId(), IntervalIntDomain(4, 7));
     Variable<IntervalDomain> q6(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
-    Transaction trans6(t6.getId(), q6.getId(), false);
-    r.addTransaction(trans6.getId());
+    TransactionPtr trans6(new Transaction(t6.getId(), q6.getId(), false), deleter);
+    r.addTransaction(trans6->getId());
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1));
 
     // Insert for a singleton value
     Variable<IntervalIntDomain> t7(ce.getId(), IntervalIntDomain(5, 5));
     Variable<IntervalDomain> q7(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
-    Transaction trans7(t7.getId(), q7.getId(), false);
-    r.addTransaction(trans7.getId());
+    TransactionPtr trans7(new Transaction(t7.getId(), q7.getId(), false), deleter);
+    r.addTransaction(trans7->getId());
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*5 + 7*4 + 8*3 + 9*1));
 
     // Now free them and check the retractions are working correctly
 
-    r.removeTransaction(trans7.getId());
+    r.removeTransaction(trans7->getId());
     CPPUNIT_ASSERT(ce.propagate());
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1));
-    r.removeTransaction(trans6.getId());
+    r.removeTransaction(trans6->getId());
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1));
-    r.removeTransaction(trans5.getId());
+    r.removeTransaction(trans5->getId());
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1));
-    r.removeTransaction(trans4.getId());
+    r.removeTransaction(trans4->getId());
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1));
-    r.removeTransaction(trans3.getId());
+    r.removeTransaction(trans3->getId());
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*2 + 3*2 + 4*1));
-    r.removeTransaction(trans2.getId());
+    r.removeTransaction(trans2->getId());
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*1));
-    r.removeTransaction(trans1.getId());
+    r.removeTransaction(trans1->getId());
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == 0);
 
     RESOURCE_DEFAULT_TEARDOWN();
@@ -576,59 +604,60 @@ private:
 
     DummyDetector detector(ResourceId::noId());
     TimetableProfile r(db.getId(), detector.getId());
+    BareTransactionDeleter deleter(r);
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 1));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(1, 1));
-    Transaction trans1(t1.getId(), q1.getId(), false);
-    r.addTransaction(trans1.getId());
+    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false), deleter);
+    r.addTransaction(trans1->getId());
     ce.propagate();
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*1));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 1);
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(1, 3));
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(4, 4));
-    Transaction trans2(t2.getId(), q2.getId(), true);
-    r.addTransaction(trans2.getId());
+    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), true), deleter);
+    r.addTransaction(trans2->getId());
     ce.propagate();
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*1));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1 + 4*2));
 
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(2, 4));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(8, 8));
-    Transaction trans3(t3.getId(), q3.getId(), false);
-    r.addTransaction(trans3.getId());
+    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), false), deleter);
+    r.addTransaction(trans3->getId());
     ce.propagate();
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*2 + 4*2 + 5*1));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1*1 + 4*1 + 12*1 + 8*1));
 
     Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(3, 6));
     Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(2, 2));
-    Transaction trans4(t4.getId(), q4.getId(), false);
-    r.addTransaction(trans4.getId());
+    TransactionPtr trans4(new Transaction(t4.getId(), q4.getId(), false), deleter);
+    r.addTransaction(trans4->getId());
     ce.propagate();
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*2 + 4*3 + 5*2 + 6*1));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1*1 + 4*1 + 12*1 + 10*1 + 2*2));
 
     Variable<IntervalIntDomain> t5(ce.getId(), IntervalIntDomain(2, 10));
     Variable<IntervalDomain> q5(ce.getId(), IntervalDomain(6, 6));
-    Transaction trans5(t5.getId(), q5.getId(), true);
-    r.addTransaction(trans5.getId());
+    TransactionPtr trans5(new Transaction(t5.getId(), q5.getId(), true), deleter);
+    r.addTransaction(trans5->getId());
     ce.propagate();
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*2 + 7*1));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 6*4));
 
     Variable<IntervalIntDomain> t6(ce.getId(), IntervalIntDomain(6, 8));
     Variable<IntervalDomain> q6(ce.getId(), IntervalDomain(3, 3));
-    Transaction trans6(t6.getId(), q6.getId(), false);
-    r.addTransaction(trans6.getId());
+    TransactionPtr trans6(new Transaction(t6.getId(), q6.getId(), false), deleter);
+    r.addTransaction(trans6->getId());
     ce.propagate();
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*3 + 7*2 + 8*1));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*2 + 6*2));
 
     Variable<IntervalIntDomain> t7(ce.getId(), IntervalIntDomain(7, 8));
     Variable<IntervalDomain> q7(ce.getId(), IntervalDomain(4, 4));
-    Transaction trans7(t7.getId(), q7.getId(), true);
-    r.addTransaction(trans7.getId());
+    TransactionPtr trans7(new Transaction(t7.getId(), q7.getId(), true), deleter);
+    r.addTransaction(trans7->getId());
     ce.propagate();
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*3 + +7* 3 + 8*3 + 9*1));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*1 + 13*1 + 6*2));
@@ -643,21 +672,22 @@ private:
 
     DummyDetector detector(ResourceId::noId());
     TimetableProfile r(db.getId(), detector.getId());
+    BareTransactionDeleter deleter(r);
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 10));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(10, 10));
-    Transaction trans1(t1.getId(), q1.getId(), false);
-    r.addTransaction(trans1.getId());
+    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false), deleter);
+    r.addTransaction(trans1->getId());
     ce.propagate();
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 10*10);
 
-    trans1.time()->restrictBaseDomain(IntervalIntDomain(1, trans1.time()->lastDomain().getUpperBound()));
+    trans1->time()->restrictBaseDomain(IntervalIntDomain(1, trans1->time()->lastDomain().getUpperBound()));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 10*9);
 
-    trans1.time()->restrictBaseDomain(IntervalIntDomain(trans1.time()->lastDomain().getLowerBound(), eint(8)));
+    trans1->time()->restrictBaseDomain(IntervalIntDomain(trans1->time()->lastDomain().getLowerBound(), eint(8)));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 10*7);
 
-    trans1.time()->restrictBaseDomain(IntervalIntDomain(trans1.time()->lastDomain().getLowerBound(), eint(6)));
+    trans1->time()->restrictBaseDomain(IntervalIntDomain(trans1->time()->lastDomain().getLowerBound(), eint(6)));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 10*5);
 
     RESOURCE_DEFAULT_TEARDOWN();
@@ -670,21 +700,21 @@ private:
 
     DummyDetector detector(ResourceId::noId());
     TimetableProfile r(db.getId(), detector.getId());
-
+    BareTransactionDeleter deleter(r);
 
     // Test producer
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 10));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(5, 10));
-    Transaction trans1(t1.getId(), q1.getId(), false);
-    r.addTransaction(trans1.getId());
+    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false), deleter);
+    r.addTransaction(trans1->getId());
     ce.propagate();
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 10*10);
 
     // Test consumer
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(1, 5));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(1, 4));
-    Transaction trans3(t3.getId(), q3.getId(), true);
-    r.addTransaction(trans3.getId());
+    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), true), deleter);
+    r.addTransaction(trans3->getId());
     ce.propagate();
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 10*1 + 14*4 + 13*5);//+ 14*3 + 21*1 + 20*3 + 20*2);
 
@@ -698,58 +728,59 @@ private:
 
     DummyResource r(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, initialCapacity, limitMin, limitMax,
 		    productionRateMax, -(consumptionRateMax), productionMax, -(consumptionMax));
+    BareTransactionDeleter deleter(r);
 
     db.close();
 
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 1));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(productionRateMax, productionRateMax + 1));
-    Transaction trans1(t1.getId(), q1.getId(), false);
-    r.addTransaction(trans1.getId());
+    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false), deleter);
+    r.addTransaction(trans1->getId());
     ce.propagate();
 
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(0, 1));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(1, 1));
-    Transaction trans3(t3.getId(), q3.getId(), false);
-    r.addTransaction(trans3.getId());
+    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), false), deleter);
+    r.addTransaction(trans3->getId());
 
     // no violation because of temporal flexibility
     CPPUNIT_ASSERT(ce.propagate());
 
-    trans1.time()->restrictBaseDomain(IntervalIntDomain(1, trans1.time()->lastDomain().getUpperBound()));
-    trans3.time()->restrictBaseDomain(IntervalIntDomain(1, trans3.time()->lastDomain().getUpperBound()));
+    trans1->time()->restrictBaseDomain(IntervalIntDomain(1, trans1->time()->lastDomain().getUpperBound()));
+    trans3->time()->restrictBaseDomain(IntervalIntDomain(1, trans3->time()->lastDomain().getUpperBound()));
     CPPUNIT_ASSERT(!ce.propagate());
 
     //r->getResourceViolations(violations);
     //CPPUNIT_ASSERT(violations.size() == 1);
     //CPPUNIT_ASSERT(violations.front()->getType() == ResourceViolation::ProductionRateExceeded);
 
-    r.removeTransaction(trans3.getId());
-    r.removeTransaction(trans1.getId());
+    r.removeTransaction(trans3->getId());
+    r.removeTransaction(trans1->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(0, 1));
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(-(consumptionRateMax), -(consumptionRateMax - 1)));
-    Transaction trans2(t2.getId(), q2.getId(), true);
-    r.addTransaction(trans2.getId());
+    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), true), deleter);
+    r.addTransaction(trans2->getId());
     ce.propagate();
 
     Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(0, 1));
     Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(1, 1));
-    Transaction trans4(t4.getId(), q4.getId(), true);
-    r.addTransaction(trans4.getId());
+    TransactionPtr trans4(new Transaction(t4.getId(), q4.getId(), true), deleter);
+    r.addTransaction(trans4->getId());
     // no violation because of temporal flexibility
     CPPUNIT_ASSERT(ce.propagate());
-    trans2.time()->restrictBaseDomain(IntervalIntDomain(1, trans2.time()->lastDomain().getUpperBound()));
-    trans4.time()->restrictBaseDomain(IntervalIntDomain(1, trans4.time()->lastDomain().getUpperBound()));
+    trans2->time()->restrictBaseDomain(IntervalIntDomain(1, trans2->time()->lastDomain().getUpperBound()));
+    trans4->time()->restrictBaseDomain(IntervalIntDomain(1, trans4->time()->lastDomain().getUpperBound()));
     CPPUNIT_ASSERT(!ce.propagate());
 
     //violations.clear();
     //r->getResourceViolations(violations);
     //CPPUNIT_ASSERT(violations.size() == 1);
     //CPPUNIT_ASSERT(violations.front()->getType() == ResourceViolation::ConsumptionRateExceeded);
-    r.removeTransaction(trans4.getId());
-    r.removeTransaction(trans2.getId());
+    r.removeTransaction(trans4->getId());
+    r.removeTransaction(trans2->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     RESOURCE_DEFAULT_TEARDOWN();
@@ -764,45 +795,46 @@ private:
 
     DummyResource r(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, initialCapacity, limitMin, limitMax,
 		    productionRateMax, -(consumptionRateMax), productionMax, -(consumptionMax));
+    BareTransactionDeleter deleter(r);
     db.close();
 
     // Test that a violation is detected when the excess in the level cannot be overcome by remaining
     // production
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(2, 2));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(8, 8));
-    Transaction trans1(t1.getId(), q1.getId(), true);
-    r.addTransaction(trans1.getId());
+    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), true), deleter);
+    r.addTransaction(trans1->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(3, 3));
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(8, 8));
-    Transaction trans2(t2.getId(), q2.getId(), true);
-    r.addTransaction(trans2.getId());
+    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), true), deleter);
+    r.addTransaction(trans2->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(4, 4));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(8, 8));
-    Transaction trans3(t3.getId(), q3.getId(), true);
-    r.addTransaction(trans3.getId());
+    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), true), deleter);
+    r.addTransaction(trans3->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(5, 5));
     Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(8, 8));
-    Transaction trans4(t4.getId(), q4.getId(), true);
-    r.addTransaction(trans4.getId());
+    TransactionPtr trans4(new Transaction(t4.getId(), q4.getId(), true), deleter);
+    r.addTransaction(trans4->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t5(ce.getId(), IntervalIntDomain(6, 6));
     Variable<IntervalDomain> q5(ce.getId(), IntervalDomain(8, 8));
-    Transaction trans5(t5.getId(), q5.getId(), true);
-    r.addTransaction(trans5.getId());
+    TransactionPtr trans5(new Transaction(t5.getId(), q5.getId(), true), deleter);
+    r.addTransaction(trans5->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     // This will push it over the edge
     Variable<IntervalIntDomain> t6(ce.getId(), IntervalIntDomain(10, 10));
     Variable<IntervalDomain> q6(ce.getId(), IntervalDomain(8, 8));
-    Transaction trans6(t6.getId(), q6.getId(), true);
-    r.addTransaction(trans6.getId());
+    TransactionPtr trans6(new Transaction(t6.getId(), q6.getId(), true), deleter);
+    r.addTransaction(trans6->getId());
     CPPUNIT_ASSERT(!ce.propagate());
 
     CPPUNIT_ASSERT(checkLevelArea(r.getProfile()) == 0);
@@ -821,51 +853,52 @@ private:
 
     DummyResource r(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, initialCapacity, limitMin, limitMax,
 		    PLUS_INFINITY, -(consumptionMax), PLUS_INFINITY, -(consumptionMax));
+    BareTransactionDeleter deleter(r);
     db.close();
 
     // Test that a violation is detected when the excess in the level cannot be overcome by remaining
     // production
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(2, 2));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(8, 8));
-    Transaction trans1(t1.getId(), q1.getId(), true);
-    r.addTransaction(trans1.getId());
+    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), true), deleter);
+    r.addTransaction(trans1->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(3, 3));
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(8, 8));
-    Transaction trans2(t2.getId(), q2.getId(), true);
-    r.addTransaction(trans2.getId());
+    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), true), deleter);
+    r.addTransaction(trans2->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(4, 4));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(8, 8));
-    Transaction trans3(t3.getId(), q3.getId(), true);
-    r.addTransaction(trans3.getId());
+    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), true), deleter);
+    r.addTransaction(trans3->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(5, 5));
     Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(8, 8));
-    Transaction trans4(t4.getId(), q4.getId(), true);
-    r.addTransaction(trans4.getId());
+    TransactionPtr trans4(new Transaction(t4.getId(), q4.getId(), true), deleter);
+    r.addTransaction(trans4->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t5(ce.getId(), IntervalIntDomain(6, 6));
     Variable<IntervalDomain> q5(ce.getId(), IntervalDomain(8, 8));
-    Transaction trans5(t5.getId(), q5.getId(), true);
-    r.addTransaction(trans5.getId());
+    TransactionPtr trans5(new Transaction(t5.getId(), q5.getId(), true), deleter);
+    r.addTransaction(trans5->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t6(ce.getId(), IntervalIntDomain(8, 8));
     Variable<IntervalDomain> q6(ce.getId(), IntervalDomain(8, 8));
-    Transaction trans6(t6.getId(), q6.getId(), true);
-    r.addTransaction(trans6.getId());
+    TransactionPtr trans6(new Transaction(t6.getId(), q6.getId(), true), deleter);
+    r.addTransaction(trans6->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     // This will push it over the edge
     Variable<IntervalIntDomain> t7(ce.getId(), IntervalIntDomain(10, 10));
     Variable<IntervalDomain> q7(ce.getId(), IntervalDomain(8, 8));
-    Transaction trans7(t7.getId(), q7.getId(), true);
-    r.addTransaction(trans7.getId());
+    TransactionPtr trans7(new Transaction(t7.getId(), q7.getId(), true), deleter);
+    r.addTransaction(trans7->getId());
     CPPUNIT_ASSERT(!ce.propagate());
 
     CPPUNIT_ASSERT(checkLevelArea(r.getProfile()) == 0);
@@ -914,8 +947,10 @@ private:
 //     CPPUNIT_ASSERT(violations.size() == 1);
 //     CPPUNIT_ASSERT(violations.front()->getType() == ResourceViolation::LevelTooHigh);
 
-    for(std::list<TransactionId>::iterator it = transactions.begin(); it != transactions.end(); ++it)
+    for(std::list<TransactionId>::iterator it = transactions.begin(); it != transactions.end(); ++it) {
+      r.removeTransaction(*it);
       delete (Transaction*) (*it);
+    }
     for(std::list<ConstrainedVariableId>::iterator it = vars.begin(); it != vars.end(); ++it)
       delete (ConstrainedVariable*) (*it);
 
@@ -964,8 +999,10 @@ private:
 //     r->getResourceViolations(violations);
 //     CPPUNIT_ASSERT(violations.size() > 0);
 
-    for(std::list<TransactionId>::iterator it = transactions.begin(); it != transactions.end(); ++it)
+    for(std::list<TransactionId>::iterator it = transactions.begin(); it != transactions.end(); ++it) {
+      r.removeTransaction(*it);
       delete (Transaction*) (*it);
+    }
     for(std::list<ConstrainedVariableId>::iterator it = variables.begin(); it != variables.end(); ++it)
       delete (ConstrainedVariable*) (*it);
     RESOURCE_DEFAULT_TEARDOWN();
@@ -990,6 +1027,7 @@ private:
 
     DummyResource r(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, initialCapacity, limitMin, limitMax,
 		    productionRateMax, -(consumptionRateMax), 5, -(consumptionMax));
+    BareTransactionDeleter deleter(r);
     db.close();
 
     IntervalDomain result;
@@ -1000,8 +1038,8 @@ private:
     // Test that a flaw is signalled when there is a possibility to violate limits
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(5, 5));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(5, 5));
-    Transaction trans1(t1.getId(), q1.getId(), false);
-    r.addTransaction(trans1.getId());
+    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false), deleter);
+    r.addTransaction(trans1->getId());
 
     // Have a single transaction, test before, at and after.
     getLevel(r, 0, result);
@@ -1013,13 +1051,13 @@ private:
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(0, 7));
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(5, 5));
-    Transaction trans2(t2.getId(), q2.getId(), true);
-    r.addTransaction(trans2.getId());
+    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), true), deleter);
+    r.addTransaction(trans2->getId());
 
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(2, 10));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(5, 5));
-    Transaction trans3(t3.getId(), q3.getId(), true);
-    r.addTransaction(trans3.getId());
+    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), true), deleter);
+    r.addTransaction(trans3->getId());
 
     // Confirm that we can query in the middle
     getLevel(r, 6, result);
@@ -1040,6 +1078,7 @@ private:
     RESOURCE_DEFAULT_SETUP(ce, db, false);
     DummyDetector detector(ResourceId::noId());
     DummyProfile profile(db.getId(), detector.getId());
+    BareTransactionDeleter deleter(profile);
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 10), true, "t1");
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(10, 15), true, "t2");
@@ -1050,15 +1089,15 @@ private:
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(1, 1), true, "q3");
     Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(1, 1), true, "q4");
 
-    Transaction trans1(t1.getId(), q1.getId(), false);
-    Transaction trans2(t2.getId(), q2.getId(), true);
-    Transaction trans3(t3.getId(), q3.getId(), true);
-    Transaction trans4(t4.getId(), q4.getId(), false);
+    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false), deleter);
+    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), true), deleter);
+    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), true), deleter);
+    TransactionPtr trans4(new Transaction(t4.getId(), q4.getId(), false), deleter);
 
-    profile.addTransaction(trans1.getId());
-    profile.addTransaction(trans2.getId());
-    profile.addTransaction(trans3.getId());
-    profile.addTransaction(trans4.getId());
+    profile.addTransaction(trans1->getId());
+    profile.addTransaction(trans2->getId());
+    profile.addTransaction(trans3->getId());
+    profile.addTransaction(trans4->getId());
 
 
     InstantId inst = profile.getInstant(0);
@@ -1067,14 +1106,14 @@ private:
     for(std::set<TransactionId>::const_iterator it = inst->getTransactions().begin();
 	it != inst->getTransactions().end(); ++it) {
       CPPUNIT_ASSERT((*it).isValid());
-      CPPUNIT_ASSERT((*it) == trans1.getId());
+      CPPUNIT_ASSERT((*it) == trans1->getId());
     }
 
     //for time 5
     std::set<TransactionId> trans;
-    trans.insert(trans1.getId());
-    trans.insert(trans3.getId());
-    trans.insert(trans4.getId());
+    trans.insert(trans1->getId());
+    trans.insert(trans3->getId());
+    trans.insert(trans4->getId());
 
     inst = profile.getInstant(5);
     CPPUNIT_ASSERT(inst.isValid());
@@ -1088,10 +1127,10 @@ private:
     CPPUNIT_ASSERT(trans.empty());
 
     //for time 10
-    trans.insert(trans1.getId());
-    trans.insert(trans2.getId());
-    trans.insert(trans3.getId());
-    trans.insert(trans4.getId());
+    trans.insert(trans1->getId());
+    trans.insert(trans2->getId());
+    trans.insert(trans3->getId());
+    trans.insert(trans4->getId());
 
     inst = profile.getInstant(10);
     CPPUNIT_ASSERT(inst.isValid());
@@ -1105,9 +1144,9 @@ private:
     CPPUNIT_ASSERT(trans.empty());
 
     //for time 15
-    trans.insert(trans2.getId());
-    trans.insert(trans3.getId());
-    trans.insert(trans4.getId());
+    trans.insert(trans2->getId());
+    trans.insert(trans3->getId());
+    trans.insert(trans4->getId());
 
     inst = profile.getInstant(15);
     CPPUNIT_ASSERT(inst.isValid());
@@ -1838,7 +1877,8 @@ private:
 		std::string earliest = "<ResourceThreatManager order=\"earliest\"><FlawHandler component=\"ResourceThreatHandler\"/></ResourceThreatManager>";
 		TiXmlElement* earliestXml = initXml(earliest);
 		ResourceThreatManager earliestManager(*earliestXml);
-		earliestManager.initialize(*earliestXml, db, SOLVERS::ContextId::noId(), SOLVERS::FlawManagerId::noId());
+                SOLVERS::Context ctx("foo");
+		earliestManager.initialize(*earliestXml, db, ctx.getId(), SOLVERS::FlawManagerId::noId());
 		CPPUNIT_ASSERT(earliestManager.betterThan(instants[0], instants[1], explanation)); //these are identical except for the time
 		CPPUNIT_ASSERT(earliestManager.betterThan(instants[1], instants[2], explanation)); //these have different levels
 		CPPUNIT_ASSERT(!earliestManager.betterThan(instants[0], instants[0], explanation));
@@ -1846,7 +1886,7 @@ private:
 		std::string latest = "<ResourceThreatManager order=\"latest\"><FlawHandler component=\"ResourceThreatHandler\"/></ResourceThreatManager>";
 		TiXmlElement* latestXml = initXml(latest);
 		ResourceThreatManager latestManager(*latestXml);
-		latestManager.initialize(*latestXml, db, SOLVERS::ContextId::noId(), SOLVERS::FlawManagerId::noId());
+		latestManager.initialize(*latestXml, db, ctx.getId(), SOLVERS::FlawManagerId::noId());
 		CPPUNIT_ASSERT(latestManager.betterThan(instants[3], instants[2], explanation));
 		CPPUNIT_ASSERT(latestManager.betterThan(instants[2], instants[1], explanation));
 		CPPUNIT_ASSERT(!latestManager.betterThan(instants[0], instants[0], explanation));
@@ -1854,7 +1894,7 @@ private:
 		std::string most = "<ResourceThreatManager order=\"most\"><FlawHandler component=\"ResourceThreatHandler\"/></ResourceThreatManager>";
 		TiXmlElement* mostXml = initXml(most);
 		ResourceThreatManager mostManager(*mostXml);
-		mostManager.initialize(*mostXml, db, SOLVERS::ContextId::noId(), SOLVERS::FlawManagerId::noId());
+		mostManager.initialize(*mostXml, db, ctx.getId(), SOLVERS::FlawManagerId::noId());
 		CPPUNIT_ASSERT(mostManager.betterThan(instants[0], instants[1], explanation));
 		CPPUNIT_ASSERT(!mostManager.betterThan(instants[1], instants[0], explanation));
 		CPPUNIT_ASSERT(!mostManager.betterThan(instants[1], instants[2], explanation));
@@ -1863,7 +1903,7 @@ private:
 		std::string least = "<ResourceThreatManager order=\"least\"><FlawHandler component=\"ResourceThreatHandler\"/></ResourceThreatManager>";
 		TiXmlElement* leastXml = initXml(least);
 		ResourceThreatManager leastManager(*leastXml);
-		leastManager.initialize(*leastXml, db, SOLVERS::ContextId::noId(), SOLVERS::FlawManagerId::noId());
+		leastManager.initialize(*leastXml, db, ctx.getId(), SOLVERS::FlawManagerId::noId());
 		CPPUNIT_ASSERT(!leastManager.betterThan(instants[0], instants[1], explanation));
 		CPPUNIT_ASSERT(leastManager.betterThan(instants[1], instants[0], explanation));
 		CPPUNIT_ASSERT(!leastManager.betterThan(instants[3], instants[4], explanation));

@@ -70,33 +70,73 @@ namespace EUROPA
       delete (Transaction*) m_dummySourceTransaction;
     }
 
-    bool FlowProfile::getEarliestLowerLevelInstant( const TransactionId& t, InstantId& i )
-    {
-      check_error( t.isValid());
+bool FlowProfile::getEarliestLowerLevelInstant(const TransactionId& t, InstantId& i) {
+  check_error( t.isValid());
 
-      TransactionId2InstantId::iterator ite = m_lowerLevelContribution.find( t );
-
-      if( m_lowerLevelContribution.end() == ite )
-	return false;
-
-      i = (*ite).second;
-
-      return true;
+  if(t->isConsumer()) {
+    i = getInstant(t->time()->lastDomain().getLowerBound());
+    return true;
+  }
+  else {
+    std::map<eint, InstantId>::const_iterator end = 
+        m_instants.upper_bound(t->time()->lastDomain().getUpperBound());
+    for(std::map<eint, InstantId>::const_iterator start = 
+            m_instants.lower_bound(t->time()->lastDomain().getLowerBound());
+        start != end; ++start) {
+      InstantId inst = start->second;
+      for(std::set<TransactionId>::const_iterator it = 
+              inst->getTransactions().begin();
+          it != inst->getTransactions().end(); ++it) {
+        if((*it)->isConsumer()) {
+          switch(getOrdering(t, *it)) {
+            case BEFORE_OR_AT:
+            case STRICTLY_AT:
+              i = inst;
+              return true;
+            default:
+              break;
+          }
+        }
+      }
     }
+    i = getInstant(t->time()->lastDomain().getUpperBound());
+    return true;
+  }
+}
 
-    bool FlowProfile::getEarliestUpperLevelInstant( const TransactionId& t, InstantId& i )
-    {
-      check_error( t.isValid());
+bool FlowProfile::getEarliestUpperLevelInstant(const TransactionId& t, InstantId& i) {
+  check_error( t.isValid());
 
-      TransactionId2InstantId::iterator ite = m_upperLevelContribution.find( t );
-
-      if( m_upperLevelContribution.end() == ite )
-	return false;
-
-      i = (*ite).second;
-
-      return true;
+  if(!t->isConsumer()) {
+    i = getInstant(t->time()->lastDomain().getLowerBound());
+    return true;
+  }
+  else {
+    std::map<eint, InstantId>::const_iterator end = 
+        m_instants.upper_bound(t->time()->lastDomain().getUpperBound());
+    for(std::map<eint, InstantId>::const_iterator start = 
+            m_instants.lower_bound(t->time()->lastDomain().getLowerBound());
+        start != end; ++start) {
+      InstantId inst = start->second;
+      for(std::set<TransactionId>::const_iterator it = 
+              inst->getTransactions().begin();
+          it != inst->getTransactions().end(); ++it) {
+        if(!(*it)->isConsumer()) {
+          switch(getOrdering(t, *it)) {
+            case BEFORE_OR_AT:
+            case STRICTLY_AT:
+              i = inst;
+              return true;
+            default:
+              break;
+          }
+        }
+      }
     }
+    i = getInstant(t->time()->lastDomain().getUpperBound());
+    return true;
+  }
+}
 
 
 void FlowProfile::initRecompute(InstantId inst) {

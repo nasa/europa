@@ -93,42 +93,54 @@ namespace EUROPA {
       bool m_treatAsLowerFlaw;
     };
 
-    class PredecessorNotContributingChoiceFilter : public DefaultChoiceFilter {
-    public:
-      PredecessorNotContributingChoiceFilter(Profile* profile, const LabelStr& explanation, const InstantId& inst)
-        : DefaultChoiceFilter(profile, explanation, inst) {
-    	  // For this ChoiceFilter, we need the profile to be a subclass of FlowProfile:
-    	  FlowProfile * fProfile = dynamic_cast <FlowProfile*>((Profile*) profile);
-    	  check_runtime_error(fProfile != 0,
-    			  "Cannot create PredecessorNotContributingChoiceFilter for profile not derived from FlowProfile " \
-    			  " (choice of ResourceThreatHandler filter in PlannerConfig.xml probably conflicts with choice of profileType in NDDL)");
+class PredecessorNotContributingChoiceFilter : public DefaultChoiceFilter {
+ public:
+  PredecessorNotContributingChoiceFilter(Profile* profile, const LabelStr& explanation,
+                                         const InstantId& inst)
+      : DefaultChoiceFilter(profile, explanation, inst) {
+    // For this ChoiceFilter, we need the profile to be a subclass of FlowProfile:
+    FlowProfile * fProfile = dynamic_cast <FlowProfile*>((Profile*) profile);
+    checkRuntimeError(fProfile != 0,
+                      "Cannot create PredecessorNotContributingChoiceFilter for " <<
+                      "profile not derived from FlowProfile (choice of " <<
+                      "ResourceThreatHandler filter in PlannerConfig.xml probably " <<
+                      "conflicts with choice of profileType in NDDL)");
+  }
+  
+  bool operator()(const std::pair<TransactionId, TransactionId>& p) const {
+    InstantId inst = InstantId::noId();
+    bool contributing = false;
+    
+    if(m_treatAsLowerFlaw) {
+      if(p.first->isConsumer()) {
+        debugMsg("ResourceThreatDecisionPoint:filter:predecessorNot",
+                 "Rejecting choice because flaw is lower level and  predecessor is " <<
+                 "a consumer.");
+        return false;
       }
-
-      bool operator()(const std::pair<TransactionId, TransactionId>& p) const {
-        InstantId inst = InstantId::noId();
-        bool contributing = false;
-
-        if(m_treatAsLowerFlaw) {
-          if(p.first->isConsumer()) {
-            debugMsg("ResourceThreatDecisionPoint:filter:predecessorNot", "Rejecting choice because flaw is lower level and  predecessor is a consumer.");
-            return false;
-          }
-          contributing = ((FlowProfile*) m_profile)->getEarliestLowerLevelInstant(p.first, inst);
-        }
-        else {
-          if(!p.first->isConsumer()) {
-            debugMsg("ResourceThreatDecisionPoint:filter:predecesorNot", "Rejecting choice because flaw is upper level and predecessor is a producer.");
-            return false;
-          }
-          contributing = ((FlowProfile*) m_profile)->getEarliestUpperLevelInstant(p.first, inst);
-        }
-        checkError(contributing, "Should always have an instant for transaction " << p.first->toString());
-        condDebugMsg(inst->getTime() <= m_inst->getTime(), "ResourceThreatDecisionPoint:filter:predecessorNot",
-                     "Rejecting choice because predecessor is contributing at this instant.");
-        return inst->getTime() > m_inst->getTime();
+      contributing = 
+          ((FlowProfile*) m_profile)->getEarliestLowerLevelInstant(p.first, inst);
+    }
+    else {
+      if(!p.first->isConsumer()) {
+        debugMsg("ResourceThreatDecisionPoint:filter:predecesorNot", 
+                 "Rejecting choice because flaw is upper level and predecessor is " <<
+                 "a producer.");
+        return false;
       }
-      std::string toString() const {return "PredecessorNotContributingFilter";}
-    };
+      contributing = 
+          ((FlowProfile*) m_profile)->getEarliestUpperLevelInstant(p.first, inst);
+    }
+    checkError(contributing,
+               "Should always have an instant for transaction " << 
+               p.first->toString());
+    condDebugMsg(inst->getTime() <= m_inst->getTime(), 
+                 "ResourceThreatDecisionPoint:filter:predecessorNot",
+                 "Rejecting choice because predecessor is contributing at this instant.");
+    return inst->getTime() > m_inst->getTime();
+  }
+  std::string toString() const {return "PredecessorNotContributingFilter";}
+};
 
     class SuccessorContributingChoiceFilter : public DefaultChoiceFilter {
     public:

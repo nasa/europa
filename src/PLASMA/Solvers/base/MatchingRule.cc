@@ -16,6 +16,7 @@ namespace EUROPA {
 
     MatchingRule::MatchingRule(const TiXmlElement& configData)
       : Component(configData), 
+        m_context(),
         m_objectType(WILD_CARD()), m_predicate(WILD_CARD()), m_variable(WILD_CARD()), 
         m_masterObjectType(WILD_CARD()), m_masterPredicate(WILD_CARD()), m_masterRelation(WILD_CARD()),
         m_tokenName(WILD_CARD()),

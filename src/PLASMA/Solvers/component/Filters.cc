@@ -5,6 +5,7 @@
 #include "RuleVariableListener.hh"
 #include "TokenVariable.hh"
 #include "RuleInstance.hh"
+#include "Context.hh"
 
 #include <set>
 
@@ -155,11 +156,6 @@ namespace EUROPA {
       return !tok->master()->isAssigned();
     }
 
-    /** HORIZON FILTERING **/
-    IntervalIntDomain& HorizonFilter::getHorizon() {
-      static IntervalIntDomain sl_instance;
-      return sl_instance;
-    }
 
     HorizonFilter::HorizonFilter(const TiXmlElement& configData)
       : FlawFilter(configData, true) {
@@ -194,13 +190,17 @@ namespace EUROPA {
       else
         token = entity;
 
-      const IntervalIntDomain& horizon = getHorizon();
+      checkRuntimeError(getContext() != ContextId::noId(), 
+                        "HorizonFilter::test called without a valid context on " <<
+                        MatchingRule::getId());
+      const IntervalIntDomain horizon = IntervalIntDomain(getContext()->get("horizonStart"),
+                                                          getContext()->get("horizonEnd"));
       checkError(horizon.isFinite(), "Infinite Horizon not permitted." << horizon.toString());
       const IntervalIntDomain& startTime = token->start()->lastDomain();
       const IntervalIntDomain& endTime = token->end()->lastDomain();
 
       bool withinHorizon = false;
-
+      
       debugMsg("HorizonFilter:test",
                "Evaluating: " << token->toString() << 
                " Start=" << startTime.toString() << ", End=" << endTime.toString() <<
@@ -223,9 +223,16 @@ namespace EUROPA {
 
 
     std::string HorizonFilter::toString() const {
-      const IntervalIntDomain& horizon = getHorizon();
-      std::string expr = FlawFilter::toString();
-      expr = expr + " Policy='" + m_policy.toString() + "' Horizon=" + horizon.toString();
+      std::string expr = 
+          FlawFilter::toString() + " Policy='" + m_policy.toString() + "' Horizon=";
+      if(getContext().isValid()) {
+        const IntervalIntDomain horizon = IntervalIntDomain(getContext()->get("horizonStart"),
+                                                            getContext()->get("horizonEnd"));
+        expr = expr + horizon.toString();
+      }
+      else {
+        expr = expr + "Undetermined";
+      }
       return expr;
     }
 
@@ -233,6 +240,11 @@ namespace EUROPA {
       : FlawFilter(configData, true), m_horizonFilter(configData){
       setExpression(toString() + ":variable");
     }
+
+  void HorizonVariableFilter::setContext(ContextId ctx) {
+    MatchingRule::setContext(ctx);
+    m_horizonFilter.setContext(ctx);
+  }
 
     bool HorizonVariableFilter::test(const EntityId& entity) {
       if(!ConstrainedVariableId::convertable(entity))

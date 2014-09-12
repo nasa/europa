@@ -149,21 +149,12 @@ void BoostFlowProfileGraph::enableTransaction(const TransactionId& t,
                                               const InstantId& inst,
                                               TransactionId2InstantId& contributions) {
   debugMsg("BoostFlowProfileGraph:enableTransaction", 
-           (isLowerLevel() ? "<lower>" : "<upper>") << "Enabling " << t << " at " 
-           << inst->getTime());
+           (isLowerLevel() ? "<lower>" : "<upper>") << "Enabling " << 
+           (t->isConsumer() ? "consumer " : "producer ") << t << "" << t->toString() <<
+           " at " << inst->getTime());
 
-  edouble edgeCapacity = 0.0;
+  // edouble edgeCapacity = 0.0;
 
-  if(isLowerLevel() == t->isConsumer()) {
-    edgeCapacity = t->quantity()->lastDomain().getUpperBound();
-  }
-  else {
-    edgeCapacity = t->quantity()->lastDomain().getLowerBound();
-  }
-
-  if(0.0 == edgeCapacity) {
-    contributions[t] = inst; //?
-  }
   if(std::find(m_activeTransactions.begin(), m_activeTransactions.end(), t) ==
      m_activeTransactions.end()) {
     m_activeTransactions.push_back(t);
