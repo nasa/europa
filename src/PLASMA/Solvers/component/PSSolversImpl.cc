@@ -2,6 +2,7 @@
 #include "PSSolversImpl.hh"
 #include "Filters.hh"
 #include "Solver.hh"
+#include "Context.hh"
 
 namespace EUROPA
 {
@@ -122,17 +123,17 @@ namespace EUROPA
   const std::string& PSSolverImpl::getConfigFilename() {return m_configFile;}
 
   eint::basis_type PSSolverImpl::getHorizonStart() {
-    return cast_int(SOLVERS::HorizonFilter::getHorizon().getLowerBound());
+    return m_solver->getContext()->get("horizonStart");
   }
 
   eint::basis_type PSSolverImpl::getHorizonEnd() {
-    return cast_int(SOLVERS::HorizonFilter::getHorizon().getUpperBound());
+    return m_solver->getContext()->get("horizonEnd");
   }
 
   void PSSolverImpl::configure(eint::basis_type horizonStart, eint::basis_type horizonEnd) {
     check_runtime_error(horizonStart <= horizonEnd);
-    SOLVERS::HorizonFilter::getHorizon().reset(IntervalIntDomain());
-    SOLVERS::HorizonFilter::getHorizon().intersect(horizonStart, horizonEnd);
+    m_solver->getContext()->put("horizonStart", horizonStart);
+    m_solver->getContext()->put("horizonEnd", horizonEnd);
   }
 
 }

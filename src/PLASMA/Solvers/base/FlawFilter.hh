@@ -21,8 +21,8 @@ namespace EUROPA {
 
       virtual bool test(const EntityId& entity);
 
-      ContextId getContext() const {return m_context;}
-      void setContext(ContextId& ctx) {m_context = ctx;}
+      // ContextId getContext() const {return m_context;}
+      // void setContext(ContextId& ctx) {m_context = ctx;}
 
     private:
       const bool m_isDynamic;

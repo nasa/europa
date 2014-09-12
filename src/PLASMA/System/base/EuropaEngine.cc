@@ -17,6 +17,7 @@
 
 // Solver Support
 #include "Solver.hh"
+#include "Context.hh"
 #include "Filters.hh"
 #include "PlanDatabaseWriter.hh"
 
@@ -130,7 +131,8 @@ namespace EUROPA {
 
       eint start = horizonStart->baseDomain().getSingletonValue();
       eint end = horizonEnd->baseDomain().getSingletonValue();
-      SOLVERS::HorizonFilter::getHorizon() = IntervalDomain(start, end);
+      solver->getContext()->put("horizonStart", cast_double(start));
+      solver->getContext()->put("horizonEnd", cast_double(end));
 
       // Now get planner step max
       int steps = cast_int(plannerSteps->baseDomain().getSingletonValue());

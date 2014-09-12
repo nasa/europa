@@ -405,12 +405,14 @@ private:
     UnboundVariableManager fm(*root);
     CPPUNIT_ASSERT(testEngine.playTransactions( (getTestLoadLibraryPath() + "/UnboundVariableFiltering.nddl").c_str() ));
 
-    // Initialize after filling the database since we are not connected to an event source
-    fm.initialize(*root,testEngine.getPlanDatabase());
-
     // Set the horizon
-    IntervalIntDomain& horizon = HorizonFilter::getHorizon();
-    horizon = IntervalIntDomain(0, 1000);
+    Context ctx("");
+    ctx.put("horizonStart", 0);
+    ctx.put("horizonEnd", 1000);
+
+    // Initialize after filling the database since we are not connected to an event source
+    fm.initialize(*root,testEngine.getPlanDatabase(), ctx.getId());
+
 
     // Simple filter on a variable
     ConstrainedVariableSet variables = testEngine.getConstraintEngine()->getVariables();
@@ -458,12 +460,13 @@ private:
 
     TestEngine testEngine;
     OpenConditionManager fm(*root);
-    IntervalIntDomain& horizon = HorizonFilter::getHorizon();
-    horizon = IntervalIntDomain(0, 1000);
     CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/OpenConditionFiltering.nddl").c_str() ));
 
+    Context ctx("");
+    ctx.put("horizonStart", 0);
+    ctx.put("horizonEnd", 1000);
     // Initialize with data in the database
-    fm.initialize(*root,testEngine.getPlanDatabase());
+    fm.initialize(*root,testEngine.getPlanDatabase(), ctx.getId());
 
     TokenSet tokens = testEngine.getPlanDatabase()->getTokens();
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it){
@@ -485,12 +488,13 @@ private:
 
     TestEngine testEngine;
     ThreatManager fm(*root);
-    IntervalIntDomain& horizon = HorizonFilter::getHorizon();
-    horizon = IntervalIntDomain(0, 1000);
+    Context ctx("");
+    ctx.put("horizonStart", 0);
+    ctx.put("horizonEnd", 1000);
     CPPUNIT_ASSERT(testEngine.playTransactions(( getTestLoadLibraryPath() + "/ThreatFiltering.nddl").c_str()));
 
     // Initialize with data in the database
-    fm.initialize(*root,testEngine.getPlanDatabase());
+    fm.initialize(*root,testEngine.getPlanDatabase(), ctx.getId());
 
     TokenSet tokens = testEngine.getPlanDatabase()->getTokens();
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it){
@@ -1657,10 +1661,12 @@ private:
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleActivationSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
-      IntervalIntDomain& horizon = HorizonFilter::getHorizon();
-      horizon = IntervalIntDomain(0, 1000);
       CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/SimpleActivation.nddl").c_str()));
       Solver solver(testEngine.getPlanDatabase(), *child);
+      ContextId ctx = solver.getContext();
+      ctx->put("horizonStart", 0);
+      ctx->put("horizonEnd", 1000);
+
       CPPUNIT_ASSERT(solver.solve());
     }
 
@@ -1672,11 +1678,14 @@ private:
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleRejectionSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
-      IntervalIntDomain& horizon = HorizonFilter::getHorizon();
-      horizon = IntervalIntDomain(0, 1000);
+
 
       CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/SimpleRejection.nddl").c_str()));
       Solver solver(testEngine.getPlanDatabase(), *child);
+
+      ContextId ctx = solver.getContext();
+      ctx->put("horizonStart", 0);
+      ctx->put("horizonEnd", 1000);
 
       CPPUNIT_ASSERT(solver.solve(100, 100));
       CPPUNIT_ASSERT_MESSAGE(toString(testEngine.getPlanDatabase()->getTokens().size()), testEngine.getPlanDatabase()->getTokens().size() == 1);
@@ -1858,8 +1867,10 @@ private:
     // iterate over the possibilties with commiting and deleting with four tokens
     for(int i=1;i<255;i++)
     {
-      IntervalIntDomain& horizon = HorizonFilter::getHorizon();
-      horizon = IntervalIntDomain(0, 40);
+      ContextId ctx = solver.getContext();
+      ctx->put("horizonStart", 0);
+      ctx->put("horizonEnd", 40);
+
       TokenId first = db->getClient()->createToken("CommitTest.chaina", "first", false);
       first->start()->specify(0);
       solver.solve(100,100);
@@ -1893,7 +1904,10 @@ private:
 
       CPPUNIT_ASSERT_MESSAGE("Solver must be valid after discards.", solver.isValid());
 
-      horizon = IntervalIntDomain(0, 40);
+
+      ctx = solver.getContext();
+      ctx->put("horizonStart", 0);
+      ctx->put("horizonEnd", 40);
       solver.solve(100,100);
       // TODO: this is failing, why? re-enable after understanding causes
       //CPPUNIT_ASSERT_MESSAGE("Solver must be valid after continuing solving after discards.", solver.isValid());
@@ -1928,11 +1942,12 @@ private:
 
     TestEngine testEngine;
     UnboundVariableManager fm(*root);
-    fm.initialize(*root,testEngine.getPlanDatabase());
+    Context ctx("");
+    ctx.put("horizonStart", 0);
+    ctx.put("horizonEnd", 1000);
+    fm.initialize(*root,testEngine.getPlanDatabase(), ctx.getId());
     CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/UnboundVariableFiltering.nddl").c_str()));
 
-    IntervalIntDomain& horizon = HorizonFilter::getHorizon();
-    horizon = IntervalIntDomain(0, 1000);
 
     ConstrainedVariableSet variables = testEngine.getConstraintEngine()->getVariables();
     IteratorId flawIterator = fm.createIterator();
@@ -1960,9 +1975,11 @@ private:
 
     TestEngine testEngine;
     OpenConditionManager fm(*root);
-    IntervalIntDomain& horizon = HorizonFilter::getHorizon();
-    horizon = IntervalIntDomain(0, 1000);
-    fm.initialize(*root,testEngine.getPlanDatabase());
+    Context ctx("");
+    ctx.put("horizonStart", 0);
+    ctx.put("horizonEnd", 1000);
+
+    fm.initialize(*root,testEngine.getPlanDatabase(), ctx.getId());
     CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/OpenConditionFiltering.nddl").c_str()));
 
     TokenSet tokens = testEngine.getPlanDatabase()->getTokens();
@@ -1993,9 +2010,10 @@ private:
 
     TestEngine testEngine;
     ThreatManager fm(*root);
-    IntervalIntDomain& horizon = HorizonFilter::getHorizon();
-    horizon = IntervalIntDomain(0, 1000);
-    fm.initialize(*root,testEngine.getPlanDatabase());
+    Context ctx("");
+    ctx.put("horizonStart", 0);
+    ctx.put("horizonEnd", 1000);
+    fm.initialize(*root,testEngine.getPlanDatabase(), ctx.getId());
     CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/ThreatFiltering.nddl").c_str()));
 
     TokenSet tokens = testEngine.getPlanDatabase()->getTokens();
@@ -2028,8 +2046,9 @@ private:
     UnboundVariableManager uvm(*(root->FirstChildElement("UnboundVariableManager")));
     Solver solver(testEngine.getPlanDatabase(), *root);
 
-    IntervalIntDomain& horizon = HorizonFilter::getHorizon();
-    horizon = IntervalIntDomain(0, 1000);
+    ContextId ctx = solver.getContext();
+    ctx->put("horizonStart", 0);
+    ctx->put("horizonEnd", 1000);
 
     CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/ThreatFiltering.nddl").c_str()));
 

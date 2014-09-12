@@ -101,11 +101,13 @@ namespace EUROPA {
       for(std::set<MatchingRuleId>::const_iterator it = m_flawFilters->getRules().begin(); it != m_flawFilters->getRules().end(); ++it) {
         MatchingRuleId rule = *it;
         check_error(rule.isValid());
+        debugMsg("FlawManager:initialize", "Setting context on " << rule);
         rule->setContext(m_context);
       }
       for(std::set<MatchingRuleId>::const_iterator it = m_flawHandlers->getRules().begin(); it != m_flawHandlers->getRules().end(); ++it) {
         MatchingRuleId rule = *it;
         check_error(rule.isValid());
+        debugMsg("FlawManager:initialize", "Setting context on " << rule);
         rule->setContext(m_context);
       }
       handleInitialize();

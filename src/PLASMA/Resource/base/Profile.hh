@@ -106,6 +106,8 @@ namespace EUROPA {
       std::map<eint, InstantId>::iterator getLeastInstant(const eint time);
 
       const std::map<eint, InstantId>& getInstants() {return m_instants;}
+      
+      InstantId getInstant(const eint time) const;
 
     private:
       friend class ProfilePropagator;

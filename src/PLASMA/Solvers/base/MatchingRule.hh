@@ -68,8 +68,8 @@ namespace EUROPA {
 
       const LabelStr& tokenNameFilter() const;
 
-      ContextId getContext() {return m_context;}
-      void setContext(ContextId ctx) {m_context = ctx;}
+      ContextId getContext() const {return m_context;}
+      virtual void setContext(ContextId ctx) {check_error(ctx != ContextId::noId()); m_context = ctx;}
     protected:
       void setExpression(const std::string& expression);
       ContextId m_context;

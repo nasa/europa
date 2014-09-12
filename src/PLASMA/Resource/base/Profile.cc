@@ -45,6 +45,11 @@ namespace EUROPA {
       m_id.remove();
     }
 
+InstantId Profile::getInstant(const eint time) const {
+  std::map<eint, InstantId>::const_iterator it = m_instants.find(time);
+  return (it == m_instants.end() ? InstantId::noId() : it->second);
+}
+
     void Profile::addTransaction(const TransactionId t) {
       checkError(m_transactions.find(t) == m_transactions.end(), "Attempted to insert a transaction twice!");
       checkError(m_variableListeners.find(t) == m_variableListeners.end(), "Already have time and/or quantity listeners for this transaction.");
@@ -413,13 +418,17 @@ namespace EUROPA {
     /**
       * @brief Remove
       */
-     void Profile::handleTransactionVariableDeletion(const TransactionId& t){
-         std::map<TransactionId, ConstrainedVariableListenerId>::iterator listIt = m_otherListeners.find(t);
-         checkError(listIt != m_otherListeners.end(),
-                    "Attempted to remove variable listener for transaction at time " << t->time()->toString() << " with quantity " << t->quantity()->toString() << ".");
-         delete (ConstraintAdditionListener*) listIt->second;
-         m_otherListeners.erase(t);
-     }
+
+void Profile::handleTransactionVariableDeletion(const TransactionId& t){
+  std::map<TransactionId, ConstrainedVariableListenerId>::iterator listIt =
+      m_otherListeners.find(t);
+  checkError(listIt != m_otherListeners.end(),
+             "Attempted to remove variable listener for transaction at time " <<
+             t->time()->toString() << " with quantity " << 
+             t->quantity()->toString() << ".");
+  delete (ConstraintAdditionListener*) listIt->second;
+  m_otherListeners.erase(t);
+}
 
     void Profile::getLevel(const eint time, IntervalDomain& dest) {
     	if(needsRecompute())
