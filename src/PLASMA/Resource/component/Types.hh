@@ -124,6 +124,20 @@ typedef boost::unordered_map< Node*, edouble, NodeHash > Node2Double;
 typedef boost::unordered_map< Edge*, edouble, EdgeHash > Edge2DoubleMap;
 typedef boost::unordered_map< TransactionId, InstantId, TransactionIdHash > TransactionId2InstantId;
 #endif
+/**
+ * @brief Indicates the ordering between two time variables associated with a transaction
+ */
+enum Order {
+  AFTER_OR_AT = 0, /*!< Indicates one transaction is strictly after or at the same time with another transaction. */
+  BEFORE_OR_AT,/*!< Indicates one transaction is strictly before or at the same time with another transaction. */
+  NOT_ORDERED,/*!< Indicates one transaction is not ordered with another transaction. */
+  STRICTLY_AT,/*!< Indicates one transaction is strictly at the same time with another transaction. */
+  UNKNOWN
+};
+typedef std::pair<TransactionId,TransactionId> TransactionIdTransactionIdPair;
+typedef std::map< TransactionIdTransactionIdPair, Order > TransactionIdTransactionIdPair2Order;
+
+
 
   std::ostream& operator<<( std::ostream& os, const EdgeIdentity& fei ) ;
 

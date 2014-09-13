@@ -162,38 +162,38 @@ void BoostFlowProfileGraph::enableTransaction(const TransactionId& t,
   m_recalculate = true;
 }
 
-edouble BoostFlowProfileGraph::getResidualFromSource(const FlowProfile::TransactionIdTransactionIdPair2Order& at,
-                                                     const FlowProfile::TransactionIdTransactionIdPair2Order& other) {
+edouble BoostFlowProfileGraph::getResidualFromSource(const TransactionIdTransactionIdPair2Order& at,
+                                                     const TransactionIdTransactionIdPair2Order& other) {
   using namespace boost;
   reset();
   for(std::vector<TransactionId>::const_iterator it = m_activeTransactions.begin();
       it != m_activeTransactions.end(); ++it) {
     addTransactionToGraph(*it);
   }
-  for(FlowProfile::TransactionIdTransactionIdPair2Order::const_iterator it = at.begin(); 
+  for(TransactionIdTransactionIdPair2Order::const_iterator it = at.begin(); 
       it != at.end(); ++it) {
     enableAt(it->first.first, it->first.second);
   }
-  for(FlowProfile::TransactionIdTransactionIdPair2Order::const_iterator it = other.begin();
+  for(TransactionIdTransactionIdPair2Order::const_iterator it = other.begin();
       it != other.end(); ++it) {
     debugMsg("BoostFlowProfileGraph:getResidualFromSource", 
              it->first.first << 
-             (it->second == FlowProfile::AFTER_OR_AT ? " after-or-at " :
-              (it->second == FlowProfile::BEFORE_OR_AT ? " before-or-at " :
-               (it->second == FlowProfile::NOT_ORDERED ? " unordered " :
-                (it->second == FlowProfile::STRICTLY_AT ? " at " : " unknown ")))) <<
+             (it->second == AFTER_OR_AT ? " after-or-at " :
+              (it->second == BEFORE_OR_AT ? " before-or-at " :
+               (it->second == NOT_ORDERED ? " unordered " :
+                (it->second == STRICTLY_AT ? " at " : " unknown ")))) <<
              it->first.second);
     switch(it->second) {
-      case FlowProfile::AFTER_OR_AT:
+      case AFTER_OR_AT:
         enableAtOrBefore(it->first.second, it->first.first);
         break;
-      case FlowProfile::BEFORE_OR_AT:
+      case BEFORE_OR_AT:
         enableAtOrBefore(it->first.first, it->first.second);
-      case FlowProfile::NOT_ORDERED:
+      case NOT_ORDERED:
         break;
-      case FlowProfile::STRICTLY_AT:
+      case STRICTLY_AT:
         enableAt(it->first.first, it->first.second);
-      case FlowProfile::UNKNOWN:
+      case UNKNOWN:
         break;
       default:
         break;
