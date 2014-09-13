@@ -81,8 +81,8 @@ class BoostFlowProfileGraph : public FlowProfileGraph {
    * edge. Might trigger a maximum flow (re) calculation if required.
    */
   edouble getResidualFromSource();
-  edouble getResidualFromSource(const FlowProfile::TransactionIdTransactionIdPair2Order& at,
-                                const FlowProfile::TransactionIdTransactionIdPair2Order& other);
+  edouble getResidualFromSource(const TransactionIdTransactionIdPair2Order& at,
+                                const TransactionIdTransactionIdPair2Order& other);
 
   /**
    * @brief Disables every node reachable from the source in the residual network. Returns the sum

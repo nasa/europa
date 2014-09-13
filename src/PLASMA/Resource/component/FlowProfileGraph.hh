@@ -3,7 +3,6 @@
 
 
 #include "Types.hh"
-#include "FlowProfile.hh"
 
 namespace EUROPA {
 
@@ -84,8 +83,8 @@ class FlowProfileGraph
    * edge. Might trigger a maximum flow (re) calculation if required.
    */
   virtual edouble getResidualFromSource() = 0;
-  virtual edouble getResidualFromSource(const FlowProfile::TransactionIdTransactionIdPair2Order& at,
-                                        const FlowProfile::TransactionIdTransactionIdPair2Order& other) = 0;
+  virtual edouble getResidualFromSource(const TransactionIdTransactionIdPair2Order& at,
+                                        const TransactionIdTransactionIdPair2Order& other) = 0;
   /**
    * @brief Disables every node reachable from the source in the residual network. Returns the sum
    * of the contribution of each disabled node. The contribution is determined as following:
@@ -151,8 +150,8 @@ class FlowProfileGraphImpl : public FlowProfileGraph {
   void disable(const TransactionId& transaction);
   void pushFlow( const TransactionId& transaction );
   edouble getResidualFromSource();
-  edouble getResidualFromSource(const FlowProfile::TransactionIdTransactionIdPair2Order& at,
-                                const FlowProfile::TransactionIdTransactionIdPair2Order& other) {
+  edouble getResidualFromSource(const TransactionIdTransactionIdPair2Order& at,
+                                const TransactionIdTransactionIdPair2Order& other) {
     return getResidualFromSource();
   }
 

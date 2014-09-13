@@ -165,6 +165,7 @@ public:
      testScenario13< EUROPA::IncrementalFlowProfile>();
      testScenario14< EUROPA::IncrementalFlowProfile>();
      //testPaulBug<EUROPA::IncrementalFlowProfile>();
+     return true;
   }
 
   static bool test(){

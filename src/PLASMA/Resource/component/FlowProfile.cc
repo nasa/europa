@@ -310,7 +310,7 @@ void FlowProfile::recomputeLevels(InstantId prev, InstantId inst) {
                 0, 0, 0, 0 );
 }
 
-    FlowProfile::Order FlowProfile::getOrdering( const TransactionId t1, const TransactionId t2 )
+Order FlowProfile::getOrdering( const TransactionId t1, const TransactionId t2 )
     {
       // in case constraint added and already constrained to be before or after we no longer have to
       // recalculate
