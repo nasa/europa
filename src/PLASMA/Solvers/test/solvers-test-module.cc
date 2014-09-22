@@ -36,6 +36,9 @@
 
 #include <fstream>
 
+#include <boost/scoped_ptr.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+
 #ifdef near
 #undef near
 #endif
@@ -53,6 +56,7 @@
 using namespace EUROPA;
 using namespace EUROPA::SOLVERS;
 using namespace EUROPA::SOLVERS::HSTS;
+using namespace boost;
 
 void registerTestElements(EngineId& engine);
 
@@ -236,10 +240,56 @@ public:
     EUROPA_runTest(testVariableFiltering);
     EUROPA_runTest(testTokenFiltering);
     EUROPA_runTest(testThreatFiltering);
+    EUROPA_runTest(testGuardFilter);
     return true;
   }
 
 private:
+  static bool testGuardFilter() {
+    TestEngine testEngine(true);
+    DbClientId client = testEngine.getPlanDatabase()->getClient();
+    ObjectId obj = client->createObject("BacktrackTest", "filtered");
+    TokenId tok = client->createToken("BacktrackTest.pred");
+    client->activate(tok);
+    client->constrain(obj, tok, tok);
+    CPPUNIT_ASSERT_MESSAGE("Initially inconsistent", client->propagate());
+    
+    const ConstrainedVariableSet& vars = 
+        testEngine.getConstraintEngine()->getVariables();
+    std::string filterStr("<FlawFilter component=\"GuardFilter\"/>");
+    scoped_ptr<TiXmlElement> filterXml(initXml(filterStr));
+    GuardFilter f(*filterXml);
+    NotGuardFilter g(*filterXml);
+    bool guardFound = false;
+    for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
+      if((*it)->getName() == std::string("b")) {
+        CPPUNIT_ASSERT_MESSAGE(std::string("Should be a guard: ") + \
+                               (*it)->getName().toString(),
+                               f.test(*it));
+        CPPUNIT_ASSERT_MESSAGE(std::string("Should be a guard: ") + \
+                               (*it)->getName().toString(),
+                               !g.test(*it));
+        guardFound = true;
+      }
+      else if(starts_with((*it)->getName().toString(), "implicit") || 
+              starts_with((*it)->getName().toString(), "ExprConstant_PSEUDO_VARIABLE")) {
+        //these *might* be guards, but might not.  can't tell a priori, so skipping the
+        //test
+      }
+      else {
+        //everything else should be a guard
+        CPPUNIT_ASSERT_MESSAGE(std::string("Should not be a guard: ") + \
+                               (*it)->getName().toString(),
+                               !f.test(*it));
+        CPPUNIT_ASSERT_MESSAGE(std::string("Should not be a guard: ") + \
+                               (*it)->getName().toString(),
+                               g.test(*it));
+      }
+    }
+    CPPUNIT_ASSERT_MESSAGE("Failed to find any guards in the model.", guardFound);
+    return true;
+  }
+
   static bool testRuleMatching() {
     TestEngine testEngine(true);
 
