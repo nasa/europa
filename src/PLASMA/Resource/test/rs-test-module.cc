@@ -328,11 +328,11 @@ private:
 
     std::set<int> times;
 
-    TransactionPtr trans1(new Transaction(t1.getId(), quantity.getId(), false), deleter);
-    TransactionPtr trans2(new Transaction(t2.getId(), quantity.getId(), false), deleter); //distinct cases
-    TransactionPtr trans3(new Transaction(t3.getId(), quantity.getId(), false), deleter); //overlap on left side.  both trans1 and trans2 should appear at time 0
-    TransactionPtr trans4(new Transaction(t4.getId(), quantity.getId(), false), deleter); //overlap in the middle.  should have trans3 and trans4 at time 1 and only trans4 at time 4
-    TransactionPtr trans5(new Transaction(t5.getId(), quantity.getId(), false), deleter); //overlap on right side.  both trans 4 and trans5 should appear at time 4
+    TransactionPtr trans1(new Transaction(t1.getId(), quantity.getId(), false, EntityId::noId()), deleter);
+    TransactionPtr trans2(new Transaction(t2.getId(), quantity.getId(), false, EntityId::noId()), deleter); //distinct cases
+    TransactionPtr trans3(new Transaction(t3.getId(), quantity.getId(), false, EntityId::noId()), deleter); //overlap on left side.  both trans1 and trans2 should appear at time 0
+    TransactionPtr trans4(new Transaction(t4.getId(), quantity.getId(), false, EntityId::noId()), deleter); //overlap in the middle.  should have trans3 and trans4 at time 1 and only trans4 at time 4
+    TransactionPtr trans5(new Transaction(t5.getId(), quantity.getId(), false, EntityId::noId()), deleter); //overlap on right side.  both trans 4 and trans5 should appear at time 4
 
     profile.addTransaction(trans1->getId());
     times.insert(0);
@@ -413,11 +413,11 @@ private:
     times.insert(3); times.insert(4);
     times.insert(6); times.insert(10);
 
-    TransactionPtr trans1(new Transaction(t1.getId(), quantity.getId(), false), deleter);
-    TransactionPtr trans2(new Transaction(t2.getId(), quantity.getId(), false), deleter);
-    TransactionPtr trans3(new Transaction(t3.getId(), quantity.getId(), false), deleter);
-    TransactionPtr trans4(new Transaction(t4.getId(), quantity.getId(), false), deleter);
-    TransactionPtr trans5(new Transaction(t5.getId(), quantity.getId(), false), deleter);
+    TransactionPtr trans1(new Transaction(t1.getId(), quantity.getId(), false, EntityId::noId()), deleter);
+    TransactionPtr trans2(new Transaction(t2.getId(), quantity.getId(), false, EntityId::noId()), deleter);
+    TransactionPtr trans3(new Transaction(t3.getId(), quantity.getId(), false, EntityId::noId()), deleter);
+    TransactionPtr trans4(new Transaction(t4.getId(), quantity.getId(), false, EntityId::noId()), deleter);
+    TransactionPtr trans5(new Transaction(t5.getId(), quantity.getId(), false, EntityId::noId()), deleter);
 
     profile.addTransaction(trans1->getId());
     profile.addTransaction(trans2->getId());
@@ -479,14 +479,14 @@ private:
 
 //     Variable<IntervalIntDomain> t0(ce.getId(), IntervalIntDomain(MINUS_INFINITY, MINUS_INFINITY));
 //     Variable<IntervalDomain> q0(ce.getId(), IntervalDomain(0, 0));
-//     TransactionPtr trans0(new Transaction(t0.getId(), q0.getId(), false), deleter);
+//     TransactionPtr trans0(new Transaction(t0.getId(), q0.getId(), false, EntityId::noId()), deleter);
 //     r.addTransaction(trans0->getId());
 
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 0);
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, HORIZON_END));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(45, 45));
-    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false), deleter);
+    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false, EntityId::noId()), deleter);
     r.addTransaction(trans1->getId());
     CPPUNIT_ASSERT(ce.propagate());
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*1));
@@ -494,7 +494,7 @@ private:
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(1, HORIZON_END));
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(35, 35));
-    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), false), deleter);
+    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), false, EntityId::noId()), deleter);
     r.addTransaction(trans2->getId());
     CPPUNIT_ASSERT(ce.propagate());
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*2));
@@ -502,7 +502,7 @@ private:
 
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(2, HORIZON_END));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(20, 20));
-    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), false), deleter);
+    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), false, EntityId::noId()), deleter);
     r.addTransaction(trans3->getId());
     CPPUNIT_ASSERT(ce.propagate());
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*3));
@@ -535,44 +535,44 @@ private:
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(4, 6));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
-    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false), deleter);
+    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false, EntityId::noId()), deleter);
     r.addTransaction(trans1->getId());
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*1));
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(-4, 10));
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
-    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), false), deleter);
+    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), false, EntityId::noId()), deleter);
     r.addTransaction(trans2->getId());
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*2 + 3*2 + 4*1));
 
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(1, 3));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
-    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), false), deleter);
+    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), false, EntityId::noId()), deleter);
     r.addTransaction(trans3->getId());
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1));
 
     Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(1, 2));
     Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
-    TransactionPtr trans4(new Transaction(t4.getId(), q4.getId(), false), deleter);
+    TransactionPtr trans4(new Transaction(t4.getId(), q4.getId(), false, EntityId::noId()), deleter);
     r.addTransaction(trans4->getId());
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1));
 
     Variable<IntervalIntDomain> t5(ce.getId(), IntervalIntDomain(3, 7));
     Variable<IntervalDomain> q5(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
-    TransactionPtr trans5(new Transaction(t5.getId(), q5.getId(), false), deleter);
+    TransactionPtr trans5(new Transaction(t5.getId(), q5.getId(), false, EntityId::noId()), deleter);
     r.addTransaction(trans5->getId());
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1));
 
     Variable<IntervalIntDomain> t6(ce.getId(), IntervalIntDomain(4, 7));
     Variable<IntervalDomain> q6(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
-    TransactionPtr trans6(new Transaction(t6.getId(), q6.getId(), false), deleter);
+    TransactionPtr trans6(new Transaction(t6.getId(), q6.getId(), false, EntityId::noId()), deleter);
     r.addTransaction(trans6->getId());
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1));
 
     // Insert for a singleton value
     Variable<IntervalIntDomain> t7(ce.getId(), IntervalIntDomain(5, 5));
     Variable<IntervalDomain> q7(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
-    TransactionPtr trans7(new Transaction(t7.getId(), q7.getId(), false), deleter);
+    TransactionPtr trans7(new Transaction(t7.getId(), q7.getId(), false, EntityId::noId()), deleter);
     r.addTransaction(trans7->getId());
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*5 + 7*4 + 8*3 + 9*1));
 
@@ -608,7 +608,7 @@ private:
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 1));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(1, 1));
-    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false), deleter);
+    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false, EntityId::noId()), deleter);
     r.addTransaction(trans1->getId());
     ce.propagate();
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*1));
@@ -616,7 +616,7 @@ private:
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(1, 3));
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(4, 4));
-    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), true), deleter);
+    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), true, EntityId::noId()), deleter);
     r.addTransaction(trans2->getId());
     ce.propagate();
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*1));
@@ -624,7 +624,7 @@ private:
 
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(2, 4));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(8, 8));
-    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), false), deleter);
+    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), false, EntityId::noId()), deleter);
     r.addTransaction(trans3->getId());
     ce.propagate();
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*2 + 4*2 + 5*1));
@@ -632,7 +632,7 @@ private:
 
     Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(3, 6));
     Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(2, 2));
-    TransactionPtr trans4(new Transaction(t4.getId(), q4.getId(), false), deleter);
+    TransactionPtr trans4(new Transaction(t4.getId(), q4.getId(), false, EntityId::noId()), deleter);
     r.addTransaction(trans4->getId());
     ce.propagate();
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*2 + 4*3 + 5*2 + 6*1));
@@ -640,7 +640,7 @@ private:
 
     Variable<IntervalIntDomain> t5(ce.getId(), IntervalIntDomain(2, 10));
     Variable<IntervalDomain> q5(ce.getId(), IntervalDomain(6, 6));
-    TransactionPtr trans5(new Transaction(t5.getId(), q5.getId(), true), deleter);
+    TransactionPtr trans5(new Transaction(t5.getId(), q5.getId(), true, EntityId::noId()), deleter);
     r.addTransaction(trans5->getId());
     ce.propagate();
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*2 + 7*1));
@@ -648,7 +648,7 @@ private:
 
     Variable<IntervalIntDomain> t6(ce.getId(), IntervalIntDomain(6, 8));
     Variable<IntervalDomain> q6(ce.getId(), IntervalDomain(3, 3));
-    TransactionPtr trans6(new Transaction(t6.getId(), q6.getId(), false), deleter);
+    TransactionPtr trans6(new Transaction(t6.getId(), q6.getId(), false, EntityId::noId()), deleter);
     r.addTransaction(trans6->getId());
     ce.propagate();
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*3 + 7*2 + 8*1));
@@ -656,7 +656,7 @@ private:
 
     Variable<IntervalIntDomain> t7(ce.getId(), IntervalIntDomain(7, 8));
     Variable<IntervalDomain> q7(ce.getId(), IntervalDomain(4, 4));
-    TransactionPtr trans7(new Transaction(t7.getId(), q7.getId(), true), deleter);
+    TransactionPtr trans7(new Transaction(t7.getId(), q7.getId(), true, EntityId::noId()), deleter);
     r.addTransaction(trans7->getId());
     ce.propagate();
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*3 + +7* 3 + 8*3 + 9*1));
@@ -676,7 +676,7 @@ private:
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 10));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(10, 10));
-    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false), deleter);
+    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false, EntityId::noId()), deleter);
     r.addTransaction(trans1->getId());
     ce.propagate();
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 10*10);
@@ -705,7 +705,7 @@ private:
     // Test producer
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 10));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(5, 10));
-    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false), deleter);
+    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false, EntityId::noId()), deleter);
     r.addTransaction(trans1->getId());
     ce.propagate();
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 10*10);
@@ -713,7 +713,7 @@ private:
     // Test consumer
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(1, 5));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(1, 4));
-    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), true), deleter);
+    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), true, EntityId::noId()), deleter);
     r.addTransaction(trans3->getId());
     ce.propagate();
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 10*1 + 14*4 + 13*5);//+ 14*3 + 21*1 + 20*3 + 20*2);
@@ -735,13 +735,13 @@ private:
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 1));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(productionRateMax, productionRateMax + 1));
-    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false), deleter);
+    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false, EntityId::noId()), deleter);
     r.addTransaction(trans1->getId());
     ce.propagate();
 
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(0, 1));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(1, 1));
-    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), false), deleter);
+    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), false, EntityId::noId()), deleter);
     r.addTransaction(trans3->getId());
 
     // no violation because of temporal flexibility
@@ -761,13 +761,13 @@ private:
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(0, 1));
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(-(consumptionRateMax), -(consumptionRateMax - 1)));
-    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), true), deleter);
+    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), true, EntityId::noId()), deleter);
     r.addTransaction(trans2->getId());
     ce.propagate();
 
     Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(0, 1));
     Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(1, 1));
-    TransactionPtr trans4(new Transaction(t4.getId(), q4.getId(), true), deleter);
+    TransactionPtr trans4(new Transaction(t4.getId(), q4.getId(), true, EntityId::noId()), deleter);
     r.addTransaction(trans4->getId());
     // no violation because of temporal flexibility
     CPPUNIT_ASSERT(ce.propagate());
@@ -802,38 +802,38 @@ private:
     // production
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(2, 2));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(8, 8));
-    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), true), deleter);
+    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), true, EntityId::noId()), deleter);
     r.addTransaction(trans1->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(3, 3));
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(8, 8));
-    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), true), deleter);
+    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), true, EntityId::noId()), deleter);
     r.addTransaction(trans2->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(4, 4));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(8, 8));
-    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), true), deleter);
+    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), true, EntityId::noId()), deleter);
     r.addTransaction(trans3->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(5, 5));
     Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(8, 8));
-    TransactionPtr trans4(new Transaction(t4.getId(), q4.getId(), true), deleter);
+    TransactionPtr trans4(new Transaction(t4.getId(), q4.getId(), true, EntityId::noId()), deleter);
     r.addTransaction(trans4->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t5(ce.getId(), IntervalIntDomain(6, 6));
     Variable<IntervalDomain> q5(ce.getId(), IntervalDomain(8, 8));
-    TransactionPtr trans5(new Transaction(t5.getId(), q5.getId(), true), deleter);
+    TransactionPtr trans5(new Transaction(t5.getId(), q5.getId(), true, EntityId::noId()), deleter);
     r.addTransaction(trans5->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     // This will push it over the edge
     Variable<IntervalIntDomain> t6(ce.getId(), IntervalIntDomain(10, 10));
     Variable<IntervalDomain> q6(ce.getId(), IntervalDomain(8, 8));
-    TransactionPtr trans6(new Transaction(t6.getId(), q6.getId(), true), deleter);
+    TransactionPtr trans6(new Transaction(t6.getId(), q6.getId(), true, EntityId::noId()), deleter);
     r.addTransaction(trans6->getId());
     CPPUNIT_ASSERT(!ce.propagate());
 
@@ -860,44 +860,44 @@ private:
     // production
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(2, 2));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(8, 8));
-    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), true), deleter);
+    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), true, EntityId::noId()), deleter);
     r.addTransaction(trans1->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(3, 3));
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(8, 8));
-    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), true), deleter);
+    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), true, EntityId::noId()), deleter);
     r.addTransaction(trans2->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(4, 4));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(8, 8));
-    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), true), deleter);
+    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), true, EntityId::noId()), deleter);
     r.addTransaction(trans3->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(5, 5));
     Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(8, 8));
-    TransactionPtr trans4(new Transaction(t4.getId(), q4.getId(), true), deleter);
+    TransactionPtr trans4(new Transaction(t4.getId(), q4.getId(), true, EntityId::noId()), deleter);
     r.addTransaction(trans4->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t5(ce.getId(), IntervalIntDomain(6, 6));
     Variable<IntervalDomain> q5(ce.getId(), IntervalDomain(8, 8));
-    TransactionPtr trans5(new Transaction(t5.getId(), q5.getId(), true), deleter);
+    TransactionPtr trans5(new Transaction(t5.getId(), q5.getId(), true, EntityId::noId()), deleter);
     r.addTransaction(trans5->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t6(ce.getId(), IntervalIntDomain(8, 8));
     Variable<IntervalDomain> q6(ce.getId(), IntervalDomain(8, 8));
-    TransactionPtr trans6(new Transaction(t6.getId(), q6.getId(), true), deleter);
+    TransactionPtr trans6(new Transaction(t6.getId(), q6.getId(), true, EntityId::noId()), deleter);
     r.addTransaction(trans6->getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     // This will push it over the edge
     Variable<IntervalIntDomain> t7(ce.getId(), IntervalIntDomain(10, 10));
     Variable<IntervalDomain> q7(ce.getId(), IntervalDomain(8, 8));
-    TransactionPtr trans7(new Transaction(t7.getId(), q7.getId(), true), deleter);
+    TransactionPtr trans7(new Transaction(t7.getId(), q7.getId(), true, EntityId::noId()), deleter);
     r.addTransaction(trans7->getId());
     CPPUNIT_ASSERT(!ce.propagate());
 
@@ -926,7 +926,7 @@ private:
     for (int i = 0; i < 11; i++){
       ConstrainedVariableId time = (new Variable<IntervalIntDomain>(ce.getId(), IntervalIntDomain(i, i)))->getId();
       ConstrainedVariableId quantity = (new Variable<IntervalDomain>(ce.getId(), IntervalDomain(productionRateMax, productionRateMax)))->getId();
-      TransactionId t = (new Transaction(time, quantity, false))->getId();
+      TransactionId t = (new Transaction(time, quantity, false, EntityId::noId()))->getId();
       r.addTransaction(t);
       transactions.push_back(t);
       vars.push_back(quantity);
@@ -973,7 +973,7 @@ private:
     for (int i = 0; i < 11; i++){
       ConstrainedVariableId time = (new Variable<IntervalIntDomain>(ce.getId(), IntervalIntDomain(i, i)))->getId();
       ConstrainedVariableId quantity = (new Variable<IntervalDomain>(ce.getId(), IntervalDomain(productionRateMax, productionRateMax)))->getId();
-      TransactionId t = (new Transaction(time, quantity, false))->getId();
+      TransactionId t = (new Transaction(time, quantity, false, EntityId::noId()))->getId();
       r.addTransaction(t);
       //r->constrain(t);
       transactions.push_back(t);
@@ -983,7 +983,7 @@ private:
     for (int i = 0; i < 11; i++){
       ConstrainedVariableId time = (new Variable<IntervalIntDomain>(ce.getId(), IntervalIntDomain(i, i)))->getId();
       ConstrainedVariableId quantity = (new Variable<IntervalDomain>(ce.getId(), IntervalDomain(productionRateMax, productionRateMax)))->getId();
-      TransactionId t = (new Transaction(time, quantity, true))->getId();
+      TransactionId t = (new Transaction(time, quantity, true, EntityId::noId()))->getId();
       r.addTransaction(t);
       //r->constrain(t);
       transactions.push_back(t);
@@ -1038,7 +1038,7 @@ private:
     // Test that a flaw is signalled when there is a possibility to violate limits
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(5, 5));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(5, 5));
-    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false), deleter);
+    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false, EntityId::noId()), deleter);
     r.addTransaction(trans1->getId());
 
     // Have a single transaction, test before, at and after.
@@ -1051,12 +1051,12 @@ private:
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(0, 7));
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(5, 5));
-    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), true), deleter);
+    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), true, EntityId::noId()), deleter);
     r.addTransaction(trans2->getId());
 
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(2, 10));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(5, 5));
-    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), true), deleter);
+    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), true, EntityId::noId()), deleter);
     r.addTransaction(trans3->getId());
 
     // Confirm that we can query in the middle
@@ -1089,10 +1089,10 @@ private:
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(1, 1), true, "q3");
     Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(1, 1), true, "q4");
 
-    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false), deleter);
-    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), true), deleter);
-    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), true), deleter);
-    TransactionPtr trans4(new Transaction(t4.getId(), q4.getId(), false), deleter);
+    TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false, EntityId::noId()), deleter);
+    TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), true, EntityId::noId()), deleter);
+    TransactionPtr trans3(new Transaction(t3.getId(), q3.getId(), true, EntityId::noId()), deleter);
+    TransactionPtr trans4(new Transaction(t4.getId(), q4.getId(), false, EntityId::noId()), deleter);
 
     profile.addTransaction(trans1->getId());
     profile.addTransaction(trans2->getId());

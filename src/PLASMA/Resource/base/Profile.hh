@@ -38,7 +38,7 @@ namespace EUROPA {
      * for causing subclasses to recalculate the profile.
      * When should we recalculate?
      */
-    class Profile : public FactoryObj {
+class Profile : public FactoryObj {
     public:
 
       /**

@@ -14,7 +14,9 @@
 namespace EUROPA {
 
     Profile::Profile(const PlanDatabaseId db, const FVDetectorId flawDetector)
-    	: m_id(this)
+    	: 
+        FactoryObj(),
+        m_id(this)
     	, m_changeCount(0)
     	, m_needsRecompute(false)
         , m_planDatabase(db)

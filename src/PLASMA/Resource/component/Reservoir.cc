@@ -33,7 +33,8 @@ namespace EUROPA {
     debugMsg("Reservoir:createTransactions",
              "Creating transactions for " << (t->isConsumer() ? "consumer " : "producer ") << "token " <<
              tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
-    TransactionId trans = (new Transaction(t->getTime(), t->getQuantity(), t->isConsumer()))->getId();
+    TransactionId trans = 
+        (new Transaction(t->getTime(), t->getQuantity(), t->isConsumer(), getId()))->getId();
     m_transactionsToTokens.insert(std::pair<TransactionId, TokenId>(trans, tok));
     m_tokensToTransactions.insert(std::pair<TokenId, TransactionId>(tok, trans));
   }

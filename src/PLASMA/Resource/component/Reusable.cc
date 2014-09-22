@@ -60,8 +60,8 @@ namespace EUROPA {
              toString() << " Creating transactions for " << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
     //here's the major difference between Reusable and Reservoir:  always consume the quantity at the start
     //and produce it again at the end
-    TransactionId t1 = (new Transaction(t->start(), t->getQuantity(), true))->getId();
-    TransactionId t2 = (new Transaction(t->end(), t->getQuantity(), false))->getId();
+    TransactionId t1 = (new Transaction(t->start(), t->getQuantity(), true, getId()))->getId();
+    TransactionId t2 = (new Transaction(t->end(), t->getQuantity(), false, getId()))->getId();
     m_transactionsToTokens.insert(std::make_pair(t1, tok));
     m_transactionsToTokens.insert(std::make_pair(t2, tok));
     m_tokensToTransactions.insert(std::make_pair(tok, std::make_pair(t1, t2)));
