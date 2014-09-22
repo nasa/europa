@@ -314,30 +314,34 @@ namespace EUROPA{
       check_error(ALWAYS_FAILS);
   }
 
-  void Token::doMerge(const TokenId& activeToken){
-    check_error(isValid());
-    check_error(isInactive());
-    check_error(activeToken.isValid());
-    check_error(activeToken->isActive());
-    checkError(m_state->lastDomain().isMember(MERGED), "Not permitted to merge." << toString());
-    check_error(getPlanDatabase()->getSchema()->isA(activeToken->getPredicateName(), m_predicateName),
-		"Cannot merge tokens with different predicates: " +
-		m_predicateName.toString() + ", " + activeToken->getPredicateName().toString());
-
-    m_state->setSpecified(MERGED);
-    m_unifyMemento = UnifyMementoId(new UnifyMemento(m_id, activeToken));
-    m_activeToken = activeToken;
-    m_activeToken->addMergedToken(m_id);
-
-    /** Send a message to all objects that it has been rejected **/
-    const std::set<edouble>& objects = getObject()->getBaseDomain().getValues();
-    for(std::set<edouble>::const_iterator it = objects.begin(); it!= objects.end(); ++it){
-      ObjectId object = Entity::getTypedEntity<Object>(*it);
-      object->notifyMerged(m_id);
-    }
-
-    m_planDatabase->notifyMerged(m_id);
+void Token::doMerge(const TokenId& activeToken){
+  check_error(isValid());
+  check_error(isInactive());
+  check_error(activeToken.isValid());
+  check_error(activeToken->isActive());
+  checkError(m_state->lastDomain().isMember(MERGED),
+             "Not permitted to merge." << toString());
+  check_error(getPlanDatabase()->getSchema()->isA(activeToken->getPredicateName(), m_predicateName),
+              "Cannot merge tokens with different predicates: " +
+              m_predicateName.toString() + ", " + activeToken->getPredicateName().toString());
+  checkError((isFact() && activeToken->isFact()) || true,
+             "Cannot merge fact " << toString() << " onto non-fact " << 
+             activeToken->toString());
+  
+  m_state->setSpecified(MERGED);
+  m_unifyMemento = UnifyMementoId(new UnifyMemento(m_id, activeToken));
+  m_activeToken = activeToken;
+  m_activeToken->addMergedToken(m_id);
+  
+  /** Send a message to all objects that it has been rejected **/
+  const std::set<edouble>& objects = getObject()->getBaseDomain().getValues();
+  for(std::set<edouble>::const_iterator it = objects.begin(); it!= objects.end(); ++it){
+    ObjectId object = Entity::getTypedEntity<Object>(*it);
+    object->notifyMerged(m_id);
   }
+  
+  m_planDatabase->notifyMerged(m_id);
+}
 
   void Token::split(){
     check_error(isValid());
