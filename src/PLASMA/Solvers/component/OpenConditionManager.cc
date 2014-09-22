@@ -25,6 +25,11 @@ namespace EUROPA {
 	addFlaw(token);
       }
     }
+  
+  bool OpenConditionManager::noMoreFlaws() {
+    return m_flawCandidates.empty();
+  }
+
 
     /**
      * Filter out if not a token

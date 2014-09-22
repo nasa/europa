@@ -67,10 +67,11 @@ namespace EUROPA {
       void setCutoff(unsigned int maxChoices) {m_maxChoices = maxChoices;}
 
       const eint getFlawedEntityKey() {return m_entityKey;}
-    protected:
+      //    protected:
       DecisionPoint(const DbClientId& client, eint entityKey, const LabelStr& explanation);
 
-      friend class Solver; /*!< grants special access to execute and undo methods */
+      // friend class Solver; /*!< grants special access to execute and undo methods */
+      // friend class ::FlawManagerTests;
 
       /**
        * @brief Tests if execute has been called more times than undo.

@@ -11,10 +11,34 @@
  * @date May, 2005
  */
 namespace EUROPA {
-  namespace SOLVERS {
+namespace SOLVERS {
+namespace {
+class ThreatIterator : public FlawIterator {
+ public:
+  ThreatIterator(ThreatManager& manager)
+      : FlawIterator(manager), 
+        m_it(manager.getPlanDatabase()->getTokensToOrder().begin()), 
+        m_end(manager.getPlanDatabase()->getTokensToOrder().end()){
+    advance();
+  }
+  
+ private:
+  const EntityId nextCandidate() {
+    EntityId candidate;
+    if(m_it != m_end){
+      candidate = m_it->second.first;
+      ++m_it;
+    }
+    return candidate;
+  }
+  
+  std::map<eint, std::pair<TokenId, ObjectSet> >::const_iterator m_it;
+  std::map<eint, std::pair<TokenId, ObjectSet> >::const_iterator m_end;
+};
+}
 
-    ThreatManager::ThreatManager(const TiXmlElement& configData)
-      : FlawManager(configData){}
+ThreatManager::ThreatManager(const TiXmlElement& configData)
+    : FlawManager(configData){}
 
     ThreatManager::~ThreatManager(){}
 
@@ -35,6 +59,24 @@ namespace EUROPA {
       return staticMatch(entity) || FlawManager::dynamicMatch(entity);
     }
 
+bool ThreatManager::noMoreFlaws() {
+  // const std::map<eint, std::pair<TokenId, ObjectSet> >& flaws =
+  //     getPlanDatabase()->getTokensToOrder();
+
+  // if(!flaws.empty()) {
+  //   for(std::map<eint, std::pair<TokenId, ObjectSet> >::const_iterator it = 
+  //           flaws.begin(); it != flaws.end(); ++it) {
+  //     if(!dynamicMatch(it->second.first))
+  //       return false;
+  //   }
+  // }
+  // return true;
+  return ThreatIterator(*this).done();
+}
+
+IteratorId ThreatManager::createIterator() {
+  return (new ThreatIterator(*this))->getId();
+}
     std::string ThreatManager::toString(const EntityId& entity) const {
       checkError(TokenId::convertable(entity), entity->toString());
       TokenId token = entity;
@@ -43,31 +85,5 @@ namespace EUROPA {
       return os.str();
     }
 
-    class ThreatIterator : public FlawIterator {
-    public:
-      ThreatIterator(ThreatManager& manager)
-	: FlawIterator(manager), 
-	  m_it(manager.getPlanDatabase()->getTokensToOrder().begin()), 
-	  m_end(manager.getPlanDatabase()->getTokensToOrder().end()){
-	advance();
-      }
-
-    private:
-      const EntityId nextCandidate() {
-	EntityId candidate;
-	if(m_it != m_end){
-	  candidate = m_it->second.first;
-	  ++m_it;
-	}
-	return candidate;
-      }
-
-      std::map<eint, std::pair<TokenId, ObjectSet> >::const_iterator m_it;
-      std::map<eint, std::pair<TokenId, ObjectSet> >::const_iterator m_end;
-    };
-
-    IteratorId ThreatManager::createIterator() {
-      return (new ThreatIterator(*this))->getId();
-    }
-  }
+}
 }

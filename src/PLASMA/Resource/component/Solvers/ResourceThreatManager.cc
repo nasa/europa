@@ -30,6 +30,43 @@ namespace EUROPA {
 //       }
 //     };
 
+namespace {
+class ThreatIterator : public FlawIterator {
+ public:
+  ThreatIterator(ResourceThreatManager& manager) : FlawIterator(manager) {
+    const ObjectSet& objs = manager.getPlanDatabase()->getObjects();
+    for(ObjectSet::const_iterator it = objs.begin(); it != objs.end(); ++it) {
+      ObjectId obj(*it);
+      check_error(obj.isValid());
+      debugMsg("ThreatIterator:ThreatIterator", "Checking to see if " << obj->toString() << " is a resource...");
+      if(!ResourceId::convertable(obj))
+        continue;
+      ResourceId res(obj);
+      std::vector<InstantId> temp;
+      debugMsg("ThreatIterator:ThreatIterator", "Resource!  Getting flawed instants...");
+      res->getFlawedInstants(temp);
+      m_flawedInstants.insert(m_flawedInstants.end(), temp.begin(), temp.end());
+    }
+    debugMsg("ThreatIterator:ThreatIterator", "Got " << m_flawedInstants.size() << " total instants.");
+    m_it = m_flawedInstants.begin();
+    advance();
+    condDebugMsg(done(), "ThreatIterator:ThreatIterator", "Advanced to the end right away.");
+  }
+ protected:
+ private:
+  const EntityId nextCandidate() {
+    EntityId candidate;
+    if(m_it != m_flawedInstants.end()) {
+      candidate = *m_it;
+      ++m_it;
+    }
+    return candidate;
+  }
+  std::vector<InstantId> m_flawedInstants;
+  std::vector<InstantId>::iterator m_it;
+};
+}
+
     class InstantComparator {
     public:
       enum FlawDirection {
@@ -284,40 +321,10 @@ namespace EUROPA {
       return os.str();
     }
 
-    class ThreatIterator : public FlawIterator {
-    public:
-      ThreatIterator(ResourceThreatManager& manager) : FlawIterator(manager) {
-        const ObjectSet& objs = manager.getPlanDatabase()->getObjects();
-        for(ObjectSet::const_iterator it = objs.begin(); it != objs.end(); ++it) {
-          ObjectId obj(*it);
-          check_error(obj.isValid());
-          debugMsg("ThreatIterator:ThreatIterator", "Checking to see if " << obj->toString() << " is a resource...");
-          if(!ResourceId::convertable(obj))
-            continue;
-          ResourceId res(obj);
-          std::vector<InstantId> temp;
-          debugMsg("ThreatIterator:ThreatIterator", "Resource!  Getting flawed instants...");
-          res->getFlawedInstants(temp);
-          m_flawedInstants.insert(m_flawedInstants.end(), temp.begin(), temp.end());
-        }
-        debugMsg("ThreatIterator:ThreatIterator", "Got " << m_flawedInstants.size() << " total instants.");
-        m_it = m_flawedInstants.begin();
-        advance();
-        condDebugMsg(done(), "ThreatIterator:ThreatIterator", "Advanced to the end right away.");
-      }
-    protected:
-    private:
-      const EntityId nextCandidate() {
-        EntityId candidate;
-        if(m_it != m_flawedInstants.end()) {
-          candidate = *m_it;
-          ++m_it;
-        }
-        return candidate;
-      }
-      std::vector<InstantId> m_flawedInstants;
-      std::vector<InstantId>::iterator m_it;
-    };
+bool ResourceThreatManager::noMoreFlaws() {
+  return ThreatIterator(*this).done();
+}
+
 
     IteratorId ResourceThreatManager::createIterator() {
       return (new ThreatIterator(*this))->getId();

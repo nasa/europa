@@ -24,7 +24,7 @@ namespace EUROPA {
       IteratorId createIterator();
 
       std::string toString(const EntityId& entity) const;
-
+      bool noMoreFlaws();
     private:
       friend class UnboundVariableIterator;
 

@@ -155,6 +155,8 @@ namespace EUROPA {
 
       ContextId getContext() const {return m_context;}
 
+      virtual bool noMoreFlaws() = 0;
+
     protected:
 
       FlawManager(const TiXmlElement& configData);

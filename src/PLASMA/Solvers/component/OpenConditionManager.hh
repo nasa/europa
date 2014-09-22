@@ -26,6 +26,7 @@ namespace EUROPA {
 
       virtual std::string toString(const EntityId& entity) const;
 
+      bool noMoreFlaws();
     protected:
       virtual void addFlaw(const TokenId& token);
       virtual void removeFlaw(const TokenId& token);

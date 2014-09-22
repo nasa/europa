@@ -198,6 +198,10 @@ namespace EUROPA {
       return os.str();
     }
 
+  bool UnboundVariableManager::noMoreFlaws() {
+    return m_flawCandidates.empty();
+  }
+
     class UnboundVariableIterator : public FlawIterator {
     public:
       UnboundVariableIterator(UnboundVariableManager& manager)

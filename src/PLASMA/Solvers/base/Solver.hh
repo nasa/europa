@@ -115,7 +115,7 @@ namespace EUROPA {
       /**
        * @brief Tests if we have concluded there are no more flaws.
        */
-      bool noMoreFlaws() const;
+      bool noMoreFlaws();
 
       /**
        * @brief Tests if the search space have been exhausted.
@@ -238,6 +238,7 @@ namespace EUROPA {
       public:
 	MasterFilter(const TiXmlElement& configData): FlawManager(configData){}
 	IteratorId createIterator() {return IteratorId::noId();}
+        bool noMoreFlaws() {return true;}
       private:
 	friend class Solver;
 	void handleInitialize(){}

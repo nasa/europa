@@ -31,6 +31,8 @@ namespace EUROPA {
 
       std::string toString(const EntityId& entity) const;
 
+      bool noMoreFlaws();
+
     private:
       friend class ThreatIterator;
       void handleInitialize();
