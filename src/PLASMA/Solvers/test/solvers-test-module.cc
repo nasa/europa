@@ -193,14 +193,17 @@ private:
   static bool testBasicAllocation(){
     TestEngine testEngine(true);
 
-    TiXmlElement* configXml = initXml((getTestLoadLibraryPath() + "/ComponentFactoryTest.xml").c_str());
+    TiXmlElement* configXml = 
+        initXml((getTestLoadLibraryPath() + "/ComponentFactoryTest.xml").c_str());
 
     for (TiXmlElement * child = configXml->FirstChildElement();
          child != NULL;
          child = child->NextSiblingElement()) {
 
-      ComponentFactoryMgr* cfm = (ComponentFactoryMgr*)testEngine.getComponent("ComponentFactoryMgr");
-      TestComponent * testComponent = static_cast<TestComponent*>(cfm->createInstance(*child));
+      ComponentFactoryMgr* cfm = 
+          (ComponentFactoryMgr*)testEngine.getComponent("ComponentFactoryMgr");
+      TestComponent * testComponent = 
+          static_cast<TestComponent*>(cfm->createInstance(*child));
       delete testComponent;
     }
 
@@ -1551,10 +1554,29 @@ public:
     EUROPA_runTest(testDeletedFlaw);
     EUROPA_runTest(testDeleteAfterCommit);
     EUROPA_runTest(testSingleonGuardLoop);
+    EUROPA_runTest(testNoMoreFlawsAfterAddition);
     return true;
   }
 
 private:
+  static bool testNoMoreFlawsAfterAddition() {
+    TestEngine testEngine;
+    TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SingletonLoop");
+    TiXmlElement* child = root->FirstChildElement();
+    
+    CPPUNIT_ASSERT(testEngine.playTransactions( (getTestLoadLibraryPath() + "/StaticCSP.nddl").c_str()));
+    Solver solver(testEngine.getPlanDatabase(), *child);
+    CPPUNIT_ASSERT(solver.solve());
+    CPPUNIT_ASSERT(solver.noMoreFlaws());
+
+    testEngine.getPlanDatabase()->getClient()->createVariable("int",
+                                                              IntervalIntDomain(0, 10),
+                                                              "v5");
+    CPPUNIT_ASSERT(!solver.noMoreFlaws());
+    
+    return true;
+  }
+
 
   /**
    * @brief Tests for an infinite loop when binding a singleton guard.
@@ -2096,9 +2118,131 @@ private:
   }
 };
 
+
+class FlawManagerListener : public ConstraintEngineListener {
+ public:
+  FlawManagerListener(const ConstraintEngineId& ce, FlawManager& fm) 
+      : ConstraintEngineListener(ce), m_fm(fm) {}
+  void notifyChanged(const ConstrainedVariableId& var, const DomainListener::ChangeType& change) {
+    m_fm.notifyChanged(var, change);
+  }
+ private:
+  FlawManager& m_fm;
+};
+
 class FlawManagerTests {
 public:
   static bool test() {
+    EUROPA_runTest(testUnboundVariableNoMoreFlaws);
+    EUROPA_runTest(testThreatNoMoreFlaws);
+    EUROPA_runTest(testOpenConditionNoMoreFlaws);
+    return true;
+  }
+  static bool testUnboundVariableNoMoreFlaws() {
+    TestEngine testEngine;
+    TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SingletonLoop");
+    TiXmlElement* child = root->FirstChildElement()->FirstChildElement("UnboundVariableManager");
+    Context ctx("foo");
+    UnboundVariableManager m(*child);
+
+    CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/StaticCSP.nddl").c_str()));
+    m.initialize(*child, testEngine.getPlanDatabase(), ctx.getId());
+    FlawManagerListener listener(testEngine.getConstraintEngine(), m);
+
+    CPPUNIT_ASSERT(!m.noMoreFlaws());
+    Priority p = worstCasePriority() + 1;
+    std::list<DecisionPointId> decisions;
+    for(DecisionPointId d = m.next(p); d.isValid(); d = m.next(p)) {
+      d->initialize();
+      d->execute();
+      CPPUNIT_ASSERT(testEngine.getConstraintEngine()->propagate());
+      decisions.push_front(d);
+      p = worstCasePriority() + 1;
+    }
+    CPPUNIT_ASSERT(m.noMoreFlaws());
+    
+    testEngine.getPlanDatabase()->getClient()->createVariable("int",
+                                                              IntervalIntDomain(0, 10),
+                                                              "v5");
+    CPPUNIT_ASSERT(!m.noMoreFlaws());
+
+    for(std::list<DecisionPointId>::iterator it = decisions.begin(); 
+        it != decisions.end(); ++it) {
+      delete static_cast<DecisionPoint*>(*it);
+    }
+    delete root;
+    return true;
+  }
+  static bool testThreatNoMoreFlaws() {
+    TestEngine testEngine;
+    DbClientId client = testEngine.getPlanDatabase()->getClient();
+    TiXmlElement* root = 
+        initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), 
+                "SimpleActivationSolver");
+    TiXmlElement* child = 
+        root->FirstChildElement()->FirstChildElement("ThreatManager");
+    Context ctx("SimpleTokenSolverContext");
+    ctx.put("horizonStart", 0);
+    ctx.put("horizonEnd", 100);
+    ThreatManager m(*child);
+
+    CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/Model.nddl").c_str()));
+    ObjectId t = client->createObject("PredicateRoot", "foo");
+    TokenId t0 = client->createToken("PredicateRoot.predicateD");
+    TokenId t1 = client->createToken("PredicateRoot.predicateD");
+    client->activate(t0);
+    client->activate(t1);
+
+    m.initialize(*child, testEngine.getPlanDatabase(), ctx.getId());
+    FlawManagerListener listener(testEngine.getConstraintEngine(), m);
+
+    CPPUNIT_ASSERT(!m.noMoreFlaws());
+    
+    client->constrain(t, t0, t1);
+    CPPUNIT_ASSERT(m.noMoreFlaws());
+
+    TokenId t2 = client->createToken("PredicateRoot.predicateD");
+    client->activate(t2);
+    CPPUNIT_ASSERT(!m.noMoreFlaws());
+
+    delete root;
+    return true;
+  }
+  static bool testOpenConditionNoMoreFlaws() {
+    TestEngine testEngine;
+    TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "GNATS_3196");
+    TiXmlElement* child = root->FirstChildElement()->FirstChildElement("OpenConditionManager");
+    Context ctx("foo");
+    OpenConditionManager m(*child);
+    
+    CPPUNIT_ASSERT(testEngine.playTransactions( (getTestLoadLibraryPath() + "/OpenConditionFiltering.nddl").c_str()));
+    m.initialize(*child, testEngine.getPlanDatabase(), ctx.getId());
+    FlawManagerListener listener(testEngine.getConstraintEngine(), m);
+
+
+    CPPUNIT_ASSERT(!m.noMoreFlaws());
+    Priority p = worstCasePriority() + 1;
+    std::list<DecisionPointId> decisions;
+    for(DecisionPointId d = m.next(p); d.isValid(); d = m.next(p)) {
+      d->initialize();
+      d->execute();
+      CPPUNIT_ASSERT(testEngine.getConstraintEngine()->propagate());
+      decisions.push_front(d);
+      p = worstCasePriority() + 1;
+    }
+    CPPUNIT_ASSERT(m.noMoreFlaws());
+    
+    testEngine.getPlanDatabase()->getClient()->createToken("HorizonFiltered.predicate1",
+                                                           "testToken",
+                                                           true,
+                                                           false);
+    CPPUNIT_ASSERT(!m.noMoreFlaws());
+
+    for(std::list<DecisionPointId>::iterator it = decisions.begin(); 
+        it != decisions.end(); ++it) {
+      delete static_cast<DecisionPoint*>(*it);
+    }
+    delete root;
     return true;
   }
 };

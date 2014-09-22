@@ -128,7 +128,14 @@ namespace EUROPA {
 
     std::string Solver::getLastExecutedDecision() const {return m_lastExecutedDecision;}
 
-    bool Solver::noMoreFlaws() const{return m_noFlawsFound;}
+    bool Solver::noMoreFlaws() {
+      for(FlawManagers::const_iterator it = m_flawManagers.begin(); 
+          it != m_flawManagers.end(); ++it) {
+        if(!(*it)->noMoreFlaws())
+          return false;
+      }
+      return true;
+    }
 
     const DecisionStack& Solver::getDecisionStack() const {return m_decisionStack;}
 

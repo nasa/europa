@@ -114,7 +114,10 @@ namespace EUROPA {
       condDebugMsg(!isValid(), "FlawManager:isValid", "Invalid datastructures in flaw manger.");
     }
 
-    IteratorId FlawManager::createIterator(){ return IteratorId::noId();}
+  IteratorId FlawManager::createIterator(){ 
+    checkRuntimeError(ALWAYS_FAIL, "Should never get here.");
+    return IteratorId::noId();
+  }
 
     void FlawManager::notifyRemoved(const ConstraintId& constraint) {
       // Check if it's the correct type (FlawHandler::VariableListener)

@@ -215,11 +215,9 @@ class BareTransactionDeleter {
   BareTransactionDeleter(DummyResource& res) : m_profile(NULL), m_res(&res) {}
   void operator()(Transaction* t) {
     if(m_profile != NULL) {
-      std::cout << "Removing " << t->getId() << " from a profile" << std::endl;
       m_profile->removeTransaction(t->getId());
     }
     if(m_res != NULL) {
-      std::cout << "Removing " << t->getId() << " from a resource" << std::endl;
       m_res->removeTransaction(t->getId());
     }
     delete t;
@@ -1476,52 +1474,53 @@ private:
 
 // Test that used to be in Solvers/test/solvers-test-module.cc
 class ResourceSolverTest {
-public:
-	static bool test() {
-		EUROPA_runTest(testResourceDecisionPoint);
-		EUROPA_runTest(testResourceThreatDecisionPoint);
-		EUROPA_runTest(testResourceThreatManager);
-		return true;
-	}
-private:
+ public:
+  static bool test() {
+    EUROPA_runTest(testResourceDecisionPoint);
+    EUROPA_runTest(testResourceThreatDecisionPoint);
+    EUROPA_runTest(testResourceThreatManager);
+    EUROPA_runTest(testResourceThreatManagerNoMoreFlaws);
+    return true;
+  }
+ private:
 
-	// TBS:  This tested a previous version of ResourceThreatDecisionPoint (basically a glorified ThreatDecisionPoint, which we now test here), so
-	//       there's not much value in this test anymore.
-	static bool testResourceDecisionPoint() {
+  // TBS:  This tested a previous version of ResourceThreatDecisionPoint (basically a glorified ThreatDecisionPoint, which we now test here), so
+  //       there's not much value in this test anymore.
+  static bool testResourceDecisionPoint() {
 
-		RESOURCE_DEFAULT_SETUP(ceObj, dbObj, false);
+    RESOURCE_DEFAULT_SETUP(ceObj, dbObj, false);
 
-		PlanDatabaseId db = dbObj.getId();
-		ConstraintEngineId ce = ceObj.getId();
-		DbClientId client = db->getClient();
+    PlanDatabaseId db = dbObj.getId();
+    ConstraintEngineId ce = ceObj.getId();
+    DbClientId client = db->getClient();
 
-		Reusable reusable(db, "Reusable", "myReusable", "ClosedWorldFVDetector", "IncrementalFlowProfile", 2, 2, 0);
+    Reusable reusable(db, "Reusable", "myReusable", "ClosedWorldFVDetector", "IncrementalFlowProfile", 2, 2, 0);
 
-		ReusableToken tok1(db, "Reusable.uses", IntervalIntDomain(1, 3), IntervalIntDomain(10, 12), IntervalIntDomain(1, PLUS_INFINITY),
-				IntervalDomain(1.0, 1.0), "myReusable");
+    ReusableToken tok1(db, "Reusable.uses", IntervalIntDomain(1, 3), IntervalIntDomain(10, 12), IntervalIntDomain(1, PLUS_INFINITY),
+                       IntervalDomain(1.0, 1.0), "myReusable");
 
-		ReusableToken tok2(db, "Reusable.uses", IntervalIntDomain(11, 13), IntervalIntDomain(15, 17), IntervalIntDomain(1, PLUS_INFINITY),
-				IntervalDomain(1.0, 1.0), "myReusable");
+    ReusableToken tok2(db, "Reusable.uses", IntervalIntDomain(11, 13), IntervalIntDomain(15, 17), IntervalIntDomain(1, PLUS_INFINITY),
+                       IntervalDomain(1.0, 1.0), "myReusable");
 
-		ReusableToken tok3(db, "Reusable.uses", IntervalIntDomain(11, 16), IntervalIntDomain(18, 19), IntervalIntDomain(1, PLUS_INFINITY),
-				IntervalDomain(1.0, 1.0), "myReusable");
+    ReusableToken tok3(db, "Reusable.uses", IntervalIntDomain(11, 16), IntervalIntDomain(18, 19), IntervalIntDomain(1, PLUS_INFINITY),
+                       IntervalDomain(1.0, 1.0), "myReusable");
 
-		CPPUNIT_ASSERT(ce->propagate());
-		CPPUNIT_ASSERT(reusable.hasTokensToOrder());
-		TiXmlElement dummy("");
-		SOLVERS::ThreatDecisionPoint dp1(client, tok1.getId(), dummy);
+    CPPUNIT_ASSERT(ce->propagate());
+    CPPUNIT_ASSERT(reusable.hasTokensToOrder());
+    TiXmlElement dummy("");
+    SOLVERS::ThreatDecisionPoint dp1(client, tok1.getId(), dummy);
 
-		dp1.initialize();
+    dp1.initialize();
 
-		SOLVERS::ThreatDecisionPoint dp2(client, tok2.getId(), dummy);
-		dp2.initialize();
+    SOLVERS::ThreatDecisionPoint dp2(client, tok2.getId(), dummy);
+    dp2.initialize();
 
-		SOLVERS::ThreatDecisionPoint dp3(client, tok3.getId(), dummy);
-		dp3.initialize();
+    SOLVERS::ThreatDecisionPoint dp3(client, tok3.getId(), dummy);
+    dp3.initialize();
 
-		RESOURCE_DEFAULT_TEARDOWN();
-		return true;
-	}
+    RESOURCE_DEFAULT_TEARDOWN();
+    return true;
+  }
 
   static bool testResourceThreatDecisionPoint() {
 
@@ -1849,73 +1848,116 @@ private:
   }
 
 
-	static bool testResourceThreatManager() {
+  static bool testResourceThreatManager() {
 
-		RESOURCE_DEFAULT_SETUP(ceObj, dbObj, false);
+    RESOURCE_DEFAULT_SETUP(ceObj, dbObj, false);
 
-		PlanDatabaseId db = dbObj.getId();
-		ConstraintEngineId ce = ceObj.getId();
-		DbClientId client = db->getClient();
+    PlanDatabaseId db = dbObj.getId();
+    ConstraintEngineId ce = ceObj.getId();
+    DbClientId client = db->getClient();
 
-		Reusable reusable(db, "Reusable", "myReusable", "ClosedWorldFVDetector", "IncrementalFlowProfile", 1, 1, 0);
+    Reusable reusable(db, "Reusable", "myReusable", "ClosedWorldFVDetector", "IncrementalFlowProfile", 1, 1, 0);
 
-		ReusableToken tok1(db, "Reusable.uses", IntervalIntDomain(1, 3), IntervalIntDomain(10, 12), IntervalIntDomain(1, PLUS_INFINITY),
-				IntervalDomain(1.0, 1.0), "myReusable");
+    ReusableToken tok1(db, "Reusable.uses", IntervalIntDomain(1, 3), IntervalIntDomain(10, 12), IntervalIntDomain(1, PLUS_INFINITY),
+                       IntervalDomain(1.0, 1.0), "myReusable");
 
-		ReusableToken tok2(db, "Reusable.uses", IntervalIntDomain(11, 13), IntervalIntDomain(15, 17), IntervalIntDomain(1, PLUS_INFINITY),
-				IntervalDomain(1.0, 1.0), "myReusable");
+    ReusableToken tok2(db, "Reusable.uses", IntervalIntDomain(11, 13), IntervalIntDomain(15, 17), IntervalIntDomain(1, PLUS_INFINITY),
+                       IntervalDomain(1.0, 1.0), "myReusable");
 
-		ReusableToken tok3(db, "Reusable.uses", IntervalIntDomain(11, 16), IntervalIntDomain(18, 19), IntervalIntDomain(1, PLUS_INFINITY),
-				IntervalDomain(1.0, 1.0), "myReusable");
+    ReusableToken tok3(db, "Reusable.uses", IntervalIntDomain(11, 16), IntervalIntDomain(18, 19), IntervalIntDomain(1, PLUS_INFINITY),
+                       IntervalDomain(1.0, 1.0), "myReusable");
 
-		CPPUNIT_ASSERT(ce->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
 
-		std::vector<InstantId> instants;
-		reusable.getFlawedInstants(instants);
+    std::vector<InstantId> instants;
+    reusable.getFlawedInstants(instants);
 
-		LabelStr explanation;
-		std::string earliest = "<ResourceThreatManager order=\"earliest\"><FlawHandler component=\"ResourceThreatHandler\"/></ResourceThreatManager>";
-		TiXmlElement* earliestXml = initXml(earliest);
-		ResourceThreatManager earliestManager(*earliestXml);
-                SOLVERS::Context ctx("foo");
-		earliestManager.initialize(*earliestXml, db, ctx.getId(), SOLVERS::FlawManagerId::noId());
-		CPPUNIT_ASSERT(earliestManager.betterThan(instants[0], instants[1], explanation)); //these are identical except for the time
-		CPPUNIT_ASSERT(earliestManager.betterThan(instants[1], instants[2], explanation)); //these have different levels
-		CPPUNIT_ASSERT(!earliestManager.betterThan(instants[0], instants[0], explanation));
+    LabelStr explanation;
+    std::string earliest = "<ResourceThreatManager order=\"earliest\"><FlawHandler component=\"ResourceThreatHandler\"/></ResourceThreatManager>";
+    TiXmlElement* earliestXml = initXml(earliest);
+    ResourceThreatManager earliestManager(*earliestXml);
+    SOLVERS::Context ctx("foo");
+    earliestManager.initialize(*earliestXml, db, ctx.getId(), SOLVERS::FlawManagerId::noId());
+    CPPUNIT_ASSERT(earliestManager.betterThan(instants[0], instants[1], explanation)); //these are identical except for the time
+    CPPUNIT_ASSERT(earliestManager.betterThan(instants[1], instants[2], explanation)); //these have different levels
+    CPPUNIT_ASSERT(!earliestManager.betterThan(instants[0], instants[0], explanation));
 
-		std::string latest = "<ResourceThreatManager order=\"latest\"><FlawHandler component=\"ResourceThreatHandler\"/></ResourceThreatManager>";
-		TiXmlElement* latestXml = initXml(latest);
-		ResourceThreatManager latestManager(*latestXml);
-		latestManager.initialize(*latestXml, db, ctx.getId(), SOLVERS::FlawManagerId::noId());
-		CPPUNIT_ASSERT(latestManager.betterThan(instants[3], instants[2], explanation));
-		CPPUNIT_ASSERT(latestManager.betterThan(instants[2], instants[1], explanation));
-		CPPUNIT_ASSERT(!latestManager.betterThan(instants[0], instants[0], explanation));
+    std::string latest = "<ResourceThreatManager order=\"latest\"><FlawHandler component=\"ResourceThreatHandler\"/></ResourceThreatManager>";
+    TiXmlElement* latestXml = initXml(latest);
+    ResourceThreatManager latestManager(*latestXml);
+    latestManager.initialize(*latestXml, db, ctx.getId(), SOLVERS::FlawManagerId::noId());
+    CPPUNIT_ASSERT(latestManager.betterThan(instants[3], instants[2], explanation));
+    CPPUNIT_ASSERT(latestManager.betterThan(instants[2], instants[1], explanation));
+    CPPUNIT_ASSERT(!latestManager.betterThan(instants[0], instants[0], explanation));
 
-		std::string most = "<ResourceThreatManager order=\"most\"><FlawHandler component=\"ResourceThreatHandler\"/></ResourceThreatManager>";
-		TiXmlElement* mostXml = initXml(most);
-		ResourceThreatManager mostManager(*mostXml);
-		mostManager.initialize(*mostXml, db, ctx.getId(), SOLVERS::FlawManagerId::noId());
-		CPPUNIT_ASSERT(mostManager.betterThan(instants[0], instants[1], explanation));
-		CPPUNIT_ASSERT(!mostManager.betterThan(instants[1], instants[0], explanation));
-		CPPUNIT_ASSERT(!mostManager.betterThan(instants[1], instants[2], explanation));
-		CPPUNIT_ASSERT(!mostManager.betterThan(instants[3], instants[4], explanation));
+    std::string most = "<ResourceThreatManager order=\"most\"><FlawHandler component=\"ResourceThreatHandler\"/></ResourceThreatManager>";
+    TiXmlElement* mostXml = initXml(most);
+    ResourceThreatManager mostManager(*mostXml);
+    mostManager.initialize(*mostXml, db, ctx.getId(), SOLVERS::FlawManagerId::noId());
+    CPPUNIT_ASSERT(mostManager.betterThan(instants[0], instants[1], explanation));
+    CPPUNIT_ASSERT(!mostManager.betterThan(instants[1], instants[0], explanation));
+    CPPUNIT_ASSERT(!mostManager.betterThan(instants[1], instants[2], explanation));
+    CPPUNIT_ASSERT(!mostManager.betterThan(instants[3], instants[4], explanation));
 
-		std::string least = "<ResourceThreatManager order=\"least\"><FlawHandler component=\"ResourceThreatHandler\"/></ResourceThreatManager>";
-		TiXmlElement* leastXml = initXml(least);
-		ResourceThreatManager leastManager(*leastXml);
-		leastManager.initialize(*leastXml, db, ctx.getId(), SOLVERS::FlawManagerId::noId());
-		CPPUNIT_ASSERT(!leastManager.betterThan(instants[0], instants[1], explanation));
-		CPPUNIT_ASSERT(leastManager.betterThan(instants[1], instants[0], explanation));
-		CPPUNIT_ASSERT(!leastManager.betterThan(instants[3], instants[4], explanation));
-		CPPUNIT_ASSERT(!leastManager.betterThan(instants[4], instants[3], explanation));
+    std::string least = "<ResourceThreatManager order=\"least\"><FlawHandler component=\"ResourceThreatHandler\"/></ResourceThreatManager>";
+    TiXmlElement* leastXml = initXml(least);
+    ResourceThreatManager leastManager(*leastXml);
+    leastManager.initialize(*leastXml, db, ctx.getId(), SOLVERS::FlawManagerId::noId());
+    CPPUNIT_ASSERT(!leastManager.betterThan(instants[0], instants[1], explanation));
+    CPPUNIT_ASSERT(leastManager.betterThan(instants[1], instants[0], explanation));
+    CPPUNIT_ASSERT(!leastManager.betterThan(instants[3], instants[4], explanation));
+    CPPUNIT_ASSERT(!leastManager.betterThan(instants[4], instants[3], explanation));
 
-		//can't test upper/lower with reusables
-		delete leastXml;
-		delete mostXml;
-		delete latestXml;
-		delete earliestXml;
-		return true;
-	}
+    //can't test upper/lower with reusables
+    delete leastXml;
+    delete mostXml;
+    delete latestXml;
+    delete earliestXml;
+    return true;
+  }
+
+  static bool testResourceThreatManagerNoMoreFlaws() {
+    RESOURCE_DEFAULT_SETUP(ceObj, dbObj, false);
+
+    PlanDatabaseId db = dbObj.getId();
+    ConstraintEngineId ce = ceObj.getId();
+    DbClientId client = db->getClient();
+
+    Reusable reusable(db, "Reusable", "myReusable", "ClosedWorldFVDetector", "IncrementalFlowProfile", 1, 1, 0);
+
+    ReusableToken tok1(db, "Reusable.uses", 
+                       IntervalIntDomain(1, 3), IntervalIntDomain(10, 12),
+                       IntervalIntDomain(1, PLUS_INFINITY),
+                       IntervalDomain(1.0, 1.0), "myReusable");
+
+    ReusableToken tok2(db, "Reusable.uses", 
+                       IntervalIntDomain(11, 13), IntervalIntDomain(15, 17),
+                       IntervalIntDomain(1, PLUS_INFINITY),
+                       IntervalDomain(1.0, 1.0), "myReusable");
+    CPPUNIT_ASSERT(ce->propagate());
+
+
+    std::string earliest = "<ResourceThreatManager order=\"earliest\"><FlawHandler component=\"ResourceThreatHandler\"/></ResourceThreatManager>";
+    TiXmlElement* earliestXml = initXml(earliest);
+    ResourceThreatManager earliestManager(*earliestXml);
+    SOLVERS::Context ctx("foo");
+    earliestManager.initialize(*earliestXml, db, ctx.getId(), SOLVERS::FlawManagerId::noId());
+    
+    CPPUNIT_ASSERT(!earliestManager.noMoreFlaws());
+    client->constrain(reusable.getId(), tok1.getId(), tok2.getId());
+    CPPUNIT_ASSERT(ce->propagate());
+    CPPUNIT_ASSERT(earliestManager.noMoreFlaws());
+
+    ReusableToken tok3(db, "Reusable.uses", 
+                       IntervalIntDomain(16, 18), IntervalIntDomain(20, 30),
+                       IntervalIntDomain(1, PLUS_INFINITY),
+                       IntervalDomain(1.0, 1.0), "myReusable");
+    CPPUNIT_ASSERT(ce->propagate());
+    
+    CPPUNIT_ASSERT(!earliestManager.noMoreFlaws());
+    delete earliestXml;
+    return true;
+  }
 };
 
 void ResourceModuleTests::cppSetup(void)

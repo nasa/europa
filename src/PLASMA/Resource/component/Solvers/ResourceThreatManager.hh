@@ -35,6 +35,7 @@ namespace EUROPA {
       virtual void notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType){}
       virtual void notifyAdded(const TokenId& token) {}
       virtual void notifyRemoved(const TokenId& token) {}
+      bool noMoreFlaws();
 
     protected:
     private:
