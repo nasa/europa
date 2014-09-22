@@ -265,10 +265,10 @@ private:
 
     ce.propagate();
 
-    Transaction trans1(t1.getId(), q1.getId(), false);
-    Transaction trans2(t2.getId(), q2.getId(), true);
-    Transaction trans3(t3.getId(), q3.getId(), true);
-    Transaction trans4(t4.getId(), q4.getId(), false);
+    Transaction trans1(t1.getId(),  q1.getId(),  false, EntityId::noId());
+    Transaction trans2(t2.getId(),  q2.getId(),  true, EntityId::noId());
+    Transaction trans3(t3.getId(),  q3.getId(),  true, EntityId::noId());
+    Transaction trans4(t4.getId(),  q4.getId(),  false, EntityId::noId());
 
     profile.addTransaction( trans1.getId() );
     profile.addTransaction( trans2.getId() );
@@ -309,10 +309,10 @@ private:
     Variable<IntervalDomain> q3( ce.getId(), IntervalDomain(1, 1), true, "q3" );
     Variable<IntervalDomain> q4( ce.getId(), IntervalDomain(1, 1), true, "q4" );
 
-    Transaction trans1( t1.getId(), q1.getId(), false);
-    Transaction trans2( t2.getId(), q2.getId(), true );
-    Transaction trans3( t3.getId(), q3.getId(), true);
-    Transaction trans4( t4.getId(), q4.getId(), false);
+    Transaction trans1( t1.getId(),  q1.getId(),  false, EntityId::noId());
+    Transaction trans2( t2.getId(),  q2.getId(),  true , EntityId::noId());
+    Transaction trans3( t3.getId(),  q3.getId(),  true, EntityId::noId());
+    Transaction trans4( t4.getId(),  q4.getId(),  false, EntityId::noId());
 
     profile.addTransaction( trans1.getId() );
     profile.addTransaction( trans2.getId() );
@@ -334,8 +334,8 @@ private:
     Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(1, 1), true, "q1" );
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(1, 1), true, "q2" );
 
-    Transaction trans1( t1.getId(), q1.getId(), false);
-    Transaction trans2( t2.getId(), q2.getId(), true );
+    Transaction trans1( t1.getId(),  q1.getId(),  false, EntityId::noId());
+    Transaction trans2( t2.getId(),  q2.getId(),  true , EntityId::noId());
 
     profile.addTransaction( trans1.getId() );
     profile.addTransaction( trans2.getId() );
@@ -356,9 +356,9 @@ private:
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(1, 2), true, "q2" );
     Variable<IntervalDomain> q3( ce.getId(), IntervalDomain(1, 2), true, "q3" );
 
-    Transaction trans1( t1.getId(), q1.getId(), false);
-    Transaction trans2( t2.getId(), q2.getId(), true );
-    Transaction trans3( t3.getId(), q3.getId(), false );
+    Transaction trans1( t1.getId(),  q1.getId(),  false, EntityId::noId());
+    Transaction trans2( t2.getId(),  q2.getId(),  true , EntityId::noId());
+    Transaction trans3( t3.getId(),  q3.getId(),  false , EntityId::noId());
 
     profile.addTransaction( trans1.getId() );
     profile.addTransaction( trans2.getId() );
@@ -380,9 +380,9 @@ private:
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(1, 2), true, "q2" );
     Variable<IntervalDomain> q3( ce.getId(), IntervalDomain(1, 2), true, "q3" );
 
-    Transaction trans1( t1.getId(), q1.getId(), false);
-    Transaction trans2( t2.getId(), q2.getId(), true );
-    Transaction trans3( t3.getId(), q3.getId(), false );
+    Transaction trans1( t1.getId(),  q1.getId(),  false, EntityId::noId());
+    Transaction trans2( t2.getId(),  q2.getId(),  true , EntityId::noId());
+    Transaction trans3( t3.getId(),  q3.getId(),  false , EntityId::noId());
 
     profile.addTransaction( trans1.getId() );
     profile.addTransaction( trans2.getId() );
@@ -404,8 +404,8 @@ private:
     Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(1, 1), true, "q1" );
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(1, 1), true, "q2" );
 
-    Transaction trans1( t1.getId(), q1.getId(), false);
-    Transaction trans2( t2.getId(), q2.getId(), true );
+    Transaction trans1( t1.getId(),  q1.getId(),  false, EntityId::noId());
+    Transaction trans2( t2.getId(),  q2.getId(),  true , EntityId::noId());
 
     EqualConstraint c0(LabelStr("concurrent"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), t2.getId()));
 
@@ -453,10 +453,10 @@ private:
     Variable<IntervalDomain> q3( ce.getId(), IntervalDomain(1, 2), true, "q3" );
     Variable<IntervalDomain> q4( ce.getId(), IntervalDomain(1, 2), true, "q4" );
 
-    Transaction trans1( t1.getId(), q1.getId(), false);
-    Transaction trans2( t2.getId(), q2.getId(), true );
-    Transaction trans3( t3.getId(), q3.getId(), false);
-    Transaction trans4( t4.getId(), q4.getId(), true );
+    Transaction trans1( t1.getId(),  q1.getId(),  false, EntityId::noId());
+    Transaction trans2( t2.getId(),  q2.getId(),  true , EntityId::noId());
+    Transaction trans3( t3.getId(),  q3.getId(),  false, EntityId::noId());
+    Transaction trans4( t4.getId(),  q4.getId(),  true , EntityId::noId());
 
     profile.addTransaction( trans1.getId() );
     profile.addTransaction( trans2.getId() );
@@ -606,8 +606,8 @@ private:
     Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(2, 2), true, "q1" );
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(1, 2), true, "q2" );
 
-    Transaction trans1( t1.getId(), q1.getId(), false);
-    Transaction trans2( t2.getId(), q2.getId(), true );
+    Transaction trans1( t1.getId(),  q1.getId(),  false, EntityId::noId());
+    Transaction trans2( t2.getId(),  q2.getId(),  true , EntityId::noId());
 
     EqualConstraint c0(LabelStr("concurrent"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), t2.getId()));
 
@@ -630,8 +630,8 @@ private:
     Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(1, 2), true, "q1" );
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(2, 2), true, "q2" );
 
-    Transaction trans1( t1.getId(), q1.getId(), false);
-    Transaction trans2( t2.getId(), q2.getId(), true );
+    Transaction trans1( t1.getId(),  q1.getId(),  false, EntityId::noId());
+    Transaction trans2( t2.getId(),  q2.getId(),  true , EntityId::noId());
 
     EqualConstraint c0(LabelStr("concurrent"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), t2.getId()));
 
@@ -659,10 +659,10 @@ private:
     Variable<IntervalDomain> q3( ce.getId(), IntervalDomain(1, 1), true, "q3" );
     Variable<IntervalDomain> q4( ce.getId(), IntervalDomain(1, 1), true, "q4" );
 
-    Transaction trans1( t1.getId(), q1.getId(), true);
-    Transaction trans2( t2.getId(), q2.getId(), false );
-    Transaction trans3( t3.getId(), q3.getId(), true);
-    Transaction trans4( t4.getId(), q4.getId(), false );
+    Transaction trans1( t1.getId(),  q1.getId(),  true, EntityId::noId());
+    Transaction trans2( t2.getId(),  q2.getId(),  false , EntityId::noId());
+    Transaction trans3( t3.getId(),  q3.getId(),  true, EntityId::noId());
+    Transaction trans4( t4.getId(),  q4.getId(),  false , EntityId::noId());
 
     profile.addTransaction( trans1.getId() );
     profile.addTransaction( trans2.getId() );
@@ -696,31 +696,31 @@ private:
 
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain(0,0), true, "t1" );
     Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(3, 3), true, "q1" );
-    Transaction trans1( t1.getId(), q1.getId(), true);
+    Transaction trans1( t1.getId(),  q1.getId(),  true, EntityId::noId());
 
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain(10, 10), true, "t2" );
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(3, 3), true, "q2" );
-    Transaction trans2( t2.getId(), q2.getId(), false );
+    Transaction trans2( t2.getId(),  q2.getId(),  false , EntityId::noId());
 
     LessThanEqualConstraint c0(LabelStr("precedes"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), t2.getId()));
 
     Variable<IntervalIntDomain> t3( ce.getId(), IntervalIntDomain(10, 10), true, "t3" );
     Variable<IntervalDomain> q3( ce.getId(), IntervalDomain(2, 2), true, "q3" );
-    Transaction trans3( t3.getId(), q3.getId(), true);
+    Transaction trans3( t3.getId(),  q3.getId(),  true, EntityId::noId());
 
     Variable<IntervalIntDomain> t4( ce.getId(), IntervalIntDomain(100, 100), true, "t4" );
     Variable<IntervalDomain> q4( ce.getId(), IntervalDomain(2, 2), true, "q4" );
-    Transaction trans4( t4.getId(), q4.getId(), false );
+    Transaction trans4( t4.getId(),  q4.getId(),  false , EntityId::noId());
 
     LessThanEqualConstraint c1(LabelStr("precedes"), LabelStr("Temporal"), ce.getId() , makeScope(t3.getId(), t4.getId()));
 
     Variable<IntervalIntDomain> t5( ce.getId(), IntervalIntDomain(11, 100), true, "t5" );
     Variable<IntervalDomain> q5( ce.getId(), IntervalDomain(3, 3), true, "q5" );
-    Transaction trans5( t5.getId(), q5.getId(), true);
+    Transaction trans5( t5.getId(),  q5.getId(),  true, EntityId::noId());
 
     Variable<IntervalIntDomain> t6( ce.getId(), IntervalIntDomain(12, 100), true, "t6" );
     Variable<IntervalDomain> q6( ce.getId(), IntervalDomain(3, 3), true, "q6" );
-    Transaction trans6( t6.getId(), q6.getId(), false );
+    Transaction trans6( t6.getId(),  q6.getId(),  false , EntityId::noId());
 
     LessThanEqualConstraint c2(LabelStr("precedes"), LabelStr("Temporal"), ce.getId() , makeScope(t5.getId(), t6.getId()));
 
@@ -763,8 +763,8 @@ private:
     Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(0, PLUS_INFINITY), true, "q1" );
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(0, PLUS_INFINITY), true, "q2" );
 
-    Transaction trans1( t1.getId(), q1.getId(), true);
-    Transaction trans2( t2.getId(), q2.getId(), false );
+    Transaction trans1( t1.getId(),  q1.getId(),  true, EntityId::noId());
+    Transaction trans2( t2.getId(),  q2.getId(),  false , EntityId::noId());
 
     LessThanEqualConstraint c1(LabelStr("precedes"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), t2.getId()));
 
@@ -800,8 +800,8 @@ private:
     Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(0, PLUS_INFINITY), true, "q1" );
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(0, PLUS_INFINITY), true, "q2" );
 
-    Transaction trans1( t1.getId(), q1.getId(), true);
-    Transaction trans2( t2.getId(), q2.getId(), false );
+    Transaction trans1( t1.getId(),  q1.getId(),  true, EntityId::noId());
+    Transaction trans2( t2.getId(),  q2.getId(),  false , EntityId::noId());
 
 
     Variable<IntervalIntDomain> distance( ce.getId(), IntervalIntDomain( 1, PLUS_INFINITY ), true, "distance" );
@@ -873,9 +873,9 @@ private:
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(3, 3), true, "q2" );
     Variable<IntervalDomain> q3( ce.getId(), IntervalDomain(3, 3), true, "q3" );
 
-    Transaction trans1( t1.getId(), q1.getId(), true);
-    Transaction trans2( t2.getId(), q2.getId(), false );
-    Transaction trans3( t3.getId(), q3.getId(), true );
+    Transaction trans1( t1.getId(),  q1.getId(),  true, EntityId::noId());
+    Transaction trans2( t2.getId(),  q2.getId(),  false , EntityId::noId());
+    Transaction trans3( t3.getId(),  q3.getId(),  true , EntityId::noId());
 
     Variable<IntervalIntDomain> distance( ce.getId(), IntervalIntDomain( 1, PLUS_INFINITY ), true, "distance" );
     AddEqualConstraint c1(LabelStr("temporalDistance"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), distance.getId(), t2.getId()));
@@ -907,7 +907,7 @@ private:
 
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 0, 10 ), true, "t1" );
     Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(3, 3), true, "q1" );
-    Transaction trans1( t1.getId(), q1.getId(), true);
+    Transaction trans1( t1.getId(),  q1.getId(),  true, EntityId::noId());
 
     profile.addTransaction( trans1.getId() );
 
@@ -939,7 +939,7 @@ private:
 
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( 5, 15 ), true, "t2" );
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(3, 3), true, "q2" );
-    Transaction trans2( t2.getId(), q2.getId(), true );
+    Transaction trans2( t2.getId(),  q2.getId(),  true , EntityId::noId());
 
     profile.addTransaction( trans2.getId() );
 
@@ -974,7 +974,7 @@ private:
 
     Variable<IntervalIntDomain> t3( ce.getId(), IntervalIntDomain( 20, 25  ), true, "t3" );
     Variable<IntervalDomain> q3( ce.getId(), IntervalDomain(3, 3), true, "q3" );
-    Transaction trans3( t3.getId(), q3.getId(), true );
+    Transaction trans3( t3.getId(),  q3.getId(),  true , EntityId::noId());
 
     profile.addTransaction( trans3.getId() );
 
@@ -1009,7 +1009,7 @@ private:
 
     Variable<IntervalIntDomain> t4( ce.getId(), IntervalIntDomain(-10, 0 ), true, "t4" );
     Variable<IntervalDomain> q4( ce.getId(), IntervalDomain(3, 3), true, "q4" );
-    Transaction trans4( t4.getId(), q4.getId(), true );
+    Transaction trans4( t4.getId(),  q4.getId(),  true , EntityId::noId());
 
     profile.addTransaction( trans4.getId() );
 
@@ -1061,10 +1061,10 @@ private:
     Variable<IntervalDomain> q3( ce.getId(), IntervalDomain(1, 1), true, "q3" );
     Variable<IntervalDomain> q4( ce.getId(), IntervalDomain(1, 1), true, "q4" );
 
-    Transaction trans1( t1.getId(), q1.getId(), false);
-    Transaction trans2( t2.getId(), q2.getId(), true );
-    Transaction trans3( t3.getId(), q3.getId(), true);
-    Transaction trans4( t4.getId(), q4.getId(), false);
+    Transaction trans1( t1.getId(),  q1.getId(),  false, EntityId::noId());
+    Transaction trans2( t2.getId(),  q2.getId(),  true , EntityId::noId());
+    Transaction trans3( t3.getId(),  q3.getId(),  true, EntityId::noId());
+    Transaction trans4( t4.getId(),  q4.getId(),  false, EntityId::noId());
 
     profile.addTransaction( trans1.getId() );
     profile.addTransaction( trans2.getId() );

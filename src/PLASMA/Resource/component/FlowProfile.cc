@@ -52,8 +52,10 @@ namespace EUROPA
       Variable<IntervalIntDomain> * dummy4 =
     	  new Variable<IntervalIntDomain>( db->getConstraintEngine(), IntervalIntDomain(0, 0));
 
-      m_dummySourceTransaction = ( new Transaction(dummy1->getId(), dummy2->getId(), false ) )->getId();
-      m_dummySinkTransaction = ( new Transaction(dummy3->getId(), dummy4->getId(), false) )->getId();
+      m_dummySourceTransaction = 
+          (new Transaction(dummy1->getId(), dummy2->getId(), false, EntityId::noId()))->getId();
+      m_dummySinkTransaction = 
+          (new Transaction(dummy3->getId(), dummy4->getId(), false, EntityId::noId()))->getId();
 
       initializeGraphs<FlowProfileGraphImpl>();
     }

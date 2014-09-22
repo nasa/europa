@@ -29,7 +29,8 @@ namespace EUROPA {
        * @param isConsumer Because all transactions have positive quantities, it is necessary to indicate that a transaction is
        *  consuming the resource in some way other than a negative quantity.  This flag is what indicates it.
        */
-      Transaction(ConstrainedVariableId time, ConstrainedVariableId quantity, bool isConsumer, EntityId owner=EntityId::noId());
+      Transaction(ConstrainedVariableId time, ConstrainedVariableId quantity, 
+                  bool isConsumer, EntityId owner);
       ~Transaction();
 
       /**

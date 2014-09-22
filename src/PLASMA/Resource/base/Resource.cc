@@ -60,19 +60,18 @@ namespace EUROPA {
 	{
 	}
 
-	Resource::~Resource()
-	{
-		for(std::map<TransactionId, TokenId>::const_iterator it = m_transactionsToTokens.begin(); it != m_transactionsToTokens.end();
-				++it) {
-			if ((it->first->getOwner()).isNoId())
-				delete (Transaction*) it->first;
-		}
-
-		delete (Profile*) m_profile;
-		delete (ExplicitProfile*) m_limitProfile;
-		delete (ExplicitProfile*) m_capacityProfile;
-		delete (FVDetector*) m_detector;
-	}
+Resource::~Resource() {
+  for(std::map<TransactionId, TokenId>::const_iterator it = m_transactionsToTokens.begin();
+      it != m_transactionsToTokens.end(); ++it) {
+    if ((it->first->getOwner()).isNoId() || (it->first->getOwner() == getId()))
+      delete (Transaction*) it->first;
+  }
+  
+  delete (Profile*) m_profile;
+  delete (ExplicitProfile*) m_limitProfile;
+  delete (ExplicitProfile*) m_capacityProfile;
+  delete (FVDetector*) m_detector;
+}
 
 	void Resource::init(const edouble initCapacityLb, const edouble initCapacityUb,
 			const edouble lowerLimit, const edouble upperLimit,
