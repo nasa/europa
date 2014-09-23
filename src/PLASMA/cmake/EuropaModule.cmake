@@ -275,51 +275,46 @@ macro(declare_module name root_srcs base_srcs component_srcs test_srcs module_de
     FILES_MATCHING PATTERN "*.hh" PATTERN "*.h")
 endmacro(declare_module)
 
-function(unjar target jar dest_dir classes)
+function(list_jar jar contents)
+  set(jar_files "")
+  set(jar_files_ndir "")
+  set(jar_files_str "")
+  # message(STATUS ${Java_JAR_EXECUTABLE} tf ${jar})
   execute_process(
     COMMAND ${Java_JAR_EXECUTABLE} tf ${jar}
     OUTPUT_VARIABLE jar_files_str
     RESULT_VARIABLE rv)
   string(REPLACE "\n" ";" jar_files_ndir ${jar_files_str})
-  
 
-  set(jar_files "")
-  set(class_files "")
-  foreach(f ${jar_files_ndir})
-    # set(fname "${dest_dir}/${f}")
-    set(fname "${f}")
-    list(APPEND jar_files ${fname})
-    string(REGEX MATCH ".class$" classfile ${fname})
-    #message(STATUS "File ${fname}")
-    if(classfile)
-      #message(STATUS "Class!")
-      string(REPLACE "\$" "\$\$" fname ${fname})
-      list(APPEND class_files ${fname})
-    endif(classfile)
-  endforeach(f)
-  set(classes ${class_files} PARENT_SCOPE)
-  #message(STATUS "Classes: ${classes}")
-  list(LENGTH class_files class_count)
-  if(class_count GREATER 0)
-    add_custom_command(OUTPUT ${class_files}
-      COMMAND ${Java_JAR_EXECUTABLE}
-      xf ${jar};
-      #touch ${target}
-      WORKING_DIRECTORY ${dest_dir}
-      )
-    else()
-    add_custom_command(OUTPUT ${jar_files}
-      COMMAND ${Java_JAR_EXECUTABLE}
-      xf ${jar};
-      touch ${target}
-      WORKING_DIRECTORY ${dest_dir}
-      )
-    endif(class_count GREATER 0)
+  foreach(fname ${jar_files_ndir})
+    get_filename_component(n ${fname} NAME)
+    # message(STATUS ${n})
+    if(NOT "${n}" STREQUAL "")
+      # message(STATUS ${n})
+      list(APPEND jar_files ${fname})
+    endif(NOT "${n}" STREQUAL "")
+  endforeach(fname)
+  list(REMOVE_ITEM jar_files "META-INF/MANIFEST.MF")
+  set(${contents} ${jar_files} PARENT_SCOPE)
 
-  # set(all_classes "")
-  # foreach(f ${class_files})
-    # string(REPLACE "\$" "\$\$" g ${f})
-    #list(APPEND all_classes ${g})
-  #endforeach(f)
-  #set(classes ${all_classes} PARENT_SCOPE)
+  # list(REMOVE_ITEM jar_files_ndir "META-INF/")
+  # list(REMOVE_ITEM jar_files_ndir "META-INF/MANIFEST.MF")
+  # set(${contents} ${jar_files_ndir} PARENT_SCOPE)
+endfunction(list_jar)
+
+function(unjar target jar dest_dir contents)
+  set(jar_contents "")
+
+  list_jar(${jar} jar_contents)
+
+  # message(STATUS ${jar_contents})
+  set(${contents} ${jar_contents} PARENT_SCOPE)
+  add_custom_target(${target})
+  add_custom_command(
+    TARGET ${target}
+    COMMAND ${Java_JAR_EXECUTABLE}
+    xf ${jar}
+    WORKING_DIRECTORY ${dest_dir}
+    )
+
 endfunction(unjar)

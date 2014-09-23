@@ -80,7 +80,6 @@ add_jar(PSEngineGenerated
 include_directories(${ANTLR_INCLUDE_DIR})
 include_directories(${JNI_INCLUDE_DIRS})
 swig_add_module(PSEngine java base/PSEngine.i)
-message(STATUS "!! ${System_FULL_DEPENDENCIES}")
 foreach(dep ${internal_dependencies})
   add_common_module_include_dep(PSEngine ${dep})
   target_link_libraries(PSEngine "${dep}${EUROPA_SUFFIX}")

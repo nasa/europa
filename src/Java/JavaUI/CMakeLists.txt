@@ -16,9 +16,10 @@ set(libjars   lib/bsh-2.0b4.jar
 
 foreach(jar ${libjars})
   set(classes "")
-  unjar(${jar}_unjarred ${CMAKE_CURRENT_SOURCE_DIR}/${jar} temp classes)
-#  message(STATUS ${classes})
-  list(APPEND jarclasses ${classes})
+  get_filename_component(jarname ${jar} NAME)
+  unjar(${jarname}_unjarred ${CMAKE_CURRENT_SOURCE_DIR}/${jar} temp contents)
+  # message(STATUS ${classes})
+  list(APPEND jarcontents ${contents})
 endforeach(jar)
 
 add_jar(PSUISwing
@@ -110,31 +111,26 @@ add_jar(PSUISwing
   MANIFEST
   ${CMAKE_CURRENT_SOURCE_DIR}/META-INF/MANIFEST.SWING
   )
-# add_dependencies(PSUISwing ${jarclasses})
+foreach(f ${libjars})
+  get_filename_component(jarname ${f} NAME)
+  add_dependencies(PSUISwing ${jarname}_unjarred)
+endforeach(f)
 # foreach(f ${jarclasses})
-#   add_custom_command(TARGET PSUISwing
-#     POST_BUILD #?
-#     COMMAND
-#     ${Java_JAR_EXECUTABLE} -uf PSUISwing.jar -C ${CMAKE_CURRENT_BINARY_DIR}/temp ${f}
-#     #WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/temp
-#     )
+#   add_dependencies(PSUISwing ${CMAKE_CURRENT_BINARY_DIR}/temp/${f})
 # endforeach(f)
-# add_custom_command(TARGET PSUISwing
-#   POST_BUILD #?
-#   COMMAND
-#   ${Java_JAR_EXECUTABLE} -uf PSUISwing.jar -C ${CMAKE_CURRENT_BINARY_DIR}/temp ${jarclasses}
-#   #WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/temp
-#   )
-#string(REPLACE ";" "\n" classes_with_newlines ${jarclasses})
-foreach(f ${jarclasses})
+# add_dependencies(PSUISwing ${jarclasses})
+
+file(REMOVE PSEngineAdditionalClasses)
+foreach(f ${jarcontents})
   file(APPEND PSEngineAdditionalClasses "${f}\n")
 endforeach(f)
-#file(WRITE PSEngineAdditionalClasses ${jarclasses})
+
 add_custom_command(TARGET PSUISwing
   POST_BUILD #?
   COMMAND
   ${Java_JAR_EXECUTABLE} -uf PSUISwing.jar -C ${CMAKE_CURRENT_BINARY_DIR}/temp .
   #WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/temp
 )
+
 
 install_jar(PSUISwing ${EUROPA_ROOT}/dist/europa)
