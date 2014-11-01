@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 /**
  * Java version of Antlr3 AST node as passed through verbose string
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 public class AstNode {
@@ -27,7 +27,7 @@ public class AstNode {
 	/**
 	 * Read from the string/offset. Expect to see
 	 * "text":token-type:"file":line:offset-in-line or "text":token-type
-	 * 
+	 *
 	 * @return offset past this node
 	 */
 	public int readNodeFrom(String astString, int offset) {

@@ -53,15 +53,15 @@ public class PSDesktop
 //    protected NddlAshInterpreter nddlInterpreter_;
 	protected JConsole bshConsole_;
     protected Interpreter bshInterpreter_;
-    
+
 	protected static String debugMode_="g";
 	protected static String bshFile_=null;
 
 	public static void main(String[] args)
-	{	
+	{
 		try {
 			String debugMode = args[0];
-			PSUtil.loadLibraries(debugMode);	   
+			PSUtil.loadLibraries(debugMode);
 
 			PSEngine engine = PSEngine.makeInstance();
 			engine.start();
@@ -72,39 +72,39 @@ public class PSDesktop
 		}
     	catch (Exception e) {
     		e.printStackTrace();
-    		Runtime.getRuntime().exit(-1);    
+    		Runtime.getRuntime().exit(-1);
     	}
 	}
-	
-    static class ShutdownHook extends Thread 
+
+    static class ShutdownHook extends Thread
     {
 	    public ShutdownHook()
 	    {
 	        super("ShutdownHook");
 	    }
-	    
-	    public void run() 
+
+	    public void run()
 	    {
 	        PSDesktop.getInstance().getPSEngine().shutdown();
 	    }
-    }	  
+    }
 
     public String getLibsMode() { return debugMode_; }
-	
+
     public static PSDesktop getInstance()
     {
     	if (instance_ == null)
     		instance_ = makeInstance(PSEngine.makeInstance(),new String[]{"g",null});
-    	
+
     	return instance_;
     }
-    
+
 	public static Map<String,String> parseArgs(String args[])
 	{
 		Map<String,String> retval = new HashMap<String,String>();
 		String debugMode = "g";
-		String bshFile = null; 
-		
+		String bshFile = null;
+
 		if (args.length > 0)
  		    debugMode = args[0];
 		if ((args.length > 1) && (args[1].length()>0))
@@ -112,41 +112,41 @@ public class PSDesktop
 
 		retval.put("debugMode", debugMode);
 		retval.put("bshFile",bshFile);
-		
+
 		return retval;
 	}
-	
+
 	public static PSDesktop makeInstance(PSEngine pse,String args[])
 	{
-		if (instance_ != null) 
+		if (instance_ != null)
 			throw new RuntimeException("PSDesktop is a singleton");
 
 		init(args);
         instance_ = new PSDesktop(pse);
-        
+
         return instance_;
  	}
 
    public static void init(String[] args)
-    {   
-        init(parseArgs(args));    
+    {
+        init(parseArgs(args));
     }
-    
+
 	public static void init(Map<String,String> args)
 	{
 		debugMode_ = args.get("debugMode");
-		bshFile_ = args.get("bshFile");		
+		bshFile_ = args.get("bshFile");
 	}
-	
+
 	protected PSDesktop(PSEngine pse)
 	{
 		assert (pse != null);
 	    psEngine_ = pse;
 //        nddlInterpreter_ = new NddlAshInterpreter(psEngine_);
         bshConsole_ = new JConsole();
-        bshInterpreter_ = new Interpreter(bshConsole_);                	    
+        bshInterpreter_ = new Interpreter(bshConsole_);
 	}
-		
+
     public PSEngine getPSEngine() { return psEngine_; }
 
     public void runUI()
@@ -236,7 +236,7 @@ public class PSDesktop
             throw new RuntimeException(e);
         }
     }
-    
+
     protected void registerBshVariables()
     {
         addBshVariable("desktop",this);
@@ -247,10 +247,10 @@ public class PSDesktop
     {
     	PSSolver solver = getPSEngine().createSolver(config);
     	solver.configure(horizonStart,horizonEnd);
-    	
+
     	return solver;
     }
-        
+
     public PSSolverDialog makeSolverDialog(PSSolver solver)
     {
     	try {
@@ -259,7 +259,7 @@ public class PSDesktop
     		PSSolverDialog d = new PSSolverDialog(this,solver);
     		frame.getContentPane().add(new JScrollPane(d));
     		frame.setSize(675,375);
-    		
+
     		return d;
     	}
     	catch (Exception e)
@@ -284,7 +284,7 @@ public class PSDesktop
     }
 
     public void showTokens(String title,PSTokenList l)
-    { 	
+    {
         List<Object> columnNames = new ArrayList<Object>();
         List<Object> data = new ArrayList<Object>();
         columnNames.add("Key");
@@ -308,12 +308,12 @@ public class PSDesktop
        	 }
        	 data.add(row);
         }
-        
+
 
     	JInternalFrame frame = makeNewFrame(title);
    	    JTable table = new JTable(new Util.MatrixTableModel(data,columnNames));
    	    JScrollPane scrollpane = new JScrollPane(table);
-   	    frame.getContentPane().add(scrollpane);    	
+   	    frame.getContentPane().add(scrollpane);
 		frame.setSize(frame.getSize()); // Force repaint
     }
 
@@ -326,7 +326,7 @@ public class PSDesktop
 
         return frame;
     }
-    
+
     public JInternalFrame makeViolationsFrame()
     {
         ActionViolationsPanel vp = new ActionViolationsPanel(getPSEngine());
@@ -347,7 +347,7 @@ public class PSDesktop
         frame.setSize(300,200);
 
         return frame;
-    }    
+    }
 
     public PSResourceChart makeResourceChart(PSResource r,Calendar start)
     {
@@ -361,7 +361,7 @@ public class PSDesktop
     {
         JTabbedPane resourceTabs = new JTabbedPane();
         List<PSResource> resources = PSUtil.toResourceList(getPSEngine().getObjectsByType(type));
-        for (PSResource r : resources) 
+        for (PSResource r : resources)
             resourceTabs.add(r.getEntityName(),makeResourceChart(r,start));
 
         JInternalFrame frame = makeNewFrame("Resources");
@@ -370,7 +370,7 @@ public class PSDesktop
 
         return frame;
     }
-    
+
     public JInternalFrame makeResourceGanttFrame(
             String objectsType,
             Calendar start,
@@ -378,7 +378,7 @@ public class PSDesktop
     {
         return makeResourceGanttFrame(objectsType,start,end,Calendar.MINUTE);
     }
-    
+
     public JInternalFrame makeResourceGanttFrame(
     		String objectsType,
 	        Calendar start,
@@ -393,8 +393,8 @@ public class PSDesktop
 
         return frame;
     }
-    
-/*    
+
+/*
     // Creates a table on the results of a JoSQL query
     public void makeTableFrame(String title,List l,String josqlQry)
     {
@@ -406,12 +406,12 @@ public class PSDesktop
     		model.parse(josqlQry);
     		model.execute(l);
 
-    		
+
     		//Query qry = new Query();
     		//qry.parse(josqlQry);
     		//List data = qry.execute(l).getResults();
     		//TableModel model = Util.makeTableModel(data, new String[]{"toString"});
-    		
+
 
     		JTable table = new JTable(model);
     		JScrollPane scrollpane = new JScrollPane(table);
@@ -422,14 +422,14 @@ public class PSDesktop
     		throw new RuntimeException(e);
     	}
     }
-    
+
     public void makeNddlConsole()
     {
     	JInternalFrame nddlInterpFrame = makeNewFrame("Nddl Console");
     	AshConsole console = new AshConsole(nddlInterpreter_);
     	nddlInterpreter_.setConsole(console);
     	console.setTokenMarker(new NddlTokenMarker());
-    	nddlInterpFrame.setContentPane(console);    
+    	nddlInterpFrame.setContentPane(console);
     }
 
     public void makeAnmlConsole()
@@ -440,7 +440,7 @@ public class PSDesktop
       anmlInterpreter.setConsole(console);
       console.setTokenMarker(new AnmlTokenMarker());
       anmlInterpFrame.setContentPane(console);
-    }    
+    }
     */
 }
 

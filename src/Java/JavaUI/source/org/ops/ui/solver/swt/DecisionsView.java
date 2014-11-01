@@ -21,7 +21,7 @@ import org.ops.ui.solver.model.StepStatisticsRecord;
 
 /**
  * SWT version of Open Decision dialog
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 public class DecisionsView extends SolverModelViewImpl {
@@ -147,8 +147,8 @@ public class DecisionsView extends SolverModelViewImpl {
 
 		setModel();
 	}
-	
-	private void updateData() {		
+
+	private void updateData() {
 		// Load data, if any
 		boolean haveData = model != null && !model.isTerminated();
 		if (haveData) {

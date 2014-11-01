@@ -5,7 +5,7 @@ package org.ops.ui.rchart.model;
 
 import psengine.PSResourceProfile;
 
-public interface PSResourceChartModel 
+public interface PSResourceChartModel
 {
     public PSResourceProfile getCapacity();
     public PSResourceProfile getUsage();

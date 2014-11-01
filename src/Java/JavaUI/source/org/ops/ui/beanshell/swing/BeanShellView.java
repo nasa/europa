@@ -23,8 +23,8 @@ public class BeanShellView extends EuropaInternalFrame {
 
 		console = new JConsole();
 		this.setContentPane(console);
-		this.interpreter = new Interpreter(console);		
-		
+		this.interpreter = new Interpreter(console);
+
 		// Register variables
 		try {
 			interpreter.set("desktop", psDesktop);

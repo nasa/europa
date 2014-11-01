@@ -17,7 +17,7 @@ import org.eclipse.ui.IFileEditorInput;
 
 /**
  * Launch shortcut to appear in "Run as" menus
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 public class NddlLaunchShortcut implements ILaunchShortcut,

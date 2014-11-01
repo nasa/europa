@@ -80,11 +80,11 @@ public class NddlModelTab extends AbstractLaunchConfigurationTab implements
 		fHorizonEnd = createSingleText(comp, 2);
 		fHorizonEnd.addModifyListener(this);
 	}
-	
+
 	public void modifyText(ModifyEvent e) {
 		this.updateLaunchConfigurationDialog();
 	}
-	
+
 	private Text createSingleText(Composite parent, int hspan) {
 		Text t = new Text(parent, SWT.SINGLE | SWT.BORDER);
 		t.setFont(parent.getFont());

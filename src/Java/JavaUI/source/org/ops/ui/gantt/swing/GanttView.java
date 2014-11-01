@@ -50,7 +50,7 @@ public class GanttView extends EuropaInternalFrame {
 
 	/** Make this thing configurable? Issue 117 */
 	private boolean skipEmptyObjects = false;
-	
+
 	/** Odd and even background colors */
 	protected static final Color oddBg = new Color(250, 255, 250),
 			evenBg = new Color(250, 250, 150), boldGrid = Color.gray,
@@ -133,7 +133,7 @@ public class GanttView extends EuropaInternalFrame {
 			LinePanel line;
 			if (r != null) {
 				// Can resource timeline also have tokens?
-				line = new ResourcePanel(r);				
+				line = new ResourcePanel(r);
 //				. TODO
 			} else {
 				TimelinePanel tline = new TimelinePanel(model.getResourceName(i));
@@ -154,7 +154,7 @@ public class GanttView extends EuropaInternalFrame {
 			tokenPanel.add(line);
 			labelPanel.add(line.getLabel());
 		}
-		
+
 		Point p = new Point(0,0);
 		timeHeader.setViewPosition(p);
 		labelVPort.setViewPosition(p);
