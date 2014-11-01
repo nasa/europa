@@ -7,7 +7,7 @@ import org.ops.ui.schemabrowser.model.SchemaNode;
 
 /**
  * Wrapping SchemaSource as a SWT content provider
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 public class SchemaContentProvider implements ITreeContentProvider {
@@ -26,7 +26,7 @@ public class SchemaContentProvider implements ITreeContentProvider {
 	public void setModel(SchemaModel model) {
 		this.model = model;
 	}
-	
+
 	public void dispose() {
 	}
 

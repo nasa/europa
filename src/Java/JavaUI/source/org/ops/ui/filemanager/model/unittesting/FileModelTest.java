@@ -19,10 +19,10 @@ import psengine.PSUtil;
  * Often changes to the NDDL grammar cause these constants to shift, in which
  * case AstNodeTypes.java needs to be updated. For now this update is manual,
  * which is bad.
- * 
+ *
  * At the very least we need some unittests to verify that constants still
  * match.
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 public class FileModelTest extends TestCase {

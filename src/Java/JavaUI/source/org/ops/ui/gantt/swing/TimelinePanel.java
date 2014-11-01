@@ -5,7 +5,7 @@ import java.util.ArrayList;
 /**
  * Single resource time line, may include multiple rows of tokens. Rows are
  * ordered by the earliest token start, ties are broken by the order of arrival.
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 public class TimelinePanel extends LinePanel {
@@ -53,7 +53,7 @@ public class TimelinePanel extends LinePanel {
 
 		if (index >= lines.size()) {
 			line = new ArrayList<TokenWidget>();
-			
+
 			// Insert so that the earliest token starts are sorted
 			int mine = token.getActivity().getStartMin();
 			for (index=0; index<lines.size(); index++) {

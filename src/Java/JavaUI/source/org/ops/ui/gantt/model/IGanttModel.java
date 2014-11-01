@@ -3,11 +3,11 @@ package org.ops.ui.gantt.model;
 import java.util.List;
 
 /** Generic model providing access to activities and resource profiles.
- * 
+ *
  * @author Tatiana
  */
 public interface IGanttModel {
-	
+
 	public int getResourceCount();
 
 	public List<IGanttActivity> getActivities(int resource);

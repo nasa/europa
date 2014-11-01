@@ -6,20 +6,20 @@ import psengine.util.LibraryLoader;
 import org.ops.ui.main.swing.PSDesktop;
 import bsh.Interpreter;
 
-class Main 
+class Main
 {
     protected static PSEngine psEngine_;
-    
-    public static void main(String args[]) 
+
+    public static void main(String args[])
     {
 	    String debugMode = args[0];
-        PSUtil.loadLibraries(debugMode);	   
+        PSUtil.loadLibraries(debugMode);
 
 	    psEngine_ = PSEngine.makeInstance();
 	    psEngine_.start();
 		Runtime.getRuntime().addShutdownHook(new ShutdownHook());
 		loadCustomCode(debugMode);
-		
+
 		if(args.length > 2 && args[2].equals("nogui"))
 		{
 			Interpreter bshInterpreter_ = new bsh.Interpreter();
@@ -29,7 +29,7 @@ class Main
 			}
 			catch (Exception e) {
 			     throw new RuntimeException(e);
-			}            		
+			}
 		}
 		else
 		{
@@ -42,28 +42,28 @@ class Main
     {
     	//Load module with any custom code if it exists:
     	String libName = "Shopping_" + debugMode;
-    	String fullLibName = LibraryLoader.getResolvedName(libName); 
+    	String fullLibName = LibraryLoader.getResolvedName(libName);
     	if(fullLibName == null) {
     		// Run 'make' to compile the library if you need it:
-    		System.out.println("INFO: Custom library " + libName + " wasn't found and won't be loaded.");  
+    		System.out.println("INFO: Custom library " + libName + " wasn't found and won't be loaded.");
     	}
     	else {
     		// WARNING: Shared library loaded twice (see ticket #164)
     		System.load(fullLibName);
     		psEngine_.loadModule(fullLibName);
-    	}  	
+    	}
     }
-    
-    static class ShutdownHook extends Thread 
+
+    static class ShutdownHook extends Thread
     {
 	    public ShutdownHook()
 	    {
 	        super("ShutdownHook");
 	    }
-	    
-	    public void run() 
+
+	    public void run()
 	    {
            	psEngine_.shutdown();
 	    }
-    }	  
+    }
 }

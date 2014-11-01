@@ -9,7 +9,7 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 /**
  * NDDL editor with syntax highlighting.
- * 
+ *
  * @author Tatiana
  */
 public class NddlEditor extends TextEditor {
@@ -29,7 +29,7 @@ public class NddlEditor extends TextEditor {
 
 	/**
 	 * Create the part control.
-	 * 
+	 *
 	 * @see org.eclipse.ui.IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
@@ -45,7 +45,7 @@ public class NddlEditor extends TextEditor {
 
 	/**
 	 * Used by platform to get the OutlinePage and ProjectionSupport adapter.
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */
 	@SuppressWarnings("unchecked")
@@ -60,7 +60,7 @@ public class NddlEditor extends TextEditor {
 		}
 		return super.getAdapter(required);
 	}
-	
+
 	public NddlContentProvider getNddlContentProvider() {
 		return provider;
 	}

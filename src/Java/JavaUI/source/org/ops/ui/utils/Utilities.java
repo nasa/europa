@@ -10,25 +10,25 @@ import psengine.PSVariable;
 public class Utilities {
 
 	public static String getUserFriendlyValue(PSVariable variable) {
-		
+
 		if(variable.isSingleton()) {
 			return variable.getSingletonValue().toString();
 		}
-		
+
 		else if (variable.isInterval()) {
 			// TODO:  Combine this with gantt hover functionality for a common output
 			// format for variables:
 			return "[" + variable.getLowerBound() + ", " + variable.getUpperBound() + "]";
 		}
-		else if (variable.isEnumerated()){ 
+		else if (variable.isEnumerated()){
 			String retval = "{";
-			
+
 			PSValueList vals = variable.getValues();
-			
+
 			if(vals.size() == 1) {
 				return vals.get(0).toString();
 			}
-			
+
 			boolean firstOne = true;
 			for(int i = 0 ;i < vals.size(); ++i) {
 				if(!firstOne) {
@@ -39,7 +39,7 @@ public class Utilities {
 					firstOne = false;
 				}
 			}
-			
+
 			return retval + "}";
 		}
 		else {
@@ -55,7 +55,7 @@ public class Utilities {
 	{
 		try {
 		    List<Object> retval = new Vector<Object>();
-		
+
 		    Method m = list.getClass().getMethod("size", (Class[])null);
 		    int size = (Integer)m.invoke(list,(Object[])null);
 		    m = list.getClass().getMethod("get", new Class[]{int.class});
@@ -64,7 +64,7 @@ public class Utilities {
 		    	args[0] = i;
 		    	retval.add(m.invoke(list, args));
 		    }
-		    	
+
 	    	return retval;
 		}
 		catch (Exception e) {

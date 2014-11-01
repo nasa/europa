@@ -7,7 +7,7 @@ import psengine.PSStringList;
 
 /**
  * A single record containing various aspects of step statistics
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 public class StepStatisticsRecord {
@@ -29,7 +29,7 @@ public class StepStatisticsRecord {
 
 	/**
 	 * Create a record for the current state of the solver.
-	 * 
+	 *
 	 * @param solver
 	 *            the solver to read data from
 	 * @param timeMs

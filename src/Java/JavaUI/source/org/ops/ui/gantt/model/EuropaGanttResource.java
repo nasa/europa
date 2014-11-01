@@ -6,7 +6,7 @@ import psengine.PSTimePointList;
 
 /**
  * Implementation of IGanttResource around Europa PSResource
- * 
+ *
  * @author tatiana
  */
 public class EuropaGanttResource implements IGanttResource {
@@ -52,7 +52,7 @@ public class EuropaGanttResource implements IGanttResource {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.ops.ui.gantt.model.IGanttResource#getName()
 	 */
 	@Override
@@ -62,7 +62,7 @@ public class EuropaGanttResource implements IGanttResource {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.ops.ui.gantt.model.IGanttResource#getActualMin()
 	 */
 	@Override
@@ -72,7 +72,7 @@ public class EuropaGanttResource implements IGanttResource {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.ops.ui.gantt.model.IGanttResource#getActualMax()
 	 */
 	@Override
@@ -82,7 +82,7 @@ public class EuropaGanttResource implements IGanttResource {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.ops.ui.gantt.model.IGanttResource#getLow(int)
 	 */
 	@Override
@@ -92,7 +92,7 @@ public class EuropaGanttResource implements IGanttResource {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.ops.ui.gantt.model.IGanttResource#getHigh(int)
 	 */
 	@Override

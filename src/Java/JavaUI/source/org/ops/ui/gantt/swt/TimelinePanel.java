@@ -7,7 +7,7 @@ import org.eclipse.draw2d.geometry.Dimension;
 /**
  * Single resource time line, may include multiple rows of tokens. Rows are
  * ordered by the earliest token start, ties are broken by the order of arrival.
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 public class TimelinePanel extends LinePanel {
@@ -25,7 +25,7 @@ public class TimelinePanel extends LinePanel {
 			* (6 + (showDurationLine ? 1 : 0));
 
 	private ArrayList<ArrayList<ActivityWidget>> lines = new ArrayList<ArrayList<ActivityWidget>>();
-	
+
 	public TimelinePanel(String resourceName) {
 		super(resourceName);
 		this.setLayoutManager(null);

@@ -12,7 +12,7 @@ import org.ops.ui.schemabrowser.model.SchemaModel;
 
 /**
  * Convert schema nodes into Swing tree model
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 public class SchemaTreeModel implements TreeModel {

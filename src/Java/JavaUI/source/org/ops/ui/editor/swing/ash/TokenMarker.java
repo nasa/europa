@@ -109,7 +109,7 @@ public abstract class TokenMarker {
    * add syntax tokens to the token list. Then, it should return
    * the initial token type for the next line.<p>
    *
-   * For example if the current line contains the start of a 
+   * For example if the current line contains the start of a
    * multiline comment that doesn't end on that line, this method
    * should return the comment token type so that it continues on
    * the next line.
@@ -141,7 +141,7 @@ public abstract class TokenMarker {
    * the document. This inserts a gap in the <code>lineInfo</code>
    * array.
    * @param index The first line number
-   * @param lines The number of lines 
+   * @param lines The number of lines
    */
   public void insertLines(int index, int lines) {
     if(lines <= 0)

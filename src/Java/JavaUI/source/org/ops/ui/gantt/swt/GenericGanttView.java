@@ -36,7 +36,7 @@ import org.ops.ui.gantt.model.IGanttResource;
 
 /**
  * Gantt chart view - SWT version for the Eclipse plugin
- * 
+ *
  * @author Tatiana Kichkaylo, Tristan Smith
  */
 public abstract class GenericGanttView extends ViewPart implements ISelectionProvider {
@@ -58,7 +58,7 @@ public abstract class GenericGanttView extends ViewPart implements ISelectionPro
 	/** Odd and even background colors */
 	protected static Color oddBg, evenBg, smallGrid,
 			boldGrid = ColorConstants.gray;
-	
+
 	/** Make this thing configurable? Issue 117 */
 	private boolean skipEmptyObjects = false;
 
@@ -70,7 +70,7 @@ public abstract class GenericGanttView extends ViewPart implements ISelectionPro
 	@Override
 	public void createPartControl(final Composite parent) {
 		initializeColors();
-		
+
 		final Sash sash = new Sash(parent, SWT.VERTICAL);
 		labelCanvas = new FigureCanvas(parent, SWT.H_SCROLL);
 
@@ -193,18 +193,18 @@ public abstract class GenericGanttView extends ViewPart implements ISelectionPro
 		// Register so we can report when user selects tokens:
 		getSite().setSelectionProvider(this);
 	}
-	
+
 	@Override
 	public void setFocus() {
 	}
-	
+
 	protected abstract IGanttModel getGanttModel();
 
 	private void doUpdate() {
 		contents.removeAll();
 		lines.clear();
 		labelContents.removeAll();
-		
+
 		IGanttModel gmodel = getGanttModel();
 		if (gmodel == null) {
 			stepCount = 0;
@@ -329,8 +329,8 @@ public abstract class GenericGanttView extends ViewPart implements ISelectionPro
 	public void setSelection(ISelection selection) {
 		for (ISelectionChangedListener listener : selectionChangedListeners ) {
 			listener.selectionChanged(new SelectionChangedEvent(
-					this, selection/*getSelection()*/));				
+					this, selection/*getSelection()*/));
 		}
 	}
-	
+
 }

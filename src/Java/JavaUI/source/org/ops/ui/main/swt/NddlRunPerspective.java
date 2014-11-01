@@ -55,7 +55,7 @@ public class NddlRunPerspective implements IPerspectiveFactory {
 				IPageLayout.RIGHT, 0.3f, factory.getEditorArea());
 		bottomRight.addView(DetailsView.VIEW_ID);
 		bottomRight.addView(IPageLayout.ID_RES_NAV);
-		
+
 		// Little buttons at the bottom. Left from the template
 		factory.addFastView("org.eclipse.team.ccvs.ui.RepositoriesView", 0.50f); // NON-NLS-1
 		factory.addFastView("org.eclipse.team.sync.views.SynchronizeView",

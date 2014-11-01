@@ -11,7 +11,7 @@ import org.ops.ui.solver.swt.SolverModelView;
 
 /**
  * Gantt chart view - SWT version for the Eclipse plugin
- * 
+ *
  * @author Tatiana Kichkaylo, Tristan Smith
  */
 public class GanttView extends GenericGanttView implements SolverListener,

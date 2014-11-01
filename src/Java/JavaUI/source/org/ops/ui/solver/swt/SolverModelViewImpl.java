@@ -6,11 +6,11 @@ import org.ops.ui.solver.model.SolverListener;
 /**
  * Common class for view parts that also listen to the solver model events. See
  * issue 123.
- * 
+ *
  * Provides empty implementations for the methods of SolverListener in case
  * deriving classes want only some of them. Also provides empty implementation
  * of setFocus() from ViewPart.
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 public abstract class SolverModelViewImpl extends ViewPart implements
