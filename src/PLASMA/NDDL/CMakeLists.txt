@@ -2,7 +2,7 @@ include(EuropaModule)
 set(ANTLR_FIND_REQUIRED TRUE)
 include(FindANTLR)
 if(NOT ANTLR_FOUND)
-  message(ERROR "ANTLR not found!")
+  message(FATAL_ERROR "ANTLR not found!")
 endif(NOT ANTLR_FOUND)
 
 set(nddl_parser_sources NDDL3.tokens NDDL3Lexer.cpp NDDL3Lexer.h NDDL3Parser.cpp NDDL3Parser.h)
