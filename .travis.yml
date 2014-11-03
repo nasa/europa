@@ -2,4 +2,5 @@ language: cpp
 compiler:
  - gcc
  - clang
+install: sudo apt-get boost
 script: mkdir build && cd build && cmake .. && make
