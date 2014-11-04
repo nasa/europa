@@ -2,5 +2,5 @@ language: cpp
 compiler:
  - gcc
  - clang
-install: sudo apt-get install libboost-dev libcppunit-dev
+install: sudo apt-get install libboost-dev libcppunit-dev libantlr3c-dev antlr
 script: mkdir build && cd build && cmake .. && make
