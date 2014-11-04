@@ -2,5 +2,5 @@ language: cpp
 compiler:
  - gcc
  - clang
-install: sudo apt-get update && sudo apt-cache search .
+install: sudo apt-get update && sudo apt-get install libboost-dev  .
 script: mkdir build && cd build && cmake .. && make
