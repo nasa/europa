@@ -1,8 +1,4 @@
 include(CheckIncludeFileCXX)
-#check_include_file_cxx(tr1/functional HAVE_TR1_FUNCTIONAL)
-#configure_file("${CMAKE_CURRENT_SOURCE_DIR}/europa-config.h.in"
-#  "${CMAKE_CURRENT_BINARY_DIR}/europa-config.h")
-#include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 include(EuropaModule)
 set(internal_dependencies TinyXml)
