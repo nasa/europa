@@ -26,7 +26,7 @@ declare_module(System "${root_sources}" "${base_sources}" "${component_sources}"
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 set(CMAKE_SWIG_FLAGS "")
-set(CMAKE_SWIG_OUTDIR "${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine")
+set(CMAKE_SWIG_OUTDIR "${CMAKE_CURRENT_BINARY_DIR}/psengine")
 
 set_source_files_properties(base/PSEngine.i PROPERTIES CPLUSPLUS ON)
 set_source_files_properties(base/PSEngine.i PROPERTIES SWIG_FLAGS "-package;psengine;-includeall")
@@ -36,56 +36,75 @@ if(NOT java_included)
   message(FATAL_ERROR "Failed to include UseJava")
 endif(NOT java_included)
 
+if(NOT EUROPA_ROOT)
+message(FATAL_ERROR "EUROPA_ROOT not set")
+endif(NOT EUROPA_ROOT)
+message(STATUS "EUROPA_ROOT: ${EUROPA_ROOT}")
+
+set(SWIG_GENERATED_JAVA
+  psengine/PSConstraint.java
+  psengine/PSConstraintEngineListener.java
+  psengine/PSConstraintList.java
+  psengine/PSDataType.java
+  psengine/PSDataTypeList.java
+  psengine/PSEngine.java
+  psengine/PSEngineInterface.java
+  psengine/PSEngineInterfaceJNI.java
+  psengine/PSEntity.java
+  psengine/PSException.java
+  psengine/PSIntList.java
+  psengine/PSLanguageException.java
+  psengine/PSLanguageExceptionList.java
+  psengine/PSObject.java
+  psengine/PSObjectList.java
+  psengine/PSObjectType.java
+  psengine/PSObjectTypeList.java
+  psengine/PSPlanDatabaseClient.java
+  psengine/PSPlanDatabaseListener.java
+  psengine/PSResource.java
+  psengine/PSResourceProfile.java
+  psengine/PSSchema.java
+  psengine/PSSolver.java
+  psengine/PSStringList.java
+  psengine/PSTimePointList.java
+  psengine/PSToken.java
+  psengine/PSTokenList.java
+  psengine/PSTokenState.java
+  psengine/PSTokenType.java
+  psengine/PSTokenTypeList.java
+  psengine/PSValueList.java
+  psengine/PSVarType.java
+  psengine/PSVarValue.java
+  psengine/PSVariable.java
+  psengine/PSVariableList.java
+  psengine/StringErrorStream.java
+  psengine/EngineConfig.java
+)
+
+set(SWIG_GENERATED_JAVA_FULL_PATH "")
+foreach(f ${SWIG_GENERATED_JAVA})
+  list(APPEND SWIG_GENERATED_JAVA_FULL_PATH ${CMAKE_CURRENT_BINARY_DIR}/${f})
+endforeach(f)
+
 add_jar(PSEngineGenerated
-  SOURCES
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSConstraint.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSConstraintEngineListener.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSConstraintList.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSDataType.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSDataTypeList.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSEngine.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSEngineInterface.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSEngineInterfaceJNI.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSEntity.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSException.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSIntList.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSLanguageException.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSLanguageExceptionList.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSObject.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSObjectList.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSObjectType.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSObjectTypeList.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSPlanDatabaseClient.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSPlanDatabaseListener.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSResource.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSResourceProfile.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSSchema.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSSolver.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSStringList.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSTimePointList.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSToken.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSTokenList.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSTokenState.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSTokenType.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSTokenTypeList.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSValueList.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSVarType.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSVarValue.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSVariable.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/PSVariableList.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/StringErrorStream.java
-  ${CMAKE_SOURCE_DIR}/src/Java/PSEngine/generated/psengine/EngineConfig.java
-  OUTPUT_DIR ${CMAKE_SOURCE_DIR}/src/java/PSEngine)
+  SOURCES ${SWIG_GENERATED_JAVA_FULL_PATH}
+  OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
 include_directories(${ANTLR_INCLUDE_DIR})
 include_directories(${JNI_INCLUDE_DIRS})
-swig_add_module(PSEngine java base/PSEngine.i)
+set(PSEngine_target PSEngine${EUROPA_SUFFIX})
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/base)
+swig_add_module(${PSEngine_target} java base/PSEngine.i)
+add_dependencies(${PSEngine_target} base)
 foreach(dep ${internal_dependencies})
-  add_common_module_include_dep(PSEngine ${dep})
-  target_link_libraries(PSEngine "${dep}${EUROPA_SUFFIX}")
+  add_common_module_include_dep(${PSEngine_target} ${dep})
+  target_link_libraries(${PSEngine_target} "${dep}${EUROPA_SUFFIX}")
 endforeach(dep)
-add_common_module_include_dep(PSEngine System)
-target_link_libraries(PSEngine "System${EUROPA_SUFFIX}")
-add_dependencies(PSEngineGenerated PSEngine)
+add_common_module_include_dep(${PSEngine_target} System)
+target_link_libraries(${PSEngine_target} "System${EUROPA_SUFFIX}")
+add_dependencies(PSEngineGenerated ${PSEngine_target})
+install(TARGETS ${PSEngine_target}
+  EXPORT Europa2
+  DESTINATION ${EUROPA_ROOT}/dist/europa)
 
 add_subdirectory(test)
