@@ -106,9 +106,12 @@ add_jar(PSEngineGenerated
 include_directories(${ANTLR_INCLUDE_DIR})
 include_directories(${JNI_INCLUDE_DIRS})
 set(PSEngine_target PSEngine${EUROPA_SUFFIX})
-#file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/base)
+# file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/base)
 swig_add_module(${PSEngine_target} java base/PSEngine.i)
-#add_dependencies(${PSEngine_target} base)
+# add_dependencies(${PSEngine_target} ${CMAKE_CURRENT_BINARY_DIR}/base)
+add_custom_command(TARGET ${PSEngine_target} PRE_BUILD
+  COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/base)
+  
 foreach(dep ${internal_dependencies})
   add_common_module_include_dep(${PSEngine_target} ${dep})
   target_link_libraries(${PSEngine_target} "${dep}${EUROPA_SUFFIX}")
