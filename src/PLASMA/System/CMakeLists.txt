@@ -1,5 +1,18 @@
+#14 -> Yosemite
+#13 -> Mavericks
+#12 -> Mountain Lion
+#11 -> Lion
+#10 -> Snow Leopard
 if(${APPLE})
-  set(JNI_INCLUDE_DIRS /System/Library/Frameworks/JavaVM.framework/Versions/A/Headers)
+  exec_program(uname ARGS -r  OUTPUT_VARIABLE DARWIN_VERSION)
+
+  if(DARWIN_VERSION VERSION_EQUAL 14)
+    message(STATUS "Setting Yosemite include")
+    set(JNI_INCLUDE_DIRS /Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/include)
+  else(DARWIN_VERSION)
+    message(STATUS "Setting pre-Yosemite include")
+    set(JNI_INCLUDE_DIRS /System/Library/Frameworks/JavaVM.framework/Versions/A/Headers)
+  endif(DARWIN_VERSION VERSION_EQUAL 14)
 else(${APPLE})
   find_package(JNI REQUIRED)  
 endif(${APPLE})
@@ -93,9 +106,9 @@ add_jar(PSEngineGenerated
 include_directories(${ANTLR_INCLUDE_DIR})
 include_directories(${JNI_INCLUDE_DIRS})
 set(PSEngine_target PSEngine${EUROPA_SUFFIX})
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/base)
+#file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/base)
 swig_add_module(${PSEngine_target} java base/PSEngine.i)
-add_dependencies(${PSEngine_target} base)
+#add_dependencies(${PSEngine_target} base)
 foreach(dep ${internal_dependencies})
   add_common_module_include_dep(${PSEngine_target} ${dep})
   target_link_libraries(${PSEngine_target} "${dep}${EUROPA_SUFFIX}")
