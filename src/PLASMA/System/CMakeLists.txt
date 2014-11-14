@@ -34,7 +34,7 @@ common_module_prepends("${base_sources}" "${component_sources}" "${test_sources}
 
 declare_module(System "${root_sources}" "${base_sources}" "${component_sources}" "${test_sources}" "${internal_dependencies}" "")
 
-
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/base)
 #TODO: let the user configure which language or languages to build for
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
@@ -100,8 +100,8 @@ foreach(f ${SWIG_GENERATED_JAVA})
 endforeach(f)
 
 add_jar(PSEngineGenerated
-  SOURCES ${SWIG_GENERATED_JAVA_FULL_PATH}
-  OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
+  SOURCES ${SWIG_GENERATED_JAVA_FULL_PATH})
+  #OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
 include_directories(${ANTLR_INCLUDE_DIR})
 include_directories(${JNI_INCLUDE_DIRS})
@@ -109,8 +109,8 @@ set(PSEngine_target PSEngine${EUROPA_SUFFIX})
 # file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/base)
 swig_add_module(${PSEngine_target} java base/PSEngine.i)
 # add_dependencies(${PSEngine_target} ${CMAKE_CURRENT_BINARY_DIR}/base)
-add_custom_command(TARGET ${PSEngine_target} PRE_BUILD
-  COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/base)
+#add_custom_command(TARGET ${PSEngine_target} PRE_LINK
+#  COMMAND mkdir base)
   
 foreach(dep ${internal_dependencies})
   add_common_module_include_dep(${PSEngine_target} ${dep})

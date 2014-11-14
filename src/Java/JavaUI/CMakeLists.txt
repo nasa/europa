@@ -20,12 +20,13 @@ foreach(jar ${libjars})
   unjar(${jarname}_unjarred ${CMAKE_CURRENT_SOURCE_DIR}/${jar} temp contents)
   # message(STATUS ${classes})
   list(APPEND jarcontents ${contents})
+  set(CMAKE_JAVA_INCLUDE_PATH "${CMAKE_JAVA_INCLUDE_PATH}:${jar}")
 endforeach(jar)
-
+  set(CMAKE_JAVA_INCLUDE_PATH "${CMAKE_JAVA_INCLUDE_PATH}:lib/PSEngine.jar")
 add_jar(PSUISwing
-  INCLUDE_JARS
-  ${libjars}
-  ${CMAKE_CURRENT_BINARY_DIR}/../PSEngine/PSEngine.jar
+  # INCLUDE_JARS
+  # ${libjars}
+  # ${CMAKE_CURRENT_BINARY_DIR}/../PSEngine/PSEngine.jar
   SOURCES
   #${jarclasses}
   source/org/ops/ui/beanshell/swing/BeanShellView.java
