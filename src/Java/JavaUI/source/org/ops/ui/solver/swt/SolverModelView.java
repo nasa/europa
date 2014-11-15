@@ -2,7 +2,7 @@ package org.ops.ui.solver.swt;
 
 /**
  * Any view that depends on selection of solver model.
- * 
+ *
  * @author tatiana
  */
 public interface SolverModelView {

@@ -51,7 +51,7 @@ public class Token {
 
   /**
    * Literal 3 token id. This can be used to mark a numeric
-   * literal 
+   * literal
    */
   public static final byte LITERAL3 = 5;
 

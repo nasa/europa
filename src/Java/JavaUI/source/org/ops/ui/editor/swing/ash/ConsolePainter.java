@@ -568,7 +568,7 @@ public class ConsolePainter extends JComponent implements TabExpander {
 
   protected void paintCaret(Graphics gfx, int line, int y) {
     if(console.isCaretVisible()) {
-      int offset = console.getCaretPosition() 
+      int offset = console.getCaretPosition()
         - console.getLineStartOffset(line);
       int caretX = console._offsetToX(line,offset);
       int caretWidth = ((blockCaret || console.isOverwriteEnabled()) ? fm.charWidth('w') : 1);

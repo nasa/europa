@@ -1,7 +1,7 @@
 package org.ops.ui.filemanager.model;
 
 /**
- * Type constants. The numbers in this file should match those in 
+ * Type constants. The numbers in this file should match those in
  * /Europa/src/PLASMA/NDDL/base/NDDL3.tokens
  */
 public interface AstNodeTypes {
@@ -20,6 +20,6 @@ public interface AstNodeTypes {
 	public static final int FACT_KEYWORD = 59;
 	// instantiation of predicate
 	public static final int PREDICATE_INSTANCE = 9;
-	public static final int CONSTRAINT_INSTANCE = 4;	
+	public static final int CONSTRAINT_INSTANCE = 4;
 	public static final int ENUM_KEYWORD = 32;
 }

@@ -40,19 +40,19 @@ import org.ops.ui.main.swing.PSDesktop;
 import psengine.PSSolver;
 import psengine.PSStringList;
 
-public class PSSolverDialog 
+public class PSSolverDialog
     extends JPanel
     implements ActionListener
 {
 	private static final long serialVersionUID = -7130640151223933584L;
-	
+
 	protected JTextField horizonStart_ = new JTextField("0");
 	protected JTextField horizonEnd_  = new JTextField("5760");
 	protected JTextField maxSteps_ = new JTextField("2000");
 	protected JTextField maxDepth_ = new JTextField("100000");
 	protected JTextField configFile_ = new JTextField("../Crew1/PlannerConfig.xml");
 	protected JTextField incSteps_ = new JTextField("500",8);
-	
+
 	protected JButton btnConfigure_= new JButton("Configure");
 	protected JButton btnStep_= new JButton("Go");
 	protected JButton btnSolve_ = new JButton("Solve");
@@ -60,30 +60,30 @@ public class PSSolverDialog
 	protected JLabel lblRunTime_ = new JLabel(format(startTime_));
 	protected JLabel lblStepCnt_ = new JLabel("0");
 	protected JLabel lblMaxStepCnt_ = new JLabel("0");
-	
+
 	protected XYSeries solverDepthSeries_;
 	protected XYSeries stepTimeSeries_;
 	protected XYSeries stepAvgTimeSeries_;
 	protected double totalTime_;
 	protected XYSeries decisionCntSeries_;
 	protected JPanel chartsPanel_;
-	
+
 	protected OpenDecisionsPanel openDecisions_;
-	
+
 	protected JSplitPane topSplitPane_;
-	
+
 	protected PSDesktop desktop_;
 	protected PSSolver solver_;
 	protected Integer maxStepsValue_=100;
 	protected Integer maxDepthValue_=100;
-	
+
 	protected List<PSSolverDialogListener> listeners_ = new Vector<PSSolverDialogListener>();
-	
+
     public PSSolverDialog(PSDesktop desktop,PSSolver solver)
     {
     	desktop_ = desktop;
         solver_ = solver;
-        
+
         if (solver != null) {
     	    horizonStart_ = new JTextField(new Integer(solver_.getHorizonStart()).toString(),15);
     	    horizonEnd_  = new JTextField(new Integer(solver_.getHorizonEnd()).toString(),15);
@@ -92,18 +92,18 @@ public class PSSolverDialog
     	    configFile_ = new JTextField(solver_.getConfigFilename());
     	    incSteps_ = new JTextField(maxStepsValue_.toString(),8);
         }
-        
+
     	totalTime_ = 0;
-    	        
+
     	JPanel solverPanel = new JPanel(new BorderLayout());
     	JTabbedPane tp = new JTabbedPane();
     	tp.add("Run",makeRunPanel());
     	tp.add("Configure",makeConfigPanel());
     	solverPanel.add(tp);
-    	
-    	openDecisions_ = new OpenDecisionsPanel(); 
 
-    	setLayout(new BorderLayout());	    
+    	openDecisions_ = new OpenDecisionsPanel();
+
+    	setLayout(new BorderLayout());
         add(solverPanel);
 
         JInternalFrame frame = desktop_.makeNewFrame("Solver Open Decisions");
@@ -111,10 +111,10 @@ public class PSSolverDialog
         frame.setSize(400,400);
         frame.setLocation(700,20);
     }
-    
+
     public void addListener(PSSolverDialogListener l) { listeners_.add(l); }
     public void removeListener(PSSolverDialogListener l) { listeners_.remove(l); }
-    
+
     protected JPanel makeConfigPanel()
     {
     	JPanel p = new JPanel(new FlowLayout());
@@ -129,24 +129,24 @@ public class PSSolverDialog
 
         btnConfigure_.addActionListener(this);btnConfigure_.setActionCommand("configure");
 
-        JPanel buttonPanel = new JPanel(new FlowLayout());        
-        buttonPanel.add(btnConfigure_);        
-         
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        buttonPanel.add(btnConfigure_);
+
     	JPanel p1 = new JPanel(new BorderLayout());
         p1.add(BorderLayout.CENTER,configPanel);
         p1.add(BorderLayout.SOUTH,buttonPanel);
 
         p.add(p1);
-        
+
         return p;
     }
-    
+
     protected JPanel makeRunPanel()
     {
     	JPanel p = new JPanel(new BorderLayout());
-    	
+
     	chartsPanel_ = new JPanel(new GridLayout(1,3));
-    	
+
     	stepTimeSeries_ = new XYSeries("Time (secs) per Step");
     	stepAvgTimeSeries_ = new XYSeries("Avg Time (secs) per Step");
     	chartsPanel_.add(makeChartPanel(
@@ -156,7 +156,7 @@ public class PSSolverDialog
                 new XYSeries[]{stepTimeSeries_,stepAvgTimeSeries_},
                 false // Create legend
     	));
-    	    	
+
     	decisionCntSeries_ = new XYSeries("Open Decision Cnt");
     	chartsPanel_.add(makeChartPanel(
             	"Open Decision Count",  // title
@@ -164,7 +164,7 @@ public class PSSolverDialog
                 "Open Decision Count",  // y-axis label
                 new XYSeries[]{decisionCntSeries_},
                 false // Create legend
-    	));    	
+    	));
 
     	solverDepthSeries_ = new XYSeries("Decisions in Plan");
     	chartsPanel_.add(makeChartPanel(
@@ -173,7 +173,7 @@ public class PSSolverDialog
                 "Decisions in Plan",  // y-axis label
                 new XYSeries[]{solverDepthSeries_},
                 false // Create legend
-    	));    
+    	));
 
         btnStep_.addActionListener(this);btnStep_.setActionCommand("step");
         btnSolve_.addActionListener(this);btnSolve_.setActionCommand("solve");
@@ -181,14 +181,14 @@ public class PSSolverDialog
         boolean enabled = solver_ != null;
     	btnStep_.setEnabled(enabled);
     	btnSolve_.setEnabled(enabled);
-        
+
         JPanel buttonPanel = new JPanel(new GridLayout(1,4));
         /*
 		lblMaxStepCnt_.setText(solver_.getMaxSteps().toString());
         buttonPanel.add(new JLabel("Max Step Count : "));
         buttonPanel.add(lblMaxStepCnt_);
         */
-        
+
         buttonPanel.add(new JLabel("Run for"));
         buttonPanel.add(incSteps_);
         buttonPanel.add(new JLabel("steps"));
@@ -200,12 +200,12 @@ public class PSSolverDialog
         JPanel totalsPanel = new JPanel(new GridLayout(1,4));
 		lblStepCnt_.setText(Integer.toString(solver_.getStepCount()));
         totalsPanel.add(new JLabel("Step Count : "));
-        totalsPanel.add(lblStepCnt_);        
+        totalsPanel.add(lblStepCnt_);
         totalsPanel.add(new JLabel("Run Time :"));
         totalsPanel.add(lblRunTime_);
         JPanel p2 = new JPanel(new FlowLayout());
         p2.add(totalsPanel);
-        
+
         JPanel p3 = new JPanel(new FlowLayout());
         p3.add(chartsPanel_);
     	p.add(BorderLayout.NORTH,p1);
@@ -224,12 +224,12 @@ public class PSSolverDialog
         XYSeriesCollection dataset = new XYSeriesCollection();
         for (XYSeries s : series)
             dataset.addSeries(s);
-        
+
         JFreeChart chart = createChart(title,xAxisLabel,yAxisLabel,dataset,createLegend);
 
         return makeChartPanel(chart);
     }
-    
+
 	protected JPanel makeChartPanel(JFreeChart chart)
     {
     	JPanel p = new JPanel(new BorderLayout());
@@ -237,37 +237,37 @@ public class PSSolverDialog
         ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new Dimension(200, 150));
         chartPanel.setMouseZoomable(true, false);
-        
+
         Border border = BorderFactory.createCompoundBorder(
                 BorderFactory.createEmptyBorder(1, 1, 1, 1),
                 BorderFactory.createEtchedBorder()
         );
         chartPanel.setBorder(border);
-        
+
         p.add(new JScrollPane(chartPanel));
         return p;
     }
-    
+
     protected JFreeChart createChart(
     		String title,
     		String xAxisLabel,
     		String yAxisLabel,
     		XYDataset dataset,
-    		boolean createLegend) 
+    		boolean createLegend)
 	{
 	    JFreeChart chart = ChartFactory.createXYLineChart(
 	        title,
 	        xAxisLabel,
 	        yAxisLabel,
-	        dataset,            
+	        dataset,
 	        PlotOrientation.VERTICAL,
 	        createLegend,               // create legend?
 	        true,               // generate tooltips?
 	        false               // generate URLs?
 	    );
-	
+
 	    chart.setBackgroundPaint(Color.white);
-	
+
 	    XYPlot plot = (XYPlot) chart.getPlot();
 	    plot.setBackgroundPaint(Color.lightGray);
 	    plot.setDomainGridlinePaint(Color.white);
@@ -275,17 +275,17 @@ public class PSSolverDialog
 	    plot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
 	    plot.setDomainCrosshairVisible(true);
 	    plot.setRangeCrosshairVisible(true);
-	    
+
 	    XYItemRenderer r = plot.getRenderer();
 	    if (r instanceof XYLineAndShapeRenderer) {
 	        XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) r;
 	        renderer.setBaseShapesVisible(true);
 	        renderer.setBaseShapesFilled(true);
 	    }
-	
+
 	    return chart;
-	}    
-    
+	}
+
 	public void configureSolver()
 	{
 		int horizonStart = getInteger(horizonStart_.getText());
@@ -294,36 +294,36 @@ public class PSSolverDialog
 	    solver_ = desktop_.getPSEngine().createSolver(config);
 	    solver_.configure(horizonStart,horizonEnd);
 	}
-	
+
 	protected int getInteger(String text)
 	{
 		return new Integer(text.trim());
 	}
-    
+
     public void stepSolver()
     {
     	try {
 			startTime_ = System.currentTimeMillis();
             setButtons(false);
-            
+
     		int maxIter = getInteger(incSteps_.getText());
             int stepCnt = solver_.getStepCount();
     		int max =  stepCnt+maxIter;
-    		
-    		for (int i=1; solver_.hasFlaws() 
+
+    		for (int i=1; solver_.hasFlaws()
     			 && !solver_.isExhausted()
     			 && !solver_.isTimedOut()
-    			 && stepCnt<max;i++) { 
+    			 && stepCnt<max;i++) {
 
     			long t = System.currentTimeMillis();
-    			solver_.step(); 
+    			solver_.step();
     			double secs = (System.currentTimeMillis()-t)/1000.0;
                 totalTime_ += secs;
     			stepCnt = solver_.getStepCount();
     			solverDepthSeries_.add(stepCnt,solver_.getDepth());
     			stepTimeSeries_.add(stepCnt,secs);
     			stepAvgTimeSeries_.add(stepCnt,totalTime_/stepCnt);
-    			
+
     			if (solver_.isConstraintConsistent()) {
     				// TODO: this is weird, it takes the solver one more iteration to set its internal m_noFlawsFound flag, fix it
     				if (solver_.hasFlaws()) {
@@ -340,19 +340,19 @@ public class PSSolverDialog
     			//System.out.println(stepCnt + "-" + solver.getDepth()+" - "+secs);
     			lblRunTime_.setText(format(System.currentTimeMillis()-startTime_));
     			lblStepCnt_.setText(Integer.toString(solver_.getStepCount()));
-    			
+
     			for (PSSolverDialogListener l : listeners_)
     				l.stepCompleted(solver_);
     		}
-    		
+
             setButtons(true);
     	}
     	catch (Exception e) {
             setButtons(true);
     		e.printStackTrace();
     	}
-    }    
-    
+    }
+
     protected void forceRepaint(final java.awt.Container container)
     {
 	    SwingUtilities.invokeLater(new Runnable() {
@@ -361,37 +361,37 @@ public class PSSolverDialog
             }
         });
     }
-    
+
     public void runSolver()
     {
     	try {
             setButtons(false);
-   			solver_.solve(maxStepsValue_,maxDepthValue_); 
+   			solver_.solve(maxStepsValue_,maxDepthValue_);
             setButtons(true);
     	}
     	catch (Exception e) {
     		e.printStackTrace();
     	}
-    }    
+    }
 
     protected void setButtons(boolean isEnabled)
     {
     	btnStep_.setEnabled(isEnabled);
     	btnSolve_.setEnabled(isEnabled);
-    	btnConfigure_.setEnabled(isEnabled);    	
+    	btnConfigure_.setEnabled(isEnabled);
     }
-    
-    public void actionPerformed(ActionEvent e) 
+
+    public void actionPerformed(ActionEvent e)
     {
         if ("configure".equals(e.getActionCommand())) {
         	configureSolver();
         	btnStep_.setEnabled(true);
         	btnSolve_.setEnabled(true);
         	return;
-        } 
+        }
 
         Thread handler;
-        
+
         if ("step".equals(e.getActionCommand())) {
         	handler = new Thread() {
             	public void run() {
@@ -400,8 +400,8 @@ public class PSSolverDialog
             };
             handler.start();
         	return;
-        } 
-        
+        }
+
         if ("solve".equals(e.getActionCommand())) {
             handler = new Thread() {
             	public void run() {
@@ -410,9 +410,9 @@ public class PSSolverDialog
             };
             handler.start();
         	return;
-        }         
-    }  
-    
+        }
+    }
+
     public static String format (long msecs) {
         if (msecs < 1000)
           return Long.toString(msecs) + " msecs";
@@ -425,5 +425,5 @@ public class PSSolverDialog
       private final static NumberFormat decimal3 = NumberFormat.getNumberInstance();
       {
         decimal3.setMaximumFractionDigits(3);
-      }    
+      }
 }

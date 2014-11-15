@@ -16,7 +16,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 /**
  * Trigger comment // for the current selection of the currently active editor.
- * 
+ *
  * @author Tatiana, Tristan
  */
 public class NddlToggleCommentHandler extends AbstractHandler {

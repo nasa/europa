@@ -11,8 +11,8 @@ import psengine.StringErrorStream;
 
 /**
  * Solver model corresponds to a single engine, or "run". Each launch of an NDDL
- * model creates a separate solver model. 
- * 
+ * model creates a separate solver model.
+ *
  * @author tatiana
  */
 
@@ -25,10 +25,10 @@ import psengine.StringErrorStream;
 public class SolverModel {
 	/** Property name in the engine config: list of search paths for includes */
 	private final String INCLUDE_PATH = "nddl.includePath";
-	
+
 	protected Logger log = Logger.getLogger(getClass().getName());
 	private PSEngine engine = null;
-	private PSSolver solver = null;	
+	private PSSolver solver = null;
 	private ArrayList<SolverListener> listeners = new ArrayList<SolverListener>();
 
 	private ArrayList<StepStatisticsRecord> stepStatistics = new ArrayList<StepStatisticsRecord>();
@@ -40,7 +40,7 @@ public class SolverModel {
 	private int horizonStart, horizonEnd;
 	/** Planner configuration file */
 	private File plannerConfig = null;
-	
+
 	public void configure(File modelFile, File plannerConfigFile,
 			int horizonStart, int horizonEnd) {
 		this.modelFile = modelFile;
@@ -69,11 +69,11 @@ public class SolverModel {
 			this.engine.getConfig().setProperty(INCLUDE_PATH, oldPath);
 		}
 	}
-	
+
 	public File getModelFile() {
 		return this.modelFile;
 	}
-	
+
 	public File getPlannerConfig() {
 		return this.plannerConfig;
 	}
@@ -113,7 +113,7 @@ public class SolverModel {
 
 	/**
 	 * Make one step (assuming we can)
-	 * 
+	 *
 	 * @return time in ms
 	 */
 	public long stepOnce() {
@@ -163,7 +163,7 @@ public class SolverModel {
 	public boolean isTerminated() {
 		return solver == null;
 	}
-	
+
 	/** Start and configure engine. Assume it is not already running */
 	public synchronized void start() {
 		if (engine != null)

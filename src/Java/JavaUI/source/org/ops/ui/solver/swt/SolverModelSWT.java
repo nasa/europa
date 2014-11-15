@@ -21,7 +21,7 @@ import org.ops.ui.solver.model.SolverModel;
  * model implements IProcess, so that it can be started and stopped through
  * standard Launch mechanism. The IProcess stuff is separated into this class to
  * avoid dependency of Swing code on Eclipse libraries.
- * 
+ *
  * @author tatiana
  */
 public class SolverModelSWT extends SolverModel implements IProcess {

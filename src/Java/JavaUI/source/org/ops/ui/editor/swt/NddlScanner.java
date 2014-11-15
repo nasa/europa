@@ -95,7 +95,7 @@ public class NddlScanner extends BufferedRuleBasedScanner {
 
 		/**
 		 * Creates a new operator rule.
-		 * 
+		 *
 		 * @param token
 		 *            Token to use for this rule
 		 */

@@ -9,7 +9,7 @@ import org.ops.ui.gantt.model.IGanttResource;
 
 /**
  * Single resource profile panel, includes upper and lower lines.
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 public class ResourcePanel extends LinePanel {

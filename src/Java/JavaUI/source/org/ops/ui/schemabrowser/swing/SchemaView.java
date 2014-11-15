@@ -12,10 +12,10 @@ import org.ops.ui.schemabrowser.model.SchemaModel;
 public class SchemaView extends JPanel {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	private JTree tree;
 	private SchemaTreeModel treeModel;
 
@@ -24,7 +24,7 @@ public class SchemaView extends JPanel {
 		this.treeModel = new SchemaTreeModel(model);
 
 		setLayout(new BorderLayout());
-		
+
 		// Widgets
 		this.tree = new JTree(treeModel);
 		this.add(new JScrollPane(tree));

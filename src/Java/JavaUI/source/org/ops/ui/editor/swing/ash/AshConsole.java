@@ -1636,7 +1636,7 @@ public class AshConsole extends JPanel {
       dim.height = insets.top + insets.bottom;
 
       Dimension centerPref = center.getMinimumSize();
-      dim.width += centerPref.width; 
+      dim.width += centerPref.width;
       dim.height += centerPref.height;
       Dimension rightPref = right.getMinimumSize();
       dim.width += rightPref.width;
@@ -1750,7 +1750,7 @@ public class AshConsole extends JPanel {
       int newStart;
       int newEnd;
 
-      if(selectionStart > offset || (selectionStart 
+      if(selectionStart > offset || (selectionStart
             == selectionEnd && selectionStart == offset))
         newStart = selectionStart + length;
       else
@@ -1885,7 +1885,7 @@ public class AshConsole extends JPanel {
       }
     }
 
-    private void doSingleClick(MouseEvent evt, int line, 
+    private void doSingleClick(MouseEvent evt, int line,
         int offset, int dot) {
       if((evt.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
         rectSelect = (evt.getModifiers() & InputEvent.CTRL_MASK) != 0;

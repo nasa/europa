@@ -2,7 +2,7 @@ package org.ops.ui.gantt.model;
 
 /**
  * Interface for a resource profile to be used with Gantt chart.
- * 
+ *
  * @author tatiana
  */
 public interface IGanttResource {
