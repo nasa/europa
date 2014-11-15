@@ -3,7 +3,7 @@ package org.ops.ui.solver.model;
 import java.text.NumberFormat;
 
 public abstract class TimeFormatHelper {
-	
+
 	private TimeFormatHelper() {}
 
 	private final static NumberFormat decimal3 = NumberFormat

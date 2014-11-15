@@ -2,7 +2,7 @@ package org.ops.ui.gantt.model;
 
 /**
  * Interface for the data structure representing an activity in Gantt chart
- * 
+ *
  * @author Tatiana
  */
 public interface IGanttActivity {

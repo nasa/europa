@@ -12,7 +12,7 @@ import org.ops.ui.solver.model.StepStatisticsRecord;
 
 /**
  * Statistics charts of the solver moved into a separate view.
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 public class StatisticsChartsView extends SolverModelViewImpl {

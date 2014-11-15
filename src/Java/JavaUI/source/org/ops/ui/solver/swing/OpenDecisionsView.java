@@ -28,7 +28,7 @@ import org.ops.ui.solver.model.StepStatisticsRecord;
 /**
  * Panel for open decisions. This panel listens to SolverModel and gets all data
  * from it.
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 public class OpenDecisionsView extends EuropaInternalFrame {

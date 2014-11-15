@@ -13,7 +13,7 @@ import java.io.FileWriter;
 class Main
 {
 	protected static PSEngine psEngine_;
-	   
+
 	public static void main(String args[])
 	{
 		if ((args.length >= 4) && !(args[3].equals(""))) {
@@ -21,13 +21,13 @@ class Main
 		}
 	    else {
 		    String debugMode = args[0];
-	        PSUtil.loadLibraries(debugMode);	   
+	        PSUtil.loadLibraries(debugMode);
 
 		    psEngine_ = PSEngine.makeInstance();
 		    psEngine_.start();
 			Runtime.getRuntime().addShutdownHook(new ShutdownHook());
 			loadCustomCode(debugMode);
-			
+
 			if((args.length >= 3) && args[2].equals("nogui")) {
 				Interpreter bshInterpreter_ = new bsh.Interpreter();
 				try {
@@ -36,7 +36,7 @@ class Main
 				}
 				catch (Exception e) {
 					throw new RuntimeException(e);
-				}            		
+				}
 			}
 			else {
 				PSDesktop d = PSDesktop.makeInstance(psEngine_,args);
@@ -44,50 +44,50 @@ class Main
 			}
 	    }
 	}
-	
+
     protected static void loadCustomCode(String debugMode)
     {
     	//Load module with any custom code if it exists:
     	String libName = "UBO_" + debugMode;
-    	String fullLibName = LibraryLoader.getResolvedName(libName); 
+    	String fullLibName = LibraryLoader.getResolvedName(libName);
     	if(fullLibName == null) {
     		// Run 'make' to compile the library if you need it:
-    		System.out.println("INFO: Custom library " + libName + " wasn't found and won't be loaded.");  
+    		System.out.println("INFO: Custom library " + libName + " wasn't found and won't be loaded.");
     	}
     	else {
     		// WARNING: Shared library loaded twice (see ticket #164)
     		System.load(fullLibName);
     		psEngine_.loadModule(fullLibName);
-    	}  	
+    	}
     }
-    
-    
-    static class ShutdownHook extends Thread 
+
+
+    static class ShutdownHook extends Thread
     {
 	    public ShutdownHook()
 	    {
 	        super("ShutdownHook");
 	    }
-	    
-	    public void run() 
+
+	    public void run()
 	    {
            	psEngine_.shutdown();
 	    }
-    }	  
-	
-    
+    }
+
+
 	public static void runBatchTest(String args[])
 	{
 	    try {
 	        String debugMode = args[0];
 	        String test = args[3];
 	        Integer bound = new Integer(args[4]);
-	        long timeoutMsecs = (new Integer(args[5])).intValue() * 1000; 
+	        long timeoutMsecs = (new Integer(args[5])).intValue() * 1000;
 	        String solver = args[6];
 
 	    	System.out.println("Running batch test: "+debugMode+" "+test+" "+bound+" "+timeoutMsecs+" "+solver);
 
-	        LibraryLoader.loadLibrary("System_"+debugMode);        
+	        LibraryLoader.loadLibrary("System_"+debugMode);
 	        PSEngine engine = PSEngine.makeInstance();
 	        engine.start();
 	        String nddlModel = "UBO-gen-initial-state.nddl";
@@ -102,21 +102,21 @@ class Main
 	        else
 	            throw new RuntimeException("Unknown solver:"+solver);
 
-	        //engine.shutdown();  TODO: this is causing problems      
+	        //engine.shutdown();  TODO: this is causing problems
 	    }
 	    catch (Exception e) {
-            throw new RuntimeException(e);	        
+            throw new RuntimeException(e);
 	    }
-	}	
-	
+	}
+
 	public static void runBuiltInSolver(PSEngine engine,String solverName, String test,Integer bound, long timeoutMsecs)
 	{
         PSVariable v = engine.getVariableByName("maxDuration");
         v.specifyValue(PSVarValue.getInstance(bound));
 
         PSSolver solver = engine.createSolver("PlannerConfig.xml"/*config*/);
-	    solver.configure(0/*horizonStart*/,1000/*horizonEnd*/);	   
-	    
+	    solver.configure(0/*horizonStart*/,1000/*horizonEnd*/);
+
 	    SimpleTimer timer = new SimpleTimer();
 	    timer.start();
 	    boolean timedOut = false;
@@ -128,7 +128,7 @@ class Main
 	        }
 	    }
         timer.stop();
-        
+
         // Save results
         // test-name bound best-makespan time-in-msecs solution stepCount
         int makespan = ((timedOut || solver.isExhausted()) ? 0 : bound); // TODO: this could be lower, ground solution and find out
@@ -141,17 +141,17 @@ class Main
            //.append(s.getSolutionAsString()) // TODO: extract solution
            .append(solver.getStepCount()).append(separator)
            .append("\n");
-        
-        writeToFile("Solver-"+solverName+"-"+timeoutMsecs+".txt",buf.toString());  
+
+        writeToFile("Solver-"+solverName+"-"+timeoutMsecs+".txt",buf.toString());
 	}
 
     public static void runRCPSPSolver(PSEngine engine,RCPSPSolver s, String test,Integer bound, long timeoutMsecs)
-    {     
+    {
         // TODO: since this is randomized, run several times an get avg
         boolean usePSResources = false; // TODO: eventually switch to true
         s.solve(engine,timeoutMsecs,bound,usePSResources);
         //RCPSPUtil.ground(s.getActivities());
-        
+
         // Save results
         // test-name bound best-makespan time-in-msecs solution
         int makespan = (s.getBestMakespan() != Integer.MAX_VALUE ? s.getBestMakespan() : 0);
@@ -164,20 +164,20 @@ class Main
            .append(s.getTimeToBest()).append(separator)
            .append(s.getSolutionAsString())
            .append("\n");
-        
+
         String filename = "Solver-"+s.getName()+"-"+(s.getActivities().size()-2)+".txt";
         writeToFile(filename,buf.toString());
-    }	
-    
+    }
+
     protected static void writeToFile(String filename,String str)
     {
         try {
             BufferedWriter out = new BufferedWriter(new FileWriter(filename,true/*append*/));
             out.write(str);
             out.close();
-        } 
+        }
         catch (Exception e) {
             throw new RuntimeException(e);
-        }                
+        }
     }
 }

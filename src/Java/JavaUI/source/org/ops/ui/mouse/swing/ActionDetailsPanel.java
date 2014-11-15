@@ -6,32 +6,32 @@ import psengine.PSToken;
 import psengine.PSVariable;
 import psengine.PSVariableList;
 
-public class ActionDetailsPanel 
-    extends MouseListenerPanel 
+public class ActionDetailsPanel
+    extends MouseListenerPanel
 {
 	private static final long serialVersionUID = 7779941401503562818L;
 
 	protected PSEngine psengine_ = null;
-	
+
     public ActionDetailsPanel(PSEngine pse)
     {
     	psengine_ = pse;
     }
-	
+
 	@Override
-	public void mouseMoved(Object key) 
+	public void mouseMoved(Object key)
 	{
-		if (key == null) 
+		if (key == null)
 			text_.setText("");
-		else 
+		else
 		    text_.setText(getDetails((Integer)key));
 	}
-	
+
 	protected String getDetails(Integer key)
 	{
 		return tokenDetails(psengine_.getTokenByKey(key));
 	}
-		
+
 	protected String tokenDetails(PSToken t)
 	{
 		StringBuffer buf = new StringBuffer();
@@ -40,7 +40,7 @@ public class ActionDetailsPanel
            .append("Name   : ").append(t.getEntityName()).append("\n")
            .append("isFact  : ").append(t.isFact()).append("\n")
         ;
-        
+
         if (t.getParameters().size() > 0) {
             buf.append("Parameters:").append("\n");
             PSVariableList parameters = t.getParameters();
@@ -49,7 +49,7 @@ public class ActionDetailsPanel
                 buf.append(p.getEntityName()).append(" : ").append(p.toString()).append("\n");
             }
         }
-           
+
 		return buf.toString();
-	}	
+	}
 }

@@ -11,7 +11,7 @@ import javax.swing.*;
 
 import psengine.*;
 
-public class NQueensPanel 
+public class NQueensPanel
      extends MouseAdapter
      implements TSNQueensSolver.SolverObserver
 {
@@ -25,9 +25,9 @@ public class NQueensPanel
     protected List solutions_;
     protected int curSolution_;
     protected JButton nextBtn_,prevBtn_;
-	
+
 	public NQueensPanel(PSEngine psengine,
-			            int queenCnt, 
+			            int queenCnt,
 			            JTextArea mouseInfo)
 	{
 		createUIPanel(psengine,queenCnt,mouseInfo);
@@ -36,9 +36,9 @@ public class NQueensPanel
 		solutions_ = new Vector();
 		curSolution_ = -1;
 	}
-	
+
 	public JPanel getUIPanel() { return uiPanel_; }
-	
+
 	public void createUIPanel(PSEngine psengine,int queenCnt, JTextArea mouseInfo)
 	{
 		uiPanel_ = new JPanel(new BorderLayout());
@@ -65,24 +65,24 @@ public class NQueensPanel
 		prevBtn_.setEnabled(false);
 		bottomPanel.add(prevBtn_);
 		bottomPanel.add(nextBtn_);
-		
+
 		solverPanel.add(BorderLayout.NORTH,topPanel);
 		solverPanel.add(BorderLayout.CENTER,solverBoard_);
 		solverPanel.add(BorderLayout.SOUTH,bottomPanel);
-		
+
 		tabbedPane_ = new JTabbedPane();
 		tabbedPane_.addTab("Current State",new NQueensBoard(psengine,queenCnt,mouseInfo,false));
 		tabbedPane_.addTab("Solver",solverPanel);
 
-		uiPanel_.add(tabbedPane_);	
+		uiPanel_.add(tabbedPane_);
 	}
-	
+
    	public void mouseClicked(MouseEvent e)
     {
    		try {
-   			if (e.getSource()==solveBtn_) {   				
+   			if (e.getSource()==solveBtn_) {
    				SolverRunner handler = new SolverRunner();
-   				handler.start();        	
+   				handler.start();
    			}
    	        if (e.getSource()==nextBtn_) {
    	            setCurrentSolution(curSolution_+1);
@@ -94,12 +94,12 @@ public class NQueensPanel
    		catch (Exception ex) {
    			throw new RuntimeException(ex);
    		}
-    }	
-   	
+    }
+
    	class SolverRunner
    	    extends Thread
    	{
-		public void run() 
+		public void run()
 		{
 			solveBtn_.setEnabled(false);
 			tabbedPane_.setEnabledAt(0,false);
@@ -107,15 +107,15 @@ public class NQueensPanel
 	    	solver_.solve(maxIter);
 			tabbedPane_.setEnabledAt(0,true);
 			solveBtn_.setEnabled(true);
-		}   	    
+		}
    	}
 
-	public void iterationCompleted(int iteration) 
+	public void iterationCompleted(int iteration)
 	{
 	    SwingUtilities.invokeLater(new Updater1(iteration));
 	}
 
-	public void newSolutionFound(int iteration, List<Integer> queenPositions, List<String> queenViolations) 
+	public void newSolutionFound(int iteration, List<Integer> queenPositions, List<String> queenViolations)
 	{
 		solutions_.add(new Object[]{new Integer(iteration),queenPositions,queenViolations});
 	    SwingUtilities.invokeLater(new Updater2());
@@ -125,7 +125,7 @@ public class NQueensPanel
 	{
     	if (i >= solutions_.size() || i < 0)
     		return;
-    	
+
     	curSolution_=i;
 
     	if (curSolution_==solutions_.size()-1)
@@ -140,22 +140,22 @@ public class NQueensPanel
 
     	solverBoard_.setSolution((Object[])solutions_.get(curSolution_));
 	}
-	
+
 	class Updater1 implements Runnable
 	{
 		int iteration_;
-		
+
 		public Updater1(int i) { iteration_ = i; }
-        
+
 		public void run() {
-            iterationCount_.setText("Iteration : "+iteration_);		
-        }	
+            iterationCount_.setText("Iteration : "+iteration_);
+        }
 	}
-	
+
 	class Updater2 implements Runnable
 	{
         public void run() {
     	    setCurrentSolution(solutions_.size()-1);
-        }	
+        }
 	}
 }

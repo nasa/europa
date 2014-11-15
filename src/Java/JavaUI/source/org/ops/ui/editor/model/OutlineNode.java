@@ -8,7 +8,7 @@ import org.ops.ui.filemanager.model.AstNodeTypes;
 /**
  * Outline node. Outline tree is computed from AST tree. This class also
  * contains a bunch of static methods for the actual AST to Outline conversion.
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 public class OutlineNode {

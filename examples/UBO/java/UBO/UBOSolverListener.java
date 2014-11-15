@@ -16,7 +16,7 @@ public class UBOSolverListener
     Vector planHistory_;
     Vector<Integer> treeSize_;
     Vector currentTree_;
-    
+
     public UBOSolverListener()
     {
         lastDepth_ = 0;
@@ -26,16 +26,16 @@ public class UBOSolverListener
         treeSize_ = new Vector();
         currentTree_ = new Vector();
     }
-    
+
     PSEngine getPSEngine()
     {
-    	return PSDesktop.getInstance().getPSEngine(); 
+    	return PSDesktop.getInstance().getPSEngine();
     //	return PSDesktop.desktop.getPSEngine();
     }
-    
+
     public Vector getDecisionHistory() { return decisionHistory_; }
     public Vector getPlanHistory() { return planHistory_; }
-    
+
     protected PlanHistoryEntry makePlanHistoryEntry(PSSolver s)
     {
         // Compute remaining nodes to explore
@@ -43,25 +43,25 @@ public class UBOSolverListener
         for (Integer i : treeSize_) {
             if (i != null)
                 size *= i;
-        }        
-        
+        }
+
         PlanHistoryEntry entry = new PlanHistoryEntry(s.getStepCount(),size,currentTree_.toString(),plan_.toString());
 
         return entry;
     }
-    
+
     protected void decreasePlanSize(int delta)
     {
     	int newSize = Math.max(0,plan_.size()-delta);
-    	
+
         plan_.setSize(newSize);
         treeSize_.setSize(newSize);
         currentTree_.setSize(newSize);
     }
-    
+
     public void stepCompleted(PSSolver s)
     {
-        String lastDecision = s.getLastExecutedDecision();        
+        String lastDecision = s.getLastExecutedDecision();
         if (lastDecision.startsWith("INSTANT") && (lastDepth_ <= s.getDepth())) {
             Pattern p = Pattern.compile("token=[0-9]+");
             Matcher m = p.matcher(lastDecision);
@@ -70,7 +70,7 @@ public class UBOSolverListener
             m.find();
             Integer succId = new Integer(lastDecision.substring(m.start()+6,m.end()));
             String tokenDecision = " tokens:{" + predId + "} < {" + succId +"}";
-            
+
             PSObject resource = getPSEngine().getTokenByKey(predId).getOwner();
             PSToken pred = getPSEngine().getTokenByKey(predId).getMaster();
             PSToken succ = getPSEngine().getTokenByKey(succId).getMaster();
@@ -91,29 +91,29 @@ public class UBOSolverListener
             String decision = decisionBuf.toString();
             String decisionMsg = s.getStepCount() + ": "+ decision + " because of " + resource.getEntityName() + tokenDecision;
             decisionHistory_.add(decisionMsg);
-            //System.out.println(decisionMsg);            
+            //System.out.println(decisionMsg);
 
             plan_.add(decision);
             treeSize_.add((remaining > 0) ? remaining : new Integer(1));
             currentTree_.add("("+choiceIdx+","+choiceCnt+")");
             PlanHistoryEntry entry = makePlanHistoryEntry(s);
-            planHistory_.add(entry);        
-            //System.out.println(entry);           
-        }        
-        
+            planHistory_.add(entry);
+            //System.out.println(entry);
+        }
+
         if (lastDepth_ >= s.getDepth()) {
             String btMsg = s.getStepCount() + ": Backtracked! from "+plan_.size()+" to "+s.getDepth();
             decisionHistory_.add(btMsg);
-            //System.out.println(btMsg); 
+            //System.out.println(btMsg);
 
             decreasePlanSize(lastDepth_ - s.getDepth());
             PlanHistoryEntry entry = makePlanHistoryEntry(s);
-            planHistory_.add(entry);        
-            //System.out.println(entry);           
+            planHistory_.add(entry);
+            //System.out.println(entry);
         }
 
-        lastDepth_ = s.getDepth(); 
+        lastDepth_ = s.getDepth();
         //System.out.println(s.getStepCount()+" set last depth to:"+lastDepth_);
     }
-} 
+}
 

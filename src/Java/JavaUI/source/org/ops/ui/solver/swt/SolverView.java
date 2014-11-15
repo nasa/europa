@@ -44,7 +44,7 @@ import org.ops.ui.solver.model.TimeFormatHelper;
 
 /**
  * Solver view, Eclipse version.
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 
@@ -496,7 +496,7 @@ public class SolverView extends SolverModelViewImpl {
 		// The state of the button is changed, just read it
 		if (runEngineButton.getSelection()) {
 			// Need to run
-			
+
 			runEngineButton.setImage(EuropaPlugin.getDefault().getImageRegistry()
 					.get(CommonImages.IMAGE_STOP));
 			assert (model.isTerminated());
@@ -508,7 +508,7 @@ public class SolverView extends SolverModelViewImpl {
 		}
 		updateState();
 	}
-	
+
 	/** So the model can be started programmatically (from elsewhere or from subclass) */
 	public void setModelStateIfNecessary(boolean started) {
 		if(started == runEngineButton.getSelection()) {
@@ -520,8 +520,8 @@ public class SolverView extends SolverModelViewImpl {
 			doEngineButtonPressed(null);
 		}
 	}
-	
-	
+
+
 	/**
 	 * Check if engine produced any error output. If so, print that output on a
 	 * console. If necessary, create the console and/or make it visible.
