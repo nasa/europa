@@ -13,7 +13,7 @@ import javax.swing.event.InternalFrameEvent;
 /**
  * Base class for internal frames of Swing version of GUI. This class takes care
  * of various open/close behavior and supplies check box menu item
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 public class EuropaInternalFrame extends JInternalFrame {
@@ -36,7 +36,7 @@ public class EuropaInternalFrame extends JInternalFrame {
 			}
 		});
 	}
-	
+
 	/** Minimum/initial size. Made into a method for overriding */
 	public Dimension getFavoriteSize() {
 		return new Dimension(100, 100);

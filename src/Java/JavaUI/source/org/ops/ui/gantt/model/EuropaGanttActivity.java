@@ -37,7 +37,7 @@ public class EuropaGanttActivity implements IGanttActivity {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.ops.ui.gantt.model.IGanttActivity#getStartMin()
 	 */
 	@Override
@@ -47,7 +47,7 @@ public class EuropaGanttActivity implements IGanttActivity {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.ops.ui.gantt.model.IGanttActivity#getStartMax()
 	 */
 	@Override
@@ -57,7 +57,7 @@ public class EuropaGanttActivity implements IGanttActivity {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.ops.ui.gantt.model.IGanttActivity#getEndMin()
 	 */
 	@Override
@@ -67,7 +67,7 @@ public class EuropaGanttActivity implements IGanttActivity {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.ops.ui.gantt.model.IGanttActivity#getEndMax()
 	 */
 	@Override
@@ -77,7 +77,7 @@ public class EuropaGanttActivity implements IGanttActivity {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.ops.ui.gantt.model.IGanttActivity#getDurMin()
 	 */
 	@Override
@@ -87,7 +87,7 @@ public class EuropaGanttActivity implements IGanttActivity {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.ops.ui.gantt.model.IGanttActivity#getDurMax()
 	 */
 	@Override
@@ -101,7 +101,7 @@ public class EuropaGanttActivity implements IGanttActivity {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.ops.ui.gantt.model.IGanttActivity#getText()
 	 */
 	@Override

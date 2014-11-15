@@ -4,7 +4,7 @@ import java.awt.Color;
 
 /**
  * Color structure for painting a token
- * 
+ *
  * @author Tatiana
  */
 public class TokenColor {

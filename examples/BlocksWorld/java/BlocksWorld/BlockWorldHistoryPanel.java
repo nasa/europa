@@ -24,15 +24,15 @@ public class BlockWorldHistoryPanel
 	protected int currentIdx_;
     protected JTextField gotoIdx_;
     protected JLabel status_;
-    
+
 	public BlockWorldHistoryPanel()
 	{
 		history_ = new Vector<BlockHistoryEntry>();
 		blockWorldHistory_ = new Vector<BlockWorld>();
-		
+
 	    historyTable_ = new JTable();
 	    currentIdx_ = -1;
-	    
+
     	JPanel buttonPanel = new JPanel(new FlowLayout());
     	JButton b;
 		b = new JButton("<<"); b.addActionListener(this);b.setActionCommand("prev"); buttonPanel.add(b);
@@ -40,29 +40,29 @@ public class BlockWorldHistoryPanel
 		b = new JButton("Go To Step"); b.addActionListener(this);b.setActionCommand("goto"); buttonPanel.add(b);
 		gotoIdx_ = new JTextField(6);
 		buttonPanel.add(gotoIdx_);
-		
+
         status_ = new JLabel("");
 		JPanel statusPanel = new JPanel(new FlowLayout());
         statusPanel.add(status_);
-        
+
 		setLayout(new BorderLayout());
     	add(BorderLayout.NORTH,buttonPanel);
-    	add(BorderLayout.CENTER,new JScrollPane(historyTable_));		
+    	add(BorderLayout.CENTER,new JScrollPane(historyTable_));
     	add(BorderLayout.SOUTH,statusPanel);
-    	
+
     	updateStatus();
 	}
 
     public List getHistory() { return history_; }
     public List getBlockWorldHistory() { return blockWorldHistory_; }
-    
-    protected void updateStatus() 
-    {	
-	    status_.setText("Currently showing step "+(currentIdx_+1)+" out of "+blockWorldHistory_.size()+" available");    	
+
+    protected void updateStatus()
+    {
+	    status_.setText("Currently showing step "+(currentIdx_+1)+" out of "+blockWorldHistory_.size()+" available");
     }
-    
-    public void showStep(int step) 
-    { 
+
+    public void showStep(int step)
+    {
     	if (step>=0 && step<blockWorldHistory_.size()) {
         	currentIdx_ = step;
     	    historyTable_.setModel(new BlockWorldTableModel(blockWorldHistory_.get(currentIdx_)));
@@ -78,21 +78,21 @@ public class BlockWorldHistoryPanel
 	    updateStatus();
 		//System.out.println(step);
 	}
-	
-    public void actionPerformed(ActionEvent e) 
+
+    public void actionPerformed(ActionEvent e)
     {
         if ("next".equals(e.getActionCommand())) {
         	showStep(currentIdx_+1);
         	return;
-        } 
+        }
 
         if ("prev".equals(e.getActionCommand())) {
         	showStep(currentIdx_-1);
         	return;
-        }         
+        }
 
         if ("goto".equals(e.getActionCommand())) {
-    		int step;    		
+    		int step;
     		try {
     			step = new Integer(gotoIdx_.getText());
     		}
@@ -100,11 +100,11 @@ public class BlockWorldHistoryPanel
     			// TODO: display error message
     			return;
     		}
-    		
+
 		    showStep(step-1);
-    		
+
         	return;
-        }         
-    }    	        
+        }
+    }
 }
 

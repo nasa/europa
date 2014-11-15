@@ -9,7 +9,7 @@ import psengine.PSEngine;
  * File model gets AST from a file. To do so, it creates a brand new copy of
  * engine, and deletes it when it is done. Loading of models into an engine for
  * running is done in SolverModel.
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 public class FileModel {

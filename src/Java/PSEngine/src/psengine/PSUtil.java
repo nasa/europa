@@ -15,7 +15,7 @@ public class PSUtil
     {
     	try {
     	    List<Object> retval = new Vector<Object>();
-    	
+
     	    Method m = psList.getClass().getMethod("size", (Class[])null);
     	    int size = (Integer)m.invoke(psList,(Object[])null);
     	    m = psList.getClass().getMethod("get", new Class[]{int.class});
@@ -24,33 +24,33 @@ public class PSUtil
     	    	args[0] = i;
     	    	retval.add(m.invoke(psList, args));
     	    }
-    	    	
+
         	return retval;
     	}
     	catch (Exception e) {
     		throw new RuntimeException(e);
     	}
-    }	
-    
+    }
+
     // TODO: unify this one with the toJavaList by using generics
     public static List<PSResource> toResourceList(PSObjectList psList)
     {
    	    List<PSResource> retval = new Vector<PSResource>();
-    	
-   	    for (int i=0; i<psList.size();i++) 
+
+   	    for (int i=0; i<psList.size();i++)
    	    	retval.add(PSResource.asPSResource(psList.get(i)));
-    	    	
+
        	return retval;
-    }	
-    
+    }
+
     public static void loadLibraries(String debugMode)
     {
-        LibraryLoader.loadLibrary("System_"+debugMode);	
+        LibraryLoader.loadLibrary("System_"+debugMode);
     }
-    
-    /** 
-     * Try various modifiers to pick the libraries. If all fail, throws 
-     * UnsatisfiedLinkError 
+
+    /**
+     * Try various modifiers to pick the libraries. If all fail, throws
+     * UnsatisfiedLinkError
      */
     public static void loadLibraries() {
     	try { loadLibraries("g"); return; }

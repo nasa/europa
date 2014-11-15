@@ -2,16 +2,16 @@ package org.ops.ui.gantt.model;
 
 import java.util.Calendar;
 
-public class PSGanttActivityImpl 
-    implements PSGanttActivity 
+public class PSGanttActivityImpl
+    implements PSGanttActivity
  {
 	protected Object key_;
 	protected Calendar start_;
 	protected Calendar finish_;
 	protected double violation_;
-	
-	public PSGanttActivityImpl(Object key, 
-			                   Calendar start, 
+
+	public PSGanttActivityImpl(Object key,
+			                   Calendar start,
 			                   Calendar finish,
 			                   double violation)
 	{
@@ -24,5 +24,5 @@ public class PSGanttActivityImpl
 	public Calendar getFinish() { return finish_; }
 	public Object getKey() { return key_; }
     public Calendar getStart() {  return start_; }
-    public double getViolation() { return violation_; }    
+    public double getViolation() { return violation_; }
 }

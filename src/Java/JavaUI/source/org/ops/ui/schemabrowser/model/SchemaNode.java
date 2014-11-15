@@ -7,10 +7,10 @@ import psengine.PSDataType;
 
 /**
  * Node of the schema tree.
- * 
+ *
  * @author Tatiana Kichkaylo
  */
-public class SchemaNode 
+public class SchemaNode
 {
 	/** Seed for conversion to array */
 	private final static SchemaNode[] seedArray = {};
@@ -123,22 +123,22 @@ public class SchemaNode
 		children.clear();
 	}
 
-	public void setFileLocation(FileLocation fl) 
+	public void setFileLocation(FileLocation fl)
 	{
 		this.fileLocation = fl;
 	}
 
-	public FileLocation getFileLocation() 
+	public FileLocation getFileLocation()
 	{
 		return fileLocation;
 	}
-	
+
 	public static class FileLocation
 	{
 		public String filename;
 		public int startLine;
 		public int endLine;
-		
+
 		public FileLocation(String fn, int sl, int el)
 		{
 			filename = fn;

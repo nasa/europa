@@ -25,7 +25,7 @@ import org.ops.ui.solver.model.TimeFormatHelper;
 
 /**
  * Solver dialog. Contents of the original dialog folded into one panel.
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 
@@ -36,7 +36,7 @@ public class PSSolverView extends EuropaInternalFrame implements
 		SolverListener {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 
@@ -239,7 +239,7 @@ public class PSSolverView extends EuropaInternalFrame implements
 		String msg = solver.retrieveEngineOutput();
 		if (msg == null || msg.isEmpty())
 			return; // nothing to do
-		
+
 		console.addText(msg);
 		console.setVisible(true);
 	}

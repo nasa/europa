@@ -21,18 +21,18 @@ import javax.swing.filechooser.FileFilter;
  * <p>
  * The following example creates a {@code FileNameExtensionFilter} that will
  * show {@code jpg} files:
- * 
+ *
  * <pre>
  * FileFilter filter = new FileNameExtensionFilter("JPEG file", "jpg", "jpeg");
  * JFileChooser fileChooser = ...;
  * fileChooser.addChoosableFileFilter(filter);
  * </pre>
- * 
+ *
  * @see FileFilter
  * @see javax.swing.JFileChooser#setFileFilter
  * @see javax.swing.JFileChooser#addChoosableFileFilter
  * @see javax.swing.JFileChooser#getFileFilter
- * 
+ *
  * @version 1.1 02/02/06
  * @since 1.6
  */
@@ -51,7 +51,7 @@ public final class FileNameExtensionFilter extends FileFilter {
 	 * and file name extensions. The returned {@code FileNameExtensionFilter}
 	 * will accept all directories and any file with a file name extension
 	 * contained in {@code extensions}.
-	 * 
+	 *
 	 * @param description
 	 *            textual description for the filter, may be {@code null}
 	 * @param extensions
@@ -83,7 +83,7 @@ public final class FileNameExtensionFilter extends FileFilter {
 	 * Tests the specified file, returning true if the file is accepted, false
 	 * otherwise. True is returned if the extension matches one of the file name
 	 * extensions of this {@code FileFilter}, or the file is a directory.
-	 * 
+	 *
 	 * @param f
 	 *            the {@code File} to test
 	 * @return true if the file is to be accepted, false otherwise
@@ -116,7 +116,7 @@ public final class FileNameExtensionFilter extends FileFilter {
 
 	/**
 	 * The description of this filter. For example: "JPG and GIF Images."
-	 * 
+	 *
 	 * @return the description of this filter
 	 */
 	@Override
@@ -126,7 +126,7 @@ public final class FileNameExtensionFilter extends FileFilter {
 
 	/**
 	 * Returns the set of file name extensions files are tested against.
-	 * 
+	 *
 	 * @return the set of file name extensions files are tested against
 	 */
 	public String[] getExtensions() {
@@ -140,7 +140,7 @@ public final class FileNameExtensionFilter extends FileFilter {
 	 * This method is intended to be used for debugging purposes, and the
 	 * content and format of the returned string may vary between
 	 * implementations.
-	 * 
+	 *
 	 * @return a string representation of this {@code FileNameExtensionFilter}
 	 */
 	@Override
