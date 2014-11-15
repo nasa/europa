@@ -3,4 +3,4 @@ compiler:
  - gcc
  - clang
 install: sudo add-apt-repository --yes ppa:kalakris/cmake && sudo apt-get update -qq && sudo apt-get install cmake libboost-dev libcppunit-dev libantlr3c-dev antlr swig
-script: mkdir build && cd build && cmake .. && make && ctest
+script: mkdir build && cd build && cmake .. && make -j2 && ctest -VV
