@@ -76,6 +76,7 @@ ConstraintEngineId DefaultEngineAccessor::s_instance;
   } \
   catch(std::exception e) {                     \
     std::cout << e.what() << std::endl;         \
+    CPPUNIT_FAIL(e.what());                     \
  } \
 }
 
