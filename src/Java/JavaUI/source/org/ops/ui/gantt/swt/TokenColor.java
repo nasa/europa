@@ -5,7 +5,7 @@ import org.eclipse.swt.graphics.Color;
 
 /**
  * Color structure for painting a token
- * 
+ *
  * @author Tatiana
  */
 public class TokenColor {

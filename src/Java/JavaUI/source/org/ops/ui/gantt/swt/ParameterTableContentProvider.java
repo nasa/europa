@@ -8,11 +8,11 @@ import psengine.PSVariable;
 import psengine.PSVariableList;
 
 /**
- * Content provider for token parameters (ie variables), 
+ * Content provider for token parameters (ie variables),
  * simply returns all variables as an array.
- * 
+ *
  * @author Tristan Smith
- * 
+ *
  */
 
 public class ParameterTableContentProvider implements
@@ -29,7 +29,7 @@ public class ParameterTableContentProvider implements
 	@Override
 	public Object[] getElements(Object inputElement) {
 		PSToken token = (PSToken) inputElement;
-		
+
 		if(token == null) {
 			return null;
 		}

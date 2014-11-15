@@ -13,7 +13,7 @@ import org.ops.ui.schemabrowser.model.SchemaNode;
 
 /**
  * Label and icon provider for the SWT version of schema browser
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 public class SchemaLabelProvider extends LabelProvider implements

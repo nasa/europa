@@ -8,17 +8,17 @@ import org.ops.ui.utils.Utilities;
 import psengine.PSVariable;
 
 /**
- * Label provider for token parameters (ie variables), assumes you 
+ * Label provider for token parameters (ie variables), assumes you
  * want the variable name in first column and user-friendly value
  * in second.
- * 
+ *
  * @author Tristan Smith
- * 
+ *
  */
 
 public class ParameterTableLabelProvider extends ColumnLabelProvider {
 
-	
+
 	public void update(ViewerCell cell) {
 		Object element = cell.getElement();
 		cell.setText(getColumnText(element, cell.getColumnIndex()));
@@ -32,7 +32,7 @@ public class ParameterTableLabelProvider extends ColumnLabelProvider {
 //	@Override
 	public String getColumnText(Object element, int index) {
 		PSVariable variable = (PSVariable) element;
-		
+
 		if(variable == null) {
 			return "--";
 		}

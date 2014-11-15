@@ -19,7 +19,7 @@ public class NonRuleBasedDamagerRepairer implements IPresentationDamager,
 
 	/** The document this object works on */
 	protected IDocument fDocument;
-	
+
 	/**
 	 * The default text attribute if non is returned as data by the current
 	 * token
@@ -43,7 +43,7 @@ public class NonRuleBasedDamagerRepairer implements IPresentationDamager,
 	 * Returns the end offset of the line that contains the specified offset or
 	 * if the offset is inside a line delimiter, the end offset of the next
 	 * line.
-	 * 
+	 *
 	 * @param offset
 	 *            the offset whose line end offset must be computed
 	 * @return the line end offset for the given offset
@@ -112,7 +112,7 @@ public class NonRuleBasedDamagerRepairer implements IPresentationDamager,
 
 	/**
 	 * Adds style information to the given text presentation.
-	 * 
+	 *
 	 * @param presentation
 	 *            the text presentation to be extended
 	 * @param offset

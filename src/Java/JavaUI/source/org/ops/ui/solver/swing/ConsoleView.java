@@ -8,7 +8,7 @@ import org.ops.ui.main.swing.EuropaInternalFrame;
 
 /**
  * A read-only view to capture engine's error output. Used by PSSolverDialog.
- * 
+ *
  * @author Tatiana
  */
 public class ConsoleView extends EuropaInternalFrame {

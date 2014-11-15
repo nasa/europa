@@ -10,7 +10,7 @@ public class BlockWorldTableModel
 {
 	protected BlockWorld data_;
     protected int maxTowerSize_;
-    
+
 	public BlockWorldTableModel(BlockWorld bw)
 	{
 		data_ = bw;
@@ -27,7 +27,7 @@ public class BlockWorldTableModel
 
 	public int getRowCount() { return maxTowerSize_; }
 
-	public Object getValueAt(int rowIndex, int columnIndex) 
+	public Object getValueAt(int rowIndex, int columnIndex)
 	{
     	List tower = data_.getTowers().get(columnIndex);
 	    if (tower.size() > rowIndex)

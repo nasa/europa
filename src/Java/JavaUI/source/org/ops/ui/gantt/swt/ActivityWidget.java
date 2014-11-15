@@ -10,7 +10,7 @@ import org.ops.ui.gantt.model.IGanttActivity;
 
 /**
  * A graphic representation of an activity on Gantt chart
- * 
+ *
  * @author tatiana
  */
 public class ActivityWidget extends Figure {
@@ -21,16 +21,16 @@ public class ActivityWidget extends Figure {
 	private final IGanttActivity activity;
 	private final GenericGanttView view; // our master, so we can send selection events
 	private TokenColor color;
-	
+
 	private void tokenSelected() {
 		view.setSelection(new TokenSelection(activity));
 	}
-	
+
 	public ActivityWidget(IGanttActivity activity, TokenColor color, GenericGanttView view) {
 		this.activity = activity;
 		this.color = color;
 		this.view = view;
-		
+
 		this.setLayoutManager(null);
 
 		StringBuffer b = new StringBuffer();
@@ -45,8 +45,8 @@ public class ActivityWidget extends Figure {
 		this.setToolTip(new Label(b.toString()));
 		this.setBackgroundColor(color.body);
 		this.setOpaque(true);
-		
-		
+
+
 		this.addMouseListener(new MouseListener() {
 
 			@Override
@@ -108,7 +108,7 @@ public class ActivityWidget extends Figure {
 	public String toString() {
 		return activity.getText() + this.getBounds();
 	}
-	
+
 	@Override
 	public void setBounds(Rectangle rect) {
 		super.setBounds(rect);

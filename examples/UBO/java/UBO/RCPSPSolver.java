@@ -5,13 +5,13 @@ import java.util.Collection;
 import psengine.PSEngine;
 import psengine.PSToken;
 
-public interface RCPSPSolver 
+public interface RCPSPSolver
 {
     public String getName();
-    
-    public void solve(PSEngine psengine, 
+
+    public void solve(PSEngine psengine,
                       long timeout, // in msecs
-                      int bound, 
+                      int bound,
                       boolean usePSResources);
 
     public long getElapsedMsecs();

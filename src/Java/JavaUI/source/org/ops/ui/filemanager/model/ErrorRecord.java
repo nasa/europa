@@ -3,7 +3,7 @@ package org.ops.ui.filemanager.model;
 /**
  * Record for representing error messages accompanying AST. All fields are read
  * only.
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 public class ErrorRecord {

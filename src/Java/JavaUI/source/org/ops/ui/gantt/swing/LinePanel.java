@@ -7,7 +7,7 @@ import javax.swing.JPanel;
 
 /**
  * Parent class for TimelinePanel and ResourcePanel.
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 public abstract class LinePanel extends JPanel {

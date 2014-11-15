@@ -22,7 +22,7 @@ import org.ops.ui.solver.swt.SolverModelViewImpl;
 
 /**
  * Europa schema browser - SWT version
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 public class SchemaView extends SolverModelViewImpl {

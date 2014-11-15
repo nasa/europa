@@ -35,7 +35,7 @@ public class TokenWidget extends JPanel {
 		this.setToolTipText(b.toString());
 		this.setBackground(color.body);
 	}
-	
+
 	private static String str(int num) {
 		if (num == Integer.MAX_VALUE)
 			return "inf";

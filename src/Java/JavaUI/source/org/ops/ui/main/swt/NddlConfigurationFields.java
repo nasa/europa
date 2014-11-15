@@ -2,7 +2,7 @@ package org.ops.ui.main.swt;
 
 /**
  * Attribute names in a launch configuration for NDDL models
- * 
+ *
  * @author Tatiana Kichkaylo
  */
 public interface NddlConfigurationFields {
