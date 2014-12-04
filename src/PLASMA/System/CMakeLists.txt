@@ -112,6 +112,8 @@ swig_add_module(${PSEngine_target} java base/PSEngine.i)
 #add_custom_command(TARGET ${PSEngine_target} PRE_LINK
 #  COMMAND mkdir base)
   
+#add_dependencies(${PSEngine_target} base)
+
 foreach(dep ${internal_dependencies})
   add_common_module_include_dep(${PSEngine_target} ${dep})
   target_link_libraries(${PSEngine_target} "${dep}${EUROPA_SUFFIX}")
