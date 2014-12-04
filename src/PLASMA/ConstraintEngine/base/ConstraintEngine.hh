@@ -122,6 +122,7 @@ namespace EUROPA {
 
     enum Event { UPPER_BOUND_DECREASED = 0, /**< If the upper bound of an interval domain is reduced. */
                  LOWER_BOUND_INCREASED, /**< If the lower bound of an interval domain is increased. */
+                 REFTIME_CHANGED, /**< PHM Support for reftime calculations. */
                  BOUNDS_RESTRICTED, /**< Both upper and lower are decreased and increased respectively. */
                  VALUE_REMOVED, /**< A restriction to an enumerated domain. */
                  RESTRICT_TO_SINGLETON, /**< A restriction of the domain to a singleton value through inference. */
