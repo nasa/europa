@@ -381,6 +381,8 @@ namespace EUROPA {
 
     if(getCurrentDomain().isEmpty())
       return;
+    if(internal_baseDomain().isSingleton() && !isSpecified())
+      internalSpecify(internal_baseDomain().getSingletonValue());
   }
 
   void ConstrainedVariable::open() {

@@ -40,7 +40,7 @@ namespace EUROPA{
   }
 
   EquivalenceClassCollection::EquivalenceClassCollection()
-    :m_requiresUpdate(false){}
+      : m_nodesByVar(), m_graphsByKey(), m_requiresUpdate(false), m_nextCycle(0), m_nextGraph(0) {}
 
   EquivalenceClassCollection::~EquivalenceClassCollection(){
     for(std::map<ConstrainedVariableId, ConstraintNodeId>::iterator it = m_nodesByVar.begin(); it != m_nodesByVar.end(); ++it)
