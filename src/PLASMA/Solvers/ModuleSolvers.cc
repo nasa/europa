@@ -59,6 +59,7 @@ namespace EUROPA {
       REGISTER_FLAW_HANDLER(cfm,SOLVERS::MinValue, StandardVariableHandler);
       REGISTER_FLAW_HANDLER(cfm,SOLVERS::MinValue, Min);
       REGISTER_FLAW_HANDLER(cfm,SOLVERS::MaxValue, Max);
+      REGISTER_FLAW_HANDLER(cfm,SOLVERS::RandomValue, Random);
       REGISTER_FLAW_HANDLER(cfm,SOLVERS::HSTS::ValueEnum, ValEnum);
 
       REGISTER_FLAW_MANAGER(cfm,SOLVERS::OpenConditionManager, OpenConditionManager);

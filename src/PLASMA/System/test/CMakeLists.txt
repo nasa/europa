@@ -37,7 +37,7 @@ function(run_planner_problem model configFile dep)
     set(model "${model}.nddl")
   endif(NOT is_nddl)
 
-  set(test_target run-nddl-interp-${model})
+  set(test_target run-nddl-interp-${model}-${configFile})
   add_test(NAME ${test_target}
     COMMAND ${exec_plan} ${model} ${configFile} nddl)
   #add_dependencies(${dep} ${test_target})
@@ -59,7 +59,7 @@ run_planner_problem(HTX.3 HTX.3.solverConfig.xml nddl)
 run_planner_problem(reusable-test-transaction ReusableTestConfig.xml nddl)
 run_planner_problem(unary-resource-test-transaction ReusableTestConfig.xml nddl)
 run_planner_problem(Mini-crew-init.nddl MiniCrewSolverConfig.xml nddl)
-
+run_planner_problem(basic-model-transaction RandomPlannerConfig.xml nddl)
 
 file(GLOB models *.nddl)
 file(COPY ${models} DESTINATION .)
