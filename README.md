@@ -13,16 +13,16 @@ Welcome!  EUROPA is a framework to model and tackle problems in Planning, Schedu
 - **A Problem Solver:** A core solver to automatically find and fix flaws in the plan database. It can be configured to plan, schedule or both. It can be easily customized to integrate specialized heuristics and resolution operations.
 - **A Tool Box:** Europa includes a debugger for instrumentation and visualization of applications. It also includes a very high-level, declarative modeling language for describing problem domains and partial-plans.
 
-[Learn more...](What-Is-Europa.md)
+[Learn more...](What-Is-Europa)
 
 EUROPA was developed at NASA's Ames Research Center and is available under NASA's open source agreement [(NOSA)](http://opensource.arc.nasa.gov/page/nosa-software-agreement) 
 
 |**Getting Started**|**Documentation**|**Development**|
 |-------------------|-----------------|---------------|
-|[Download](Europa-Download.md)|[Background/Overview](Europa-Background.md)|[Building EUROPA](Building-Europa.md)|
-|[Installation](Europa-Installation.md)|[User Documentation](Europa-Docs.md)|[Automated Builds](Nightly-Builds.md)|
-|[Quick Start](Quick-Start.md)|[Examples](Europa-Examples.md)|[Developer Notes](Misc-Development.md)|
-||[Publications](Europa-Publications.md)|[Product Roadmap](Europa-Roadmap.md)|
-|||[People](Europa-Team.md)|
+|[Download](Europa-Download)|[Background/Overview](Europa-Background)|[Building EUROPA](Building-Europa)|
+|[Installation](Europa-Installation)|[User Documentation](Europa-Docs)|[Automated Builds](Nightly-Builds)|
+|[Quick Start](Quick-Start)|[Examples](Europa-Examples)|[Developer Notes](Misc-Development)|
+||[Publications](Europa-Publications)|[Product Roadmap](Europa-Roadmap)|
+|||[People](Europa-Team)|
 
 For questions, please use the [europa-users](http://groups.google.com/group/europa-users) google group.

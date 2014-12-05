@@ -202,10 +202,6 @@ namespace EUROPA {
     static std::map<std::string, edouble>& keysFromString();
     static std::map<edouble, std::string>& stringFromKeys();
 
-#ifndef EUROPA_FAST
-    const char* m_chars;
-#endif
-
   };
 }
 #endif
