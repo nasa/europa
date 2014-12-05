@@ -1,4 +1,7 @@
-# EUROPA [![Build Status](https://travis-ci.org/nasa/europa.svg?branch=master)](https://travis-ci.org/nasa/europa)
+# EUROPA [![Build Status](https://travis-ci.org/nasa/europa.svg?branch=master)](https://travis-ci.org/nasa/europa) <a href="https://scan.coverity.com/projects/3615">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/3615/badge.svg"/>
+</a>
 
 **EUROPA is available under [NASA's Open Source Agreement (NOSA) ](http://opensource.arc.nasa.gov/page/nosa-software-agreement)**
 
