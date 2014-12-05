@@ -36,7 +36,7 @@ class DummyDomain : public Domain {
   size_type getSize() const {return 1;}
   edouble getUpperBound() const {return 1.0;}
   edouble getLowerBound() const {return 1.0;}
-  bool getBounds(edouble& lb, edouble& ub) const {lb = getLowerBound(); ub = getUpperBound();}
+  bool getBounds(edouble& lb, edouble& ub) const {lb = getLowerBound(); ub = getUpperBound(); return false;}
   void getValues(std::list<edouble>& results) const {results.clear(); results.push_back(1.0);}
   edouble getSingletonValue() const {return 1.0;}
   void empty() {}

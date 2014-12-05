@@ -33,9 +33,6 @@ namespace EUROPA {
   LabelStr::LabelStr() {
     std::string empty("");
     m_key = getKey(empty);
-#ifndef EUROPA_FAST
-    m_chars = empty.c_str();
-#endif
   }
 
   pthread_mutex_t& LabelStrMutex()
@@ -53,27 +50,18 @@ namespace EUROPA {
   LabelStr::LabelStr(const std::string& label) {
     m_key = getKey(label);
 
-#ifndef EUROPA_FAST
-    m_chars = label.c_str();
-#endif
   }
 
   LabelStr::LabelStr(const char* label) {
     std::string str(label);
     m_key = getKey(label);
 
-#ifndef EUROPA_FAST
-    m_chars = label;
-#endif
   }
 
   LabelStr::LabelStr(edouble key)
     : m_key(key) {
     check_error(isString(m_key), "Invalid key provided.");
 
-#ifndef EUROPA_FAST
-    m_chars = toString().c_str();
-#endif
   }
 
   const std::string& LabelStr::toString() const {
@@ -88,7 +76,6 @@ namespace EUROPA {
 
   LabelStr::LabelStr(const LabelStr& org)
     : m_key(org.m_key) {
-    m_chars = org.m_chars;
   }
 
   LabelStr::operator edouble () const {
