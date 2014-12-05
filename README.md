@@ -1,6 +1,4 @@
-# Main wiki page
-
-# EUROPA
+# EUROPA [![Build Status](https://travis-ci.org/nasa/europa.svg?branch=master)](https://travis-ci.org/nasa/europa)
 
 **EUROPA is available under [NASA's Open Source Agreement (NOSA) ](http://opensource.arc.nasa.gov/page/nosa-software-agreement)**
 
