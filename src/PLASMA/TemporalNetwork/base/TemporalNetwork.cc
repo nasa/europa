@@ -357,10 +357,11 @@ namespace EUROPA {
   TemporalNetwork::getConstraintScope(const TemporalConstraintId& id) {
     std::list<TimepointId> result;
 
-    if(id.isInvalid())
-      handle_error(is.isInvalid(),
-                   "Cannot get scope of invalid constraint.",
-                   TempNetErr::TempNetInvalidConstraintError());
+    if(id.isInvalid()) {
+      check_error(id.isInvalid(),
+                  "Cannot get scope of invalid constraint.",
+                  TempNetErr::TempNetInvalidConstraintError());
+    }
 
     Tspec* spec = id.operator->();
     result.push_back(spec->head->getId());
@@ -378,7 +379,7 @@ namespace EUROPA {
   Time
   TemporalNetwork::getConstraintUpperBound(const TemporalConstraintId& id) {
     if(id.isInvalid())
-      handle_error(id.isInvalid(),
+      check_error(id.isInvalid(),
                    "Cannot get scope of invalid constraint.",
                    TempNetErr::TempNetInvalidConstraintError());
 
@@ -390,7 +391,7 @@ namespace EUROPA {
   Time
   TemporalNetwork::getConstraintLowerBound(const TemporalConstraintId& id) {
     if(id.isInvalid())
-      handle_error(id.isInvalid(),
+      check_error(id.isInvalid(),
                    "Cannot get scope of invalid constraint.",
                    TempNetErr::TempNetInvalidConstraintError());
     Tspec* spec = id.operator->();
