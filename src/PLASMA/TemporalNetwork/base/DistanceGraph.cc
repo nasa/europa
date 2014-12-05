@@ -126,7 +126,7 @@ Void attachEdge (DedgeId*& edgeArray, Int& size, Int& count, DedgeId edge)
       size = 2*size;
     DedgeId* newEdgeArray = new DedgeId[size];
     if(!newEdgeArray)
-      handle_error(!newEdgeArray,
+      check_error(!newEdgeArray,
                    "Memory allocation failed for TemporalNetwork edge-array",
                    TempNetErr::TempNetMemoryError());
     for (Int i=0; i<count; i++)

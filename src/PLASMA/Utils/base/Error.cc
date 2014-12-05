@@ -63,10 +63,9 @@ Error::Error(const std::string& condition, const std::string& msg, const std::st
     s_os = &(std::cerr);
 }
 
+// coverity[+kill]
 void Error::handleAssert() {
   display();
-  if (throwEnabled())
-    throw *this;
 #ifndef __BEOS__
   assert(false); // Need the stack to work backwards and look at state in the debugger
 #else

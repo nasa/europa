@@ -60,14 +60,15 @@ void DispatchGraph::createEdge(DispatchNode* from, DispatchNode* to,
 void DispatchGraph::filter( void (*keepEdge)(DispatchNode*, DispatchNode*,
                                              Time) )
 {
-  if (bellmanFord() == false)
-    handle_error(bellmanFord() == false,
+  if (bellmanFord() == false) {
+    check_error(bellmanFord() == false,
                 "Dispatchability analysis called on inconsistent graph",
                 TempNetErr::DistanceGraphInconsistentError());
+  }
   this->reversePostorder = new DispatchNode*[this->nodes.size()];
 
   if (!this->reversePostorder)
-    handle_error(!this->reversePostorder, 
+    check_error(!this->reversePostorder, 
                  "Could not allocate memory to process dispatchability",
                  TempNetErr::TempNetMemoryError());
   this->sccLeaders = std::vector<DispatchNode*>();
@@ -108,7 +109,7 @@ void DispatchGraph::findSccs( void (*keepEdge)(DispatchNode*, DispatchNode*,
   Int nodeCount = this->nodes.size();
   DispatchNode** scc = new DispatchNode*[nodeCount];  // Scratch list for SCCs.
   if (!scc)
-    handle_error(!scc, 
+    check_error(!scc, 
                 "Could not allocate memory to process dispatchability",
                 TempNetErr::TempNetMemoryError());
   buildReversePostorder (this->nodes);

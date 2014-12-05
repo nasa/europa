@@ -85,6 +85,7 @@ class IntrinsicsTest {
   };
   static bool lessThanTest() {
     DummyDomain dom;
+    CPPUNIT_ASSERT(dom.minDelta() == 0.5);
     CPPUNIT_ASSERT(dom.lt(0.0, 0.5));
     CPPUNIT_ASSERT(!dom.lt(0.0, 0.4));
     CPPUNIT_ASSERT(dom.lt(0.0, 0.6));

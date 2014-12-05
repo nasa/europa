@@ -52,22 +52,6 @@
 #define ALWAYS_FAIL (false)
 
 /**
- * @def handle_error
- * Create an error instance for throwing, printing, etc., per class Error.
- * @param cond Condition that failed (was false), implying an error has occurred.
- * @param optarg Optional arguments passed on to the appropriate
- * class Error constructor.
- */
-#ifndef _MSC_VER
-#define handle_error(cond, optarg...) { \
-  new Error(#cond, ##optarg, __FILE__, __LINE__); \
-}
-#else
-#define handle_error(cond, ...) { \
-  new Error(#cond, __VA_ARGS__, __FILE__, __LINE__); \
-}
-#endif
-/**
  * @def DECLARE_ERROR
  * Declare an error as a function that returns a string naming itself.
  * @param error The error to declare.
@@ -81,25 +65,25 @@
 #ifndef _MSC_VER
 #define assertTrue(cond, optarg...) { \
   if (!(cond)) { \
-    (new Error(#cond, ##optarg,  __FILE__, __LINE__))->handleAssert();	\
+    Error __e__(#cond, ##optarg,  __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();}	\
   } \
 }
 
 #define assertFalse(cond, optarg...) { \
   if (cond) { \
-    (new Error(#cond, ##optarg, __FILE__, __LINE__))->handleAssert(); \
+    Error __e__(#cond, ##optarg, __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();} \
   } \
 }
 #else
 #define assertTrue(cond, ...) { \
   if (!(cond)) { \
-    (new Error(#cond, __VA_ARGS__, __FILE__, __LINE__))->handleAssert(); \
+    Error __e__(#cond, __VA_ARGS__, __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();} \
   } \
 }
 
 #define assertFalse(cond, ...) { \
   if (cond) { \
-    (new Error(#cond, __VA_ARGS__, __FILE__, __LINE__))->handleAssert(); \
+    Error __e__(#cond, __VA_ARGS__, __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();} \
   } \
 }
 #endif
@@ -178,13 +162,13 @@
 #ifndef _MSC_VER
 #define check_error(cond, optarg...) { \
   if (!(cond)) { \
-    (new Error(#cond, ##optarg, __FILE__, __LINE__))->handleAssert(); \
+    Error __e__(#cond, ##optarg, __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();} \
   } \
 }
 #else
 #define check_error(cond, ...) { \
   if (!(cond)) { \
-    (new Error(#cond, __VA_ARGS__, __FILE__, __LINE__))->handleAssert(); \
+    Error __e__(#cond, __VA_ARGS__, __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();} \
   } \
 }
 #endif
@@ -194,7 +178,7 @@
   if (!(cond)) { \
     std::stringstream sstr; \
     sstr << msg; \
-    (new Error(#cond, sstr.str(), ##optarg, __FILE__, __LINE__))->handleAssert(); \
+    Error __e__(#cond, sstr.str(), ##optarg, __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();} \
   } \
 }
 #else
@@ -204,7 +188,7 @@
   if (!(cond)) { \
     std::stringstream sstr; \
     sstr << msg; \
-    (new Error(#cond, sstr.str(), __FILE__, __LINE__))->handleAssert(); \
+    Error __e__(#cond, sstr.str(), __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();} \
   } \
 }
 
@@ -212,7 +196,7 @@
     if (!(cond)) { \
     std::stringstream sstr; \
     sstr << msg; \
-    (new Error(#cond, sstr.str(), __FILE__, __LINE__))->handleAssert(); \
+    Error __e__(#cond, sstr.str(), __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();} \
     } \
 }
 #endif
@@ -246,13 +230,13 @@
 #ifndef _MSC_VER
 #define check_runtime_error(cond, optarg...) { \
   if (!(cond)) { \
-    (new Error(#cond, ##optarg, __FILE__, __LINE__))->handleAssert(); \
+    Error __e__(#cond, ##optarg, __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();} \
   } \
 }
 #else
 #define check_runtime_error(cond, ...) { \
   if (!(cond)) { \
-    (new Error(#cond, __VA_ARGS__, __FILE__, __LINE__))->handleAssert(); \
+    Error __e__(#cond, __VA_ARGS__, __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();} \
   } \
 }
 #endif
@@ -260,7 +244,7 @@
   if (!(cond)) { \
     std::stringstream sstr; \
     sstr << msg; \
-    (new Error(#cond, sstr.str(), __FILE__, __LINE__))->handleAssert(); \
+    Error __e__(#cond, sstr.str(), __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();} \
   } \
 }
 
