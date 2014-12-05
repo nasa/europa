@@ -89,6 +89,12 @@ class IntrinsicsTest {
     CPPUNIT_ASSERT(!dom.lt(0.0, 0.4));
     CPPUNIT_ASSERT(dom.lt(0.0, 0.6));
     CPPUNIT_ASSERT(!dom.lt(0.0, 0.0));
+
+    CPPUNIT_ASSERT(dom.lt(1.0, 1.5));
+    CPPUNIT_ASSERT(!dom.lt(1.0, 1.4));
+    CPPUNIT_ASSERT(dom.lt(1.0, 1.6));
+    CPPUNIT_ASSERT(!dom.lt(1.0, 1.0));
+
     return true;
   }
 
@@ -98,6 +104,11 @@ class IntrinsicsTest {
     CPPUNIT_ASSERT(!dom.eq(0.0, 0.5));
     CPPUNIT_ASSERT(dom.eq(0.0, 0.4));
     CPPUNIT_ASSERT(!dom.eq(0.0, 0.6));
+
+    CPPUNIT_ASSERT(dom.eq(1.0, 1.0));
+    CPPUNIT_ASSERT(!dom.eq(1.0, 1.5));
+    CPPUNIT_ASSERT(dom.eq(1.0, 1.4));
+    CPPUNIT_ASSERT(!dom.eq(1.0, 1.6));
     return true;
   }
   static bool lessThanOrEqualTest() {
@@ -107,6 +118,12 @@ class IntrinsicsTest {
     CPPUNIT_ASSERT(dom.leq(0.0, 0.6));
     CPPUNIT_ASSERT(dom.leq(0.0, 0.0));
     CPPUNIT_ASSERT(!dom.leq(0.5, 0.0));
+
+    CPPUNIT_ASSERT(dom.leq(1.0, 1.5));
+    CPPUNIT_ASSERT(dom.leq(1.0, 1.4));
+    CPPUNIT_ASSERT(dom.leq(1.0, 1.6));
+    CPPUNIT_ASSERT(dom.leq(1.0, 1.0));
+    CPPUNIT_ASSERT(!dom.leq(1.5, 1.0));
     return true;
   }
 };
