@@ -8,6 +8,109 @@
 
 namespace EUROPA {
 
+class DummyDT : public DataType {
+ public:
+  DummyDT();
+  virtual ~DummyDT() {}
+  
+  bool isNumeric() const {return true;}
+  bool isBool() const {return false;}
+  bool isString() const {return false;}
+
+  edouble createValue(const std::string& value) const {return 1.0;}
+  
+  static const std::string& NAME() {
+    static std::string sl_name("DummyDT"); 
+    return sl_name;
+  }
+  static const DataTypeId& instance();
+  
+};
+
+class DummyDomain : public Domain {
+ public:
+  DummyDomain(const DataTypeId& id = DummyDT::instance()) : Domain(id, false, true) {}
+  bool isEmpty() const {return false;}
+  bool isFinite() const {return true;}
+  bool isSingleton() const {return true;}
+  size_type getSize() const {return 1;}
+  edouble getUpperBound() const {return 1.0;}
+  edouble getLowerBound() const {return 1.0;}
+  bool getBounds(edouble& lb, edouble& ub) const {lb = getLowerBound(); ub = getUpperBound();}
+  void getValues(std::list<edouble>& results) const {results.clear(); results.push_back(1.0);}
+  edouble getSingletonValue() const {return 1.0;}
+  void empty() {}
+  void set(edouble value) {}
+  void reset(const Domain& dom) {}
+  void relax(const Domain& dom) {}
+  void relax(edouble value) {}
+  void insert(edouble value) {}
+  void insert(const std::list<edouble>& values) {}
+  void remove(edouble value) {}
+  bool intersect(const Domain& dom) {return false;}
+  bool intersect(const edouble lb, const edouble ub) {return false;}
+  bool difference(const Domain& dom) {return false;}
+  bool equate(Domain& dom) {return false;}
+  bool isMember(edouble value) const {return value == 1.0;}
+  bool isSubsetOf(const Domain& dom) const {return dom.isMember(1.0);}
+  bool intersects(const Domain& dom) const {return isSubsetOf(dom);}
+  Domain* copy() const;
+  bool convertToMemberValue(const std::string& strValue, edouble& dblValue) const {
+    return false;
+  }
+  void testPrecision(const edouble& value) const {}
+ private:
+};
+
+Domain* DummyDomain::copy() const {return new DummyDomain(DummyDT::instance());}
+
+const DataTypeId& DummyDT::instance() { 
+  static DummyDT sl_instance; 
+  return sl_instance.getId(); 
+}
+
+DummyDT::DummyDT() : DataType(DummyDT::NAME().c_str()) {
+  m_minDelta = 0.5;
+  m_baseDomain = new DummyDomain(getId());
+}
+
+class IntrinsicsTest {
+ public:
+  static bool test() {
+    DataTypeId dt = DummyDT::instance();
+    EUROPA_runTest(lessThanTest);
+    EUROPA_runTest(equalTest);
+    EUROPA_runTest(lessThanOrEqualTest);
+    return true;
+  };
+  static bool lessThanTest() {
+    DummyDomain dom;
+    CPPUNIT_ASSERT(dom.lt(0.0, 0.5));
+    CPPUNIT_ASSERT(!dom.lt(0.0, 0.4));
+    CPPUNIT_ASSERT(dom.lt(0.0, 0.6));
+    CPPUNIT_ASSERT(!dom.lt(0.0, 0.0));
+    return true;
+  }
+
+  static bool equalTest() {
+    DummyDomain dom;
+    CPPUNIT_ASSERT(dom.eq(0.0, 0.0));
+    CPPUNIT_ASSERT(!dom.eq(0.0, 0.5));
+    CPPUNIT_ASSERT(dom.eq(0.0, 0.4));
+    CPPUNIT_ASSERT(!dom.eq(0.0, 0.6));
+    return true;
+  }
+  static bool lessThanOrEqualTest() {
+    DummyDomain dom;
+    CPPUNIT_ASSERT(dom.leq(0.0, 0.5));
+    CPPUNIT_ASSERT(dom.leq(0.0, 0.4));
+    CPPUNIT_ASSERT(dom.leq(0.0, 0.6));
+    CPPUNIT_ASSERT(dom.leq(0.0, 0.0));
+    CPPUNIT_ASSERT(!dom.leq(0.5, 0.0));
+    return true;
+  }
+};
+
   class ChangeListener : public DomainListener {
   public:
     ChangeListener()
@@ -1813,6 +1916,7 @@ bool DomainTests::test() {
   /*runTestSuite(EUROPA::IntervalDomainTest::test);
   runTestSuite(EUROPA::EnumeratedDomainTest::test);
   runTestSuite(EUROPA::MixedTypeTest::test);*/
+  EUROPA::IntrinsicsTest::test();
   EUROPA::IntervalDomainTest::test();
   EUROPA::EnumeratedDomainTest::test();
   EUROPA::MixedTypeTest::test();
