@@ -36,12 +36,13 @@
 #define _H_Error
 
 /* $Id: Error.hh,v 1.6 2007-04-29 04:36:18 miatauro Exp $ */
-
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <map>
 #include <cassert>
+
+#define _ARG3(_0, _1, _2, _3, ...) _3
+#define NARG3(...) _ARG3(__VA_ARGS__, 3, 2, 1, 0)
 
 /**
  * @def ALWAYS_FAIL
@@ -62,31 +63,32 @@
     return(sl_lblStr); \
   }
 
-#ifndef _MSC_VER
-#define assertTrue(cond, optarg...) { \
-  if (!(cond)) { \
-    Error __e__(#cond, ##optarg,  __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();}	\
-  } \
-}
+#define EUROPA_ERROR(__e__) if(Error::throwEnabled()) {throw __e__;} else {__e__.handleAssert();}
 
-#define assertFalse(cond, optarg...) { \
-  if (cond) { \
-    Error __e__(#cond, ##optarg, __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();} \
-  } \
-}
-#else
-#define assertTrue(cond, ...) { \
-  if (!(cond)) { \
-    Error __e__(#cond, __VA_ARGS__, __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();} \
-  } \
-}
+#define assert1(value, cond) {                                           \
+    if((cond) == value) {                                               \
+      Error __e__(#cond, __FILE__, __LINE__); EUROPA_ERROR(__e__);      \
+    }                                                                   \
+  }
 
-#define assertFalse(cond, ...) { \
-  if (cond) { \
-    Error __e__(#cond, __VA_ARGS__, __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();} \
-  } \
-}
-#endif
+#define assert2(value, cond, msg) {                                      \
+    if((cond) == value) {                                               \
+      Error __e__(#cond, msg, __FILE__, __LINE__); EUROPA_ERROR(__e__); \
+    }                                                                   \
+  }
+
+#define assert3(value, cond, msg, type) {                               \
+    if((cond) == value) {                                               \
+      Error __e__(#cond, msg, type, __FILE__, __LINE__); EUROPA_ERROR(__e__); \
+    }                                                                   \
+  }
+
+#define __assert_(value, N, ...) assert ## N (value, __VA_ARGS__)
+#define _assert(value, N, ...) __assert_(value, N, __VA_ARGS__)
+
+#define assertTrue(...) _assert(true, NARG3(__VA_ARGS__), __VA_ARGS__)
+#define assertFalse(...) _assert(false, NARG3(__VA_ARGS__), __VA_ARGS__)
+
 
 #define check_error_function __attribute__ ((unused))
 
@@ -96,7 +98,7 @@
  * @def check_error_variable
  * Declare a variable as only being used for checkError (supresses warnings when compiling optimized).
  */
-#define check_error_variable(decl) 
+#  define check_error_variable(decl) 
 
 
 /**
@@ -106,22 +108,22 @@
  * @param optarg Other values to pass to the class Error constructor when creating the error instance.
  * @note When EUROPA_FAST is defined, these are ignored.
  */
-#ifndef _MSC_VER
-#define check_error(cond, optarg...)
-#define checkError(cond, msg, optarg...)
-#else 
-#define check_error(cond, ...)
-#define checkError(cond, msg)
-#endif
+#  define check_error1(cond)
+#  define check_error2(cond, msg)
+#  define check_error3(cond, msg, type)
+#  define checkError1(cond)
+#  define checkError2(cond, msg)
+#  define checkError3(cond, msg, type)
+
 /**
  * @def warn
  * Print a warning if such is enabled.
  * @param msg The information to print.
  * @note When EUROPA_FAST is defined, these are ignored
  */
-#ifndef warn
-#define europaWarn(msg)
-#endif
+#  ifndef warn
+#    define europaWarn(msg)
+#  endif
 
 /**
  * @def condWarning
@@ -130,11 +132,11 @@
  * @param msg The information to print in the warning.
  * @note When EUROPA_FAST is defined, these are ignored
  */
-#define condWarning(cond, msg)
+#  define condWarning(cond, msg)
 
-#else
+#else //EUROPA_FAST
 
-#define check_error_variable(decl) decl
+#  define check_error_variable(decl) decl
 
 /**
  * @def check_error
@@ -159,59 +161,56 @@
  *
  * @see assertTrue, assertFalse, ALWAYS_FAIL
 */
-#ifndef _MSC_VER
-#define check_error(cond, optarg...) { \
-  if (!(cond)) { \
-    Error __e__(#cond, ##optarg, __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();} \
-  } \
-}
-#else
-#define check_error(cond, ...) { \
-  if (!(cond)) { \
-    Error __e__(#cond, __VA_ARGS__, __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();} \
-  } \
-}
-#endif
+#  define check_error1(cond) {                                          \
+    if(!(cond)) {                                                       \
+      Error __e__(#cond, __FILE__, __LINE__); EUROPA_ERROR(__e__);      \
+    }                                                                   \
+  }
+#  define check_error2(cond, msg) {                                     \
+    if(!(cond)) {                                                       \
+      Error __e__(#cond, msg, __FILE__, __LINE__); EUROPA_ERROR(__e__); \
+    }                                                                   \
+  }
+#  define check_error3(cond, msg, type) {                               \
+    if(!(cond)) {                                                       \
+      Error __e__(#cond, msg, type, __FILE__, __LINE__); EUROPA_ERROR(__e__); \
+    }                                                                   \
+  }
 
-#ifndef _MSC_VER
-#define checkError(cond, msg, optarg...) {		\
-  if (!(cond)) { \
-    std::stringstream sstr; \
-    sstr << msg; \
-    Error __e__(#cond, sstr.str(), ##optarg, __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();} \
-  } \
-}
-#else
+#  define checkError1(cond) {                              \
+    if(!(cond)) {                                               \
+      Error __e__(#cond, __FILE__, __LINE__); EUROPA_ERROR(__e__);  \
+    }                                                           \
+  }
 
-//TODO: mcr - some calls to this are ambiguous .. do you want an error or a msg?
-#define checkError(cond, msg) { \
-  if (!(cond)) { \
-    std::stringstream sstr; \
-    sstr << msg; \
-    Error __e__(#cond, sstr.str(), __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();} \
-  } \
-}
+#  define checkError2(cond, msg) {                                      \
+    if (!(cond)) {                                                      \
+      std::stringstream sstr;                                           \
+      sstr << msg;                                                      \
+      Error __e__(#cond, sstr.str(), __FILE__, __LINE__); EUROPA_ERROR(__e__); \
+    }                                                                   \
+  }
 
-#define check_Error(cond, msg, errorType) { \
-    if (!(cond)) { \
-    std::stringstream sstr; \
-    sstr << msg; \
-    Error __e__(#cond, sstr.str(), __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();} \
-    } \
-}
-#endif
+#  define checkError3(cond, msg, type) {          \
+    if (!(cond)) {                                \
+      std::stringstream sstr;                     \
+      sstr << msg;                                                      \
+      Error __e__(#cond, sstr.str(), #type,  __FILE__, __LINE__); EUROPA_ERROR(__e__); \
+    }                                                                   \
+  }
 
-#ifndef warn
-#define europaWarn(msg) (Error::printWarning((msg), __FILE__, __LINE__))
-#endif
+#  ifndef warn
+#    define europaWarn(msg) (Error::printWarning((msg), __FILE__, __LINE__))
+#  endif
 
-#define condWarning(cond, msg) { \
-  if (!(cond)) { \
-    Error::printWarning((msg), __FILE__, __LINE__); \
-  } \
-}
+#  define condWarning(cond, msg) {                \
+    if (!(cond)) {                                      \
+      Error::printWarning((msg), __FILE__, __LINE__);   \
+    }                                                   \
+  }
 
 #endif /* EUROPA_FAST */
+
 
 /**
  * @def check_runtime_error
@@ -227,19 +226,35 @@
  * removing check_error has to do with debug levels.
  * removing check_runtime_error doesn't have to do with debugging, but with leaving behavior out for speed sake.
  */
-#ifndef _MSC_VER
-#define check_runtime_error(cond, optarg...) { \
-  if (!(cond)) { \
-    Error __e__(#cond, ##optarg, __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();} \
-  } \
-}
-#else
-#define check_runtime_error(cond, ...) { \
-  if (!(cond)) { \
-    Error __e__(#cond, __VA_ARGS__, __FILE__, __LINE__); if(Error::throwEnabled()){throw __e__;}else{__e__.handleAssert();} \
-  } \
-}
-#endif
+
+#  define check_runtime_error1(cond) {                                  \
+    if(!(cond)) {                                                       \
+      Error __e__(#cond, __FILE__, __LINE__); EUROPA_ERROR(__e__);      \
+    }                                                                   \
+  }
+#  define check_runtime_error2(cond, msg) {                             \
+    if(!(cond)) {                                                       \
+      Error __e__(#cond, msg, __FILE__, __LINE__); EUROPA_ERROR(__e__); \
+    }                                                                   \
+  }
+#  define check_runtime_error3(cond, msg, type) {                       \
+    if(!(cond)) {                                                       \
+      Error __e__(#cond, msg, type, __FILE__, __LINE__); EUROPA_ERROR(__e__); \
+    }                                                                   \
+  }
+#define __check_error(N, ...) check_error ## N(__VA_ARGS__)
+#define _check_error(N, ...) __check_error(N, __VA_ARGS__)
+#define check_error(...) _check_error(NARG3(__VA_ARGS__), __VA_ARGS__)
+
+#define __checkError(N, ...) checkError ## N(__VA_ARGS__)
+#define _checkError(N, ...) __checkError(N, __VA_ARGS__)
+#define checkError(...) _checkError(NARG3(__VA_ARGS__), __VA_ARGS__)
+
+#define __check_runtime_error(N, ...) check_runtime_error ## N(__VA_ARGS__)
+#define _check_runtime_error(N, ...) __check_runtime_error(N, __VA_ARGS__)
+#define check_runtime_error(...) _check_runtime_error(NARG3(__VA_ARGS__), __VA_ARGS__)
+
+
 #define checkRuntimeError(cond, msg) { \
   if (!(cond)) { \
     std::stringstream sstr; \
@@ -348,7 +363,7 @@ public:
     return(m_condition);
   }
 
-  inline const int getLine() const {
+  inline int getLine() const {
     return(m_line);
   }
 
