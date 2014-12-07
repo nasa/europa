@@ -157,7 +157,6 @@ private:
    * @param file File containing the debug message instance.
    * @param line Line on which it is declared/created.
    * @param marker Name for the particular instance (not required to be unique within the process).
-   * @param enabled Whether the instance is enabled at creation.
    * @note Only constructor that should be used.
    * @note Should only be called from static member functions.
    */
@@ -281,7 +280,6 @@ public:
 
   /**
     @brief Enable all debug messages, including ones not yet created.
-    @param val
     @par Errors thrown:
     @li If no debug stream has been assigned.
     @see DebugMessage::setStream
