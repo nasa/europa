@@ -134,107 +134,108 @@ int main()
 		}
 		doc.SaveFile();
 	}
+	ostringstream outputStream( ostringstream::out );
+        {
+          TiXmlDocument doc( "demotest.xml" );
+          bool loadOkay = doc.LoadFile();
+          
+          if ( !loadOkay )
+          {
+            printf( "Could not load test file 'demotest.xml'. Error='%s'. Exiting.\n", doc.ErrorDesc() );
+            exit( 1 );
+          }
 
-	TiXmlDocument doc( "demotest.xml" );
-	bool loadOkay = doc.LoadFile();
+          printf( "** Demo doc read from disk: ** \n\n" );
+          doc.Print( stdout );
 
-	if ( !loadOkay )
-	{
-		printf( "Could not load test file 'demotest.xml'. Error='%s'. Exiting.\n", doc.ErrorDesc() );
-		exit( 1 );
-	}
-
-	printf( "** Demo doc read from disk: ** \n\n" );
-	doc.Print( stdout );
-
-	TiXmlNode* node = 0;
-	TiXmlElement* todoElement = 0;
-	TiXmlElement* itemElement = 0;
-
-
-	// --------------------------------------------------------
-	// An example of changing existing attributes, and removing
-	// an element from the document.
-	// --------------------------------------------------------
-
-	// Get the "ToDo" element.
-	// It is a child of the document, and can be selected by name.
-	node = doc.FirstChild( "ToDo" );
-	assert( node );
-	todoElement = node->ToElement();
-	assert( todoElement  );
-
-	// Going to the toy store is now our second priority...
-	// So set the "priority" attribute of the first item in the list.
-	node = todoElement->FirstChildElement();	// This skips the "PDA" comment.
-	assert( node );
-	itemElement = node->ToElement();
-	assert( itemElement  );
-	itemElement->SetAttribute( "priority", 2 );
-
-	// Change the distance to "doing bills" from
-	// "none" to "here". It's the next sibling element.
-	itemElement = itemElement->NextSiblingElement();
-	assert( itemElement );
-	itemElement->SetAttribute( "distance", "here" );
-
-	// Remove the "Look for Evil Dinosours!" item.
-	// It is 1 more sibling away. We ask the parent to remove
-	// a particular child.
-	itemElement = itemElement->NextSiblingElement();
-	todoElement->RemoveChild( itemElement );
-
-	itemElement = 0;
-
-	// --------------------------------------------------------
-	// What follows is an example of created elements and text
-	// nodes and adding them to the document.
-	// --------------------------------------------------------
-
-	// Add some meetings.
-	TiXmlElement item( "Item" );
-	item.SetAttribute( "priority", "1" );
-	item.SetAttribute( "distance", "far" );
-
-	TiXmlText text( "Talk to:" );
-
-	TiXmlElement meeting1( "Meeting" );
-	meeting1.SetAttribute( "where", "School" );
-
-	TiXmlElement meeting2( "Meeting" );
-	meeting2.SetAttribute( "where", "Lunch" );
-
-	TiXmlElement attendee1( "Attendee" );
-	attendee1.SetAttribute( "name", "Marple" );
-	attendee1.SetAttribute( "position", "teacher" );
-
-	TiXmlElement attendee2( "Attendee" );
-	attendee2.SetAttribute( "name", "Vo&#x82;" );
-	attendee2.SetAttribute( "position", "counselor" );
-
-	// Assemble the nodes we've created:
-	meeting1.InsertEndChild( attendee1 );
-	meeting1.InsertEndChild( attendee2 );
-
-	item.InsertEndChild( text );
-	item.InsertEndChild( meeting1 );
-	item.InsertEndChild( meeting2 );
-
-	// And add the node to the existing list after the first child.
-	node = todoElement->FirstChild( "Item" );
-	assert( node );
-	itemElement = node->ToElement();
-	assert( itemElement );
-
-	todoElement->InsertAfterChild( itemElement, item );
-
-	printf( "\n** Demo doc processed: ** \n\n" );
-	doc.Print( stdout );
+          TiXmlNode* node = 0;
+          TiXmlElement* todoElement = 0;
+          TiXmlElement* itemElement = 0;
 
 
+          // --------------------------------------------------------
+          // An example of changing existing attributes, and removing
+          // an element from the document.
+          // --------------------------------------------------------
+          
+          // Get the "ToDo" element.
+          // It is a child of the document, and can be selected by name.
+          node = doc.FirstChild( "ToDo" );
+          assert( node );
+          todoElement = node->ToElement();
+          assert( todoElement  );
+          
+          // Going to the toy store is now our second priority...
+          // So set the "priority" attribute of the first item in the list.
+          node = todoElement->FirstChildElement();	// This skips the "PDA" comment.
+          assert( node );
+          itemElement = node->ToElement();
+          assert( itemElement  );
+          itemElement->SetAttribute( "priority", 2 );
+          
+          // Change the distance to "doing bills" from
+          // "none" to "here". It's the next sibling element.
+          itemElement = itemElement->NextSiblingElement();
+          assert( itemElement );
+          itemElement->SetAttribute( "distance", "here" );
+          
+          // Remove the "Look for Evil Dinosours!" item.
+          // It is 1 more sibling away. We ask the parent to remove
+          // a particular child.
+          itemElement = itemElement->NextSiblingElement();
+          todoElement->RemoveChild( itemElement );
+          
+          itemElement = 0;
+          
+          // --------------------------------------------------------
+          // What follows is an example of created elements and text
+          // nodes and adding them to the document.
+          // --------------------------------------------------------
+          
+          // Add some meetings.
+          TiXmlElement item( "Item" );
+          item.SetAttribute( "priority", "1" );
+          item.SetAttribute( "distance", "far" );
+          
+          TiXmlText text( "Talk to:" );
+          
+          TiXmlElement meeting1( "Meeting" );
+          meeting1.SetAttribute( "where", "School" );
+          
+          TiXmlElement meeting2( "Meeting" );
+          meeting2.SetAttribute( "where", "Lunch" );
+          
+          TiXmlElement attendee1( "Attendee" );
+          attendee1.SetAttribute( "name", "Marple" );
+          attendee1.SetAttribute( "position", "teacher" );
+          
+          TiXmlElement attendee2( "Attendee" );
+          attendee2.SetAttribute( "name", "Vo&#x82;" );
+          attendee2.SetAttribute( "position", "counselor" );
+          
+          // Assemble the nodes we've created:
+          meeting1.InsertEndChild( attendee1 );
+          meeting1.InsertEndChild( attendee2 );
+          
+          item.InsertEndChild( text );
+          item.InsertEndChild( meeting1 );
+          item.InsertEndChild( meeting2 );
+          
+          // And add the node to the existing list after the first child.
+          node = todoElement->FirstChild( "Item" );
+          assert( node );
+          itemElement = node->ToElement();
+          assert( itemElement );
+          
+          todoElement->InsertAfterChild( itemElement, item );
+          
+          printf( "\n** Demo doc processed: ** \n\n" );
+          doc.Print( stdout );
+          
+          
 #ifdef TIXML_USE_STL
-	printf( "** Demo doc processed to stream: ** \n\n" );
-	cout << doc << endl << endl;
+          printf( "** Demo doc processed to stream: ** \n\n" );
+          cout << doc << endl << endl;
 #endif
 
 	// --------------------------------------------------------
@@ -248,12 +249,11 @@ int main()
 
 #ifdef TIXML_USE_STL
 	cout << "** Basic structure. **\n";
-	ostringstream outputStream( ostringstream::out );
 	outputStream << doc;
 	XmlTest( "Output stream correct.",	string( demoEnd ).c_str(),
-										outputStream.str().c_str(), true );
+                 outputStream.str().c_str(), true );
 #endif
-
+        
 	node = doc.RootElement();
 	XmlTest( "Root element exists.", true, ( node != 0 && node->ToElement() ) );
 	XmlTest ( "Root element value is 'ToDo'.", "ToDo",  node->Value());
@@ -345,19 +345,18 @@ int main()
 		XmlTest ( "Read attribute with entity value '>'.", ">", element0.Attribute( "attribute2" ) );
 	}
 #endif
-
+        }
 	{
-		const char* error =	"<?xml version=\"1.0\" standalone=\"no\" ?>\n"
-							"<passages count=\"006\" formatversion=\"20020620\">\n"
-							"    <wrong error>\n"
-							"</passages>";
-
-        TiXmlDocument doc;
-		doc.Parse( error );
-		XmlTest( "Error row", doc.ErrorRow(), 3 );
-		XmlTest( "Error column", doc.ErrorCol(), 17 );
-		//printf( "error=%d id='%s' row %d col%d\n", (int) doc.Error(), doc.ErrorDesc(), doc.ErrorRow()+1, doc.ErrorCol() + 1 );
-
+          const char* error =	"<?xml version=\"1.0\" standalone=\"no\" ?>\n"
+              "<passages count=\"006\" formatversion=\"20020620\">\n"
+              "    <wrong error>\n"
+              "</passages>";
+          
+          TiXmlDocument doc;
+          doc.Parse( error );
+          XmlTest( "Error row", doc.ErrorRow(), 3 );
+          XmlTest( "Error column", doc.ErrorCol(), 17 );
+          //printf( "error=%d id='%s' row %d col%d\n", (int) doc.Error(), doc.ErrorDesc(), doc.ErrorRow()+1, doc.ErrorCol() + 1 );
 	}
 	{
 		const char* str =	"\t<?xml version=\"1.0\" standalone=\"no\" ?>\t<room doors='2'>\n"
@@ -448,9 +447,9 @@ int main()
 
 		result = ele->QueryDoubleAttribute( "attr0", &dVal );
 		XmlTest( "Query attribute: int as double", result, TIXML_SUCCESS );
-		XmlTest( "Query attribute: int as double", (int)dVal, 1 );
+		XmlTest( "Query attribute: int as double", static_cast<int>(dVal), 1 );
 		result = ele->QueryDoubleAttribute( "attr1", &dVal );
-		XmlTest( "Query attribute: double as double", (int)dVal, 2 );
+		XmlTest( "Query attribute: double as double", static_cast<int>(dVal), 2 );
 		result = ele->QueryIntAttribute( "attr1", &iVal );
 		XmlTest( "Query attribute: double as int", result, TIXML_SUCCESS );
 		XmlTest( "Query attribute: double as int", iVal, 2 );

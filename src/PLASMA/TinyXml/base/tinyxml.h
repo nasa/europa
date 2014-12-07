@@ -36,6 +36,7 @@ distribution.
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <boost/cast.hpp>
 
 // Help out windows:
 #if defined( _DEBUG ) && !defined( DEBUG )
@@ -504,12 +505,12 @@ public:
 	/// Returns true if this node has no children.
 	bool NoChildren() const						{ return !firstChild; }
 
-	TiXmlDocument* ToDocument()	const		{ return ( this && type == DOCUMENT ) ? (TiXmlDocument*) this : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
-	TiXmlElement*  ToElement() const		{ return ( this && type == ELEMENT  ) ? (TiXmlElement*)  this : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
-	TiXmlComment*  ToComment() const		{ return ( this && type == COMMENT  ) ? (TiXmlComment*)  this : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
-	TiXmlUnknown*  ToUnknown() const		{ return ( this && type == UNKNOWN  ) ? (TiXmlUnknown*)  this : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
-	TiXmlText*	   ToText()    const		{ return ( this && type == TEXT     ) ? (TiXmlText*)     this : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
-	TiXmlDeclaration* ToDeclaration() const	{ return ( this && type == DECLARATION ) ? (TiXmlDeclaration*) this : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
+  TiXmlDocument* ToDocument()	const		{ return ( this && type == DOCUMENT ) ? boost::polymorphic_cast<TiXmlDocument*>(const_cast<TiXmlNode*>(this)) : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
+  TiXmlElement*  ToElement() const		{ return ( this && type == ELEMENT  ) ? boost::polymorphic_cast<TiXmlElement*>(  const_cast<TiXmlNode*>(this)) : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
+  TiXmlComment*  ToComment() const		{ return ( this && type == COMMENT  ) ? boost::polymorphic_cast<TiXmlComment*>(  const_cast<TiXmlNode*>(this)) : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
+  TiXmlUnknown*  ToUnknown() const		{ return ( this && type == UNKNOWN  ) ? boost::polymorphic_cast<TiXmlUnknown*>(  const_cast<TiXmlNode*>(this)) : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
+  TiXmlText*	   ToText()    const		{ return ( this && type == TEXT     ) ? boost::polymorphic_cast<TiXmlText*>(     const_cast<TiXmlNode*>(this)) : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
+  TiXmlDeclaration* ToDeclaration() const	{ return ( this && type == DECLARATION ) ? boost::polymorphic_cast<TiXmlDeclaration*>( const_cast<TiXmlNode*>(this)) : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
 
 	virtual TiXmlNode* Clone() const = 0;
 
@@ -587,8 +588,8 @@ public:
 
 	const char*		Name()  const		{ return name.c_str (); }		///< Return the name of this attribute.
 	const char*		Value() const		{ return value.c_str (); }		///< Return the value of this attribute.
-	const int       IntValue() const;									///< Return the value of this attribute, converted to an integer.
-	const double	DoubleValue() const;								///< Return the value of this attribute, converted to a double.
+  int       IntValue() const;									///< Return the value of this attribute, converted to an integer.
+  double	DoubleValue() const;								///< Return the value of this attribute, converted to a double.
 
 	/** QueryIntValue examines the value string. It is an alternative to the
 		IntValue() method with richer error checking.
@@ -1050,7 +1051,7 @@ public:
 	/** Generally, you probably want the error string ( ErrorDesc() ). But if you
 		prefer the ErrorId, this function will fetch it.
 	*/
-	const int ErrorId()	const				{ return errorId; }
+  int ErrorId()	const				{ return errorId; }
 
 	/** Returns the location (if known) of the error. The first column is column 1, 
 		and the first row is row 1. A value of 0 means the row and column wasn't applicable
@@ -1205,7 +1206,7 @@ class TiXmlHandle
 {
 public:
 	/// Create a handle from any node (at any depth of the tree.) This can be a null pointer.
-	TiXmlHandle( TiXmlNode* node )			{ this->node = node; }
+	TiXmlHandle( TiXmlNode* _node )			{ this->node = _node; }
 	/// Copy constructor
 	TiXmlHandle( const TiXmlHandle& ref )	{ this->node = ref.node; }
 
