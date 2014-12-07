@@ -28,12 +28,12 @@
 #include<iostream>
 #include<stdlib.h>
 
-#define DLERROR_STR_MAX_LEN 256
+
 
 namespace EUROPA {
 
 #if defined(__APPLE__) && (__GNUC__ < 4)
-
+#define DLERROR_STR_MAX_LEN 256
   /*
    * Provide portable dl functions using Apple's API for gcc prior to v4
    */

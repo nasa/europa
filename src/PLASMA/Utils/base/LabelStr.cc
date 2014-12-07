@@ -100,10 +100,9 @@ namespace EUROPA {
     return m_key != lbl.m_key;
   }
 
-  unsigned int LabelStr::getSize() {
+  unsigned long LabelStr::getSize() {
     check_error(keysFromString().size() == stringFromKeys().size());
-    int toRet = keysFromString().size();
-    return toRet;
+    return keysFromString().size();
   }
 
   edouble LabelStr::getKey(const std::string& label) {
@@ -155,12 +154,12 @@ namespace EUROPA {
 
   bool LabelStr::contains(const LabelStr& lblStr) const{
     const std::string& thisStr = toString();
-    int index = thisStr.find(lblStr.c_str());
-    return (index >= 0);
+    std::string::size_type index = thisStr.find(lblStr.c_str());
+    return index != std::string::npos;
   }
 
 
-  unsigned int LabelStr::countElements(const char* delimiter) const{
+  unsigned long LabelStr::countElements(const char* delimiter) const{
     check_error(delimiter != NULL && delimiter != 0 && delimiter[0] != '\0', "'NULL' and '\\0' are not valid delimiters");
 
     //allocate a results vector

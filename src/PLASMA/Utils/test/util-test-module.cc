@@ -313,11 +313,11 @@ public:
   }
 };
 
-void overloadFunc(const Id<Bing>& arg) {
+void overloadFunc(const Id<Bing>&) {
   CPPUNIT_ASSERT(true);
 }
 
-void overloadFunc(const Id<Foo>& arg) {
+void overloadFunc(const Id<Foo>&) {
   CPPUNIT_ASSERT(true);
 }
 
@@ -354,7 +354,7 @@ bool IdTests::test() {
 
 bool IdTests::testBasicAllocation() {
 #ifndef EUROPA_FAST
-  unsigned int initialSize = IdTable::size();
+  unsigned long initialSize = IdTable::size();
 #endif
   Foo *fooPtr = new Foo();
   Id<Foo> fId1(fooPtr);
@@ -388,7 +388,7 @@ bool IdTests::testTypicalConversionsAndComparisons()
   CPPUNIT_ASSERT(fId1 == fId2); // Equality operator
   CPPUNIT_ASSERT(&*fId1 == &*fId2); // Dereferencing operator
   CPPUNIT_ASSERT(foo1 == &*fId2); // Dereferencing operator
-  CPPUNIT_ASSERT(foo1 == (Foo*) fId2); // Dereferencing operator
+  CPPUNIT_ASSERT(foo1 == static_cast<Foo*>(fId2)); // Dereferencing operator
   CPPUNIT_ASSERT(foo1 == fId2.operator->());
   CPPUNIT_ASSERT( ! (fId1 > fId2));
   CPPUNIT_ASSERT( ! (fId1 < fId2));
@@ -424,14 +424,14 @@ bool IdTests::testCastingSupport()
 {
   Foo* foo = new Foo();
   Id<Foo> fId(foo);
-  Foo* fooByCast = (Foo*) fId;
+  Foo* fooByCast = static_cast<Foo*>(fId);
   CPPUNIT_ASSERT(foo == fooByCast);
 
   CPPUNIT_ASSERT(Id<Bar>::convertable(fId) == false);
   fId.release();
 
   Foo* bar = new Bar();
-  Id<Bar> bId((Bar*) bar);
+  Id<Bar> bId(dynamic_cast<Bar*>(bar));
   fId = bId;
   CPPUNIT_ASSERT(Id<Bar>::convertable(fId) == true);
   bId.release();
@@ -490,7 +490,7 @@ bool IdTests::testBadAllocationErrorHandling()
   // This exception simply isn't being caught on Cygwin for some reason.
   try {
     Error::doNotDisplayErrors();
-    Id<Foo> fId0((Foo*) 0);
+    Id<Foo> fId0(static_cast<Foo*>(NULL));
     CPPUNIT_ASSERT_MESSAGE("Id<Foo> fId0((Foo*) 0); failed to error out.", false);
     success = false;
   }
@@ -499,10 +499,10 @@ bool IdTests::testBadAllocationErrorHandling()
     // Path of Id.hh may vary depending on where test is run from.
     // Match only the filename and not the full path
     std::string pathMsg = e.getFile();
-    int end = pathMsg.length();
+    std::string::size_type end = pathMsg.length();
     std::string name = "Id.hh";
-    int start = pathMsg.find(name);
-    if (start >= 0) {
+    std::string::size_type start = pathMsg.find(name);
+    if (start != std::string::npos) {
       std::string fileMsg = pathMsg.substr(start, end);
       e.setFile(fileMsg);
     }
@@ -880,6 +880,7 @@ private:
 class NumberTest {
 public:
   static bool test() {
+    EUROPA_runTest(testSize);
     EUROPA_runTest(testEint);
     EUROPA_runTest(testEintInfinity);
     EUROPA_runTest(testEdouble);
@@ -887,6 +888,12 @@ public:
     return true;
   }
 private:
+
+  static bool testSize() {
+    CPPUNIT_ASSERT_EQUAL(sizeof(eint::basis_type), sizeof(eint));
+    CPPUNIT_ASSERT_EQUAL(sizeof(edouble::basis_type), sizeof(edouble));
+    return true;
+  }
   static bool testEint() {
     EUROPA::eint e(3);
 #ifdef E2_LONG_INT

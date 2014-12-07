@@ -7,17 +7,11 @@ DEFINE_GLOBAL_CONST(bool, g_alwaysFails, false);
 
 namespace EUROPA {
 
-  std::string toString(double value) {
-    std::stringstream s;
-    s << std::setprecision(MAX_PRECISION) << value;
-    return(s.str());
-  }
-
-  std::string toString(edouble value) {
-    std::stringstream s;
-    s << std::setprecision(MAX_PRECISION) << value;
-    return(s.str());
-  }
+std::string toString(edouble value) {
+  std::stringstream s;
+  s << std::setprecision(MAX_PRECISION) << value;
+  return(s.str());
+}
 
   void tokenize(const std::string& str,
 		std::vector<std::string>& tokens,

@@ -41,7 +41,7 @@ namespace EUROPA{
       typedef typename COLLECTION::iterator object_iterator;
       for(object_iterator it = objects.begin(); it != objects.end(); ++it){
 	check_error((*it).isValid());
-	Entity* elem = (Entity*) (*it);
+	Entity* elem = static_cast<Entity*>(*it);
 	elem->discard();
       }
       objects.clear();
@@ -50,7 +50,7 @@ namespace EUROPA{
     virtual ~Entity();
 
     inline eint getKey() const {return m_key;}
-    inline PSEntityKey getEntityKey() const {return cast_int(m_key);}
+    inline PSEntityKey getEntityKey() const {return static_cast<PSEntityKey>(cast_int(m_key));}
 
     
     virtual const std::string& getEntityName() const;
@@ -202,7 +202,7 @@ namespace EUROPA{
       return t1->getKey() < t2->getKey();
     }
 
-    bool operator==(const EntityComparator& c){return true;}
+    bool operator==(const EntityComparator&){return true;}
   };
 
 }

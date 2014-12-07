@@ -121,7 +121,7 @@ namespace EUROPA {
     object_iterator it = objects.begin();
     while(it != objects.end()){
       check_error((*it).isValid());
-      delete (TYPE*) (*it++);
+      delete static_cast<TYPE*>(*it++);
     }
     objects.clear();
   }
@@ -132,7 +132,7 @@ namespace EUROPA {
     object_iterator it = objects.begin();
     while(it != objects.end()){
       check_error((*it).isValid());
-      delete (TYPE*) (*it++);
+      delete static_cast<TYPE*>(*it++);
     }
     objects.clear();
   }
@@ -143,7 +143,7 @@ namespace EUROPA {
     object_iterator it = objects.begin();
     while(it != objects.end()){
       check_error((*it).isValid());
-      delete (TYPE*) (*it++);
+      delete static_cast<TYPE*>(*it++);
     }
     objects.clear();
   }
@@ -154,7 +154,7 @@ namespace EUROPA {
     object_iterator it = objects.begin();
     while(it != objects.end()){
       checkError((*it).isValid(), *it);
-      delete (TYPE*) (*it++);
+      delete static_cast<TYPE*>(*it++);
     }
     objects.clear();
   }
@@ -196,7 +196,7 @@ namespace EUROPA {
       Id<TYPE> object = *it;
       if(!object.isNoId()){
 	check_error(object.isValid());
-	delete (TYPE*) (*it++);
+	delete static_cast<TYPE*>(*it++);
       }
       else
 	++it;
@@ -211,7 +211,7 @@ namespace EUROPA {
     while(it != objects.end()){
       Id<TYPE2> item = (it++)->second;
       check_error(item.isValid());
-      delete (TYPE2*) item;
+      delete static_cast<TYPE2*>(item);
     }
     objects.clear();
   }
@@ -223,7 +223,7 @@ namespace EUROPA {
     while(it != objects.end()){
       Id<TYPE2> item = (it++)->second;
       check_error(item.isValid());
-      delete (TYPE2*) item;
+      delete static_cast<TYPE2*>(item);
     }
     objects.clear();
   }

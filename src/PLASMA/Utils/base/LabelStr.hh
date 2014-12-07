@@ -12,7 +12,7 @@
 #include "Error.hh"
 #include <map>
 #include <string>
-#include <boost/unordered_map.hpp>
+//#include <boost/unordered_map.hpp>
 
 
 namespace EUROPA {
@@ -44,7 +44,7 @@ namespace EUROPA {
 
     /**
      * @brief Constructor
-     * @param The symbolic value as a string
+     * @param label The symbolic value as a string
      */
     LabelStr(const std::string& label);
 
@@ -133,7 +133,7 @@ namespace EUROPA {
      * @return The number of elements found.
      * @see getElement
      */
-    unsigned int countElements(const char* delimiter) const;
+    unsigned long countElements(const char* delimiter) const;
 
     /**
      * @brief Return the requested element in a delimited string
@@ -144,14 +144,14 @@ namespace EUROPA {
      * 2. 'A:B:C:DEF', > 3 => error
      *
      * @param index The position of the requested element
-     * @param delimeter The delimeter to mark
+     * @param delimiter The delimeter to mark
      */
     LabelStr getElement(unsigned int index, const char* delimiter) const;
 
     /**
      * @brief Return the number of strings stored.
      */
-    static unsigned int getSize();
+    static unsigned long getSize();
 
     /**
      * @brief Obtain the key for the given string and possibly conducting an insertion into keysFromString.

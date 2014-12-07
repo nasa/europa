@@ -60,10 +60,10 @@ namespace EUROPA {
     static IdTable sl_instance;
     return(sl_instance);
   }
-  unsigned int IdTable::size() {
-    MutexGrabber mg(IdTableMutex());
-    return(getInstance().m_collection.size());
-  }
+unsigned long IdTable::size() {
+  MutexGrabber mg(IdTableMutex());
+  return(getInstance().m_collection.size());
+}
 
   bool IdTable::allocated(unsigned long int id) {
     MutexGrabber mg(IdTableMutex());

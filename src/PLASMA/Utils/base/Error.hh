@@ -515,7 +515,7 @@ public:
    * @note Which is done depends on throwEnabled().
    * @see throwEnabled
    */
-  void handleAssert();
+  void handleAssert() __attribute__((noreturn));
 
 private:
 
