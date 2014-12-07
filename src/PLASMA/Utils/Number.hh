@@ -206,97 +206,97 @@ namespace EUROPA {
     return std::numeric_limits<type>::minus_infinity();         \
 }
 
-#define handle_inf_add(type, v1, v2) {                          \
-  if(((type::basis_type) v1) >= std::numeric_limits<type>::infinity()) {             \
-    if(((type::basis_type) v2) > std::numeric_limits<type>::minus_infinity())        \
-      return std::numeric_limits<type>::infinity();             \
-        }                                                       \
-  else if(((type::basis_type) v1) <= std::numeric_limits<type>::minus_infinity()) {  \
-    if(((type::basis_type) v2) < std::numeric_limits<type>::infinity())              \
-      return std::numeric_limits<type>::minus_infinity();       \
+#define handle_inf_add(type, v1, v2) {                                  \
+  if(static_cast<type::basis_type>(v1) >= std::numeric_limits<type>::infinity()) { \
+    if(static_cast<type::basis_type>(v2) > std::numeric_limits<type>::minus_infinity()) \
+      return std::numeric_limits<type>::infinity();                     \
+  }                                                                     \
+  else if(static_cast<type::basis_type>(v1) <= std::numeric_limits<type>::minus_infinity()) { \
+    if(static_cast<type::basis_type>(v2) < std::numeric_limits<type>::infinity()) \
+      return std::numeric_limits<type>::minus_infinity();               \
   }                                                             \
-  if(((type::basis_type) v2) >= std::numeric_limits<type>::infinity()) {             \
-    if(((type::basis_type) v1) > std::numeric_limits<type>::minus_infinity())        \
+  if(static_cast<type::basis_type>(v2) >= std::numeric_limits<type>::infinity()) { \
+    if(static_cast<type::basis_type>(v1) > std::numeric_limits<type>::minus_infinity()) \
       return std::numeric_limits<type>::infinity();             \
   }                                                             \
-  else if(((type::basis_type) v2) <= std::numeric_limits<type>::minus_infinity()) {  \
-    if(((type::basis_type) v1) < std::numeric_limits<type>::infinity())              \
+  else if(static_cast<type::basis_type>(v2) <= std::numeric_limits<type>::minus_infinity()) {  \
+    if(static_cast<type::basis_type>(v1) < std::numeric_limits<type>::infinity())              \
       return std::numeric_limits<type>::minus_infinity();       \
   }                                                             \
 }
 
 #define handle_inf_sub(type, v1, v2) {                          \
-  if(((type::basis_type) v1) >= std::numeric_limits<type>::infinity()) {             \
-    if(((type::basis_type) v2) < std::numeric_limits<type>::infinity())              \
+  if(static_cast<type::basis_type>(v1) >= std::numeric_limits<type>::infinity()) {             \
+    if(static_cast<type::basis_type>(v2) < std::numeric_limits<type>::infinity())              \
       return std::numeric_limits<type>::infinity();             \
   }                                                             \
-  else if(((type::basis_type) v1) <= std::numeric_limits<type>::minus_infinity()) {  \
-    if(((type::basis_type) v2) > std::numeric_limits<type>::minus_infinity())        \
+  else if(static_cast<type::basis_type>(v1) <= std::numeric_limits<type>::minus_infinity()) {  \
+    if(static_cast<type::basis_type>(v2) > std::numeric_limits<type>::minus_infinity())        \
       return std::numeric_limits<type>::minus_infinity();       \
   }                                                             \
-  if(((type::basis_type) v2) >= std::numeric_limits<type>::infinity()) {             \
-    if(((type::basis_type) v1) < std::numeric_limits<type>::infinity())              \
+  if(static_cast<type::basis_type>(v2) >= std::numeric_limits<type>::infinity()) {             \
+    if(static_cast<type::basis_type>(v1) < std::numeric_limits<type>::infinity())              \
       return std::numeric_limits<type>::minus_infinity();       \
   }                                                             \
-  else if(((type::basis_type) v2) <= std::numeric_limits<type>::minus_infinity()) {  \
-    if(((type::basis_type) v1) > std::numeric_limits<type>::minus_infinity())        \
+  else if(static_cast<type::basis_type>(v2) <= std::numeric_limits<type>::minus_infinity()) {  \
+    if(static_cast<type::basis_type>(v1) > std::numeric_limits<type>::minus_infinity())        \
       return std::numeric_limits<type>::infinity();             \
   }                                                             \
 }
 
 #define handle_inf_mul(type, v1, v2) {                          \
-  if(((type::basis_type) v1) >= std::numeric_limits<type>::infinity()) {             \
-    if(((type::basis_type) v2) > 0)                                                  \
+  if(static_cast<type::basis_type>(v1) >= std::numeric_limits<type>::infinity()) {             \
+    if(static_cast<type::basis_type>(v2) > 0)                                                  \
       return std::numeric_limits<type>::infinity();             \
-    else if(((type::basis_type) v2) < 0)                                             \
+    else if(static_cast<type::basis_type>(v2) < 0)                                             \
       return std::numeric_limits<type>::minus_infinity();       \
   }                                                             \
-  else if(((type::basis_type) v1) <= std::numeric_limits<type>::minus_infinity()) {  \
-    if(((type::basis_type) v2) > 0)                                                  \
+  else if(static_cast<type::basis_type>(v1) <= std::numeric_limits<type>::minus_infinity()) {  \
+    if(static_cast<type::basis_type>(v2) > 0)                                                  \
       return std::numeric_limits<type>::minus_infinity();       \
-    else if(((type::basis_type) v2) < 0)                                             \
+    else if(static_cast<type::basis_type>(v2) < 0)                                             \
       return std::numeric_limits<type>::infinity();             \
   }                                                             \
-  if(((type::basis_type) v2) >= std::numeric_limits<type>::infinity()) {             \
-    if(((type::basis_type) v1) > 0)                                                  \
+  if(static_cast<type::basis_type>(v2) >= std::numeric_limits<type>::infinity()) {             \
+    if(static_cast<type::basis_type>(v1) > 0)                                                  \
       return std::numeric_limits<type>::infinity();             \
-    else if(((type::basis_type) v1) < 0)                                             \
+    else if(static_cast<type::basis_type>(v1) < 0)                                             \
       return std::numeric_limits<type>::minus_infinity();       \
   }                                                             \
-  else if(((type::basis_type) v2) <= std::numeric_limits<type>::minus_infinity()) {  \
-    if(((type::basis_type) v1) > 0)                                                  \
+  else if(static_cast<type::basis_type>(v2) <= std::numeric_limits<type>::minus_infinity()) {  \
+    if(static_cast<type::basis_type>(v1) > 0)                                                  \
       return std::numeric_limits<type>::minus_infinity();       \
-    else if(((type::basis_type) v1) < 0)                                             \
+    else if(static_cast<type::basis_type>(v1) < 0)                                             \
       return std::numeric_limits<type>::infinity();             \
   }                                                             \
 }
 
 #define handle_inf_div(type, v1, v2) {                                  \
-  if(((type::basis_type) v1) >= std::numeric_limits<type>::infinity()) {                     \
-    if(((type::basis_type) v2) > 0 && ((type::basis_type) v2) < std::numeric_limits<type>::infinity())            \
+  if(static_cast<type::basis_type>(v1) >= std::numeric_limits<type>::infinity()) {                     \
+    if(static_cast<type::basis_type>(v2) > 0 && static_cast<type::basis_type>(v2) < std::numeric_limits<type>::infinity())            \
       return std::numeric_limits<type>::infinity();                     \
-    else if(((type::basis_type) v2) < 0 && ((type::basis_type) v2) > std::numeric_limits<type>::minus_infinity()) \
+    else if(static_cast<type::basis_type>(v2) < 0 && static_cast<type::basis_type>(v2) > std::numeric_limits<type>::minus_infinity()) \
       return std::numeric_limits<type>::minus_infinity();               \
   }                                                                     \
-  else if(((type::basis_type) v1) <= std::numeric_limits<type>::minus_infinity()) {          \
-    if(((type::basis_type) v2) > 0 && ((type::basis_type) v2) < std::numeric_limits<type>::infinity())            \
+  else if(static_cast<type::basis_type>(v1) <= std::numeric_limits<type>::minus_infinity()) {          \
+    if(static_cast<type::basis_type>(v2) > 0 && static_cast<type::basis_type>(v2) < std::numeric_limits<type>::infinity())            \
       return std::numeric_limits<type>::minus_infinity();               \
-    else if(((type::basis_type) v2) < 0 && ((type::basis_type) v2) > std::numeric_limits<type>::minus_infinity()) \
+    else if(static_cast<type::basis_type>(v2) < 0 && static_cast<type::basis_type>(v2) > std::numeric_limits<type>::minus_infinity()) \
       return std::numeric_limits<type>::infinity();                     \
   }                                                                     \
-  else if(((type::basis_type) v2) >= std::numeric_limits<type>::infinity() || ((type::basis_type) v2) <= std::numeric_limits<type>::minus_infinity()) { \
-    if(((type::basis_type) v1) < std::numeric_limits<type>::infinity() && ((type::basis_type) v1) > std::numeric_limits<type>::minus_infinity()) \
+  else if(static_cast<type::basis_type>(v2) >= std::numeric_limits<type>::infinity() || static_cast<type::basis_type>(v2) <= std::numeric_limits<type>::minus_infinity()) { \
+    if(static_cast<type::basis_type>(v1) < std::numeric_limits<type>::infinity() && static_cast<type::basis_type>(v1) > std::numeric_limits<type>::minus_infinity()) \
       return type(0, true);                                             \
   }                                                                     \
 }
 
 #define handle_inf_mod(type, v1, v2) {                                  \
-  if(((type::basis_type) v1) >= std::numeric_limits<type>::infinity() || ((type::basis_type) v1) <= std::numeric_limits<type>::minus_infinity()) \
+  if(static_cast<type::basis_type>(v1) >= std::numeric_limits<type>::infinity() || static_cast<type::basis_type>(v1) <= std::numeric_limits<type>::minus_infinity()) \
     return type(0, true);                                               \
-  else if(((type::basis_type) v2) == std::numeric_limits<type>::infinity())                  \
-    return type(((type::basis_type) v1), true);                                              \
-  else if(((type::basis_type) v2) == std::numeric_limits<type>::minus_infinity())            \
-    return type(-((type::basis_type) v1), true);                                             \
+  else if(static_cast<type::basis_type>(v2) == std::numeric_limits<type>::infinity())                  \
+    return type(static_cast<type::basis_type>(v1), true);                                              \
+  else if(static_cast<type::basis_type>(v2) == std::numeric_limits<type>::minus_infinity())            \
+    return type(-static_cast<type::basis_type>(v1), true);                                             \
 }
 
   /**
@@ -304,14 +304,14 @@ namespace EUROPA {
    */
 #ifndef NO_OVERFLOW_CHECKING
 #define op(type, a, x, b) {                                             \
-  double temp = ((double)(a)) x (b);                                    \
+  double temp = static_cast<double>(a) x (b);                                    \
   if(temp > std::numeric_limits<type>::infinity()) {                    \
     throw std::overflow_error("greater-than-infinity error"); \
   }                                                                     \
   else if(temp < std::numeric_limits<type>::minus_infinity()) {         \
     throw std::underflow_error("less-than-minus-infinity error"); \
   }                                                                     \
-  return type((type::basis_type)temp, true);                            \
+  return type(static_cast<type::basis_type>(temp), true);               \
 }
 #else
 #define op(type, a, x, b) return (a) x (b)
@@ -394,7 +394,7 @@ namespace EUROPA {
       }
 
     } 
-    eint(const unsigned int v) : m_v((long)v) {
+    eint(const unsigned int v) : m_v(static_cast<long>(v)) {
       if(m_v > std::numeric_limits<eint>::infinity()) {
         assert(m_v <= std::numeric_limits<eint>::infinity());
         m_v = cast_int(std::numeric_limits<eint>::infinity());
@@ -404,7 +404,7 @@ namespace EUROPA {
         m_v = cast_int(std::numeric_limits<eint>::minus_infinity());
       }
     }
-    eint(const unsigned long v) : m_v((long)v) {
+    eint(const unsigned long v) : m_v(static_cast<long>(v)) {
       if(m_v > std::numeric_limits<eint>::infinity()) {
         assert(m_v <= std::numeric_limits<eint>::infinity());
         assert(m_v >= std::numeric_limits<eint>::minus_infinity());
@@ -538,7 +538,7 @@ namespace EUROPA {
 #ifdef _MSC_VER
     friend struct std::numeric_limits<eint>;
 #else
-    friend class std::numeric_limits<eint>;
+    friend struct std::numeric_limits<eint>;
 #endif //_MSC_VER
   
     /**
@@ -547,7 +547,7 @@ namespace EUROPA {
     eint(const int v, bool) : m_v(v) {}
     eint(const unsigned int v, bool) : m_v(v) {}
     eint(const long v, bool) : m_v(v) {}
-    eint(const unsigned long v, bool) : m_v(v) {}
+    eint(const unsigned long v, bool) : m_v(static_cast<long>(v)) {}
 
     friend eint operator+(const long o, const eint e);
     friend eint operator-(const long o, const eint e);
@@ -601,7 +601,7 @@ namespace EUROPA {
     edouble() : m_v(0.0) {}
     inline edouble operator+() const {return edouble(+m_v, true);}
     inline edouble operator-() const {return edouble(-m_v, true);}
-    inline bool operator!() const {return !m_v;}
+    inline bool operator!() const {return m_v == 0.0;}
     inline edouble operator++() {handle_inf_unary(edouble, m_v); return edouble(++m_v, true);}
     inline edouble operator++(int) {handle_inf_unary(edouble, m_v); return edouble(m_v++, true);}
     inline edouble operator--() {handle_inf_unary(edouble, m_v); return edouble(--m_v, true);}
@@ -629,7 +629,7 @@ namespace EUROPA {
     GEN_COMPARISONS(long long int);
     GEN_COMPARISONS(long double);
 
-    inline operator eint() const {return eint((long)m_v);} //is this a good idea?
+    inline operator eint() const {return eint(static_cast<long>(m_v));} //is this a good idea?
 
     friend eint::basis_type cast_int(const edouble e);
     friend long cast_long(const edouble e);
@@ -643,7 +643,7 @@ namespace EUROPA {
 #ifdef _MSC_VER
     friend struct std::numeric_limits<edouble>;
 #else
-    friend class std::numeric_limits<edouble>;
+    friend struct std::numeric_limits<edouble>;
 #endif //_MSC_VER
 
     //private version that doesn't do infinity checking
@@ -678,20 +678,20 @@ namespace EUROPA {
     double m_v;
   };
 
-  edouble eint::operator+(const edouble o) const {handle_inf_add(edouble, m_v, o.m_v); op(edouble, (double)m_v, +, o.m_v);}
-  edouble eint::operator-(const edouble o) const {handle_inf_sub(edouble, m_v, o.m_v); op(edouble, (double)m_v, -, o.m_v);}
-  edouble eint::operator*(const edouble o) const {handle_inf_mul(edouble, m_v, o.m_v); op(edouble, (double)m_v, *, o.m_v);}
-  edouble eint::operator/(const edouble o) const {handle_inf_div(edouble, m_v, o.m_v); op(edouble, (double)m_v, /, o.m_v);}
-  edouble eint::operator+(const double o) const {handle_inf_add(edouble, m_v, o); op(edouble, (double)m_v, +, o);}
-  edouble eint::operator-(const double o) const {handle_inf_sub(edouble, m_v, o); op(edouble, (double)m_v, -, o);}
-  edouble eint::operator*(const double o) const {handle_inf_mul(edouble, m_v, o); op(edouble, (double)m_v, *, o);}
-  edouble eint::operator/(const double o) const {handle_inf_div(edouble, m_v, o); op(edouble, (double)m_v, /, o);}
-  bool eint::operator<(const edouble o) const {return m_v < o.m_v;}
-  bool eint::operator<=(const edouble o) const {return m_v <= o.m_v;}
-  bool eint::operator==(const edouble o) const {return m_v == o.m_v;}
-  bool eint::operator>=(const edouble o) const {return m_v >= o.m_v;}
-  bool eint::operator>(const edouble o) const {return m_v > o.m_v;}
-  bool eint::operator!=(const edouble o) const {return m_v != o.m_v;}
+edouble eint::operator+(const edouble o) const {handle_inf_add(edouble, m_v, o.m_v); op(edouble, static_cast<double>(m_v), +, o.m_v);}
+edouble eint::operator-(const edouble o) const {handle_inf_sub(edouble, m_v, o.m_v); op(edouble, static_cast<double>(m_v), -, o.m_v);}
+edouble eint::operator*(const edouble o) const {handle_inf_mul(edouble, m_v, o.m_v); op(edouble, static_cast<double>(m_v), *, o.m_v);}
+edouble eint::operator/(const edouble o) const {handle_inf_div(edouble, m_v, o.m_v); op(edouble, static_cast<double>(m_v), /, o.m_v);}
+edouble eint::operator+(const double o) const {handle_inf_add(edouble, m_v, o); op(edouble, static_cast<double>(m_v), +, o);}
+edouble eint::operator-(const double o) const {handle_inf_sub(edouble, m_v, o); op(edouble, static_cast<double>(m_v), -, o);}
+edouble eint::operator*(const double o) const {handle_inf_mul(edouble, m_v, o); op(edouble, static_cast<double>(m_v), *, o);}
+edouble eint::operator/(const double o) const {handle_inf_div(edouble, m_v, o); op(edouble, static_cast<double>(m_v), /, o);}
+bool eint::operator<(const edouble o) const {return m_v < o.m_v;}
+bool eint::operator<=(const edouble o) const {return m_v <= o.m_v;}
+bool eint::operator==(const edouble o) const {return m_v == o.m_v;}
+bool eint::operator>=(const edouble o) const {return m_v >= o.m_v;}
+bool eint::operator>(const edouble o) const {return m_v > o.m_v;}
+bool eint::operator!=(const edouble o) const {return m_v != o.m_v;}
 
   bool eint::operator<(const double o) const {return m_v < o;}
   bool eint::operator<=(const double o) const {return m_v <= o;}
@@ -750,7 +750,7 @@ namespace std {
   {return EUROPA::eint(numeric_limits<long>::max(), true);}
 #endif
   inline EUROPA::eint numeric_limits<EUROPA::eint>::minus_infinity() throw() {return -infinity();}
-  inline EUROPA::eint numeric_limits<EUROPA::eint>::max() throw() {return cast_basis(infinity()) - (long)1;}
+inline EUROPA::eint numeric_limits<EUROPA::eint>::max() throw() {return cast_basis(infinity()) - 1L;}
   inline EUROPA::eint numeric_limits<EUROPA::eint>::min() throw() {return -max();}
   inline EUROPA::eint numeric_limits<EUROPA::eint>::epsilon() throw() {return 0;}
   inline EUROPA::eint numeric_limits<EUROPA::eint>::round_error() throw() {return 0;}
@@ -788,7 +788,7 @@ namespace std {
 
   inline EUROPA::edouble abs(const EUROPA::edouble d) { return EUROPA::edouble(abs(d.m_v), true);}
   inline EUROPA::edouble sqrt(const EUROPA::edouble d) { handle_inf_unary(EUROPA::edouble, d); return EUROPA::edouble(sqrt(d.m_v), true);}
-  inline EUROPA::edouble pow(const EUROPA::edouble d, const EUROPA::eint i) {return EUROPA::edouble(std::pow(d.m_v, (int)i.m_v));}
+inline EUROPA::edouble pow(const EUROPA::edouble d, const EUROPA::eint i) {return EUROPA::edouble(std::pow(d.m_v, static_cast<int>(i.m_v)));}
   inline EUROPA::edouble sin(const EUROPA::edouble d) {return EUROPA::edouble(std::sin(d.m_v), true);}
   inline EUROPA::edouble ceil(const EUROPA::edouble d) {return EUROPA::edouble(std::ceil(d.m_v), true);}
   inline EUROPA::edouble floor(const EUROPA::edouble d) {return EUROPA::edouble(std::floor(d.m_v), true);}
@@ -803,9 +803,9 @@ namespace std {
 
 namespace boost {
   //I'm not entirely sure this is safe, but it's worked so far.  Maybe this should be changed to
-  //*((size_t*)&(__x.m_v))
-  size_t hash<EUROPA::edouble>::operator()(EUROPA::edouble __x) const {return (size_t) (__x.m_v);}
-  size_t hash<EUROPA::eint>::operator()(EUROPA::eint __x) const {return (size_t) (long) (__x.m_v);}
+//*((size_t*)&(__x.m_v))
+size_t hash<EUROPA::edouble>::operator()(EUROPA::edouble __x) const {return static_cast<size_t>(__x.m_v);}
+size_t hash<EUROPA::eint>::operator()(EUROPA::eint __x) const {return static_cast<size_t>(static_cast<long>(__x.m_v));}
 }
 
 // #define min MIN_COPY

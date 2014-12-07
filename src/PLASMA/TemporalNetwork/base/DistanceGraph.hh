@@ -400,7 +400,7 @@ public:
   /**
    * @brief constructor
    */
-  Dedge ():m_id(this){}
+  Dedge ():m_id(this), length(0) {}
   /**
    * @brief destructor
    */

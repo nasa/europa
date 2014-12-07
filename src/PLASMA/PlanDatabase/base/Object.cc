@@ -384,7 +384,7 @@ namespace EUROPA {
   ConstrainedVariableId Object::getVariable(const std::vector<unsigned int>& path) const {
     unsigned int index = path[0];
 
-    checkError(index >= 0 && index < m_variables.size(),
+    checkError(index < m_variables.size(),
 	       "index of " << index << " out of bounds for " << getName().toString());
 
     ConstrainedVariableId var = m_variables[index];

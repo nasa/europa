@@ -11,9 +11,10 @@ namespace EUROPA {
       m_sm.release();
   }
   
-  UnifyMemento::UnifyMemento() {}
+UnifyMemento::UnifyMemento() : m_method(mergeMethod), m_mm(), m_sm() {}
 
-  UnifyMemento::UnifyMemento(const TokenId& inactiveToken, const TokenId& activeToken) {
+UnifyMemento::UnifyMemento(const TokenId& inactiveToken,
+                           const TokenId& activeToken) {
     static const char* TRUE_VALUE = "1";
 
     const char *envStr = getenv("EUROPA_USE_STACK_METHOD");

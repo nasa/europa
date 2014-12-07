@@ -12,6 +12,7 @@ namespace EUROPA {
     : DefaultPropagator(name, constraintEngine)
     , m_updateRequired(false)
     , m_inBatchMode(false)
+    , m_batchListener(NULL)
     {
     }
 

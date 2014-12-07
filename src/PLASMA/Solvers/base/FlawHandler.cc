@@ -37,8 +37,6 @@ namespace EUROPA {
       const char* maxChoicesStr =  m_configData->Attribute("maxChoices");
       m_maxChoices = static_cast<unsigned int>(atof(maxChoicesStr));
 
-      checkError(m_maxChoices >= 0, maxChoicesStr << " must be positive");
-
       // The base uses a number that exceeds the max absolute value priority allowed.
       // It also multiplies by a minimum of 1 to ensure that 0 guards are handled as low weights.
       // Note also that we make it 2 so that defaul t compatibility heuristics 

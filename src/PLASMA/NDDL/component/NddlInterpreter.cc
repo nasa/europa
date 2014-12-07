@@ -28,19 +28,22 @@ NddlInterpreter::~NddlInterpreter()
 {
 }
 
-pANTLR3_INPUT_STREAM getInputStream(std::istream& input, const std::string& source, std::string& strInput)
-{
-    if (source == "<eval>") {
-        // TODO: this is kind of a hack, see if it can be made more robust & efficient
-        std::istringstream* is = dynamic_cast<std::istringstream*>(&input);
-        strInput = is->str(); // This makes a copy of the original string that could be avoided
-
-		debugMsg("NddlInterpreter", "INPUT SCRIPT:" << std::endl << strInput);
-        return antlr3NewAsciiStringInPlaceStream((pANTLR3_UINT8)strInput.c_str(),(ANTLR3_UINT32)strInput.size(),(pANTLR3_UINT8)source.c_str());
+pANTLR3_INPUT_STREAM getInputStream(std::istream& input, const std::string& source,
+                                    std::string& strInput) {
+  if (source == "<eval>") {
+    // TODO: this is kind of a hack, see if it can be made more robust & efficient
+    std::istringstream* is = dynamic_cast<std::istringstream*>(&input);
+    if(is != NULL) {
+      strInput = is->str(); // This makes a copy of the original string that could be avoided
+      
+      debugMsg("NddlInterpreter", "INPUT SCRIPT:" << std::endl << strInput);
+      return antlr3NewAsciiStringInPlaceStream((pANTLR3_UINT8)strInput.c_str(),(ANTLR3_UINT32)strInput.size(),(pANTLR3_UINT8)source.c_str());
     }
-    else {
-        return antlr3AsciiFileStreamNew((pANTLR3_UINT8)source.c_str());
-    }
+  }
+  else {
+    return antlr3AsciiFileStreamNew((pANTLR3_UINT8)source.c_str());
+  }
+  return NULL;
 }
 
 bool isFile(const std::string& filename)

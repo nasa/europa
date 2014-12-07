@@ -442,8 +442,10 @@ private:
       std::vector<MatchingRuleId> rules;
       me.getMatches(ConstrainedVariableId(E_predicateC->duration()), rules);
       CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getPredicateName().toString(), rules.size() == 4);
-      for(int i=0;i>4; i++)
-        CPPUNIT_ASSERT_MESSAGE(rules[i]->toString(), expectedRules.find(LabelStr(rules[i]->toString())) != expectedRules.end());
+      for(int i=0;i<4; i++) {//? {
+        CPPUNIT_ASSERT_MESSAGE(rules[i]->toString(),
+                               expectedRules.find(LabelStr(rules[i]->toString())) != expectedRules.end());
+      }
 
       nukeToken(db->getClient(),token);
     }

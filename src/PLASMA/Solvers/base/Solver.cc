@@ -28,53 +28,54 @@
   }
 
 namespace EUROPA {
-  namespace SOLVERS {
+namespace SOLVERS {
 
-    Solver::Solver(const PlanDatabaseId& db, const TiXmlElement& configData)
-      : m_id(this), m_db(db),
-        m_stepCountFloor(0), m_depthFloor(0), m_stepCount(0),
-        m_noFlawsFound(false), m_exhausted(false), m_timedOut(false),
+Solver::Solver(const PlanDatabaseId& db, const TiXmlElement& configData)
+    : m_baseConflictLevel(0.0),
+      m_id(this), m_db(db),
+      m_stepCountFloor(0), m_depthFloor(0), m_stepCount(0),
+      m_noFlawsFound(false), m_exhausted(false), m_timedOut(false),
 #ifdef _MSC_VER
-        m_maxSteps( UINT_MAX ),
-        m_maxDepth( UINT_MAX ),
+      m_maxSteps( UINT_MAX ),
+      m_maxDepth( UINT_MAX ),
 #else
-        m_maxSteps(std::numeric_limits<unsigned int>::max()),
-        m_maxDepth(std::numeric_limits<unsigned int>::max()),
+      m_maxSteps(std::numeric_limits<unsigned int>::max()),
+      m_maxDepth(std::numeric_limits<unsigned int>::max()),
 #endif //_MSC_VER
-        m_masterFlawFilter(configData), m_ceListener(db->getConstraintEngine(), *this),
-        m_dbListener(db, *this) {
-      checkError(strcmp(configData.Value(), "Solver") == 0,
-                 "Configuration file error. Expected element <Solver> but found " << configData.Value());
+      m_masterFlawFilter(configData), m_ceListener(db->getConstraintEngine(), *this),
+      m_dbListener(db, *this) {
+  checkError(strcmp(configData.Value(), "Solver") == 0,
+             "Configuration file error. Expected element <Solver> but found " << configData.Value());
 
-      // Extract the name of the Solver
-      m_name = extractData(configData, "name");
+  // Extract the name of the Solver
+  m_name = extractData(configData, "name");
 
-      m_context = ((new Context(m_name.toString() + "Context"))->getId());
-      // Initialize the common filter
-      m_masterFlawFilter.initialize(configData, m_db, m_context);
+  m_context = ((new Context(m_name.toString() + "Context"))->getId());
+  // Initialize the common filter
+  m_masterFlawFilter.initialize(configData, m_db, m_context);
 
-      // Now load all the flaw managers
-      for (TiXmlElement * child = configData.FirstChildElement();
-           child != NULL;
-           child = child->NextSiblingElement()) {
-        const char* component = child->Attribute("component");
+  // Now load all the flaw managers
+  for (TiXmlElement * child = configData.FirstChildElement();
+       child != NULL;
+       child = child->NextSiblingElement()) {
+    const char* component = child->Attribute("component");
 
-        if(strcmp(child->Value(), "FlawFilter") != 0){
-          // If no component name is provided, register it with the tag name of configuration element
-          // thus obtaining the default.
-          if(component == NULL)
-            child->SetAttribute("component", child->Value());
+    if(strcmp(child->Value(), "FlawFilter") != 0){
+      // If no component name is provided, register it with the tag name of configuration element
+      // thus obtaining the default.
+      if(component == NULL)
+        child->SetAttribute("component", child->Value());
 
-          // Now allocate the particular flaw manager using an abstract factory pattern.
-          EngineId& engine = db->getEngine();
-          ComponentFactoryMgr* cfm = (ComponentFactoryMgr*)engine->getComponent("ComponentFactoryMgr");
-          FlawManagerId flawManager = cfm->createInstance(*child);
-          debugMsg("Solver:Solver", "Created FlawManager with id " << flawManager);
-          flawManager->initialize(*child, m_db, m_context, m_masterFlawFilter.getId());
-          m_flawManagers.push_back(flawManager);
-        }
-      }
+      // Now allocate the particular flaw manager using an abstract factory pattern.
+      EngineId& engine = db->getEngine();
+      ComponentFactoryMgr* cfm = (ComponentFactoryMgr*)engine->getComponent("ComponentFactoryMgr");
+      FlawManagerId flawManager = cfm->createInstance(*child);
+      debugMsg("Solver:Solver", "Created FlawManager with id " << flawManager);
+      flawManager->initialize(*child, m_db, m_context, m_masterFlawFilter.getId());
+      m_flawManagers.push_back(flawManager);
     }
+  }
+}
 
     Solver::~Solver(){
       cleanupDecisions();

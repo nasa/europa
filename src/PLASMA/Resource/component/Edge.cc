@@ -72,8 +72,9 @@ namespace EUROPA
 
     std::ostream& operator<<( std::ostream& os, const Edge& fe )
     {
+      std::ios::fmtflags f(os.flags());
       os << fe.getIdentity() << " {" << fe.getCapacity() << "} (enabled: " << std::boolalpha << fe.isEnabled() << ")";
-
+      os.flags(f);
       return os;
     }
 }

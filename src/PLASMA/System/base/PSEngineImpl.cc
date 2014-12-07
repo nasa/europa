@@ -24,9 +24,7 @@ namespace EUROPA {
 	  return new PSEngineImpl();
   }
 
-  PSEngineImpl::PSEngineImpl()
-  {
-  }
+PSEngineImpl::PSEngineImpl() : m_started(false) {}
 
   PSEngineImpl::~PSEngineImpl()
   {

@@ -437,17 +437,16 @@ namespace EUROPA
       return NULL;
     }
 
-    EngineComponent* EngineBase::removeComponent(const std::string& name)
-    {
-        EngineComponent* c = getComponent(name);
-
-        if (c != NULL)
-            getComponents().erase(LabelStr(name));
-
-        static EngineId s_nullEngineId;
-        c->setEngine(s_nullEngineId);
-        return c;
-    }    
+EngineComponent* EngineBase::removeComponent(const std::string& name) {
+  static EngineId s_nullEngineId;
+  EngineComponent* c = getComponent(name);
+  
+  if (c != NULL) {
+    getComponents().erase(LabelStr(name));
+    c->setEngine(s_nullEngineId);
+  }
+  return c;
+}    
     
     std::map<edouble, EngineComponent*>& EngineBase::getComponents()
     {

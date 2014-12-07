@@ -4,6 +4,8 @@
 #include <string>
 #include <iostream>
 
+#include <boost/cast.hpp>
+
 #include "Debug.hh"
 #include "Entity.hh"
 #include "Utils.hh"
@@ -566,21 +568,21 @@ namespace EUROPA {
 
   ConstrainedVariableId PSPlanDatabaseClientImpl::toId(PSVariable* v)
   {
-      return dynamic_cast<ConstrainedVariable*>(v)->getId();
+      return boost::polymorphic_cast<ConstrainedVariable*>(v)->getId();
   }
 
   ConstraintId PSPlanDatabaseClientImpl::toId(PSConstraint* c)
   {
-      return dynamic_cast<Constraint*>(c)->getId();
+      return boost::polymorphic_cast<Constraint*>(c)->getId();
   }
 
   ObjectId PSPlanDatabaseClientImpl::toId(PSObject* o)
   {
-      return dynamic_cast<Object*>(o)->getId();
+      return boost::polymorphic_cast<Object*>(o)->getId();
   }
 
   TokenId PSPlanDatabaseClientImpl::toId(PSToken* t)
   {
-      return dynamic_cast<Token*>(t)->getId();
+      return boost::polymorphic_cast<Token*>(t)->getId();
   }
 }
