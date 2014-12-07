@@ -18,8 +18,12 @@ namespace EUROPA {
       return(TokenId::convertable(entity) || TokenId(entity)->isActive());
     }
 
-    ThreatDecisionPoint::ThreatDecisionPoint(const DbClientId& client, const TokenId& tokenToOrder, const TiXmlElement& configData, const LabelStr& explanation)
-      : DecisionPoint(client, tokenToOrder->getKey(), explanation), m_tokenToOrder(tokenToOrder), m_index(0) {
+  ThreatDecisionPoint::ThreatDecisionPoint(const DbClientId& client,
+                                           const TokenId& tokenToOrder,
+                                           const TiXmlElement& configData,
+                                           const LabelStr& explanation)
+      : DecisionPoint(client, tokenToOrder->getKey(), explanation),
+        m_tokenToOrder(tokenToOrder), m_choiceCount(0), m_index(0) {
       // Here is where we would look for custom processing for configuration of the decision point
     }
 

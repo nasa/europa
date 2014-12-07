@@ -1065,7 +1065,9 @@ namespace EUROPA {
     this->consistent = c;
   }
 
-  Tnode::Tnode(TemporalNetwork* t) :  Dnode(), m_deletionMarker(true) , owner(t){
+Tnode::Tnode(TemporalNetwork* t) :
+    Dnode(), reftime(0), prev_reftime(0), ordinal(0), m_deletionMarker(true), index(0),
+    owner(t){
     lowerBound = NEG_INFINITY;
     upperBound = POS_INFINITY;
   }

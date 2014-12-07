@@ -459,7 +459,9 @@ namespace EUROPA {
     if(membershipRelation_it == membershipRelation.end() && hasParent(parentType))
       return getNameFromIndex(getParent(parentType), index);
 
-    // Alternately, we have to have a hit
+    checkError(membershipRelation_it != membershipRelation.end(),
+               "Invalid membership relation: " << parentType);
+   // Alternately, we have to have a hit
     const NameValueVector& members = membershipRelation_it->second;
     unsigned int counter = 0;
     for(NameValueVector::const_iterator it = members.begin(); it != members.end(); ++it){

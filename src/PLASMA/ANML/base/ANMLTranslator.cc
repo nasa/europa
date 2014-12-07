@@ -483,10 +483,11 @@ namespace ANML
   }    
 
   Range::Range(const std::string& name,const Type& dataType,const std::string& lb,const std::string& ub)	
-    : Type(name!="" ? name : autoIdentifier("Range"))
-    , m_dataType(dataType)
-    , m_lb(lb)
-    , m_ub(ub)
+      : Type(name!="" ? name : autoIdentifier("Range")),
+        m_isResourceType(false),
+        m_dataType(dataType),
+        m_lb(lb),
+        m_ub(ub)
     {
       // TODO: convert lb,ub to typed values
     }
@@ -687,15 +688,18 @@ namespace ANML
   }
 
   Variable::Variable(const Type& dataType, const std::string& name)
-    : m_name(name)
-      , m_dataType(dataType)
+      : m_name(name),
+        m_objType(NULL),
+        m_dataType(dataType)
+      
   {
   }
 
   Variable::Variable(const Type& dataType, const std::string& name, const std::vector<Arg*>& args)
-    : m_name(name)
-      , m_dataType(dataType)
-                            , m_args(args)
+      : m_name(name),
+        m_objType(NULL),
+        m_dataType(dataType),
+        m_args(args)
   {
   }
 
@@ -1126,15 +1130,14 @@ namespace ANML
   }
 
   Proposition::Proposition(TemporalQualifier* tq,Fluent* f) 
-    : m_temporalQualifier(tq)
+      : m_context(), m_temporalQualifier(tq), m_fluents(), m_parentAction(NULL)
   {
     m_fluents.push_back(f);
     commonInit();
   }
 
   Proposition::Proposition(TemporalQualifier* tq,const std::vector<Fluent*>& fluents) 
-    : m_temporalQualifier(tq)
-      , m_fluents(fluents) 
+    : m_context(), m_temporalQualifier(tq), m_fluents(fluents), m_parentAction(NULL)
   {
     commonInit();
   }

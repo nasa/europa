@@ -20,7 +20,11 @@ namespace EUROPA {
 					       const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_objectDomain(static_cast<ObjectDomain&>(getCurrentDomain(variables[0]))),
-      m_proxyDomain(static_cast<EnumeratedDomain&>(getCurrentDomain(variables[1]))){
+      m_proxyDomain(static_cast<EnumeratedDomain&>(getCurrentDomain(variables[1]))),
+      m_path(),
+      m_autoSpecified(false),
+      m_sourceConstraintKey(),
+      m_sourceConstraint() {
     checkError(getScope().size() == ARG_COUNT, toString());
   }
 

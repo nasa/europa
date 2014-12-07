@@ -19,6 +19,7 @@ namespace EUROPA {
         m_id(this)
     	, m_changeCount(0)
     	, m_needsRecompute(false)
+        , m_constraintKeyLb(0)
         , m_planDatabase(db)
         , m_detector(flawDetector)
     {

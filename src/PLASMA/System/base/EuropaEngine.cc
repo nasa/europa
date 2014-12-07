@@ -27,11 +27,10 @@ namespace EUROPA {
   //Logger  &EuropaEngine::LOGGER = Logger::getInstance( "EUROPA::System::EuropaEngine", Logger::DEBUG );
   LOGGER_CLASS_INSTANCE_IMPL( EuropaEngine, "EUROPA::System::EuropaEngine", DEBUG );
 
-    EuropaEngine::EuropaEngine()
-    {
-        Error::doThrowExceptions(); // throw exceptions!
-        Error::doDisplayErrors();
-    }
+EuropaEngine::EuropaEngine() : m_totalNodes(0), m_finalDepth(0) {
+  Error::doThrowExceptions(); // throw exceptions!
+  Error::doDisplayErrors();
+}
 
     EuropaEngine::~EuropaEngine()
     {
