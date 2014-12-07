@@ -23,30 +23,30 @@
 
 #include "TestData.hh"
 
-void TestData::failedCompare(const std::string& macro, const std::string& one,
+void TestData::failedCompare(const std::string&, const std::string& one,
                              const std::string& two,
                              const std::string& file, const int& line) {
   std::cerr << file << ':' << line << ": comparison failed: "
             << one << " is not equal to " << two << std::endl;
 }
 
-void TestData::unexpectedException(const std::string& macro, const Error& exception,
+void TestData::unexpectedException(const std::string& , const Error& exception,
                                    const std::string& file, const int& line) {
   std::cerr << file << ':' << line << ": unexpected exception " << exception << std::endl;
 }
 
-void TestData::missingException(const std::string& macro, const std::string& msg,
+void TestData::missingException(const std::string& , const std::string& msg,
                                 const std::string& file, const int& line) {
   std::cerr << file << ':' << line << ": unexpected success; " << msg << std::endl;
 }
 
-void TestData::missingException(const std::string& macro, const Error& exception,
+void TestData::missingException(const std::string& , const Error& exception,
                                 const std::string& file, const int& line) {
   std::cerr << file << ':' << line << ": unexpected success; expected exception: "
             << exception << std::endl;
 }
 
-void TestData::wrongException(const std::string& macro,
+void TestData::wrongException(const std::string& ,
                               const Error& caughtException,
                               const Error& expectedException,
                               const std::string& file, const int& line) {
@@ -54,13 +54,13 @@ void TestData::wrongException(const std::string& macro,
             << caughtException << " is not the expected " << expectedException << std::endl;
 }
 
-void TestData::areEqual(const std::string& macro,
+void TestData::areEqual(const std::string& ,
                         const std::string& one,
                         const std::string& two) {
   std::cerr << one << " equals " << two << '\n';
 }
 
-void TestData::correctException(const std::string& macro,
+void TestData::correctException(const std::string& ,
                                 const Error& exception) {
   std::cout << "Caught expected exception " << exception << '\n';
 }

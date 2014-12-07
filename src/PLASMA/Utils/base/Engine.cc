@@ -76,56 +76,61 @@ namespace EUROPA
 		{
 			xml = m_doc->RootElement();
 			if (xml == NULL) return 0;
-			if(strcmp((const char *)xml->Value(),"EuropaConfig") == 0)
+			if(strcmp(static_cast<const char *>(xml->Value()),"EuropaConfig") == 0)
 			{
 				parseXML(xml);
 				status = 1;
 			}
 			else
-				debugMsg("EngineConfig","Expected <EuropaConfig>, Found: " << (const char *)xml->Value());
+                          debugMsg("EngineConfig",
+                                   "Expected <EuropaConfig>, Found: " <<
+                                   static_cast<const char *>(xml->Value()));
 		}
 		else
 		{
-			assert("LOAD FAIL");
+                  assertTrue(ALWAYS_FAIL, "LOAD FAIL");
 		}
 		delete m_doc;
 		return status;
 
 	}
 
-	void EngineConfig::parseXML(TiXmlNode * pParent){
-		TiXmlNode * pChild = 0;
-		TiXmlNode * pChildEle = 0;
-		const char * comp_name = "";
-		const char * prop_name = "";
-		const char * prop_value = "";
-		while(( pChild = pParent->IterateChildren( pChild ) ))
-		{
-			if( pParent->Type() == TiXmlNode::ELEMENT )
-			{
-				if(strcmp((const char *)pChild->ToElement()->Value(),"Component") == 0
-										&& pChild->ToElement())
-				{
-					comp_name = (const char *)pChild->ToElement()->FirstAttribute()->Value();
-				}
-
-				while((pChildEle = pChild->IterateChildren(pChildEle))
-						&& strcmp((const char *)pChild->ToElement()->FirstChildElement()->Value(),"Property") == 0)
-				{
-					if(pChildEle->FirstChild())
-					{
-						prop_name = (const char *)pChildEle->ToElement()->FirstAttribute()->Value();
-						prop_value = (const char *)pChildEle->FirstChild()->ToText()->Value();
-						if(std::string(prop_name).compare("") != 0)
-						{
-							setProperty(std::string(comp_name).append(".").append(prop_name), std::string(prop_value));
-						}
-					}
-				}
-			}
-
-		}
-	}
+void EngineConfig::parseXML(TiXmlNode * pParent){
+  TiXmlNode * pChild = 0;
+  TiXmlNode * pChildEle = 0;
+  const char * comp_name = "";
+  const char * prop_name = "";
+  const char * prop_value = "";
+  while(( pChild = pParent->IterateChildren( pChild ) ))
+  {
+    if( pParent->Type() == TiXmlNode::ELEMENT )
+    {
+      if(strcmp(static_cast<const char *>(pChild->ToElement()->Value()),"Component") == 0
+         && pChild->ToElement())
+      {
+        comp_name =
+            static_cast<const char *>(pChild->ToElement()->FirstAttribute()->Value());
+      }
+      
+      while((pChildEle = pChild->IterateChildren(pChildEle))
+            && strcmp(static_cast<const char *>(pChild->ToElement()->FirstChildElement()->Value()),
+                      "Property") == 0)
+      {
+        if(pChildEle->FirstChild())
+        {
+          prop_name =
+              static_cast<const char *>(pChildEle->ToElement()->FirstAttribute()->Value());
+          prop_value = static_cast<const char *>(pChildEle->FirstChild()->ToText()->Value());
+          if(std::string(prop_name).compare("") != 0)
+          {
+            setProperty(std::string(comp_name).append(".").append(prop_name), std::string(prop_value));
+          }
+        }
+      }
+    }
+    
+  }
+}
 
 	void EngineConfig::writeFromXML(const char* file_name){
 		TiXmlDocument * m_doc = new TiXmlDocument(file_name);
@@ -231,11 +236,10 @@ namespace EUROPA
 	    	initializeModule(m_modules[i]);
     }
 
-    void EngineBase::uninitializeModules()
-    {
-        for (unsigned int i=m_modules.size(); i>0 ;i--)
-        	uninitializeModule(m_modules[i-1]);
-    }
+void EngineBase::uninitializeModules() {
+  for (std::vector<ModuleId>::size_type i=m_modules.size(); i>0 ;i--)
+    uninitializeModule(m_modules[i-1]);
+}
 
     bool EngineBase::isStarted()
     {
@@ -288,36 +292,45 @@ namespace EUROPA
 		m_modules.erase(it);
 	}
 
+template <typename T>
+struct fptr_cast_helper {
+  union helper {
+    void* v;
+    T fn;
+  };
+  helper h;
+};
 	// Basically a copy of PSEngineImpl::loadModel
-	void EngineBase::loadModule(const std::string& moduleFileName)
-	{
-		check_runtime_error(m_started,"Engine has not been started");
+void EngineBase::loadModule(const std::string& moduleFileName) {
+  check_runtime_error(m_started,"Engine has not been started");
 
-	#ifdef _MSC_VER
-		void* libHandle = p_dlopen(moduleFileName.c_str(), RTLD_NOW);
-		checkRuntimeError(libHandle != NULL,
-				"Error opening module " << moduleFileName << ": " << p_dlerror());
+#ifdef _MSC_VER
+  void* libHandle = p_dlopen(moduleFileName.c_str(), RTLD_NOW);
+  checkRuntimeError(libHandle != NULL,
+                    "Error opening module " << moduleFileName << ": " << p_dlerror());
 
-		Module* (*fcn_module)();
-		fcn_module = (Module* (*)()) p_dlsym(libHandle, "initializeModule");
-		checkError(fcn_module != NULL,
-				"Error locating symbol 'initializeModule' in " << moduleFileName << ": " <<
-				p_dlerror());
-	#else
-		void* libHandle = dlopen(moduleFileName.c_str(), RTLD_NOW);
-		checkRuntimeError(libHandle != NULL,
-				"Error opening module " << moduleFileName << ": " << dlerror());
+  Module* (*fcn_module)();
+  fcn_module = (Module* (*)()) p_dlsym(libHandle, "initializeModule");
+  checkError(fcn_module != NULL,
+             "Error locating symbol 'initializeModule' in " << moduleFileName << ": " <<
+             p_dlerror());
+#else
+  void* libHandle = dlopen(moduleFileName.c_str(), RTLD_NOW);
+  checkRuntimeError(libHandle != NULL,
+                    "Error opening module " << moduleFileName << ": " << dlerror());
 
-		Module* (*fcn_module)();
-		fcn_module = (Module* (*)()) dlsym(libHandle, "initializeModule");
-		checkError(fcn_module != NULL,
-				"Error locating symbol 'initializeModule' in " << moduleFileName << ": " <<
-				dlerror());
-	#endif
+  Module* (*fcn_module)();
+  fptr_cast_helper<Module*(*)()> helper;
+  helper.h.v = dlsym(libHandle, "initializeModule");
+  fcn_module = helper.h.fn;
+  checkError(fcn_module != NULL,
+             "Error locating symbol 'initializeModule' in " << moduleFileName << ": " <<
+             dlerror());
+#endif
 
-		ModuleId module = (*fcn_module)()->getId();
-		addModule(module);
-	}
+  ModuleId module = (*fcn_module)()->getId();
+  addModule(module);
+}
 
 
     void EngineBase::initializeByModule(ModuleId module)
@@ -338,11 +351,10 @@ namespace EUROPA
 	    	initializeByModule(m_modules[i]);
     }
 
-    void EngineBase::uninitializeByModules()
-    {
-    	for (int i=m_modules.size(); i>0; i--)
-    		uninitializeByModule(m_modules[i-1]);
-    }
+void EngineBase::uninitializeByModules() {
+  for (std::vector<ModuleId>::size_type i=m_modules.size(); i>0; i--)
+    uninitializeByModule(m_modules[i-1]);
+}
 
     std::string EngineBase::executeScript(const std::string& language, const std::string& script, bool isFile)
     {

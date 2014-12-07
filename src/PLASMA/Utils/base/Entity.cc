@@ -66,7 +66,7 @@ class EntityInternals {
       debugMsg("Entity:garbageCollect",
                "Garbage collecting entity " << entity->getEntityName() << "(" << 
                entity->getKey() << ")");
-      delete (Entity*) entity;
+      delete entity;
       count++;
     }
 
@@ -213,14 +213,14 @@ const std::string& Entity::getEntityType() const {
     clearExternalEntity();
   }
 
-  const EntityId& Entity::getExternalEntity() const{
-    check_error(m_externalEntity.isNoId() || m_externalEntity.isValid());
-    return m_externalEntity;
-  }
+const EntityId& Entity::getExternalEntity() const{
+  check_error(m_externalEntity.isNoId() || m_externalEntity.isValid());
+  return m_externalEntity;
+}
 
-  const PSEntity* Entity::getExternalPSEntity() const {
-    return (const PSEntity*) getExternalEntity();
-  }
+const PSEntity* Entity::getExternalPSEntity() const {
+  return dynamic_cast<const PSEntity*>(static_cast<Entity*>(getExternalEntity()));
+}
 
   void Entity::purgeStarted(){
     internals().second.get().purgeStarted();
@@ -281,7 +281,7 @@ bool Entity::isPurging(){
     m_dependents.erase(entity);
   }
 
-  void Entity::notifyDiscarded(const Entity* entity) {}
+  void Entity::notifyDiscarded(const Entity*) {}
 
   bool Entity::isPooled(Entity* entity) {
     return internals().second.get().isPooled(entity);

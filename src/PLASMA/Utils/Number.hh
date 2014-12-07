@@ -8,7 +8,6 @@
 #include <limits>
 #include <ostream>
 #include <stdexcept>
-#include <boost/unordered_map.hpp>
 
 #ifdef _MSC_VER
 #  if ( LONG_MAX > INT_MAX)
@@ -53,6 +52,7 @@ namespace EUROPA {
 }
 
 namespace boost {
+template<typename T> struct hash;
 
 template<> struct hash<EUROPA::edouble> {
   inline size_t operator()(EUROPA::edouble __x) const;
@@ -62,6 +62,7 @@ template<> struct hash<EUROPA::eint> {
   inline size_t operator()(EUROPA::eint __x) const;
 };
 }
+
 
 namespace std {
   template<>
@@ -801,12 +802,6 @@ inline EUROPA::edouble pow(const EUROPA::edouble d, const EUROPA::eint i) {retur
 
 }
 
-namespace boost {
-  //I'm not entirely sure this is safe, but it's worked so far.  Maybe this should be changed to
-//*((size_t*)&(__x.m_v))
-size_t hash<EUROPA::edouble>::operator()(EUROPA::edouble __x) const {return static_cast<size_t>(__x.m_v);}
-size_t hash<EUROPA::eint>::operator()(EUROPA::eint __x) const {return static_cast<size_t>(static_cast<long>(__x.m_v));}
-}
 
 // #define min MIN_COPY
 // #define max MAX_COPY

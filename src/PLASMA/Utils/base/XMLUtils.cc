@@ -17,25 +17,25 @@ namespace EUROPA {
     return data;
   }
 
-  TiXmlElement* initXml(const char* sourceFile, const char* element){
-		TiXmlDocument* doc = new TiXmlDocument(sourceFile);
-		doc->LoadFile();
-    checkError(!doc->Error(), "Invalid or malformed XML file '" << sourceFile << "'");
-    TiXmlElement * xmlElement = doc->RootElement();
-      debugMsg("Tests", "Loading element " << *xmlElement);
-    if(element == NULL)
-			return xmlElement;
-		while(xmlElement != NULL && strcmp(xmlElement->Value(), element) != 0)
-			xmlElement = (TiXmlElement*)xmlElement->NextSibling();
-		if(xmlElement == NULL) {
-			// here's a bit of a hack to do string concatination.
-			// it's in an if statement so we don't construct the string otherwise.
-			std::string message = "\"";
-			message = message + element + "\" could not be found in " + sourceFile;
-			assertTrue(xmlElement != NULL, message);
-		}
+TiXmlElement* initXml(const char* sourceFile, const char* element) {
+  TiXmlDocument* doc = new TiXmlDocument(sourceFile);
+  doc->LoadFile();
+  checkError(!doc->Error(), "Invalid or malformed XML file '" << sourceFile << "'");
+  TiXmlElement * xmlElement = doc->RootElement();
+  debugMsg("Tests", "Loading element " << *xmlElement);
+  if(element == NULL)
     return xmlElement;
+  while(xmlElement != NULL && strcmp(xmlElement->Value(), element) != 0)
+    xmlElement = static_cast<TiXmlElement*>(xmlElement->NextSibling());
+  if(xmlElement == NULL) {
+    // here's a bit of a hack to do string concatination.
+    // it's in an if statement so we don't construct the string otherwise.
+    std::string message = "\"";
+    message = message + element + "\" could not be found in " + sourceFile;
+    assertTrue(xmlElement != NULL, message);
   }
+  return xmlElement;
+}
 
   TiXmlElement* initXml(std::string& xmlStr) {
     std::stringstream is;

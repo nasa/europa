@@ -225,9 +225,9 @@ public:
   /**
     @brief Create a new DebugMessage.  Should only be called from the
     debugMsg() macro and readConfigFile().
-    @param file
-    @param line
-    @param marker
+    @param file The originating file
+    @param line The line number
+    @param marker The message marker for matching
     @par Errors thrown:
     @li If no debug stream has been assigned.
     @see DebugMessage::enable
@@ -240,10 +240,10 @@ public:
   /**
     @brief Create a new DebugMessage.  Should only be called from the
     debugMsg() macro and readConfigFile().
-    @param file
-    @param line
-    @param marker
-    @param level
+    @param file The originating file
+    @param line The line number
+    @param marker The message marker for matching
+    @param level The message level
     @par Errors thrown:
     @li If no debug stream has been assigned.
     @see DebugMessage::enable
@@ -256,8 +256,8 @@ public:
 
   /**
     @brief Find any matching DebugMessage.
-    @param file
-    @param pattern
+    @param file The originating file
+    @param pattern The pattern to match markers against
   */
   static DebugMessage *findMsg(const std::string& file,
                                const std::string& pattern);
@@ -265,9 +265,9 @@ public:
   /**
     @brief Find all matching DebugMessages and appends them to matches parameter
     without emptying it first.
-    @param file
-    @param pattern
-    @param matches
+    @param file The originating file
+    @param pattern The pattern to match markers against
+    @param matches Destination for matches
   */
   static void findMatchingMsgs(const std::string& file,
                                const std::string& pattern,
@@ -293,7 +293,7 @@ public:
 
   /**
     @brief Assign a stream to which all debug messages will be sent.
-    @param os
+    @param os The output stream to send messages to
    */
   inline static void setStream(std::ostream& os) {
     streamPtr() = &os;
@@ -309,7 +309,7 @@ public:
   /**
     @brief Read a list of debug message enablements from the
     stream argument.
-    @param is
+    @param is Input stream to read
     @par Errors thrown:
     @li If the stream is not good.
     @li If setStream() has not been called
@@ -374,7 +374,7 @@ public:
   /**
     @brief Print the data members of the debug message in a format
     that Emacs can use to display the corresponding source code.
-    @param
+    @param os The output stream to write to
    */
   inline void print(std::ostream *os = streamPtr()) const {
     try {
@@ -389,8 +389,8 @@ public:
 
   /**
     @brief Enable matching debug messages, including those created later.
-    @param file
-    @param marker
+    @param file The originating file
+    @param marker Marker to match messages against
     @par Errors thrown:
     @li If a message would be enabled but no debug stream has been set.
     @see DebugMessage::setStream
@@ -400,8 +400,8 @@ public:
 
   /**
      @brief Disable matching debug messages, including those created later.
-     @param file
-     @param marker
+     @param file The originating file
+     @param marker Marker to match messages against
    */
 
   static void disableMatchingMsgs(const std::string& file,

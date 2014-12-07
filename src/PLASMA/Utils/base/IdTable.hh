@@ -21,7 +21,6 @@
 
 
 /**
- * @file IdTable.hh
  * @author Conor McGann
  * @brief Defines a singleton class managing allocation and deallocation of ids for pointers.
  * @date  July, 2003
@@ -44,7 +43,7 @@ namespace EUROPA {
   public:
     ~IdTable(); // deallocating statics requires public access on beos
 
-    static unsigned int size();
+    static unsigned long size();
 
     static unsigned int insert(unsigned long int id, const char* baseType);
     static void remove(unsigned long int id);
