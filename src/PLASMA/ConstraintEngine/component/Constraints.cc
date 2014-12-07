@@ -1457,7 +1457,7 @@ namespace EUROPA {
 
       // Could just add to current unionOfDomains rather than failing here, but
       //   very messy to implement using current interface to *Domain classes.
-      assertFalse(newUnion == 0);
+      assertFalse(newUnion == NULL);
       delete *unionOfDomains;
       *unionOfDomains = newUnion;
       return;
