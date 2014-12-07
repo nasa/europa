@@ -141,7 +141,8 @@ namespace EUROPA {
       , m_otherName(otherName)
       , m_rotateCount(rotateCount)
     {
-      assertTrue(name != otherName);
+      checkError(name != otherName,
+                 "Rotated name " << name << " is the same as un-rotated " << otherName);
     }
 
     ConstraintId createConstraint(
@@ -179,8 +180,8 @@ namespace EUROPA {
                                  const LabelStr& otherName, const int& first, const int& second)
       : ConstraintType(name, propagatorName),
         m_otherName(otherName), m_first(first), m_second(second) {
-      assertTrue(name != otherName);
-      assertTrue(first != second);
+      checkError(name != otherName);
+      checkError(first != second);
     }
 
     ConstraintId createConstraint(

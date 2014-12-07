@@ -86,8 +86,8 @@
 #define __assert_(value, N, ...) assert ## N (value, __VA_ARGS__)
 #define _assert(value, N, ...) __assert_(value, N, __VA_ARGS__)
 
-#define assertTrue(...) _assert(true, NARG3(__VA_ARGS__), __VA_ARGS__)
-#define assertFalse(...) _assert(false, NARG3(__VA_ARGS__), __VA_ARGS__)
+#define assertTrue(...) _assert(false, NARG3(__VA_ARGS__), __VA_ARGS__)
+#define assertFalse(...) _assert(true, NARG3(__VA_ARGS__), __VA_ARGS__)
 
 
 #define check_error_function __attribute__ ((unused))
