@@ -42,21 +42,21 @@ void TiXmlBase::PutString( const TIXML_STRING& str, TIXML_OSTREAM* stream )
 
 void TiXmlBase::PutString( const TIXML_STRING& str, TIXML_STRING* outString )
 {
-	int i=0;
+  TIXML_STRING::size_type i=0;
 
-	while( i<(int)str.length() )
+	while( i < static_cast<TIXML_STRING::size_type>(str.length()) )
 	{
 		int c = str[i];
 
 		if (    c == '&' 
-		     && i < ( (int)str.length() - 2 )
+                        && i < ( static_cast<TIXML_STRING::size_type>(str.length() - 2 ))
 			 && str[i+1] == '#'
 			 && str[i+2] == 'x' )
 		{
 			// Hexadecimal character reference.
 			// Pass through unchanged.
 			// &#xA9;	-- copyright symbol, for example.
-			while ( i<(int)str.length() )
+                  while ( i<static_cast<TIXML_STRING::size_type>(str.length()) )
 			{
 				outString->append( str.c_str() + i, 1 );
 				++i;
@@ -94,13 +94,13 @@ void TiXmlBase::PutString( const TIXML_STRING& str, TIXML_STRING* outString )
 			// Easy pass at non-alpha/numeric/symbol
 			// 127 is the delete key. Below 32 is symbolic.
 			char buf[ 32 ];
-			sprintf( buf, "&#x%02X;", (unsigned) ( c & 0xff ) );
+			sprintf( buf, "&#x%02X;", static_cast<unsigned> ( c & 0xff ) );
 			outString->append( buf, strlen( buf ) );
 			++i;
 		}
 		else
 		{
-			char realc = (char) c;
+                  char realc = static_cast<char>( c);
 			outString->append( &realc, 1 );
 			++i;
 		}
@@ -726,7 +726,7 @@ bool TiXmlDocument::LoadFile( const char* filename )
 		fseek( file, 0, SEEK_SET );
 
 		// Strange case, but good to handle up front.
-		if ( length == 0 )
+		if ( length == 0 || length == -1)
 		{
 			fclose( file );
 			return false;
@@ -735,7 +735,7 @@ bool TiXmlDocument::LoadFile( const char* filename )
 		// If we have a file, assume it is all one big XML file, and read it in.
 		// The document parser may decide the document ends sooner than the entire file, however.
 		TIXML_STRING data;
-		data.reserve( length );
+		data.reserve( static_cast<unsigned>(length) );
 
 		const int BUF_SIZE = 2048;
 		char buf[BUF_SIZE];
@@ -896,12 +896,12 @@ void TiXmlAttribute::SetDoubleValue( double _value )
 	SetValue (buf);
 }
 
-const int TiXmlAttribute::IntValue() const
+int TiXmlAttribute::IntValue() const
 {
 	return atoi (value.c_str ());
 }
 
-const double  TiXmlAttribute::DoubleValue() const
+double  TiXmlAttribute::DoubleValue() const
 {
 	return atof (value.c_str ());
 }
