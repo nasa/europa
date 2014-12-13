@@ -146,7 +146,7 @@ namespace EUROPA {
      * @param index The position of the requested element
      * @param delimiter The delimeter to mark
      */
-    LabelStr getElement(unsigned int index, const char* delimiter) const;
+    LabelStr getElement(unsigned long index, const char* delimiter) const;
 
     /**
      * @brief Return the number of strings stored.

@@ -46,7 +46,7 @@ namespace EUROPA {
 
   void Timeline::getOrderingChoices(const TokenId& token,
 				    std::vector< std::pair<TokenId, TokenId> >& results,
-				    unsigned int limit){
+				    unsigned long limit){
     check_error(results.empty());
     check_error(token.isValid());
     check_error(limit > 0, "Cannot set limit to less than 1.");
@@ -408,13 +408,13 @@ namespace EUROPA {
       // Also ensure x.end <= (x+1).start.
       if (!cleaningUp && getPlanDatabase()->getConstraintEngine()->constraintConsistent()) {
         check_error(predecessor.isNoId() || isConstrainedToPrecede(predecessor, token));
-        eint earliest_start = (eint) token->start()->lastDomain().getLowerBound();
-        eint latest_start = (eint) token->start()->lastDomain().getUpperBound();
+        eint earliest_start = static_cast<eint>(token->start()->lastDomain().getLowerBound());
+        eint latest_start = static_cast<eint>(token->start()->lastDomain().getUpperBound());
         check_error(earliest_start == MINUS_INFINITY || earliest_start == PLUS_INFINITY || earliest_start > prior_earliest_start);
         check_error(prior_earliest_end <= earliest_start);
         check_error(prior_latest_end <= latest_start);
-        prior_earliest_end = (eint) token->end()->lastDomain().getLowerBound();
-        prior_latest_end = (eint) token->end()->lastDomain().getLowerBound();
+        prior_earliest_end = static_cast<eint>(token->end()->lastDomain().getLowerBound());
+        prior_latest_end = static_cast<eint>(token->end()->lastDomain().getLowerBound());
         prior_earliest_start = earliest_start;
       }
       predecessor = token;
@@ -512,8 +512,8 @@ namespace EUROPA {
     return (!token->isDeleted() && m_tokenIndex.find(token->getKey()) == m_tokenIndex.end());
   }
 
-  void Timeline::notifyMerged(const TokenId& token){}
-  void Timeline::notifyRejected(const TokenId& token) {}
+  void Timeline::notifyMerged(const TokenId& ){}
+  void Timeline::notifyRejected(const TokenId&) {}
   void Timeline::notifyDeleted(const TokenId& token){
     remove(token);
   }
@@ -531,7 +531,7 @@ namespace EUROPA {
                         const PlanDatabaseId& planDb,
                         const LabelStr& objectType,
                         const LabelStr& objectName,
-                        const std::vector<const Domain*>& arguments) const
+                        const std::vector<const Domain*>&) const
   {
     ObjectId instance =  (new Timeline(planDb, objectType, objectName,true))->getId();
     debugMsg("Interpreter:NativeObjectFactory","Created Native " << m_className.toString() << ":" << objectName.toString() << " type:" << objectType.toString());

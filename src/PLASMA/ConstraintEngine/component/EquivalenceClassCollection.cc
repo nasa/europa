@@ -82,7 +82,7 @@ namespace EUROPA{
     m_requiresUpdate = true;
   }
 
-  int EquivalenceClassCollection::getGraphCount(){
+unsigned long EquivalenceClassCollection::getGraphCount(){
     recomputeIfNecessary();
     return m_graphsByKey.size();
   }

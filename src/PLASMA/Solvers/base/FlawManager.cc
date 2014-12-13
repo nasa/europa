@@ -119,7 +119,8 @@ namespace EUROPA {
     return IteratorId::noId();
   }
 
-    void FlawManager::notifyRemoved(const ConstraintId& constraint) {
+  void FlawManager::notifyAdded(const ConstraintId&) {}
+  void FlawManager::notifyRemoved(const ConstraintId& constraint) {
       // Check if it's the correct type (FlawHandler::VariableListener)
       // then we search through the map and remove any instances of it.
       if(Id<FlawHandler::VariableListener>::convertable(constraint)) {
@@ -259,6 +260,11 @@ namespace EUROPA {
       condDebugMsg(!isValid(), "FlawManager:isValid", "Invalid datastructures in flaw manger.");
     }
 
+  void FlawManager::notifyChanged(const ConstrainedVariableId& ,
+                                  const DomainListener::ChangeType& ){}
+
+
+  void FlawManager::notifyAdded(const TokenId&){}
     void FlawManager::notifyRemoved(const TokenId& token) {
       debugMsg("FlawManager:notifyRemoved", getId() << " Removing active flaw handlers and guards for " << token->getPredicateName().toString() <<
                "(" << token->getKey() << ")");

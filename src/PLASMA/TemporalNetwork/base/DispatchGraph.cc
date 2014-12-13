@@ -34,6 +34,8 @@ Notes:
 #include "DispatchGraph.hh"
 #include "Error.hh"
 
+#include <boost/cast.hpp>
+
 namespace EUROPA {
 
 DnodeId DispatchGraph::makeNode()
@@ -45,7 +47,8 @@ DnodeId DispatchGraph::makeNode()
 
 DispatchNode* DispatchGraph::createNode(Referent name)
 {
-  DispatchNode* node = (DispatchNode*)DistanceGraph::createNode();
+  //this line can't possibly be right.  dispatchgraph appears to be broken
+  DispatchNode* node = id_cast<DispatchNode>(DistanceGraph::createNode());
   node->name = name;
   node->isSccMember = false;
   return node;
@@ -74,7 +77,7 @@ void DispatchGraph::filter( void (*keepEdge)(DispatchNode*, DispatchNode*,
   this->sccLeaders = std::vector<DispatchNode*>();
   // Set initial distances to same as potential
   for (std::vector<DnodeId>::const_iterator it=nodes.begin(); it != nodes.end(); ++it) {
-    DispatchNode* node = (DispatchNode*) *it;
+    DispatchNode* node = id_cast<DispatchNode>(*it);
     node->distance = node->potential;
   }
 
@@ -106,7 +109,7 @@ void DispatchGraph::findSccs( void (*keepEdge)(DispatchNode*, DispatchNode*,
   // See P. 488 in "Introduction To Algorithms"
   //                by Cormen, Leiverson, & Rivest.
   // The SCCs contain all the rigid (no slack) edges in the network.
-  Int nodeCount = this->nodes.size();
+  Int nodeCount = static_cast<Int>(this->nodes.size());
   DispatchNode** scc = new DispatchNode*[nodeCount];  // Scratch list for SCCs.
   if (!scc)
     check_error(!scc, 
@@ -114,42 +117,41 @@ void DispatchGraph::findSccs( void (*keepEdge)(DispatchNode*, DispatchNode*,
                 TempNetErr::TempNetMemoryError());
   buildReversePostorder (this->nodes);
   Dnode::unmarkAll();
-  for (Int i=0; i < nodeCount; i++) {
+  for (unsigned long i=0; i < static_cast<unsigned>(nodeCount); i++) {
     DispatchNode* node = this->reversePostorder[i];
     if (!node->isMarked()) {
       size_t sccSize = 0;
       predGraphTraceScc (node, scc, sccSize, nodeCount);  // Builds scc.
-      qsort ((void*)scc, sccSize, sizeof(DispatchNode*),
-             (Int (*)(const void*,const void*)) compareNodes);
+      //std::sort(scc, scc + sccSize, compareNodes);
+      // qsort (static_cast<void*>(scc), sccSize, sizeof(DispatchNode*),
+      //        static_cast<Int (*)(const void*,const void*)>(compareNodes));
       processScc (scc, sccSize, keepEdge);
     }
   }
   delete[] scc;
 }
 
-void DispatchGraph::buildReversePostorder (std::vector<DnodeId>& argNodes)
-{
+void DispatchGraph::buildReversePostorder (std::vector<DnodeId>& argNodes) {
   // Do depth-first searches, collecting nodes into reverse-postorder.
   Dnode::unmarkAll();
-  Int position = argNodes.size();
+  Int position = static_cast<Int>(argNodes.size());
   for (std::vector<DnodeId>::const_iterator it=argNodes.begin(); it != argNodes.end(); ++it) {
     Dnode* node = *it;
     if (!node->isMarked())
-      predGraphDfs ((DispatchNode*)node, position);
+      predGraphDfs (boost::polymorphic_cast<DispatchNode*>(node), position);
   }
 
   check_error(!(position > 0), "Lost some nodes from reversePostorder list",
               TempNetErr::TempNetInternalError());
 }
 
-void DispatchGraph::predGraphDfs (DispatchNode* node, Int& position)
-{
+void DispatchGraph::predGraphDfs (DispatchNode* node, Int& position) {
   // Depth-first-search through predecessor graph (PG).  An edge
   // is in PG if start_distance + length(edge) == end_distance.
   node->mark();
   for (Int i=0; i < node->outCount; i++) {
     Dedge* edge = node->outArray[i];
-    DispatchNode* next = (DispatchNode*) edge->to;
+    DispatchNode* next = id_cast<DispatchNode>(edge->to);
     if (!next->isMarked() && node->distance + edge->length == next->distance)
       this->predGraphDfs (next, position);
   }
@@ -161,18 +163,18 @@ void DispatchGraph::predGraphDfs (DispatchNode* node, Int& position)
 }
 
 void DispatchGraph::predGraphTraceScc (DispatchNode* node, DispatchNode* scc[],
-                                       size_t& sccSize, Int nodeCount)
-{
+                                       size_t& sccSize, Int nodeCount) {
   node->mark();
   node->isSccMember = true;
-  check_error(!((Int)sccSize >= nodeCount), "Inserting node beyond end of node-array",
+  check_error(!(static_cast<Int>(sccSize) >= nodeCount),
+              "Inserting node beyond end of node-array",
               TempNetErr::TempNetInternalError());
 
   scc[sccSize++] = node;
 
   for (Int i=0; i< node->inCount; i++) {
     Dedge* edge = node->inArray[i];
-    DispatchNode* parent = (DispatchNode*) edge->from;
+    DispatchNode* parent = id_cast<DispatchNode>(edge->from);
     if (!parent->isMarked()
         && parent->distance + edge->length == node->distance)
       predGraphTraceScc (parent, scc, sccSize, nodeCount);
@@ -194,7 +196,7 @@ void DispatchGraph::processScc (DispatchNode* scc[], size_t sccSize,
   // Arrange in a doubly-linked chain.
   DispatchNode* previous = leader;
   Time prevdistance = leader->distance;
-  for (Int i=1; i < (Int)sccSize; i++) {
+  for (Int i=1; i < static_cast<Int>(sccSize); i++) {
     DispatchNode* node = scc[i];
     Time distance = node->distance;
     Time increment = distance - prevdistance;
@@ -242,8 +244,8 @@ void DispatchGraph::sccMoveFluids (DispatchNode* node, DispatchNode* leader)
 }
 
 // Following are defined in DistanceGraph.cc
-Void attachEdge (DedgeId*& edgeArray, Int& size, Int& count, DedgeId edge);
-Void detachEdge (DedgeId*& edgeArray, Int& count, DedgeId edge);
+// Void attachEdge (DedgeId*& edgeArray, Int& size, Int& count, DedgeId edge);
+// Void detachEdge (DedgeId*& edgeArray, Int& count, DedgeId edge);
 
 
 /* TBW: Replaced by newer version that does more error checking
@@ -314,7 +316,7 @@ void DispatchGraph::sccMoveDirectional (DispatchNode* node,
 
   for (Int i=0; i< node->*outCount; i++) {
     Dedge* edge = (node->*outs)[i];
-    DispatchNode* next = (DispatchNode*) (edge->*to);
+    DispatchNode* next = id_cast<DispatchNode>(edge->*to);
     if (next == leader)  // Delink from leader
       detachEdge (leader->*ins, leader->*inCount, edge);
     if (next->isSccMember == false) {   // next is not in the SCC.
@@ -326,7 +328,7 @@ void DispatchGraph::sccMoveDirectional (DispatchNode* node,
       Dedge* leaderEdge = 0;
       for (Int j=0; j < leader->*outCount; j++) {
         Dedge* e = (leader->*outs)[j];
-        Dnode* eTo = (Dnode*)(e->*to);
+        Dnode* eTo = id_cast<Dnode>(e->*to);
         if (eTo == next)
           leaderEdge = e;
       }
@@ -355,7 +357,7 @@ void DispatchGraph::findKeptEdges (DispatchNode* source,
 {
   // This computes what edges to keep among those that are outside
   // the SCCs.  These are the fluid (non-rigid) edges.
-  Int leaderCount = this->sccLeaders.size();
+  Int leaderCount = static_cast<Int>(this->sccLeaders.size());
   Dnode::unmarkAll();
   Int position = leaderCount;
   // Following collects nodes downward into reverse-postorder
@@ -376,7 +378,7 @@ void DispatchGraph::findKeptEdges (DispatchNode* source,
     if ( node->isMarked() ) {
       for (Int j=0; j < node->outCount; j++) {
         Dedge* edge = node->outArray[j];
-        DispatchNode* child = (DispatchNode*) edge->to;
+        DispatchNode* child = id_cast<DispatchNode>(edge->to);
         if ( node->distance + edge->length == child->distance )
           child->mark();
       }
@@ -390,7 +392,7 @@ void DispatchGraph::findKeptEdges (DispatchNode* source,
     Time minDistance = POS_INFINITY;
     for (Int k=0; k < node->inCount; k++) {
       Dedge* edge = node->inArray[k];
-      DispatchNode* parent = (DispatchNode*) edge->from;
+      DispatchNode* parent = id_cast<DispatchNode>(edge->from);
       if ( parent->distance + edge->length == node->distance  // Pred graph
            && parent->minDistance < minDistance)
         minDistance = parent->minDistance;

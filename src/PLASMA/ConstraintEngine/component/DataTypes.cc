@@ -40,20 +40,20 @@ bool VoidDT::isNumeric() const { return false; }
 bool VoidDT::isBool() const  { return false; }
 bool VoidDT::isString() const  { return false; }
 
-edouble VoidDT::createValue(const std::string& value) const
+edouble VoidDT::createValue(const std::string&) const
 {
   check_error(ALWAYS_FAILS, "can't create void value");
   return -1;
 }
 
 ConstrainedVariableId
-VoidDT::createVariable(const ConstraintEngineId& constraintEngine,
-                                const Domain& baseDomain,
-                                const bool internal,
-                                bool canBeSpecified,
-                                const char* name,
-                                const EntityId& parent,
-                                int index) const
+VoidDT::createVariable(const ConstraintEngineId&,
+                                const Domain&,
+                                const bool,
+                                bool,
+                                const char*,
+                                const EntityId&,
+                                unsigned int) const
 {
     check_error(ALWAYS_FAILS, "can't create void variable");
     return ConstrainedVariableId::noId();

@@ -29,37 +29,37 @@ namespace EUROPA {
   }
 
 
-  void PlanDatabaseListener::notifyAdded(const ObjectId& object){}
+  void PlanDatabaseListener::notifyAdded(const ObjectId&){}
 
-  void PlanDatabaseListener::notifyRemoved(const ObjectId& object){}
+  void PlanDatabaseListener::notifyRemoved(const ObjectId&){}
 
-  void PlanDatabaseListener::notifyAdded(const TokenId& token){}
+  void PlanDatabaseListener::notifyAdded(const TokenId&){}
 
-  void PlanDatabaseListener::notifyRemoved(const TokenId& token){}
+  void PlanDatabaseListener::notifyRemoved(const TokenId&){}
 
-  void PlanDatabaseListener::notifyActivated(const TokenId& token){}
+  void PlanDatabaseListener::notifyActivated(const TokenId&){}
 
-  void PlanDatabaseListener::notifyDeactivated(const TokenId& token){}
+  void PlanDatabaseListener::notifyDeactivated(const TokenId&){}
 
-  void PlanDatabaseListener::notifyMerged(const TokenId& token){}
+  void PlanDatabaseListener::notifyMerged(const TokenId&){}
 
-  void PlanDatabaseListener::notifySplit(const TokenId& token){}
+  void PlanDatabaseListener::notifySplit(const TokenId&){}
 
-  void PlanDatabaseListener::notifyRejected(const TokenId& token){}
+  void PlanDatabaseListener::notifyRejected(const TokenId&){}
 
-  void PlanDatabaseListener::notifyReinstated(const TokenId& token){}
+  void PlanDatabaseListener::notifyReinstated(const TokenId&){}
 
-  void PlanDatabaseListener::notifyConstrained(const ObjectId& object, const TokenId& predecessor, const TokenId& successor){}
+  void PlanDatabaseListener::notifyConstrained(const ObjectId&, const TokenId&, const TokenId& ){}
 
-  void PlanDatabaseListener::notifyFreed(const ObjectId& object, const TokenId& predecessor, const TokenId& successor){}
+  void PlanDatabaseListener::notifyFreed(const ObjectId&, const TokenId&, const TokenId&){}
 
-  void PlanDatabaseListener::notifyAdded(const ObjectId& object, const TokenId& token){}
+  void PlanDatabaseListener::notifyAdded(const ObjectId&, const TokenId&){}
 
-  void PlanDatabaseListener::notifyRemoved(const ObjectId& object, const TokenId& token){}
+  void PlanDatabaseListener::notifyRemoved(const ObjectId&, const TokenId&){}
 
-  void PlanDatabaseListener::notifyCommitted(const TokenId& token){}
+  void PlanDatabaseListener::notifyCommitted(const TokenId&){}
 
-  void PlanDatabaseListener::notifyTerminated(const TokenId& token){}
+  void PlanDatabaseListener::notifyTerminated(const TokenId&){}
 
   const PlanDatabaseListenerId& PlanDatabaseListener::getId() const{return m_id;}
 }

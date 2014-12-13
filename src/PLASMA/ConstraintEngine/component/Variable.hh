@@ -38,7 +38,7 @@ namespace EUROPA {
              bool canBeSpecified = true,
              const LabelStr& name = ConstrainedVariable::NO_NAME(),
              const EntityId& parent = EntityId::noId(),
-             int index = ConstrainedVariable::NO_INDEX);
+             unsigned long index = ConstrainedVariable::NO_INDEX);
 
     /**
      * Destructor.
@@ -112,7 +112,7 @@ namespace EUROPA {
                                  bool canBeSpecified,
                                  const LabelStr& name,
                                  const EntityId& parent,
-                                 int index)
+                                 unsigned long index)
     : ConstrainedVariable(constraintEngine, internal, canBeSpecified, name, parent, index),
     m_baseDomain(static_cast<DomainType*>(baseDomain.copy())),
     m_derivedDomain(static_cast<DomainType*>(baseDomain.copy())) {

@@ -14,7 +14,7 @@
 #include "Pdlfcn.hh"
 
 #if defined(__APPLE__) && (__GNUC__ < 4)   
-#include <mach-o/dyld.h>
+#  include <mach-o/dyld.h>
 #elif defined(__MINGW32__ )
 #  include <windows.h>
 #  define _WINDOWS_BUILD
@@ -22,7 +22,7 @@
 #  include <windows.h>
 #  define _WINDOWS_BUILD
 #else
-#include <dlfcn.h>
+#  include <dlfcn.h>
 #endif
 
 #include<iostream>
@@ -33,162 +33,162 @@
 namespace EUROPA {
 
 #if defined(__APPLE__) && (__GNUC__ < 4)
-#define DLERROR_STR_MAX_LEN 256
-  /*
-   * Provide portable dl functions using Apple's API for gcc prior to v4
-   */
+#  define DLERROR_STR_MAX_LEN 256
+/*
+ * Provide portable dl functions using Apple's API for gcc prior to v4
+ */
 
-  // helper function to set or get error string used by dlerror
-  static const char *setError(int isSet, const char *fmt, ...) {
-    static char errorStr[DLERROR_STR_MAX_LEN];
-    static int errorIsSet = 0;
-    va_list arg; 
-    if (isSet) {
-      //set the error string
-      va_start(arg, fmt);
-      vsnprintf(errorStr, sizeof(errorStr), fmt, arg);
-      va_end(arg);
-      errorIsSet = 1;
+// helper function to set or get error string used by dlerror
+static const char *setError(int isSet, const char *fmt, ...) {
+  static char errorStr[DLERROR_STR_MAX_LEN];
+  static int errorIsSet = 0;
+  va_list arg; 
+  if (isSet) {
+    //set the error string
+    va_start(arg, fmt);
+    vsnprintf(errorStr, sizeof(errorStr), fmt, arg);
+    va_end(arg);
+    errorIsSet = 1;
+  } else {
+    //get the error string
+    if (errorIsSet) {
+      errorIsSet = 0;
+      return errorStr;
     } else {
-      //get the error string
-      if (errorIsSet) {
-        errorIsSet = 0;
-        return errorStr;
-      } else {
-        return 0;
-      }
-    }
-    return 0;
-  }
-
-  void * p_dlopen(const char *path, int mode) {  /* mode ignored */
-    NSObjectFileImage *fileImage;
-    NSModule handle = 0;
-    NSObjectFileImageReturnCode  returnCode =
-           NSCreateObjectFileImageFromFile(path, &fileImage);
-
-    if(returnCode == NSObjectFileImageSuccess) {
-      //try to load bundle (not used for EUROPA2)
-      handle = NSLinkModule(fileImage, path,
-                            NSLINKMODULE_OPTION_RETURN_ON_ERROR |
-                            NSLINKMODULE_OPTION_PRIVATE);
-    } else if(returnCode == NSObjectFileImageInappropriateFile) {
-      //try to load dynamic library (normal path in EUROPA2)
-      handle = NSAddImage(path, NSADDIMAGE_OPTION_RETURN_ON_ERROR);
-    }
-    if (!handle) {
-      setError(1, "p_dlopen:  Could not load shared library: %s", path);
-    }
-    return handle;
-  }
-
-  void * p_dlsym(void * handle, const char * symbol) {
-    char ubSymbol[256];
-    snprintf (ubSymbol, sizeof(ubSymbol), "_%s", symbol);
-    
-    NSSymbol nssym = NSLookupSymbolInImage(handle, ubSymbol,
-                            NSLOOKUPSYMBOLINIMAGE_OPTION_RETURN_ON_ERROR |
-                            NSLOOKUPSYMBOLINIMAGE_OPTION_BIND);
-    if (!nssym) {
-      setError(1, "p_dlsym: Did not find symbol %s", ubSymbol);
-    }
-    return (NSAddressOfSymbol(nssym));
-  }
-
-
-  const char * p_dlerror(void) {
-    return setError(0, (char *) 0);
-  }
-
-  int p_dlclose(void * handle) {
-
-    DYLD_BOOL result = NSUnLinkModule(handle, 0);
-    if (!result) {
-      setError(1, "p_dlclose: Failed to close library %s", NSNameOfModule(handle));
-      //darwin doesn't seem to support unloading shared libraries, so fake it.
       return 0;
     }
+  }
+  return 0;
+}
+
+void * p_dlopen(const char *path, int mode) {  /* mode ignored */
+  NSObjectFileImage *fileImage;
+  NSModule handle = 0;
+  NSObjectFileImageReturnCode  returnCode =
+      NSCreateObjectFileImageFromFile(path, &fileImage);
+
+  if(returnCode == NSObjectFileImageSuccess) {
+    //try to load bundle (not used for EUROPA2)
+    handle = NSLinkModule(fileImage, path,
+                          NSLINKMODULE_OPTION_RETURN_ON_ERROR |
+                          NSLINKMODULE_OPTION_PRIVATE);
+  } else if(returnCode == NSObjectFileImageInappropriateFile) {
+    //try to load dynamic library (normal path in EUROPA2)
+    handle = NSAddImage(path, NSADDIMAGE_OPTION_RETURN_ON_ERROR);
+  }
+  if (!handle) {
+    setError(1, "p_dlopen:  Could not load shared library: %s", path);
+  }
+  return handle;
+}
+
+void * p_dlsym(void * handle, const char * symbol) {
+  char ubSymbol[256];
+  snprintf (ubSymbol, sizeof(ubSymbol), "_%s", symbol);
+    
+  NSSymbol nssym = NSLookupSymbolInImage(handle, ubSymbol,
+                                         NSLOOKUPSYMBOLINIMAGE_OPTION_RETURN_ON_ERROR |
+                                         NSLOOKUPSYMBOLINIMAGE_OPTION_BIND);
+  if (!nssym) {
+    setError(1, "p_dlsym: Did not find symbol %s", ubSymbol);
+  }
+  return (NSAddressOfSymbol(nssym));
+}
+
+
+const char * p_dlerror(void) {
+  return setError(0, (char *) 0);
+}
+
+int p_dlclose(void * handle) {
+
+  DYLD_BOOL result = NSUnLinkModule(handle, 0);
+  if (!result) {
+    setError(1, "p_dlclose: Failed to close library %s", NSNameOfModule(handle));
+    //darwin doesn't seem to support unloading shared libraries, so fake it.
     return 0;
   }
+  return 0;
+}
 #elif defined( _WINDOWS_BUILD )
 
-  static DWORD dlerror_last = ERROR_SUCCESS;
+static DWORD dlerror_last = ERROR_SUCCESS;
 
-  void* p_dlopen(const char* path, int mode) {
-    if(!path) {
-      dlerror_last = ERROR_NOT_SUPPORTED;
-      return NULL;
-    }
-    HMODULE result = LoadLibrary(path);
-
-    if(!result)
-      dlerror_last = GetLastError();
-    return result;
+void* p_dlopen(const char* path, int mode) {
+  if(!path) {
+    dlerror_last = ERROR_NOT_SUPPORTED;
+    return NULL;
   }
+  HMODULE result = LoadLibrary(path);
 
-  void* p_dlsym(void* handle, const char* symbol) {
-    HMODULE hmodule = (HMODULE) handle;
+  if(!result)
+    dlerror_last = GetLastError();
+  return result;
+}
 
-    if(!handle) {
-      dlerror_last = ERROR_INVALID_HANDLE;
-      return NULL;
-    }
+void* p_dlsym(void* handle, const char* symbol) {
+  HMODULE hmodule = (HMODULE) handle;
 
-    void* result = (void*) GetProcAddress(hmodule, symbol);
-
-    if(!result)
-      dlerror_last = GetLastError();
-
-    return result;
-  }
-
-  const char* p_dlerror(void) {
-    if(dlerror_last != ERROR_SUCCESS) {
-      static char buffer[256];
-      if(!FormatMessage(FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM, NULL, dlerror_last, 0, buffer, sizeof(buffer), NULL))
-#ifdef _MSC_VER
-        _snprintf_c(buffer, sizeof(buffer), "Failed to format error message");
-#else
-        snprintf(buffer, sizeof(buffer), "Failed to format error message");
-#endif //_MSC_VER
-      dlerror_last = ERROR_SUCCESS;
-
-      return buffer;
-    }
+  if(!handle) {
+    dlerror_last = ERROR_INVALID_HANDLE;
     return NULL;
   }
 
-  int p_dlclose(void* handle) {
-    HMODULE hmodule = (HMODULE) handle;
+  void* result = (void*) GetProcAddress(hmodule, symbol);
 
-    if(!hmodule)
-      return 0;
+  if(!result)
+    dlerror_last = GetLastError();
 
-    int result = FreeLibrary(hmodule);
-    if(!result)
-      dlerror_last = GetLastError();
+  return result;
+}
 
-    return !result;
-  }
+const char* p_dlerror(void) {
+  if(dlerror_last != ERROR_SUCCESS) {
+    static char buffer[256];
+    if(!FormatMessage(FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM, NULL, dlerror_last, 0, buffer, sizeof(buffer), NULL))
+#ifdef _MSC_VER
+      _snprintf_c(buffer, sizeof(buffer), "Failed to format error message");
 #else
-  /*
-   * use unix dl functions in all non Apple cases
-   */
-  void * p_dlopen(const char *path, int mode) {  
-    return dlopen(path, mode);
-  }
+    snprintf(buffer, sizeof(buffer), "Failed to format error message");
+#endif //_MSC_VER
+    dlerror_last = ERROR_SUCCESS;
 
-  void * p_dlsym(void * handle, const char * symbol) {
-    return dlsym(handle, symbol);
+    return buffer;
   }
+  return NULL;
+}
 
-  const char * p_dlerror(void) {
-    return dlerror();
-  }
+int p_dlclose(void* handle) {
+  HMODULE hmodule = (HMODULE) handle;
 
-  int p_dlclose(void * handle) {
-    return dlclose(handle);
-  }
+  if(!hmodule)
+    return 0;
+
+  int result = FreeLibrary(hmodule);
+  if(!result)
+    dlerror_last = GetLastError();
+
+  return !result;
+}
+#else
+/*
+ * use unix dl functions in all non Apple cases
+ */
+void * p_dlopen(const char *path, int mode) {  
+  return dlopen(path, mode);
+}
+
+void * p_dlsym(void * handle, const char * symbol) {
+  return dlsym(handle, symbol);
+}
+
+const char * p_dlerror(void) {
+  return dlerror();
+}
+
+int p_dlclose(void * handle) {
+  return dlclose(handle);
+}
 #endif
 
 }

@@ -34,7 +34,7 @@ namespace EUROPA {
 
     /**
      * @brief Create a variable
-     * @param type The type for the variable.
+     * @param typeName The type for the variable.
      * @param baseDomain The base domain of the new variable.
      * @param name The name for the variable. Must be unique.
      * @return The Id of the variable created. Will error out rather than return a noId.
@@ -43,7 +43,7 @@ namespace EUROPA {
 
     /**
      * @brief Create a variable
-     * @param type The type for the variable.
+     * @param typeName The type for the variable.
      * @param name The name for the variable. Must be unique.
      * @return The Id of the variable created. Will error out rather than return a noId.
      */
@@ -56,8 +56,6 @@ namespace EUROPA {
 
     /**
      * @brief Create an object instance in the dabatase.
-     * @param key The expected key value for the object. This is used as a check to ensure we are creating values
-     * in the order we expect.
      * @param type The type of instance to create. Must match a name in the Schema. The daatabase must be open for
      * creation of instances of this type.
      * @param name The name for the instance. Must be unique.
@@ -67,8 +65,6 @@ namespace EUROPA {
 
     /**
      * @brief Create an object instance in the dabatase, with a call to a specialized constructor
-     * @param key The expected key value for the object. This is used as a check to ensure we are creating values
-     * in the order we expect.
      * @param type The type of instance to create. Must match a name in the Schema. The database must be open for
      * creation of instances of this type.
      * @param name The name for the instance. Must be unique.
@@ -96,7 +92,7 @@ namespace EUROPA {
 
     /**
      * @brief Constructs a Token instance.
-     * @param predicateName The name of the predicate for which this token is an instance. Must match a name in the
+     * @param tokenType The name of the predicate for which this token is an instance. Must match a name in the
      * schema.
      * @return The Id of the token created. Will error out rather than return a noId.
      */
@@ -112,11 +108,10 @@ namespace EUROPA {
 
     /**
      * @brief imposes a constraint such that token comes before successor, on the given object.
-     * @param object
+     * @param object The object to constrain to.
      * @param predecessor The token to be the predecessor
      * @param successor The token to be the successor. If 0, the Token is constrained to succeed all
      * other ordered tokens.
-     * @return The resulting 'precedes' constraint
      */
     void constrain(const ObjectId& object, const TokenId& predecessor, const TokenId& successor);
 
@@ -125,7 +120,6 @@ namespace EUROPA {
      * @param object The object to which the token has been constrained.
      * @param predecessor The token that is the predecessor
      * @param successor The token that is the successor.
-     * @param constraint The constraint to be removed.
      */
     void free(const ObjectId& object, const TokenId& predecessor, const TokenId& successor);
 
@@ -138,7 +132,7 @@ namespace EUROPA {
     /**
      * @brief Merge the given token
      * @param token The token to be merged. It must be inactive.
-     * @param activeTokenKey The token to be merged onto.
+     * @param activeToken The token to be merged onto.
      */
     void merge(const TokenId& token, const TokenId& activeToken);
 
@@ -182,7 +176,7 @@ namespace EUROPA {
     /**
      * @brief Restricts the base domain of a variable
      * @param variable The variable to be restricted
-     * @param value The new base domain of the variable.
+     * @param domain The new base domain of the variable.
      * @see getEntityByKey
      */
     void restrict(const ConstrainedVariableId& variable, const Domain& domain);
@@ -226,7 +220,7 @@ namespace EUROPA {
 
     /**
      * @brief Lookup a global variable by name. It is an error if not present
-     * @retrun The requested variable.
+     * @return The requested variable.
      */
     const ConstrainedVariableId getGlobalVariable(const LabelStr& varName) const;
 
@@ -238,7 +232,7 @@ namespace EUROPA {
 
     /**
      * @brief Lookup a global token by name. It is an error if not present
-     * @retrun The requested token.
+     * @return The requested token.
      */
     const TokenId getGlobalToken(const LabelStr& name) const;
 
@@ -257,7 +251,7 @@ namespace EUROPA {
      * @see Token::getChild(int slavePosition)
      * @see enableTransactionLogging
      */
-    TokenId getTokenByPath(const std::vector<int>& relativePath) const;
+    TokenId getTokenByPath(const std::vector<unsigned int>& relativePath) const;
 
     /**
      * @brief Retrieve the relative path for obtaining the target token from a given root token.

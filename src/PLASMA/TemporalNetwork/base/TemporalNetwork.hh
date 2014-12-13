@@ -56,7 +56,7 @@ namespace EUROPA {
     Bool hasDeletions;
     Int nodeCounter;
     /**
-     * @breif Used for specialized cycle detection
+     * @brief Used for specialized cycle detection
      */
     TimepointId incrementalSource;
 
@@ -125,7 +125,7 @@ namespace EUROPA {
      * @param id the timepoint for which you require this information.
      * @return lower bound of timepoint.
      */
-    Time getLowerTimepointBound(const TimepointId&);
+    Time getLowerTimepointBound(const TimepointId& id);
 
     /**
      * @brief Accessor for the Upper Timepoint bound. The method
@@ -133,7 +133,7 @@ namespace EUROPA {
      * @param id the timepoint for which you require this information.
      * @return upper bound of timepoint.
      */
-    Time getUpperTimepointBound(const TimepointId&);
+    Time getUpperTimepointBound(const TimepointId& id);
 
     /**
      * @brief Test if the STN is consistent
@@ -189,27 +189,27 @@ namespace EUROPA {
      * @param id temporal constraint of interest.
      * @result two time points - the head and foot of the constraint (in that order).
      */
-    std::list<TimepointId> getConstraintScope(const TemporalConstraintId&);
+    std::list<TimepointId> getConstraintScope(const TemporalConstraintId& id);
 
     /**
      * @brief Get the upperbound on the time of a temporal constraint.
      * @param id temporal constraint of interest.
      * @result Upperbound time on constraint.
      */
-    Time getConstraintUpperBound(const TemporalConstraintId&);
+    Time getConstraintUpperBound(const TemporalConstraintId& id);
 
     /**
      * @brief Get the lowerbound on the time of a temporal constraint.
      * @param id temporal constraint of interest.
      * @result Lowerbound time on constraint.
      */
-    Time getConstraintLowerBound(const TemporalConstraintId&);
+    Time getConstraintLowerBound(const TemporalConstraintId& id);
 
     /**
      * @brief Identify the timepoints that mark the head and foot of a temporal constraint.
      * @param constraint temporal constraint of interest.
-     * @param returns head of temporal constraint
-     * @param returns foot of temporal constraint
+     * @param source head of temporal constraint
+     * @param target foot of temporal constraint
      */
     void getConstraintScope(const TemporalConstraintId& constraint, TimepointId& source, TimepointId& target) const;
 
@@ -317,7 +317,7 @@ namespace EUROPA {
 
     /**
      * @brief Identify if timepoint is connected to the origin of the STN through edges in the network
-     * @param timepoint
+     * @param timepoint The timepoint to test
      * @return true iff timepoint has edge to the origin. False, otherwise.
      * @todo make const when we constify methods in the DistanceGraph
      */
@@ -331,29 +331,13 @@ namespace EUROPA {
 
     // For Dispatchability Processing
 
-    /**
-     * @brief
-     * @return
-     */
     std::list<TemporalConstraintId>    addDispatchConstraints();
     // Additional exec-oriented functions
 
-     /**
-     * @brief
-     * @return
-     */
     TimepointId getRingLeader(TimepointId tpId);
 
-    /**
-     * @brief
-     * @return
-     */
     std::list<TimepointId> getRingFollowers (TimepointId tpId);
 
-    /**
-     * @brief
-     * @return
-     */
     std::list<TimepointId> getRingPredecessors (TimepointId tpId);
 
     /**
@@ -395,7 +379,7 @@ namespace EUROPA {
 
     /**
      * @brief For incremental propagation, determines whether a propagation
-     *        should be tried from head to foot or vice versa.
+     *        should be tried from head to foot or vice versa, and does first propagation
      *
      *  The supplied
      * edge must be in the direction of propagation from head to foot.
@@ -403,15 +387,10 @@ namespace EUROPA {
      * supplied) in the other direction.  Used with various
      * distance-like values.  Note that an effective prop in one
      * direction precludes one in the other direction.
-     * @return node at which incremental propogation should be tried.
+     * @return node from which to continue the propagation 
+     *         (or noId if the first prop is ineffective)
      */
-    /**
-     * @brief For incremental propagation, determines whether a propagation
-     *        is started from head to foot or vice versa, and does first
-     *        propagation.  (PHM: 06/21/2007 Recoded for efficiency.)
-     * @return node from which to continue
-     *        the propagation (or noId if first prop is ineffective).
-     */
+    //(PHM: 06/21/2007 Recoded for efficiency.)
     DnodeId startNode (TimepointId head, Time& headDistance,
                        TimepointId foot, Time& footDistance,
                        bool forwards = true);
@@ -443,14 +422,8 @@ namespace EUROPA {
      */
     Void propagateBoundsFrom (const TimepointId& src);
 
-    /**
-     * @brief
-     */
     Void maintainTEQ (Time lb, Time ub, TimepointId src, TimepointId targ);
 
-    /**
-     * @brief
-     */
     Void cleanupTEQ(TimepointId tpt);
 
     /**
@@ -460,7 +433,7 @@ namespace EUROPA {
     Bool isValidId(const TimepointId& id);
 
     /**
-     * @breif check if constraint is valid
+     * @brief check if constraint is valid
      */
     Bool isValidId(const TemporalConstraintId& id);
 

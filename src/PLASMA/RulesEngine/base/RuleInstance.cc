@@ -378,11 +378,11 @@ void RuleInstance::setGuard(const ConstrainedVariableId& guard, const Domain& do
   debugMsg("RuleInstance:setGuard", "Added guard: " << m_guardListener->toLongString());
 }
 
-  TokenId RuleInstance::addSlave(Token* slave){
-    m_slaves.push_back(slave->getId());
-    slave->addDependent((Entity*) this);
-    return slave->getId();
-  }
+TokenId RuleInstance::addSlave(Token* slave){
+  m_slaves.push_back(slave->getId());
+  slave->addDependent(this);
+  return slave->getId();
+}
 
   ConstrainedVariableId RuleInstance::addVariable( const Domain& baseDomain,
 				       bool canBeSpecified,
@@ -470,14 +470,14 @@ void RuleInstance::setGuard(const ConstrainedVariableId& guard, const Domain& do
     addConstraint(constraint);
   }
 
-  void RuleInstance::addConstraint(const ConstraintId& constraint){
-    m_constraints.push_back(constraint);
-    const LabelStr& name = constraint->getName();
-    m_constraintsByName.erase(name.getKey());
-    m_constraintsByName.insert(std::make_pair(name.getKey(), constraint));
-    constraint->addDependent((Entity*) this);
+void RuleInstance::addConstraint(const ConstraintId& constraint){
+  m_constraints.push_back(constraint);
+  const LabelStr& name = constraint->getName();
+  m_constraintsByName.erase(name.getKey());
+  m_constraintsByName.insert(std::make_pair(name.getKey(), constraint));
+  constraint->addDependent(this);
     debugMsg("RuleInstance:addConstraint", "added constraint:" << constraint->toString());
-  }
+}
 
   void RuleInstance::addChildRule(RuleInstance* instance){
     m_childRules.push_back(instance->getId());
@@ -549,7 +549,7 @@ void RuleInstance::setGuard(const ConstrainedVariableId& guard, const Domain& do
   std::vector<ConstrainedVariableId> RuleInstance::getVariables(const std::string& delimitedVars) const{
     std::vector<ConstrainedVariableId> scope;
     LabelStr strScope(delimitedVars);
-    unsigned int size = strScope.countElements(":");
+    unsigned long size = strScope.countElements(":");
     for(unsigned int i=0; i < size; i++){
       LabelStr strVar = strScope.getElement(i, ":");
       ConstrainedVariableId var;
@@ -583,87 +583,89 @@ void RuleInstance::setGuard(const ConstrainedVariableId& guard, const Domain& do
     return retVar;
   }
 
-  ConstrainedVariableId RuleInstance::varFromObject(const ConstrainedVariableId& obj,
-						    const std::string& varString,
-						    const std::string& fullName,
-						    bool canBeSpecified){
-    std::vector<std::string> names;
-    tokenize(varString, names, std::string(Schema::getDelimiter()));
-    unsigned int varindex = 0;
+ConstrainedVariableId RuleInstance::varFromObject(const ConstrainedVariableId& obj,
+                                                  const std::string& varString,
+                                                  const std::string& fullName,
+                                                  bool canBeSpecified){
+  std::vector<std::string> names;
+  tokenize(varString, names, std::string(Schema::getDelimiter()));
+  unsigned int varindex = 0;
 
-    // First we compute the position index, and get the type of the last variable. This will then
-    // be used to populate the base domain of the proxy variable by iteration over the base domain.
+  // First we compute the position index, and get the type of the last variable. This will then
+  // be used to populate the base domain of the proxy variable by iteration over the base domain.
 
-    // Initialize with any object in the domain
-    ObjectId iObj = Entity::getTypedEntity<Object>(obj->lastDomain().getLowerBound());
-    std::vector<unsigned int> path; /*!< Push indexes as they are found */
+  // Initialize with any object in the domain
+  ObjectId iObj = Entity::getTypedEntity<Object>(obj->lastDomain().getLowerBound());
+  std::vector<unsigned int> path; /*!< Push indexes as they are found */
 
-    // Traverse the object structure using the names in each case. Store indexes as we go to build a path
-    for (; varindex < names.size()-1; ++varindex) {
-      ConstrainedVariableId iVar = iObj->getVariable(LabelStr(iObj->getName().toString() + "." + names[varindex]));
-      path.push_back(iVar->getIndex());
-      checkError(iVar->lastDomain().isSingleton(), iVar->toString() + ", " + iObj->getName().toString() + "." + names[varindex]);
-      iObj = Entity::getTypedEntity<Object>(iVar->lastDomain().getSingletonValue());
-    }
-
-    // Finally, handle the terminal point - the field variable itself
-    std::string field_name = iObj->getName().toString() + "." + names[varindex];
-    ConstrainedVariableId fieldVar = iObj->getVariable(LabelStr(field_name));
-    checkError(fieldVar.isValid(), "No variable named '" << field_name << "' in " << iObj->getName().toString());
-    path.push_back(fieldVar->getIndex());
-
-    // Get the field type for the resulting domain.
-    const bool isOpen = fieldVar->baseDomain().isOpen();
-    const bool isBool = fieldVar->baseDomain().isBool();
-
-    // At this point, the index is complete, and we know the type. We can allocate and populate the domain
-    const ObjectDomain& objectDomain = static_cast<const ObjectDomain&>(obj->baseDomain());
-
-    // Iterate over each object. For each, obtain the variable using the path, and store its value
-    const std::list<ObjectId> objects = objectDomain.makeObjectList();
-
-    EnumeratedDomain proxyBaseDomain(fieldVar->baseDomain().getDataType());
-
-    std::list<edouble> values;
-    for(std::list<ObjectId>::const_iterator it = objects.begin(); it != objects.end(); ++it){
-      ObjectId object = *it;
-      ConstrainedVariableId fieldVar = object->getVariable(path);
-      checkError(fieldVar->lastDomain().isSingleton(), fieldVar->toString() + " : " + fieldVar->lastDomain().toString() + " is not a singleton.");
-      edouble value = fieldVar->lastDomain().getSingletonValue();
-      proxyBaseDomain.insert(value);
-      debugMsg("RuleInstance:varFromObject", "Adding value from " << fieldVar->toString());
-    }
-
-    // Allocate the proxy variable
-    ConstrainedVariableId proxyVariable;
-
-    // If it is a boolean, allocate a bool domain instead of the enumerated domain
-    if(isBool){
-      BoolDomain boolDomain(fieldVar->baseDomain().getDataType());
-      edouble lb = proxyBaseDomain.getLowerBound();
-      edouble ub = proxyBaseDomain.getUpperBound();
-
-      // If a singleton, set as such
-      if(lb == ub)
-          boolDomain.set(ub);
-
-      proxyVariable = addVariable(boolDomain, canBeSpecified, fullName);
-    }
-    else {
-      // Close if necessary
-      if(!isOpen)
-          proxyBaseDomain.close();
-
-      proxyVariable = addVariable(proxyBaseDomain, canBeSpecified, fullName);
-    }
-
-    // Post the new constraint
-    ConstraintId proxyVariableRelation = (new ProxyVariableRelation(obj, proxyVariable, path))->getId();
-    addConstraint(proxyVariableRelation);
-
-    // Return the new variable
-    return proxyVariable;
+  // Traverse the object structure using the names in each case. Store indexes as we go to build a path
+  for (; varindex < names.size()-1; ++varindex) {
+    ConstrainedVariableId iVar = iObj->getVariable(LabelStr(iObj->getName().toString() + "." + names[varindex]));
+    path.push_back(static_cast<unsigned int>(iVar->getIndex()));
+    checkError(iVar->lastDomain().isSingleton(), iVar->toString() + ", " + iObj->getName().toString() + "." + names[varindex]);
+    iObj = Entity::getTypedEntity<Object>(iVar->lastDomain().getSingletonValue());
   }
+
+  // Finally, handle the terminal point - the field variable itself
+  std::string field_name = iObj->getName().toString() + "." + names[varindex];
+  ConstrainedVariableId fieldVar = iObj->getVariable(LabelStr(field_name));
+  checkError(fieldVar.isValid(), "No variable named '" << field_name << "' in " << iObj->getName().toString());
+  path.push_back(static_cast<unsigned int>(fieldVar->getIndex()));
+
+  // Get the field type for the resulting domain.
+  const bool isOpen = fieldVar->baseDomain().isOpen();
+  const bool isBool = fieldVar->baseDomain().isBool();
+
+  // At this point, the index is complete, and we know the type. We can allocate and populate the domain
+  const ObjectDomain& objectDomain = static_cast<const ObjectDomain&>(obj->baseDomain());
+
+  // Iterate over each object. For each, obtain the variable using the path, and store its value
+  const std::list<ObjectId> objects = objectDomain.makeObjectList();
+
+  EnumeratedDomain proxyBaseDomain(fieldVar->baseDomain().getDataType());
+
+  std::list<edouble> values;
+  for(std::list<ObjectId>::const_iterator it = objects.begin(); it != objects.end(); ++it){
+    ObjectId object = *it;
+    ConstrainedVariableId objectFieldVar = object->getVariable(path);
+    checkError(objectFieldVar->lastDomain().isSingleton(),
+               objectFieldVar->toString() << " : " <<
+               objectFieldVar->lastDomain().toString() << " is not a singleton.");
+    edouble value = objectFieldVar->lastDomain().getSingletonValue();
+    proxyBaseDomain.insert(value);
+    debugMsg("RuleInstance:varFromObject", "Adding value from " << objectFieldVar->toString());
+  }
+
+  // Allocate the proxy variable
+  ConstrainedVariableId proxyVariable;
+
+  // If it is a boolean, allocate a bool domain instead of the enumerated domain
+  if(isBool){
+    BoolDomain boolDomain(fieldVar->baseDomain().getDataType());
+    edouble lb = proxyBaseDomain.getLowerBound();
+    edouble ub = proxyBaseDomain.getUpperBound();
+
+    // If a singleton, set as such
+    if(lb == ub)
+      boolDomain.set(ub);
+
+    proxyVariable = addVariable(boolDomain, canBeSpecified, fullName);
+  }
+  else {
+    // Close if necessary
+    if(!isOpen)
+      proxyBaseDomain.close();
+
+    proxyVariable = addVariable(proxyBaseDomain, canBeSpecified, fullName);
+  }
+
+  // Post the new constraint
+  ConstraintId proxyVariableRelation = (new ProxyVariableRelation(obj, proxyVariable, path))->getId();
+  addConstraint(proxyVariableRelation);
+
+  // Return the new variable
+  return proxyVariable;
+}
 
   ConstrainedVariableId RuleInstance::varfromtok(const TokenId& token, const std::string varstring) {
     std::string local_name = varstring.substr(0, varstring.find(Schema::getDelimiter()));
@@ -769,7 +771,7 @@ void RuleInstance::setGuard(const ConstrainedVariableId& guard, const Domain& do
     else {
       ss << "Slaves: " << std::endl;
       for(std::map<edouble, TokenId>::const_iterator it = m_slavesByName.begin(); it != m_slavesByName.end(); ++it){
-	LabelStr name = (LabelStr) it->first;
+	LabelStr name(it->first);
 	TokenId token = it->second;
 	ss << TAB_DELIMITER << name.toString() << "==" << token->toString() << std::endl;
       }

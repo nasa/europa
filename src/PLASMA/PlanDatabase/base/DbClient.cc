@@ -29,10 +29,8 @@
 
 namespace EUROPA {
 
-  const char* DELIMITER = ":"; /*!< Used for delimiting streamed output */
-
   DbClient::DbClient(const PlanDatabaseId& db)
-    : m_id((DbClient*)this), m_deleted(false), m_transactionLoggingEnabled(false) {
+    : m_id(this), m_deleted(false), m_transactionLoggingEnabled(false) {
     check_error(db.isValid());
     m_planDb = db;
   }
@@ -91,20 +89,20 @@ namespace EUROPA {
     return variable;
   }
 
-  void DbClient::deleteVariable(const ConstrainedVariableId& var) {
-    if(isGlobalVariable(var->getName()))
-      m_planDb->unregisterGlobalVariable(var);
-    publish(notifyVariableDeleted(var));
-    delete (ConstrainedVariable*) var;
-  }
+void DbClient::deleteVariable(const ConstrainedVariableId& var) {
+  if(isGlobalVariable(var->getName()))
+    m_planDb->unregisterGlobalVariable(var);
+  publish(notifyVariableDeleted(var));
+  delete static_cast<ConstrainedVariable*>(var);
+}
 
-  ObjectId DbClient::createObject(const char* type, const char* name){
-    static const std::vector<const Domain*> noArguments;
-    ObjectId object = m_planDb->createObject(type, name, noArguments);
-    debugMsg("DbClient:createObject", object->toLongString());
-    publish(notifyObjectCreated(object));
-    return object;
-  }
+ObjectId DbClient::createObject(const char* type, const char* name){
+  static const std::vector<const Domain*> noArguments;
+  ObjectId object = m_planDb->createObject(type, name, noArguments);
+  debugMsg("DbClient:createObject", object->toLongString());
+  publish(notifyObjectCreated(object));
+  return object;
+}
 
   ObjectId DbClient::createObject(const char* type, const char* name, const std::vector<const Domain*>& arguments){
     ObjectId object = m_planDb->createObject(type, name, arguments);
@@ -115,7 +113,7 @@ namespace EUROPA {
 
   void DbClient::deleteObject(const ObjectId& obj) {
     publish(notifyObjectDeleted(obj));
-    delete (Object*) obj;
+    delete static_cast<Object*>(obj);
   }
 
   void DbClient::close(){
@@ -141,28 +139,28 @@ namespace EUROPA {
     return(token);
   }
 
-  void DbClient::deleteToken(const TokenId& token, const std::string& name) {
-    check_error(token.isValid());
-    checkError(token->isInactive() || token->isFact(),
-	       "Attempted to delete active, non-fact token " << token->toLongString());
-    if(isGlobalToken(token->getName()))
-      m_planDb->unregisterGlobalToken(token);
-    publish(notifyTokenDeleted(token, name));
+void DbClient::deleteToken(const TokenId& token, const std::string& name) {
+  check_error(token.isValid());
+  checkError(token->isInactive() || token->isFact(),
+             "Attempted to delete active, non-fact token " << token->toLongString());
+  if(isGlobalToken(token->getName()))
+    m_planDb->unregisterGlobalToken(token);
+  publish(notifyTokenDeleted(token, name));
 
-    //the keys are only recorded if logging is enabled
-    //this may not be the right thing...
-    if(!m_keysOfTokensCreated.empty()) {
-      if(m_keysOfTokensCreated.back() == token->getKey()) {
-	debugMsg("DbClient:deleteToken",
-		 "Removing token key " << m_keysOfTokensCreated.back());
-	m_keysOfTokensCreated.pop_back();
-      }
-      checkError(std::find(m_keysOfTokensCreated.begin(), m_keysOfTokensCreated.end(),
-			   token->getKey()) == m_keysOfTokensCreated.end(),
-		 "Attempted to delete " << token->toString() << " out of order.");
+  //the keys are only recorded if logging is enabled
+  //this may not be the right thing...
+  if(!m_keysOfTokensCreated.empty()) {
+    if(m_keysOfTokensCreated.back() == token->getKey()) {
+      debugMsg("DbClient:deleteToken",
+               "Removing token key " << m_keysOfTokensCreated.back());
+      m_keysOfTokensCreated.pop_back();
     }
-    delete (Token*) token;
+    checkError(std::find(m_keysOfTokensCreated.begin(), m_keysOfTokensCreated.end(),
+                         token->getKey()) == m_keysOfTokensCreated.end(),
+               "Attempted to delete " << token->toString() << " out of order.");
   }
+  delete static_cast<Token*>(token);
+}
 
   void DbClient::constrain(const ObjectId& object, const TokenId& predecessor, const TokenId& successor){
     object->constrain(predecessor, successor);
@@ -284,7 +282,7 @@ namespace EUROPA {
   /**
    * @brief Traverse the path and obtain the right token
    */
-  TokenId DbClient::getTokenByPath(const std::vector<int>& relativePath) const
+  TokenId DbClient::getTokenByPath(const std::vector<unsigned int>& relativePath) const
   {
     check_error(isTransactionLoggingEnabled());
     check_error(!relativePath.empty());
@@ -292,7 +290,7 @@ namespace EUROPA {
     check_error(relativePath[0] >= 0); // Can never be a valid path
 
     // Quick check for the root of the path
-    if((unsigned)relativePath[0] >= m_keysOfTokensCreated.size()) // Cannot be a path for a token with this key set
+    if(relativePath[0] >= m_keysOfTokensCreated.size()) // Cannot be a path for a token with this key set
       return TokenId::noId();
 
     // Obtain the root token key using the first element in the path to index the tokenKeys.
@@ -358,7 +356,7 @@ namespace EUROPA {
     int indexOfMaster = -1;
     for(unsigned int i=0; i< m_keysOfTokensCreated.size(); i++)
       if(m_keysOfTokensCreated[i] == keyOfMaster){
-	indexOfMaster = i;
+	indexOfMaster = static_cast<int>(i);
 	break;
       }
 
@@ -464,7 +462,7 @@ namespace EUROPA {
   PSVariable* PSPlanDatabaseClientImpl::createVariable(const std::string& typeName, const std::string& name, bool isTmpVar)
   {
       ConstrainedVariableId var = m_client->createVariable(typeName.c_str(),name.c_str(),isTmpVar);
-      return dynamic_cast<PSVariable*>((ConstrainedVariable*)var);
+      return dynamic_cast<PSVariable*>(static_cast<ConstrainedVariable*>(var));
   }
 
   void PSPlanDatabaseClientImpl::deleteVariable(PSVariable* var)
@@ -475,7 +473,7 @@ namespace EUROPA {
   PSObject* PSPlanDatabaseClientImpl::createObject(const std::string& type, const std::string& name)
   {
       ObjectId obj = m_client->createObject(type.c_str(),name.c_str());
-      return dynamic_cast<PSObject*>((Object*)obj);
+      return dynamic_cast<PSObject*>(static_cast<Object*>(obj));
   }
 
   //PSObject* PSPlanDatabaseClientImpl::createObject(const std::string& type, const std::string& name, const PSList<PSVariable*>& arguments){}
@@ -488,7 +486,7 @@ namespace EUROPA {
   PSToken* PSPlanDatabaseClientImpl::createToken(const std::string& predicateName, bool rejectable, bool isFact)
   {
       TokenId tok = m_client->createToken(predicateName.c_str(),NULL, rejectable,isFact);
-      return dynamic_cast<PSToken*>((Token*)tok);
+      return dynamic_cast<PSToken*>(static_cast<Token*>(tok));
   }
 
   void PSPlanDatabaseClientImpl::deleteToken(PSToken* token)
@@ -533,7 +531,7 @@ namespace EUROPA {
           idScope.push_back(toId(scope.get(i)));
 
       ConstraintId c = m_client->createConstraint(name.c_str(),idScope);
-      return dynamic_cast<PSConstraint*>((Constraint*)c);
+      return dynamic_cast<PSConstraint*>(static_cast<Constraint*>(c));
   }
 
   void PSPlanDatabaseClientImpl::deleteConstraint(PSConstraint* c)

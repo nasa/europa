@@ -98,7 +98,7 @@ namespace EUROPA {
 
     /**
      * @brief Register an allocated global variable.
-     * @param var. The variable to be registered. Must not have a parent. Furthermore, the name of the variable must be unique in this scope.
+     * @param var The variable to be registered. Must not have a parent. Furthermore, the name of the variable must be unique in this scope.
      */
     void registerGlobalVariable(const ConstrainedVariableId& var);
 
@@ -134,7 +134,7 @@ namespace EUROPA {
 
     /**
      * @brief Test if the given inactive token has any tokens with which it can merge.
-     * @param inactiveToken
+     * @param inactiveToken The token to check for merge candidates.
      * @return true if there is 1 or more tokens with which to merge, otherwse false.
      * @see getCompatibleTokens, countCompatibleTokens
      */
@@ -172,13 +172,13 @@ namespace EUROPA {
      * @brief Returns a count of compatible tokens up to the given limit
      * @see getCompatibleTokens
      */
-    unsigned int countCompatibleTokens(const TokenId& inactiveToken,
+    unsigned long countCompatibleTokens(const TokenId& inactiveToken,
 #ifdef _MSC_VER
-				       unsigned int limit = UINT_MAX,  //std::numeric_limits<unsigned int>::max(),
+                                        unsigned int limit = UINT_MAX,  //std::numeric_limits<unsigned int>::max(),
 #else
-                                       unsigned int limit = std::numeric_limits<unsigned int>::max(),
+                                        unsigned int limit = std::numeric_limits<unsigned int>::max(),
 #endif //_MSC_VER
-				       bool useExactTest = false);
+                                        bool useExactTest = false);
 
     /**
      * @brief Returns the last count obtained for the prior call to query the set of compatible tokens. This can be useful
@@ -212,11 +212,11 @@ namespace EUROPA {
      * @brief Returns a count or all ordering choices for a token up to the given limit
      * @see Object::getOrderingChoices
      */
-    unsigned int countOrderingChoices(const TokenId& token,
+    unsigned long countOrderingChoices(const TokenId& token,
 #ifdef _MSC_VER
-				      unsigned int limit = UINT_MAX  //std::numeric_limits<unsigned int>::max(),
+				      unsigned long limit = UINT_MAX  //std::numeric_limits<unsigned int>::max(),
 #else
-				      unsigned int limit = std::numeric_limits<unsigned int>::max()
+				      unsigned long limit = std::numeric_limits<unsigned long>::max()
 #endif //_MSC_VER
 				      );
     /**
@@ -224,7 +224,7 @@ namespace EUROPA {
      * @param token The token for which we want ordering choices. Cannot be rejected.
      * @return The last count value
      */
-    unsigned int lastOrderingChoiceCount(const TokenId& token) const;
+    unsigned long lastOrderingChoiceCount(const TokenId& token) const;
 
     /**
      * @brief True if there is at least one ordering choice
@@ -307,7 +307,7 @@ namespace EUROPA {
      * @note We can extend this to pass in a functor or some other object to allow it to handle archival details.
      * @see Object::archive
      */
-    unsigned int archive(eint tick = PLUS_INFINITY);
+    unsigned long archive(eint tick = PLUS_INFINITY);
 
 
     // PSPlanDatabase methods

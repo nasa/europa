@@ -5,7 +5,7 @@
 #include "Solver.hh"
 
 namespace EUROPA {
-  namespace SOLVERS {
+namespace SOLVERS {
     DecisionPoint::DecisionPoint(const DbClientId& client, eint entityKey, const LabelStr& explanation) 
       : Entity(), m_client(client),  m_entityKey(entityKey), m_id(this), 
 	m_explanation(explanation), m_isExecuted(false), m_initialized(false), m_maxChoices(0), m_counter(0) {}
@@ -52,5 +52,7 @@ namespace EUROPA {
     bool DecisionPoint::isInitialized() const {
       return m_initialized;
     }
-  }
+
+bool SolverDecisionPoint::customStaticMatch(const EntityId& entity) {return true;}
+}
 }

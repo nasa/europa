@@ -49,10 +49,11 @@ namespace EUROPA {
 
       /**
        * @brief Hook for default behavior. Subclasses can make new static methods to specialize the static matching.
+       * @param entity The entity to match.
        * @see FlawHandler
        * @return true if the entity can be dynamically matched. Otherwise false.
        */
-      static bool customStaticMatch(const EntityId& entity) {return true;}
+      static bool customStaticMatch(const EntityId& entity);
 
       /**
        * @brief Hook for default behavior. Will allow subclasses to add a weighting 
@@ -125,13 +126,11 @@ namespace EUROPA {
       /**
        * @brief Implement this method with behavior for making an update to the Plan
        * Database reflecting the current choice.
-       * @param client The databasse client on which to invoke decision execution operations.
        */
       virtual void handleExecute() = 0;
 
       /**
        * @brief Implement this method to handle retraction of last choice executed.
-       * @param client The databasse client on which to invoke decision retraction operations.
        */
       virtual void handleUndo() = 0;
 

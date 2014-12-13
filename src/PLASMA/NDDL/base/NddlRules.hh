@@ -29,12 +29,14 @@ namespace NDDL {
   /**
    * @brief Function to detokenize a delimited list into a list.
    */
-  std::list<edouble> listFromString(const std::string& str, bool isNumeric);
+std::list<EUROPA::edouble> listFromString(const std::string& str, bool isNumeric);
 
   /**
    * @brief Function to allocate a token on the same object as the master
    */
-  TokenId allocateOnSameObject(const TokenId& parent, const LabelStr& predicateSuffix, const LabelStr& relationToMaster);
+EUROPA::TokenId allocateOnSameObject(const EUROPA::TokenId& parent,
+                                     const EUROPA::LabelStr& predicateSuffix,
+                                     const EUROPA::LabelStr& relationToMaster);
 
   /**
    * Macro declaration and definition for the Rule which provides a factory

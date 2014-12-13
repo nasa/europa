@@ -86,6 +86,8 @@ namespace EUROPA {
       return TokenId::noId();
   }
 
+void* EvalContext::getElement(const char*) const {return NULL;}
+
   std::string EvalContext::toString() const
   {
     std::ostringstream os;
@@ -171,10 +173,9 @@ namespace EUROPA {
   {
   }
 
-  DataRef ExprNoop::eval(EvalContext& context) const
-  {
-      std::cout << "Noop:" << m_str << std::endl;
-      return DataRef::null;
-  }
+DataRef ExprNoop::eval(EvalContext&) const {
+  std::cout << "Noop:" << m_str << std::endl;
+  return DataRef::null;
+}
 }
 

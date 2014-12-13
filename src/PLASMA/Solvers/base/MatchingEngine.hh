@@ -49,10 +49,7 @@ namespace EUROPA {
        *       written for each type.
        */
       template<typename T>
-      void getMatches(const T& entity, std::vector<MatchingRuleId>& results) {
-	checkError(ALWAYS_FAIL,
-		   "Don't know how to match objects of type " << typeid(T).name());
-      }
+      void getMatches(const T& entity, std::vector<MatchingRuleId>& results);
 
       /**
        * @brief Adds a rule. Details of how it is indexed are internal
@@ -128,6 +125,12 @@ namespace EUROPA {
       std::map<edouble, MatchFinderId>& getEntityMatchers();
     };
     
+  template<typename T>
+  void MatchingEngine::getMatchesInternal(const T&, std::vector<MatchingRuleId>&) {
+    checkError(ALWAYS_FAIL,
+               "Don't know how to match objects of type " << typeid(T).name());
+  }
+
     template<>
     void MatchingEngine::getMatches(const EntityId& entity,
 				    std::vector<MatchingRuleId>& results);

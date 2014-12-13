@@ -23,22 +23,22 @@ namespace EUROPA{
     apply();
   }
 
-  void HasAncestorConstraint::handleExecute(const ConstrainedVariableId& variable,
-					       int argIndex,
-					       const DomainListener::ChangeType& changeType){
-    handleExecute();
-  }
+void HasAncestorConstraint::handleExecute(const ConstrainedVariableId&,
+                                          unsigned int,
+                                          const DomainListener::ChangeType&){
+  handleExecute();
+}
 
-  bool HasAncestorConstraint::canIgnore(const ConstrainedVariableId& variable,
-					   int argIndex,
-					   const DomainListener::ChangeType& changeType){
-    check_error(argIndex <= 1);
-
-    if(m_first.isOpen() || m_restrictions.isOpen())
-      return true;
-
-    return (false);
-  }
+bool HasAncestorConstraint::canIgnore(const ConstrainedVariableId&,
+                                      unsigned int argIndex,
+                                      const DomainListener::ChangeType&){
+  check_error(argIndex <= 1);
+  
+  if(m_first.isOpen() || m_restrictions.isOpen())
+    return true;
+  
+  return (false);
+}
 
   void HasAncestorConstraint::apply() {
     
@@ -70,8 +70,8 @@ namespace EUROPA{
       candidate->getAncestors(candidatesAncestors);
       bool removeCandidate = true;
       for(std::list<ObjectId>::const_iterator it1 = candidatesAncestors.begin(); it1 != candidatesAncestors.end(); ++it1){
-	ObjectId object = *it1;
-	if(setOfAncestors.isMember(object)){ // Found common ancestor
+	ObjectId ancestor = *it1;
+	if(setOfAncestors.isMember(ancestor)){ // Found common ancestor
 	  removeCandidate = false;
 	  break;
 	}

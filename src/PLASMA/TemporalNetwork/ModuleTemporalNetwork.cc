@@ -7,6 +7,8 @@
 #include "TemporalPropagator.hh"
 #include "STNTemporalAdvisor.hh"
 
+#include <boost/cast.hpp>
+
 namespace EUROPA {
 
   ModuleTemporalNetwork::ModuleTemporalNetwork()
@@ -26,31 +28,31 @@ namespace EUROPA {
   {
   }
 
-  void ModuleTemporalNetwork::initialize(EngineId engine)
-  {
-      ConstraintEngine* ce = (ConstraintEngine*)engine->getComponent("ConstraintEngine");
-      CESchema* ces = ce->getCESchema();
+void ModuleTemporalNetwork::initialize(EngineId engine) {
+  ConstraintEngine* ce =
+      boost::polymorphic_cast<ConstraintEngine*>(engine->getComponent("ConstraintEngine"));
+  CESchema* ces = ce->getCESchema();
 
-      REGISTER_SYSTEM_CONSTRAINT(ces,EqualConstraint, "concurrent", "Temporal");
-      REGISTER_SYSTEM_CONSTRAINT(ces,LessThanEqualConstraint, "precedes", "Temporal");
-      REGISTER_SYSTEM_CONSTRAINT(ces, LessThanConstraint, "strictlyPrecedes", "Temporal");
-      REGISTER_SYSTEM_CONSTRAINT(ces,AddEqualConstraint, "temporalDistance", "Temporal");
+  REGISTER_SYSTEM_CONSTRAINT(ces,EqualConstraint, "concurrent", "Temporal");
+  REGISTER_SYSTEM_CONSTRAINT(ces,LessThanEqualConstraint, "precedes", "Temporal");
+  REGISTER_SYSTEM_CONSTRAINT(ces, LessThanConstraint, "strictlyPrecedes", "Temporal");
+  REGISTER_SYSTEM_CONSTRAINT(ces,AddEqualConstraint, "temporalDistance", "Temporal");
 
-      PlanDatabase* pdb = (PlanDatabase*)engine->getComponent("PlanDatabase");
+  PlanDatabase* pdb =
+      boost::polymorphic_cast<PlanDatabase*>(engine->getComponent("PlanDatabase"));
 
-	  PropagatorId temporalPropagator;
-	  if (engine->getConfig()->getProperty("TemporalNetwork.useTemporalPropagator") != "N") {
-	      temporalPropagator = (new TemporalPropagator(LabelStr("Temporal"), ce->getId()))->getId();
-	      pdb->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
-	  }
-	  else {
-          temporalPropagator = (new DefaultPropagator(LabelStr("Temporal"), ce->getId()))->getId();
-          pdb->setTemporalAdvisor((new DefaultTemporalAdvisor(ce->getId()))->getId());
-	  }
+  PropagatorId temporalPropagator;
+  if (engine->getConfig()->getProperty("TemporalNetwork.useTemporalPropagator") != "N") {
+    temporalPropagator = (new TemporalPropagator(LabelStr("Temporal"), ce->getId()))->getId();
+    pdb->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
   }
-
-  void ModuleTemporalNetwork::uninitialize(EngineId engine)
-  {
-      // TODO: cleanup
+  else {
+    temporalPropagator = (new DefaultPropagator(LabelStr("Temporal"), ce->getId()))->getId();
+    pdb->setTemporalAdvisor((new DefaultTemporalAdvisor(ce->getId()))->getId());
   }
+}
+
+void ModuleTemporalNetwork::uninitialize(EngineId) {
+  // TODO: cleanup
+}
 }

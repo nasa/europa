@@ -55,11 +55,11 @@ namespace EUROPA {
 	||
 	second->getExternalEntity().isNoId() )
       {
-	eint f_lb = (eint) first->getLastDomain().getLowerBound();
-	eint f_ub = (eint) first->getLastDomain().getUpperBound();
+	eint f_lb = static_cast<eint>(first->getLastDomain().getLowerBound());
+	eint f_ub = static_cast<eint>(first->getLastDomain().getUpperBound());
 	
-	eint s_lb = (eint) second->getLastDomain().getLowerBound();
-	eint s_ub = (eint) second->getLastDomain().getUpperBound();
+	eint s_lb = static_cast<eint>(second->getLastDomain().getLowerBound());
+	eint s_ub = static_cast<eint>(second->getLastDomain().getUpperBound());
 	
 	eint min_distance = -g_infiniteTime();
 
@@ -98,9 +98,12 @@ namespace EUROPA {
   void STNTemporalAdvisor::getTemporalDistanceSigns(const ConstrainedVariableId& first,
                                                     const std::vector<ConstrainedVariableId>&
                                                     seconds,
-                                                    std::vector<Time>& lbs,
-                                                    std::vector<Time>& ubs) {
-    return (m_propagator->getTemporalDistanceSigns(first, seconds, lbs, ubs));
+                                                    std::vector<eint>& lbs,
+                                                    std::vector<eint>& ubs) {
+    std::vector<Time> tLbs, tUbs;
+    m_propagator->getTemporalDistanceSigns(first, seconds, tLbs, tUbs);
+    std::copy(tLbs.begin(), tLbs.end(), std::back_inserter(lbs));
+    std::copy(tUbs.begin(), tUbs.end(), std::back_inserter(ubs));
   }
 
 

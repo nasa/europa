@@ -39,16 +39,10 @@ namespace EUROPA{
   void StackMemento::undo(bool){
     check_error(!m_stackConstraints.empty());
     // Delete all new constraints.
-    for(std::list<ConstraintId>::const_iterator it = m_stackConstraints.begin(); it!= m_stackConstraints.end(); ++it) {
-      ConstraintId constraint = *it;
-      check_error(constraint.isValid());
-      delete (Constraint*) constraint;
-    }
-
-    m_stackConstraints.clear();
+    cleanup(m_stackConstraints);
   }
 
-  void StackMemento::handleAdditionOfInactiveConstraint(const ConstraintId& constraint){ }
+  void StackMemento::handleAdditionOfInactiveConstraint(const ConstraintId&){ }
 
-  void StackMemento::handleRemovalOfInactiveConstraint(const ConstraintId& constraint){ }
+  void StackMemento::handleRemovalOfInactiveConstraint(const ConstraintId&){ }
 }

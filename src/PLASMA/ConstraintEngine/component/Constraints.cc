@@ -6,52 +6,54 @@
 #include "Utils.hh"
 #include "Debug.hh"
 #include <algorithm>
+#include <cmath>
 
 namespace EUROPA {
 
-  void requireArgCount(std::string name, const std::vector<DataTypeId>& argTypes, const unsigned int count) {
-      if (argTypes.size() != count) {
-	  std::ostringstream msg; msg << "Constraint " << name << " takes 2 args, not " << argTypes.size();
-          throw msg.str();
-      }
+namespace {
+void requireArgCount(std::string name, const std::vector<DataTypeId>& argTypes, const unsigned int count) {
+  if (argTypes.size() != count) {
+    std::ostringstream msg; msg << "Constraint " << name << " takes 2 args, not " << argTypes.size();
+    throw msg.str();
   }
+}
 
-  void mutuallyAssignable(std::string name, DataTypeId a, DataTypeId b) {
-      if (b->isNumeric() && b->isNumeric()) {
-	  //This is a hopefully temporary hack that makes the constraints work so the tests can pass. Waiting for agreement on the
-          //mailling list before deciding what to do in this case. Tony T. Pratkanis: 9/11/09.
-          return;
-      }
-      if (!b->isAssignableFrom(a) || !a->isAssignableFrom(b)) {
-          std::ostringstream msg; msg << "Constraint " << name << " args must be assignable. In this case, "
-				      << a->getName().c_str() << " and " << b->getName().c_str()
-				      << " are not assignable.";
-          throw msg.str();
-      }
+void mutuallyAssignable(std::string name, DataTypeId a, DataTypeId b) {
+  if (b->isNumeric() && b->isNumeric()) {
+    //This is a hopefully temporary hack that makes the constraints work so the tests can pass. Waiting for agreement on the
+    //mailling list before deciding what to do in this case. Tony T. Pratkanis: 9/11/09.
+    return;
   }
-
-  void requireNumeric(std::string name, DataTypeId a) {
-      if (!a->isNumeric()) {
-          std::ostringstream msg; msg << "Constraint " << name << " args must be numeric. " << a->getName().c_str() << " is not.";
-          throw msg.str();
-      }
+  if (!b->isAssignableFrom(a) || !a->isAssignableFrom(b)) {
+    std::ostringstream msg; msg << "Constraint " << name << " args must be assignable. In this case, "
+                                << a->getName().c_str() << " and " << b->getName().c_str()
+                                << " are not assignable.";
+    throw msg.str();
   }
+}
 
-  void requireBoolean(std::string name, DataTypeId a) {
-      if (!a->isBool()) {
-          std::ostringstream msg; msg << "Constraint " << name << " args must be numeric. " << a->getName().c_str() << " is not.";
-          throw msg.str();
-      }
+void requireNumeric(std::string name, DataTypeId a) {
+  if (!a->isNumeric()) {
+    std::ostringstream msg; msg << "Constraint " << name << " args must be numeric. " << a->getName().c_str() << " is not.";
+    throw msg.str();
   }
+}
 
-  void requireAllSame(std::string name, const std::vector<DataTypeId>& argTypes) {
-    for (unsigned int i = 0; i < argTypes.size(); i++) {
-      for (unsigned int u = i + 1; u < argTypes.size(); u++) {
-	mutuallyAssignable(name, argTypes[i], argTypes[u]);
-      }
+void requireBoolean(std::string name, DataTypeId a) {
+  if (!a->isBool()) {
+    std::ostringstream msg; msg << "Constraint " << name << " args must be numeric. " << a->getName().c_str() << " is not.";
+    throw msg.str();
+  }
+}
+
+void requireAllSame(std::string name, const std::vector<DataTypeId>& argTypes) {
+  for (unsigned int i = 0; i < argTypes.size(); i++) {
+    for (unsigned int u = i + 1; u < argTypes.size(); u++) {
+      mutuallyAssignable(name, argTypes[i], argTypes[u]);
     }
   }
-
+}
+}
 
   void TwoSameArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
   {
@@ -164,8 +166,8 @@ namespace EUROPA {
     m_x = 0;
   }
 
-  bool UnaryConstraint::canIgnore(const ConstrainedVariableId& variable,
-				  int argIndex,
+  bool UnaryConstraint::canIgnore(const ConstrainedVariableId&,
+				  unsigned int argIndex,
 				  const DomainListener::ChangeType& changeType){
     checkError(argIndex == 0, "Cannot have more than one variable in scope.");
 
@@ -179,7 +181,7 @@ namespace EUROPA {
 
   void UnaryConstraint::setSource(const ConstraintId& sourceConstraint){
     checkError(m_x == 0, "Already set domain for " << toString() << " and not using " << sourceConstraint->toString());
-    UnaryConstraint* source = (UnaryConstraint*) sourceConstraint;
+    UnaryConstraint* source = id_cast<UnaryConstraint>(sourceConstraint);
     m_x = source->m_x->copy();
   }
 
@@ -221,7 +223,7 @@ namespace EUROPA {
       m_y(getCurrentDomain(m_variables[Y])),
       m_z(getCurrentDomain(m_variables[Z]))
   {
-    check_error(variables.size() == (unsigned int) ARG_COUNT);
+    check_error(variables.size() ==  ARG_COUNT);
   }
 
   void AddEqualConstraint::handleExecute() {
@@ -298,8 +300,8 @@ namespace EUROPA {
                                            const ConstraintEngineId& constraintEngine,
                                            const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
-    check_error(variables.size() == (unsigned int) ARG_COUNT);
-    for (int i = 0; i < ARG_COUNT; i++)
+    check_error(variables.size() ==  ARG_COUNT);
+    for (unsigned int i = 0; i < ARG_COUNT; i++)
       check_error(!getCurrentDomain(m_variables[i]).isEnumerated());
   }
 /*
@@ -406,109 +408,110 @@ namespace EUROPA {
    */
   // Update Z's domain bounds using domains of X and Y in: X * Y = Z.
   // Return TRUE if we have new bounds for Z
-  bool updateMultBounds(IntervalDomain& domZ,
+namespace {
+bool updateMultBounds(IntervalDomain& domZ,
                       const IntervalDomain& domX,
                       const IntervalDomain& domY)
-  {
-    // Can not do any update if the domain of any variable is empty
-    if(domX.isEmpty() || domY.isEmpty() || domZ.isEmpty())
+{
+  // Can not do any update if the domain of any variable is empty
+  if(domX.isEmpty() || domY.isEmpty() || domZ.isEmpty())
+    return false;
+
+  edouble xMin, yMin, xMax, yMax, zMin, zMax, a, b, c, d;
+  domX.getBounds(xMin, xMax);
+  domY.getBounds(yMin, yMax);
+
+  a = xMin * yMin;
+  b = xMin * yMax;
+  c = xMax * yMin;
+  d = xMax * yMax;
+
+  zMin = std::min(std::min(a,b),std::min(c,d));
+  zMax = std::max(std::max(a,b),std::max(c,d));
+
+  return domZ.intersect(zMin,zMax);
+}
+
+// Update Z's domain bounds using domains of X and Y in: X / Y = Z.
+// Return TRUE if we have new bounds for Z
+// NOTE: given the division-by-zero problem, there will be many different scenarios that need
+// special treatments
+bool updateDivBounds(IntervalDomain& domZ,
+                     const IntervalDomain& domX,
+                     const IntervalDomain& domY)
+{
+  // Can not do any update if the domain of any variable is empty
+  if(domX.isEmpty() || domY.isEmpty() || domZ.isEmpty())
+    return false;
+
+  edouble xMin, yMin, xMax, yMax, zMin, zMax, a, b, c, d;
+  domX.getBounds(xMin, xMax);
+  domY.getBounds(yMin, yMax);
+
+
+  // if [Y] = {0} (singleton 0 value)
+  if(yMin == 0.0 && yMax == 0.0) {
+    // If [X] doesn't contain 0 then inconsistent -> empty Z domain
+    // NOTE: alternatively, [X] can be emptied instead of [Z] but it doesn't matter
+    // with the current mechanism in Europa
+    if((xMin > 0.0 || xMax < 0.0)) {
+      domZ.empty();
+      return true;
+    } else {
+      // If 0 \in [X] then no bound tightening (because 0/0 can be anything)
       return false;
+    }
+  }
 
-    edouble xMin, yMin, xMax, yMax, zMin, zMax, a, b, c, d;
-    domX.getBounds(xMin, xMax);
-    domY.getBounds(yMin, yMax);
+  // If 0 \in [Y] but 0 is not one of the bounds then no tightening
+  // NOTE: regardless of the bounds of X because [Y] contains both positive & negative values
+  if(yMin < 0.0 && yMax > 0.0)
+    return false;
 
-    a = xMin * yMin;
-    b = xMin * yMax;
-    c = xMax * yMin;
-    d = xMax * yMax;
+  // If [Y] doesn't contain 0. Safely compute the two possible new bounds
+  if(yMin > 0.0 || yMax < 0.0) {
+    a = xMin / yMin;
+    b = xMin / yMax;
+    c = xMax / yMin;
+    d = xMax / yMax;
 
     zMin = std::min(std::min(a,b),std::min(c,d));
     zMax = std::max(std::max(a,b),std::max(c,d));
-
     return domZ.intersect(zMin,zMax);
   }
 
-  // Update Z's domain bounds using domains of X and Y in: X / Y = Z.
-  // Return TRUE if we have new bounds for Z
-  // NOTE: given the division-by-zero problem, there will be many different scenarios that need
-  // special treatments
-  bool updateDivBounds(IntervalDomain& domZ,
-      const IntervalDomain& domX,
-      const IntervalDomain& domY)
-  {
-    // Can not do any update if the domain of any variable is empty
-    if(domX.isEmpty() || domY.isEmpty() || domZ.isEmpty())
-      return false;
+  // if lb[Y] = 0 OR ub[Y] = 0 and ub[Y] > lb[Y] (i.e., 0 is one but not both bounds of [Y])
+  // and 0 \in [X] then there is no bound tightening (because 0/0 can be anything)
+  if((yMin == 0.0 || yMax == 0.0) && (xMin <= 0.0 && xMax >= 0.0))
+    return false;
 
-    edouble xMin, yMin, xMax, yMax, zMin, zMax, a, b, c, d;
-    domX.getBounds(xMin, xMax);
-    domY.getBounds(yMin, yMax);
+  /*
+   * if lb[Y] = 0 OR ub[Y] = 0 and [X] doesn't contain 0, then we can compute one of the bounds
+   */
+  // One of the bounds will be \infinity so we will initialize both of the potential
+  // new [Z]'s bounds with the existing bounds on [Z]
+  domZ.getBounds(zMin, zMax);
 
+  // Case 1 [+,+] / [0,+]: new bounds [xMin / yMax, +infinity]
+  if(yMin == 0.0 && xMin > 0.0)
+    zMin = xMin / yMax;
 
-    // if [Y] = {0} (singleton 0 value)
-    if(yMin == 0.0 && yMax == 0.0) {
-        // If [X] doesn't contain 0 then inconsistent -> empty Z domain
-        // NOTE: alternatively, [X] can be emptied instead of [Z] but it doesn't matter
-        // with the current mechanism in Europa
-        if((xMin > 0.0 || xMax < 0.0)) {
-          domZ.empty();
-          return true;
-        } else {
-          // If 0 \in [X] then no bound tightening (because 0/0 can be anything)
-          return false;
-        }
-    }
+  // Case 2 [-,-] / [0,+] : new bounds [-infinity, xMax / yMax]
+  if(yMin == 0.0 && xMax < 0.0)
+    zMax = xMax / yMax;
 
-    // If 0 \in [Y] but 0 is not one of the bounds then no tightening
-    // NOTE: regardless of the bounds of X because [Y] contains both positive & negative values
-    if(yMin < 0.0 && yMax > 0.0)
-      return false;
+  // Case 3 [+,+] / [-,0]: new bounds [-infinity, xMin /yMin]
+  if(yMax == 0.0 && xMin > 0.0)
+    zMax = xMin / yMin;
 
-    // If [Y] doesn't contain 0. Safely compute the two possible new bounds
-    if(yMin > 0.0 || yMax < 0.0) {
-      a = xMin / yMin;
-      b = xMin / yMax;
-      c = xMax / yMin;
-      d = xMax / yMax;
+  // Case 4 [-,-] / [-,0]: new bounds [xMax / yMin, +infinity ]
+  if(yMax == 0.0 && xMax < 0.0)
+    zMin = xMax / yMin;
 
-      zMin = std::min(std::min(a,b),std::min(c,d));
-      zMax = std::max(std::max(a,b),std::max(c,d));
-      return domZ.intersect(zMin,zMax);
-    }
-
-    // if lb[Y] = 0 OR ub[Y] = 0 and ub[Y] > lb[Y] (i.e., 0 is one but not both bounds of [Y])
-    // and 0 \in [X] then there is no bound tightening (because 0/0 can be anything)
-    if((yMin == 0.0 || yMax == 0.0) && (xMin <= 0.0 && xMax >= 0.0))
-      return false;
-
-    /*
-     * if lb[Y] = 0 OR ub[Y] = 0 and [X] doesn't contain 0, then we can compute one of the bounds
-     */
-    // One of the bounds will be \infinity so we will initialize both of the potential
-    // new [Z]'s bounds with the existing bounds on [Z]
-    domZ.getBounds(zMin, zMax);
-
-    // Case 1 [+,+] / [0,+]: new bounds [xMin / yMax, +infinity]
-    if(yMin == 0.0 && xMin > 0.0)
-      zMin = xMin / yMax;
-
-    // Case 2 [-,-] / [0,+] : new bounds [-infinity, xMax / yMax]
-    if(yMin == 0.0 && xMax < 0.0)
-      zMax = xMax / yMax;
-
-    // Case 3 [+,+] / [-,0]: new bounds [-infinity, xMin /yMin]
-    if(yMax == 0.0 && xMin > 0.0)
-      zMax = xMin / yMin;
-
-    // Case 4 [-,-] / [-,0]: new bounds [xMax / yMin, +infinity ]
-    if(yMax == 0.0 && xMax < 0.0)
-      zMin = xMax / yMin;
-
-    // Set the new bounds
-    return domZ.intersect(zMin,zMax);
-  }
-
+  // Set the new bounds
+  return domZ.intersect(zMin,zMax);
+}
+}
   void MultEqualConstraint::handleExecute() {
     IntervalDomain& domX = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[X]));
     IntervalDomain& domY = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Y]));
@@ -548,8 +551,8 @@ namespace EUROPA {
                                            const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables)
   {
-    check_error(variables.size() == (unsigned int) ARG_COUNT);
-    for (int i = 0; i < ARG_COUNT; i++)
+    check_error(variables.size() == ARG_COUNT);
+    for (unsigned int i = 0; i < ARG_COUNT; i++)
       check_error(!getCurrentDomain(m_variables[i]).isEnumerated());
   }
 
@@ -616,7 +619,7 @@ namespace EUROPA {
     //is now equal to the intersection of all of the variables,
     //we can just equate backwards and they should all be equal
     if(changed && m_argCount > 2) {
-      for(unsigned int i = m_argCount - 2; i >= 1; i--) {
+      for(unsigned long i = m_argCount - 2; i >= 1; i--) {
 	ConstrainedVariableId v1 = m_variables[i];
 	ConstrainedVariableId v2 = m_variables[i-1];
 	bool isEmpty = false;
@@ -701,17 +704,17 @@ namespace EUROPA {
     m_currentDomain.intersect(m_superSetDomain);
   }
 
-  bool SubsetOfConstraint::canIgnore(const ConstrainedVariableId& variable,
-				     int argIndex,
-				     const DomainListener::ChangeType& changeType){
-    // If not a relaxation, and if it is the first argument, then we can ignore it as it will already be a subset
-    if(changeType == DomainListener::RESET ||
-       changeType == DomainListener::RELAXED ||
-       argIndex == 1)
-      return false;
-    else
-      return true;
-  }
+bool SubsetOfConstraint::canIgnore(const ConstrainedVariableId&,
+                                   unsigned int argIndex,
+                                   const DomainListener::ChangeType& changeType){
+  // If not a relaxation, and if it is the first argument, then we can ignore it as it will already be a subset
+  if(changeType == DomainListener::RESET ||
+     changeType == DomainListener::RELAXED ||
+     argIndex == 1)
+    return false;
+  else
+    return true;
+}
 
   /*********** LessThanEqualConstraint *************/
   LessThanEqualConstraint::LessThanEqualConstraint(const LabelStr& name,
@@ -721,7 +724,7 @@ namespace EUROPA {
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_x(getCurrentDomain(variables[X])),
       m_y(getCurrentDomain(variables[Y])){
-    checkError(variables.size() == (unsigned int) ARG_COUNT, toString());
+    checkError(variables.size() == ARG_COUNT, toString());
     checkError(m_x.isNumeric(), variables[X]->toString());
     checkError(m_y.isNumeric(), variables[Y]->toString());
   }
@@ -751,26 +754,24 @@ namespace EUROPA {
     m_y.intersect(m_x.getLowerBound(), m_y.getUpperBound());
   }
 
-  bool LessThanEqualConstraint::canIgnore(const ConstrainedVariableId& variable,
-					  int argIndex,
-					  const DomainListener::ChangeType& changeType) {
-    return((argIndex == X &&
-	    (changeType == DomainListener::UPPER_BOUND_DECREASED)) ||
-	   (argIndex == Y &&
-	    (changeType == DomainListener::LOWER_BOUND_INCREASED)));
-  }
-  /**
-   * @todo
-   */
-  bool LessThanEqualConstraint::testIsRedundant(const ConstrainedVariableId& var) const{
-    if(Constraint::testIsRedundant(var))
-      return true;
+bool LessThanEqualConstraint::canIgnore(const ConstrainedVariableId&,
+                                        unsigned int argIndex,
+                                        const DomainListener::ChangeType& changeType) {
+  return((argIndex == X &&
+          (changeType == DomainListener::UPPER_BOUND_DECREASED)) ||
+         (argIndex == Y &&
+          (changeType == DomainListener::LOWER_BOUND_INCREASED)));
+}
 
-    if(getScope()[X]->baseDomain().getUpperBound() <= getScope()[Y]->baseDomain().getLowerBound())
-      return true;
-
-    return false;
-  }
+bool LessThanEqualConstraint::testIsRedundant(const ConstrainedVariableId& var) const{
+  if(Constraint::testIsRedundant(var))
+    return true;
+  
+  if(getScope()[X]->baseDomain().getUpperBound() <= getScope()[Y]->baseDomain().getLowerBound())
+    return true;
+  
+  return false;
+}
 
 
   /*********** NotEqualConstraint *************/
@@ -779,7 +780,7 @@ namespace EUROPA {
 					 const ConstraintEngineId& constraintEngine,
 					 const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
-    check_error(variables.size() == (unsigned int) ARG_COUNT);
+    check_error(variables.size() == ARG_COUNT);
   }
 
   void NotEqualConstraint::handleExecute() {
@@ -833,20 +834,20 @@ namespace EUROPA {
     return(false);
   }
 
-  bool NotEqualConstraint::canIgnore(const ConstrainedVariableId& variable,
-				     int argIndex,
-				     const DomainListener::ChangeType& changeType) {
-    if(changeType==DomainListener::RESET || changeType == DomainListener::RELAXED)
-      return false;
+bool NotEqualConstraint::canIgnore(const ConstrainedVariableId& variable,
+                                   unsigned int,
+                                   const DomainListener::ChangeType& changeType) {
+  if(changeType==DomainListener::RESET || changeType == DomainListener::RELAXED)
+    return false;
 
-    const Domain& domain = variable->lastDomain();
+  const Domain& domain = variable->lastDomain();
 
-    if(domain.isSingleton() ||
-       (domain.isInterval() && domain.isFinite() && domain.getSize() <=2 )) // Since this transition is key for propagation
-       return false;
+  if(domain.isSingleton() ||
+     (domain.isInterval() && domain.isFinite() && domain.getSize() <=2 )) // Since this transition is key for propagation
+    return false;
 
-    return true;
-  }
+  return true;
+}
 
   /*********** LessThanConstraint *************/
   LessThanConstraint::LessThanConstraint(const LabelStr& name,
@@ -854,7 +855,7 @@ namespace EUROPA {
                                          const ConstraintEngineId& constraintEngine,
                                          const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
-    check_error(variables.size() == (unsigned int) ARG_COUNT);
+    check_error(variables.size() == ARG_COUNT);
   }
 
   void LessThanConstraint::handleExecute() {
@@ -894,20 +895,16 @@ namespace EUROPA {
     }
   }
 
-  bool LessThanConstraint::canIgnore(const ConstrainedVariableId& variable,
-				     int argIndex,
-				     const DomainListener::ChangeType& changeType) {
-    return((argIndex == X &&
-	    (changeType == DomainListener::UPPER_BOUND_DECREASED)) ||
-	   (argIndex == Y &&
-	    (changeType == DomainListener::LOWER_BOUND_INCREASED)));
-  }
+bool LessThanConstraint::canIgnore(const ConstrainedVariableId&,
+                                   unsigned int argIndex,
+                                   const DomainListener::ChangeType& changeType) {
+  return((argIndex == X &&
+          (changeType == DomainListener::UPPER_BOUND_DECREASED)) ||
+         (argIndex == Y &&
+          (changeType == DomainListener::LOWER_BOUND_INCREASED)));
+}
 
 
-  /**
-   * @class AddMultEqualConstraint
-   * @brief A + (B*C) == D
-   */
   AddMultEqualConstraint::AddMultEqualConstraint(const LabelStr& name,
                                                  const LabelStr& propagatorName,
                                                  const ConstraintEngineId& constraintEngine,
@@ -918,7 +915,7 @@ namespace EUROPA {
 			    makeScope(m_variables[B], m_variables[C], m_interimVariable.getId())),
       m_addEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine,
 			   makeScope(m_interimVariable.getId(), m_variables[A], m_variables[D])) {
-    check_error(m_variables.size() == (unsigned int) ARG_COUNT);
+    check_error(m_variables.size() == ARG_COUNT);
   }
 
   AddMultEqualConstraint::~AddMultEqualConstraint(){
@@ -931,22 +928,22 @@ namespace EUROPA {
   }
 
   /*********** EqualSumConstraint *************/
-  EqualSumConstraint::EqualSumConstraint(const LabelStr& name,
-                                         const LabelStr& propagatorName,
-                                         const ConstraintEngineId& constraintEngine,
-                                         const std::vector<ConstrainedVariableId>& variables)
+EqualSumConstraint::EqualSumConstraint(const LabelStr& name,
+                                       const LabelStr& propagatorName,
+                                       const ConstraintEngineId& constraintEngine,
+                                       const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       ARG_COUNT(variables.size()),
       m_sum1(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalEqSumVariable"), getId()),
       m_sum2(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalEqSumVariable"), getId()),
       m_sum3(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalEqSumVariable"), getId()),
       m_sum4(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalEqSumVariable"), getId()) {
-    check_error(ARG_COUNT > 2 && ARG_COUNT == (unsigned int)m_variables.size());
-    std::vector<ConstrainedVariableId> scope;
-    // B is always first and C is always second for the first set, so:
-    scope.push_back(m_variables[1]); // B + ...
-    scope.push_back(m_variables[2]); // ... C ...
-    switch (ARG_COUNT) {
+  check_error(ARG_COUNT > 2 && ARG_COUNT == m_variables.size());
+  std::vector<ConstrainedVariableId> scope;
+  // B is always first and C is always second for the first set, so:
+  scope.push_back(m_variables[1]); // B + ...
+  scope.push_back(m_variables[2]); // ... C ...
+  switch (ARG_COUNT) {
     case 3: // A = B + C
       scope.push_back(m_variables[0]); // ... = A
       m_eqSumC1 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
@@ -976,36 +973,36 @@ namespace EUROPA {
       scope.push_back(m_variables[3]); // D + ...
       scope.push_back(m_variables[4]); // E ...
       switch (ARG_COUNT) {
-      case 5:
-        scope.push_back(m_sum2.getId()); // ... = (D + E)
-        m_eqSumC3 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
-        break;
-      case 6:
-        scope.push_back(m_sum3.getId()); // ... = (D + E)
-        m_eqSumC3 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
-        scope.clear();
-        scope.push_back(m_sum3.getId()); // (D + E) + ...
-        scope.push_back(m_variables[5]); // ... F = ...
-        scope.push_back(m_sum2.getId()); // ... (D + E + F)
-        m_eqSumC4 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
-        break;
-      case 7:
-        scope.push_back(m_sum3.getId()); // ... = (D + E)
-        m_eqSumC3 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
-        scope.clear();
-        scope.push_back(m_sum3.getId()); // (D + E) + ...
-        scope.push_back(m_sum4.getId()); // ... (F + G) = ...
-        scope.push_back(m_sum2.getId()); // (D + E + F + G)
-        m_eqSumC4 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
-        scope.clear();
-        scope.push_back(m_variables[5]); // F + ...
-        scope.push_back(m_variables[6]); // ... G = ...
-        scope.push_back(m_sum4.getId()); // ... (F + G)
-        m_eqSumC5 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
-        break;
-      default:
-        check_error(ALWAYS_FAILS);
-        break;
+        case 5:
+          scope.push_back(m_sum2.getId()); // ... = (D + E)
+          m_eqSumC3 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
+          break;
+        case 6:
+          scope.push_back(m_sum3.getId()); // ... = (D + E)
+          m_eqSumC3 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
+          scope.clear();
+          scope.push_back(m_sum3.getId()); // (D + E) + ...
+          scope.push_back(m_variables[5]); // ... F = ...
+          scope.push_back(m_sum2.getId()); // ... (D + E + F)
+          m_eqSumC4 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
+          break;
+        case 7:
+          scope.push_back(m_sum3.getId()); // ... = (D + E)
+          m_eqSumC3 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
+          scope.clear();
+          scope.push_back(m_sum3.getId()); // (D + E) + ...
+          scope.push_back(m_sum4.getId()); // ... (F + G) = ...
+          scope.push_back(m_sum2.getId()); // (D + E + F + G)
+          m_eqSumC4 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
+          scope.clear();
+          scope.push_back(m_variables[5]); // F + ...
+          scope.push_back(m_variables[6]); // ... G = ...
+          scope.push_back(m_sum4.getId()); // ... (F + G)
+          m_eqSumC5 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
+          break;
+        default:
+          check_error(ALWAYS_FAILS);
+          break;
       } // switch (ARGCOUNT) 5, 6, 7
       break;
     default:
@@ -1018,8 +1015,8 @@ namespace EUROPA {
         m_eqSumC1 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
         scope.clear();
         scope.push_back(m_sum1.getId()); // first_half = ...
-        unsigned int half = ARG_COUNT/2;
-        unsigned int i = 1;
+        unsigned long half = ARG_COUNT/2;
+        unsigned long i = 1;
         for ( ; i <= half; i++)
           scope.push_back(m_variables[i]); // ... X + ...
         m_eqSumC2 = (new EqualSumConstraint(LabelStr("EqualSum"), propagatorName, constraintEngine, scope))->getId();
@@ -1030,9 +1027,8 @@ namespace EUROPA {
         m_eqSumC3 = (new EqualSumConstraint(LabelStr("EqualSum"), propagatorName, constraintEngine, scope))->getId();
         break;
       }
-      break;
-    }
   }
+}
 
   EqualSumConstraint::~EqualSumConstraint() {
     discard(false);
@@ -1060,7 +1056,7 @@ namespace EUROPA {
       m_product2(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalEqProductVariable"), getId()),
       m_product3(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalEqProductVariable"), getId()),
       m_product4(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalEqProductVariable"), getId()) {
-    check_error(ARG_COUNT > 2 && ARG_COUNT == (unsigned int)m_variables.size());
+    check_error(ARG_COUNT > 2 && ARG_COUNT == m_variables.size());
     std::vector<ConstrainedVariableId> scope;
     // B is always first and C is always second for the first set, so:
     scope.push_back(m_variables[1]); // B * ...
@@ -1137,8 +1133,8 @@ namespace EUROPA {
         m_eqProductC1 = (new MultEqualConstraint(LabelStr("MultEqual"), propagatorName, constraintEngine, scope))->getId();
         scope.clear();
         scope.push_back(m_product1.getId()); // first_half = ...
-        unsigned int half = ARG_COUNT/2;
-        unsigned int i = 1;
+        unsigned long half = ARG_COUNT/2;
+        unsigned long i = 1;
         for ( ; i <= half; i++)
           scope.push_back(m_variables[i]); // ... X * ...
         m_eqProductC2 = (new EqualProductConstraint(LabelStr("EqualProduct"), propagatorName, constraintEngine, scope))->getId();
@@ -1149,7 +1145,6 @@ namespace EUROPA {
         m_eqProductC3 = (new EqualProductConstraint(LabelStr("EqualProduct"), propagatorName, constraintEngine, scope))->getId();
         break;
       }
-      break;
     }
   }
 
@@ -1410,6 +1405,7 @@ namespace EUROPA {
                                                 getCurrentDomain(m_variables[i])));
   }
 
+namespace {
   /**
    * @brief Helper function: add domToAdd to unionOfDomains "usefully".
    * Adds all of the members of domToAdd and, if needed and useful,
@@ -1424,79 +1420,80 @@ namespace EUROPA {
    * simply returning a single larger interval that 'covers' both
    * original intervals.
    */
-  static void addToUnion(Domain **unionOfDomains,
-                         const Domain& domToAdd) {
-    check_error(unionOfDomains != 0 && *unionOfDomains != 0);
-    check_error(!(*unionOfDomains)->isEmpty() && !(*unionOfDomains)->isOpen());
-    check_error(!domToAdd.isEmpty() && !domToAdd.isOpen());
-    Domain *newUnion = 0;
-    std::list<edouble> membersToAdd;
-    std::list<edouble> newMembers;
-    if (((*unionOfDomains)->isEnumerated() || (*unionOfDomains)->isSingleton())
-        && (domToAdd.isEnumerated() || domToAdd.isSingleton())) {
-      if (domToAdd.isEnumerated())
-        domToAdd.getValues(membersToAdd);
-      else
-        membersToAdd.push_back(domToAdd.getSingletonValue());
-      if ((*unionOfDomains)->isEnumerated())
-        (*unionOfDomains)->getValues(newMembers);
-      else
-        newMembers.push_back((*unionOfDomains)->getSingletonValue());
-      for (std::list<edouble>::const_iterator it = membersToAdd.begin();
-           it != membersToAdd.end(); it++) {
-        std::list<edouble>::const_iterator it2 = newMembers.begin();
-        for ( ; it2 != newMembers.end(); it2++)
-          if (*it == *it2)
-            break;
-        if (it2 == newMembers.end())
-          newMembers.push_back(*it);
-      }
-      newUnion = new EnumeratedDomain(
-              (*unionOfDomains)->getDataType(),
-              newMembers);
+void addToUnion(Domain **unionOfDomains,
+                const Domain& domToAdd) {
+  check_error(unionOfDomains != 0 && *unionOfDomains != 0);
+  check_error(!(*unionOfDomains)->isEmpty() && !(*unionOfDomains)->isOpen());
+  check_error(!domToAdd.isEmpty() && !domToAdd.isOpen());
+  Domain *newUnion = 0;
+  std::list<edouble> membersToAdd;
+  std::list<edouble> newMembers;
+  if (((*unionOfDomains)->isEnumerated() || (*unionOfDomains)->isSingleton())
+      && (domToAdd.isEnumerated() || domToAdd.isSingleton())) {
+    if (domToAdd.isEnumerated())
+      domToAdd.getValues(membersToAdd);
+    else
+      membersToAdd.push_back(domToAdd.getSingletonValue());
+    if ((*unionOfDomains)->isEnumerated())
+      (*unionOfDomains)->getValues(newMembers);
+    else
+      newMembers.push_back((*unionOfDomains)->getSingletonValue());
+    for (std::list<edouble>::const_iterator it = membersToAdd.begin();
+         it != membersToAdd.end(); it++) {
+      std::list<edouble>::const_iterator it2 = newMembers.begin();
+      for ( ; it2 != newMembers.end(); it2++)
+        if (*it == *it2)
+          break;
+      if (it2 == newMembers.end())
+        newMembers.push_back(*it);
+    }
+    newUnion = new EnumeratedDomain(
+        (*unionOfDomains)->getDataType(),
+        newMembers);
 
-      // Could just add to current unionOfDomains rather than failing here, but
-      //   very messy to implement using current interface to *Domain classes.
-      assertFalse(newUnion == NULL);
-      delete *unionOfDomains;
-      *unionOfDomains = newUnion;
-      return;
-    }
-    // At least one is a non-singleton interval, so the result will be
-    //   also be one.
-    edouble toAddMin, toAddMax, newMin, newMax;
-    domToAdd.getBounds(toAddMin, toAddMax);
-    (*unionOfDomains)->getBounds(newMin, newMax);
-    bool changing = false;
-    if (toAddMin < newMin) {
-      newMin = toAddMin;
-      changing = true;
-    }
-    if (newMax < toAddMax) {
-      newMax = toAddMax;
-      changing = true;
-    }
-    if (changing) {
-      if((*unionOfDomains)->minDelta() < 1.0)
-        newUnion = new IntervalDomain(newMin, newMax);
-      else
-        newUnion = new IntervalIntDomain((eint)newMin, (eint)newMax);
-
-      /* BOOL should be not get to here since both are non-singleton
-       *   but then unionOfDomains "covers" domToAdd and changing
-       *   would be false.
-       * USER_DEFINED and REAL_ENUMERATION should not get to here
-       *   since enumerations are dealt with above.
-       * As above, a memory failure here could be dealt with, but
-       *   messy to implement, but note that this also checks the
-       *   assumptions/logic earlier in this comment.
-       */
-      checkError(newUnion != 0, "Failed to allocate memory.");
-      delete *unionOfDomains;
-      *unionOfDomains = newUnion;
-      return;
-    }
+    // Could just add to current unionOfDomains rather than failing here, but
+    //   very messy to implement using current interface to *Domain classes.
+    assertFalse(newUnion == NULL);
+    delete *unionOfDomains;
+    *unionOfDomains = newUnion;
+    return;
   }
+  // At least one is a non-singleton interval, so the result will be
+  //   also be one.
+  edouble toAddMin, toAddMax, newMin, newMax;
+  domToAdd.getBounds(toAddMin, toAddMax);
+  (*unionOfDomains)->getBounds(newMin, newMax);
+  bool changing = false;
+  if (toAddMin < newMin) {
+    newMin = toAddMin;
+    changing = true;
+  }
+  if (newMax < toAddMax) {
+    newMax = toAddMax;
+    changing = true;
+  }
+  if (changing) {
+    if((*unionOfDomains)->minDelta() < 1.0)
+      newUnion = new IntervalDomain(newMin, newMax);
+    else
+      newUnion = new IntervalIntDomain(static_cast<eint>(newMin), static_cast<eint>(newMax));
+
+    /* BOOL should be not get to here since both are non-singleton
+     *   but then unionOfDomains "covers" domToAdd and changing
+     *   would be false.
+     * USER_DEFINED and REAL_ENUMERATION should not get to here
+     *   since enumerations are dealt with above.
+     * As above, a memory failure here could be dealt with, but
+     *   messy to implement, but note that this also checks the
+     *   assumptions/logic earlier in this comment.
+     */
+    checkError(newUnion != 0, "Failed to allocate memory.");
+    delete *unionOfDomains;
+    *unionOfDomains = newUnion;
+    return;
+  }
+}
+}
 
   void CondAllDiffConstraint::handleExecute() {
     BoolDomain& boolDom = static_cast<BoolDomain&>(getCurrentDomain(m_variables[0]));
@@ -1539,7 +1536,7 @@ namespace EUROPA {
           canProveTrue = false;
         // Add members of current to unionOfOthers "usefully".
         addToUnion(&unionOfOthers, current);
-        if (unionOfOthers->isFinite() && (unsigned int)(unionOfOthers->getSize()) < i) {
+        if (unionOfOthers->isFinite() && (unionOfOthers->getSize()) < i) {
           // At least two of the variables must have same value.
           boolDom.remove(true);
           canProveTrue = false;
@@ -1756,7 +1753,7 @@ namespace EUROPA {
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_zeros(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalCountNonZerosVar"), getId()),
       m_otherVars(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalCountNonZerosOtherVars"), getId()),
-      m_superset(constraintEngine, IntervalDomain((edouble)(variables.size() - 1)), true, false, LabelStr("InternalCountNonZerosSuperset"), getId()),
+      m_superset(constraintEngine, IntervalDomain(static_cast<edouble>(variables.size() - 1)), true, false, LabelStr("InternalCountNonZerosSuperset"), getId()),
       m_addEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine,
                            makeScope(m_zeros.getId(), m_variables[0], m_otherVars.getId()))
   {
@@ -1995,6 +1992,8 @@ namespace EUROPA {
     check_error(m_eqSumConstraint.isValid());
   }
 
+
+
   RotateScopeRightConstraint::RotateScopeRightConstraint(const LabelStr& name,
                                                          const LabelStr& propagatorName,
                                                          const ConstraintEngineId& constraintEngine,
@@ -2003,21 +2002,24 @@ namespace EUROPA {
                                                          const int& rotateCount)
     : Constraint(name, propagatorName, constraintEngine, variables)
   {
-    check_error((unsigned) abs(rotateCount) < m_variables.size());
+    check_error(static_cast<unsigned>(abs(rotateCount)) < m_variables.size());
     std::vector<ConstrainedVariableId> otherScope;
     otherScope.reserve(m_variables.size());
-    unsigned int i;
+
+    unsigned long i;
     if (rotateCount > 0) {
+      unsigned long realCount = static_cast<unsigned long>(rotateCount);
       // Rotate to right: last var becomes first, pushing others to the right.
-      for (i = rotateCount; i > 0; i--)
+      for (i = realCount; i > 0; i--)
         otherScope.push_back(m_variables[m_variables.size() - i]);
-      for (i = 0; i < m_variables.size() - rotateCount; i++)
+      for (i = 0; i < m_variables.size() - realCount; i++)
         otherScope.push_back(m_variables[i]);
-    } else {
+    }
+    else {
       // Rotate to left: first var becomes last, pushing others to the left.
-      for (i = (unsigned) abs(rotateCount); i < m_variables.size(); i++)
+      for (i = static_cast<unsigned>(abs(rotateCount)); i < m_variables.size(); i++)
         otherScope.push_back(m_variables[i]);
-      for (i = 0; i < (unsigned) abs(rotateCount); i++)
+      for (i = 0; i < static_cast<unsigned>(abs(rotateCount)); i++)
         otherScope.push_back(m_variables[i]);
     }
     check_error(m_variables.size() == otherScope.size());
@@ -2032,16 +2034,19 @@ namespace EUROPA {
                                                int firstIndex, int secondIndex)
     : Constraint(name, propagatorName, constraintEngine, variables)
   {
-    check_error((unsigned) abs(firstIndex) < m_variables.size());
-    check_error((unsigned) abs(secondIndex) < m_variables.size());
+    check_error(static_cast<unsigned>(abs(firstIndex)) < m_variables.size());
+    check_error(static_cast<unsigned>(abs(secondIndex)) < m_variables.size());
     check_error(firstIndex != secondIndex);
-    if (firstIndex < 0)
-      firstIndex = m_variables.size() - firstIndex;
-    if (secondIndex < 0)
-      secondIndex = m_variables.size() - secondIndex;
+    unsigned long realFirstIndex = (firstIndex < 0 ?
+                                    (m_variables.size() - static_cast<unsigned long>(std::abs(firstIndex))) :
+                                    static_cast<unsigned long>(firstIndex));
+    unsigned long realSecondIndex = (secondIndex < 0 ?
+                                     (m_variables.size() - static_cast<unsigned long>(std::abs(secondIndex))) :
+                                     static_cast<unsigned long>(secondIndex));
+    check_error(realFirstIndex != realSecondIndex);
     std::vector<ConstrainedVariableId> otherScope(m_variables);
-    otherScope[firstIndex] = m_variables[secondIndex];
-    otherScope[secondIndex] = m_variables[firstIndex];
+    otherScope[realFirstIndex] = m_variables[realSecondIndex];
+    otherScope[realSecondIndex] = m_variables[realFirstIndex];
     m_otherConstraint = constraintEngine->createConstraint(otherName, otherScope);
   }
 
@@ -2482,7 +2487,7 @@ namespace EUROPA {
 							     const ConstraintEngineId& constraintEngine,
 							     const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
-    check_error(variables.size() == (unsigned int) ARG_COUNT);
+    check_error(variables.size() == ARG_COUNT);
   }
 
   /**
@@ -2515,7 +2520,7 @@ namespace EUROPA {
 					 const ConstraintEngineId& constraintEngine,
 					 const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
-    check_error(variables.size() == (unsigned int) ARG_COUNT);
+    check_error(variables.size() == ARG_COUNT);
   }
 
   /**
@@ -2640,9 +2645,10 @@ namespace EUROPA {
     getCurrentDomain(m_variables[0]).intersect(m_rvalue, m_rvalue);
   }
 
-  eint mod(eint a, eint b) { return a % b; }
-  eint mod(edouble a, edouble b) {return cast_int(a) % cast_int(b);}
-
+namespace {
+eint mod(eint a, eint b) { return a % b; }
+eint mod(edouble a, edouble b) {return static_cast<eint::basis_type>(std::fmod(cast_basis(a), cast_basis(b)));}
+}
   CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Max, std::max, edouble);
   CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Min, std::min, edouble);
   CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Abs, std::abs, edouble);

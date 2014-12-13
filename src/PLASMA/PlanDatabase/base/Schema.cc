@@ -65,15 +65,11 @@ namespace EUROPA {
 
   Schema::~Schema()
   {
-      delete (TokenTypeMgr*)m_tokenTypeMgr;
-      delete (ObjectTypeMgr*)m_objectTypeMgr;
+    delete static_cast<TokenTypeMgr*>(m_tokenTypeMgr);
+    delete static_cast<ObjectTypeMgr*>(m_objectTypeMgr);
 
-      std::map<edouble,MethodId>::iterator mit = m_methods.begin();
-      for(;mit != m_methods.end();++mit)
-          delete (Method*)mit->second;
-      m_methods.clear();
-
-      m_id.remove();
+    cleanup(m_methods);
+    m_id.remove();
   }
 
   const SchemaId& Schema::getId() const {return m_id;}
@@ -493,7 +489,7 @@ namespace EUROPA {
     return LabelStr("error");
   }
 
-  unsigned int Schema::getParameterCount(const LabelStr& predicate) const {
+  unsigned long Schema::getParameterCount(const LabelStr& predicate) const {
     check_error(isPredicate(predicate), predicate.toString() + " is not defined as a Predicate");
     // First see if we get a hit for the parentType
     std::map<edouble, NameValueVector>::const_iterator membershipRelation_it =
@@ -589,7 +585,7 @@ namespace EUROPA {
   /**
    * @todo memberType is not checked yet. It can be a class, enum, or primitive
    */
-  unsigned int Schema::addMember(const LabelStr& parentType,
+  unsigned long Schema::addMember(const LabelStr& parentType,
 				 const LabelStr& memberType,
 				 const LabelStr& memberName) {
     check_error(isType(parentType), parentType.toString() + " is undefined.");
@@ -688,29 +684,30 @@ namespace EUROPA {
       results.push_back(it->first);
   }
 
-  const Id<ObjectFactory>& createDefaultObjectFactory(
+namespace {
+const Id<ObjectFactory>& createDefaultObjectFactory(
           const ObjectTypeId& objType,
-          bool canCreateObjects)
-  {
-      std::vector<std::string> constructorArgNames;
-      std::vector<std::string> constructorArgTypes;
-      std::vector<Expr*> constructorBody;
-      ExprConstructorSuperCall* superCallExpr = NULL;
+          bool canCreateObjects) {
+  std::vector<std::string> constructorArgNames;
+  std::vector<std::string> constructorArgTypes;
+  std::vector<Expr*> constructorBody;
+  ExprConstructorSuperCall* superCallExpr = NULL;
 
-      // If it can't create objects, generate default super call
-      if (!canCreateObjects)
-          superCallExpr = new ExprConstructorSuperCall(objType->getParent()->getName(),std::vector<Expr*>());
+  // If it can't create objects, generate default super call
+  if (!canCreateObjects)
+    superCallExpr = new ExprConstructorSuperCall(objType->getParent()->getName(),std::vector<Expr*>());
 
-      return (new InterpretedObjectFactory(
-              objType,
-              objType->getName(),
-              constructorArgNames,
-              constructorArgTypes,
-              superCallExpr,
-              constructorBody,
-              canCreateObjects)
-             )->getId();
-  }
+  return (new InterpretedObjectFactory(
+      objType,
+      objType->getName(),
+      constructorArgNames,
+      constructorArgTypes,
+      superCallExpr,
+      constructorBody,
+      canCreateObjects)
+          )->getId();
+}
+}
 
   void Schema::registerObjectType(const ObjectTypeId& objType)
   {
@@ -810,48 +807,46 @@ namespace EUROPA {
       m_methods[m->getName()] = m;
   }
 
-  MethodId Schema::getMethod(const LabelStr& methodName, const DataTypeId& targetType, const std::vector<DataTypeId>& argTypes)
+  MethodId Schema::getMethod(const LabelStr& methodName, const DataTypeId&, const std::vector<DataTypeId>&)
   {
       // TODO: use target type and arg types to resolve
       std::map<edouble,MethodId>::iterator it = m_methods.find(methodName);
       return (it != m_methods.end() ? it->second : MethodId::noId());
   }
 
-  std::vector<TokenTypeId> Schema::getTypeSupporters( TokenTypeId type )
-  {
-    edouble key = type->getSignature().getKey();
-    std::vector<TokenTypeId> retval;
+std::vector<TokenTypeId> Schema::getTypeSupporters( TokenTypeId type ) {
+  edouble key = type->getSignature().getKey();
+  std::vector<TokenTypeId> retval;
 
-    PSList<PSTokenType*> actionTypes = getPSTokenTypesByAttr( PSTokenType::ACTION );
+  PSList<PSTokenType*> actionTypes = getPSTokenTypesByAttr( PSTokenType::ACTION );
 
-    for( int i = 0; i < actionTypes.size(); i++){
+  for( int i = 0; i < actionTypes.size(); i++){
 
-      TokenType* tt = (TokenType*)actionTypes.get( i );
-      PSList<PSTokenType*> effects = tt->getSubgoalsByAttr( PSTokenType::EFFECT);
+    TokenType* tt = dynamic_cast<TokenType*>(actionTypes.get( i ));
+    PSList<PSTokenType*> effects = tt->getSubgoalsByAttr( PSTokenType::EFFECT);
 
-      for ( int i = 0; i < effects.size(); i++ ) {
-	TokenType* tt_effect = (TokenType*) effects.get(i);
-	if( tt_effect->getSignature().getKey() == key)
-	      retval.push_back( tt->getId() );
-      }
+    for (long j = 0; j < effects.size(); j++ ) {
+      TokenType* tt_effect = dynamic_cast<TokenType*>(effects.get(j));
+      if( tt_effect->getSignature().getKey() == key)
+        retval.push_back( tt->getId() );
     }
-
-    return retval;
-
   }
 
+  return retval;
+
+}
+
   // PSSchema methods:
-  PSList<std::string> Schema::getAllPredicates() const
-   {
-     PSList<std::string> retval;
-     std::set<LabelStr> predicates;
-     getPredicates(predicates);
-     for(std::set<LabelStr>::const_iterator it = predicates.begin(); it != predicates.end(); ++it)
-     {
-    	 retval.push_back((*it).toString());
-     }
-     return retval;
-   }
+PSList<std::string> Schema::getAllPredicates() const {
+  PSList<std::string> retval;
+  std::set<LabelStr> predicates_;
+  getPredicates(predicates_);
+  for(std::set<LabelStr>::const_iterator it = predicates_.begin(); it != predicates_.end();
+      ++it) {
+    retval.push_back((*it).toString());
+  }
+  return retval;
+}
 
   PSList<PSObjectType*> Schema::getAllPSObjectTypes() const {
 	PSList<PSObjectType*> retval;

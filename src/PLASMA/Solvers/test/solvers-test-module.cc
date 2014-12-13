@@ -62,14 +62,14 @@ void registerTestElements(EngineId& engine);
 
 class SolversTestEngine : public EngineBase
 {
-  public:
-	SolversTestEngine();
-	virtual ~SolversTestEngine();
-
-    const SchemaId&           getSchema()           { return ((Schema*)getComponent("Schema"))->getId(); }
-    const ConstraintEngineId& getConstraintEngine() { return ((ConstraintEngine*)getComponent("ConstraintEngine"))->getId(); }
-    const PlanDatabaseId&     getPlanDatabase()     { return ((PlanDatabase*)getComponent("PlanDatabase"))->getId(); }
-    const RulesEngineId&      getRulesEngine()      { return ((RulesEngine*)getComponent("RulesEngine"))->getId(); }
+ public:
+  SolversTestEngine();
+  virtual ~SolversTestEngine();
+  
+  const SchemaId&           getSchema()           { return static_cast<Schema*>(getComponent("Schema"))->getId(); }
+  const ConstraintEngineId& getConstraintEngine() { return static_cast<ConstraintEngine*>(getComponent("ConstraintEngine"))->getId(); }
+  const PlanDatabaseId&     getPlanDatabase()     { return static_cast<PlanDatabase*>(getComponent("PlanDatabase"))->getId(); }
+  const RulesEngineId&      getRulesEngine()      { return static_cast<RulesEngine*>(getComponent("RulesEngine"))->getId(); }
 
   protected:
     void createModules();
@@ -205,7 +205,7 @@ private:
          child = child->NextSiblingElement()) {
 
       ComponentFactoryMgr* cfm = 
-          (ComponentFactoryMgr*)testEngine.getComponent("ComponentFactoryMgr");
+          dynamic_cast<ComponentFactoryMgr*>(testEngine.getComponent("ComponentFactoryMgr"));
       TestComponent * testComponent = 
           static_cast<TestComponent*>(cfm->createInstance(*child));
       delete testComponent;

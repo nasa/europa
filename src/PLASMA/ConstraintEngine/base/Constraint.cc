@@ -134,16 +134,15 @@ namespace EUROPA {
       m_violationExpl = msg;
   }
 
-  PSList<PSVariable*> Constraint::getVariables() const
-  {
-	  PSList<PSVariable*> retval;
-	  for(size_t i = 0; i < m_variables.size(); ++i)
-	  {
-		  ConstrainedVariableId id = m_variables[i];
-		  retval.push_back((PSVariable *) id);
-	  }
-	  return retval;
+PSList<PSVariable*> Constraint::getVariables() const {
+  PSList<PSVariable*> retval;
+  for(std::vector<ConstrainedVariableId>::const_iterator it = m_variables.begin();
+      it != m_variables.end(); ++it) {
+    ConstrainedVariableId id = *it;
+    retval.push_back(dynamic_cast<PSVariable *>(static_cast<ConstrainedVariable*>(id)));
   }
+  return retval;
+}
 
   const ConstraintId& Constraint::getId() const {
     return m_id;
@@ -186,8 +185,8 @@ namespace EUROPA {
   }
 
   void Constraint::execute(const ConstrainedVariableId& variable,
-				 int argIndex,
-				 const DomainListener::ChangeType& changeType) {
+                           unsigned int argIndex,
+                           const DomainListener::ChangeType& changeType) {
 
    for(unsigned int i=0;i<m_variables.size();i++)
     	m_variables[i]->setCurrentPropagatingConstraint(m_id);
@@ -198,21 +197,22 @@ namespace EUROPA {
     	m_variables[i]->setCurrentPropagatingConstraint(ConstraintId::noId());
   }
 
-  void Constraint::handleExecute(const ConstrainedVariableId& variable,
-				 int argIndex,
-				 const DomainListener::ChangeType& changeType) {
+  void Constraint::handleExecute(const ConstrainedVariableId&,
+				 unsigned int,
+				 const DomainListener::ChangeType&) {
     handleExecute();
   }
 
-  bool Constraint::canIgnore(const ConstrainedVariableId& variable,
-			     int argIndex,
-			     const DomainListener::ChangeType& changeType) {
+  bool Constraint::canIgnore(const ConstrainedVariableId&,
+			     unsigned int,
+			     const DomainListener::ChangeType&) {
     return false;
   }
 
-  const std::vector<ConstrainedVariableId>& Constraint::getModifiedVariables(const ConstrainedVariableId& variable) const {
-    return getScope();
-  }
+const std::vector<ConstrainedVariableId>&
+Constraint::getModifiedVariables(const ConstrainedVariableId&) const {
+  return getScope();
+}
 
   const std::vector<ConstrainedVariableId>& Constraint::getModifiedVariables() const {
     return getScope();

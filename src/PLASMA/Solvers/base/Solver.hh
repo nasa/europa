@@ -267,7 +267,7 @@ namespace EUROPA {
       unsigned int m_maxSteps; /*!< The maximum number of steps to take.  Used only for planner control.*/
       unsigned int m_maxDepth; /*!< The maximum depth to search.  Used only for planner control.*/
       MasterFilter m_masterFlawFilter; /*!< Used to handle shared filter data across contained flaw managers */
-      ContextId m_context; /*<! Used to share data from the Solver on down.*/
+      ContextId m_context; /*!< Used to share data from the Solver on down.*/
       FlawManagers m_flawManagers; /*!< Sequence of flaw managers to include in scope */
       DecisionStack m_decisionStack; /*!< Stack of decisions made */
       std::string m_lastExecutedDecision; /*!< Kept for debugging and UI purposes */

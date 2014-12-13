@@ -35,7 +35,7 @@ void deleteIfEqual(std::vector<ELEMENT>& elements, ELEMENT element){
 }
 
 // Global value overridden only for Rax-derived system test.
-Bool IsOkToRemoveConstraintTwice = false;
+// Bool IsOkToRemoveConstraintTwice = false;
 
 DistanceGraph::DistanceGraph ()
 {
@@ -69,7 +69,43 @@ DnodeId DistanceGraph::createNode()
   return node;
 }
 
-Void detachEdge (DedgeId*& edgeArray, Int& count, DedgeId edge);
+Void attachEdge (DedgeId*& edgeArray, Int& size, Int& count, DedgeId edge) {
+  check_error(!(count > size), "Corrupted edge-array in TemporalNetwork",
+              TempNetErr::TempNetInternalError());
+
+  if (count == size) {
+    // Grow edge-array
+    if (size < 1)
+      size = 1;
+    else
+      size = 2*size;
+    DedgeId* newEdgeArray = new DedgeId[size];
+    if(!newEdgeArray)
+      check_error(!newEdgeArray,
+                   "Memory allocation failed for TemporalNetwork edge-array",
+                   TempNetErr::TempNetMemoryError());
+    for (Int i=0; i<count; i++)
+      newEdgeArray[i] = edgeArray[i];
+    if (edgeArray != nullptr)  // edgeArray starts out as null.
+      delete[] edgeArray;
+    edgeArray = newEdgeArray;
+  }
+  edgeArray[count++] = edge;
+}
+
+
+Void detachEdge (DedgeId*& edgeArray, Int& count, DedgeId edge)
+{
+  Int i = 0;
+  while (i < count && edgeArray[i] != edge)
+      i++;
+  // check_error(!(i == count && IsOkToRemoveConstraintTwice),
+  //             "Trying to delete edge not in edge-array",
+  //             TempNetErr::TempNetInternalError());
+
+  for (--count; i < count; i++)
+    edgeArray[i] = edgeArray[i + 1];
+}
 
 Void DistanceGraph::deleteNode(DnodeId node)
 {
@@ -113,44 +149,6 @@ DedgeId DistanceGraph::findEdge(DnodeId from, DnodeId to)
   return DedgeId::noId();
 }
 
-Void attachEdge (DedgeId*& edgeArray, Int& size, Int& count, DedgeId edge)
-{
-  check_error(!(count > size), "Corrupted edge-array in TemporalNetwork",
-              TempNetErr::TempNetInternalError());
-
-  if (count == size) {
-    // Grow edge-array
-    if (size < 1)
-      size = 1;
-    else
-      size = 2*size;
-    DedgeId* newEdgeArray = new DedgeId[size];
-    if(!newEdgeArray)
-      check_error(!newEdgeArray,
-                   "Memory allocation failed for TemporalNetwork edge-array",
-                   TempNetErr::TempNetMemoryError());
-    for (Int i=0; i<count; i++)
-      newEdgeArray[i] = edgeArray[i];
-    if (edgeArray != nullptr)  // edgeArray starts out as null.
-      delete[] edgeArray;
-    edgeArray = newEdgeArray;
-  }
-  edgeArray[count++] = edge;
-}
-
-Void detachEdge (DedgeId*& edgeArray, Int& count, DedgeId edge)
-{
-  Int i = 0;
-  while (i < count && edgeArray[i] != edge)
-      i++;
-  check_error(!(i == count && IsOkToRemoveConstraintTwice),
-              "Trying to delete edge not in edge-array",
-              TempNetErr::TempNetInternalError());
-
-  for (--count; i < count; i++)
-    edgeArray[i] = edgeArray[i + 1];
-}
-
 DedgeId DistanceGraph::createEdge(DnodeId from, DnodeId to, Time length)
 {
 
@@ -172,6 +170,8 @@ DedgeId DistanceGraph::createEdge(DnodeId from, DnodeId to, Time length)
   return edge;
 }
 
+void DistanceGraph::handleNodeUpdate(const DnodeId&) {}
+
 Void DistanceGraph::deleteEdge(DedgeId edge)
 {
   detachEdge (edge->from->outArray, edge->from->outCount, edge);
@@ -187,7 +187,7 @@ Void DistanceGraph::eraseEdge(DedgeId edge)
   edge->from = DnodeId::noId();
   edge->to = DnodeId::noId();
   edge->length = 99;  // A clue for debugging purposes
-  delete (Dedge*) edge;
+  delete static_cast<Dedge*>(edge);
 }
 
 Void DistanceGraph::addEdgeSpec(DnodeId from, DnodeId to, Time length)
@@ -250,7 +250,7 @@ Bool DistanceGraph::bellmanFord()
     // minimizes the amount of wasted superseded propagations.
     queue->insertInQueue (node, -oldPotential);
   }
-  Int BFbound = nodes.size();
+  Int BFbound = static_cast<int>(nodes.size());
   while (true) {
     DnodeId node = queue->popMinFromQueue();
     if (node.isNoId())
@@ -291,7 +291,7 @@ Bool DistanceGraph::bellmanFord()
 
 Bool DistanceGraph::incBellmanFord()
 {
-  Int BFbound = nodes.size();
+  Int BFbound = static_cast<Int>(nodes.size());
   //Dqueue* queue = dqueue;
   BucketQueue* queue = bqueue;
 
@@ -369,7 +369,7 @@ Void DistanceGraph::dijkstra (DnodeId source, DnodeId destination)
   BucketQueue* queue = initializeBqueue();
   queue->insertInQueue (source);
 #ifndef EUROPA_FAST
-  Int BFbound = this->nodes.size();
+  Int BFbound = static_cast<Int>(this->nodes.size());
 #endif
   while (true) {
     DnodeId node = queue->popMinFromQueue();
@@ -576,8 +576,8 @@ Void DistanceGraph::preventNodeMarkOverflow()
   // Unlikely to happen, but just in case...
   if (Dnode::markGlobal == INT_MAX) {
     // Roll all marks over to zero.
-    Int nodeCount = this->nodes.size();
-    for (Int i=0; i< nodeCount; i++)
+    unsigned long nodeCount = this->nodes.size();
+    for (unsigned long i=0; i< static_cast<unsigned long>(nodeCount); i++)
       nodes[i]->markLocal = 0;
     Dnode::markGlobal = 0;
   }
@@ -588,8 +588,8 @@ Void DistanceGraph::preventGenerationOverflow()
   // Unlikely to happen, but just in case...
   if (this->dijkstraGeneration == INT_MAX) {
     // Roll all generations over to zero.
-    Int nodeCount = this->nodes.size();
-    for (Int i=0; i< nodeCount; i++)
+    unsigned long nodeCount = this->nodes.size();
+    for (unsigned long i=0; i< nodeCount; i++)
       this->nodes[i]->generation = 0;
     this->dijkstraGeneration = 0;
   }
@@ -644,7 +644,7 @@ Void DistanceGraph::boundedDijkstra (const DnodeId& source,
   BucketQueue* queue = initializeBqueue();
   queue->insertInQueue (source);
 
-  Int BFbound EUROPA_ATTRIBUTE_UNUSED = this->nodes.size();
+  check_error_variable(Int BFbound = static_cast<Int>(this->nodes.size()));
   while (true) {
     DnodeId node = queue->popMinFromQueue();
     if (node.isNoId())

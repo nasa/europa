@@ -98,10 +98,10 @@ namespace EUROPA {
     bool isEnum(const LabelStr& str) const;
 
     /**
-     * @brief Test if the given value is a member of the given enum
+     * @brief Test if the given value is a member of the given enum.  Calling this 
+     *        function with a name that isn't an enum is an error.
      * @param enumName The name of the enumeration
      * @param value The value to be tested.
-     * @error !isEnum(enum)
      */
     bool isEnumValue(const LabelStr& enumName, edouble value) const;
 
@@ -199,10 +199,10 @@ namespace EUROPA {
     const std::vector<LabelStr>&  getAllObjectTypes(const LabelStr& objectType);
 
      /**
-     * @brief Obtains the set of values for an enumeration.
+     * @brief Obtains the set of values for an enumeration.  Calling this function with a
+     *        name not of an enumeration is an error.
      * @param enumName enumeration type name.
      * @return a const ref to the set of values for enumName.
-     * @error !isEnum(enumName).
      */
     const std::set<edouble>& getEnumValues(const LabelStr& enumName) const;
 
@@ -213,11 +213,10 @@ namespace EUROPA {
     const LabelStr& getEnumForValue(edouble value) const;
 
     /**
-     * @brief Obtain the set of predicates for a given object type.
+     * @brief Obtain the set of predicates for a given object type.  Errors if objectType
+     *        doesn't name an object type.
      * @param objectType The ObjectType to use
-     * @return a const ref to a set of LabelStr (each of which is the name of a Predicate)
      * @see addObjectType, isType
-     * @error !isType(objecttype)
      */
     void getPredicates(const LabelStr& objectType, std::set<LabelStr>& results) const;
 
@@ -242,10 +241,10 @@ namespace EUROPA {
     bool makeParentPredicateString(const LabelStr& predicate, std::string& predStr) const;
 
     /**
-     * @brief Obtain the object type for the given predicate.
+     * @brief Obtain the object type for the given predicate.  Errors if predicate doesn't
+     *        name an existing predicate.
      * @param predicate The predicate to use
      * @see addPredicate, isPredicateDefined
-     * @error !isPredicateDefined(predicate)
      */
     const LabelStr getObjectTypeForPredicate(const LabelStr& predicate) const;
 
@@ -270,17 +269,16 @@ namespace EUROPA {
     const LabelStr getEnumFromMember(const LabelStr& member) const;
 
     /**
-     * @brief Gets the number of parameters in a predicate
+     * @brief Gets the number of parameters in a predicate.  Error: !isPredicateDefined(predicate)
      * @param predicate the name of the predicate
-     * @error !isPredicateDefined(predicate)
      */
-    unsigned int getParameterCount(const LabelStr& predicate) const;
+    unsigned long getParameterCount(const LabelStr& predicate) const;
 
     /**
-     * @brief Gets the type of parameter at a particular index location in a predicate
+     * @brief Gets the type of parameter at a particular index location in a predicate.
+     *        Errors: !isPredicateDefined(predicate)
      * @param predicate the name of the predicate
      * @param paramIndex the index of the parameter
-     * @error !isPredicateDefined(predicate)
      */
     const LabelStr getParameterType(const LabelStr& predicate, unsigned int paramIndex) const;
 
@@ -308,9 +306,8 @@ namespace EUROPA {
                        const LabelStr& parent);
 
     /**
-     * @brief Adds a predicate.
+     * @brief Adds a predicate.  Errors: !isObjectType(prefix), isPredicateDefined(suffix)
      * @param predicate The fully qualified name of the predicate. Must be of the form <prefix>.<suffix>
-     * @error !isObjectType(prefix), isPredicateDefined(suffix)
      */
     void addPredicate(const LabelStr& predicate);
 
@@ -321,7 +318,7 @@ namespace EUROPA {
      * @param memberName The name of the composed member
      * @return The indexed position of the parameter in the predicate list of parameters.
      */
-    unsigned int addMember(const LabelStr& parentObjectType,
+    unsigned long addMember(const LabelStr& parentObjectType,
 				   const LabelStr& memberType,
 				   const LabelStr& memberName);
 

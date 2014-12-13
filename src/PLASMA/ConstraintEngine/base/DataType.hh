@@ -120,13 +120,13 @@ public:
     /**
      * @brief Create a variable
      */
-    virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine,
-                                                 const Domain& baseDomain,
-                                                 const bool internal = false,
-                                                 bool canBeSpecified = true,
-                                                 const char* name = NO_VAR_NAME,
-                                                 const EntityId& parent = EntityId::noId(),
-                                                 int index = ConstrainedVariable::NO_INDEX) const;
+  virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine,
+                                               const Domain& baseDomain,
+                                               const bool internal = false,
+                                               bool canBeSpecified = true,
+                                               const char* name = NO_VAR_NAME,
+                                               const EntityId& parent = EntityId::noId(),
+                                               unsigned int index = ConstrainedVariable::NO_INDEX) const;
 
 protected:
     DataTypeId m_id;

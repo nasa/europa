@@ -82,17 +82,17 @@ namespace EUROPA{
         purge();
 
       if (!m_temporalAdvisor.isNoId())
-        delete (TemporalAdvisor*) m_temporalAdvisor;
+        delete static_cast<TemporalAdvisor*>(m_temporalAdvisor);
 
       // Delete the client
       check_error(m_client.isValid());
-      delete (DbClient*) m_client;
+      delete static_cast<DbClient*>(m_client);
       delete m_psClient;
 
       // Delete all object variable listeners:
       for(ObjVarsByObjType_CI it = m_objectVariablesByObjectType.begin();
         it != m_objectVariablesByObjectType.end(); ++it)
-     	delete (ObjectVariableListener*) it->second.second;
+     	delete static_cast<ObjectVariableListener*>(it->second.second);
 
       m_id.remove();
   }
@@ -396,7 +396,7 @@ namespace EUROPA{
 		 "PlanDatabase:getCompatibleTokens", "No candidates to evaluate for " << inactiveToken->toString());
 
     const std::vector<ConstrainedVariableId>& inactiveTokenVariables = inactiveToken->getVariables();
-    int variableCount = inactiveTokenVariables.size();
+    unsigned long variableCount = inactiveTokenVariables.size();
 
     unsigned int choiceCount = 0; // Used for comparison against given limit
 
@@ -418,7 +418,7 @@ namespace EUROPA{
       const std::vector<ConstrainedVariableId>& candidateTokenVariables = candidate->getVariables();
 
       // Check assumption that the set of variables is the same
-      checkError(candidateTokenVariables.size() == (unsigned int) variableCount,
+      checkError(candidateTokenVariables.size() == static_cast<unsigned int>(variableCount),
 		 "Candidate token (" << candidate->getKey() << ") has " <<
 		 candidateTokenVariables.size() << " variables, while inactive token (" <<
 		 inactiveToken->getKey() << ") has " << variableCount);
@@ -432,7 +432,7 @@ namespace EUROPA{
       check_error(inactiveTokenVariables[0] == inactiveToken->getState(),
                   "We expect the first var to be the state var, which we must skip.");
 
-      for(int i=1;i<variableCount;i++){
+      for(unsigned int i=1;i<variableCount;i++){
 	const Domain& domA = inactiveTokenVariables[i]->lastDomain();
 	const Domain& domB = candidateTokenVariables[i]->lastDomain();
 
@@ -496,13 +496,13 @@ namespace EUROPA{
     getCompatibleTokens(inactiveToken, results, std::numeric_limits<unsigned int>::max(), false);
   }
 
-  unsigned int PlanDatabase::countCompatibleTokens(const TokenId& inactiveToken,
-                                                   unsigned int limit,
-                                                   bool useExactTest){
-    std::vector<TokenId> results;
-    getCompatibleTokens(inactiveToken, results, limit, useExactTest);
-    return results.size();
-  }
+unsigned long PlanDatabase::countCompatibleTokens(const TokenId& inactiveToken,
+                                                  unsigned int limit,
+                                                  bool useExactTest){
+  std::vector<TokenId> results;
+  getCompatibleTokens(inactiveToken, results, limit, useExactTest);
+  return results.size();
+}
 
   const std::map<eint, std::pair<TokenId, ObjectSet> >& PlanDatabase::getTokensToOrder(){
     return m_tokensToOrder;
@@ -542,14 +542,14 @@ namespace EUROPA{
     checkError(results.size() <= limit, "Cutoff must be enforced.");
   }
 
-  unsigned int PlanDatabase::countOrderingChoices(const TokenId& token,
-                                                  unsigned int limit){
+  unsigned long PlanDatabase::countOrderingChoices(const TokenId& token,
+                                                   unsigned long limit){
     if(!m_constraintEngine->propagate())
       return 0;
 
     std::list<edouble> objects;
     token->getObject()->lastDomain().getValues(objects);
-    unsigned int choiceCount = 0;
+    unsigned long choiceCount = 0;
     for(std::list<edouble>::const_iterator it = objects.begin(); it != objects.end(); ++it){
       ObjectId object = Entity::getTypedEntity<Object>(*it);
       choiceCount = choiceCount + object->countOrderingChoices(token, limit-choiceCount);
@@ -560,11 +560,11 @@ namespace EUROPA{
     return choiceCount;
   }
 
-  unsigned int PlanDatabase::lastOrderingChoiceCount(const TokenId& token) const{
+  unsigned long PlanDatabase::lastOrderingChoiceCount(const TokenId& token) const{
     checkError(m_constraintEngine->constraintConsistent(),
                "Cannot query for ordering choices while database is not constraintConsistent.");
     std::list<edouble> objects;
-    unsigned int choiceCount = 0;
+    unsigned long choiceCount = 0;
     token->getObject()->lastDomain().getValues(objects);
     for(std::list<edouble>::const_iterator it = objects.begin(); it != objects.end(); ++it){
       ObjectId object = Entity::getTypedEntity<Object>(*it);
@@ -652,7 +652,7 @@ namespace EUROPA{
       check_error(connectedObjectVariable.isValid());
       if(!connectedObjectVariable->isClosed())
     	  connectedObjectVariable->close();
-      delete (ObjectVariableListener*) it->second.second;
+      delete static_cast<ObjectVariableListener*>(it->second.second);
       m_objectVariablesByObjectType.erase(it++);
     }
 
@@ -675,7 +675,7 @@ namespace EUROPA{
     	  connectedObjectVariable->close();
     	  debugMsg("PlanDatabase:close","Closing "+objectType.toString()+" closed "+connectedObjectVariable->toString());
       }
-      delete (ObjectVariableListener*) it->second.second;
+      delete static_cast<ObjectVariableListener*>(it->second.second);
       m_objectVariablesByObjectType.erase(it++);
     }
     m_closedObjectTypes.insert(objectType);
@@ -854,19 +854,19 @@ namespace EUROPA{
   /**
    * @brief Remove
    */
-  void PlanDatabase::handleObjectVariableDeletion(const ConstrainedVariableId& objectVar){
+void PlanDatabase::handleObjectVariableDeletion(const ConstrainedVariableId& objectVar){
 
-    // Now iterate over objectVariables stored and remove them - should be at least one reference
-    for(ObjVarsByObjType_I it = m_objectVariablesByObjectType.begin();
-        it != m_objectVariablesByObjectType.end();){
-      if(it->second.first == objectVar){
-    	  delete (ObjectVariableListener*) it->second.second;
-    	  m_objectVariablesByObjectType.erase(it++);
-      }
-      else
-        ++it;
+  // Now iterate over objectVariables stored and remove them - should be at least one reference
+  for(ObjVarsByObjType_I it = m_objectVariablesByObjectType.begin();
+      it != m_objectVariablesByObjectType.end();){
+    if(it->second.first == objectVar){
+      delete static_cast<ObjectVariableListener*>(it->second.second);
+      m_objectVariablesByObjectType.erase(it++);
     }
+    else
+      ++it;
   }
+}
 
   void PlanDatabase::handleObjectVariableCreation(const LabelStr& objectType,
 						  const ConstrainedVariableId& objectVar,
@@ -883,49 +883,49 @@ namespace EUROPA{
     return Entity::getEntity(key);
   }
 
-  unsigned int PlanDatabase::archive(eint tick){
-    checkError(getConstraintEngine()->constraintConsistent(),
-	       "Must be propagated to a consistent state before archiving.");
+unsigned long PlanDatabase::archive(eint tick){
+  checkError(getConstraintEngine()->constraintConsistent(),
+             "Must be propagated to a consistent state before archiving.");
 
-    const unsigned int initialCount = getTokens().size();
+  const unsigned long initialCount = getTokens().size();
 
-    // Build a collection of tokens ordered by earliest start time. This is done to make cleaning up
-    // of structures like a timeline more efficient. No measurements backing this up or evaluating the  true cost
-    // of this algorithm
-    std::multimap<eint, TokenId> tokensToRemove;
-    {
-      EntityIterator< TokenSet::const_iterator > tokenIterator(m_tokens.begin(), m_tokens.end());
-      while(!tokenIterator.done()){
-	TokenId token = tokenIterator.next();
+  // Build a collection of tokens ordered by earliest start time. This is done to make cleaning up
+  // of structures like a timeline more efficient. No measurements backing this up or evaluating the  true cost
+  // of this algorithm
+  std::multimap<eint, TokenId> tokensToRemove;
+  {
+    EntityIterator< TokenSet::const_iterator > tokenIterator(m_tokens.begin(), m_tokens.end());
+    while(!tokenIterator.done()){
+      TokenId token = tokenIterator.next();
 
-	// Do not store merged tokens for removal since we will terminate them when we terminate the
-	// supporting token.
-	if(token->isMerged())
-	  continue;
+      // Do not store merged tokens for removal since we will terminate them when we terminate the
+      // supporting token.
+      if(token->isMerged())
+        continue;
 
-	eint latestEndTime = cast_int(token->end()->lastDomain().getUpperBound());
+      eint latestEndTime = cast_int(token->end()->lastDomain().getUpperBound());
 
-	if(latestEndTime <= tick && token->canBeTerminated(tick)){
-	  debugMsg("PlanDatabase:archive:remove",
-		   token->toString() << " ending by " << latestEndTime << " for tick " << tick);
-	  eint earliestStartTime = cast_int(token->start()->lastDomain().getLowerBound());
-          tokensToRemove.insert(std::make_pair(earliestStartTime, token));
-	}
-	else {
-	  condDebugMsg(!token->isMerged(), "PlanDatabase:archive:skip",
-		       token->toString() << " with end time " << token->end()->toString() << " for tick " << tick);
-	}
+      if(latestEndTime <= tick && token->canBeTerminated(tick)){
+        debugMsg("PlanDatabase:archive:remove",
+                 token->toString() << " ending by " << latestEndTime << " for tick " << tick);
+        eint earliestStartTime = cast_int(token->start()->lastDomain().getLowerBound());
+        tokensToRemove.insert(std::make_pair(earliestStartTime, token));
+      }
+      else {
+        condDebugMsg(!token->isMerged(), "PlanDatabase:archive:skip",
+                     token->toString() << " with end time " << token->end()->toString() << " for tick " << tick);
       }
     }
-
-    for(std::multimap<eint, TokenId>::const_iterator it = tokensToRemove.begin(); it != tokensToRemove.end(); ++it){
-      TokenId token = it->second;
-      token->terminate();
-      token->discard();
-    }
-
-    return initialCount-getTokens().size();
   }
+
+  for(std::multimap<eint, TokenId>::const_iterator it = tokensToRemove.begin(); it != tokensToRemove.end(); ++it){
+    TokenId token = it->second;
+    token->terminate();
+    token->discard();
+  }
+
+  return initialCount-getTokens().size();
+}
 
   void PlanDatabase::insertActiveToken(const TokenId& token){
     static const LabelStr sl_objectRoot("Object");
@@ -989,71 +989,68 @@ namespace EUROPA{
   }
 
   // PSPlanDatabase methods
-  PSList<PSObject*> PlanDatabase::getAllObjects() const {
-    PSList<PSObject*> retval;
-    const ObjectSet& objects = getObjects();
-    for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it)
-      retval.push_back((PSObject*) *it);
-    return retval;
+PSList<PSObject*> PlanDatabase::getAllObjects() const {
+  PSList<PSObject*> retval;
+  const ObjectSet& objects = getObjects();
+  for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it)
+    retval.push_back(id_cast<PSObject>(*it));
+  return retval;
+}
+
+PSList<PSObject*> PlanDatabase::getObjectsByType(const std::string& objectType) const {
+  PSList<PSObject*> retval;
+
+  const ObjectSet& objects = getObjects();
+  for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
+    ObjectId object = *it;
+    if(m_schema->isA(object->getType(), objectType.c_str()))
+      retval.push_back(id_cast<PSObject>(object));
   }
 
-  PSList<PSObject*> PlanDatabase::getObjectsByType(const std::string& objectType) const
-  {
-    PSList<PSObject*> retval;
+  return retval;
+}
 
-    const ObjectSet& objects = getObjects();
-    for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
-        ObjectId object = *it;
-        if(m_schema->isA(object->getType(), objectType.c_str()))
-            retval.push_back((PSObject *) object);
-    }
+PSObject* PlanDatabase::getObjectByKey(PSEntityKey id) const {
+  ObjectId object = Entity::getEntity(id);
+  check_runtime_error(object.isValid());
+  return id_cast<PSObject>(object);
+}
 
-    return retval;
+PSObject* PlanDatabase::getObjectByName(const std::string& name) const {
+  ObjectId object = getObject(LabelStr(name));
+  check_runtime_error(object.isValid());
+  return id_cast<PSObject>(object);
+}
+
+PSList<PSToken*> PlanDatabase::getAllTokens() const {
+  const TokenSet& tokens = getTokens();
+  PSList<PSToken*> retval;
+  
+  for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
+    TokenId id = *it;
+    retval.push_back(id_cast<PSToken>(id));
   }
+  
+  return retval;
+}
 
-  PSObject* PlanDatabase::getObjectByKey(PSEntityKey id) const
-  {
-    ObjectId object = Entity::getEntity(id);
-    check_runtime_error(object.isValid());
-    return (PSObject *) object;
+PSToken* PlanDatabase::getTokenByKey(PSEntityKey id) const {
+  Id <Token> psId = Entity::getEntity(id);
+  check_runtime_error(psId.isValid());
+  return id_cast<PSToken>(psId);
+}
+
+PSList<PSVariable*>  PlanDatabase::getAllGlobalVariables() const {
+
+  const ConstrainedVariableSet& vars = getGlobalVariables();
+  PSList<PSVariable*> retval;
+  
+  for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
+    ConstrainedVariableId id = *it;
+    retval.push_back(id_cast<PSVariable>(id));
   }
-
-  PSObject* PlanDatabase::getObjectByName(const std::string& name) const {
-    ObjectId object = getObject(LabelStr(name));
-    check_runtime_error(object.isValid());
-    return (PSObject *) object;
-  }
-
-  PSList<PSToken*> PlanDatabase::getAllTokens() const {
-    const TokenSet& tokens = getTokens();
-    PSList<PSToken*> retval;
-
-    for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
-    	TokenId id = *it;
-    	retval.push_back((PSToken *) id);
-    }
-
-    return retval;
-  }
-
-  PSToken* PlanDatabase::getTokenByKey(PSEntityKey id) const
-  {
-	Id <Token> psId = Entity::getEntity(id);
-    check_runtime_error(psId.isValid());
-    return (PSToken *) psId;
-  }
-
-  PSList<PSVariable*>  PlanDatabase::getAllGlobalVariables() const {
-
-    const ConstrainedVariableSet& vars = getGlobalVariables();
-    PSList<PSVariable*> retval;
-
-    for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
-    	ConstrainedVariableId id = *it;
-    	retval.push_back((PSVariable *) id);
-    }
-    return retval;
-  }
+  return retval;
+}
 
   ObjectId PlanDatabase::createObject(const LabelStr& objectType,
                                       const LabelStr& objectName,
@@ -1068,20 +1065,20 @@ namespace EUROPA{
       return object;
   }
 
-  std::string autoLabel(const char* prefix)
-  {
-      static int cnt = 0;
-      std::ostringstream os;
+namespace {
+std::string autoLabel(const char* prefix) {
+  static int cnt = 0;
+  std::ostringstream os;
+  
+  os << prefix << "_" << cnt++;
+  return os.str();
+}
+}
 
-      os << prefix << "_" << cnt++;
-      return os.str();
-  }
-
-  TokenId PlanDatabase::createToken(const char* tokenType,
-                                    const char* tokenName,
-                                    bool rejectable,
-                                    bool isFact)
-  {
+TokenId PlanDatabase::createToken(const char* tokenType,
+                                  const char* tokenName,
+                                  bool rejectable,
+                                  bool isFact) {
       LabelStr ttype(tokenType);
       std::string nameStr = (tokenName != NULL ? tokenName : autoLabel("globalToken"));
       LabelStr tname(nameStr);

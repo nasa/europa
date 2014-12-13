@@ -55,24 +55,24 @@ namespace EUROPA{
     check_error(m_planDb->getTokens().empty());
   }
 
-  RulesEngine::~RulesEngine(){
-    check_error(m_planDbListener.isValid());
+RulesEngine::~RulesEngine(){
+  check_error(m_planDbListener.isValid());
 
-    // If we are not purging, then events should have propagated removal of all rule instances
-    check_error(Entity::isPurging() || m_ruleInstancesByToken.empty());
+  // If we are not purging, then events should have propagated removal of all rule instances
+  check_error(Entity::isPurging() || m_ruleInstancesByToken.empty());
 
-    m_deleted = true;
-    // Thus, only if we are in purge mode will we directly remove rule instances
-    for(std::multimap<eint, RuleInstanceId>::const_iterator it=m_ruleInstancesByToken.begin();it!=m_ruleInstancesByToken.end();++it){
-      RuleInstanceId ruleInstance = it->second;
-      check_error(ruleInstance.isValid());
-      ruleInstance->discard();
-    }
-
-    delete (PlanDatabaseListener*) m_planDbListener;  // removes itself from the plan database set of listeners
-    delete (PostPropagationCallback*) m_callback;
-    m_id.remove();
+  m_deleted = true;
+  // Thus, only if we are in purge mode will we directly remove rule instances
+  for(std::multimap<eint, RuleInstanceId>::const_iterator it=m_ruleInstancesByToken.begin();it!=m_ruleInstancesByToken.end();++it){
+    RuleInstanceId ruleInstance = it->second;
+    check_error(ruleInstance.isValid());
+    ruleInstance->discard();
   }
+
+  delete static_cast<PlanDatabaseListener*>(m_planDbListener);  // removes itself from the plan database set of listeners
+  delete static_cast<PostPropagationCallback*>(m_callback);
+  m_id.remove();
+}
 
   const RulesEngineId& RulesEngine::getId() const{return m_id;}
 

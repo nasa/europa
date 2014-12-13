@@ -22,16 +22,17 @@ namespace EUROPA{
 
     /**
      * @brief Inform listeners that timpoint has been added
-     * @param var
+     * @param var The temporal variable from the constraint network
      * @param timepoint new timepoint 
      */
-    inline virtual void notifyTimepointAdded(const ConstrainedVariableId& var, const TimepointId& timepoint) {}
+    virtual void notifyTimepointAdded(const ConstrainedVariableId& var,
+                                      const TimepointId& timepoint);
 
     /**
      * @brief Inform listeners that timpoint has been deleted
      * @param timepoint deleted
      */
-    inline virtual void notifyTimepointDeleted(const TimepointId& timepoint) {}
+    virtual void notifyTimepointDeleted(const TimepointId& timepoint);
 
     /**
      * @brief Inform listeners that a constraint has been added to the base domain
@@ -40,7 +41,9 @@ namespace EUROPA{
      * @param lb lower bound
      * @param ub upper bound 
      */
-    inline virtual void notifyBaseDomainConstraintAdded(const ConstrainedVariableId& c, const TemporalConstraintId& constraint, Time lb, Time ub) {} ;
+    virtual void notifyBaseDomainConstraintAdded(const ConstrainedVariableId& c,
+                                                 const TemporalConstraintId& constraint,
+                                                 Time lb, Time ub);
 
     /**
      * @brief Inform listeners a constraint has been added.
@@ -49,29 +52,31 @@ namespace EUROPA{
      * @param lb lower bound
      * @param ub upper bound 
      */
-    inline virtual void notifyConstraintAdded(const ConstraintId c, const TemporalConstraintId& constraint, Time lb, Time ub) {} ;
+    virtual void notifyConstraintAdded(const ConstraintId c,
+                                       const TemporalConstraintId& constraint,
+                                       Time lb, Time ub);
 
     /**
      * @brief Inform listeners that a constraint has been deleted
-     * @param key
+     * @param key The key of the deleted constraint
      * @param constraint constraint deleted 
      */
-    inline virtual void notifyConstraintDeleted(eint key, const TemporalConstraintId& constraint) {} ;
+    virtual void notifyConstraintDeleted(eint key, const TemporalConstraintId& constraint);
 
     /**
      * @brief Inform listeners that bounds have been restricted
      * @param v constrained variable restricted
      * @param newlb new lower bound
-     * @param newup new upper bound
+     * @param newub new upper bound
      */
-    inline virtual void notifyBoundsRestricted(const ConstrainedVariableId& v, Time newlb, Time newub) {} ;
+    virtual void notifyBoundsRestricted(const ConstrainedVariableId& v, Time newlb, Time newub);
 
     /**
      * @brief Inform listeners that bounds are unchanged
      * @param v constrained variable where bounds remain the same
-     * @param timepoint
+     * @param timepoint The corresponding timepoint
      */
-    inline virtual void notifyBoundsSame(const ConstrainedVariableId& v,  const TimepointId& timepoint) {}
+    virtual void notifyBoundsSame(const ConstrainedVariableId& v,  const TimepointId& timepoint);
 
     /**
      * @brief Get unique id of listener.

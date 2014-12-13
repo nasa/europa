@@ -87,12 +87,12 @@ edouble DataType::minDelta() const
 
 ConstrainedVariableId
 DataType::createVariable(const ConstraintEngineId& constraintEngine,
-                                  const Domain& baseDomain,
-                                  const bool internal,
-                                  bool canBeSpecified,
-                                  const char* name,
-                                  const EntityId& parent,
-                                  int index) const
+                         const Domain& baseDomain,
+                         const bool internal,
+                         bool canBeSpecified,
+                         const char* name,
+                         const EntityId& parent,
+                         unsigned int index) const
 {
     // TODO: perform stronger checks here
     check_error(Domain::canBeCompared(*m_baseDomain,baseDomain),

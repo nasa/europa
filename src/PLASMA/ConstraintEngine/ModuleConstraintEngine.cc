@@ -5,6 +5,8 @@
 #include "Propagators.hh"
 #include "CFunctions.hh"
 
+#include <boost/cast.hpp>
+
 namespace EUROPA {
 
   ModuleConstraintEngine::ModuleConstraintEngine()
@@ -53,14 +55,14 @@ namespace EUROPA {
       engine->addComponent("ConstraintEngine",ce);
   }
 
-  void ModuleConstraintEngine::uninitialize(EngineId engine)
-  {
-      ConstraintEngine* ce = (ConstraintEngine*)engine->removeComponent("ConstraintEngine");
-      delete ce;
+void ModuleConstraintEngine::uninitialize(EngineId engine) {
+  ConstraintEngine* ce =
+      boost::polymorphic_cast<ConstraintEngine*>(engine->removeComponent("ConstraintEngine"));
+  delete ce;
 
-      CESchema* ces = (CESchema*)engine->removeComponent("CESchema");
-      delete ces;
-  }
+  CESchema* ces = boost::polymorphic_cast<CESchema*>(engine->removeComponent("CESchema"));
+  delete ces;
+}
 
   /**************************************************************************************/
 
@@ -85,7 +87,7 @@ namespace EUROPA {
   {
       debugMsg("ModuleConstraintLibrary:initialize", "Initializing the constraint library");
 
-      CESchema* ces = (CESchema*)engine->getComponent("CESchema");
+      CESchema* ces = boost::polymorphic_cast<CESchema*>(engine->getComponent("CESchema"));
 
       // Register constraint Factories
       REGISTER_CONSTRAINT_TYPE(ces,AbsoluteValueCT, "absVal", "Default");
@@ -210,7 +212,7 @@ namespace EUROPA {
 
   void ModuleConstraintLibrary::uninitialize(EngineId engine)
   {
-      CESchema* ces = (CESchema*)engine->getComponent("CESchema");
+    CESchema* ces = boost::polymorphic_cast<CESchema*>(engine->getComponent("CESchema"));
       // TODO: should be more selective and only remove the constraints we added above
       ces->purgeConstraintTypes();
   }

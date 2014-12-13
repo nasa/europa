@@ -49,10 +49,10 @@ namespace EUROPA {
     /**
       * @brief Defines a base class for factories that take xml configuration data.
       */    
-    class ComponentFactoryMgr : public FactoryMgr {       
-    public:
-       virtual ComponentId createInstance(const TiXmlElement& configData);
-    };
+  class ComponentFactoryMgr : public FactoryMgr {       
+   public:
+    virtual ComponentId createComponentInstance(const TiXmlElement& configData);
+  };
 
     /**
     * @brief Provides concrete allocation using a template.
@@ -64,10 +64,10 @@ namespace EUROPA {
       ComponentFactory(const LabelStr& name) : Factory(name) {}
 
       virtual EUROPA::FactoryObjId& createInstance(const EUROPA::FactoryArgs& fa) {
-	const ComponentArgs& args = (const ComponentArgs&)fa;
+	const ComponentArgs& args = dynamic_cast<const ComponentArgs&>(fa);
 	ComponentType* ct = new ComponentType(args.configData);
 	ct->setName(getName());
-	return (EUROPA::FactoryObjId&)(ct->getId());
+	return static_cast<EUROPA::FactoryObjId&>(ct->getId());
       }
     };
 

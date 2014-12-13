@@ -20,4 +20,8 @@ namespace EUROPA {
   const RulesEngineListenerId &RulesEngineListener::getId() const {
     return m_id;
   }
+
+void RulesEngineListener::notifyExecuted(const RuleInstanceId &){}
+void RulesEngineListener::notifyUndone(const RuleInstanceId &){}
+
 }

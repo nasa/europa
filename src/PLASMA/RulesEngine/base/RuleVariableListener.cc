@@ -44,9 +44,9 @@ namespace EUROPA {
    * so that rule execution is not subject to the vagaries of propagtion timing
    * @return true
    */
-  bool RuleVariableListener::canIgnore(const ConstrainedVariableId& variable,
-				       int argIndex,
-				       const DomainListener::ChangeType& changeType){
+  bool RuleVariableListener::canIgnore(const ConstrainedVariableId&,
+				       unsigned int,
+				       const DomainListener::ChangeType&){
     checkError(getRuleInstance().isValid(), getKey() << " has lost its rule instance:" << getRuleInstance());
 
     if(getRuleInstance().isNoId())
@@ -64,7 +64,7 @@ namespace EUROPA {
       checkError(m_sourceConstraint.isValid(), "Must be able to get this from a source constraint.");
 
       // Now obtain the rule instance from the source
-      RuleVariableListener* source = (RuleVariableListener*) m_sourceConstraint;
+      RuleVariableListener* source = id_cast<RuleVariableListener>(m_sourceConstraint);
       m_ruleInstance = source->getRuleInstance();
 
       checkError(m_ruleInstance.isNoId() || m_ruleInstance.isValid(), m_sourceConstraint->toString());

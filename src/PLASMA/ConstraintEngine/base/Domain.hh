@@ -257,7 +257,7 @@ namespace EUROPA {
 
     /**
      * @brief Remove the given element form the domain.
-     * @param value. The value to be removed.
+     * @param value The value to be removed.
      * @note If the value was in the domain, this call will generate a value removal event.
      * @see DomainListener::VALUE_REMOVED
      */
@@ -292,7 +292,7 @@ namespace EUROPA {
      * @note Can only be called on domains that have no listeners attached,
      * since it will not cause propagation. It is more of a utility.
      */
-    virtual Domain& operator=(const Domain& dom) {
+    virtual Domain& operator=(const Domain&) {
       return(*this);
     }
 
@@ -316,14 +316,14 @@ namespace EUROPA {
     /**
      * @brief Test if this domain is a subset of dom.
      * @param dom the domain tested against.
-     * @param true if all elements of this domain are in dom. Otherwise false.
+     * @return true if all elements of this domain are in dom. Otherwise false.
      */
     virtual bool isSubsetOf(const Domain& dom) const = 0;
 
     /**
      * @brief Test if the intersection between this domain and the given domain is empty.
      * @param dom the domain tested against.
-     * @param true if any elements of this domain are in dom. Otherwise false.
+     * @return true if any elements of this domain are in dom. Otherwise false.
      */
     virtual bool intersects(const Domain& dom) const = 0;
 
@@ -424,10 +424,10 @@ namespace EUROPA {
   protected:
     /**
      * @brief Constructor.
+     * @param dataType indicates the type name to use
+     * @param enumerated true if this is an explicit enumeration.
      * @param closed indicates if the domain is to be dynamic or closed on construction.  Once closed, no
      * additions to extend the contents of the domain will be permitted.
-     * @param enumerated true if this is an explicit enumeration.
-     * @param typeName indicates the type name to use
      * @todo Review how semantics of closed can be enforced in operations.
      */
     Domain(const DataTypeId& dataType, bool enumerated, bool closed);

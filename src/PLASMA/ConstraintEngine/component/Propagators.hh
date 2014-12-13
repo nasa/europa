@@ -27,7 +27,7 @@ namespace EUROPA {
     virtual void handleConstraintActivated(const ConstraintId& constrain);
     virtual void handleConstraintDeactivated(const ConstraintId& constraint);
     virtual void handleNotification(const ConstrainedVariableId& variable,
-				    int argIndex,
+				    unsigned int argIndex,
 				    const ConstraintId& constraint,
 				    const DomainListener::ChangeType& changeType);
 
@@ -74,7 +74,7 @@ namespace EUROPA {
     void handleConstraintDeactivated(const ConstraintId& constraint);
 
     void handleNotification(const ConstrainedVariableId& variable,
-			    int argIndex,
+			    unsigned int argIndex,
 			    const ConstraintId& constraint,
 			    const DomainListener::ChangeType& changeType);
 

@@ -147,7 +147,7 @@ namespace EUROPA {
      * @brief Count of possible constraint events.
      * @note Depends on the first Event having an int value of 0.
      */
-    static const int EVENT_COUNT = (int)LAST_EVENT;
+    static const int EVENT_COUNT = static_cast<int>(LAST_EVENT);
 
     /**
      * @brief Constructor currently creates a basic configuration of propagators.
@@ -317,22 +317,22 @@ namespace EUROPA {
      * @brief Create a variable
      */
     ConstrainedVariableId createVariable(const char* typeName,
-                                                const bool internal = false,
-                                                bool canBeSpecified = true,
-                                                const char* name = NO_VAR_NAME,
-                                                const EntityId& parent = EntityId::noId(),
-                                                int index = ConstrainedVariable::NO_INDEX);
-
+                                         const bool internal = false,
+                                         bool canBeSpecified = true,
+                                         const char* name = NO_VAR_NAME,
+                                         const EntityId& parent = EntityId::noId(),
+                                         unsigned int index = ConstrainedVariable::NO_INDEX);
+    
     /**
      * @brief Create a variable
      */
     ConstrainedVariableId createVariable(const char* typeName,
-                                                const Domain& baseDomain,
-                                                const bool internal = false,
-                                                bool canBeSpecified = true,
-                                                const char* name = NO_VAR_NAME,
-                                                const EntityId& parent = EntityId::noId(),
-                                                int index = ConstrainedVariable::NO_INDEX);
+                                         const Domain& baseDomain,
+                                         const bool internal = false,
+                                         bool canBeSpecified = true,
+                                         const char* name = NO_VAR_NAME,
+                                         const EntityId& parent = EntityId::noId(),
+                                         unsigned int index = ConstrainedVariable::NO_INDEX);
 
 
     ConstraintId createConstraint(const LabelStr& name,
@@ -390,22 +390,22 @@ namespace EUROPA {
      * @brief Called by the VariableListener when a change occurs on its varible.
      *
      * This method provides the core event control logic of the ConstraintEngine.
-     * @param listener The listener with the necessary data for the variable.
-     * @param change Type the type of change that occured on the variable.
+     * @param source The changed variable
+     * @param changeType Type the type of change that occured on the variable.
      * @see DomainListener::ChangeType, handleEmptied, handleRelaxed, Propagator::handleNotification(), Constraint::canIgnore()
      */
     void notify(const ConstrainedVariableId& source, const DomainListener::ChangeType& changeType);
 
     /**
      * @brief Update appropriately when a variabe domain has been emptied.
-     * @param the variable that has been emptied.
+     * @param variable The variable that has been emptied.
      * @see notify(const ConstrainedVariableId& source, const DomainListener::ChangeType& changeType)
      */
     void handleEmpty(const ConstrainedVariableId& variable);
 
     /**
      * @brief Update appropriately when a variable has been relaxed.
-     * @param the variable that has been relaxed.
+     * @param variable The variable that has been relaxed.
      * @see notify(const ConstrainedVariableId& source, const DomainListener::ChangeType& changeType)
      */
     void handleRelax(const ConstrainedVariableId& variable);
@@ -413,7 +413,7 @@ namespace EUROPA {
     
     /**
      * @brief Update appropriately when a variable has been restricted but not emptied.
-     * @param the variable that has been restricted.
+     * @param variable The variable that has been restricted.
      * @see notify(const ConstrainedVariableId& source, const DomainListener::ChangeType& changeType)
      */
     void handleRestrict(const ConstrainedVariableId& variable);
@@ -440,7 +440,7 @@ namespace EUROPA {
     void notifyRedundant(const ConstraintId& redundantConstraint);
 
     /**
-     * @breif Notification from a variable when it has been deactivated
+     * @brief Notification from a variable when it has been deactivated
      */
     void notifyDeactivated(const ConstrainedVariableId& var);
 
@@ -469,7 +469,7 @@ namespace EUROPA {
      */
     void execute(const ConstraintId& constraint,
                  const ConstrainedVariableId& variable,
-                 int argIndex,
+                 unsigned int argIndex,
                  const DomainListener::ChangeType& changeType);
 
     friend class ConstrainedVariable;
@@ -558,8 +558,8 @@ namespace EUROPA {
     bool m_purged;            /*!< Indicates if the engine has been purged of its data */
     bool m_dirty;              /*!< Flag to record if any messages handled without propagating consequences */
 
-    int m_cycleCount; /*!< A monotonically increasing count of propagation cycles. Identifies
-                         when propagation events have already been queued or handled. */
+    unsigned int m_cycleCount; /*!< A monotonically increasing count of propagation cycles. Identifies
+                                 when propagation events have already been queued or handled. */
     unsigned int m_mostRecentRepropagation; /*!< A monotonically increasing record of cycles where a relaxation occurred. */
 
     std::set<ConstraintEngineListenerId> m_listeners; /*!< Stores the set of registered listeners. */
@@ -588,7 +588,7 @@ namespace EUROPA {
     /** 
      * @brief Constructor with initial constraint engine.
      * 
-     * @param ce 
+     * @param ce The constraint engine to register with
      */
     PostPropagationCallback(const ConstraintEngineId& ce) : m_id(this), m_ce(ce) {ce->addCallback(m_id);}
 

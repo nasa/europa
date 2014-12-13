@@ -160,12 +160,12 @@ protected:
 class PSLanguageExceptionList
 {
 public:
-	PSLanguageExceptionList(const std::vector<PSLanguageException>& exceptions);
-	friend std::ostream &operator<<(std::ostream &, const PSLanguageExceptionList &);
-    int getExceptionCount() const { return m_exceptions.size(); }
-    const PSLanguageException& getException(int index) const {
-    	return m_exceptions[index];
-    }
+  PSLanguageExceptionList(const std::vector<PSLanguageException>& exceptions);
+  friend std::ostream &operator<<(std::ostream &, const PSLanguageExceptionList &);
+  long getExceptionCount() const { return static_cast<long>(m_exceptions.size()); }
+  const PSLanguageException& getException(int index) const {
+    return m_exceptions[static_cast<unsigned>(index)];
+  }
 protected:
 	std::vector<PSLanguageException> m_exceptions;
 };

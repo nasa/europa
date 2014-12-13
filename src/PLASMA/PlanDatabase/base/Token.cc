@@ -18,7 +18,6 @@
  * @author Conor McGann
  */
 
-#define MERGING 1
 
 namespace EUROPA{
 
@@ -179,16 +178,13 @@ namespace EUROPA{
   /**
    * This works because we have key based comparators which allow us to rely on positions
    */
-  const TokenId& Token::getSlave(int slavePosition) const{
-    int i = 0;
-    for(TokenSet::const_iterator it = m_slaves.begin(); it != m_slaves.end(); ++it){
-      if(i == slavePosition)
-	return *it;
-      else
-	i++;
-    }
+const TokenId& Token::getSlave(unsigned int slavePosition) const{
+  if(slavePosition >= m_slaves.size())
     return TokenId::noId();
-  }
+  TokenSet::const_iterator it = m_slaves.begin();
+  std::advance(it, slavePosition);
+  return *it;
+}
 
   int Token::getSlavePosition(const TokenId& slave) const{
     int i = 0;
@@ -728,109 +724,112 @@ void Token::doMerge(const TokenId& activeToken){
    * @brief Tests if a token can be terminated.
    * @see terminate
    */
-  bool Token::canBeTerminated(eint tick) const{
-    if(isTerminated())
-      return false;
+bool Token::canBeTerminated(eint) const{
+  if(isTerminated())
+    return false;
 
-    // Rejected tokens can be immediately terminated without any consideration of their variables or their constraints
-    if(isRejected())
+  // Rejected tokens can be immediately terminated without any consideration of their variables or their constraints
+  if(isRejected())
+    return true;
+
+  // Now if it has any merged tokens, it cannot be terminated. The merged tokens must be removed first
+  if(!m_mergedTokens.empty()){
+    debugMsg("Token:canBeTerminated",
+             "Cannot terminate " << toString() <<
+             " because of remaining supported token " <<
+             (*m_mergedTokens.begin())->toString());
+    return false;
+  }
+
+  // Use this count for iteration later
+  const unsigned long varCount = m_allVariables.size();
+
+  // If merged, it is redundant if the variables in its scope are supersets of the corresponding active token variable base domain
+  if(isMerged()){
+    TokenId activeToken = getActiveToken();
+
+    // No basis for termination if active token is not committed.
+    if(!activeToken->isCommitted()){
+      debugMsg("Token:canBeTerminated", "Cannot terminate " << toString() << " which is a slave of " << m_master->toString());
+      return false;
+    }
+
+    // Definitiely can terminate if the active token is terminated
+    if(activeToken->isTerminated())
       return true;
 
-    // Now if it has any merged tokens, it cannot be terminated. The merged tokens must be removed first
-    if(!m_mergedTokens.empty()){
-      debugMsg("Token:canBeTerminated", "Cannot terminate " << toString() << " because of remaining supported token " << ((TokenId) * (m_mergedTokens.begin()))->toString() );
-      return false;
-    }
+    // Finally, we have to analyze the variables to see if the merged token is imposing restrictions on the active token
+    // that would be lost if it were removed. The anaylsis will check that the base domain of the active token is a subset of the
+    // derived domain of the merged token.
+    const std::vector<ConstrainedVariableId>& activeVariables = activeToken->getVariables();
+    // All variables except state variable
+    for(unsigned int i = 1; i < varCount; i++){
+      const Domain& activeBaseDomain = activeVariables[i]->baseDomain();
+      const Domain& inactiveDerivedDomain = m_allVariables[i]->lastDomain();
+      if(!activeBaseDomain.isSubsetOf(inactiveDerivedDomain)){
+        debugMsg("Token:canBeTerminated",
+                 "Cannot terminate " << this->toString() << activeBaseDomain.toString() << " can be further restricted by " << inactiveDerivedDomain.toString() << std::endl <<
+                 "Active Variable: " << activeVariables[i]->toString() << " Inactive Variable: " << m_allVariables[i]->toString());
 
-    // Use this count for iteration later
-    const unsigned int varCount = m_allVariables.size();
-
-    // If merged, it is redundant if the variables in its scope are supersets of the corresponding active token variable base domain
-    if(isMerged()){
-      TokenId activeToken = getActiveToken();
-
-      // No basis for termination if active token is not committed.
-      if(!activeToken->isCommitted()){
-	debugMsg("Token:canBeTerminated", "Cannot terminate " << toString() << " which is a slave of " << m_master->toString());
-	return false;
-      }
-
-      // Definitiely can terminate if the active token is terminated
-      if(activeToken->isTerminated())
-	return true;
-
-      // Finally, we have to analyze the variables to see if the merged token is imposing restrictions on the active token
-      // that would be lost if it were removed. The anaylsis will check that the base domain of the active token is a subset of the
-      // derived domain of the merged token.
-      const std::vector<ConstrainedVariableId>& activeVariables = activeToken->getVariables();
-      // All variables except state variable
-      for(unsigned int i = 1; i < varCount; i++){
-	const Domain& activeBaseDomain = activeVariables[i]->baseDomain();
-	const Domain& inactiveDerivedDomain = m_allVariables[i]->lastDomain();
-	if(!activeBaseDomain.isSubsetOf(inactiveDerivedDomain)){
-	  debugMsg("Token:canBeTerminated",
-		   "Cannot terminate " << this->toString() << activeBaseDomain.toString() << " can be further restricted by " << inactiveDerivedDomain.toString() << std::endl <<
-		   "Active Variable: " << activeVariables[i]->toString() << " Inactive Variable: " << m_allVariables[i]->toString());
-
-	  return false;
-	}
-      }
-
-      return true;
-    }
-
-    //
-    // Declare a set to pull together all variables in the scope of a token into a single easy to check collection.
-    // Could manage this incrementally on the token also for greater efficiency
-    std::set<eint> allVars;
-
-    // Construct the set of constraints on variables of this token. Use a constraint set to avoid memory dependent order.
-    ConstraintSet constraints;
-    for(unsigned int i = 0; i < varCount; i++){
-      ConstrainedVariableId var = m_allVariables[i];
-      var->constraints(constraints);
-      allVars.insert(var->getKey());
-    }
-
-    for(ConstrainedVariableSet::const_iterator it = m_localVariables.begin(); it != m_localVariables.end(); ++it){
-      ConstrainedVariableId var = *it;
-      var->constraints(constraints);
-      allVars.insert(var->getKey());
-    }
-
-    for(ConstraintSet::const_iterator it = constraints.begin(); it != constraints.end(); ++it){
-      ConstraintId constraint = *it;
-      checkError(constraint.isValid(), constraint);
-
-      // No problem if the constraint has been deactivated already
-      if(!constraint->isActive() || constraint->isRedundant())
-	continue;
-
-      // If it is active, then we should ensure it has at least one external variable
-      const std::vector<ConstrainedVariableId>& scope = constraint->getScope();
-      for(unsigned int i=0;i<scope.size();i++){
-	ConstrainedVariableId var = scope[i];
-
-	// If the variable has no parent, its scope is not defined temporally. This is typically only arising
-	// in initialization.
-	if (var->parent().isNoId())
-	  continue;
-
-	// If it is a culprit with an unbound domain, and an external variable,
-	// then it is an external constraint that must be retained and so we cannot terminate
-	if(allVars.find(var->getKey()) == allVars.end() && !var->baseDomain().isSingleton()){
-	  debugMsg("Token:canBeTerminated",
-		   "Cannot terminate " << toString() << ". "
-		   << var->toString() << " has an active external constraint "
-		   << constraint->toString() << ".");
-
-	  return false;
-	}
+        return false;
       }
     }
 
     return true;
   }
+
+  //
+  // Declare a set to pull together all variables in the scope of a token into a single easy to check collection.
+  // Could manage this incrementally on the token also for greater efficiency
+  std::set<eint> allVars;
+
+  // Construct the set of constraints on variables of this token. Use a constraint set to avoid memory dependent order.
+  ConstraintSet constraints;
+  for(unsigned int i = 0; i < varCount; i++){
+    ConstrainedVariableId var = m_allVariables[i];
+    var->constraints(constraints);
+    allVars.insert(var->getKey());
+  }
+
+  for(ConstrainedVariableSet::const_iterator it = m_localVariables.begin(); it != m_localVariables.end(); ++it){
+    ConstrainedVariableId var = *it;
+    var->constraints(constraints);
+    allVars.insert(var->getKey());
+  }
+
+  for(ConstraintSet::const_iterator it = constraints.begin(); it != constraints.end(); ++it){
+    ConstraintId constraint = *it;
+    checkError(constraint.isValid(), constraint);
+
+    // No problem if the constraint has been deactivated already
+    if(!constraint->isActive() || constraint->isRedundant())
+      continue;
+
+    // If it is active, then we should ensure it has at least one external variable
+    const std::vector<ConstrainedVariableId>& scope = constraint->getScope();
+    for(unsigned int i=0;i<scope.size();i++){
+      ConstrainedVariableId var = scope[i];
+
+      // If the variable has no parent, its scope is not defined temporally. This is typically only arising
+      // in initialization.
+      if (var->parent().isNoId())
+        continue;
+
+      // If it is a culprit with an unbound domain, and an external variable,
+      // then it is an external constraint that must be retained and so we cannot terminate
+      if(allVars.find(var->getKey()) == allVars.end() && !var->baseDomain().isSingleton()){
+        debugMsg("Token:canBeTerminated",
+                 "Cannot terminate " << toString() << ". "
+                 << var->toString() << " has an active external constraint "
+                 << constraint->toString() << ".");
+
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
 
   void Token::terminate(){
     // Set this flag immediately so that other tokens can evaluate its state when we are dealing with cascaded effects
@@ -985,16 +984,16 @@ PSObject* Token::getOwner() const {
 
   ObjectVarId objVar = getObject();
   ObjectId id = Entity::getTypedEntity<Object>(objVar->lastDomain().getSingletonValue());
-  return (PSObject *) id;
+  return id_cast<PSObject>(id);
   //  return new PSObject(ObjectId(objVar->lastDomain().getSingletonValue()));
 }
 
 PSToken* Token::getMaster() const {
-	TokenId m = master();
-	if (m.isNoId())
-	    return NULL;
-
-	return (PSToken *) m;
+  TokenId m = master();
+  if (m.isNoId())
+    return NULL;
+  
+  return id_cast<PSToken>(m);
 }
 
 PSList<PSToken*> Token::getSlaves() const {
@@ -1004,14 +1003,14 @@ PSList<PSToken*> Token::getSlaves() const {
   for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
     TokenId id = *it;
 	  //PSToken* tok = new PSToken(*it);
-    retval.push_back((PSToken *) id);
+    retval.push_back(id_cast<PSToken>(id));
   }
   return retval;
 }
 
 PSToken* Token::getActive() const
 {
-    return (PSToken*)((Token*)getActiveToken());
+  return id_cast<PSToken>(getActiveToken());
 }
 
 PSList<PSToken*> Token::getMerged() const
@@ -1027,47 +1026,36 @@ PSList<PSToken*> Token::getMerged() const
 }
 
 
-PSTokenState Token::getTokenState() const
-{
-    if (isActive())
-        return EUROPA::ACTIVE;
+PSTokenState Token::getTokenState() const {
+  if (isActive())
+    return EUROPA::ACTIVE;
 
-    if (isInactive())
-        return EUROPA::INACTIVE;
-
-    if (isMerged())
-        return EUROPA::MERGED;
-
-    if (isRejected())
-        return EUROPA::REJECTED;
-
-    check_error(ALWAYS_FAIL,"Unknown token state");
+  if (isInactive())
     return EUROPA::INACTIVE;
+
+  if (isMerged())
+    return EUROPA::MERGED;
+
+  if (isRejected())
+    return EUROPA::REJECTED;
+
+  check_runtime_error(ALWAYS_FAIL,"Unknown token state");
 }
 
-PSVariable* Token::getStart() const
-{
-    return (PSVariable *) start();
-}
+PSVariable* Token::getStart() const {return id_cast<PSVariable>(start());}
 
-PSVariable* Token::getEnd() const
-{
-	  return (PSVariable *) end();
-}
+PSVariable* Token::getEnd() const {return id_cast<PSVariable>(end());}
 
-PSVariable* Token::getDuration() const
-{
-	  return (PSVariable *) duration();
-}
+PSVariable* Token::getDuration() const {return id_cast<PSVariable>(duration());}
 
-PSList<PSVariable*> Token::getParameters() const
-{
+
+PSList<PSVariable*> Token::getParameters() const {
   PSList<PSVariable*> retval;
   const std::vector<ConstrainedVariableId>& vars = getVariables();
   for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();++it) {
-	  ConstrainedVariableId id = *it;
-	  PSVariable* psVar = (PSVariable *) id;
-	  retval.push_back(psVar);
+    ConstrainedVariableId id = *it;
+    PSVariable* psVar = id_cast<PSVariable>(id);
+    retval.push_back(psVar);
   }
   return retval;
 }
@@ -1077,23 +1065,22 @@ PSList<PSVariable*> Token::getPredicateParameters() const {
   const std::vector<ConstrainedVariableId>& vars = parameters();
   for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();++it) {
     ConstrainedVariableId id = *it;
-    PSVariable* psVar = (PSVariable *) id;
+    PSVariable* psVar = id_cast<PSVariable>(id);
     retval.push_back(psVar);
   }
   return retval;
 }
 
-PSVariable* Token::getParameter(const std::string& name) const
-{
+PSVariable* Token::getParameter(const std::string& name) const {
   LabelStr realName(name);
   PSVariable* retval = NULL;
   const std::vector<ConstrainedVariableId>& vars = getVariables();
   for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
-	++it) {
-  	ConstrainedVariableId id = *it;
+      ++it) {
+    ConstrainedVariableId id = *it;
     if((*it)->getName() == realName) {
-	retval = (PSVariable *) id;
-	break;
+      retval = id_cast<PSVariable>(id);
+      break;
     }
   }
   return retval;
@@ -1106,38 +1093,38 @@ void Token::merge(PSToken* activeToken)
     doMerge(tok);
 }
 
-PSList<PSToken*> Token::getCompatibleTokens(unsigned int limit, bool useExactTest)
-{
-    std::vector<TokenId> tokens;
-    getPlanDatabase()->getCompatibleTokens(this,tokens,limit,useExactTest);
-    PSList<PSToken*> retval;
-
-    for(unsigned int i=0;i<tokens.size();i++) {
-    	TokenId id = tokens[i];
-    	retval.push_back((PSToken *) id);
-    }
-
-    return retval;
+PSList<PSToken*> Token::getCompatibleTokens(unsigned int limit, bool useExactTest) {
+  std::vector<TokenId> tokens;
+  getPlanDatabase()->getCompatibleTokens(this,tokens,limit,useExactTest);
+  PSList<PSToken*> retval;
+  
+  for(unsigned int i=0;i<tokens.size();i++) {
+    TokenId id = tokens[i];
+    retval.push_back(id_cast<PSToken>(id));
+  }
+  
+  return retval;
 }
 
-std::string attrsToString(int attrs)
-{
-	std::ostringstream os;
+namespace {
+std::string attrsToString(int attrs) {
+  std::ostringstream os;
 
-	os << "{";
+  os << "{";
 
-	if (attrs & PSTokenType::ACTION)
-		os << " ACTION";
-	if (attrs & PSTokenType::PREDICATE)
-		os << " PREDICATE";
-	if (attrs & PSTokenType::CONDITION)
-		os << " CONDITION";
-	if (attrs & PSTokenType::EFFECT)
-		os << " EFFECT";
+  if (attrs & PSTokenType::ACTION)
+    os << " ACTION";
+  if (attrs & PSTokenType::PREDICATE)
+    os << " PREDICATE";
+  if (attrs & PSTokenType::CONDITION)
+    os << " CONDITION";
+  if (attrs & PSTokenType::EFFECT)
+    os << " EFFECT";
 
-	os << " }";
+  os << " }";
 
-	return os.str();
+  return os.str();
+}
 }
 
 std::string Token::toLongString() const

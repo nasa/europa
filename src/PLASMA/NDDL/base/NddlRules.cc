@@ -8,6 +8,7 @@
  * @author Conor McGann
  * @date December, 2004
  */
+using namespace EUROPA;
 namespace NDDL {
 
   /**

@@ -90,7 +90,7 @@ namespace EUROPA{
     void removeConnection(const ConstrainedVariableId& v1, const ConstrainedVariableId& v2);
     bool updateRequired() const {return m_requiresUpdate;}
 
-    int getGraphCount();
+    unsigned long getGraphCount();
     int getGraphKey(const ConstrainedVariableId& variable);
     void getGraphKeys(std::set<int>& keys);
     const std::set<ConstrainedVariableId>& getGraphVariables(int key) const;

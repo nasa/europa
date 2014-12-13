@@ -56,7 +56,7 @@ namespace EUROPA {
       /**
        * @brief Tests for a match between this factory and the entity
        */
-      virtual bool customStaticMatch(const EntityId& entity) const {return true;}
+      virtual bool customStaticMatch(const EntityId& entity) const;
 
       /**
        * @brief Tests how many costm static filters should be applied. Factors into comparative weights
@@ -96,8 +96,8 @@ namespace EUROPA {
                                              const ConstrainedVariableId& guardVar,
                                              const edouble& testValue);
 
-      static const unsigned int WEIGHT_BASE() {return 100000;} /*!< Used to weight active instances. 
-                                                                 Establishes upper limit on priority values.*/
+      static unsigned int WEIGHT_BASE() {return 100000;} /*!< Used to weight active instances. 
+                                                           Establishes upper limit on priority values.*/
 
 
       friend class FlawManager;

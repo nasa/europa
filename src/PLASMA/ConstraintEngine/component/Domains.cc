@@ -548,6 +548,8 @@ namespace EUROPA {
 	  os << "}";
   }
 
+void EnumeratedDomain::testPrecision(const edouble&) const {}
+
   std::string EnumeratedDomain::toString() const
   {
 	  return Domain::toString();
@@ -669,11 +671,11 @@ namespace EUROPA {
     relax(dom.getLowerBound(), dom.getUpperBound());
   }
 
-  void IntervalDomain::insert(edouble value) {
+  void IntervalDomain::insert(edouble) {
     check_error(ALWAYS_FAILS, "Cannot insert to an interval domain");
   }
 
-  void IntervalDomain::insert(const std::list<edouble>& values){
+  void IntervalDomain::insert(const std::list<edouble>&){
     check_error(ALWAYS_FAILS, "Cannot insert to an interval domain");
   }
 
@@ -902,9 +904,9 @@ namespace EUROPA {
     else if (isSingleton()) // Need to test separately in case of rounding errors
         return(1);
     else if(isFinite())
-      return(cast_int(m_ub - m_lb + 1));
+      return static_cast<Domain::size_type>(cast_int(m_ub - m_lb + 1));
     else
-      return cast_int(PLUS_INFINITY);
+      return static_cast<Domain::size_type>(cast_int(PLUS_INFINITY));
   }
 
   void IntervalDomain::getValues(std::list<edouble>& results) const {
@@ -920,7 +922,7 @@ namespace EUROPA {
   }
 
 
-  void IntervalDomain::testPrecision(const edouble& value) const {}
+  void IntervalDomain::testPrecision(const edouble&) const {}
 
   void IntervalDomain::operator>>(ostream& os) const {
     Domain::operator>>(os);
@@ -1020,17 +1022,17 @@ StringDomain::StringDomain(const std::list<LabelStr>& values, const DataTypeId& 
 
   void StringDomain::set(const std::string& value){
     LabelStr lbl(value);
-    set((edouble) lbl);
+    set(static_cast<edouble>(lbl));
   }
 
   bool StringDomain::isMember(const std::string& value) const{
     LabelStr lbl(value);
-    return isMember((edouble) lbl);
+    return isMember(static_cast<edouble>(lbl));
   }
 
   void StringDomain::insert(const std::string& value){
     LabelStr lbl(value);
-    EnumeratedDomain::insert((edouble) lbl);
+    EnumeratedDomain::insert(static_cast<edouble>(lbl));
   }
 
   void StringDomain::insert(edouble value){
@@ -1088,7 +1090,7 @@ StringDomain::StringDomain(const std::list<LabelStr>& values, const DataTypeId& 
   void IntervalIntDomain::testPrecision(const edouble& value) const {
 #ifndef EUROPA_FAST
     eint::basis_type intValue = cast_int(value);
-    edouble::basis_type dblValue = (edouble::basis_type) intValue;
+    edouble::basis_type dblValue = static_cast<edouble::basis_type>(intValue);
     checkError(dblValue == value,
 	       value << " must be an integer."); // confirms no loss in precision
 #endif

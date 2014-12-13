@@ -33,7 +33,6 @@ namespace EUROPA{
     /**
      * @brief Constructor to construct a guarded root rule context where the guard is triggered
      * whenever the guard variable is set to a singleton.
-     * @param guard The variable which will be evaluated. trigger rule when set to any singleton value.
      */
     RuleInstance(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb,
                  const std::vector<ConstrainedVariableId>& guards);
@@ -138,7 +137,7 @@ namespace EUROPA{
 
     /**
      * @brief Tests if the condition, if there is one, is satisfied.
-     * @param The guard variables to evaluate against
+     * @param guards The guard variables to evaluate against
      */
     bool test(const std::vector<ConstrainedVariableId>& guards) const;
 
@@ -294,8 +293,8 @@ namespace EUROPA{
     bool m_isPositive; /*!< If this is false, the rule's guard is on a negative test. */
     std::vector<ConstraintId> m_constraints; /*!< Constraints introduced through rule execution */
     std::vector<RuleInstanceId> m_childRules; /*!< Child rules introduced through rule execution */
-    std::vector<ConstrainedVariableId> m_variables; /*< Local variables introduced through rule execution */
-    std::vector<TokenId> m_slaves; /*< Slaves introduced through rule execution */
+    std::vector<ConstrainedVariableId> m_variables; /*!< Local variables introduced through rule execution */
+    std::vector<TokenId> m_slaves; /*!< Slaves introduced through rule execution */
     std::map<edouble, ConstrainedVariableId> m_variablesByName; /*!< Context lookup */
     std::map<edouble, TokenId> m_slavesByName; /*!< Context lookup */
     std::map<edouble, ConstraintId> m_constraintsByName; /*!< Context lookup */

@@ -35,11 +35,12 @@ namespace EUROPA {
     m_key = getKey(empty);
   }
 
-  pthread_mutex_t& LabelStrMutex()
-  {
-      static pthread_mutex_t sl_mutex = PTHREAD_MUTEX_INITIALIZER;
-      return sl_mutex;      
-  }
+namespace {
+pthread_mutex_t& LabelStrMutex() {
+  static pthread_mutex_t sl_mutex = PTHREAD_MUTEX_INITIALIZER;
+  return sl_mutex;      
+}
+}
   
   
   /**
@@ -176,7 +177,7 @@ namespace EUROPA {
     return tokens.size();
   }
 
-  LabelStr LabelStr::getElement(unsigned int index, const char* delimiter) const{
+  LabelStr LabelStr::getElement(unsigned long index, const char* delimiter) const{
     check_error(delimiter != NULL && delimiter != 0 && delimiter[0] != '\0', "'NULL' and '\\0' are not valid delimiters");
 
     //allocate a results vector

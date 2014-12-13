@@ -76,7 +76,7 @@ namespace EUROPA
 			 const std::vector<ConstrainedVariableId>& scope);
 
     bool canIgnore(const ConstrainedVariableId& variable, 
-		   int argIndex, 
+		   unsigned int argIndex, 
 		   const DomainListener::ChangeType& changeType);
 
     void handleExecute();

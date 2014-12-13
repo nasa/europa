@@ -22,12 +22,11 @@ ObjectType::ObjectType(const char* name, const ObjectTypeId& parent, bool isNati
 {
 }
 
-ObjectType::~ObjectType()
-{
-    // TODO: enable this when Schema API is cleaned up to reflect the fact that object factories and token factories are owned by the object type
-    // purgeAll();
-    delete (ObjectDT*)m_varType;
-    m_id.remove();
+ObjectType::~ObjectType() {
+  // TODO: enable this when Schema API is cleaned up to reflect the fact that object factories and token factories are owned by the object type
+  // purgeAll();
+  delete id_cast<ObjectDT>(m_varType);
+  m_id.remove();
 }
 
 const DataTypeId& ObjectType::getVarType() const
@@ -35,15 +34,9 @@ const DataTypeId& ObjectType::getVarType() const
     return m_varType;
 }
 
-void ObjectType::purgeAll()
-{
-    for(std::map<edouble, ObjectFactoryId>::const_iterator it = m_objectFactories.begin(); it != m_objectFactories.end(); ++it)
-        delete (ObjectFactory*) it->second;
-    m_objectFactories.clear();
-
-    for(std::map<edouble, TokenTypeId>::const_iterator it = m_tokenTypes.begin(); it != m_tokenTypes.end(); ++it)
-        delete (TokenType*) it->second;
-    m_tokenTypes.clear();
+void ObjectType::purgeAll() {
+  cleanup(m_objectFactories);
+  cleanup(m_tokenTypes);
 }
 
 
@@ -126,33 +119,31 @@ PSDataType* ObjectType::getMemberTypeRef(const std::string& name) const {
 	return getMemberType(name.c_str());
 }
 
-void ObjectType::addObjectFactory(const ObjectFactoryId& factory)
-{
-    // TODO: allow redefinition of old one
-    m_objectFactories[(edouble)(factory->getSignature())] = factory;
+void ObjectType::addObjectFactory(const ObjectFactoryId& factory) {
+  // TODO: allow redefinition of old one
+  m_objectFactories[static_cast<edouble>(factory->getSignature())] = factory;
 }
 
-void ObjectType::addTokenType(const TokenTypeId& factory)
-{
-    // TODO: allow redefinition of old one
-    m_tokenTypes[(edouble)(factory->getSignature())] = factory;
+void ObjectType::addTokenType(const TokenTypeId& factory) {
+  // TODO: allow redefinition of old one
+  m_tokenTypes[static_cast<edouble>(factory->getSignature())] = factory;
 }
 
-const TokenTypeId& ObjectType::getTokenType(const LabelStr& signature) const
-{
-    check_error(signature.getElement(0,".")==getName(),
-            "Can't look for a token factory I don't own");
+const TokenTypeId& ObjectType::getTokenType(const LabelStr& signature) const {
+  check_error(signature.getElement(0,".")==getName(),
+              "Can't look for a token factory I don't own");
 
-    std::map<edouble,TokenTypeId>::const_iterator it = m_tokenTypes.find((edouble)signature);
-    if (it != m_tokenTypes.end())
-        return it->second;
+  std::map<edouble,TokenTypeId>::const_iterator it =
+      m_tokenTypes.find(static_cast<edouble>(signature));
+  if (it != m_tokenTypes.end())
+    return it->second;
+  
+  if (m_parent.isId()) {
+    std::string parentSignature = m_parent->getName().toString()+"."+signature.getElement(1,".").toString();
+    return m_parent->getTokenType(parentSignature);
+  }
 
-    if (m_parent.isId()) {
-        std::string parentSignature = m_parent->getName().toString()+"."+signature.getElement(1,".").toString();
-        return m_parent->getTokenType(parentSignature);
-    }
-
-    return TokenTypeId::noId();
+  return TokenTypeId::noId();
 }
 
 PSList<PSTokenType*> ObjectType::getPredicates() const {
@@ -233,8 +224,8 @@ std::string ObjectType::toString() const
     debugMsg("ObjectFactory:ObjectFactory", "Creating factory " << signature.toString());
 
     // Now we want to populate the signature types
-    unsigned int count = signature.countElements(TYPE_DELIMITER);
-    for(unsigned int i=0;i<count;i++){
+    unsigned long count = signature.countElements(TYPE_DELIMITER);
+    for(unsigned long i=0;i<count;i++){
       LabelStr labelStr = signature.getElement(i, TYPE_DELIMITER);
       m_signatureTypes.push_back(labelStr);
     }
@@ -250,6 +241,18 @@ std::string ObjectType::toString() const
   const LabelStr& ObjectFactory::getSignature() const {return m_signature;}
 
   const std::vector<LabelStr>& ObjectFactory::getSignatureTypes() const {return m_signatureTypes;}
+
+ObjectId ObjectFactory::makeNewObject(const PlanDatabaseId&,
+                                      const LabelStr&,
+                                      const LabelStr&,
+                                      const std::vector<const Domain*>&) const {
+  return ObjectId::noId();
+}
+
+void ObjectFactory::evalConstructorBody(ObjectId&,
+                                        const std::vector<const Domain*>&) const {
+}
+
 
   ObjectTypeMgr::ObjectTypeMgr()
       : m_id(this)
@@ -267,24 +270,21 @@ std::string ObjectType::toString() const
       return m_id;
   }
 
-  void ObjectTypeMgr::purgeAll(){
-    debugMsg("ObjectFactory:purgeAll", "Purging all");
-
-    // TODO: this should be done by the object types
-    std::set<ObjectFactory*> alreadyDeleted;
-    for(std::map<edouble, ObjectFactoryId>::const_iterator it = m_factories.begin(); it != m_factories.end(); ++it) {
-      if(alreadyDeleted.find(it->second) == alreadyDeleted.end()) {
-        alreadyDeleted.insert((ObjectFactory*)it->second);
-        delete (ObjectFactory*) it->second;
-      }
+void ObjectTypeMgr::purgeAll(){
+  debugMsg("ObjectFactory:purgeAll", "Purging all");
+  
+  // TODO: this should be done by the object types
+  std::set<ObjectFactory*> alreadyDeleted;
+  for(std::map<edouble, ObjectFactoryId>::const_iterator it = m_factories.begin(); it != m_factories.end(); ++it) {
+    if(alreadyDeleted.find(it->second) == alreadyDeleted.end()) {
+      alreadyDeleted.insert(static_cast<ObjectFactory*>(it->second));
+      delete static_cast<ObjectFactory*>(it->second);
     }
-    m_factories.clear();
-
-    std::map<edouble,ObjectTypeId>::iterator it = m_objTypes.begin();
-    for(;it != m_objTypes.end();++it)
-        delete (ObjectType*)it->second;
-    m_objTypes.clear();
   }
+  m_factories.clear();
+  
+  cleanup(m_objTypes);
+}
 
 
   void ObjectTypeMgr::registerObjectType(const ObjectTypeId& objType)
@@ -301,15 +301,12 @@ std::string ObjectType::toString() const
       debugMsg("Schema:registerObjectType","Registered object type:" << std::endl << objType->toString());
   }
 
-  const ObjectTypeId& ObjectTypeMgr::getObjectType(const LabelStr& objType) const
-  {
-      std::map<edouble,ObjectTypeId>::const_iterator it = m_objTypes.find((edouble)objType);
+const ObjectTypeId& ObjectTypeMgr::getObjectType(const LabelStr& objType) const {
+  std::map<edouble,ObjectTypeId>::const_iterator it =
+      m_objTypes.find(static_cast<edouble>(objType));
 
-      if (it == m_objTypes.end())
-          return ObjectTypeId::noId();
-      else
-          return it->second;
-  }
+  return (it == m_objTypes.end() ? ObjectTypeId::noId() : it->second);
+}
 
   std::vector<ObjectTypeId> ObjectTypeMgr::getAllObjectTypes() const
   {
@@ -415,7 +412,7 @@ std::string ObjectType::toString() const
     if(m_factories.find(factory->getSignature().getKey()) != m_factories.end()){
       ObjectFactoryId oldFactory = m_factories.find(factory->getSignature().getKey())->second;
       m_factories.erase(factory->getSignature().getKey());
-      delete (ObjectFactory*) oldFactory;
+      delete static_cast<ObjectFactory*>(oldFactory);
       debugMsg("ObjectFactory:registerFactory", "Over-riding registeration for factory with signature " << factory->getSignature().toString());
     }
 
@@ -474,13 +471,12 @@ std::string ObjectType::toString() const
     }
   }
 
-  void* ObjectEvalContext::getElement(const char* name) const
-  {
-      if (std::string(name)=="PlanDatabase")
-          return (PlanDatabase*)m_obj->getPlanDatabase();
-
-      return EvalContext::getElement(name);
-  }
+void* ObjectEvalContext::getElement(const char* name) const {
+  if (std::string(name)=="PlanDatabase")
+    return static_cast<PlanDatabase*>(m_obj->getPlanDatabase());
+  
+  return EvalContext::getElement(name);
+}
 
   InterpretedObjectFactory::InterpretedObjectFactory(
                              const ObjectTypeId& objType,
@@ -563,13 +559,11 @@ std::string ObjectType::toString() const
     }
   }
 
-  void* ObjectFactoryEvalContext::getElement(const char* name) const
-  {
-      if (std::string(name)=="PlanDatabase")
-          return (PlanDatabase*)m_planDb;
-
-      return EvalContext::getElement(name);
-  }
+void* ObjectFactoryEvalContext::getElement(const char* name) const {
+  if (std::string(name)=="PlanDatabase")
+    return static_cast<PlanDatabase*>(m_planDb);
+  return EvalContext::getElement(name);
+}
 
   ObjectId InterpretedObjectFactory::createInstance(
                             const PlanDatabaseId& planDb,
@@ -590,7 +584,7 @@ std::string ObjectType::toString() const
     return instance;
   }
 
-  bool InterpretedObjectFactory::checkArgs(const std::vector<const Domain*>& arguments) const
+  bool InterpretedObjectFactory::checkArgs(const std::vector<const Domain*>&) const
   {
     // TODO: implement this. is this even necessary?, parser should take care of it
     return true;

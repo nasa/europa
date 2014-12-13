@@ -121,7 +121,7 @@ public:
   /**
   * @brief Add edge to the network
   * @param from start of the edge
-  * @param end end of the edge
+  * @param to end of the edge
   * @param length length of the edge
   */
   Void addEdgeSpec(DnodeId from, DnodeId to, Time length);
@@ -260,7 +260,7 @@ protected:
    * createEdge directly.  (The DispatchGraph uses this feature.)
    * @param from from node
    * @param to to node
-   * @param time duration of edge
+   * @param length duration of edge
    */
    DedgeId createEdge(DnodeId from, DnodeId to, Time length);
 
@@ -280,7 +280,7 @@ protected:
    * @brief Allow subclass to take action when a node is updated
    * @param node node updated
    */
-  virtual void handleNodeUpdate(const DnodeId& node) {}
+  virtual void handleNodeUpdate(const DnodeId& node);
 
 private:
   Void deleteEdge(DedgeId edge);
@@ -406,7 +406,7 @@ public:
    */
   ~Dedge(){m_id.remove();}
   /**
-   * @breif get id of edge
+   * @brief get id of edge
    * @return id of edge
    */
   const DedgeId& getId() const {return m_id;}
@@ -535,6 +535,8 @@ public:
   Bool isEmpty();
 };
 
+Void attachEdge (DedgeId*& edgeArray, Int& size, Int& count, DedgeId edge);
+Void detachEdge (DedgeId*& edgeArray, Int& count, DedgeId edge);
 } /* namespace Europa */
 
 #endif

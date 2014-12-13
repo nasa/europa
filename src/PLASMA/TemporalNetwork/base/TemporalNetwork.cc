@@ -16,6 +16,8 @@
 #include "TemporalNetwork.hh"
 #include "Debug.hh"
 
+#include <boost/cast.hpp>
+
 namespace EUROPA {
 
   Bool TemporalNetwork::isValidId(const TimepointId& id){
@@ -125,8 +127,9 @@ namespace EUROPA {
     check_error(this->consistent,
                 "TemporalNetwork: Checking distance in inconsistent network",
                 TempNetErr::TempNetInconsistentError());
-    DistanceGraph* graph = (DistanceGraph*) this;
-    return graph->isDistanceLessThan(from, to, bound);
+    return DistanceGraph::isDistanceLessThan(from, to, bound);
+    // DistanceGraph* graph = boost::polymorphic_cast<DistanceGraph*>(this);
+    // return graph->isDistanceLessThan(from, to, bound);
   }
 
 
@@ -257,7 +260,7 @@ namespace EUROPA {
   Void TemporalNetwork::propagateBoundsFrom (const TimepointId& src)
   {
     for(std::vector<DnodeId>::const_iterator it = nodes.begin(); it != nodes.end(); ++it){
-      TimepointId node = (TimepointId) *it;
+      TimepointId node = *it;
       node->upperBound = POS_INFINITY;
       node->lowerBound = NEG_INFINITY;
     }
@@ -371,7 +374,7 @@ namespace EUROPA {
 
   void TemporalNetwork::getConstraintScope(const TemporalConstraintId& constraint, TimepointId& source, TimepointId& target) const{
     check_error(constraint.isValid());
-    Tspec* spec = (Tspec*) constraint;
+    Tspec* spec = id_cast<Tspec>(constraint);
     source = spec->head->getId();
     target = spec->foot->getId();
   }
@@ -544,12 +547,12 @@ namespace EUROPA {
     return origin->getId();
   }
 
-  TimepointId TemporalNetwork::addTimepoint()
-  {
-    TimepointId node = (TimepointId) createNode();
-    node->ordinal=++(this->nodeCounter);
-    return node->getId();
-  }
+TimepointId TemporalNetwork::addTimepoint() {
+  //this seems terrible.  ~MJI
+  TimepointId node = createNode();
+  node->ordinal=++(this->nodeCounter);
+  return node->getId();
+}
 
   Void TemporalNetwork::deleteTimepoint(const TimepointId& node)
   {
@@ -578,7 +581,7 @@ namespace EUROPA {
     for (std::list<DedgeId>::const_iterator it=edgeNogoodList.begin();
 	 it != edgeNogoodList.end(); ++it) {
       DedgeId edge = *it;
-      TimepointId node = (TimepointId) edge->to;
+      TimepointId node = edge->to;
       ans.push_back(node->getId());
     }
     return ans;
@@ -616,7 +619,7 @@ namespace EUROPA {
     // and backward directions to update the lower/upper bounds.
     // Note: these could be done lazily on request for bounds.
     for(std::vector<DnodeId>::const_iterator it = nodes.begin(); it != nodes.end(); ++it){
-      TimepointId node = (TimepointId) *it;
+      TimepointId node = *it;
       node->upperBound = POS_INFINITY;
       node->lowerBound = NEG_INFINITY;
     }
@@ -642,7 +645,7 @@ namespace EUROPA {
 	(m_refpoint->inCount == 0) ? POS_INFINITY : NEG_INFINITY;
 
       for (unsigned i=0; i < nodes.size(); i++) {
-	TimepointId node = (TimepointId) nodes[i];
+	TimepointId node = nodes[i];
 	node->reftime = initref;
       }
       m_refpoint->reftime = 0;
@@ -780,51 +783,47 @@ namespace EUROPA {
     return DnodeId::noId();
   }
 
-  Void TemporalNetwork::incDijkstraForward()
-  {
+Void TemporalNetwork::incDijkstraForward() {
 
+  BucketQueue* queue = this->bqueue;
+  check_error_variable(unsigned long BFbound = this->nodes.size());
 
-    BucketQueue* queue = this->bqueue;
-#ifndef EUROPA_FAST
-    int BFbound = this->nodes.size();
-#endif
-    while (true) {
-      DnodeId dnode = queue->popMinFromQueue();
-      if (dnode.isNoId())
-	return;
+  while (true) {
+    DnodeId dnode = queue->popMinFromQueue();
+    if (dnode.isNoId())
+      return;
 
-      TimepointId node(dnode);
+    TimepointId node(dnode);
 
-      for (int i=0; i< node->outCount; i++) {
-	DedgeId edge = node->outArray[i];
-	TimepointId next = (TimepointId) edge->to;
-	Time newDistance = node->upperBound + edge->length;
-	if (newDistance < next->upperBound) {
-    check_error(!(newDistance > MAX_DISTANCE || newDistance < MIN_DISTANCE),
-                "Potential over(under)flow during upper bound propagation",
-                TempNetErr::TimeOutOfBoundsError());
-	  // Next check is a failsafe to prevent infinite propagation.
-    check_error(!((next->depth = node->depth + 1) > BFbound),
-                "Dijkstra propagation in inconsistent network",
-                TempNetErr::TempNetInternalError());
-	  next->upperBound = newDistance;
-	  // Appropriate priority key as derived from Johnson's algorithm
-	  queue->insertInQueue (next, newDistance - next->potential);
+    for (int i=0; i< node->outCount; i++) {
+      DedgeId edge = node->outArray[i];
+      TimepointId next = edge->to;
+      Time newDistance = node->upperBound + edge->length;
+      if (newDistance < next->upperBound) {
+        check_error(!(newDistance > MAX_DISTANCE || newDistance < MIN_DISTANCE),
+                    "Potential over(under)flow during upper bound propagation",
+                    TempNetErr::TimeOutOfBoundsError());
+        // Next check is a failsafe to prevent infinite propagation.
+        check_error(!(static_cast<unsigned>(next->depth = node->depth + 1) > BFbound),
+                    "Dijkstra propagation in inconsistent network",
+                    TempNetErr::TempNetInternalError());
+        next->upperBound = newDistance;
+        // Appropriate priority key as derived from Johnson's algorithm
+        queue->insertInQueue (next, newDistance - next->potential);
 
-	  // Store in set of updated timepoints
-	  handleNodeUpdate(next);
-	}
+        // Store in set of updated timepoints
+        handleNodeUpdate(next);
       }
     }
   }
+}
 
   Void TemporalNetwork::incDijkstraBackward()
   {
 
     BucketQueue* queue = this->bqueue;
-#ifndef EUROPA_FAST
-    int BFbound = this->nodes.size();
-#endif
+    check_error_variable(unsigned long BFbound = this->nodes.size());
+
     while (true) {
       DnodeId dnode =  queue->popMinFromQueue();
       if(dnode.isNoId())
@@ -834,14 +833,15 @@ namespace EUROPA {
 
       for (int i=0; i< node->inCount; i++) {
 	DedgeId edge = node->inArray[i];
-	TimepointId next = (TimepointId) edge->from;
+	TimepointId next = edge->from;
 	Time newDistance = -(node->lowerBound) + edge->length;
 	if (newDistance < -(next->lowerBound)) {
     check_error(!(newDistance > MAX_DISTANCE || newDistance < MIN_DISTANCE),
                 "Potential over(under)flow during lower bound propagation",
                 TempNetErr::TimeOutOfBoundsError());
-	  // Next check is a failsafe to prevent infinite propagation.
-    check_error(!((next->depth = node->depth + 1) > BFbound),
+    // Next check is a failsafe to prevent infinite propagation.
+    //but a risky one, since it's got a side effect! ~MJI
+    check_error(!(static_cast<unsigned>(next->depth = node->depth + 1) > BFbound),
                 "Dijkstra propagation in inconsistent network",
                 TempNetErr::TempNetInternalError());
 	  next->lowerBound = -newDistance;
@@ -860,9 +860,8 @@ namespace EUROPA {
   {
     // PHM New function to support reftime calculations
     BucketQueue* queue = this->bqueue;
-#ifndef EUROPA_FAST
-    int BFbound = this->nodes.size();
-#endif
+    check_error_variable(unsigned long BFbound = this->nodes.size());
+
     while (true) {
       DnodeId dnode = queue->popMinFromQueue();
       if (dnode.isNoId())
@@ -870,14 +869,14 @@ namespace EUROPA {
       TimepointId node(dnode);
       for (int i=0; i< node->outCount; i++) {
 	DedgeId edge = node->outArray[i];
-	TimepointId next = (TimepointId) edge->to;
+	TimepointId next = edge->to;
 	Time newDistance = node->reftime + edge->length;
 	if (newDistance < next->reftime) {
 	  check_error(!(newDistance > MAX_DISTANCE || newDistance < MIN_DISTANCE),
 		      "Potential over(under)flow during upper bound propagation",
 		      TempNetErr::TimeOutOfBoundsError());
 	  // Next check is a failsafe to prevent infinite propagation.
-	  check_error(!((next->depth = node->depth + 1) > BFbound),
+	  check_error(!(static_cast<unsigned>(next->depth = node->depth + 1) > BFbound),
 		      "Dijkstra propagation in inconsistent network",
 		      TempNetErr::TempNetInternalError());
 	  next->reftime = newDistance;
@@ -895,9 +894,9 @@ namespace EUROPA {
   {
     // PHM New function to support reftime calculations
     BucketQueue* queue = this->bqueue;
-#ifndef EUROPA_FAST
-    int BFbound = this->nodes.size();
-#endif
+
+    check_error_variable(unsigned long BFbound = this->nodes.size());
+
     while (true) {
       DnodeId dnode =  queue->popMinFromQueue();
       if(dnode.isNoId())
@@ -905,14 +904,14 @@ namespace EUROPA {
       TimepointId node(dnode);
       for (int i=0; i< node->inCount; i++) {
 	DedgeId edge = node->inArray[i];
-	TimepointId next = (TimepointId) edge->from;
+	TimepointId next = edge->from;
 	Time newDistance = -(node->reftime) + edge->length;
 	if (newDistance < -(next->reftime)) {
     check_error(!(newDistance > MAX_DISTANCE || newDistance < MIN_DISTANCE),
                 "Potential over(under)flow during lower bound propagation",
                 TempNetErr::TimeOutOfBoundsError());
 	  // Next check is a failsafe to prevent infinite propagation.
-    check_error(!((next->depth = node->depth + 1) > BFbound),
+    check_error(!(static_cast<unsigned>(next->depth = node->depth + 1) > BFbound),
                 "Dijkstra propagation in inconsistent network",
                 TempNetErr::TempNetInternalError());
 	  next->reftime = -newDistance;
@@ -959,7 +958,7 @@ namespace EUROPA {
                 "TemporalNetwork:: accessing invalid timepoint.",
                 TempNetErr::TempNetInvalidTimepointError());
     Tnode* tpoint = tpId.operator->();
-    Tnode* tpt = (Tnode*) tpoint->ringLeader;
+    Tnode* tpt = id_cast<Tnode>(tpoint->ringLeader);
     if (tpt == 0)
       tpt = tpoint;   // Trivial TEQ, timepoint is own leader.
 
@@ -969,9 +968,9 @@ namespace EUROPA {
     std::list<TimepointId> ans;
     int numedges = tpt->outCount;
     for (int i=0; i<numedges; i++) {
-      Dedge* e = (Dedge*) tpt->outArray[i];
+      Dedge* e = static_cast<Dedge*>(tpt->outArray[i]);
       Time length = e->length;
-      Tnode* next = (Tnode*) e->to;
+      Tnode* next = static_cast<Tnode*>(e->to);
       if (length < 0)   // Negative predecessors are enabling.
 	ans.push_back (next->getId());
 

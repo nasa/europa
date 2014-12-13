@@ -21,11 +21,12 @@ namespace NDDL {
    * Used in rule firing and generating pseudo variables on tokens. They cannot be specified.
    */
   template<class ELEMENT_TYPE>
-  ConstrainedVariableId allocateVariable(const ConstraintEngineId& ce,
-						  std::vector<ConstrainedVariableId>& vars,
+  EUROPA::ConstrainedVariableId allocateVariable(const EUROPA::ConstraintEngineId& ce,
+						  std::vector<EUROPA::ConstrainedVariableId>& vars,
 						  const ELEMENT_TYPE& domain,
-						  const EntityId& parent){
+						  const EUROPA::EntityId& parent){
 
+    using namespace EUROPA;
     std::stringstream sstr;
     sstr << "PSEDUO_VARIABLE_" << vars.size();
     ConstrainedVariableId var = (new Variable< ELEMENT_TYPE >(ce,
@@ -41,9 +42,9 @@ namespace NDDL {
   /**
    * Should all be moved to the rule instance class.
    */
-  TokenId tok(const RuleInstanceId& rule, const std::string name) ;
-  ConstrainedVariableId var(const RuleInstanceId& entity, const std::string name) ;
-  ConstrainedVariableId var(const TokenId& entity, const std::string name) ;
+EUROPA::TokenId tok(const EUROPA::RuleInstanceId& rule, const std::string name) ;
+EUROPA::ConstrainedVariableId var(const EUROPA::RuleInstanceId& entity, const std::string name) ;
+EUROPA::ConstrainedVariableId var(const EUROPA::TokenId& entity, const std::string name) ;
 
 }
 

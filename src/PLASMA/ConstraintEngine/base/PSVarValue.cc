@@ -29,9 +29,6 @@ namespace EUROPA {
         os << "OBJECT:" << obj->toString();
       }
       break;
-
-    default:
-      check_error(ALWAYS_FAILS, "Unknown type");    
     }
 
     return os.str();
@@ -42,11 +39,17 @@ namespace EUROPA {
 
   PSVarType PSVarValue::getType() const {return m_type;}
 
-  int PSVarValue::asInt() const {check_runtime_error(m_type == INTEGER); return (int) m_val;}
+int PSVarValue::asInt() const {
+  check_runtime_error(m_type == INTEGER);
+  return static_cast<int>(m_val);
+}
   
   double PSVarValue::asDouble() const {return m_val;}
 
-  bool PSVarValue::asBoolean() const {check_runtime_error(m_type == BOOLEAN); return (bool) m_val;}
+bool PSVarValue::asBoolean() const {
+  check_runtime_error(m_type == BOOLEAN);
+  return static_cast<bool>(m_val);
+}
 
   const std::string& PSVarValue::asString() const {
     check_runtime_error(m_type == STRING);
@@ -58,8 +61,8 @@ namespace EUROPA {
     // only works if PSEntity remains pure virtual
     //Id<PSEntity> id(Entity::getEntity(edouble(m_val)));
     //EntityId entity = Entity::getEntity(edouble(m_val));
-    EntityId entity = Entity::getEntity((edouble) m_val);
-    return (PSEntity *) entity;
+    EntityId entity = Entity::getEntity(edouble(m_val));
+    return id_cast<PSEntity>(entity);
   }
 
 

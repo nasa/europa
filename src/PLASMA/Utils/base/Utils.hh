@@ -239,10 +239,9 @@ namespace EUROPA {
   }
 }
 
-#ifdef _MSC_VER 
-#  define EUROPA_runTest(test, ...) { \
+#define EUROPA_runTest(test, ...) { \
      try { \
-       unsigned int id_count = EUROPA::IdTable::size(); \
+       unsigned long id_count = EUROPA::IdTable::size(); \
        bool result = test( __VA_ARGS__ ); \
        EUROPA::IdTable::checkResult(result,id_count); \
      } \
@@ -250,17 +249,5 @@ namespace EUROPA {
        err.print( std::cout ); \
      } \
    }
-#else
-#  define EUROPA_runTest(test, args...) { \
-     try { \
-       unsigned int id_count = EUROPA::IdTable::size(); \
-       bool result = test(args); \
-       EUROPA::IdTable::checkResult(result,id_count); \
-     } \
-       catch (Error err){ \
-       err.print(std::cout); \
-     } \
-   }
-#endif //_MSC_VER
 
 #endif

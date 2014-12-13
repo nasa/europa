@@ -29,7 +29,7 @@ public:
                                                  bool canBeSpecified = true,
                                                  const char* name = NO_VAR_NAME,
                                                  const EntityId& parent = EntityId::noId(),
-                                                 int index = ConstrainedVariable::NO_INDEX) const;
+                                                 unsigned int index = ConstrainedVariable::NO_INDEX) const;
 
     static const std::string& NAME();
     static const DataTypeId& instance();
