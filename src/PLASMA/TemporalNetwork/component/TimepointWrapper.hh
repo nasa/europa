@@ -20,8 +20,8 @@ namespace EUROPA {
     /**
      * @brief constructor 
      * @param prop Temporal propagator managing this timepoint
-     * @param tempVar 
-     * @param point
+     * @param tempVar  The temporal variable to wrap.
+     * @param point The timepoint representing the temporal variable.
      */
     TimepointWrapper(const TemporalPropagatorId& prop, const ConstrainedVariableId& tempVar, const TimepointId& point);
  

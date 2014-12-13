@@ -104,13 +104,13 @@ namespace EUROPA {
      * This notification is information rich, so that agenda management and constraints can take advantage
      * of as much data as possibel if they are sophisticated enough.
      * @param variable The variable that has changed
-     * @param argIndiex The position of the variable in the scope of the given Constraint.
+     * @param argIndex The position of the variable in the scope of the given Constraint.
      * @param constraint The constraint that may need to be woken up.
      * @param changeType The nature of the change on the variable. Will always be a restriction
      * @see ConstraintEngine::notify()
      */
     virtual void handleNotification(const ConstrainedVariableId& variable, 
-                                    int argIndex, 
+                                    unsigned int argIndex, 
                                     const ConstraintId& constraint, 
                                     const DomainListener::ChangeType& changeType) = 0;
     /**
@@ -151,24 +151,25 @@ namespace EUROPA {
      */
     virtual void handleConstraintActivated(const ConstraintId& constraint) = 0;
 
+    //TODO: Figure out why these aren't pure virtual but the other functions are
     /**
      * @brief Handle a variable deactivation.
      * @param var The inactive variable
      */
-    virtual void handleVariableDeactivated(const ConstrainedVariableId& var){}
+    virtual void handleVariableDeactivated(const ConstrainedVariableId& var);
 
     /**
      * @brief Handle a variable Activation.
      * @param var The active variable
      */
-    virtual void handleVariableActivated(const ConstrainedVariableId& var){}
+    virtual void handleVariableActivated(const ConstrainedVariableId& var);
 
     /**
      * @brief Request execution of a Constraint.
      *
      * It is not possible to directly execute a Constraint. This is because we want to ensure control policies defined
      * can be enforced and not circumvented in derived classes. This call will delegate execution to the ConstraintEngine.
-     * @param The constraint to be executed. It must be part in m_constraints.
+     * @param constraint The constraint to be executed. It must be part in m_constraints.
      */
     virtual void execute(const ConstraintId& constraint);
 

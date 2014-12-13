@@ -30,11 +30,11 @@ namespace EUROPA
     void handleExecute();
 
     void handleExecute(const ConstrainedVariableId& variable, 
-		       int argIndex, 
+		       unsigned int argIndex, 
 		       const DomainListener::ChangeType& changeType);
 
     bool canIgnore(const ConstrainedVariableId& variable, 
-		   int argIndex, 
+		   unsigned int argIndex, 
 		   const DomainListener::ChangeType& changeType);
 
     // This constraint doesn't modify any variables through inference

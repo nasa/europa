@@ -1,6 +1,8 @@
 #include "NddlToken.hh"
 #include "Utils.hh"
 #include "Object.hh"
+
+using namespace EUROPA;
 namespace NDDL {
 
   NddlToken::NddlToken(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, const bool& rejectable, const bool& isFact, const bool& close)

@@ -53,16 +53,9 @@ namespace EUROPA {
         return m_rulesByName;
     }
 
-    void RuleSchema::purgeAll()
-    {
-        std::multimap<edouble, RuleId>& rules = m_rulesByName;
-        for(std::multimap<edouble, RuleId>::const_iterator it = rules.begin(); it != rules.end(); ++it){
-            RuleId rule = it->second;
-            delete (Rule*) rule;
-        }
-
-        rules.clear();
-    }
+void RuleSchema::purgeAll() {
+  cleanup(m_rulesByName);
+}
 
     Rule::Rule(const LabelStr& name)
         : m_id(this)

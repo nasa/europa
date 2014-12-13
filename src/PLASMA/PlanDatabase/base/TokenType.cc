@@ -3,6 +3,8 @@
 #include "Token.hh"
 #include "Utils.hh"
 
+#include <boost/cast.hpp>
+
 namespace EUROPA {
 
   TokenType::TokenType(const ObjectTypeId& ot, const LabelStr& signature)
@@ -125,7 +127,7 @@ namespace EUROPA {
       PSList<PSTokenType*> conditions = getSubgoalsByAttr( PSTokenType::CONDITION);
 
       for ( int i = 0; i < conditions.size(); i++ ){
-	TokenType* tt = (TokenType*) conditions.get(i);
+	TokenType* tt = boost::polymorphic_cast<TokenType*>(conditions.get(i));
 	oss << "\t\t\t";
 	oss<< tt->toLongString();
       }
@@ -134,7 +136,7 @@ namespace EUROPA {
       PSList<PSTokenType*> effects = getSubgoalsByAttr( PSTokenType::EFFECT);
 
       for ( int i = 0; i < effects.size(); i++ ){
-	TokenType* tt = (TokenType*) effects.get(i);
+	TokenType* tt = boost::polymorphic_cast<TokenType*>(effects.get(i));
 	oss << "\t\t\t";
 	oss<< tt->toLongString();
       }
@@ -148,7 +150,7 @@ namespace EUROPA {
   void TokenType::addSubgoalByAttr( TokenTypeId type, int attr ){
     for( int attrMask = 1; attrMask <= attr; attrMask = attrMask << 1 ){
       if( ( attr & attrMask ) == attrMask ){
-	m_subgoalsByAttr[ attrMask ].push_back(  (PSTokenType*) type );
+	m_subgoalsByAttr[ attrMask ].push_back(id_cast<PSTokenType>(type));
       }
     }
   }
@@ -169,7 +171,7 @@ namespace EUROPA {
   }
 
   PSDataType* TokenType::getParameterType(int index) const {
-    check_error((unsigned int) index < m_args.size(), "Index out of bounds");
+    check_error(static_cast<unsigned int>(index) < m_args.size(), "Index out of bounds");
     std::map<LabelStr,DataTypeId>::const_iterator it = m_args.begin();
     while (index-- > 0) ++it;
     return it->second;

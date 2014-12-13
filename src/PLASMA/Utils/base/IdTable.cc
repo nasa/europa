@@ -34,21 +34,20 @@
 
 namespace EUROPA {
 
-  unsigned int getEntryKey(std::pair<unsigned int,edouble>& entry)
-  {
+namespace {
+unsigned int getEntryKey(std::pair<unsigned int,edouble>& entry) {
     return entry.first;
-  }
+}
 
-  LabelStr getEntryType(std::pair<unsigned int,edouble>& entry)
-  {
+LabelStr getEntryType(std::pair<unsigned int,edouble>& entry) {
     return LabelStr(entry.second);
-  }
+}
 
-  pthread_mutex_t& IdTableMutex()
-  {
-      static pthread_mutex_t sl_mutex = PTHREAD_MUTEX_INITIALIZER;
-      return sl_mutex;
-  }
+pthread_mutex_t& IdTableMutex() {
+  static pthread_mutex_t sl_mutex = PTHREAD_MUTEX_INITIALIZER;
+  return sl_mutex;
+}
+}
 
   IdTable::IdTable() {
   }

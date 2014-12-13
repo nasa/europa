@@ -87,7 +87,7 @@ namespace EUROPA {
      * @brief Obtain a slave token using a positional offset from this token
      * @return TokenId::noId() if no token is found at that location
      */
-    const TokenId& getSlave(int slavePosition) const;
+    const TokenId& getSlave(unsigned int slavePosition) const;
 
     /**
      * @brief Obtain the position of the given slave token in its ordered set of slaves.
@@ -378,9 +378,9 @@ namespace EUROPA {
     /**
      * @brief Add a parameter as a member to the object. This is used when building the instance
      * and cannot be called once the specific token instance has been closed.
+     * Errors: If a parameter of the given type with the given name cannot be added
      * @param baseDomain The base domain to use to populate the variable
      * @param name The member name
-     * @error If a parameter of the given type with the given name cannot be added
      * @see Scheme::hasMember, Schema::canContain, Token::close()
      */
     template<class DomainType>
@@ -550,7 +550,6 @@ namespace EUROPA {
     TokenId m_activeToken;
     UnifyMementoId m_unifyMemento;
     bool m_committed;
-    unsigned int m_refCount; /*!< The number of sources requiring existence of the token */
     bool m_deleted;
     bool m_terminated;
     ConstrainedVariableSet m_localVariables; /*!< Variables created external to the token but related to it. They are

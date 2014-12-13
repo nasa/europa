@@ -39,10 +39,9 @@ namespace EUROPA {
       m_name = name;
     }
 
-    ComponentId ComponentFactoryMgr::createInstance(const TiXmlElement& configData)
-    {
-      LabelStr name = extractData(configData, "component");
-      return FactoryMgr::createInstance(name,ComponentArgs(configData));
-    }
+  ComponentId ComponentFactoryMgr::createComponentInstance(const TiXmlElement& configData) {
+    LabelStr name = extractData(configData, "component");
+    return FactoryMgr::createInstance(name,ComponentArgs(configData));
   }
+
 }

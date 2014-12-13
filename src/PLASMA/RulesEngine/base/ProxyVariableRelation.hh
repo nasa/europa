@@ -36,7 +36,7 @@ namespace EUROPA {
      * @brief Used to only track set and reset events. Will not be subject to propagation
      */
     bool canIgnore(const ConstrainedVariableId& variable, 
-		   int argIndex, 
+		   unsigned int argIndex, 
 		   const DomainListener::ChangeType& changeType);
 
     /**

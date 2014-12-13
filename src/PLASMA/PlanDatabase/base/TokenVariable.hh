@@ -26,7 +26,7 @@ namespace EUROPA{
   class TokenVariable : public Variable<DomainType> {
   public:
     TokenVariable(const TokenId& parent,
-		  int index,
+		  unsigned long index,
 		  const ConstraintEngineId& constraintEngine,
 		  const Domain& baseDomain,
 		  const bool internal = false,
@@ -82,7 +82,7 @@ namespace EUROPA{
 
   template <class DomainType>
   TokenVariable<DomainType>::TokenVariable(const TokenId& parent,
-					   int index,
+					   unsigned long index,
 					   const ConstraintEngineId& constraintEngine,
 					   const Domain& baseDomain,
 					   const bool internal,

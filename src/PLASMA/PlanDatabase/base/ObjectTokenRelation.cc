@@ -56,9 +56,9 @@ namespace EUROPA {
     check_error(isValid());
   }
 
-  void ObjectTokenRelation::handleExecute(const ConstrainedVariableId& variable,
-					  int argIndex,
-					  const DomainListener::ChangeType& changeType){
+  void ObjectTokenRelation::handleExecute(const ConstrainedVariableId&,
+					  unsigned int,
+					  const DomainListener::ChangeType&){
     handleExecute();
   }
 
@@ -66,7 +66,7 @@ namespace EUROPA {
    * Will handle changes immediately as long as the domain is open
    */
   bool ObjectTokenRelation::canIgnore(const ConstrainedVariableId& variable,
-				      int argIndex,
+				      unsigned int,
 				      const DomainListener::ChangeType& changeType){
 
     if(m_currentDomain.isOpen())
@@ -167,11 +167,11 @@ namespace EUROPA {
 	}*/
   }
 
-  const std::vector<ConstrainedVariableId>& ObjectTokenRelation::getModifiedVariables(const ConstrainedVariableId& variable) const
-  {
-	  static std::vector<ConstrainedVariableId> s_emptyScope;
-	  return s_emptyScope;
-  }
+const std::vector<ConstrainedVariableId>&
+ObjectTokenRelation::getModifiedVariables(const ConstrainedVariableId&) const {
+  static std::vector<ConstrainedVariableId> s_emptyScope;
+  return s_emptyScope;
+}
 
   const std::vector<ConstrainedVariableId>& ObjectTokenRelation::getModifiedVariables() const
   {

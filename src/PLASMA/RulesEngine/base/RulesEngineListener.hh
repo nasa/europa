@@ -7,8 +7,8 @@ namespace EUROPA {
   class RulesEngineListener {
   public:
     virtual ~RulesEngineListener();
-    virtual void notifyExecuted(const RuleInstanceId &rule){}
-    virtual void notifyUndone(const RuleInstanceId &rule){}
+    virtual void notifyExecuted(const RuleInstanceId &rule);
+    virtual void notifyUndone(const RuleInstanceId &rule);
     const RulesEngineListenerId &getId() const;
 
   protected:

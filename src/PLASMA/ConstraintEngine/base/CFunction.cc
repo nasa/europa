@@ -29,6 +29,7 @@ namespace EUROPA {
   {
      return m_name;
   }
-
+void CFunction::checkArgTypes(const std::vector<DataTypeId>&) {}
 }
+
 

@@ -13,5 +13,27 @@ namespace EUROPA{
     std::cout << "Done TemporalNetworkListener destructor " << std::endl;
   }
 
+void TemporalNetworkListener::notifyTimepointAdded(const ConstrainedVariableId&,
+                                                   const TimepointId&) {}
+
+void TemporalNetworkListener::notifyTimepointDeleted(const TimepointId&) {}
+
+void TemporalNetworkListener::notifyBaseDomainConstraintAdded(const ConstrainedVariableId&,
+                                                              const TemporalConstraintId&,
+                                                              Time, Time) {}
+void TemporalNetworkListener::notifyConstraintAdded(const ConstraintId,
+                                                    const TemporalConstraintId&,
+                                                    Time , Time) {}
+
+void TemporalNetworkListener::notifyConstraintDeleted(eint,
+                                                      const TemporalConstraintId&) {}
+
+void TemporalNetworkListener::notifyBoundsRestricted(const ConstrainedVariableId&,
+                                                     Time, Time) {}
+
+void TemporalNetworkListener::notifyBoundsSame(const ConstrainedVariableId&,
+                                               const TimepointId&) {}
+
+
 }
 

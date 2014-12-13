@@ -34,7 +34,7 @@ namespace EUROPA {
 
     void getOrderingChoices(const TokenId& token,
 			    std::vector< std::pair<TokenId, TokenId> >& results,
-			    unsigned int limit = std::numeric_limits<unsigned int>::max());
+			    unsigned long limit = std::numeric_limits<unsigned long>::max());
 
     void getTokensToOrder(std::vector<TokenId>& results);
 

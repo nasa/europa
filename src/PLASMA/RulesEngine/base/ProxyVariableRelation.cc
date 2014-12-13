@@ -70,7 +70,7 @@ namespace EUROPA {
 
 
   bool ProxyVariableRelation::canIgnore(const ConstrainedVariableId& variable,
-					int argIndex,
+					unsigned int argIndex,
 					const DomainListener::ChangeType& changeType){
     // If the object variable is specified to a singleton, and the proxy variable can be specified, then
     // we will force the proxy to be set to the field value of the given object
@@ -123,7 +123,8 @@ namespace EUROPA {
    */
   void ProxyVariableRelation::updatePathFromSource(){
     if(m_sourceConstraint.isId() && m_sourceConstraintKey != m_sourceConstraint->getKey()){
-      ProxyVariableRelation* proxyConstraint = (ProxyVariableRelation*) m_sourceConstraint;
+      ProxyVariableRelation* proxyConstraint =
+          id_cast<ProxyVariableRelation>(m_sourceConstraint);
       m_path = proxyConstraint->m_path;
       m_sourceConstraint = ConstraintId::noId();
     }

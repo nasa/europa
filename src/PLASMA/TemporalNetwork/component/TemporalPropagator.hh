@@ -110,7 +110,7 @@ namespace EUROPA {
     void handleVariableDeactivated(const ConstrainedVariableId& var);
     void handleVariableActivated(const ConstrainedVariableId& var);
     void handleNotification(const ConstrainedVariableId& variable,
-			    int argIndex,
+			    unsigned int argIndex,
 			    const ConstraintId& constraint,
 			    const DomainListener::ChangeType& changeType);
 

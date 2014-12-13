@@ -6,6 +6,7 @@
 #include "LabelStr.hh"
 #include "Constraint.hh"
 #include "DataType.hh"
+#include "unused.hh"
 
 #include <string>
 #include <vector>
@@ -52,95 +53,92 @@ namespace EUROPA {
 
   /**********************************************************/
 
-  template <class ConstraintInstance>
-  ConstraintId makeConstraintInstance(
-                  const LabelStr& name,
-                  const LabelStr& propagatorName,
-                  const ConstraintEngineId constraintEngine,
-                  const std::vector<ConstrainedVariableId>& scope,
-                  const char* violationExpl)
-  {
-      check_error(constraintEngine.isValid());
-      check_error(scope.size() >= 1);
-      Constraint* constraint = new ConstraintInstance(name, propagatorName, constraintEngine, scope);
-      check_error(constraint != 0);
-      check_error(constraint->getId().isValid());
-      if (violationExpl != NULL)
-          constraint->setViolationExpl(violationExpl);
+template <class ConstraintInstance>
+ConstraintId makeConstraintInstance(
+    const LabelStr& name,
+    const LabelStr& propagatorName,
+    const ConstraintEngineId constraintEngine,
+    const std::vector<ConstrainedVariableId>& scope,
+    const char* violationExpl) {
+  check_error(constraintEngine.isValid());
+  check_error(scope.size() >= 1);
+  Constraint* constraint = new ConstraintInstance(name, propagatorName, constraintEngine, scope);
+  check_error(constraint != 0);
+  check_error(constraint->getId().isValid());
+  if (violationExpl != NULL)
+    constraint->setViolationExpl(violationExpl);
+  
+  return(constraint->getId());
+}
 
-      return(constraint->getId());
-  }
+template <class ConstraintInstance>
+class ConcreteConstraintType : public ConstraintType {
+ public:
+  // TODO: remove this constructor after all constraint types have been updated to check arg types
+  ConcreteConstraintType(const LabelStr& name,
+                         const LabelStr& propagatorName,
+                         bool systemDefined = false)
+      : ConstraintType(name, propagatorName, systemDefined) {}
 
-  template <class ConstraintInstance>
-  class ConcreteConstraintType : public ConstraintType {
-  public:
-    // TODO: remove this constructor after all constraint types have been updated to check arg types
-    ConcreteConstraintType(const LabelStr& name,
-                           const LabelStr& propagatorName,
-                           bool systemDefined = false)
-      : ConstraintType(name, propagatorName, systemDefined)
-    {
-    }
-
-    ConcreteConstraintType(const LabelStr& name,
-                           const LabelStr& propagatorName,
-                           const std::vector<DataTypeId>& argTypes,
-                           bool systemDefined = false)
+  ConcreteConstraintType(const LabelStr& name,
+                         const LabelStr& propagatorName,
+                         const std::vector<DataTypeId>& argTypes,
+                         bool systemDefined = false)
       : ConstraintType(name, propagatorName, systemDefined)
       , m_argTypes(argTypes)
-    {
+  {
+  }
+
+  virtual ConstraintId createConstraint(
+      const ConstraintEngineId constraintEngine,
+      const std::vector<ConstrainedVariableId>& scope,
+      const char* violationExpl)
+  {
+    return makeConstraintInstance<ConstraintInstance>(m_name, m_propagatorName, constraintEngine, scope, violationExpl);
+  }
+
+  virtual void checkArgTypes(const std::vector<DataTypeId>& types) const
+  {
+    // TODO: remove this after all constraint types have been updated to check arg types
+    if (m_argTypes.size() == 0)
+      return;
+
+    if (m_argTypes.size() != types.size()) {
+      std::ostringstream os;
+      os << "Constraint "<< m_name.toString()
+         << " can't take " << types.size() << " parameters."
+         << " It expects " << m_argTypes.size() << ".";
+      throw os.str();
     }
 
-    virtual ConstraintId createConstraint(
-                  const ConstraintEngineId constraintEngine,
-				  const std::vector<ConstrainedVariableId>& scope,
-				  const char* violationExpl)
-    {
-      return makeConstraintInstance<ConstraintInstance>(m_name, m_propagatorName, constraintEngine, scope, violationExpl);
+    for (unsigned int i=0;i<m_argTypes.size();i++) {
+      // TODO: need some convention or a data type to represent "any"
+      if (!m_argTypes[i]->isAssignableFrom(types[i])) {
+        std::ostringstream os;
+        os << "Constraint "<< m_name.toString()
+           << " can't take a " << types[i]->getName().toString()
+           << " as parameter number " << i << "."
+           << " It expects " << m_argTypes[i]->getName().toString() << ".";
+        throw os.str();
+      }
     }
+  }
 
-    virtual void checkArgTypes(const std::vector<DataTypeId>& types) const
-    {
-        // TODO: remove this after all constraint types have been updated to check arg types
-        if (m_argTypes.size() == 0)
-            return;
+ protected:
+  std::vector<DataTypeId> m_argTypes;
+};
 
-        if (m_argTypes.size() != types.size()) {
-            std::ostringstream os;
-            os << "Constraint "<< m_name.toString()
-               << " can't take " << types.size() << " parameters."
-               << " It expects " << m_argTypes.size() << ".";
-            throw os.str();
-        }
-
-        for (unsigned int i=0;i<m_argTypes.size();i++) {
-            // TODO: need some convention or a data type to represent "any"
-            if (!m_argTypes[i]->isAssignableFrom(types[i])) {
-                std::ostringstream os;
-                os << "Constraint "<< m_name.toString()
-                   << " can't take a " << types[i]->getName().toString()
-                   << " as parameter number " << i << "."
-                   << " It expects " << m_argTypes[i]->getName().toString() << ".";
-                throw os.str();
-            }
-        }
-    }
-
-  protected:
-    std::vector<DataTypeId> m_argTypes;
-  };
-
-  template <class ConstraintInstance>
-  class RotatedNaryConstraintType : public ConstraintType {
-  public:
-    RotatedNaryConstraintType(const LabelStr& name,
-                              const LabelStr& propagatorName,
-                              const LabelStr& otherName,
-                              const int& rotateCount)
+template <class ConstraintInstance>
+class RotatedNaryConstraintType : public ConstraintType {
+ public:
+  RotatedNaryConstraintType(const LabelStr& name,
+                            const LabelStr& propagatorName,
+                            const LabelStr& otherName,
+                            const int& rotateCount)
       : ConstraintType(name, propagatorName)
       , m_otherName(otherName)
       , m_rotateCount(rotateCount)
-    {
+  {
       checkError(name != otherName,
                  "Rotated name " << name << " is the same as un-rotated " << otherName);
     }
@@ -163,10 +161,9 @@ namespace EUROPA {
       return(constraint->getId());
     }
 
-    virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes) const
-    {
-        // TODO: implement this
-    }
+  virtual void checkArgTypes(unused(const std::vector<DataTypeId>& argTypes)) const {
+    // TODO: implement this
+  }
 
   protected:
     const LabelStr m_otherName;
@@ -201,7 +198,7 @@ namespace EUROPA {
       return(constraint->getId());
     }
 
-    virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+    virtual void checkArgTypes(unused(const std::vector<DataTypeId>& argTypes)) const
     {
         // TODO: implement this
     }

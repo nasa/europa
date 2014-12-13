@@ -47,7 +47,7 @@ namespace EUROPA {
     check_error(Entity::isPurging() || m_wrappedTimepoints.empty());
     Entity::discardAll(m_wrappedTimepoints);
     check_error(m_tnet.isValid());
-    delete (TemporalNetwork*) m_tnet;
+    delete static_cast<TemporalNetwork*>(m_tnet);
 
     Propagator::handleDiscard();
   }
@@ -141,7 +141,7 @@ namespace EUROPA {
   }
 
 
-  void TemporalPropagator::handleVariableActivated(const ConstrainedVariableId& var){
+  void TemporalPropagator::handleVariableActivated(const ConstrainedVariableId& ){
     // Nothing to do - already addressed by constraint handler
   }
 
@@ -160,9 +160,9 @@ namespace EUROPA {
   }
 
   void TemporalPropagator::handleNotification(const ConstrainedVariableId& variable,
-                                              int argIndex,
+                                              unsigned int ,
                                               const ConstraintId& constraint,
-                                              const DomainListener::ChangeType& changeType){
+                                              const DomainListener::ChangeType& ){
 
     debugMsg("TemporalPropagator:handleNotification",
              variable->toLongString() << " change through " << constraint->getKey() << "-" << constraint->getName().toString());
@@ -217,27 +217,27 @@ namespace EUROPA {
     return consistent;
   }
 
+namespace {
+ConstraintId getConstraint(ConstrainedVariableId& fromvar,
+                           ConstrainedVariableId& tovar,
+                           Time& ) {
+  ConstraintSet fromConstraints;
+  fromvar->constraints(fromConstraints);
 
-  ConstraintId getConstraint(ConstrainedVariableId& fromvar,
-		                     ConstrainedVariableId& tovar,
-                             Time& length)
-  {
-	ConstraintSet fromConstraints;
-	fromvar->constraints(fromConstraints);
-
-	ConstraintSet::const_iterator it = fromConstraints.begin();
-	for (;it != fromConstraints.end();++it) {
-	    ConstraintId c = (*it);
-	    if (c->isVariableOf(tovar)) {
-	    	// TODO: fromvar and tovar could be together in more than one constraint
-	    	// need to make sure it is a temporal constraint and use length to make
-	    	// sure it is the right instance
-	    	return c;
-	    }
-	}
-
-	return ConstraintId::noId();
+  ConstraintSet::const_iterator it = fromConstraints.begin();
+  for (;it != fromConstraints.end();++it) {
+    ConstraintId c = (*it);
+    if (c->isVariableOf(tovar)) {
+      // TODO: fromvar and tovar could be together in more than one constraint
+      // need to make sure it is a temporal constraint and use length to make
+      // sure it is the right instance
+      return c;
+    }
   }
+
+  return ConstraintId::noId();
+}
+}
 
   /*
    * The Temporal Propagator has 4 phases :
@@ -360,8 +360,8 @@ namespace EUROPA {
     // Key domain restriction constrain off derived domain values
     TemporalConstraintId c = m_tnet->addTemporalConstraint(m_tnet->getOrigin(),
                                                            timepoint,
-                                                           (Time) cast_basis(var->lastDomain().getLowerBound()),
-                                                           (Time) cast_basis(var->lastDomain().getUpperBound()));
+                                                           cast_int(var->lastDomain().getLowerBound()),
+                                                           cast_int(var->lastDomain().getUpperBound()));
     check_error(c.isValid());
 
     timepoint->setBaseDomainConstraint(c);
@@ -369,8 +369,8 @@ namespace EUROPA {
     // Note, this is misleading. It is actually a constraint on the derived domain.
     publish(notifyBaseDomainConstraintAdded(var,
                                             c,
-                                            (Time) cast_basis(var->lastDomain().getLowerBound()),
-                                            (Time) cast_basis(var->lastDomain().getUpperBound())));
+                                            cast_int(var->lastDomain().getLowerBound()),
+                                            cast_int(var->lastDomain().getUpperBound())));
 
     debugMsg("TemporalPropagator:addTimepoint",
              "Constraint ADDED for Variable " << var->getKey() <<  "(" <<  c << ") "
@@ -411,11 +411,11 @@ namespace EUROPA {
     if(constraint->getScope().size() == 3){
       ConstrainedVariableId distance = end;
       end = constraint->getScope()[2];
-      lb = (Time) cast_basis(distance->lastDomain().getLowerBound());
-      ub = (Time) cast_basis(distance->lastDomain().getUpperBound());
+      lb = cast_int(distance->lastDomain().getLowerBound());
+      ub = cast_int(distance->lastDomain().getUpperBound());
     }
     else if (constraint->getName() != sl_concurrent) {
-      ub = cast_basis(g_infiniteTime());
+      ub = cast_int(g_infiniteTime());
       if(constraint->getName() == sl_strictlyPrecedes)
         lb = 1;
     }
@@ -727,8 +727,8 @@ namespace EUROPA {
       tnetConstraint->getBounds(lbt, ubt);
 
       const IntervalIntDomain& timeBounds = static_cast<const IntervalIntDomain&>(var->lastDomain());
-      Time lb = (Time) cast_basis(timeBounds.getLowerBound());
-      Time ub = (Time) cast_basis(timeBounds.getUpperBound());
+      Time lb = cast_int(timeBounds.getLowerBound());
+      Time ub = cast_int(timeBounds.getUpperBound());
 
       //if(lb < lbt || ub > ubt) {
       if(lb ==MINUS_INFINITY && ub==PLUS_INFINITY) {
@@ -759,8 +759,8 @@ namespace EUROPA {
     check_error(tp.isValid());
 
     const IntervalIntDomain& timeBounds = static_cast<const IntervalIntDomain&>(var->lastDomain());
-    Time lb = (Time) cast_basis(timeBounds.getLowerBound());
-    Time ub = (Time) cast_basis(timeBounds.getUpperBound());
+    Time lb = cast_int(timeBounds.getLowerBound());
+    Time ub = cast_int(timeBounds.getUpperBound());
     const TemporalConstraintId& baseDomainConstraint = tp->getBaseDomainConstraint();
     TemporalConstraintId newConstraint = updateConstraint(var, baseDomainConstraint, lb, ub);
 
@@ -801,8 +801,8 @@ namespace EUROPA {
           // Checks for finiteness are to avoid overflow or underflow.
           if(sourceDom.isFinite() && targetDom.isFinite()){
               IntervalIntDomain& distanceDom = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(distance));
-              Time minDistance = (Time) cast_basis(targetDom.getLowerBound() - sourceDom.getUpperBound());
-              Time maxDistance = (Time) cast_basis(targetDom.getUpperBound() - sourceDom.getLowerBound());
+              Time minDistance = cast_int(targetDom.getLowerBound() - sourceDom.getUpperBound());
+              Time maxDistance = cast_int(targetDom.getUpperBound() - sourceDom.getLowerBound());
 
               // if this intersect() call causes a violation
               // we need to have the constraint network know the culprit (constraint)
@@ -817,8 +817,8 @@ namespace EUROPA {
       checkError(distance->lastDomain().isInterval(), constraint->getKey() << " is invalid");
       const TemporalConstraintId& tnetConstraint = constraint->getExternalEntity();
       const IntervalIntDomain& dom = static_cast<const IntervalIntDomain&>(distance->lastDomain());
-      Time lb= (Time) cast_basis(dom.getLowerBound());
-      Time ub= (Time) cast_basis(dom.getUpperBound());
+      Time lb= cast_int(dom.getLowerBound());
+      Time ub= cast_int(dom.getUpperBound());
       debugMsg("TemporalPropagator:updateTemporalConstraint", "Calling updateConstraint");
       updateConstraint(distance, tnetConstraint, lb, ub);
     }
@@ -868,12 +868,12 @@ namespace EUROPA {
       EntityId cnetConstraint = tnetConstraint->getExternalEntity();
       tnetConstraint->clearExternalEntity();
       m_tnet->removeTemporalConstraint(tnetConstraint);
-      newConstraint = m_tnet->addTemporalConstraint(source, target, (Time)lb, (Time)ub);
+      newConstraint = m_tnet->addTemporalConstraint(source, target, lb, ub);
       if(!cnetConstraint.isNoId()){
         newConstraint->setExternalEntity(cnetConstraint);
         cnetConstraint->clearExternalEntity();
         cnetConstraint->setExternalEntity(newConstraint);
-        publish(notifyConstraintAdded(cnetConstraint, newConstraint,  (Time)lb, (Time)ub));
+        publish(notifyConstraintAdded(cnetConstraint, newConstraint,  lb, ub));
 
         debugMsg("TemporalPropagator:updateConstraint",
                  "ADDED-Constraint (tnet) " << newConstraint->getKey() << " for external constraint " << cnetConstraint->getKey());
@@ -881,7 +881,7 @@ namespace EUROPA {
       else {
         check_error(target == getTimepoint(var));
         target->setBaseDomainConstraint(newConstraint);
-        publish(notifyBaseDomainConstraintAdded(var, newConstraint,  (Time)lb, (Time)ub));
+        publish(notifyBaseDomainConstraintAdded(var, newConstraint,  lb, ub));
 
         debugMsg("TemporalPropagator:updateConstraint",
                  "ADDED-Constraint (Base Domain) " <<  newConstraint << " for Variable " << var->getKey()
@@ -1069,7 +1069,7 @@ namespace EUROPA {
       return tp->getReftime();
     }
     // Otherwise var is not (yet) ref timepoint, just return lb for now
-    return (Time) cast_basis(var->lastDomain().getLowerBound());
+    return cast_int(var->lastDomain().getLowerBound());
   }
 
   void TemporalPropagator::getMinPerturbTimes(const std::vector<ConstrainedVariableId>& timevars,
@@ -1121,9 +1121,9 @@ namespace EUROPA {
       else
         newreftimes[i] = oldreftimes[i];
       //std::cerr << timevars[i]->parent()->toString() << " "
-                //<< timevars[i]->lastDomain().getLowerBound() << " "
-                //<< timevars[i]->lastDomain().getUpperBound() << " "
-                //<< newreftimes[i] << " " << oldreftimes[i] << "\n";
+      //          << timevars[i]->lastDomain().getLowerBound() << " "
+      //          << timevars[i]->lastDomain().getUpperBound() << " "
+      //          << newreftimes[i] << " " << oldreftimes[i] << "\n";
 
       // Push the ub props for j>i to uppers.
       for (unsigned j=i+1; j<timevars.size(); j++) {
@@ -1158,8 +1158,8 @@ namespace EUROPA {
     for (std::list<DedgeId>::const_iterator it = edgeNogoodList.begin();
          it != edgeNogoodList.end(); it++) {
       DedgeId edge = *it;
-      TimepointId from = (TimepointId) edge->from;
-      TimepointId to = (TimepointId) edge->to;
+      TimepointId from = edge->from;
+      TimepointId to = edge->to;
       Time length = edge->length;
       ConstrainedVariableId fromvar,tovar;
       if (from == origin)

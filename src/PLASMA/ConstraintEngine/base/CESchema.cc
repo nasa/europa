@@ -50,7 +50,7 @@ namespace EUROPA
       debugMsg("CESchema::registerDataType", "Over-writing prior registration for " << dt->getName().toString());
       DataTypeId oldFactory = m_dataTypes.find(dt->getName().getKey())->second;
       m_dataTypes.erase(dt->getName().getKey());
-      delete (DataType*) oldFactory;
+      delete static_cast<DataType*>(oldFactory);
     }
 
     checkError(m_dataTypes.find(dt->getName().getKey()) == m_dataTypes.end(), "Already have '" + dt->getName().toString() + "' registered.");
@@ -73,7 +73,7 @@ namespace EUROPA
         DataTypeId dt = (it++)->second;
         debugMsg("DataType:purgeAll",
              "Removing data type " << dt->getName().toString());
-        delete (DataType *) dt;
+        delete static_cast<DataType *>(dt);
       }
       m_dataTypes.clear();
   }
@@ -130,7 +130,7 @@ namespace EUROPA
       debugMsg("CESchema::registerCFunction", "Over-writing prior registration for " << cf->getName().toString());
       CFunctionId old = m_cfunctions.find(cf->getName().getKey())->second;
       m_cfunctions.erase(cf->getName().getKey());
-      delete (CFunction*) old;
+      delete static_cast<CFunction*>(old);
     }
 
     checkError(m_cfunctions.find(cf->getName().getKey()) == m_cfunctions.end(), "Already have '" + cf->getName().toString() + "' registered.");
@@ -157,7 +157,7 @@ namespace EUROPA
         CFunctionId cf = (it++)->second;
         debugMsg("CESchema:purgeAll",
              "Removing CFunction " << cf->getName().toString());
-        delete (CFunction *) cf;
+        delete static_cast<CFunction *>(cf);
       }
       m_cfunctions.clear();
   }

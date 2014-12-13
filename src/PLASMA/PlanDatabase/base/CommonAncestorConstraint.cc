@@ -30,15 +30,15 @@ namespace EUROPA{
       apply(m_second, m_first);
   }
 
-  void CommonAncestorConstraint::handleExecute(const ConstrainedVariableId& variable,
-					       int argIndex,
-					       const DomainListener::ChangeType& changeType){
+  void CommonAncestorConstraint::handleExecute(const ConstrainedVariableId&,
+					       unsigned int,
+					       const DomainListener::ChangeType&){
     handleExecute();
   }
 
-  bool CommonAncestorConstraint::canIgnore(const ConstrainedVariableId& variable,
-					   int argIndex,
-					   const DomainListener::ChangeType& changeType){
+  bool CommonAncestorConstraint::canIgnore(const ConstrainedVariableId&,
+					   unsigned int argIndex,
+					   const DomainListener::ChangeType&){
     check_error(argIndex <= 2);
     return (!m_first.isSingleton() && !m_second.isSingleton());
   }

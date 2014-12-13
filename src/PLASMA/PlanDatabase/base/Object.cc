@@ -56,6 +56,8 @@ namespace EUROPA {
     m_id.remove();
   }
 
+void Object::constructor(const std::vector<const Domain*>&) {}
+
   /*
    * Hack! Code generation currently skips the factories and directly calls the constructor that specifies the parent,
    * so this is necessary for the interpreter to provide the same behavior
@@ -193,7 +195,8 @@ namespace EUROPA {
       debugMsg("Object:remove:token", "Also removing " << constraint->toString());
 
       // If the constraint is a precedence constraint, the additional cleanup required
-      std::map<eint, int>::iterator pos = m_keyPairsByConstraintKey.find(constraint->getKey());
+      std::map<eint, std::pair<eint, eint> >::iterator pos =
+          m_keyPairsByConstraintKey.find(constraint->getKey());
       if(pos != m_keyPairsByConstraintKey.end())
 	removePrecedenceConstraint(constraint);
     }
@@ -232,25 +235,27 @@ namespace EUROPA {
   void Object::getOrderingChoices( const TokenId& token,
 				   std::vector< std::pair<TokenId, TokenId> >& results,
 #ifdef _MSC_VER
-				   unsigned int limit
+				   unsigned long limit
 #else
-				   unsigned int limit
+				   unsigned long limit
 #endif
 				   ) {
     check_error(limit > 0, "Cannot set limit to less than 1.");
     results.push_back(std::make_pair(token, token));
   }
 
-  unsigned int Object::countOrderingChoices(const TokenId& token, unsigned int limit){
-    std::vector< std::pair<TokenId, TokenId> > results;
-    getOrderingChoices(token, results, limit);
-    m_lastOrderingChoiceCount = results.size();
-    return m_lastOrderingChoiceCount;
-  }
+unsigned long Object::countOrderingChoices(const TokenId& token, unsigned long limit){
+  std::vector< std::pair<TokenId, TokenId> > results;
+  getOrderingChoices(token, results, limit);
+  m_lastOrderingChoiceCount = results.size();
+  return m_lastOrderingChoiceCount;
+}
 
-  unsigned int Object::lastOrderingChoiceCount(const TokenId& token) const{ return m_lastOrderingChoiceCount; }
+unsigned long Object::lastOrderingChoiceCount(const TokenId&) const{
+  return m_lastOrderingChoiceCount;
+}
 
-  void Object::getTokensToOrder(std::vector<TokenId>& results) {}
+void Object::getTokensToOrder(std::vector<TokenId>&) {}
 
   bool Object::hasTokensToOrder() const {
     return(false);
@@ -260,60 +265,57 @@ namespace EUROPA {
     constrain(predecessor, successor, true);
   }
 
-  void Object::constrain(const TokenId& predecessor, const TokenId& successor, bool isExplicit) {
-    check_error(predecessor.isValid());
-    checkError(predecessor->isActive(), predecessor->toString() << ": " << predecessor->getState()->toString());
-    check_error(successor.isValid());
-    checkError(successor->isActive(), successor->toString() << ": " << successor->getState()->toString());
+void Object::constrain(const TokenId& predecessor, const TokenId& successor, bool isExplicit) {
+  check_error(predecessor.isValid());
+  checkError(predecessor->isActive(), predecessor->toString() << ": " << predecessor->getState()->toString());
+  check_error(successor.isValid());
+  checkError(successor->isActive(), successor->toString() << ": " << successor->getState()->toString());
 
-    check_error(!isConstrainedToPrecede(predecessor, successor),
-		"Attempted to constrain previously constrained tokens.");
+  check_error(!isConstrainedToPrecede(predecessor, successor),
+              "Attempted to constrain previously constrained tokens.");
 
-    // Post constraints on object variable, predecessor only in event they are equal
-    constrainToThisObjectAsNeeded(predecessor);
+  // Post constraints on object variable, predecessor only in event they are equal
+  constrainToThisObjectAsNeeded(predecessor);
 
-    debugMsg("Object:constrain",
-             "Constraining " << predecessor->toString() << " to be before " << successor->toString() <<
-             (isExplicit ? " explicitly." : " implicitly."));
-    int encodedKey = makeKey(predecessor, successor);
+  debugMsg("Object:constrain",
+           "Constraining " << predecessor->toString() << " to be before " << successor->toString() <<
+           (isExplicit ? " explicitly." : " implicitly."));
+  std::pair<eint, eint> encodedKey = std::make_pair(predecessor->getKey(),
+                                                    successor->getKey());
 
-    condDebugMsg(m_constraintsByKeyPair.find(encodedKey) != m_constraintsByKeyPair.end(), "Object:makeKey",
-		 "Collision detected for " << predecessor->toString() << " and " << successor->toString() <<
-		 " with " << encodedKey);
+  ConstraintId constraint;
 
-    ConstraintId constraint;
+  // If successor is not noId then add the precede constraint.
+  if (predecessor != successor) {
+    constrainToThisObjectAsNeeded(successor); // Also constrain successor if necessary
 
-    // If successor is not noId then add the precede constraint.
-    if (predecessor != successor) {
-      constrainToThisObjectAsNeeded(successor); // Also constrain successor if necessary
+    // Create the precedence constraint
+    std::vector<ConstrainedVariableId> vars;
+    vars.push_back(predecessor->end());
+    vars.push_back(successor->start());
+    constraint =  getPlanDatabase()->getConstraintEngine()->createConstraint(
+        LabelStr("precedes"),
+        vars);
 
-      // Create the precedence constraint
-      std::vector<ConstrainedVariableId> vars;
-      vars.push_back(predecessor->end());
-      vars.push_back(successor->start());
-      constraint =  getPlanDatabase()->getConstraintEngine()->createConstraint(
-                        LabelStr("precedes"),
-						vars);
+    // Store for bi-directional access by encoded key pair and constraint
+    m_constraintsByKeyPair.insert(std::make_pair(encodedKey, constraint));
+    m_keyPairsByConstraintKey.insert(std::make_pair(constraint->getKey(), encodedKey));
 
-      // Store for bi-directional access by encoded key pair and constraint
-      m_constraintsByKeyPair.insert(std::pair<int, ConstraintId>(encodedKey, constraint));
-      m_keyPairsByConstraintKey.insert(std::make_pair(constraint->getKey(), encodedKey));
-
-      // Store for access by token
-      m_constraintsByTokenKey.insert(std::make_pair(predecessor->getKey(), constraint));
-      m_constraintsByTokenKey.insert(std::make_pair(successor->getKey(), constraint));
-    }
-
-    if(isExplicit)
-      m_explicitConstraints.insert(constraint.isId() ? constraint->getKey() : predecessor->getKey());
-
-    m_planDatabase->notifyConstrained(m_id, predecessor, successor);
-    check_error(isValid());
-
-    if (getPlanDatabase()->getConstraintEngine()->getAutoPropagation())
-    	getPlanDatabase()->getConstraintEngine()->propagate();
-
+    // Store for access by token
+    m_constraintsByTokenKey.insert(std::make_pair(predecessor->getKey(), constraint));
+    m_constraintsByTokenKey.insert(std::make_pair(successor->getKey(), constraint));
   }
+
+  if(isExplicit)
+    m_explicitConstraints.insert(constraint.isId() ? constraint->getKey() : predecessor->getKey());
+
+  m_planDatabase->notifyConstrained(m_id, predecessor, successor);
+  check_error(isValid());
+
+  if (getPlanDatabase()->getConstraintEngine()->getAutoPropagation())
+    getPlanDatabase()->getConstraintEngine()->propagate();
+
+}
 
   void Object::free(const TokenId& predecessor, const TokenId& successor){
     free(predecessor, successor, true);
@@ -444,8 +446,9 @@ namespace EUROPA {
   }
 
   ConstraintId Object::getPrecedenceConstraint(const TokenId& predecessor, const TokenId& successor) const{
-    int encodedKey = makeKey(predecessor, successor);
-    std::multimap<int, ConstraintId>::const_iterator it = m_constraintsByKeyPair.find(encodedKey);
+    std::pair<eint, eint> encodedKey = std::make_pair(predecessor->getKey(), successor->getKey());
+    std::multimap<std::pair<eint, eint>, ConstraintId>::const_iterator it =
+        m_constraintsByKeyPair.find(encodedKey);
     while(it != m_constraintsByKeyPair.end() && it->first == encodedKey){
       ConstraintId constraint = it->second;
       if(constraint->getScope()[0] == predecessor->end() &&
@@ -480,7 +483,7 @@ namespace EUROPA {
     bool singletonFound = false;
     while(it != m_constraintsByTokenKey.end() && it->first == token->getKey()){
       ConstraintId constraint = it->second;
-      std::map<eint, int>::const_iterator pos = m_keyPairsByConstraintKey.find(constraint->getKey());
+      std::map<eint, std::pair<eint, eint> >::const_iterator pos = m_keyPairsByConstraintKey.find(constraint->getKey());
       if(pos == m_keyPairsByConstraintKey.end()){
 	check_error(singletonFound == false,
 		    "Can only find one singleton constraint per token.");
@@ -583,10 +586,13 @@ namespace EUROPA {
       check_error(Entity::getEntity(it->first).isValid());
     }
 
-    for(std::multimap<int, ConstraintId>::const_iterator it = m_constraintsByKeyPair.begin();
+    for(std::multimap<std::pair<eint, eint>, ConstraintId>::const_iterator it =
+            m_constraintsByKeyPair.begin();
 	it != m_constraintsByKeyPair.end();
 	++it){
-      checkError(it->second.isValid(), "Invalid constraint for key pair " << LabelStr(it->first).toString());
+      checkError(it->second.isValid(),
+                 "Invalid constraint for key pair <" << it->first.first << " " <<
+                 it->first.second << ">");
       checkError(m_keyPairsByConstraintKey.find(it->second->getKey())->second == it->first,
 		  "Lookup should be symmetric.");
     }
@@ -594,57 +600,56 @@ namespace EUROPA {
     return true;
   }
 
-  ConstrainedVariableId Object::addVariable(const Domain& baseDomain, const char* name){
-      std::string varTypeName = "";
-      Schema::NameValueVector members = m_planDatabase->getSchema()->getMembers(m_type);
-      for (unsigned int i = 0; i < members.size(); i++) {
-          debugMsg("Object:typeForNewMember", "member [" << members[i].first.c_str() << ", " << members[i].second.c_str() << "]");
-          if (strcmp( members[i].second.c_str(), name) == 0 ) {
-              varTypeName = members[i].first.c_str();
-          }
-      }
-
-      if (varTypeName == "") {
-           varTypeName = baseDomain.getTypeName().c_str();
-      }
-
-      const Domain& typeDomain = m_planDatabase->getConstraintEngine()->getCESchema()->baseDomain(varTypeName.c_str());
-      check_error(baseDomain.isSubsetOf(typeDomain), "Variable " + std::string(name) + " of type " +
-		  varTypeName.c_str() +" can not be set to " + baseDomain.toString());
-
-
-      check_error(!isComplete(),
-		  "Cannot add variable " + std::string(name) +
-		  " after completing object construction for " + m_name.toString());
-
-      check_error(m_planDatabase->getSchema()->canContain(m_type, varTypeName.c_str(), name),
-		  "Cannot add a variable " + std::string(name) + " of type " +
-		  baseDomain.getTypeName().toString() +
-		  " to objects of type " + m_type.toString());
-
-
-      if (!baseDomain.isSubsetOf(typeDomain)) {
-	return ConstrainedVariableId::noId();
-      }
-
-
-      std::string fullVariableName(m_name.toString() + "." + name);
-
-      ConstrainedVariableId id =
-          m_planDatabase->getConstraintEngine()->createVariable(
-	                            varTypeName.c_str(),
-				    baseDomain,
-				    false, // TODO: Should this be considered internal, I think so?
-				    true,
-				    fullVariableName.c_str(),
-				    m_id,
-				    m_variables.size()
-	      );
-
-      m_variables.push_back(id);
-
-      return(id);
+ConstrainedVariableId Object::addVariable(const Domain& baseDomain, const char* name){
+  std::string varTypeName = "";
+  Schema::NameValueVector members = m_planDatabase->getSchema()->getMembers(m_type);
+  for (unsigned int i = 0; i < members.size(); i++) {
+    debugMsg("Object:typeForNewMember", "member [" << members[i].first.c_str() << ", " << members[i].second.c_str() << "]");
+    if (strcmp( members[i].second.c_str(), name) == 0 ) {
+      varTypeName = members[i].first.c_str();
     }
+  }
+
+  if (varTypeName == "") {
+    varTypeName = baseDomain.getTypeName().c_str();
+  }
+
+  const Domain& typeDomain = m_planDatabase->getConstraintEngine()->getCESchema()->baseDomain(varTypeName.c_str());
+  check_error(baseDomain.isSubsetOf(typeDomain), "Variable " + std::string(name) + " of type " +
+              varTypeName.c_str() +" can not be set to " + baseDomain.toString());
+
+
+  check_error(!isComplete(),
+              "Cannot add variable " + std::string(name) +
+              " after completing object construction for " + m_name.toString());
+
+  check_error(m_planDatabase->getSchema()->canContain(m_type, varTypeName.c_str(), name),
+              "Cannot add a variable " + std::string(name) + " of type " +
+              baseDomain.getTypeName().toString() +
+              " to objects of type " + m_type.toString());
+
+
+  if (!baseDomain.isSubsetOf(typeDomain)) {
+    return ConstrainedVariableId::noId();
+  }
+
+
+  std::string fullVariableName(m_name.toString() + "." + name);
+
+  ConstrainedVariableId id =
+      m_planDatabase->getConstraintEngine()->createVariable(
+          varTypeName.c_str(),
+          baseDomain,
+          false, // TODO: Should this be considered internal, I think so?
+          true,
+          fullVariableName.c_str(),
+          m_id,
+          static_cast<unsigned int>(m_variables.size()));
+
+  m_variables.push_back(id);
+
+  return(id);
+}
 
 
   void Object::notifyOrderingRequired(const TokenId& token){
@@ -657,9 +662,9 @@ namespace EUROPA {
 
 
   /** Stubs for notification handlers **/
-  void Object::notifyMerged(const TokenId& token){}
+  void Object::notifyMerged(const TokenId&){}
 
-  void Object::notifyRejected(const TokenId& token){}
+  void Object::notifyRejected(const TokenId&){}
 
   void Object::notifyDeleted(const TokenId& token){
     remove(token);
@@ -691,17 +696,15 @@ namespace EUROPA {
     return sstr.str();
   }
 
-
-  int Object::makeKey(const TokenId& a, const TokenId& b){
-    return (cast_int(a->getKey()) << 16) ^ cast_int(b->getKey());
-  }
-
   void Object::removePrecedenceConstraint(const ConstraintId& constraint){
     TokenId predecessor = constraint->getScope()[0]->parent();
     TokenId successor = constraint->getScope()[1]->parent();
 
-    int encodedKey = makeKey(predecessor, successor);
-    std::multimap<int, ConstraintId>::iterator it = m_constraintsByKeyPair.find(encodedKey);
+    std::pair<eint, eint> encodedKey = std::make_pair(predecessor->getKey(),
+                                                      successor->getKey());
+    std::multimap<std::pair<eint, eint>, ConstraintId>::iterator it =
+        m_constraintsByKeyPair.find(encodedKey);
+
     while(it != m_constraintsByKeyPair.end() && it->first == encodedKey){
       ConstraintId c = it->second;
       if(c == constraint){
@@ -735,43 +738,42 @@ namespace EUROPA {
 	  return getType().toString();
   }
 
-  PSList<PSVariable*> Object::getMemberVariables()
-  {
-	  PSList<PSVariable*> retval;
-	  const std::vector<ConstrainedVariableId>& vars = getVariables();
-	  for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
-	  ++it) {
-		  ConstrainedVariableId id = *it;
-		  retval.push_back((PSVariable *) id);
-	  }
-
-	  return retval;
+PSList<PSVariable*> Object::getMemberVariables() {
+  PSList<PSVariable*> retval;
+  const std::vector<ConstrainedVariableId>& vars = getVariables();
+  for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
+      ++it) {
+    ConstrainedVariableId id = *it;
+    retval.push_back(id_cast<PSVariable>(id));
   }
+  
+  return retval;
+}
 
-  PSVariable* Object::getMemberVariable(const std::string& name) {
-	  LabelStr realName(name);
-	  PSVariable* retval = NULL;
-	  const std::vector<ConstrainedVariableId>& vars = getVariables();
-	  for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
-	  ++it) {
-		  ConstrainedVariableId id = *it;
-		  if(id->getName() == realName) {
-			  retval = (PSVariable*) id;
-			  break;
-		  }
-	  }
-	  return retval;
+PSVariable* Object::getMemberVariable(const std::string& name) {
+  LabelStr realName(name);
+  PSVariable* retval = NULL;
+  const std::vector<ConstrainedVariableId>& vars = getVariables();
+  for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
+      ++it) {
+    ConstrainedVariableId id = *it;
+    if(id->getName() == realName) {
+      retval = id_cast<PSVariable>(id);
+      break;
+    }
   }
+  return retval;
+}
 
-  PSList<PSToken*> Object::getTokens() const {
-	  PSList<PSToken*> retval;
-	  const TokenSet& t = tokens();
-	  for(TokenSet::const_iterator it = t.begin(); it != t.end(); ++it) {
-		  TokenId id = *it;
-		  retval.push_back((PSToken *) id);
-	  }
-	  return retval;
+PSList<PSToken*> Object::getTokens() const {
+  PSList<PSToken*> retval;
+  const TokenSet& t = tokens();
+  for(TokenSet::const_iterator it = t.begin(); it != t.end(); ++it) {
+    TokenId id = *it;
+    retval.push_back(id_cast<PSToken>(id));
   }
+  return retval;
+}
 
 
   void Object::addPrecedence(PSToken* pred,PSToken* succ)

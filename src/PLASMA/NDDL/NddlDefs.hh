@@ -3,20 +3,20 @@
 
 #include "RulesEngineDefs.hh"
 
-using namespace EUROPA;
+namespace EUROPA {
+class ObjectFilterConstraint;
+typedef Id<ObjectFilterConstraint> ObjectFilterConstraintId;
+
+class ObjectFilterCondition;
+typedef Id<ObjectFilterCondition> ObjectFilterConditionId;
+}
 
 namespace NDDL {
 
-  class NddlToken;
-  typedef Id<NddlToken> NddlTokenId;
+class NddlToken;
+typedef EUROPA::Id<NddlToken> NddlTokenId;
 
-  class ObjectFilterConstraint;
-  typedef Id<ObjectFilterConstraint> ObjectFilterConstraintId;
-
-  class ObjectFilterCondition;
-  typedef Id<ObjectFilterCondition> ObjectFilterConditionId;
-
-  #define inf PLUS_INFINITY
+#define inf PLUS_INFINITY
 
 } // namespace NDDL
 

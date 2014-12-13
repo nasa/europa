@@ -73,7 +73,7 @@ Bool Dqueue::isEmpty()
 /* BucketQueue functions */
 
 
-BucketQueue::BucketQueue (int n)
+BucketQueue::BucketQueue (int)
 {
   buckets = new DnodePriorityQueue();
 }

@@ -465,6 +465,11 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
     return(outStream);
   }
 
+template<typename T, typename U>
+T* id_cast(Id<U> i) {
+  return dynamic_cast<T*>(static_cast<U*>(i));
+}
+
 } // End namespace
 
 #endif

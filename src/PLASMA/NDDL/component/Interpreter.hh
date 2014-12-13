@@ -15,6 +15,8 @@
 #include "Rule.hh"
 #include "RuleInstance.hh"
 
+#include <boost/cast.hpp>
+
 namespace EUROPA {
 
   class ExprConstant : public Expr
@@ -484,23 +486,23 @@ namespace EUROPA {
     friend class ExprRelation;
   };
 
-  class TokenEvalContext : public EvalContext
-  {
-    public:
-        TokenEvalContext(EvalContext* parent, const TokenId& tok);
-        virtual ~TokenEvalContext();
+class TokenEvalContext : public EvalContext {
+ public:
+  TokenEvalContext(EvalContext* parent, const TokenId& tok);
+  virtual ~TokenEvalContext();
 
-        virtual ConstrainedVariableId getVar(const char* name);
+  virtual ConstrainedVariableId getVar(const char* name);
 
-        virtual void* getElement(const char* name) const;
+  virtual void* getElement(const char* name) const;
 
-        virtual bool isClass(const LabelStr& className) const;
+  virtual bool isClass(const LabelStr& className) const;
 
-        TokenId& getToken();
+  TokenId getToken();
+  TokenId getToken(const char* name);
 
-    protected:
-        TokenId m_token;
-  };
+ protected:
+  TokenId m_token;
+};
 
   class InterpretedRuleInstance : public RuleInstance
   {
@@ -608,18 +610,17 @@ namespace EUROPA {
    *
    */
 
-  class RuleExpr  : public Expr
+class RuleExpr  : public Expr {
+ public:
+  virtual DataRef eval(EvalContext& context) const
   {
-  	public:
-  	    virtual DataRef eval(EvalContext& context) const
-  	    {
-  	    	RuleInstanceEvalContext* ec = (RuleInstanceEvalContext*)&context;
-  	    	return doEval(*ec);
-  	    }
-
-  	    virtual DataRef doEval(RuleInstanceEvalContext& context) const = 0;
-    virtual ~RuleExpr(){}
-  };
+    RuleInstanceEvalContext* ec = boost::polymorphic_cast<RuleInstanceEvalContext*>(&context);
+    return doEval(*ec);
+  }
+  
+  virtual DataRef doEval(RuleInstanceEvalContext& context) const = 0;
+  virtual ~RuleExpr(){}
+};
 
   class ExprIfGuard : public Expr
   {

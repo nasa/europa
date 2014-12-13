@@ -10,11 +10,6 @@
  *         emulate the unix dl functions using Apple's API.
  * @ingroup Utils
  */
-#ifndef __MINGW32__
-#  include <dlfcn.h>
-#else
-#  define RTLD_NOW 0
-#endif
 
 namespace EUROPA {
 

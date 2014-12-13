@@ -8,6 +8,8 @@
 #include "Constraints.hh"
 #include "Propagators.hh"
 
+#include <boost/cast.hpp>
+
 namespace EUROPA {
 
   ModuleRulesEngine::ModuleRulesEngine()
@@ -27,30 +29,29 @@ namespace EUROPA {
   {
   }
 
-  void ModuleRulesEngine::initialize(EngineId engine)
-  {
-      PlanDatabase* pdb = (PlanDatabase*)engine->getComponent("PlanDatabase");
-      RuleSchema* rs = new RuleSchema();
-      engine->addComponent("RuleSchema",rs);
-      RulesEngine* re = new RulesEngine(rs->getId(),pdb->getId());
-      engine->addComponent("RulesEngine",re);
+void ModuleRulesEngine::initialize(EngineId engine) {
+  PlanDatabase* pdb =
+      boost::polymorphic_cast<PlanDatabase*>(engine->getComponent("PlanDatabase"));
+  RuleSchema* rs = new RuleSchema();
+  engine->addComponent("RuleSchema",rs);
+  RulesEngine* re = new RulesEngine(rs->getId(),pdb->getId());
+  engine->addComponent("RulesEngine",re);
 
-      // Allocate an instance of Default Propagator to handle rule related constraint propagation.
-      // Will be cleaned up automatically by the ConstraintEngine
-      new DefaultPropagator("RulesEngine", pdb->getConstraintEngine(), SYSTEM_PRIORITY);
+  // Allocate an instance of Default Propagator to handle rule related constraint propagation.
+  // Will be cleaned up automatically by the ConstraintEngine
+  new DefaultPropagator("RulesEngine", pdb->getConstraintEngine(), SYSTEM_PRIORITY);
 
-      CESchema* ces = (CESchema*)engine->getComponent("CESchema");
-      REGISTER_SYSTEM_CONSTRAINT(ces,ProxyVariableRelation, "proxyRelation", "Default");
-      REGISTER_SYSTEM_CONSTRAINT(ces,RuleVariableListener, RuleVariableListener::CONSTRAINT_NAME(),"Default");
-      REGISTER_SYSTEM_CONSTRAINT(ces,LockConstraint, "filterLock", "RulesEngine");
-  }
+  CESchema* ces = boost::polymorphic_cast<CESchema*>(engine->getComponent("CESchema"));
+  REGISTER_SYSTEM_CONSTRAINT(ces,ProxyVariableRelation, "proxyRelation", "Default");
+  REGISTER_SYSTEM_CONSTRAINT(ces,RuleVariableListener, RuleVariableListener::CONSTRAINT_NAME(),"Default");
+  REGISTER_SYSTEM_CONSTRAINT(ces,LockConstraint, "filterLock", "RulesEngine");
+}
 
-  void ModuleRulesEngine::uninitialize(EngineId engine)
-  {
-      RulesEngine* re = (RulesEngine*)engine->removeComponent("RulesEngine");
-      delete re;
-
-      RuleSchema* rs = (RuleSchema*)engine->removeComponent("RuleSchema");
-      delete rs;
-  }
+void ModuleRulesEngine::uninitialize(EngineId engine) {
+  RulesEngine* re = boost::polymorphic_cast<RulesEngine*>(engine->removeComponent("RulesEngine"));
+  delete re;
+  
+  RuleSchema* rs = boost::polymorphic_cast<RuleSchema*>(engine->removeComponent("RuleSchema"));
+  delete rs;
+}
 }

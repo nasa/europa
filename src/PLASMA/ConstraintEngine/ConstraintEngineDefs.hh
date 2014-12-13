@@ -43,7 +43,7 @@ namespace EUROPA {
   typedef Id<ConstraintEngine> ConstraintEngineId;
   class ConstraintEngineListener;
   typedef Id<ConstraintEngineListener> ConstraintEngineListenerId;
-  typedef std::pair<ConstraintId, int> ConstraintEntry;
+  typedef std::pair<ConstraintId, unsigned int> ConstraintEntry;
   typedef std::list<ConstraintEntry> ConstraintList;
 
   class PostPropagationCallback;

@@ -41,14 +41,13 @@ namespace EUROPA {
 
     virtual ~Object();
 
-    virtual void constructor(const std::vector<const Domain*>& arguments) {}
+    virtual void constructor(const std::vector<const Domain*>& arguments);
 
     /**
      * @brief Add a variable as a member to the object. This is used when building the object
      * and cannot be called once the specific object instance has been closed.
      * @param baseDomain The base domain to use to populate the variable
      * @param name The member name
-     * @error If a variable of the given type with the given name cannot be added
      * @see Scheme::hasMember, Schema::canContain, Object::close()
      */
     virtual ConstrainedVariableId addVariable(const Domain& baseDomain, const char* name);
@@ -115,9 +114,9 @@ namespace EUROPA {
     virtual void getOrderingChoices( const TokenId& token,
 				     std::vector< std::pair< TokenId, TokenId > >& results,
 #ifdef _MSC_VER
-				     unsigned int limit = UINT_MAX //std::numeric_limits<unsigned int>::max()
+				     unsigned long limit = UINT_MAX //std::numeric_limits<unsigned int>::max()
 #else
-    				     unsigned int limit = std::numeric_limits<unsigned int>::max()
+    				     unsigned long limit = std::numeric_limits<unsigned long>::max()
 #endif
 				     );
     /**
@@ -125,14 +124,14 @@ namespace EUROPA {
      * @param token The Token for which we want to count possible choices
      * @param limit The max we don't want to count past
      */
-    unsigned int countOrderingChoices(const TokenId& token, unsigned int limit);
+    unsigned long countOrderingChoices(const TokenId& token, unsigned long limit);
 
     /**
      * @brief Retrieve the last computed value when a call was made to countOrderingChoices.
      * @param token The token for which we want choice count.
      * @return The last value obtained from countOrderingChoices
      */
-    unsigned int lastOrderingChoiceCount(const TokenId& token) const;
+    unsigned long lastOrderingChoiceCount(const TokenId& token) const;
 
     /**
      * @brief Get all possible active tokens on this object which require ordering.
@@ -150,7 +149,7 @@ namespace EUROPA {
      * @brief imposes a constraint such that token comes before successor. May additinally impose
      * the constraint that the object variable of each token is restricted to this object. We do not restrict
      * the case where predecessor == successor. This will simply constrain the token to this object.
-     * @param token The token to be the predecessor
+     * @param predecessor The token to be the predecessor
      * @param successor The token to be the successor.
      * @see free
      */
@@ -159,7 +158,7 @@ namespace EUROPA {
     /**
      * @brief Removes the specific constraint which must have been created by calling 'constrain'. May
      * additionally remove implied constraints to constrain tokens to an object.
-     * @param token The token that is the predecessor
+     * @param predecessor The token that is the predecessor
      * @param successor The token that is the successor
      * @see constrain
      */
@@ -172,17 +171,17 @@ namespace EUROPA {
     const std::vector<ConstrainedVariableId>& getVariables() const;
 
     /**
-     * @brief Obtain a variable by name. Variable names must be unique within the context of an object.
+     * @brief Obtain a variable by name. Variable names must be unique within the context 
+     *        of an object.  Fails with an error if a variable of the given name cannot be
+     *        found.
      * @param name The name for the requested variable.
-     * @error Will fail if a variable of the given name cannot be found
      */
     const ConstrainedVariableId& getVariable(const LabelStr& name) const;
 
     /**
      * @brief Obtain the variable by traversing a path. Requires that all contained members along the way
-     * are singletons.
+     * are singletons. Error: Will fail if there are non-singleton fields or the path is not correct.
      * @param path The index based path for traversing objects structures.
-     * @error Will fail if there are non-singleton fields or the path is not correct.
      */
     ConstrainedVariableId getVariable(const std::vector<unsigned int>& path) const;
 
@@ -325,11 +324,6 @@ namespace EUROPA {
 
     void removePrecedenceConstraint(const ConstraintId& constraint);
 
-    /**
-     * @brief Utility to generate a hashkey for a token pair
-     */
-    static int makeKey(const TokenId& a, const TokenId& b);
-
     ObjectId m_id;
     ObjectId m_parent;
     LabelStr m_type;
@@ -341,10 +335,10 @@ namespace EUROPA {
     std::vector<ConstrainedVariableId> m_variables;
     std::set<eint> m_explicitConstraints; /*!< Stores list of explicitly posted constraints to order tokens. Either the key of the constraint
 					   is stored, or in cases where it is a straight assignment of a token, the key of the token is stored. */
-    unsigned int m_lastOrderingChoiceCount; /*!< The last computed count of ordering choices */
+    unsigned long m_lastOrderingChoiceCount; /*!< The last computed count of ordering choices */
     std::multimap<eint, ConstraintId> m_constraintsByTokenKey; /**< All Precedence Constraints by Token Key */
-    std::multimap<int, ConstraintId> m_constraintsByKeyPair; /**< Precedence Constraints by  encoded key pair */
-    std::map<eint, int> m_keyPairsByConstraintKey; /**< Reverse lookup to obtain the key pair */
+    std::multimap<std::pair<eint, eint>, ConstraintId> m_constraintsByKeyPair; /**< Precedence Constraints by  encoded key pair */
+    std::map<eint, std::pair<eint, eint> > m_keyPairsByConstraintKey; /**< Reverse lookup to obtain the key pair */
     ConstrainedVariableId m_thisVar; /**< Used to constrain against */
 
   private:

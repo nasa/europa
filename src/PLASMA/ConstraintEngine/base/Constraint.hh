@@ -205,7 +205,9 @@ namespace EUROPA {
      *
      */
     virtual void execute();
-    virtual void execute(const ConstrainedVariableId& variable,int argIndex,const DomainListener::ChangeType& changeType);
+    virtual void execute(const ConstrainedVariableId& variable,
+                         unsigned int argIndex,
+                         const DomainListener::ChangeType& changeType);
 
     /**
      * @brief Called when no specific change event on a variable is reported.
@@ -227,7 +229,7 @@ namespace EUROPA {
      * @see ConstraintEngine::execute(), ConstraintEngine::PENDING, DomainListener::ChangeType
      */
     virtual void handleExecute(const ConstrainedVariableId& variable,
-			       int argIndex,
+			       unsigned int argIndex,
 			       const DomainListener::ChangeType& changeType);
 
     /**
@@ -243,7 +245,7 @@ namespace EUROPA {
      * @see ConstraintEngine::notify()
      */
     virtual bool canIgnore(const ConstrainedVariableId& variable,
-			   int argIndex,
+			   unsigned int argIndex,
 			   const DomainListener::ChangeType& changeType);
 
 
@@ -276,7 +278,6 @@ namespace EUROPA {
 
     /**
      * @brief Allow implementation class to take action in the event of deactivation
-     * @param delegate The constraint which will justify deactivation
      */
     virtual void handleDeactivate(){}
 

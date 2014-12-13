@@ -81,7 +81,9 @@ namespace EUROPA {
  
     double FlawHandler::getWeight() const {return m_weight;}
     
-    unsigned int FlawHandler::getMaxChoices() const {return m_maxChoices;}
+  unsigned int FlawHandler::getMaxChoices() const {return m_maxChoices;}
+
+  bool FlawHandler::customStaticMatch(const EntityId&) const {return true;}
 
     std::string FlawHandler::toString() const{
       std::stringstream sstr;

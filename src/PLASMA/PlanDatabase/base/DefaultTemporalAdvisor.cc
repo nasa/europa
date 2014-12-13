@@ -52,49 +52,49 @@ namespace EUROPA {
   }
 
 
-  /**
-   * @brief Trivially return true since basic domain intersection tests have been done in
-   * the plan database already
-   */
-  bool DefaultTemporalAdvisor::canBeConcurrent(const TokenId& first, const TokenId& second){
-    return true;
-  }
+/**
+ * @brief Trivially return true since basic domain intersection tests have been done in
+ * the plan database already
+ */
+bool DefaultTemporalAdvisor::canBeConcurrent(const TokenId&, const TokenId&){
+  return true;
+}
 
   const TemporalAdvisorId& DefaultTemporalAdvisor::getId() const {return m_id;}
 
-  /**
-   * @brief Default return that the distance is infinite
-   */
-  const IntervalIntDomain DefaultTemporalAdvisor::getTemporalDistanceDomain(const TimeVarId& first, 
-									    const TimeVarId& second,
-									    const bool exact){ 
-    if( first->getExternalEntity().isNoId() 
-	||
-	second->getExternalEntity().isNoId() )
-      {
-	eint f_lb = cast_int(first->getDerivedDomain().getLowerBound());
-	eint f_ub = cast_int(first->getDerivedDomain().getUpperBound());
+/**
+ * @brief Default return that the distance is infinite
+ */
+const IntervalIntDomain DefaultTemporalAdvisor::getTemporalDistanceDomain(const TimeVarId& first, 
+                                                                          const TimeVarId& second,
+                                                                          const bool){ 
+  if( first->getExternalEntity().isNoId() 
+      ||
+      second->getExternalEntity().isNoId() )
+  {
+    eint f_lb = cast_int(first->getDerivedDomain().getLowerBound());
+    eint f_ub = cast_int(first->getDerivedDomain().getUpperBound());
 	
-	eint s_lb = cast_int(second->getDerivedDomain().getLowerBound());
-	eint s_ub = cast_int(second->getDerivedDomain().getUpperBound());
+    eint s_lb = cast_int(second->getDerivedDomain().getLowerBound());
+    eint s_ub = cast_int(second->getDerivedDomain().getUpperBound());
 	
-	eint min_distance = -g_infiniteTime();
+    eint min_distance = -g_infiniteTime();
 
-	if( s_lb > -g_infiniteTime() && f_ub < g_infiniteTime() ) {
-	    min_distance = std::max( min_distance, s_lb - f_ub );
-	  }
+    if( s_lb > -g_infiniteTime() && f_ub < g_infiniteTime() ) {
+      min_distance = std::max( min_distance, s_lb - f_ub );
+    }
 	  
-	eint max_distance = g_infiniteTime();
+    eint max_distance = g_infiniteTime();
 	
-	if( f_lb > -g_infiniteTime() && s_ub < g_infiniteTime() ) {
-	  max_distance = std::min( max_distance, s_ub - f_lb );
-	  }
+    if( f_lb > -g_infiniteTime() && s_ub < g_infiniteTime() ) {
+      max_distance = std::min( max_distance, s_ub - f_lb );
+    }
 
-	return(IntervalIntDomain( min_distance, max_distance ));
-      }
-
-    return(IntervalIntDomain(-g_infiniteTime(), g_infiniteTime()));
+    return(IntervalIntDomain( min_distance, max_distance ));
   }
+
+  return(IntervalIntDomain(-g_infiniteTime(), g_infiniteTime()));
+}
 
   void DefaultTemporalAdvisor::getTemporalDistanceDomains(const ConstrainedVariableId& first,
                                                           const std::vector<ConstrainedVariableId>&

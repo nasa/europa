@@ -166,10 +166,10 @@ namespace EUROPA {
     Domain& m_y;
     Domain& m_z;
 
-    static const int X = 0;
-    static const int Y = 1;
-    static const int Z = 2;
-    static const int ARG_COUNT = 3;
+    static const unsigned int X = 0;
+    static const unsigned int Y = 1;
+    static const unsigned int Z = 2;
+    static const unsigned int ARG_COUNT = 3;
   };
 
   class AddEqualCT : public ConstraintType {
@@ -203,10 +203,10 @@ namespace EUROPA {
     void handleExecute();
 
   private:
-    static const int X = 0;
-    static const int Y = 1;
-    static const int Z = 2;
-    static const int ARG_COUNT = 3;
+    static const unsigned int X = 0;
+    static const unsigned int Y = 1;
+    static const unsigned int Z = 2;
+    static const unsigned int ARG_COUNT = 3;
   };
 
 
@@ -220,10 +220,10 @@ namespace EUROPA {
     void handleExecute();
 
   private:
-    static const int X = 0;
-    static const int Y = 1;
-    static const int Z = 2;
-    static const int ARG_COUNT = 3;
+    static const unsigned int X = 0;
+    static const unsigned int Y = 1;
+    static const unsigned int Z = 2;
+    static const unsigned int ARG_COUNT = 3;
   };
 
 
@@ -241,16 +241,21 @@ namespace EUROPA {
       inline void handleExecute() { }
       void handleDiscard();
 
-      static const int A = 0;
-      static const int B = 1;
-      static const int C = 2;
-      static const int D = 3;
-      static const int ARG_COUNT = 4;
+      static const unsigned int A = 0;
+      static const unsigned int B = 1;
+      static const unsigned int C = 2;
+      static const unsigned int D = 3;
+      static const unsigned int ARG_COUNT = 4;
 
       Variable<IntervalDomain> m_interimVariable;
       MultEqualConstraint m_multEqualConstraint;
       AddEqualConstraint m_addEqualConstraint;
   };
+
+    /**
+   * @class AllDiff
+   * @brief A != B && A != C && B != C && A != D && B != D && ...
+   */
 
   class AllDiffConstraint : public Constraint {
   public:
@@ -276,6 +281,9 @@ namespace EUROPA {
     ConstraintId m_condAllDiffConstraint;
   };
 
+  /**
+   * @brief Calculate the euclidean distance in 2-d space between between 2 points
+   */
 class CalcDistanceConstraint : public Constraint {
   public:
     CalcDistanceConstraint(const LabelStr& name,
@@ -322,7 +330,7 @@ class LessThanEqualConstraint : public Constraint {
     void handleExecute();
 
     bool canIgnore(const ConstrainedVariableId& variable,
-		   int argIndex,
+		   unsigned int argIndex,
 		   const DomainListener::ChangeType& changeType);
 
     static void propagate(Domain& domx, Domain& domy);
@@ -332,11 +340,21 @@ class LessThanEqualConstraint : public Constraint {
 
     Domain& m_x;
     Domain& m_y;
-    static const int X = 0;
-    static const int Y = 1;
-    static const int ARG_COUNT = 2;
+    static const unsigned int X = 0;
+    static const unsigned int Y = 1;
+    static const unsigned int ARG_COUNT = 2;
   };
   CREATE_CONSTRAINT_TYPE(TwoSameNumericArgumentsCT, LessThanEqualCT, LessThanEqualConstraint);
+
+
+  /**
+   * @class CardinalityConstraint
+   * @brief First variable must be greater than or equal the count of the
+   * other variables that are true.
+   * @note Supports numeric domains for the other variables with the
+   * usual C/C++ convention of false being zero and true being
+   * any non-zero value.
+   */
 
 class CardinalityConstraint : public Constraint {
   public:
@@ -365,6 +383,11 @@ class CardinalityConstraint : public Constraint {
     ConstraintId m_countNonZerosConstraint;
   };
 
+    /**
+   * @class CondAllDiff
+   * @brief If A, then B != C && B != D && C != D && ... ; if not A, then !(B != C && B != D && C != D && ...).
+   */
+
 class CondAllDiffConstraint : public Constraint {
   public:
     CondAllDiffConstraint(const LabelStr& name,
@@ -377,8 +400,13 @@ class CondAllDiffConstraint : public Constraint {
     void handleExecute();
 
   private:
-    const unsigned int ARG_COUNT;
+    const unsigned long ARG_COUNT;
   };
+
+    /**
+   * @class CondAllSame
+   * @brief If A, then B == C && B == D && C == D && ... ; if not A, then !(B == C && B == D && C == D && ...).
+   */
 
 class CondAllSameConstraint : public Constraint {
   public:
@@ -392,8 +420,14 @@ class CondAllSameConstraint : public Constraint {
     void handleExecute();
 
   private:
-    const unsigned int ARG_COUNT;
+    const unsigned long ARG_COUNT;
   };
+
+    /**
+   * @class CondEqualSumConstraint
+   * @brief If A is true, then B = C + D ...; if A is false, B != C + D ...
+   * Converted into two constraints: CondAllSame(A, B, sum) and EqualSum(sum, C, D, ...).
+   */
 
 class CondEqualSumConstraint : public Constraint {
   public:
@@ -453,6 +487,12 @@ class CountNonZerosConstraint : public Constraint {
     ConstraintId m_countZerosConstraint;
   };
 
+  /**
+   * @class CountZerosConstraint
+   * @brief First variable is the count of the rest that can be zero.
+   * @note Supports boolean domains with the usual C/C++ convention of false
+   * being zero and true being non-zero.
+   */
 class CountZerosConstraint : public Constraint {
   public:
     CountZerosConstraint(const LabelStr& name,
@@ -465,12 +505,13 @@ class CountZerosConstraint : public Constraint {
     void handleExecute();
   };
 
-  /**
-   * @class CountNonZerosConstraint
-   * @brief First variable is the count of the rest that can be non-zero.
-   * @note Supports boolean domains with the usual C/C++ convention of false
-   * being zero and true being non-zero.
+
+    /**
+   * @brief DistanceFromSquaresConstraint(x, y, a) maintains the relation
+   * @li a = sqrt(x + y)
+   * if x and y are singleton
    */
+
     class DistanceFromSquaresConstraint : public Constraint {
   public:
     DistanceFromSquaresConstraint(const LabelStr& name,
@@ -481,10 +522,10 @@ class CountZerosConstraint : public Constraint {
     void handleExecute();
 
   private:
-    static const int V1 = 0;
-    static const int V2 = 1;
-    static const int RES = 2;
-    static const int ARG_COUNT = 3;
+    static const unsigned int V1 = 0;
+    static const unsigned int V2 = 1;
+    static const unsigned int RES = 2;
+    static const unsigned int ARG_COUNT = 3;
   };
 
   class EqualConstraint : public Constraint {
@@ -503,9 +544,14 @@ class CountZerosConstraint : public Constraint {
 
   private:
     bool equate(const ConstrainedVariableId& v1, const ConstrainedVariableId& v2, bool& isEmpty);
-    const unsigned int m_argCount;
+    const unsigned long m_argCount;
   };
   CREATE_CONSTRAINT_TYPE(AllSameArgumentsCT, EqualCT, EqualConstraint);
+
+    /**
+   * @class EqualMaximumConstraint
+   * @brief First variable is the maximum value of the others.
+   */
 
       class EqualMaximumConstraint : public Constraint {
   public:
@@ -519,6 +565,11 @@ class CountZerosConstraint : public Constraint {
     void handleExecute();
   };
 
+  /**
+   * @class EqualMinimumConstraint
+   * @brief First variable is the minimum value of the others.
+   */
+
 class EqualMinimumConstraint : public Constraint {
   public:
     EqualMinimumConstraint(const LabelStr& name,
@@ -530,6 +581,12 @@ class EqualMinimumConstraint : public Constraint {
 
     void handleExecute();
   };
+
+    /**
+   * @class EqualProductConstraint
+   * @brief A = B * C where B and C can each be products.
+   * Converted into an AddEqualConstraint and/or two EqProductConstraints with fewer variables.
+   */
 
 class EqualProductConstraint : public Constraint {
   public:
@@ -547,12 +604,17 @@ class EqualProductConstraint : public Constraint {
 
     void handleDiscard();
 
-    const unsigned int ARG_COUNT;
+    const unsigned long ARG_COUNT;
 
     ConstraintId m_eqProductC1, m_eqProductC2, m_eqProductC3, m_eqProductC4, m_eqProductC5;
     Variable<IntervalDomain> m_product1, m_product2, m_product3, m_product4;
   };
 
+/**
+ * @class EqualSumConstraint
+ * @brief A = B + C where B and C can each be sums.
+ * Converted into an AddEqualConstraint and/or two EqSumConstraints with fewer variables.
+ */
 class EqualSumConstraint : public Constraint {
   public:
     EqualSumConstraint(const LabelStr& name,
@@ -569,11 +631,17 @@ class EqualSumConstraint : public Constraint {
 
     void handleDiscard();
 
-    const unsigned int ARG_COUNT;
+    const unsigned long ARG_COUNT;
 
     ConstraintId m_eqSumC1, m_eqSumC2, m_eqSumC3, m_eqSumC4, m_eqSumC5;
     Variable<IntervalDomain> m_sum1, m_sum2, m_sum3, m_sum4;
   };
+
+    /**
+   * @class GreaterOrEqThanSumConstraint
+   * @brief A >= B + C + ...
+   * Converted into two constraints: A >= temp and temp equal to the sum of the rest.
+   */
 
 class GreaterOrEqThanSumConstraint : public Constraint {
   public:
@@ -613,17 +681,23 @@ class LessThanConstraint : public Constraint {
     void handleExecute();
 
     bool canIgnore(const ConstrainedVariableId& variable,
-		   int argIndex,
+		   unsigned int argIndex,
 		   const DomainListener::ChangeType& changeType);
 
     static void propagate(IntervalDomain& domx, IntervalDomain& domy);
 
   private:
-    static const int X = 0;
-    static const int Y = 1;
-    static const int ARG_COUNT = 2;
+    static const unsigned int X = 0;
+    static const unsigned int Y = 1;
+    static const unsigned int ARG_COUNT = 2;
   };
   CREATE_CONSTRAINT_TYPE(TwoSameNumericArgumentsCT, LessThanCT, LessThanConstraint);
+
+    /**
+   * @class GreaterThanSumConstraint
+   * @brief A > B + C + ...
+   * Converted into two constraints: A < temp and temp equal to the sum of the rest.
+   */
 
 class GreaterThanSumConstraint : public Constraint {
   public:
@@ -652,6 +726,12 @@ class GreaterThanSumConstraint : public Constraint {
     ConstraintId m_eqSumConstraint;
   };
 
+    /**
+   * @class LessOrEqThanSumConstraint
+   * @brief A <= B + C + ...
+   * Converted into two constraints: A <= temp and temp equal to the sum of the rest.
+   */
+
 class LessOrEqThanSumConstraint : public Constraint {
   public:
     LessOrEqThanSumConstraint(const LabelStr& name,
@@ -668,6 +748,12 @@ class LessOrEqThanSumConstraint : public Constraint {
     LessThanEqualConstraint m_lessOrEqualConstraint;
     ConstraintId m_eqSumConstraint;
   };
+
+    /**
+   * @class LessThanSumConstraint
+   * @brief A < B + C + ...
+   * Converted into two constraints: A < temp and temp equal to the sum of the rest.
+   */
 
   class LessThanSumConstraint : public Constraint {
   public:
@@ -724,8 +810,8 @@ class NegateConstraint : public Constraint {
 
     void handleExecute();
   private:
-    static const int X=0;
-    static const int Y=1;
+    static const unsigned int X=0;
+    static const unsigned int Y=1;
   };
 
 class NotEqualConstraint : public Constraint {
@@ -738,7 +824,7 @@ class NotEqualConstraint : public Constraint {
     void handleExecute();
 
     bool canIgnore(const ConstrainedVariableId& variable,
-		   int argIndex,
+		   unsigned int argIndex,
 		   const DomainListener::ChangeType& changeType);
     /**
      * @brief Helper method to do domain comparisons, and process removals if necessary
@@ -746,57 +832,15 @@ class NotEqualConstraint : public Constraint {
     static bool checkAndRemove(const Domain& domx, Domain& domy);
 
   private:
-    static const int X = 0;
-    static const int Y = 1;
-    static const int ARG_COUNT = 2;
+    static const unsigned int X = 0;
+    static const unsigned int Y = 1;
+    static const unsigned int ARG_COUNT = 2;
   };
 
   /**
    * Enforces the relation x < y
    */
 
-        /**
-   * @class EqualSumConstraint
-   * @brief A = B + C where B and C can each be sums.
-   * Converted into an AddEqualConstraint and/or two EqSumConstraints with fewer variables.
-   */
-    /**
-   * @class EqualProductConstraint
-   * @brief A = B * C where B and C can each be products.
-   * Converted into an AddEqualConstraint and/or two EqProductConstraints with fewer variables.
-   */
-    /**
-   * @class LessOrEqThanSumConstraint
-   * @brief A <= B + C + ...
-   * Converted into two constraints: A <= temp and temp equal to the sum of the rest.
-   */
-    /**
-   * @class LessThanSumConstraint
-   * @brief A < B + C + ...
-   * Converted into two constraints: A < temp and temp equal to the sum of the rest.
-   */
-    /**
-   * @class GreaterOrEqThanSumConstraint
-   * @brief A >= B + C + ...
-   * Converted into two constraints: A >= temp and temp equal to the sum of the rest.
-   */
-    /**
-   * @class GreaterThanSumConstraint
-   * @brief A > B + C + ...
-   * Converted into two constraints: A < temp and temp equal to the sum of the rest.
-   */
-    /**
-   * @class CondAllSame
-   * @brief If A, then B == C && B == D && C == D && ... ; if not A, then !(B == C && B == D && C == D && ...).
-   */
-    /**
-   * @class CondAllDiff
-   * @brief If A, then B != C && B != D && C != D && ... ; if not A, then !(B != C && B != D && C != D && ...).
-   */
-    /**
-   * @class AllDiff
-   * @brief A != B && A != C && B != C && A != D && B != D && ...
-   */
     /**
    * @class MemberImplyConstraint
    * @brief If A is subset of B, then require that C is subset of D.
@@ -813,23 +857,9 @@ class NotEqualConstraint : public Constraint {
     void handleExecute();
 
   private:
-    const unsigned int ARG_COUNT;
+    const unsigned long ARG_COUNT;
   };
 
-  /**
-   * @class CountZerosConstraint
-   * @brief First variable is the count of the rest that can be zero.
-   * @note Supports boolean domains with the usual C/C++ convention of false
-   * being zero and true being non-zero.
-   */
-  /**
-   * @class CardinalityConstraint
-   * @brief First variable must be greater than or equal the count of the
-   * other variables that are true.
-   * @note Supports numeric domains for the other variables with the
-   * usual C/C++ convention of false being zero and true being
-   * any non-zero value.
-   */
     /**
    * @class OrConstraint
    * @brief At least one of the variables must be true.
@@ -877,19 +907,6 @@ class NotEqualConstraint : public Constraint {
     unsigned int m_rvalue;
   };
 
-  /**
-   * @class EqualMinimumConstraint
-   * @brief First variable is the minimum value of the others.
-   */
-    /**
-   * @class EqualMaximumConstraint
-   * @brief First variable is the maximum value of the others.
-   */
-    /**
-   * @class CondEqualSumConstraint
-   * @brief If A is true, then B = C + D ...; if A is false, B != C + D ...
-   * Converted into two constraints: CondAllSame(A, B, sum) and EqualSum(sum, C, D, ...).
-   */
     /**
    * @class RotateScopeRightConstraint
    * @brief Rotate the scope right rotateCount places and call the otherName
@@ -903,7 +920,7 @@ class NotEqualConstraint : public Constraint {
     RotateScopeRightConstraint(const LabelStr& name,
                                const LabelStr& propagatorName,
                                const ConstraintEngineId& constraintEngine,
-                               const std::vector<ConstrainedVariableId>& variables)
+                               const std::vector<ConstrainedVariableId>& variables) __attribute__((noreturn))
       : Constraint(name, propagatorName, constraintEngine, variables) {
       // Called via REGISTER_NARY() macro's factory rather than via the
       //   REGISTER_ROTATED_NARY() macro's factory: not enough information
@@ -938,6 +955,11 @@ class NotEqualConstraint : public Constraint {
    * @brief Swap two variables in the scope and call the otherName
    * constraint.
    */
+
+    /**
+   * @brief Computes the sine of a given variable. Varable is in degrees. The constraint is a function
+   * rather than a relation. The range of the source variable must be in [0 90].
+   */
   class SineFunction : public Constraint {
   public:
     SineFunction(const LabelStr& name,
@@ -953,6 +975,12 @@ class NotEqualConstraint : public Constraint {
     Domain& m_source;
   };
 
+    /**
+   * @brief SquareOfDifference(x, y, a) maintains the relation:
+   * @li a = (x - y)^2
+   * if x and y are singleton.
+   */
+
 class SquareOfDifferenceConstraint : public Constraint {
   public:
     SquareOfDifferenceConstraint(const LabelStr& name,
@@ -963,11 +991,16 @@ class SquareOfDifferenceConstraint : public Constraint {
     void handleExecute();
 
   private:
-    static const int V1 = 0;
-    static const int V2 = 1;
-    static const int RES = 2;
-    static const int ARG_COUNT = 3;
+    static const unsigned int V1 = 0;
+    static const unsigned int V2 = 1;
+    static const unsigned int RES = 2;
+    static const unsigned int ARG_COUNT = 3;
   };
+
+    /**
+   * @brief Maintains a unary relation from a constant to a variable such that the variable
+   * is a subset of the given constant.
+   */
 
 class SubsetOfConstraint : public Constraint {
   public:
@@ -981,7 +1014,7 @@ class SubsetOfConstraint : public Constraint {
     void handleExecute();
 
     bool canIgnore(const ConstrainedVariableId& variable,
-		   int argIndex,
+		   unsigned int argIndex,
 		   const DomainListener::ChangeType& changeType);
 
   private:
@@ -990,18 +1023,18 @@ class SubsetOfConstraint : public Constraint {
   };
 
 class SwapTwoVarsConstraint : public Constraint {
-  public:
-    SwapTwoVarsConstraint(const LabelStr& name,
-                          const LabelStr& propagatorName,
-                          const ConstraintEngineId& constraintEngine,
-                          const std::vector<ConstrainedVariableId>& variables)
+ public:
+  SwapTwoVarsConstraint(const LabelStr& name,
+                        const LabelStr& propagatorName,
+                        const ConstraintEngineId& constraintEngine,
+                        const std::vector<ConstrainedVariableId>& variables) __attribute__((noreturn))
       : Constraint(name, propagatorName, constraintEngine, variables) {
-      // Called via REGISTER_NARY() macro's factory rather than via the
-      //   REGISTER_SWAP_TWO_VARS_NARY() macro's factory: not enough information
-      //   to create the constraint.
-      assertTrue(false);
-    }
-
+    // Called via REGISTER_NARY() macro's factory rather than via the
+    //   REGISTER_SWAP_TWO_VARS_NARY() macro's factory: not enough information
+    //   to create the constraint.
+    assertTrue(false);
+  }
+  
     SwapTwoVarsConstraint(const LabelStr& name,
                           const LabelStr& propagatorName,
                           const ConstraintEngineId& constraintEngine,
@@ -1094,27 +1127,6 @@ class SwapTwoVarsConstraint : public Constraint {
   CREATE_CONSTRAINT_TYPE(TestTwoSameNumericArgumentsCT, TestLEQCT, TestLEQ);
 
 
-  /**
-   * @brief Calculate the euclidean distance in 2-d space between between 2 points
-   */
-    /**
-   * @brief Computes the sign of a given variable. Varable is in degrees. The constraint is a function
-   * rather than a relation. The range of the source variable must be in [0 90].
-   */
-    /**
-   * @brief SquareOfDifference(x, y, a) maintains the relation:
-   * @li a = (x - y)^2
-   * if x and y are singleton.
-   */
-    /**
-   * @brief DistanceFromSquaresConstraint(x, y, a) maintains the relation
-   * @li a = sqrt(x + y)
-   * if x and y are singleton
-   */
-    /**
-   * @brief Maintains a unary relation from a constant to a variable such that the variable
-   * is a subset of the given constant.
-   */
   class TestNEQ : public Constraint {
   public:
     TestNEQ(const LabelStr& name,
@@ -1209,7 +1221,7 @@ class UnaryConstraint : public Constraint {
     void handleDiscard();
 
     bool canIgnore(const ConstrainedVariableId& variable,
-           int argIndex,
+                   unsigned int argIndex,
            const DomainListener::ChangeType& changeType);
 
     void setSource(const ConstraintId& sourceConstraint);

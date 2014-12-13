@@ -26,27 +26,26 @@ namespace EUROPA {
   	    ConstrainedVariableId m_value;
   };
 
-  class EvalContext
-  {
-  	public:
-  	    EvalContext(EvalContext* parent);
-  	    virtual ~EvalContext();
+class EvalContext {
+ public:
+  EvalContext(EvalContext* parent);
+  virtual ~EvalContext();
 
-  	    virtual void addVar(const char* name,const ConstrainedVariableId& v);
-  	    virtual ConstrainedVariableId getVar(const char* name);
+  virtual void addVar(const char* name,const ConstrainedVariableId& v);
+  virtual ConstrainedVariableId getVar(const char* name);
 
-  	    virtual void addToken(const char* name,const TokenId& t);
-  	    virtual TokenId getToken(const char* name);
+  virtual void addToken(const char* name,const TokenId& t);
+  virtual TokenId getToken(const char* name);
 
-  	    virtual void* getElement(const char* name) const { return NULL; }
+  virtual void* getElement(const char* name) const;
 
-        virtual std::string toString() const;
+  virtual std::string toString() const;
 
-  	protected:
-  	    EvalContext* m_parent;
-  	    std::map<std::string,ConstrainedVariableId> m_variables;
-  	    std::map<std::string,TokenId> m_tokens;
-  };
+ protected:
+  EvalContext* m_parent;
+  std::map<std::string,ConstrainedVariableId> m_variables;
+  std::map<std::string,TokenId> m_tokens;
+};
 
   class Expr
   {

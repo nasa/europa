@@ -10,31 +10,36 @@
 
 namespace EUROPA {
 
-  ConstrainedVariableListener::ConstrainedVariableListener(const ConstrainedVariableId& var)
+ConstrainedVariableListener::ConstrainedVariableListener(const ConstrainedVariableId& var)
     : m_id(this), m_var(var) {
-	  var->notifyAdded(m_id);
-  }
+  var->notifyAdded(m_id);
+}
 
-  const ConstrainedVariableListenerId& ConstrainedVariableListener::getId() const {
-    return(m_id);
-  }
+const ConstrainedVariableListenerId& ConstrainedVariableListener::getId() const {
+  return(m_id);
+}
 
-  ConstrainedVariableListener::~ConstrainedVariableListener() {
-	  m_var->notifyRemoved(m_id);
-	  m_id.remove();
-  }
+void ConstrainedVariableListener::notifyDiscard() {}
+void ConstrainedVariableListener::notifyConstraintAdded(const ConstraintId&,
+                                                        unsigned int) {}
+void ConstrainedVariableListener::notifyConstraintRemoved(const ConstraintId&,
+                                                          unsigned int) {}
+
+ConstrainedVariableListener::~ConstrainedVariableListener() {
+  m_var->notifyRemoved(m_id);
+  m_id.remove();
+}
 
   ConstrainedVariable::ConstrainedVariable(const ConstraintEngineId& constraintEngine,
                                            const bool internal,
                                            bool canBeSpecified,
                                            const LabelStr& name,
                                            const EntityId& parent,
-                                           int index)
+                                           unsigned long index)
     : Entity(), m_id(this), m_lastRelaxed(0), m_constraintEngine(constraintEngine), m_name(name),
       m_internal(internal), m_canBeSpecified(canBeSpecified), m_specifiedFlag(false), m_specifiedValue(0),
       m_index(index), m_parent(parent), m_deactivationRefCount(0), m_deleted(false) {
     check_error(m_constraintEngine.isValid());
-    check_error(m_index >= NO_INDEX);
     check_error(m_index == NO_INDEX || parent.isValid());
     m_constraintEngine->add(m_id);
     m_listener = m_constraintEngine->allocateVariableListener(m_id, m_constraints);
@@ -46,7 +51,7 @@ namespace EUROPA {
 
     discard(false);
 
-    delete (DomainListener*) m_listener;
+    delete static_cast<DomainListener*>(m_listener);
 
     m_id.remove();
   }
@@ -120,9 +125,9 @@ namespace EUROPA {
    }
 
 
-  int ConstrainedVariable::getIndex() const {
-    return(m_index);
-  }
+unsigned long ConstrainedVariable::getIndex() const {
+  return(m_index);
+}
 
   void ConstrainedVariable::deactivate() {
     check_error(!Entity::isPurging());
@@ -191,35 +196,37 @@ namespace EUROPA {
     return m_constraintEngine;
   }
 
-  void ConstrainedVariable::addConstraint(const ConstraintId& constraint, int argIndex) {
-    check_error(!Entity::isPurging());
-    check_error(constraint.isValid());
-    debugMsg("ConstrainedVariable:addConstraint", "Adding " << constraint->toString() << " to " << toString());
-    m_constraints.push_back(ConstraintEntry(constraint, argIndex));
+void ConstrainedVariable::addConstraint(const ConstraintId& constraint,
+                                        unsigned int argIndex) {
+  check_error(!Entity::isPurging());
+  check_error(constraint.isValid());
+  debugMsg("ConstrainedVariable:addConstraint", "Adding " << constraint->toString() << " to " << toString());
+  m_constraints.push_back(ConstraintEntry(constraint, argIndex));
 
-    handleConstraintAdded(constraint);
-    for(std::set<ConstrainedVariableListenerId>::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
-      (*it)->notifyConstraintAdded(constraint, argIndex);
+  handleConstraintAdded(constraint);
+  for(std::set<ConstrainedVariableListenerId>::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
+    (*it)->notifyConstraintAdded(constraint, argIndex);
 
-    check_error(isConstrainedBy(constraint));
-  }
+  check_error(isConstrainedBy(constraint));
+}
 
-  void ConstrainedVariable::removeConstraint(const ConstraintId& constraint, int argIndex) {
-    if(m_deleted) // Nothing to do
-      return;
+void ConstrainedVariable::removeConstraint(const ConstraintId& constraint,
+                                           unsigned int argIndex) {
+  if(m_deleted) // Nothing to do
+    return;
 
-    debugMsg("ConstrainedVariable:removeConstraint", "Unlinking " << constraint->toString());
+  debugMsg("ConstrainedVariable:removeConstraint", "Unlinking " << constraint->toString());
 
-    check_error(!Entity::isPurging());
-    check_error(constraint.isValid());
-    check_error(isConstrainedBy(constraint));
-    check_error(!Entity::isPurging()); // Should not be getting this message
-    m_constraints.remove(ConstraintEntry(constraint, argIndex));
+  check_error(!Entity::isPurging());
+  check_error(constraint.isValid());
+  check_error(isConstrainedBy(constraint));
+  check_error(!Entity::isPurging()); // Should not be getting this message
+  m_constraints.remove(ConstraintEntry(constraint, argIndex));
 
-    handleConstraintRemoved(constraint);
-    for(std::set<ConstrainedVariableListenerId>::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
-      (*it)->notifyConstraintRemoved(constraint, argIndex);
-  }
+  handleConstraintRemoved(constraint);
+  for(std::set<ConstrainedVariableListenerId>::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
+    (*it)->notifyConstraintRemoved(constraint, argIndex);
+}
 
   bool ConstrainedVariable::isSpecified() const {
     return m_specifiedFlag;
@@ -257,14 +264,14 @@ namespace EUROPA {
     return(false);
   }
 
-  void ConstrainedVariable::updateLastRelaxed(int cycleCount) {
+  void ConstrainedVariable::updateLastRelaxed(unsigned int cycleCount) {
     check_error(!Entity::isPurging());
     check_error(m_lastRelaxed < cycleCount);
     m_lastRelaxed = cycleCount;
     debugMsg("ConstrainedVariable:updateLastRelaxed",getName().toString() << " lastRelaxed updated to " << m_lastRelaxed);
   }
 
-  int ConstrainedVariable::lastRelaxed() const {
+  unsigned int ConstrainedVariable::lastRelaxed() const {
     return(m_lastRelaxed);
   }
 
@@ -282,7 +289,7 @@ namespace EUROPA {
       results.insert(it->first);
   }
 
-  unsigned int ConstrainedVariable::constraintCount() const{
+  unsigned long ConstrainedVariable::constraintCount() const{
     return m_constraints.size();
   }
 
@@ -308,6 +315,10 @@ namespace EUROPA {
   bool ConstrainedVariable::canBeSpecified() const {
     return(m_canBeSpecified);
   }
+
+void ConstrainedVariable::handleBase(const Domain&) {}
+void ConstrainedVariable::handleSpecified(edouble) {}
+
 
   bool ConstrainedVariable::isClosed() const {
     return(baseDomain().isClosed());
@@ -557,18 +568,17 @@ namespace EUROPA {
     return retval;
   }
 
-  PSList<PSConstraint*> ConstrainedVariable::getConstraints() const
-  {
-	  check_runtime_error(isValid());
-	  check_error(!Entity::isPurging());
-	  PSList<PSConstraint*> retval;
-	  ConstraintList::const_iterator it = m_constraints.begin();
-	  for ( ; it != m_constraints.end(); ++it) {
-		  ConstraintId cId = it->first;
-		  retval.push_back( (PSConstraint *) cId);
-	  }
-	  return retval;
-    }
+PSList<PSConstraint*> ConstrainedVariable::getConstraints() const {
+  check_runtime_error(isValid());
+  check_error(!Entity::isPurging());
+  PSList<PSConstraint*> retval;
+  ConstraintList::const_iterator it = m_constraints.begin();
+  for ( ; it != m_constraints.end(); ++it) {
+    ConstraintId cId = it->first;
+    retval.push_back(dynamic_cast<PSConstraint *>(static_cast<Constraint*>(cId)));
+  }
+  return retval;
+}
 
 
 
@@ -604,57 +614,57 @@ namespace EUROPA {
     debugMsg("ConstrainedVariable:specify","After propagate for var:" << toString());
   }
 
-  	PSEntity* ConstrainedVariable::getParent() const {
-    //EntityId parent(m_parent);//getParentEntity());
-    if(m_parent.isNoId())
-      return NULL;
+PSEntity* ConstrainedVariable::getParent() const {
+  //EntityId parent(m_parent);//getParentEntity());
+  if(m_parent.isNoId())
+    return NULL;
 
-    /* TODO: fix this
-    else if(TokenId::convertable(parent))
-      return new PSTokenImpl((TokenId) parent);
-    else if(ObjectId::convertable(parent))
-      return new PSObjectImpl((ObjectId) parent);
-    else if(RuleInstanceId::convertable(parent))
-      return new PSTokenImpl(((RuleInstanceId)parent)->getToken());
-    else {
-      checkRuntimeError(ALWAYS_FAIL,
-			"Variable " << toString() << " has a parent that isn't a token, " <<
-			"object, or rule: " << m_var->getParent()->toString());
+  /* TODO: fix this
+     else if(TokenId::convertable(parent))
+     return new PSTokenImpl((TokenId) parent);
+     else if(ObjectId::convertable(parent))
+     return new PSObjectImpl((ObjectId) parent);
+     else if(RuleInstanceId::convertable(parent))
+     return new PSTokenImpl(((RuleInstanceId)parent)->getToken());
+     else {
+     checkRuntimeError(ALWAYS_FAIL,
+     "Variable " << toString() << " has a parent that isn't a token, " <<
+     "object, or rule: " << m_var->getParent()->toString());
+     }
+  */
+
+  return dynamic_cast<PSEntity *>(static_cast<Entity*>(m_parent));
+}
+
+std::string ConstrainedVariable::toString() const {
+  std::ostringstream os;
+
+  if (isNull())
+    os << "NULL";
+  else if (isSingleton())
+    os << getSingletonValue().toString();
+  else if (isInterval())
+    os << "[" << getLowerBound() << "," << getUpperBound() << "]";
+  else if (isEnumerated()) {
+    os << "{";
+    PSList<PSVarValue> values = getValues();
+    for (unsigned int i=0;i<values.size();i++) {
+      if (i > 0)
+        os << ", ";
+      os << values.get(i).toString();
     }
-    */
-
-    return (PSEntity *) m_parent;
+    os << "}";
   }
+  else
+    os << "ERROR!";
 
-  	std::string ConstrainedVariable::toString() const {
-  		std::ostringstream os;
+  return os.str();
+}
 
-  		if (isNull())
-  			os << "NULL";
-  		else if (isSingleton())
-  			os << getSingletonValue().toString();
-  		else if (isInterval())
-  			os << "[" << getLowerBound() << "," << getUpperBound() << "]";
-  		else if (isEnumerated()) {
-  			os << "{";
-  			PSList<PSVarValue> values = getValues();
-  			for (int i=0;i<values.size();i++) {
-  				if (i > 0)
-  					os << ", ";
-  				os << values.get(i).toString();
-  			}
-  			os << "}";
-  		}
-  		else
-  			os << "ERROR!";
-
-  		return os.str();
-  	}
-
-  	// Used to be toString, but the above is shorter and more user-friendly
-  	std::string ConstrainedVariable::toLongString() const{
-  		std::stringstream sstr;
-  		sstr << Entity::toString() << (specifiedFlag() ? " (S) " : "") << " DERIVED=" << lastDomain().toString() << " BASE=" << baseDomain().toString();
-  		return sstr.str();
-  	}
+// Used to be toString, but the above is shorter and more user-friendly
+std::string ConstrainedVariable::toLongString() const{
+  std::stringstream sstr;
+  sstr << Entity::toString() << (specifiedFlag() ? " (S) " : "") << " DERIVED=" << lastDomain().toString() << " BASE=" << baseDomain().toString();
+  return sstr.str();
+}
 }

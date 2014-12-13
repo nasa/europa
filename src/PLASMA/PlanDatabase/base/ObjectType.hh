@@ -178,13 +178,14 @@ public:
                           const PlanDatabaseId& planDb,
                           const LabelStr& objectType,
                           const LabelStr& objectName,
-                          const std::vector<const Domain*>& arguments) const { return ObjectId::noId(); };
+                          const std::vector<const Domain*>& arguments) const;
   /**
    * @brief The body of the constructor after the object is created
    * any operations done by createInstance to the object after it is created must be done by this method
    * so that calls to "super()" in subclasses can be supported correctly
    */
-  virtual void evalConstructorBody(ObjectId& instance, const std::vector<const Domain*>& arguments) const {};
+  virtual void evalConstructorBody(ObjectId& instance,
+                                   const std::vector<const Domain*>& arguments) const;
 
 private:
   ObjectFactoryId m_id;

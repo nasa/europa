@@ -17,19 +17,24 @@ namespace NDDL {
      * @brief Constructor for goal tokens.
      * @see PLASMA::IntervalToken
      */
-    NddlToken(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, const bool& rejectable = false, const bool& isFact = false, const bool& close = false);
+    NddlToken(const EUROPA::PlanDatabaseId& planDatabase,
+              const EUROPA::LabelStr& predicateName,
+              const bool& rejectable = false, const bool& isFact = false,
+              const bool& close = false);
 
     /**
      * @brief Constructor for subgoal tokens.
      * @see PLASMA::IntervalToken
      */
-    NddlToken(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, const bool& close = false);
+    NddlToken(const EUROPA::TokenId& master,
+              const EUROPA::LabelStr& predicateName,
+              const EUROPA::LabelStr& relation, const bool& close = false);
 
-    StateVarId state; /**<Tracks token's state: active, merged, rejected, etc. */
-    ObjectVarId object; /**<Tracks the objects the token could be associated with. */
-    TempVarId tStart; /**<Tracks the token's possible start times. */
-    TempVarId tEnd; /**<Tracks the token's possible end times. */
-    TempVarId tDuration; /**<Tracks the token's possible durations. */
+    EUROPA::StateVarId state; /**<Tracks token's state: active, merged, rejected, etc. */
+    EUROPA::ObjectVarId object; /**<Tracks the objects the token could be associated with. */
+    EUROPA::TempVarId tStart; /**<Tracks the token's possible start times. */
+    EUROPA::TempVarId tEnd; /**<Tracks the token's possible end times. */
+    EUROPA::TempVarId tDuration; /**<Tracks the token's possible durations. */
 
   protected:
     virtual void handleDefaults(const bool&);

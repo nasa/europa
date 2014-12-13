@@ -1,7 +1,7 @@
 #include "Utils.hh"
 #include "Object.hh"
 #include "NddlUtils.hh"
-
+using namespace EUROPA;
 namespace NDDL {
 
   /**

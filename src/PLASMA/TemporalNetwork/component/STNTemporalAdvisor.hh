@@ -38,8 +38,8 @@ namespace EUROPA{
     virtual void getTemporalDistanceSigns(const ConstrainedVariableId& first,
                                           const std::vector<ConstrainedVariableId>&
                                           seconds,
-                                          std::vector<Time>& lbs,
-                                          std::vector<Time>& ubs);
+                                          std::vector<eint>& lbs,
+                                          std::vector<eint>& ubs);
 
     unsigned int mostRecentRepropagation() const;
   private:

@@ -10,6 +10,7 @@
 
 #include "CFunction.hh"
 #include "DataTypes.hh"
+#include "unused.hh"
 
 namespace EUROPA {
 
@@ -24,7 +25,7 @@ public:
 	virtual unsigned int getArgumentCount() { return 1; }
 
 	// TODO: implement this
-	virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes) {}
+  virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes);
 };
 
 class IsSpecified : public CFunction
@@ -38,7 +39,7 @@ public:
 	virtual unsigned int getArgumentCount() { return 1; }
 
 	// TODO: implement this
-	virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes) {}
+  virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes); 
 };
 
 #define DECLARE_FUNCTION_TYPE(cname, fname, constraint, type, args)	\
@@ -51,7 +52,7 @@ public:
     virtual const char* getConstraint() { return constraint; }		\
     virtual const DataTypeId getReturnType() { return type::instance(); } \
     virtual unsigned int getArgumentCount() { return args; }		\
-    virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes) {} \
+    virtual void checkArgTypes(unused(const std::vector<DataTypeId>& argTypes)) {} \
   };
 // Check args TODO.
 

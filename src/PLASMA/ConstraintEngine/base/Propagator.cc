@@ -70,4 +70,9 @@ namespace EUROPA
   {
       getConstraintEngine()->getViolationMgr().addEmptyVariable(v);
   }
+
+void Propagator::handleVariableDeactivated(const ConstrainedVariableId&){}
+void Propagator::handleVariableActivated(const ConstrainedVariableId&){}
+
+
 }

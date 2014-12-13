@@ -11,6 +11,8 @@
 #include "Methods.hh"
 #include "Propagators.hh"
 
+#include <boost/cast.hpp>
+
 namespace EUROPA {
 
   ModulePlanDatabase::ModulePlanDatabase()
@@ -42,66 +44,66 @@ namespace EUROPA {
       DbClientTransactionPlayer m_interpreter;
   };
 
-  std::string NddlXmlTxnInterpreter::interpret(std::istream& input, const std::string& script)
+  std::string NddlXmlTxnInterpreter::interpret(std::istream& input, const std::string&)
   {
 	  m_interpreter.play(input);
       return "";
   }
 
-  void ModulePlanDatabase::initialize(EngineId engine)
-  {
-      ConstraintEngine* ce = (ConstraintEngine*)engine->getComponent("ConstraintEngine");
-      CESchema* ceSchema = (CESchema*)engine->getComponent("CESchema");
+void ModulePlanDatabase::initialize(EngineId engine) {
+  ConstraintEngine* ce =
+      boost::polymorphic_cast<ConstraintEngine*>(engine->getComponent("ConstraintEngine"));
+  CESchema* ceSchema = boost::polymorphic_cast<CESchema*>(engine->getComponent("CESchema"));
 
-      new DefaultPropagator("PlanDatabaseSystemPropagator", ce->getId(), SYSTEM_PRIORITY);
-      REGISTER_SYSTEM_CONSTRAINT(ceSchema,ObjectTokenRelation, "ObjectTokenRelation", "PlanDatabaseSystemPropagator");
+  new DefaultPropagator("PlanDatabaseSystemPropagator", ce->getId(), SYSTEM_PRIORITY);
+  REGISTER_SYSTEM_CONSTRAINT(ceSchema,ObjectTokenRelation, "ObjectTokenRelation", "PlanDatabaseSystemPropagator");
+  
+  REGISTER_CONSTRAINT(ceSchema,CommonAncestorConstraint, "commonAncestor", "Default");
+  REGISTER_CONSTRAINT(ceSchema,HasAncestorConstraint, "hasAncestor", "Default");
+  
+  Schema* schema = new Schema("EngineSchema",ceSchema->getId()); // TODO: use engine name
+  schema->registerEnum("TokenStates",StateDomain());
+  engine->addComponent("Schema",schema);
+  
+  ObjectType* ot;
+  const char* rootObjType = Schema::rootObject().c_str();
+  
+  ot = new ObjectType(rootObjType,ObjectTypeId::noId(),true /*isNative*/);
+  schema->registerObjectType(ot->getId());
+  
+  ot = new ObjectType("Timeline",ot->getId(),true /*isNative*/);
+  ot->addObjectFactory((new TimelineObjectFactory(ot->getId()))->getId());
+  schema->registerObjectType(ot->getId());
 
-      REGISTER_CONSTRAINT(ceSchema,CommonAncestorConstraint, "commonAncestor", "Default");
-      REGISTER_CONSTRAINT(ceSchema,HasAncestorConstraint, "hasAncestor", "Default");
+  // Exported Methods
+  schema->registerMethod((new PDBClose())->getId());
+  schema->registerMethod((new SpecifyVariable())->getId());
+  schema->registerMethod((new ResetVariable())->getId());
+  schema->registerMethod((new CloseVariable())->getId());
+  schema->registerMethod((new ConstrainToken())->getId());
+  schema->registerMethod((new FreeToken())->getId());
+  schema->registerMethod((new ActivateToken())->getId());
+  schema->registerMethod((new MergeToken())->getId());
+  schema->registerMethod((new RejectToken())->getId());
+  schema->registerMethod((new CancelToken())->getId());
+  schema->registerMethod((new CloseClass())->getId());
 
-      Schema* schema = new Schema("EngineSchema",ceSchema->getId()); // TODO: use engine name
-      schema->registerEnum("TokenStates",StateDomain());
-      engine->addComponent("Schema",schema);
+  PlanDatabase* pdb = new PlanDatabase(ce->getId(), schema->getId());
+  engine->addComponent("PlanDatabase",pdb);
 
-      ObjectType* ot;
-      const char* rootObjType = Schema::rootObject().c_str();
+  engine->addLanguageInterpreter("nddl-xml-txn", new NddlXmlTxnInterpreter(pdb->getClient()));
+}
 
-      ot = new ObjectType(rootObjType,ObjectTypeId::noId(),true /*isNative*/);
-      schema->registerObjectType(ot->getId());
-
-      ot = new ObjectType("Timeline",ot->getId(),true /*isNative*/);
-      ot->addObjectFactory((new TimelineObjectFactory(ot->getId()))->getId());
-      schema->registerObjectType(ot->getId());
-
-      // Exported Methods
-      schema->registerMethod((new PDBClose())->getId());
-      schema->registerMethod((new SpecifyVariable())->getId());
-      schema->registerMethod((new ResetVariable())->getId());
-      schema->registerMethod((new CloseVariable())->getId());
-      schema->registerMethod((new ConstrainToken())->getId());
-      schema->registerMethod((new FreeToken())->getId());
-      schema->registerMethod((new ActivateToken())->getId());
-      schema->registerMethod((new MergeToken())->getId());
-      schema->registerMethod((new RejectToken())->getId());
-      schema->registerMethod((new CancelToken())->getId());
-      schema->registerMethod((new CloseClass())->getId());
-
-      PlanDatabase* pdb = new PlanDatabase(ce->getId(), schema->getId());
-      engine->addComponent("PlanDatabase",pdb);
-
-	  engine->addLanguageInterpreter("nddl-xml-txn", new NddlXmlTxnInterpreter(pdb->getClient()));
-  }
-
-  void ModulePlanDatabase::uninitialize(EngineId engine)
-  {
-	  LanguageInterpreter* old = engine->removeLanguageInterpreter("nddl-xml-txn");
-	  if (old)
-		  delete old;
-
-      PlanDatabase* pdb = (PlanDatabase*)engine->removeComponent("PlanDatabase");
-      delete pdb;
-
-      Schema* schema = (Schema*)engine->removeComponent("Schema");
-      delete schema;
-  }
+void ModulePlanDatabase::uninitialize(EngineId engine) {
+  LanguageInterpreter* old = engine->removeLanguageInterpreter("nddl-xml-txn");
+  if (old)
+    delete old;
+  
+  PlanDatabase* pdb =
+      boost::polymorphic_cast<PlanDatabase*>(engine->removeComponent("PlanDatabase"));
+  delete pdb;
+  
+  Schema* schema = boost::polymorphic_cast<Schema*>(engine->removeComponent("Schema"));
+  delete schema;
+}
 }
