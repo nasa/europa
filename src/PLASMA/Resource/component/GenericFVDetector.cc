@@ -199,7 +199,7 @@ namespace EUROPA {
     	}
     }
 
-    void GenericFVDetector::getLimitBounds(const InstantId& inst, edouble& lb, edouble& ub) const
+    void GenericFVDetector::getLimitBounds(const InstantId inst, edouble& lb, edouble& ub) const
     {
     	// TODO: make 1 call instead of 2?
     	lb = m_res->getLowerLimit(inst);
@@ -207,7 +207,7 @@ namespace EUROPA {
     }
 
     // TODO: Level(t) = Capacity(t) - Usage(t)
-    void GenericFVDetector::getDefaultLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const
+    void GenericFVDetector::getDefaultLevelBounds(const InstantId inst, edouble& lb, edouble& ub) const
     {
     	const std::pair<edouble,edouble>& capacityBounds = m_res->getCapacityProfile()->getValue(inst->getTime());
 
@@ -226,7 +226,7 @@ namespace EUROPA {
     		<< "Level[" << lb << "," << ub << "]");
     }
 
-    GenericFVProfile::GenericFVProfile(GenericFVDetector* fvd, const ProfileId& profile, bool isFDProfile)
+    GenericFVProfile::GenericFVProfile(GenericFVDetector* fvd, const ProfileId profile, bool isFDProfile)
     	: m_detector(fvd)
     	, m_profile(profile)
     	, m_isFDProfile(isFDProfile)

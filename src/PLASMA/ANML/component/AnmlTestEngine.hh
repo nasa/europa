@@ -3,8 +3,6 @@
 
 #include "NddlTestEngine.hh"
 
-using namespace EUROPA;
-
 class AnmlTestEngine : public NddlTestEngine
 {
   public:

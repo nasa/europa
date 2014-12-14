@@ -29,7 +29,7 @@
 
 namespace EUROPA {
 
-  DbClient::DbClient(const PlanDatabaseId& db)
+  DbClient::DbClient(const PlanDatabaseId db)
     : m_id(this), m_deleted(false), m_transactionLoggingEnabled(false) {
     check_error(db.isValid());
     m_planDb = db;
@@ -40,14 +40,14 @@ namespace EUROPA {
     m_id.remove();
   }
 
-  const DbClientId& DbClient::getId() const{return m_id;}
+  const DbClientId DbClient::getId() const{return m_id;}
 
-  const CESchemaId& DbClient::getCESchema() const
+  const CESchemaId DbClient::getCESchema() const
   {
       return m_planDb->getConstraintEngine()->getCESchema();
   }
 
-  const SchemaId& DbClient::getSchema() const
+  const SchemaId DbClient::getSchema() const
   {
       return m_planDb->getSchema();
   }
@@ -89,7 +89,7 @@ namespace EUROPA {
     return variable;
   }
 
-void DbClient::deleteVariable(const ConstrainedVariableId& var) {
+void DbClient::deleteVariable(const ConstrainedVariableId var) {
   if(isGlobalVariable(var->getName()))
     m_planDb->unregisterGlobalVariable(var);
   publish(notifyVariableDeleted(var));
@@ -111,7 +111,7 @@ ObjectId DbClient::createObject(const char* type, const char* name){
     return object;
   }
 
-  void DbClient::deleteObject(const ObjectId& obj) {
+  void DbClient::deleteObject(const ObjectId obj) {
     publish(notifyObjectDeleted(obj));
     delete static_cast<Object*>(obj);
   }
@@ -139,7 +139,7 @@ ObjectId DbClient::createObject(const char* type, const char* name){
     return(token);
   }
 
-void DbClient::deleteToken(const TokenId& token, const std::string& name) {
+void DbClient::deleteToken(const TokenId token, const std::string& name) {
   check_error(token.isValid());
   checkError(token->isInactive() || token->isFact(),
              "Attempted to delete active, non-fact token " << token->toLongString());
@@ -162,25 +162,25 @@ void DbClient::deleteToken(const TokenId& token, const std::string& name) {
   delete static_cast<Token*>(token);
 }
 
-  void DbClient::constrain(const ObjectId& object, const TokenId& predecessor, const TokenId& successor){
+  void DbClient::constrain(const ObjectId object, const TokenId predecessor, const TokenId successor){
     object->constrain(predecessor, successor);
     debugMsg("DbClient:constrain", predecessor->toString() << " before " << successor->toString());
     publish(notifyConstrained(object, predecessor, successor));
   }
 
-  void DbClient::free(const ObjectId& object, const TokenId& predecessor, const TokenId& successor){
+  void DbClient::free(const ObjectId object, const TokenId predecessor, const TokenId successor){
     object->free(predecessor, successor);
     debugMsg("DbClient:free", predecessor->toString() << " before " << successor->toString());
     publish(notifyFreed(object, predecessor, successor));
   }
 
-  void DbClient::activate(const TokenId& token){
+  void DbClient::activate(const TokenId token){
     token->activate();
     debugMsg("DbClient:activate", token->toString());
     publish(notifyActivated(token));
   }
 
-  void DbClient::merge(const TokenId& token, const TokenId& activeToken){
+  void DbClient::merge(const TokenId token, const TokenId activeToken){
     static unsigned int sl_counter(0);
     sl_counter++;
     checkError(token.isValid(), token << ":" << sl_counter);
@@ -189,14 +189,14 @@ void DbClient::deleteToken(const TokenId& token, const std::string& name) {
     publish(notifyMerged(token, activeToken));
   }
 
-  void DbClient::reject(const TokenId& token){
+  void DbClient::reject(const TokenId token){
     check_error(token.isValid());
     token->reject();
     debugMsg("DbClient:reject", token->toString());
     publish(notifyRejected(token));
   }
 
-  void DbClient::cancel(const TokenId& token){
+  void DbClient::cancel(const TokenId token){
     check_error(token.isValid());
 
     publish(notifyCancelled(token));
@@ -238,32 +238,32 @@ void DbClient::deleteToken(const TokenId& token, const std::string& name) {
     return constraint;
   }
 
-  void DbClient::deleteConstraint(const ConstraintId& c)
+  void DbClient::deleteConstraint(const ConstraintId c)
   {
     publish(notifyConstraintDeleted(c));
     m_planDb->getConstraintEngine()->deleteConstraint(c);
   }
 
-  void DbClient::restrict(const ConstrainedVariableId& variable, const Domain& domain){
+  void DbClient::restrict(const ConstrainedVariableId variable, const Domain& domain){
     debugMsg("DbClient:restrict", variable->toLongString() << " to " << domain.toString());
     variable->restrictBaseDomain(domain);
     publish(notifyVariableRestricted(variable));
   }
 
-  void DbClient::specify(const ConstrainedVariableId& variable, edouble value){
+  void DbClient::specify(const ConstrainedVariableId variable, edouble value){
     debugMsg("DbClient:specify", "before:" << variable->toLongString() << " to " << variable->toString(value));
     variable->specify(value);
     debugMsg("DbClient:specify", "after:" << variable->toLongString());
     publish(notifyVariableSpecified(variable));
   }
 
-  void DbClient::close(const ConstrainedVariableId& variable){
+  void DbClient::close(const ConstrainedVariableId variable){
     debugMsg("DbClient:close", "Closing:"+variable->toLongString());
     variable->close();
     debugMsg("DbClient:close", "Closed:"+variable->toLongString());
     publish(notifyVariableClosed(variable));
   }
-  void DbClient::reset(const ConstrainedVariableId& variable){
+  void DbClient::reset(const ConstrainedVariableId variable){
     debugMsg("DbClient:reset","before:" << variable->toLongString());
     variable->reset();
     debugMsg("DbClient:reset", "after:" << variable->toLongString());
@@ -331,10 +331,10 @@ void DbClient::deleteToken(const TokenId& token, const std::string& name) {
   /**
    * @brief Build the path from the bottom up, and return it from the top down.
    */
-  std::vector<int> DbClient::getPathByToken(const TokenId& targetToken) const
+  std::vector<unsigned int> DbClient::getPathByToken(const TokenId targetToken) const
   {
     check_error(isTransactionLoggingEnabled());
-    std::list<int> path; // Used to build up the path from the bottom up.
+    std::list<unsigned int> path; // Used to build up the path from the bottom up.
 
     TokenId master = targetToken->master();
     TokenId slave = targetToken;
@@ -342,7 +342,7 @@ void DbClient::deleteToken(const TokenId& token, const std::string& name) {
     while(!master.isNoId()){
       int slavePosition = master->getSlavePosition(slave);
       check_error(slavePosition >= 0);
-      path.push_front(slavePosition);
+      path.push_front(static_cast<unsigned>(slavePosition));
       slave = slave->master();
       master = master->master();
     }
@@ -363,20 +363,20 @@ void DbClient::deleteToken(const TokenId& token, const std::string& name) {
     check_error(indexOfMaster >= 0);
 
     // Now push the key for the root and generate path going from top down
-    path.push_front(indexOfMaster);
+    path.push_front(static_cast<unsigned int>(indexOfMaster));
 
-    std::vector<int> pathAsVector;
-    for(std::list<int>::const_iterator it = path.begin(); it != path.end(); ++it)
+    std::vector<unsigned int> pathAsVector;
+    for(std::list<unsigned int>::const_iterator it = path.begin(); it != path.end(); ++it)
       pathAsVector.push_back(*it);
 
     return pathAsVector;
   }
 
-  std::string DbClient::getPathAsString(const TokenId& targetToken) const {
+  std::string DbClient::getPathAsString(const TokenId targetToken) const {
     check_error(isTransactionLoggingEnabled());
-    const std::vector<int> path = getPathByToken(targetToken);
+    const std::vector<unsigned int> path = getPathByToken(targetToken);
     std::stringstream s;
-    std::vector<int>::const_iterator it = path.begin();
+    std::vector<unsigned int>::const_iterator it = path.begin();
     s << *it;
     for(++it ; it != path.end() ; ++it) {
       s << "." << *it;
@@ -388,7 +388,7 @@ void DbClient::deleteToken(const TokenId& token, const std::string& name) {
     return m_planDb->getConstraintEngine()->getVariable(index);
   }
 
-  unsigned int DbClient::getIndexByVariable(const ConstrainedVariableId& var){
+  unsigned int DbClient::getIndexByVariable(const ConstrainedVariableId var){
     return m_planDb->getConstraintEngine()->getIndex(var);
   }
 
@@ -396,16 +396,16 @@ void DbClient::deleteToken(const TokenId& token, const std::string& name) {
     return m_planDb->getConstraintEngine()->getConstraint(index);
   }
 
-  unsigned int DbClient::getIndexByConstraint(const ConstraintId& constr) {
+  unsigned int DbClient::getIndexByConstraint(const ConstraintId constr) {
     return m_planDb->getConstraintEngine()->getIndex(constr);
   }
 
-  void DbClient::notifyAdded(const DbClientListenerId& listener){
+  void DbClient::notifyAdded(const DbClientListenerId listener){
     check_error(m_listeners.find(listener) == m_listeners.end());
     m_listeners.insert(listener);
   }
 
-  void DbClient::notifyRemoved(const DbClientListenerId& listener){
+  void DbClient::notifyRemoved(const DbClientListenerId listener){
     check_error(m_listeners.find(listener) != m_listeners.end());
     if(!m_deleted){
       m_listeners.erase(listener);
@@ -454,7 +454,7 @@ void DbClient::deleteToken(const TokenId& token, const std::string& name) {
     return m_planDb->getConstraintEngine()->createValue(typeName,value);
   }
 
-  PSPlanDatabaseClientImpl::PSPlanDatabaseClientImpl(const DbClientId& c)
+  PSPlanDatabaseClientImpl::PSPlanDatabaseClientImpl(const DbClientId c)
       : m_client(c)
   {
   }

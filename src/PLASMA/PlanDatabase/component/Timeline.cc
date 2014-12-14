@@ -25,10 +25,10 @@ namespace EUROPA {
 
   /** TIMELINE IMPLEMENTATION **/
 
-  Timeline::Timeline(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)
+  Timeline::Timeline(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open)
     : Object(planDatabase, type, name, true) {commonInit(open);}
 
-  Timeline::Timeline(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open)
+  Timeline::Timeline(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open)
     : Object(parent, type, localName, true) {commonInit(open);}
 
   Timeline::~Timeline(){
@@ -40,11 +40,11 @@ namespace EUROPA {
       close();
   }
 
-  bool Timeline::hasToken(const TokenId& token) const{
+  bool Timeline::hasToken(const TokenId token) const{
     return m_tokenIndex.find(token->getKey()) != m_tokenIndex.end();
   }
 
-  void Timeline::getOrderingChoices(const TokenId& token,
+  void Timeline::getOrderingChoices(const TokenId token,
 				    std::vector< std::pair<TokenId, TokenId> >& results,
 				    unsigned long limit){
     check_error(results.empty());
@@ -198,7 +198,7 @@ namespace EUROPA {
    * @todo Consider deactivating redundant constraints. If we do this, we would also have to
    * activate them when freeing.
    */
-  void Timeline::constrain(const TokenId& predecessor, const TokenId& successor) {
+  void Timeline::constrain(const TokenId predecessor, const TokenId successor) {
     checkError(getPrecedenceConstraint(predecessor, successor).isNoId(),
 	       "At least one of predecessor and successor should not be sequenced yet." <<
 	       predecessor->toString() << " before " << successor->toString());
@@ -273,12 +273,12 @@ namespace EUROPA {
     }
   }
 
-  void Timeline::add(const TokenId& token){
+  void Timeline::add(const TokenId token){
     Object::add(token);
     notifyOrderingRequired(token);
   }
 
-  void Timeline::remove(const TokenId& token) {
+  void Timeline::remove(const TokenId token) {
     check_error(token.isValid());
     check_error(isValid(CLEANING_UP));
 
@@ -329,7 +329,7 @@ namespace EUROPA {
    * what tokens to remove from the sequence, and what constraints should correctly
    * be removed.
    */
-  void Timeline::free(const TokenId& predecessor, const TokenId& successor) {
+  void Timeline::free(const TokenId predecessor, const TokenId successor) {
     check_error(m_tokenIndex.find(predecessor->getKey()) != m_tokenIndex.end() &&
                 m_tokenIndex.find(successor->getKey()) != m_tokenIndex.end(),
                 "Predecessor and successor must both be sequenced if they are to be freed");
@@ -424,15 +424,15 @@ namespace EUROPA {
     return(true);
   }
 
-  bool Timeline::atStart(const TokenId& token) const {
+  bool Timeline::atStart(const TokenId token) const {
     return(!m_tokenSequence.empty() && token == m_tokenSequence.front());
   }
 
-  bool Timeline::atEnd(const TokenId& token) const {
+  bool Timeline::atEnd(const TokenId token) const {
     return(!m_tokenSequence.empty() && token == m_tokenSequence.back());
   }
 
-  TokenId Timeline::removeSuccessor(const TokenId& token) {
+  TokenId Timeline::removeSuccessor(const TokenId token) {
     freeImplicitConstraints(token);
     std::list<TokenId>::iterator pos = m_tokenIndex.find(token->getKey())->second;
     removeFromIndex(token);
@@ -451,7 +451,7 @@ namespace EUROPA {
     return *pos;
   }
 
-  TokenId Timeline::removePredecessor(const TokenId& token) {
+  TokenId Timeline::removePredecessor(const TokenId token) {
     freeImplicitConstraints(token);
     std::list<TokenId>::iterator pos = m_tokenIndex.find(token->getKey())->second;
     removeFromIndex(token);
@@ -470,7 +470,7 @@ namespace EUROPA {
     return(*pos);
   }
 
-  bool Timeline::adjacent(const TokenId& x, const TokenId& y) const {
+  bool Timeline::adjacent(const TokenId x, const TokenId y) const {
     if (x.isNoId() || y.isNoId())
       return(false);
     std::list<TokenId>::const_iterator pos = m_tokenIndex.find(x->getKey())->second;
@@ -478,7 +478,7 @@ namespace EUROPA {
     return(pos != m_tokenSequence.end() && y == *pos);
   }
 
-  void Timeline::unlink(const TokenId& token) {
+  void Timeline::unlink(const TokenId token) {
     freeImplicitConstraints(token);
     std::list<TokenId>::iterator pos = m_tokenIndex.find(token->getKey())->second;
     removeFromIndex(token);
@@ -498,27 +498,27 @@ namespace EUROPA {
     return;
   }
 
-  void Timeline::insertToIndex(const TokenId& token, const std::list<TokenId>::iterator& position){
+  void Timeline::insertToIndex(const TokenId token, const std::list<TokenId>::iterator& position){
     // Remove the cache entry for this token as it is now inserted
     m_tokenIndex.insert(std::make_pair(token->getKey(), position));
   }
 
-  void Timeline::removeFromIndex(const TokenId& token){
+  void Timeline::removeFromIndex(const TokenId token){
     m_tokenIndex.erase(token->getKey());
     notifyOrderingRequired(token);
   }
 
-  bool Timeline::orderingRequired(const TokenId& token){
+  bool Timeline::orderingRequired(const TokenId token){
     return (!token->isDeleted() && m_tokenIndex.find(token->getKey()) == m_tokenIndex.end());
   }
 
-  void Timeline::notifyMerged(const TokenId& ){}
-  void Timeline::notifyRejected(const TokenId&) {}
-  void Timeline::notifyDeleted(const TokenId& token){
+  void Timeline::notifyMerged(const TokenId ){}
+  void Timeline::notifyRejected(const TokenId) {}
+  void Timeline::notifyDeleted(const TokenId token){
     remove(token);
   }
 
-  TimelineObjectFactory::TimelineObjectFactory(const ObjectTypeId& objType)
+  TimelineObjectFactory::TimelineObjectFactory(const ObjectTypeId objType)
     : NativeObjectFactory(objType,objType->getName())
   {
   }
@@ -528,7 +528,7 @@ namespace EUROPA {
   }
 
   ObjectId TimelineObjectFactory::makeNewObject(
-                        const PlanDatabaseId& planDb,
+                        const PlanDatabaseId planDb,
                         const LabelStr& objectType,
                         const LabelStr& objectName,
                         const std::vector<const Domain*>&) const

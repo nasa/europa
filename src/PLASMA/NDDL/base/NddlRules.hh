@@ -34,7 +34,7 @@ std::list<EUROPA::edouble> listFromString(const std::string& str, bool isNumeric
   /**
    * @brief Function to allocate a token on the same object as the master
    */
-EUROPA::TokenId allocateOnSameObject(const EUROPA::TokenId& parent,
+EUROPA::TokenId allocateOnSameObject(const EUROPA::TokenId parent,
                                      const EUROPA::LabelStr& predicateSuffix,
                                      const EUROPA::LabelStr& relationToMaster);
 
@@ -47,7 +47,7 @@ EUROPA::TokenId allocateOnSameObject(const EUROPA::TokenId& parent,
   public:\
     friend class RuleInstanceName;\
     RuleName(): Rule(LabelStr(#Predicate), LabelStr(#Source)){}\
-    RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb, const RulesEngineId &rulesEngine) const{\
+    RuleInstanceId createInstance(const TokenId token, const PlanDatabaseId planDb, const RulesEngineId &rulesEngine) const{\
       RuleInstanceName *foo = new RuleInstanceName(m_id, token, planDb);\
       foo->setRulesEngine(rulesEngine);\
       return foo->getId();\

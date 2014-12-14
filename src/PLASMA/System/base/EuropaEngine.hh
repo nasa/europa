@@ -21,9 +21,9 @@ namespace EUROPA {
         EuropaEngine();
         virtual ~EuropaEngine();
 
-        virtual ConstraintEngineId& getConstraintEngine();
-        virtual PlanDatabaseId&     getPlanDatabase();
-        virtual RulesEngineId&      getRulesEngine();
+        virtual ConstraintEngineId getConstraintEngine() const;
+        virtual PlanDatabaseId     getPlanDatabase() const;
+        virtual RulesEngineId      getRulesEngine() const;
 
         virtual const ConstraintEngine* getConstraintEnginePtr() const;
         virtual const PlanDatabase*     getPlanDatabasePtr() const;
@@ -33,16 +33,16 @@ namespace EUROPA {
         virtual bool playTransactions(const char* txSource, const char* language="nddl-xml-txn");
         virtual bool plan(const char* txSource, const char* config, const char* language="nddl-xml-txn");
         virtual void write(std::ostream& os) const;
-        virtual unsigned int getTotalNodesSearched() const;
-        virtual unsigned int getDepthReached() const;
+        virtual unsigned long getTotalNodesSearched() const;
+        virtual unsigned long getDepthReached() const;
         static const char* TX_LOG();
 
     protected:
         virtual void initializeModules();
     	virtual void createModules();
 
-        unsigned int m_totalNodes;
-        unsigned int m_finalDepth;
+        unsigned long m_totalNodes;
+        unsigned long m_finalDepth;
   };
 }
 

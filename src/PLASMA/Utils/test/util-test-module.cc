@@ -313,12 +313,14 @@ public:
   }
 };
 
-void overloadFunc(const Id<Bing>&) {
-  CPPUNIT_ASSERT(true);
-}
+namespace {
+// void overloadFunc(const Id<Bing>&) {
+//   CPPUNIT_ASSERT(true);
+// }
 
-void overloadFunc(const Id<Foo>&) {
-  CPPUNIT_ASSERT(true);
+// void overloadFunc(const Id<Foo>&) {
+//   CPPUNIT_ASSERT(true);
+// }
 }
 
 class IdTests {
@@ -542,7 +544,7 @@ bool IdTests::testBadIdUsage() {
     if (e.getType() == "Error")
       CPPUNIT_ASSERT(false);
   }
-  catch (IdErr idErr) {
+  catch (IdErr) {
     Error::doDisplayErrors();
     std::cerr << "Caught expected IdErr::IdMgrInvalidItemPtrError" << std::endl;
     // No operator==() implemented ...

@@ -72,7 +72,7 @@ namespace EUROPA
     size_t operator()(Node* n) const
     {
       boost::hash<long> H;
-      return H( (long) n);
+      return H( reinterpret_cast<long>(n));
     }
   };
 
@@ -86,7 +86,7 @@ namespace EUROPA
     size_t operator()(Edge* n) const
     {
       boost::hash<long> H;
-      return H( (long) n );
+      return H( reinterpret_cast<long>(n) );
     }
     
   };
@@ -101,7 +101,7 @@ namespace EUROPA
     size_t operator()(TransactionId n) const
     {
       boost::hash<long> H;
-      return H( (long) ( (Transaction*) n ) );
+      return H(reinterpret_cast<long>(static_cast<Transaction*>(n)));
     }
     
   };

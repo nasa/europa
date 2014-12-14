@@ -5,7 +5,7 @@ namespace EUROPA{
 
   CommonAncestorConstraint::CommonAncestorConstraint(const LabelStr& name,
 						     const LabelStr& propagatorName,
-						     const ConstraintEngineId& constraintEngine,
+						     const ConstraintEngineId constraintEngine,
 						     const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_first(static_cast<ObjectDomain&>(getCurrentDomain(variables[0]))),
@@ -30,13 +30,13 @@ namespace EUROPA{
       apply(m_second, m_first);
   }
 
-  void CommonAncestorConstraint::handleExecute(const ConstrainedVariableId&,
+  void CommonAncestorConstraint::handleExecute(const ConstrainedVariableId,
 					       unsigned int,
 					       const DomainListener::ChangeType&){
     handleExecute();
   }
 
-  bool CommonAncestorConstraint::canIgnore(const ConstrainedVariableId&,
+  bool CommonAncestorConstraint::canIgnore(const ConstrainedVariableId,
 					   unsigned int argIndex,
 					   const DomainListener::ChangeType&){
     check_error(argIndex <= 2);
@@ -61,7 +61,7 @@ namespace EUROPA{
 
     singletonAncestors.push_back(singletonObject); // Has at least one, itself
 
-    const DataTypeId& dt = m_constraintEngine->getCESchema()->getDataType(singletonObject->getRootType().c_str());
+    const DataTypeId dt = m_constraintEngine->getCESchema()->getDataType(singletonObject->getRootType().c_str());
     ObjectDomain setOfAncestors(dt,singletonAncestors);
 
     //std::cout << ", " << setOfAncestors ;
@@ -84,7 +84,7 @@ namespace EUROPA{
       check_error(candidate.isValid());
       candidate->getAncestors(candidatesAncestors);
       candidatesAncestors.push_back(candidate);
-      const DataTypeId& candidateRootDT = m_constraintEngine->getCESchema()->getDataType(candidate->getRootType().c_str());
+      const DataTypeId candidateRootDT = m_constraintEngine->getCESchema()->getDataType(candidate->getRootType().c_str());
       ObjectDomain od(candidateRootDT,candidatesAncestors);
       //std::cout << "Candidate " << candidate->getName().toString() << " has ancestors " << od << std::endl;
       od.intersect(setOfAncestors);

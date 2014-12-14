@@ -6,7 +6,7 @@
 
 namespace EUROPA{
 
-  EventToken::EventToken(const PlanDatabaseId& planDatabase,
+  EventToken::EventToken(const PlanDatabaseId planDatabase,
 			 const LabelStr& predicateName,
 			 bool rejectable,
 			 bool isFact,
@@ -22,7 +22,7 @@ namespace EUROPA{
     commonInit(timeBaseDomain);
   }
 
-  EventToken::EventToken(const TokenId& master,
+  EventToken::EventToken(const TokenId master,
 			 const LabelStr& relation,
 			 const LabelStr& predicateName,
 			 const IntervalIntDomain& timeBaseDomain,
@@ -35,9 +35,9 @@ namespace EUROPA{
     commonInit(timeBaseDomain);
   }
 
-  const TempVarId& EventToken::start() const{return m_time;}
-  const TempVarId& EventToken::end() const{return m_time;}
-  const TempVarId& EventToken::getTime() const{return m_time;}
+  const TempVarId EventToken::start() const{return m_time;}
+  const TempVarId EventToken::end() const{return m_time;}
+  const TempVarId EventToken::getTime() const{return m_time;}
 
   void EventToken::commonInit(const IntervalIntDomain& timeBaseDomain){
     m_time = (new TokenVariable<IntervalIntDomain>(m_id,

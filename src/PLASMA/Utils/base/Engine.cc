@@ -18,12 +18,12 @@
 
 namespace EUROPA
 {
-    void EngineComponent::setEngine(EngineId& engine)
+    void EngineComponent::setEngine(EngineId engine)
     {
         m_engine = engine;
     }
 
-    EngineId& EngineComponent::getEngine()
+    EngineId EngineComponent::getEngine()
     {
         return m_engine;
     }
@@ -199,14 +199,14 @@ void EngineConfig::parseXML(TiXmlNode * pParent){
     {
         std::vector<ModuleId>::iterator it;
         for (it = m_modules.begin(); it != m_modules.end(); ++it) {
-            ModuleId& m = *it;
+            ModuleId m = *it;
             m.release();
         }
         m_modules.clear();
     }
 
 
-    ModuleId& EngineBase::getModule(const std::string& name)
+    ModuleId EngineBase::getModule(const std::string& name)
     {
         static ModuleId noId=ModuleId::noId();
 
@@ -465,12 +465,12 @@ EngineComponent* EngineBase::removeComponent(const std::string& name) {
         return m_components;
     }
 
-    void LanguageInterpreter::setEngine(EngineId& engine)
+    void LanguageInterpreter::setEngine(EngineId engine)
     {
         m_engine = engine;
     }
 
-    EngineId& LanguageInterpreter::getEngine()
+    EngineId LanguageInterpreter::getEngine()
     {
         return m_engine;
     }

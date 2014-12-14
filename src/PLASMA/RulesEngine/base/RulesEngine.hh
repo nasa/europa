@@ -24,22 +24,22 @@ namespace EUROPA {
    */
   class RulesEngine : public EngineComponent {
   public:
-    RulesEngine(const RuleSchemaId& schema, const PlanDatabaseId& planDatabase);
+    RulesEngine(const RuleSchemaId schema, const PlanDatabaseId planDatabase);
     ~RulesEngine();
     
-    const RulesEngineId& getId() const;
+    const RulesEngineId getId() const;
     
-    const PlanDatabaseId& getPlanDatabase() const;
+    const PlanDatabaseId getPlanDatabase() const;
 
-    void notifyActivated(const TokenId& token);
-    void notifyDeactivated(const TokenId& token);
-    void notifyTerminated(const TokenId& token);
+    void notifyActivated(const TokenId token);
+    void notifyDeactivated(const TokenId token);
+    void notifyTerminated(const TokenId token);
 
     std::set<RuleInstanceId> getRuleInstances() const;
-    void getRuleInstances(const TokenId& token,std::set<RuleInstanceId>& results) const;
-    bool hasPendingRuleInstances(const TokenId& token) const;
+    void getRuleInstances(const TokenId token,std::set<RuleInstanceId>& results) const;
+    bool hasPendingRuleInstances(const TokenId token) const;
     
-    const RuleSchemaId& getRuleSchema() const;
+    const RuleSchemaId getRuleSchema() const;
 
   private:
     friend class RulesEngineListener;
@@ -50,10 +50,10 @@ namespace EUROPA {
     void remove(const RulesEngineListenerId &listener);
     void notifyExecuted(const RuleInstanceId &rule);
     void notifyUndone(const RuleInstanceId &rule);
-    void cleanupRuleInstances(const TokenId& token);
-    bool isPending(const RuleInstanceId& r) const;
-    void scheduleForExecution(const RuleInstanceId& r);
-    void scheduleForUndoing(const RuleInstanceId& r);
+    void cleanupRuleInstances(const TokenId token);
+    bool isPending(const RuleInstanceId r) const;
+    void scheduleForExecution(const RuleInstanceId r);
+    void scheduleForUndoing(const RuleInstanceId r);
     bool doRules();
     bool hasWork() const;
     

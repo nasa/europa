@@ -26,13 +26,13 @@ namespace EUROPA {
     enum Policy {EARLIEST = 0,
 		 LATEST};
 
-    Timeline(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open = false);
+    Timeline(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open = false);
 
-    Timeline(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open = false);
+    Timeline(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open = false);
 
     virtual ~Timeline();
 
-    void getOrderingChoices(const TokenId& token,
+    void getOrderingChoices(const TokenId token,
 			    std::vector< std::pair<TokenId, TokenId> >& results,
 			    unsigned long limit = std::numeric_limits<unsigned long>::max());
 
@@ -45,19 +45,19 @@ namespace EUROPA {
      * explicit ordering.
      * @see constrain
      */
-    bool hasToken(const TokenId& token) const;
+    bool hasToken(const TokenId token) const;
 
     const std::list<TokenId>& getTokenSequence() const;
 
-    void constrain(const TokenId& predecessor, const TokenId& successor);
+    void constrain(const TokenId predecessor, const TokenId successor);
 
-    void free(const TokenId& predecessor, const TokenId& successor);
+    void free(const TokenId predecessor, const TokenId successor);
 
   protected:
     /** Implement notifications to synch cached data **/
-    void notifyMerged(const TokenId& token);
-    void notifyRejected(const TokenId& token);
-    void notifyDeleted(const TokenId& token);
+    void notifyMerged(const TokenId token);
+    void notifyRejected(const TokenId token);
+    void notifyDeleted(const TokenId token);
 
   private:
     /**
@@ -66,30 +66,30 @@ namespace EUROPA {
     void commonInit(bool open);
 
     /** Over-ride base class implementations to add extra handling **/
-    void add(const TokenId& token);
-    void remove(const TokenId& token);
+    void add(const TokenId token);
+    void remove(const TokenId token);
 
-    void insertToIndex(const TokenId& token, const std::list<TokenId>::iterator& position);
-    void removeFromIndex(const TokenId& token);
-    bool orderingRequired(const TokenId& token);
+    void insertToIndex(const TokenId token, const std::list<TokenId>::iterator& position);
+    void removeFromIndex(const TokenId token);
+    bool orderingRequired(const TokenId token);
 
     bool isValid(bool cleaningUp = false) const;
 
     /**
      * @brief True iff this token is the first in the sequence
      */
-    bool atStart(const TokenId& token) const;
+    bool atStart(const TokenId token) const;
 
     /**
      * @brief True iff this token is the last in the sequence
      */
-    bool atEnd(const TokenId& token) const;
+    bool atEnd(const TokenId token) const;
 
     /** Helper methods for the 'free' algorithm */
-    void unlink(const TokenId& token);
-    TokenId removeSuccessor(const TokenId& token);
-    TokenId removePredecessor(const TokenId& token);
-    bool adjacent(const TokenId& x, const TokenId& y) const;
+    void unlink(const TokenId token);
+    TokenId removeSuccessor(const TokenId token);
+    TokenId removePredecessor(const TokenId token);
+    bool adjacent(const TokenId x, const TokenId y) const;
 
 
     /**
@@ -110,12 +110,12 @@ namespace EUROPA {
   class TimelineObjectFactory : public NativeObjectFactory
   {
     public:
-        TimelineObjectFactory(const ObjectTypeId& objType);
+        TimelineObjectFactory(const ObjectTypeId objType);
         virtual ~TimelineObjectFactory();
 
     protected:
         virtual ObjectId makeNewObject(
-                            const PlanDatabaseId& planDb,
+                            const PlanDatabaseId planDb,
                             const LabelStr& objectType,
                             const LabelStr& objectName,
                             const std::vector<const Domain*>& arguments) const;

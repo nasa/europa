@@ -72,7 +72,7 @@ namespace EUROPA{
     return sl_noObject;
   }
 
-  Token::Token(const PlanDatabaseId& planDatabase,
+  Token::Token(const PlanDatabaseId planDatabase,
 	       const LabelStr& tokenTypeName,
 	       bool rejectable,
 	       bool isFact,
@@ -89,7 +89,7 @@ namespace EUROPA{
   }
 
   // Slave tokens cannot be rejectable.
-  Token::Token(const TokenId& master,
+  Token::Token(const TokenId master,
 	       const LabelStr& relation,
 	       const LabelStr& tokenTypeName,
 	       const IntervalIntDomain& durationBaseDomain,
@@ -160,12 +160,12 @@ namespace EUROPA{
     Entity::handleDiscard();
   }
 
-  const TokenId& Token::getId() const {
+  const TokenId Token::getId() const {
     check_error(m_id.isValid());
     return m_id;
   }
 
-  const TokenId& Token::master() const {
+  const TokenId Token::master() const {
     check_error(m_master.isNoId() || m_master.isValid());
     return m_master;
   }
@@ -178,7 +178,7 @@ namespace EUROPA{
   /**
    * This works because we have key based comparators which allow us to rely on positions
    */
-const TokenId& Token::getSlave(unsigned int slavePosition) const{
+const TokenId Token::getSlave(unsigned int slavePosition) const{
   if(slavePosition >= m_slaves.size())
     return TokenId::noId();
   TokenSet::const_iterator it = m_slaves.begin();
@@ -186,7 +186,7 @@ const TokenId& Token::getSlave(unsigned int slavePosition) const{
   return *it;
 }
 
-  int Token::getSlavePosition(const TokenId& slave) const{
+  int Token::getSlavePosition(const TokenId slave) const{
     int i = 0;
     for(TokenSet::const_iterator it = m_slaves.begin(); it != m_slaves.end(); ++it){
       TokenId token = *it;
@@ -208,19 +208,19 @@ const TokenId& Token::getSlave(unsigned int slavePosition) const{
 
   const LabelStr& Token::getUnqualifiedPredicateName() const {return m_unqualifiedPredicateName;}
 
-  const PlanDatabaseId& Token::getPlanDatabase() const {
+  const PlanDatabaseId Token::getPlanDatabase() const {
     check_error(m_planDatabase.isValid());
     return m_planDatabase;
 }
-  const StateVarId& Token::getState() const{
+  const StateVarId Token::getState() const{
     checkError(m_state.isValid(), m_state);
     return m_state;
   }
-  const ObjectVarId& Token::getObject() const{
+  const ObjectVarId Token::getObject() const{
     checkError(m_object.isValid(), m_object);
     return m_object;
   }
-  const TempVarId& Token::duration() const{
+  const TempVarId Token::duration() const{
     checkError(m_duration.isValid(), m_duration);
     return m_duration;
   }
@@ -228,7 +228,7 @@ const TokenId& Token::getSlave(unsigned int slavePosition) const{
   const std::vector<ConstrainedVariableId>& Token::getVariables() const {return m_allVariables;}
   const TokenSet& Token::slaves() const {return m_slaves;}
   const TokenSet& Token::getMergedTokens() const {return m_mergedTokens;}
-  const TokenId& Token::getActiveToken() const {return m_activeToken;}
+  const TokenId Token::getActiveToken() const {return m_activeToken;}
 
   const ConstrainedVariableId Token::getVariable(const LabelStr& name, bool checkGlobalContext) const{
     const std::vector<ConstrainedVariableId>& vars = getVariables();
@@ -246,7 +246,7 @@ const TokenId& Token::getSlave(unsigned int slavePosition) const{
     return ConstrainedVariableId::noId();
   }
 
-  void Token::add(const TokenId& slave){
+  void Token::add(const TokenId slave){
     check_error(!isIncomplete());
     check_error(m_slaves.find(slave) == m_slaves.end());
     check_error(slave->getPlanDatabase() == m_planDatabase);
@@ -254,7 +254,7 @@ const TokenId& Token::getSlave(unsigned int slavePosition) const{
     m_slaves.insert(slave);
   }
 
-  void Token::remove(const TokenId& slave){
+  void Token::remove(const TokenId slave){
     check_error(!Entity::isPurging());
     check_error(!isIncomplete());
 
@@ -310,7 +310,7 @@ const TokenId& Token::getSlave(unsigned int slavePosition) const{
       check_error(ALWAYS_FAILS);
   }
 
-void Token::doMerge(const TokenId& activeToken){
+void Token::doMerge(const TokenId activeToken){
   check_error(isValid());
   check_error(isInactive());
   check_error(activeToken.isValid());
@@ -434,12 +434,12 @@ void Token::doMerge(const TokenId& activeToken){
     m_planDatabase->notifyDeactivated(m_id);
   }
 
-  void Token::addStandardConstraint(const ConstraintId& constraint)
+  void Token::addStandardConstraint(const ConstraintId constraint)
   {
       m_standardConstraints.insert(constraint);
   }
 
-  bool Token::isStandardConstraint(const ConstraintId& constraint) const{
+  bool Token::isStandardConstraint(const ConstraintId constraint) const{
     return(m_standardConstraints.find(constraint) != m_standardConstraints.end());
   }
 
@@ -552,7 +552,7 @@ void Token::doMerge(const TokenId& activeToken){
 
     // Allocate an object variable with an empty domain
     m_baseObjectType = m_planDatabase->getSchema()->getObjectTypeForPredicate(m_predicateName);
-    const DataTypeId& dt = m_planDatabase->getSchema()->getCESchema()->getDataType(m_baseObjectType.c_str());
+    const DataTypeId dt = m_planDatabase->getSchema()->getCESchema()->getDataType(m_baseObjectType.c_str());
     m_object = (new TokenVariable<ObjectDomain>(m_id,
 						m_allVariables.size(),
 						m_planDatabase->getConstraintEngine(),
@@ -613,7 +613,7 @@ void Token::doMerge(const TokenId& activeToken){
     check_error(isValid());
   }
 
-  void Token::handleAdditionOfInactiveConstraint(const ConstraintId& constraint){
+  void Token::handleAdditionOfInactiveConstraint(const ConstraintId constraint){
     check_error(constraint.isValid());
     check_error(isMerged());
 
@@ -621,7 +621,7 @@ void Token::doMerge(const TokenId& activeToken){
     m_unifyMemento->handleAdditionOfInactiveConstraint(constraint);
   }
 
-  void Token::handleRemovalOfInactiveConstraint(const ConstraintId& constraint){
+  void Token::handleRemovalOfInactiveConstraint(const ConstraintId constraint){
     check_error(constraint.isValid());
     check_error(isMerged());
 
@@ -886,7 +886,7 @@ bool Token::canBeTerminated(eint) const{
     return true;
   }
 
-  bool Token::canBeCompared(const EntityId& entity) const{
+  bool Token::canBeCompared(const EntityId entity) const{
     return TokenId::convertable(entity);
   }
 
@@ -895,19 +895,19 @@ bool Token::canBeTerminated(eint) const{
     m_planDatabase->notifyActivated(m_id);
   }
 
-  void Token::addMergedToken(const TokenId& token){
+  void Token::addMergedToken(const TokenId token){
     checkError(isActive(), "Must be ative to merge onto it.");
     m_mergedTokens.insert(token);
     incRefCount();
   }
 
-  bool Token::removeMergedToken(const TokenId& token){
+  bool Token::removeMergedToken(const TokenId token){
     checkError(isActive(), "Must be ative to merge onto it.");
     m_mergedTokens.erase(token);
     return decRefCount();
   }
 
-  bool Token::removeMaster(const TokenId& token){
+  bool Token::removeMaster(const TokenId token){
     checkError(m_master.isValid(), "Master is not present or not valid.");
     checkError(m_master == token, "Trying to remove " << token->toString() << " instead of " << m_master->toString());
     m_master = TokenId::noId();
@@ -929,7 +929,7 @@ bool Token::canBeTerminated(eint) const{
     return willBeDiscarded;
   }
 
-  bool Token::isStateVariable(const ConstrainedVariableId& var){
+  bool Token::isStateVariable(const ConstrainedVariableId var){
     static const LabelStr sl_stateStr("state");
 
     bool result = (var->getName() == sl_stateStr);
@@ -940,11 +940,11 @@ bool Token::canBeTerminated(eint) const{
     return result;
   }
 
-  void Token::addLocalVariable(const ConstrainedVariableId& var){
+  void Token::addLocalVariable(const ConstrainedVariableId var){
     m_localVariables.insert(var);
   }
 
-  void Token::removeLocalVariable(const ConstrainedVariableId& var){
+  void Token::removeLocalVariable(const ConstrainedVariableId var){
     m_localVariables.erase(var);
   }
 

@@ -52,7 +52,7 @@ namespace EUROPA {
     return LabelStr(fullName.c_str());
   }
 
-  Schema::Schema(const LabelStr& name, const CESchemaId& ces)
+  Schema::Schema(const LabelStr& name, const CESchemaId ces)
       : m_id(this)
       , m_name(name)
       , m_ceSchema(ces)
@@ -72,7 +72,7 @@ namespace EUROPA {
     m_id.remove();
   }
 
-  const SchemaId& Schema::getId() const {return m_id;}
+  const SchemaId Schema::getId() const {return m_id;}
 
   const LabelStr& Schema::getName() const {return m_name;}
 
@@ -685,8 +685,8 @@ namespace EUROPA {
   }
 
 namespace {
-const Id<ObjectFactory>& createDefaultObjectFactory(
-          const ObjectTypeId& objType,
+const Id<ObjectFactory> createDefaultObjectFactory(
+          const ObjectTypeId objType,
           bool canCreateObjects) {
   std::vector<std::string> constructorArgNames;
   std::vector<std::string> constructorArgTypes;
@@ -709,7 +709,7 @@ const Id<ObjectFactory>& createDefaultObjectFactory(
 }
 }
 
-  void Schema::registerObjectType(const ObjectTypeId& objType)
+  void Schema::registerObjectType(const ObjectTypeId objType)
   {
       const char* className = objType->getName().c_str();
 
@@ -740,7 +740,7 @@ const Id<ObjectFactory>& createDefaultObjectFactory(
       {
           std::map<edouble,TokenTypeId>::const_iterator it = objType->getTokenTypes().begin();
           for(;it != objType->getTokenTypes().end(); ++it) {
-              const TokenTypeId& tokenType = it->second;
+              const TokenTypeId tokenType = it->second;
               LabelStr predName = tokenType->getSignature();
 
               addPredicate(predName.c_str());
@@ -755,7 +755,7 @@ const Id<ObjectFactory>& createDefaultObjectFactory(
       debugMsg("Schema:registerObjectType","Registered object type:" << std::endl << objType->toString());
   }
 
-  const ObjectTypeId& Schema::getObjectType(const LabelStr& objType)
+  const ObjectTypeId Schema::getObjectType(const LabelStr& objType)
   {
 	  return m_objectTypeMgr->getObjectType(objType);
   }
@@ -765,7 +765,7 @@ const Id<ObjectFactory>& createDefaultObjectFactory(
     return m_objectTypeMgr->getFactory(getId(),objectType,arguments,doCheckError);
   }
 
-  void Schema::registerTokenType(const TokenTypeId& f)
+  void Schema::registerTokenType(const TokenTypeId f)
   {
       m_tokenTypeMgr->registerType(f);
   }
@@ -800,14 +800,14 @@ const Id<ObjectFactory>& createDefaultObjectFactory(
   }
 
 
-  void Schema::registerMethod(const MethodId& m)
+  void Schema::registerMethod(const MethodId m)
   {
       // TODO: allow method overloading
       check_runtime_error(m_methods.find(m->getName()) == m_methods.end(), std::string("Method ")+m->getName().toString()+" already exists");
       m_methods[m->getName()] = m;
   }
 
-  MethodId Schema::getMethod(const LabelStr& methodName, const DataTypeId&, const std::vector<DataTypeId>&)
+  MethodId Schema::getMethod(const LabelStr& methodName, const DataTypeId, const std::vector<DataTypeId>&)
   {
       // TODO: use target type and arg types to resolve
       std::map<edouble,MethodId>::iterator it = m_methods.find(methodName);

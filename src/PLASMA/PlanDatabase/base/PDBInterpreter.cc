@@ -26,7 +26,7 @@ namespace EUROPA {
   {
   }
 
-  DataRef::DataRef(const ConstrainedVariableId& v)
+  DataRef::DataRef(const ConstrainedVariableId v)
     : m_value(v)
   {
   }
@@ -35,7 +35,7 @@ namespace EUROPA {
   {
   }
 
-  const ConstrainedVariableId& DataRef::getValue() { return m_value; }
+  const ConstrainedVariableId DataRef::getValue() { return m_value; }
 
   /*
    * EvalContext
@@ -49,7 +49,7 @@ namespace EUROPA {
   {
   }
 
-  void EvalContext::addVar(const char* name,const ConstrainedVariableId& v)
+  void EvalContext::addVar(const char* name,const ConstrainedVariableId v)
   {
     m_variables[name] = v;
     debugMsg("Interpreter:EvalContext","Added var:" << name << " to EvalContext");
@@ -68,7 +68,7 @@ namespace EUROPA {
       return ConstrainedVariableId::noId();
   }
 
-  void EvalContext::addToken(const char* name,const TokenId& t)
+  void EvalContext::addToken(const char* name,const TokenId t)
   {
     m_tokens[name] = t;
   }

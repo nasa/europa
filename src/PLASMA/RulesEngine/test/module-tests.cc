@@ -5,7 +5,7 @@ using namespace EUROPA;
 
 CPPUNIT_TEST_SUITE_REGISTRATION( RulesEngineModuleTests );
 
-int main( int argc, char **argv)
+int main( int, char **)
 {
     // Init data types so that id counts don't fail
     VoidDT::instance();

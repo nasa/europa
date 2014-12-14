@@ -68,11 +68,11 @@ namespace EUROPA
       delete m_upperLevelGraph;
       m_upperLevelGraph = 0;
 
-      delete (Transaction*) m_dummySinkTransaction;
-      delete (Transaction*) m_dummySourceTransaction;
+      delete static_cast<Transaction*>(m_dummySinkTransaction);
+      delete static_cast<Transaction*>(m_dummySourceTransaction);
     }
 
-bool FlowProfile::getEarliestLowerLevelInstant(const TransactionId& t, InstantId& i) {
+bool FlowProfile::getEarliestLowerLevelInstant(const TransactionId t, InstantId i) {
   check_error( t.isValid());
 
   if(t->isConsumer()) {
@@ -95,7 +95,9 @@ bool FlowProfile::getEarliestLowerLevelInstant(const TransactionId& t, InstantId
             case STRICTLY_AT:
               i = inst;
               return true;
-            default:
+            case AFTER_OR_AT:
+            case NOT_ORDERED:
+            case UNKNOWN:
               break;
           }
         }
@@ -106,7 +108,7 @@ bool FlowProfile::getEarliestLowerLevelInstant(const TransactionId& t, InstantId
   }
 }
 
-bool FlowProfile::getEarliestUpperLevelInstant(const TransactionId& t, InstantId& i) {
+bool FlowProfile::getEarliestUpperLevelInstant(const TransactionId t, InstantId i) {
   check_error( t.isValid());
 
   if(!t->isConsumer()) {
@@ -129,7 +131,9 @@ bool FlowProfile::getEarliestUpperLevelInstant(const TransactionId& t, InstantId
             case STRICTLY_AT:
               i = inst;
               return true;
-            default:
+            case AFTER_OR_AT:
+            case NOT_ORDERED:
+            case UNKNOWN:
               break;
           }
         }
@@ -206,7 +210,7 @@ void FlowProfile::recomputeLevels(InstantId prev, InstantId inst) {
 
   for( ; iter != end; ++iter )
   {
-    const TransactionId& transaction1 = (*iter);
+    const TransactionId transaction1 = (*iter);
 
     // inst->getTransactions returns all transaction overlapping inst->getTime
     // right inclusive
@@ -251,7 +255,7 @@ void FlowProfile::recomputeLevels(InstantId prev, InstantId inst) {
 
         for( ; secondIter != end; ++secondIter )
         {
-          const TransactionId& transaction2 = (*secondIter);
+          const TransactionId transaction2 = (*secondIter);
 
           if( transaction1 != transaction2  )
           {
@@ -434,45 +438,47 @@ Order FlowProfile::getOrdering( const TransactionId t1, const TransactionId t2 )
 	m_upperLevelGraph->enableAtOrBefore( t1, t2 );
     }
 
-    void FlowProfile::handleTransactionAdded(const TransactionId t)
-    {
-      check_error( t.isValid() );
+void FlowProfile::handleTransactionAdded(const TransactionId t) {
+  check_error( t.isValid() );
 
-      debugMsg("FlowProfile:handleTransactionAdded","TransactionId ("
-	       << t->getId() << ") time "
-	       << t->time()->lastDomain() << " quantity "
-	       << t->quantity()->lastDomain() << " consumer: "
-	       << std::boolalpha << t->isConsumer() );
+  debugMsg("FlowProfile:handleTransactionAdded","TransactionId ("
+           << t->getId() << ") time "
+           << t->time()->lastDomain() << " quantity "
+           << t->quantity()->lastDomain() << " consumer: "
+           << std::boolalpha << t->isConsumer() );
 
-      m_recalculateLowerLevel = true;
-      m_recalculateUpperLevel = true;
+  m_recalculateLowerLevel = true;
+  m_recalculateUpperLevel = true;
 
-      eint startRecalculation = PLUS_INFINITY;
-      eint endRecalculation = MINUS_INFINITY;
+  eint startRecalculation = PLUS_INFINITY;
+  eint endRecalculation = MINUS_INFINITY;
 
-      if( ProfileIteratorId::noId() != m_recomputeInterval )
-	{
-	  startRecalculation = std::min( m_recomputeInterval->getStartTime(), (eint) t->time()->lastDomain().getLowerBound() );
-	}
-      else
-	{
-	  startRecalculation = (eint) t->time()->lastDomain().getLowerBound();
-	}
+  if( ProfileIteratorId::noId() != m_recomputeInterval )
+  {
+    startRecalculation = std::min( m_recomputeInterval->getStartTime(),
+                                   static_cast<eint>(t->time()->lastDomain().getLowerBound()));
+  }
+  else
+  {
+    startRecalculation = static_cast<eint>(t->time()->lastDomain().getLowerBound());
+  }
 
-      // startRecalculation = MINUS_INFINITY;
-      endRecalculation = PLUS_INFINITY;
+  // startRecalculation = MINUS_INFINITY;
+  endRecalculation = PLUS_INFINITY;
 
-      if( ProfileIteratorId::noId() != m_recomputeInterval )
-	delete (ProfileIterator*) m_recomputeInterval;
+  if( ProfileIteratorId::noId() != m_recomputeInterval )
+    delete static_cast<ProfileIterator*>(m_recomputeInterval);
 
-      m_recomputeInterval = (new ProfileIterator( getId(), startRecalculation, endRecalculation ))->getId();
+  m_recomputeInterval = (new ProfileIterator( getId(), startRecalculation, endRecalculation ))->getId();
 
-      m_previousTimeBounds[ t ] = std::make_pair( (eint) t->time()->lastDomain().getLowerBound() , (eint) t->time()->lastDomain().getUpperBound()  );
+  m_previousTimeBounds[ t ] =
+      std::make_pair(static_cast<eint>(t->time()->lastDomain().getLowerBound()),
+                     static_cast<eint>(t->time()->lastDomain().getUpperBound()));
 
-      debugMsg("FlowProfile:handleTransactionAdded","Set interval to [" << startRecalculation << "," << endRecalculation << "]");
-    }
+  debugMsg("FlowProfile:handleTransactionAdded","Set interval to [" << startRecalculation << "," << endRecalculation << "]");
+}
 
-    void FlowProfile::enableTransaction( const TransactionId t, const InstantId inst )
+void FlowProfile::enableTransaction( const TransactionId t, const InstantId inst )
     {
       debugMsg("FlowProfile:enableTransaction","TransactionId (" << t->getId() << ")");
 
@@ -480,183 +486,196 @@ Order FlowProfile::getOrdering( const TransactionId t1, const TransactionId t2 )
       m_upperLevelGraph->enableTransaction( t, inst, m_upperLevelContribution );
     }
 
-    void FlowProfile::handleTransactionRemoved( const TransactionId t ) {
-      check_error(t.isValid());
+void FlowProfile::handleTransactionRemoved( const TransactionId t ) {
+  check_error(t.isValid());
 
-      debugMsg("FlowProfile:handleTransactionRemoved","TransactionId (" << t->getId() << ")");
+  debugMsg("FlowProfile:handleTransactionRemoved","TransactionId (" << t->getId() << ")");
 
-      m_recalculateLowerLevel = true;
-      m_recalculateUpperLevel = true;
+  m_recalculateLowerLevel = true;
+  m_recalculateUpperLevel = true;
 
-      m_lowerLevelGraph->removeTransaction( t );
-      m_upperLevelGraph->removeTransaction( t );
+  m_lowerLevelGraph->removeTransaction( t );
+  m_upperLevelGraph->removeTransaction( t );
 
-      m_lowerLevelContribution.erase( t );
-      m_upperLevelContribution.erase( t );
+  m_lowerLevelContribution.erase( t );
+  m_upperLevelContribution.erase( t );
 
-      eint startRecalculation = PLUS_INFINITY;
-      eint endRecalculation = MINUS_INFINITY;
+  eint startRecalculation = PLUS_INFINITY;
+  eint endRecalculation = MINUS_INFINITY;
 
-      if( ProfileIteratorId::noId() != m_recomputeInterval )
- 	{
- 	  startRecalculation = std::min( m_recomputeInterval->getStartTime(), (eint) t->time()->lastDomain().getLowerBound() );
- 	}
-      else
-	{
- 	  startRecalculation = (eint) t->time()->lastDomain().getLowerBound();
- 	}
+  if( ProfileIteratorId::noId() != m_recomputeInterval )
+  {
+    startRecalculation = std::min( m_recomputeInterval->getStartTime(),
+                                   static_cast<eint>(t->time()->lastDomain().getLowerBound()));
+  }
+  else
+  {
+    startRecalculation = static_cast<eint>(t->time()->lastDomain().getLowerBound());
+  }
 
-      endRecalculation = PLUS_INFINITY;
+  endRecalculation = PLUS_INFINITY;
 
-      if(m_recomputeInterval.isValid())
-	delete (ProfileIterator*) m_recomputeInterval;
+  if(m_recomputeInterval.isValid())
+    delete static_cast<ProfileIterator*>(m_recomputeInterval);
 
-      m_recomputeInterval = (new ProfileIterator( getId(), startRecalculation, endRecalculation ))->getId();
+  m_recomputeInterval = (new ProfileIterator( getId(), startRecalculation, endRecalculation ))->getId();
 
-      m_previousTimeBounds.erase( t );
-    }
+  m_previousTimeBounds.erase( t );
+}
 
-    void FlowProfile::handleTransactionTimeChanged(const TransactionId t, const DomainListener::ChangeType& type)
-    {
-      check_error(t.isValid());
+void FlowProfile::handleTransactionTimeChanged(const TransactionId t,
+                                               const DomainListener::ChangeType& type) {
+  check_error(t.isValid());
 
-      m_recalculateLowerLevel = true;
-      m_recalculateUpperLevel = true;
+  m_recalculateLowerLevel = true;
+  m_recalculateUpperLevel = true;
 
-      eint startRecalculation = PLUS_INFINITY;
-      eint endRecalculation = MINUS_INFINITY;
+  eint startRecalculation = PLUS_INFINITY;
+  eint endRecalculation = MINUS_INFINITY;
 
-      switch( type) {
-      case DomainListener::UPPER_BOUND_DECREASED:
-      case DomainListener::RESTRICT_TO_SINGLETON:
-      case DomainListener::SET_TO_SINGLETON:
-      case DomainListener::LOWER_BOUND_INCREASED:
-      case DomainListener::BOUNDS_RESTRICTED:
-	{
-	  TransactionId2IntIntPair::const_iterator ite = m_previousTimeBounds.find( t );
+  switch( type) {
+    case DomainListener::UPPER_BOUND_DECREASED:
+    case DomainListener::RESTRICT_TO_SINGLETON:
+    case DomainListener::SET_TO_SINGLETON:
+    case DomainListener::LOWER_BOUND_INCREASED:
+    case DomainListener::BOUNDS_RESTRICTED:
+      {
+        TransactionId2IntIntPair::const_iterator ite = m_previousTimeBounds.find( t );
 
-	  // we should have the previous value!
-	  check_error( ite != m_previousTimeBounds.end() );
+        // we should have the previous value!
+        check_error( ite != m_previousTimeBounds.end() );
 
-	  eint previousStart =  (*ite).second.first;
-	  eint previousEnd =  (*ite).second.second;
+        eint previousStart =  (*ite).second.first;
+        eint previousEnd =  (*ite).second.second;
 
-	  if( ProfileIteratorId::noId() != m_recomputeInterval )
-	    {
-	      startRecalculation = std::min( m_recomputeInterval->getStartTime(), previousStart );
-	      endRecalculation = std::max( m_recomputeInterval->getEndTime(), previousEnd );
-	    }
-	  else
-	    {
-	      startRecalculation = previousStart;
-	      endRecalculation = previousEnd;
-	    }
-	}
+        if( ProfileIteratorId::noId() != m_recomputeInterval )
+        {
+          startRecalculation = std::min( m_recomputeInterval->getStartTime(), previousStart );
+          endRecalculation = std::max( m_recomputeInterval->getEndTime(), previousEnd );
+        }
+        else
+        {
+          startRecalculation = previousStart;
+          endRecalculation = previousEnd;
+        }
+      }
       break;
-      case DomainListener::RESET:
-      case DomainListener::RELAXED:
-	{
-	  if( ProfileIteratorId::noId() != m_recomputeInterval )
-	    {
-	      startRecalculation = std::min( m_recomputeInterval->getStartTime(), (eint) t->time()->lastDomain().getLowerBound() );
-	      endRecalculation = std::max( m_recomputeInterval->getEndTime(), (eint) t->time()->lastDomain().getUpperBound() );
-	    }
-	  else
-	    {
-	      startRecalculation = (eint) t->time()->lastDomain().getLowerBound();
-	      endRecalculation = (eint) t->time()->lastDomain().getUpperBound();
-	    }
-	}
+    case DomainListener::RESET:
+    case DomainListener::RELAXED:
+      {
+        if( ProfileIteratorId::noId() != m_recomputeInterval ) {
+          startRecalculation = std::min(m_recomputeInterval->getStartTime(),
+                                        static_cast<eint>(t->time()->lastDomain().getLowerBound()));
+          endRecalculation = std::max(m_recomputeInterval->getEndTime(),
+                                      static_cast<eint>(t->time()->lastDomain().getUpperBound()));
+        }
+        else {
+          startRecalculation = static_cast<eint>(t->time()->lastDomain().getLowerBound());
+          endRecalculation = static_cast<eint>(t->time()->lastDomain().getUpperBound());
+        }
+      }
       break;
-      default:
-	break;
-      };
-
-      if(m_recomputeInterval.isValid())
-	delete (ProfileIterator*) m_recomputeInterval;
-
-      m_recomputeInterval = (new ProfileIterator( getId(), startRecalculation, endRecalculation ))->getId();
-
-      debugMsg("FlowProfile:handleTransactionTimeChanged","TransactionId (" << t->getId() << ") change " << type );
-    }
-
-    void FlowProfile::handleTransactionQuantityChanged(const TransactionId t, const DomainListener::ChangeType& type)
-    {
-      check_error(t.isValid());
-
-      switch( type) {
-      case DomainListener::UPPER_BOUND_DECREASED:
-	{
-	  if( t->isConsumer() )
-	    {
-	      m_recalculateLowerLevel = true;
-	    }
-	  else
-	    {
-	      m_recalculateUpperLevel = true;
-	    }
-
-	}
+    case DomainListener::REFTIME_CHANGED:
+    case DomainListener::VALUE_REMOVED:
+    case DomainListener::CLOSED:
+    case DomainListener::OPENED:
+    case DomainListener::EMPTIED:
+    default:
       break;
-      case DomainListener::RESET:
-      case DomainListener::RELAXED:
-      case DomainListener::RESTRICT_TO_SINGLETON:
-      case DomainListener::SET_TO_SINGLETON:
-	{
-	  m_recalculateLowerLevel = true;
-	  m_recalculateUpperLevel = true;
-	}
+  };
+
+  if(m_recomputeInterval.isValid())
+    delete static_cast<ProfileIterator*>(m_recomputeInterval);
+
+  m_recomputeInterval = (new ProfileIterator( getId(), startRecalculation, endRecalculation ))->getId();
+
+  debugMsg("FlowProfile:handleTransactionTimeChanged","TransactionId (" << t->getId() << ") change " << type );
+}
+
+void FlowProfile::handleTransactionQuantityChanged(const TransactionId t,
+                                                   const DomainListener::ChangeType& type) {
+  check_error(t.isValid());
+
+  switch( type) {
+    case DomainListener::UPPER_BOUND_DECREASED:
+      {
+        if( t->isConsumer() )
+        {
+          m_recalculateLowerLevel = true;
+        }
+        else
+        {
+          m_recalculateUpperLevel = true;
+        }
+
+      }
       break;
+    case DomainListener::RESET:
+    case DomainListener::RELAXED:
+    case DomainListener::RESTRICT_TO_SINGLETON:
+    case DomainListener::SET_TO_SINGLETON:
+      {
+        m_recalculateLowerLevel = true;
+        m_recalculateUpperLevel = true;
+      }
       break;
-      case DomainListener::LOWER_BOUND_INCREASED:
-	{
-	  if( t->isConsumer() )
-	    {
-	      m_recalculateUpperLevel = true;
-	    }
-	  else
-	    {
-	      m_recalculateLowerLevel = true;
-	    }
+    case DomainListener::LOWER_BOUND_INCREASED:
+      {
+        if( t->isConsumer() )
+        {
+          m_recalculateUpperLevel = true;
+        }
+        else
+        {
+          m_recalculateLowerLevel = true;
+        }
 
-	}
+      }
       break;
-      case DomainListener::BOUNDS_RESTRICTED:
-	{
-	  m_recalculateLowerLevel = true;
-	  m_recalculateUpperLevel = true;
+    case DomainListener::BOUNDS_RESTRICTED:
+      {
+        m_recalculateLowerLevel = true;
+        m_recalculateUpperLevel = true;
 
-	}
+      }
       break;
-      default:
-	break;
-      };
+    case DomainListener::VALUE_REMOVED:
+    case DomainListener::CLOSED:
+    case DomainListener::REFTIME_CHANGED:
+    case DomainListener::OPENED:
+    case DomainListener::EMPTIED:
+    default:
+      break;
+  };
 
-      eint startRecalculation = PLUS_INFINITY;
-      eint endRecalculation = MINUS_INFINITY;
+  eint startRecalculation = PLUS_INFINITY;
+  eint endRecalculation = MINUS_INFINITY;
 
-      if( ProfileIteratorId::noId() != m_recomputeInterval )
-	{
-	  startRecalculation = std::min( m_recomputeInterval->getStartTime(), (eint) t->time()->lastDomain().getLowerBound() );
-	  endRecalculation = std::max( m_recomputeInterval->getEndTime(), (eint) t->time()->lastDomain().getUpperBound() );
-	}
-      else
-	{
-	  startRecalculation = (eint) t->time()->lastDomain().getLowerBound();
-	  endRecalculation = (eint) t->time()->lastDomain().getUpperBound();
-	}
+  if( ProfileIteratorId::noId() != m_recomputeInterval )
+  {
+    startRecalculation = std::min(m_recomputeInterval->getStartTime(),
+                                  static_cast<eint>(t->time()->lastDomain().getLowerBound()));
+    endRecalculation = std::max(m_recomputeInterval->getEndTime(),
+                                static_cast<eint>(t->time()->lastDomain().getUpperBound()));
+  }
+  else
+  {
+    startRecalculation = static_cast<eint>(t->time()->lastDomain().getLowerBound());
+    endRecalculation = static_cast<eint>(t->time()->lastDomain().getUpperBound());
+  }
 
-      if(m_recomputeInterval.isValid())
-	delete (ProfileIterator*) m_recomputeInterval;
+  if(m_recomputeInterval.isValid())
+    delete static_cast<ProfileIterator*>(m_recomputeInterval);
 
-      m_recomputeInterval = (new ProfileIterator( getId(), startRecalculation, endRecalculation ))->getId();
+  m_recomputeInterval = (new ProfileIterator( getId(), startRecalculation, endRecalculation ))->getId();
 
-      debugMsg("FlowProfile:handleTransactionQuantityChanged","TransactionId (" << t->getId() << ") change " << type << " to " << t->quantity()->toString() );
-    }
+  debugMsg("FlowProfile:handleTransactionQuantityChanged","TransactionId (" << t->getId() << ") change " << type << " to " << t->quantity()->toString() );
+}
 
-    void FlowProfile::handleTemporalConstraintAdded( const TransactionId predecessor, const int preArgIndex,
-						     const TransactionId successor, const int sucArgIndex)
-    {
+void FlowProfile::handleTemporalConstraintAdded(const TransactionId predecessor,
+                                                const unsigned int ,
+                                                const TransactionId successor,
+                                                const unsigned int ) {
       debugMsg("FlowProfile:handleTemporalConstraintAdded","TransactionId1 (" << predecessor->getId() << ") before TransactionId2 (" << successor->getId() << ")");
 
       check_error(predecessor.isValid());
@@ -667,19 +686,27 @@ Order FlowProfile::getOrdering( const TransactionId t1, const TransactionId t2 )
       eint startRecalculation = PLUS_INFINITY;
       eint endRecalculation = MINUS_INFINITY;
 
-      if( ProfileIteratorId::noId() != m_recomputeInterval )
-	{
-	  startRecalculation = std::min( m_recomputeInterval->getStartTime(), std::min( (eint) predecessor->time()->lastDomain().getLowerBound(), (eint) successor->time()->lastDomain().getLowerBound() ) );
-	  endRecalculation = std::max( m_recomputeInterval->getEndTime(), std::max( (eint) predecessor->time()->lastDomain().getUpperBound(), (eint) successor->time()->lastDomain().getUpperBound() ) );
-	}
-      else
-	{
-	  startRecalculation = std::min( (eint) predecessor->time()->lastDomain().getLowerBound(), (eint) successor->time()->lastDomain().getLowerBound() );
-	  endRecalculation = std::max( (eint) predecessor->time()->lastDomain().getUpperBound(), (eint) successor->time()->lastDomain().getUpperBound() );
-	}
+      if( ProfileIteratorId::noId() != m_recomputeInterval ) {
+        startRecalculation =
+            std::min( m_recomputeInterval->getStartTime(),
+                      std::min(static_cast<eint>(predecessor->time()->lastDomain().getLowerBound()),
+                               static_cast<eint>(successor->time()->lastDomain().getLowerBound())));
+        endRecalculation =
+            std::max(m_recomputeInterval->getEndTime(),
+                     std::max(static_cast<eint>(predecessor->time()->lastDomain().getUpperBound()),
+                              static_cast<eint>(successor->time()->lastDomain().getUpperBound())));
+      }
+      else {
+        startRecalculation =
+            std::min(static_cast<eint>(predecessor->time()->lastDomain().getLowerBound()),
+                     static_cast<eint>(successor->time()->lastDomain().getLowerBound()));
+        endRecalculation =
+            std::max(static_cast<eint>(predecessor->time()->lastDomain().getUpperBound()),
+                     static_cast<eint>(successor->time()->lastDomain().getUpperBound()));
+      }
 
       if(m_recomputeInterval.isValid())
-        delete (ProfileIterator*) m_recomputeInterval;
+        delete static_cast<ProfileIterator*>(m_recomputeInterval);
 
       m_recomputeInterval = (new ProfileIterator( getId(), startRecalculation, endRecalculation ))->getId();
 
@@ -689,9 +716,9 @@ Order FlowProfile::getOrdering( const TransactionId t1, const TransactionId t2 )
     }
 
 void FlowProfile::handleTemporalConstraintRemoved(const TransactionId predecessor, 
-                                                  const int preArgIndex,
+                                                  const unsigned int ,
                                                   const TransactionId successor,
-                                                  const int sucArgIndex) {
+                                                  const unsigned int ) {
   debugMsg("FlowProfile:handleTemporalConstraintRemoved",
            "TransactionId1 (" << predecessor->getId() << 
            ") before TransactionId2 (" << successor->getId() << ")");
@@ -711,25 +738,25 @@ void FlowProfile::handleTemporalConstraintRemoved(const TransactionId predecesso
 
     startRecalculation = 
         std::min(start, 
-                 std::min((eint) predecessor->time()->lastDomain().getLowerBound(),
-                          (eint) successor->time()->lastDomain().getLowerBound()));
+                 std::min(static_cast<eint>(predecessor->time()->lastDomain().getLowerBound()),
+                          static_cast<eint>(successor->time()->lastDomain().getLowerBound())));
     endRecalculation = 
         std::max(end,
-                 std::max((eint) predecessor->time()->lastDomain().getUpperBound(),
-                          (eint) successor->time()->lastDomain().getUpperBound()));
+                 std::max(static_cast<eint>(predecessor->time()->lastDomain().getUpperBound()),
+                          static_cast<eint>(successor->time()->lastDomain().getUpperBound())));
   }
   else {
     startRecalculation = 
-        std::min((eint) predecessor->time()->lastDomain().getLowerBound(),
-                 (eint) successor->time()->lastDomain().getLowerBound());
+        std::min(static_cast<eint>(predecessor->time()->lastDomain().getLowerBound()),
+                 static_cast<eint>(successor->time()->lastDomain().getLowerBound()));
     endRecalculation = 
-        std::max((eint) predecessor->time()->lastDomain().getUpperBound(),
-                 (eint) successor->time()->lastDomain().getUpperBound());
+        std::max(static_cast<eint>(predecessor->time()->lastDomain().getUpperBound()),
+                 static_cast<eint>(successor->time()->lastDomain().getUpperBound()));
   }
 
 
   if(m_recomputeInterval.isValid())
-    delete (ProfileIterator*) m_recomputeInterval;
+    delete static_cast<ProfileIterator*>(m_recomputeInterval);
 
   m_recomputeInterval = 
       (new ProfileIterator( getId(), startRecalculation, endRecalculation ))->getId();

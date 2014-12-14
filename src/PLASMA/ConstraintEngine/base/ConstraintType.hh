@@ -25,7 +25,7 @@ namespace EUROPA {
   public:
     virtual ~ConstraintType();
 
-    const ConstraintTypeId& getId() const;
+    const ConstraintTypeId getId() const;
 
     const LabelStr& getName() const;
 

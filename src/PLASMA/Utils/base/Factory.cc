@@ -16,7 +16,7 @@ Factory::~Factory()
     m_id.remove();
 }
 
-FactoryId& Factory::getId() 
+FactoryId Factory::getId() 
 { 
     return m_id;         // TODO: log a message notifying of new registration
 
@@ -38,12 +38,12 @@ FactoryMgr::~FactoryMgr()
     m_id.remove();
 }
 
-FactoryMgrId& FactoryMgr::getId() 
+FactoryMgrId FactoryMgr::getId() 
 { 
     return m_id; 
 }
 
-void FactoryMgr::registerFactory(FactoryId& factory) {
+void FactoryMgr::registerFactory(FactoryId factory) {
   std::map<edouble,FactoryId>::iterator it = m_factoryMap.find(factory->getName());
   if(it != m_factoryMap.end()) {
     delete (static_cast<Factory*>(it->second));
@@ -64,13 +64,13 @@ void FactoryMgr::purgeAll()
     m_factoryMap.clear();
 }
 
-FactoryObjId& FactoryMgr::createInstance(const LabelStr& name, const FactoryArgs& args) 
+FactoryObjId FactoryMgr::createInstance(const LabelStr& name, const FactoryArgs& args) 
 {
-  FactoryId& factory = getFactory(name);
+  FactoryId factory = getFactory(name);
   return factory->createInstance(args);
 }
 
-FactoryId& FactoryMgr::getFactory(const LabelStr& name)
+FactoryId FactoryMgr::getFactory(const LabelStr& name)
 {   
     std::map<edouble,FactoryId>::iterator it = m_factoryMap.find(name);
     checkError(it != m_factoryMap.end(), "No factory registered for '" << name.toString() << "'");    

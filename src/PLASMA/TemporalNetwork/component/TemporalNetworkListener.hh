@@ -25,14 +25,14 @@ namespace EUROPA{
      * @param var The temporal variable from the constraint network
      * @param timepoint new timepoint 
      */
-    virtual void notifyTimepointAdded(const ConstrainedVariableId& var,
-                                      const TimepointId& timepoint);
+    virtual void notifyTimepointAdded(const ConstrainedVariableId var,
+                                      const TimepointId timepoint);
 
     /**
      * @brief Inform listeners that timpoint has been deleted
      * @param timepoint deleted
      */
-    virtual void notifyTimepointDeleted(const TimepointId& timepoint);
+    virtual void notifyTimepointDeleted(const TimepointId timepoint);
 
     /**
      * @brief Inform listeners that a constraint has been added to the base domain
@@ -41,8 +41,8 @@ namespace EUROPA{
      * @param lb lower bound
      * @param ub upper bound 
      */
-    virtual void notifyBaseDomainConstraintAdded(const ConstrainedVariableId& c,
-                                                 const TemporalConstraintId& constraint,
+    virtual void notifyBaseDomainConstraintAdded(const ConstrainedVariableId c,
+                                                 const TemporalConstraintId constraint,
                                                  Time lb, Time ub);
 
     /**
@@ -53,7 +53,7 @@ namespace EUROPA{
      * @param ub upper bound 
      */
     virtual void notifyConstraintAdded(const ConstraintId c,
-                                       const TemporalConstraintId& constraint,
+                                       const TemporalConstraintId constraint,
                                        Time lb, Time ub);
 
     /**
@@ -61,7 +61,7 @@ namespace EUROPA{
      * @param key The key of the deleted constraint
      * @param constraint constraint deleted 
      */
-    virtual void notifyConstraintDeleted(eint key, const TemporalConstraintId& constraint);
+    virtual void notifyConstraintDeleted(eint key, const TemporalConstraintId constraint);
 
     /**
      * @brief Inform listeners that bounds have been restricted
@@ -69,27 +69,27 @@ namespace EUROPA{
      * @param newlb new lower bound
      * @param newub new upper bound
      */
-    virtual void notifyBoundsRestricted(const ConstrainedVariableId& v, Time newlb, Time newub);
+    virtual void notifyBoundsRestricted(const ConstrainedVariableId v, Time newlb, Time newub);
 
     /**
      * @brief Inform listeners that bounds are unchanged
      * @param v constrained variable where bounds remain the same
      * @param timepoint The corresponding timepoint
      */
-    virtual void notifyBoundsSame(const ConstrainedVariableId& v,  const TimepointId& timepoint);
+    virtual void notifyBoundsSame(const ConstrainedVariableId v,  const TimepointId timepoint);
 
     /**
      * @brief Get unique id of listener.
      * @return unique id of listener.
      */
-    const TemporalNetworkListenerId& getId() const;
+    const TemporalNetworkListenerId getId() const;
 
   protected:
     /**
      * @brief Constructor
      * @param prop identify of temporal propagator to which this listener is attached.
      */
-    TemporalNetworkListener(const TemporalPropagatorId& prop);
+    TemporalNetworkListener(const TemporalPropagatorId prop);
 
     TemporalPropagatorId m_propagator;
     TemporalNetworkListenerId m_id;

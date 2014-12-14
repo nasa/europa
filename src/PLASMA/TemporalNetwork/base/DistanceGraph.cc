@@ -170,7 +170,7 @@ DedgeId DistanceGraph::createEdge(DnodeId from, DnodeId to, Time length)
   return edge;
 }
 
-void DistanceGraph::handleNodeUpdate(const DnodeId&) {}
+void DistanceGraph::handleNodeUpdate(const DnodeId) {}
 
 Void DistanceGraph::deleteEdge(DedgeId edge)
 {
@@ -631,7 +631,7 @@ std::string DistanceGraph::toString() const {
  return sstr.str();
 }
 
-Void DistanceGraph::boundedDijkstra (const DnodeId& source,
+Void DistanceGraph::boundedDijkstra (const DnodeId source,
                                      Time bound,
                                      Time destPotential,
                                      int direction)

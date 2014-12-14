@@ -11,7 +11,7 @@ namespace EUROPA {
     public:
       TimetableProfile(const PlanDatabaseId db, const FVDetectorId flawDetector);
 
-      void getTransactionsToOrder(const InstantId& inst, std::vector<TransactionId>& results);
+      void getTransactionsToOrder(const InstantId inst, std::vector<TransactionId>& results);
     protected:
 
     	/**

@@ -27,8 +27,8 @@ static int gPass = 0;
 static int gFail = 0;
 
 
-bool XmlTest (const char* testString, const char* expected, const char* found, bool noEcho = false)
-{
+namespace {
+bool XmlTest (const char* testString, const char* expected, const char* found, bool noEcho = false) {
 	bool pass = !strcmp( expected, found );
 	if ( pass )
 		printf ("[pass]");
@@ -67,7 +67,7 @@ bool XmlTest( const char* testString, int expected, int found, bool noEcho = fal
 		++gFail;
 	return pass;
 }
-
+}
 
 //
 // This file demonstrates some basic functionality of TinyXml.

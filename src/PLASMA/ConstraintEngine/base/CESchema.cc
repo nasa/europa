@@ -21,7 +21,7 @@ namespace EUROPA
       purgeDataTypes();
   }
 
-  const CESchemaId& CESchema::getId() const
+  const CESchemaId CESchema::getId() const
   {
       return m_id;
   }
@@ -42,7 +42,7 @@ namespace EUROPA
     return dt;
   }
 
-  void CESchema::registerDataType(const DataTypeId& dt)
+  void CESchema::registerDataType(const DataTypeId dt)
   {
     check_error(dt.isValid());
 
@@ -78,7 +78,7 @@ namespace EUROPA
       m_dataTypes.clear();
   }
 
-  void CESchema::registerConstraintType(const ConstraintTypeId& factory) {
+  void CESchema::registerConstraintType(const ConstraintTypeId factory) {
     const LabelStr& name = factory->getName();
     if(isConstraintType(name)){
       debugMsg("CESchema:registerConstraintType", "Over-riding prior registration for " << name.c_str());
@@ -93,7 +93,7 @@ namespace EUROPA
     debugMsg("CESchema:registerConstraintType", "Registered Constraint Type " << factory->getName().toString());
   }
 
-  const ConstraintTypeId& CESchema::getConstraintType(const LabelStr& name) {
+  const ConstraintTypeId CESchema::getConstraintType(const LabelStr& name) {
     std::map< edouble, ConstraintTypeId >::const_iterator it = m_constraintTypes.find(name.getKey());
     condDebugMsg(it ==  m_constraintTypes.end(), "europa:error", "Factory for constraint '" << name.toString() << "' is not registered.");
     check_error(it != m_constraintTypes.end(), "Factory for constraint '" + name.toString() + "' is not registered.");
@@ -122,7 +122,7 @@ namespace EUROPA
       }
   }
 
-  void CESchema::registerCFunction(const CFunctionId& cf)
+  void CESchema::registerCFunction(const CFunctionId cf)
   {
     check_error(cf.isValid());
 

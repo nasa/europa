@@ -19,16 +19,16 @@ namespace EUROPA {
         m_id.remove();
     }
 
-    const RuleSchemaId& RuleSchema::getId() const {return m_id;}
+    const RuleSchemaId RuleSchema::getId() const {return m_id;}
 
-    void RuleSchema::registerRule(const RuleId& rule)
+    void RuleSchema::registerRule(const RuleId rule)
     {
         m_rulesByName.insert(std::make_pair(rule->getName().getKey(), rule->getId()));      
     }
 
-    void RuleSchema::getRules(const PlanDatabaseId& pdb, const LabelStr& name, std::vector<RuleId>& results)
+    void RuleSchema::getRules(const PlanDatabaseId pdb, const LabelStr& name, std::vector<RuleId>& results)
     {
-        const SchemaId& schema = pdb->getSchema();
+        const SchemaId schema = pdb->getSchema();
 
         // If the predicate is defined on the parent class, then
         // call this function recursively. do it first since predicates for super-classes should be executed first
@@ -77,7 +77,7 @@ void RuleSchema::purgeAll() {
         m_id.remove();
     }
 
-    const RuleId& Rule::getId() const {return m_id;}
+    const RuleId Rule::getId() const {return m_id;}
 
     const LabelStr& Rule::getName() const {return m_name;}
 

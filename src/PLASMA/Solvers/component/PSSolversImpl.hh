@@ -23,7 +23,7 @@ namespace EUROPA
   class PSSolverImpl : public PSSolver
   {
     public:
-      PSSolverImpl(const SOLVERS::SolverId& solver,
+      PSSolverImpl(const SOLVERS::SolverId solver,
     		       const std::string& configFilename);
       virtual ~PSSolverImpl();
 

@@ -95,12 +95,12 @@ namespace EUROPA {
   }
 
 
-  const SchemaId& DbClientTransactionPlayer::getSchema() const
+  const SchemaId DbClientTransactionPlayer::getSchema() const
   {
       return m_client->getSchema();
   }
 
-  const CESchemaId& DbClientTransactionPlayer::getCESchema() const
+  const CESchemaId DbClientTransactionPlayer::getCESchema() const
   {
       return m_client->getCESchema();
   }
@@ -127,7 +127,7 @@ namespace EUROPA {
     check_error(txCounter > 0, "Failed to find any transactions in stream.");
   }
 
-  void DbClientTransactionPlayer::play(const DbClientTransactionLogId& txLog) {
+  void DbClientTransactionPlayer::play(const DbClientTransactionLogId txLog) {
     const std::list<TiXmlElement*>& transactions = txLog->getBufferedTransactions();
     for (std::list<TiXmlElement*>::const_iterator it = transactions.begin();
          it != transactions.end();
@@ -160,7 +160,7 @@ namespace EUROPA {
     cleanup(transactions);
   }
 
-  void DbClientTransactionPlayer::rewind(const DbClientTransactionLogId& txLog,
+  void DbClientTransactionPlayer::rewind(const DbClientTransactionLogId txLog,
 					 bool breakpoint) {
     const std::list<TiXmlElement*>& transactions = txLog->getBufferedTransactions();
     while(!transactions.empty()) {
@@ -447,10 +447,10 @@ namespace EUROPA {
   }
 
   const char* DbClientTransactionPlayer::getObjectAndType(
-          const SchemaId& schema,
-          const DbClientId& client,
+          const SchemaId schema,
+          const DbClientId client,
           const char* predicate,
-          ObjectId& object)
+          ObjectId object)
   {
     if (!schema->isPredicate(predicate)) {
       LabelStr typeStr(predicate);
@@ -713,8 +713,8 @@ void DbClientTransactionPlayer::playTokenCreated(const TiXmlElement & element) {
   }
 
   DbClientTransactionPlayer::TemporalRelations::iterator
-  DbClientTransactionPlayer::getTemporalConstraint(const ConstrainedVariableId& fvar,
-						   const ConstrainedVariableId& svar,
+  DbClientTransactionPlayer::getTemporalConstraint(const ConstrainedVariableId fvar,
+						   const ConstrainedVariableId svar,
 						   const std::string& name) {
     std::pair<TemporalRelations::iterator, TemporalRelations::iterator> range =
       m_relations.equal_range(std::make_pair(fvar, svar));
@@ -737,8 +737,8 @@ void DbClientTransactionPlayer::playTokenCreated(const TiXmlElement & element) {
     m_client->deleteConstraint(constr);
   }
 
-  void DbClientTransactionPlayer::removeTemporalConstraint(const ConstrainedVariableId& fvar,
-							   const ConstrainedVariableId& svar,
+  void DbClientTransactionPlayer::removeTemporalConstraint(const ConstrainedVariableId fvar,
+							   const ConstrainedVariableId svar,
 							   const std::string& name) {
     deleteTemporalConstraint(getTemporalConstraint(fvar, svar, name));
   }
@@ -847,9 +847,9 @@ void DbClientTransactionPlayer::playTokenCreated(const TiXmlElement & element) {
   }
 
   void DbClientTransactionPlayer::getElementsFromConstrain(const TiXmlElement& element,
-							   ObjectId& object,
-							   TokenId& predecessor,
-							   TokenId& successor) {
+							   ObjectId object,
+							   TokenId predecessor,
+							   TokenId successor) {
     if(strcmp(element.Value(), "invoke") == 0) {
       check_error(element.Attribute("identifier") != NULL);
       object = m_client->getObject(element.Attribute("identifier"));

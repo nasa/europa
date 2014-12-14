@@ -22,15 +22,15 @@ namespace EUROPA
      */
     RuleVariableListener(const LabelStr& name,
 			 const LabelStr& propagatorName,
-			 const ConstraintEngineId& constraintEngine, 
+			 const ConstraintEngineId constraintEngine, 
 			 const std::vector<ConstrainedVariableId>& variables);
 
     /**
      * @brief Implement this method to allow ruleInstance data to be extracted and copied
      */
-    void setSource(const ConstraintId& sourceConstraint);
+    void setSource(const ConstraintId sourceConstraint);
 
-    const RuleInstanceId& getRuleInstance();
+    const RuleInstanceId getRuleInstance();
 
     /**
      * @brief Standard constraint name
@@ -63,7 +63,7 @@ namespace EUROPA
     /**
      * @brief Over-ride base class test
      */
-    virtual bool testIsRedundant(const ConstrainedVariableId& var = ConstrainedVariableId::noId()) const;
+    virtual bool testIsRedundant(const ConstrainedVariableId var = ConstrainedVariableId::noId()) const;
 
     friend class RuleInstance;
 
@@ -71,11 +71,11 @@ namespace EUROPA
      * @brief Constructor used internally by the RuleInstance class when allocating
      * the listener.
      */
-    RuleVariableListener(const ConstraintEngineId& constraintEngine,
-			 const RuleInstanceId& ruleInstance,
+    RuleVariableListener(const ConstraintEngineId constraintEngine,
+			 const RuleInstanceId ruleInstance,
 			 const std::vector<ConstrainedVariableId>& scope);
 
-    bool canIgnore(const ConstrainedVariableId& variable, 
+    bool canIgnore(const ConstrainedVariableId variable, 
 		   unsigned int argIndex, 
 		   const DomainListener::ChangeType& changeType);
 

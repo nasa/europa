@@ -19,10 +19,10 @@ namespace EUROPA {
        */
       bool isDynamic() const;
 
-      virtual bool test(const EntityId& entity);
+      virtual bool test(const EntityId entity);
 
       // ContextId getContext() const {return m_context;}
-      // void setContext(ContextId& ctx) {m_context = ctx;}
+      // void setContext(ContextId ctx) {m_context = ctx;}
 
     private:
       const bool m_isDynamic;

@@ -107,6 +107,7 @@ std::string NddlTest::toString() const
 }
 
 
+namespace {
 std::string readLine(std::ifstream& inFile)
 {
     std::string retval;
@@ -153,6 +154,7 @@ std::string readTestResult(std::ifstream& inFile)
         throw std::string("Expected }}}");
 
     return retval;
+}
 }
 
 ErrorCheckingTests::ErrorCheckingTests(const std::string& testFilename,bool setBaseline)

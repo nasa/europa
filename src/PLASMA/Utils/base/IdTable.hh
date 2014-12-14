@@ -55,7 +55,7 @@ namespace EUROPA {
     static void output(std::ostream& os);
 
     // Test Support, checks for memory leaks
-	static void checkResult(bool result, unsigned int id_count);
+    static void checkResult(bool result, unsigned long id_count);
 
   protected:
     IdTable();

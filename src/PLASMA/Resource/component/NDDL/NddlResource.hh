@@ -15,221 +15,255 @@ namespace NDDL {
   typedef EUROPA::ObjectDomain ResuableDomain;
   typedef EUROPA::ObjectDomain ReservoirDomain;
 
-  class NddlUnaryToken : public EUROPA::UnaryToken {
-  public:
-    NddlUnaryToken(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, const bool& rejectable = false, const bool& isFact=false, const bool& close = false);
-    NddlUnaryToken(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, const bool& close = false);
+class NddlUnaryToken : public EUROPA::UnaryToken {
+ public:
+  NddlUnaryToken(const EUROPA::PlanDatabaseId planDatabase,
+                 const EUROPA::LabelStr& predicateName, const bool& rejectable = false,
+                 const bool& isFact=false, const bool& close = false);
+  NddlUnaryToken(const EUROPA::TokenId master,
+                 const EUROPA::LabelStr& predicateName,
+                 const EUROPA::LabelStr& relation, const bool& close = false);
 
-    StateVarId state;
-    ObjectVarId object;
-    TempVarId tStart;
-    TempVarId tEnd;
-    TempVarId tDuration;
-  protected:
-    virtual void handleDefaults(const bool&);
-  private:
-    void commonInit(const bool& autoClose);
+  EUROPA::StateVarId state;
+  EUROPA::ObjectVarId object;
+  EUROPA::TempVarId tStart;
+  EUROPA::TempVarId tEnd;
+  EUROPA::TempVarId tDuration;
+ protected:
+  virtual void handleDefaults(const bool&);
+ private:
+  void commonInit(const bool& autoClose);
+};
+
+class NddlUnary : public EUROPA::Reusable {
+ public:
+  NddlUnary(const EUROPA::PlanDatabaseId planDatabase,
+            const EUROPA::LabelStr& type,
+            const EUROPA::LabelStr& name,
+            bool open);
+  NddlUnary(const EUROPA::ObjectId parent,
+            const EUROPA::LabelStr& type,
+            const EUROPA::LabelStr& name,
+            bool open);
+
+  virtual ~NddlUnary(){}
+
+  virtual void close();
+
+  virtual void constructor(const std::vector<const EUROPA::Domain*>& args) {
+    Reusable::constructor(args);
+  }
+  virtual void constructor(EUROPA::edouble c_max);
+  virtual void constructor();
+
+  void handleDefaults(bool autoClose = true);
+
+  EUROPA::ConstrainedVariableId consumptionMax;
+
+  class use : public EUROPA::ReusableToken {
+   public:
+    use(const EUROPA::PlanDatabaseId planDatabase, const EUROPA::LabelStr& predicateName,
+        bool rejectable, bool isFact, bool close);
+    use(const EUROPA::TokenId master, const EUROPA::LabelStr& predicateName,
+        const EUROPA::LabelStr& relation, bool close);
+
+    EUROPA::StateVarId state;
+    EUROPA::ObjectVarId object;
+    EUROPA::TempVarId tStart;
+    EUROPA::TempVarId tEnd;
+    EUROPA::TempVarId tDuration;
+
+    virtual void close();
+   protected:
+    virtual void handleDefaults(bool autoClose = true);
+   private:
   };
+};
 
-  class NddlUnary : public EUROPA::Reusable {
-  public:
-    NddlUnary(const PlanDatabaseId& planDatabase,
-		 const LabelStr& type,
-		 const LabelStr& name,
-		 bool open);
-    NddlUnary(const ObjectId& parent,
-		 const LabelStr& type,
-		 const LabelStr& name,
-		 bool open);
+class NddlReusable : public EUROPA::Reusable {
+ public:
+  NddlReusable(const EUROPA::PlanDatabaseId planDatabase,
+               const EUROPA::LabelStr& type,
+               const EUROPA::LabelStr& name,
+               bool open);
+  NddlReusable(const EUROPA::ObjectId parent,
+               const EUROPA::LabelStr& type,
+               const EUROPA::LabelStr& name,
+               bool open);
 
-    virtual ~NddlUnary(){}
+  virtual ~NddlReusable(){}
+
+  virtual void close();
+
+  virtual void constructor(const std::vector<const EUROPA::Domain*>& args) {
+    Reusable::constructor(args);
+  }
+  virtual void constructor(EUROPA::edouble c, EUROPA::edouble ll_min);
+  virtual void constructor(EUROPA::edouble c, EUROPA::edouble ll_min,
+                           EUROPA::edouble cr_max);
+  virtual void constructor(EUROPA::edouble c, EUROPA::edouble ll_min,
+                           EUROPA::edouble c_max, EUROPA::edouble cr_max);
+  virtual void constructor();
+
+  void handleDefaults(bool autoClose = true);
+
+  EUROPA::ConstrainedVariableId capacity;
+  EUROPA::ConstrainedVariableId levelLimitMin;
+  EUROPA::ConstrainedVariableId consumptionRateMax;
+  EUROPA::ConstrainedVariableId consumptionMax;
+
+  class uses : public EUROPA::ReusableToken {
+   public:
+    uses(const EUROPA::PlanDatabaseId planDatabase, const EUROPA::LabelStr& predicateName,
+         bool rejectable, bool isFact, bool close);
+    uses(const EUROPA::TokenId master, const EUROPA::LabelStr& predicateName,
+         const EUROPA::LabelStr& relation, bool close);
+
+    EUROPA::StateVarId state;
+    EUROPA::ObjectVarId object;
+    EUROPA::TempVarId tStart;
+    EUROPA::TempVarId tEnd;
+    EUROPA::TempVarId tDuration;
+
+    EUROPA::ConstrainedVariableId quantity;
+    virtual void close();
+   protected:
+    virtual void handleDefaults(bool autoClose = true);
+   private:
+  };
+};
+
+class NddlCBReusable : public EUROPA::CBReusable {
+ public:
+  NddlCBReusable(const EUROPA::PlanDatabaseId planDatabase,
+                 const EUROPA::LabelStr& type,
+                 const EUROPA::LabelStr& name,
+                 bool open);
+  NddlCBReusable(const EUROPA::ObjectId parent,
+                 const EUROPA::LabelStr& type,
+                 const EUROPA::LabelStr& name,
+                 bool open);
+
+  virtual ~NddlCBReusable(){}
+
+  virtual void close();
+
+  virtual void constructor(const std::vector<const EUROPA::Domain*>& args) {
+    CBReusable::constructor(args);
+  }
+  virtual void constructor(EUROPA::edouble c, EUROPA::edouble ll_min);
+  virtual void constructor(EUROPA::edouble c, EUROPA::edouble ll_min,
+                           EUROPA::edouble cr_max);
+  virtual void constructor(EUROPA::edouble c, EUROPA::edouble ll_min,
+                           EUROPA::edouble c_max, EUROPA::edouble cr_max);
+  virtual void constructor();
+
+  void handleDefaults(bool autoClose = true);
+
+  EUROPA::ConstrainedVariableId capacity;
+  EUROPA::ConstrainedVariableId levelLimitMin;
+  EUROPA::ConstrainedVariableId consumptionRateMax;
+  EUROPA::ConstrainedVariableId consumptionMax;
+};
+
+class NddlReservoir : public EUROPA::Reservoir {
+ public:
+  NddlReservoir(const EUROPA::PlanDatabaseId planDatabase,
+                const EUROPA::LabelStr& type,
+                const EUROPA::LabelStr& name,
+                bool open);
+
+  NddlReservoir(const EUROPA::ObjectId parent,
+                const EUROPA::LabelStr& type,
+                const EUROPA::LabelStr& name,
+                bool open);
+
+  virtual ~NddlReservoir(){}
+
+  virtual void close();
+
+  virtual void constructor(const std::vector<const EUROPA::Domain*>& args) {
+    Reservoir::constructor(args);
+  }
+  virtual void constructor(EUROPA::edouble ic, EUROPA::edouble ll_min,
+                           EUROPA::edouble ll_max);
+
+  virtual void constructor(EUROPA::edouble ic, EUROPA::edouble ll_min,
+                           EUROPA::edouble ll_max, EUROPA::edouble p_max,
+                           EUROPA::edouble c_max);
+
+  virtual void constructor(EUROPA::edouble ic, EUROPA::edouble ll_min,
+                           EUROPA::edouble ll_max, EUROPA::edouble pr_max,
+                           EUROPA::edouble p_max, EUROPA::edouble cr_max,
+                           EUROPA::edouble c_max);
+
+  virtual void constructor();
+
+  void handleDefaults(bool autoClose = true); // default variable initialization
+
+  EUROPA::ConstrainedVariableId initialCapacity;
+  EUROPA::ConstrainedVariableId levelLimitMin;
+  EUROPA::ConstrainedVariableId levelLimitMax;
+  EUROPA::ConstrainedVariableId productionRateMax;
+  EUROPA::ConstrainedVariableId productionMax;
+  EUROPA::ConstrainedVariableId consumptionRateMax;
+  EUROPA::ConstrainedVariableId consumptionMax;
+
+  class produce : public EUROPA::ProducerToken {
+   public:
+    produce(const EUROPA::PlanDatabaseId planDatabase,
+            const EUROPA::LabelStr& predicateName, bool rejectable, bool isFact, bool close);
+    produce(const EUROPA::TokenId master, const EUROPA::LabelStr& predicateName,
+            const EUROPA::LabelStr& relation, bool close);
+
+    /* Access to primitives of a token as public members. */
+    EUROPA::StateVarId state;
+    EUROPA::ObjectVarId object;
+    EUROPA::TempVarId tStart;
+    EUROPA::TempVarId tEnd;
+    EUROPA::TempVarId tDuration;
+    EUROPA::TempVarId time;
+
+    EUROPA::ConstrainedVariableId quantity; /*!< Add member specific for a resource */
 
     virtual void close();
 
-    virtual void constructor(edouble c_max);
-    virtual void constructor();
+   protected:
+    virtual void handleDefaults(bool autoClose = true);
 
-    void handleDefaults(bool autoClose = true);
-
-    ConstrainedVariableId consumptionMax;
-
-    class use : public EUROPA::ReusableToken {
-    public:
-      use(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, bool rejectable, bool isFact, bool close);
-      use(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, bool close);
-
-      StateVarId state;
-      ObjectVarId object;
-      TempVarId tStart;
-      TempVarId tEnd;
-      TempVarId tDuration;
-
-      virtual void close();
-    protected:
-      virtual void handleDefaults(bool autoClose = true);
-    private:
-    };
+   private:
+    //void commonInit();
   };
 
-  class NddlReusable : public EUROPA::Reusable {
-  public:
-    NddlReusable(const PlanDatabaseId& planDatabase,
-		 const LabelStr& type,
-		 const LabelStr& name,
-		 bool open);
-    NddlReusable(const ObjectId& parent,
-		 const LabelStr& type,
-		 const LabelStr& name,
-		 bool open);
+  class consume : public EUROPA::ConsumerToken {
+   public:
+    consume(const EUROPA::PlanDatabaseId planDatabase,
+            const EUROPA::LabelStr& predicateName, bool rejectable, bool isFact, bool close);
+    consume(const EUROPA::TokenId master, const EUROPA::LabelStr& predicateName,
+            const EUROPA::LabelStr& relation, bool close);
 
-    virtual ~NddlReusable(){}
+    /* Access to primitives of a token as public members. */
+    EUROPA::StateVarId state;
+    EUROPA::ObjectVarId object;
+    EUROPA::TempVarId tStart;
+    EUROPA::TempVarId tEnd;
+    EUROPA::TempVarId tDuration;
+    EUROPA::TempVarId time;
+
+    EUROPA::ConstrainedVariableId quantity; /*!< Add member specific for a resource */
 
     virtual void close();
 
-    virtual void constructor(edouble c, edouble ll_min);
-    virtual void constructor(edouble c, edouble ll_min, edouble cr_max);
-    virtual void constructor(edouble c, edouble ll_min, edouble c_max, edouble cr_max);
-    virtual void constructor();
+   protected:
+    virtual void handleDefaults(bool autoClose = true);
 
-    void handleDefaults(bool autoClose = true);
-
-    ConstrainedVariableId capacity;
-    ConstrainedVariableId levelLimitMin;
-    ConstrainedVariableId consumptionRateMax;
-    ConstrainedVariableId consumptionMax;
-
-    class uses : public EUROPA::ReusableToken {
-    public:
-      uses(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, bool rejectable, bool isFact, bool close);
-      uses(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, bool close);
-
-      StateVarId state;
-      ObjectVarId object;
-      TempVarId tStart;
-      TempVarId tEnd;
-      TempVarId tDuration;
-
-      ConstrainedVariableId quantity;
-      virtual void close();
-    protected:
-      virtual void handleDefaults(bool autoClose = true);
-    private:
-    };
+   private:
+    //void commonInit();
   };
 
-  class NddlCBReusable : public EUROPA::CBReusable {
-  public:
-    NddlCBReusable(const PlanDatabaseId& planDatabase,
-         const LabelStr& type,
-         const LabelStr& name,
-         bool open);
-    NddlCBReusable(const ObjectId& parent,
-         const LabelStr& type,
-         const LabelStr& name,
-         bool open);
-
-    virtual ~NddlCBReusable(){}
-
-    virtual void close();
-
-    virtual void constructor(edouble c, edouble ll_min);
-    virtual void constructor(edouble c, edouble ll_min, edouble cr_max);
-    virtual void constructor(edouble c, edouble ll_min, edouble c_max, edouble cr_max);
-    virtual void constructor();
-
-    void handleDefaults(bool autoClose = true);
-
-    ConstrainedVariableId capacity;
-    ConstrainedVariableId levelLimitMin;
-    ConstrainedVariableId consumptionRateMax;
-    ConstrainedVariableId consumptionMax;
-  };
-
-  class NddlReservoir : public EUROPA::Reservoir {
-  public:
-    NddlReservoir(const PlanDatabaseId& planDatabase,
-		  const LabelStr& type,
-		  const LabelStr& name,
-		  bool open);
-
-    NddlReservoir(const ObjectId parent,
-		  const LabelStr& type,
-		  const LabelStr& name,
-		  bool open);
-
-    virtual ~NddlReservoir(){}
-
-    virtual void close();
-
-    virtual void constructor(edouble ic, edouble ll_min, edouble ll_max);
-
-    virtual void constructor(edouble ic, edouble ll_min, edouble ll_max, edouble p_max, edouble c_max);
-
-    virtual void constructor(edouble ic, edouble ll_min, edouble ll_max, edouble pr_max, edouble p_max, edouble cr_max, edouble c_max);
-
-    virtual void constructor();
-
-    void handleDefaults(bool autoClose = true); // default variable initialization
-
-    ConstrainedVariableId initialCapacity;
-    ConstrainedVariableId levelLimitMin;
-    ConstrainedVariableId levelLimitMax;
-    ConstrainedVariableId productionRateMax;
-    ConstrainedVariableId productionMax;
-    ConstrainedVariableId consumptionRateMax;
-    ConstrainedVariableId consumptionMax;
-
-    class produce : public EUROPA::ProducerToken {
-    public:
-      produce(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, bool rejectable, bool isFact, bool close);
-      produce(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, bool close);
-
-      /* Access to primitives of a token as public members. */
-      StateVarId state;
-      ObjectVarId object;
-      TempVarId tStart;
-      TempVarId tEnd;
-      TempVarId tDuration;
-      TempVarId time;
-
-      ConstrainedVariableId quantity; /*!< Add member specific for a resource */
-
-      virtual void close();
-
-    protected:
-      virtual void handleDefaults(bool autoClose = true);
-
-    private:
-      //void commonInit();
-    };
-
-    class consume : public EUROPA::ConsumerToken {
-    public:
-      consume(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, bool rejectable, bool isFact, bool close);
-      consume(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, bool close);
-
-      /* Access to primitives of a token as public members. */
-      StateVarId state;
-      ObjectVarId object;
-      TempVarId tStart;
-      TempVarId tEnd;
-      TempVarId tDuration;
-      TempVarId time;
-
-      ConstrainedVariableId quantity; /*!< Add member specific for a resource */
-
-      virtual void close();
-
-    protected:
-      virtual void handleDefaults(bool autoClose = true);
-
-    private:
-      //void commonInit();
-    };
-
-  protected:
-  private:
-  };
+ protected:
+ private:
+};
 
 } // namespace NDDL
 

@@ -61,7 +61,7 @@ namespace EUROPA {
   public:								\
   cname##Constraint(const LabelStr& name,				\
 		const LabelStr& propagatorName,				\
-		const ConstraintEngineId& constraintEngine,		\
+		const ConstraintEngineId constraintEngine,		\
 		const std::vector<ConstrainedVariableId>& variables);	\
   void handleExecute();							\
   private:								\
@@ -70,7 +70,7 @@ namespace EUROPA {
 #define CREATE_FUNCTION_CONSTRAINT_ONE_ARG(cname, function, rt)		\
   cname##Constraint::cname##Constraint(const LabelStr& name,		\
 				       const LabelStr& propagatorName,	\
-				       const ConstraintEngineId& constraintEngine, \
+				       const ConstraintEngineId constraintEngine, \
 				       const std::vector<ConstrainedVariableId>& variables) \
   : Constraint(name, propagatorName, constraintEngine, variables) {}	\
   void cname##Constraint::handleExecute() {				\
@@ -84,7 +84,7 @@ namespace EUROPA {
 #define CREATE_FUNCTION_CONSTRAINT_TWO_ARG(cname, function, rt)		\
   cname##Constraint::cname##Constraint(const LabelStr& name,		\
 				       const LabelStr& propagatorName,	\
-				       const ConstraintEngineId& constraintEngine, \
+				       const ConstraintEngineId constraintEngine, \
 				       const std::vector<ConstrainedVariableId>& variables) \
   : Constraint(name, propagatorName, constraintEngine, variables) {}	\
   void cname##Constraint::handleExecute() {				\
@@ -121,7 +121,7 @@ namespace EUROPA {
   public:
     AbsoluteValue(const LabelStr& name,
           const LabelStr& propagatorName,
-          const ConstraintEngineId& constraintEngine,
+          const ConstraintEngineId constraintEngine,
           const std::vector<ConstrainedVariableId>& variables);
     void handleExecute();
   private:
@@ -155,7 +155,7 @@ namespace EUROPA {
   public:
     AddEqualConstraint(const LabelStr& name,
            const LabelStr& propagatorName,
-           const ConstraintEngineId& constraintEngine,
+           const ConstraintEngineId constraintEngine,
            const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
@@ -197,7 +197,7 @@ namespace EUROPA {
   public:
     MultEqualConstraint(const LabelStr& name,
 			const LabelStr& propagatorName,
-			const ConstraintEngineId& constraintEngine,
+			const ConstraintEngineId constraintEngine,
 			const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
@@ -214,7 +214,7 @@ namespace EUROPA {
   public:
     DivEqualConstraint(const LabelStr& name,
       const LabelStr& propagatorName,
-      const ConstraintEngineId& constraintEngine,
+      const ConstraintEngineId constraintEngine,
       const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
@@ -232,7 +232,7 @@ namespace EUROPA {
     public:
       AddMultEqualConstraint(const LabelStr& name,
                  const LabelStr& propagatorName,
-                 const ConstraintEngineId& constraintEngine,
+                 const ConstraintEngineId constraintEngine,
                  const std::vector<ConstrainedVariableId>& variables);
 
       ~AddMultEqualConstraint();
@@ -261,7 +261,7 @@ namespace EUROPA {
   public:
     AllDiffConstraint(const LabelStr& name,
                       const LabelStr& propagatorName,
-                      const ConstraintEngineId& constraintEngine,
+                      const ConstraintEngineId constraintEngine,
                       const std::vector<ConstrainedVariableId>& variables);
 
     ~AllDiffConstraint() {
@@ -288,7 +288,7 @@ class CalcDistanceConstraint : public Constraint {
   public:
     CalcDistanceConstraint(const LabelStr& name,
 			   const LabelStr& propagatorName,
-			   const ConstraintEngineId& constraintEngine,
+			   const ConstraintEngineId constraintEngine,
 			   const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
@@ -324,19 +324,19 @@ class LessThanEqualConstraint : public Constraint {
   public:
     LessThanEqualConstraint(const LabelStr& name,
 			    const LabelStr& propagatorName,
-			    const ConstraintEngineId& constraintEngine,
+			    const ConstraintEngineId constraintEngine,
 			    const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
 
-    bool canIgnore(const ConstrainedVariableId& variable,
+    bool canIgnore(const ConstrainedVariableId variable,
 		   unsigned int argIndex,
 		   const DomainListener::ChangeType& changeType);
 
     static void propagate(Domain& domx, Domain& domy);
 
   private:
-    bool testIsRedundant(const ConstrainedVariableId& var = ConstrainedVariableId::noId()) const;
+    bool testIsRedundant(const ConstrainedVariableId var = ConstrainedVariableId::noId()) const;
 
     Domain& m_x;
     Domain& m_y;
@@ -360,7 +360,7 @@ class CardinalityConstraint : public Constraint {
   public:
     CardinalityConstraint(const LabelStr& name,
                           const LabelStr& propagatorName,
-                          const ConstraintEngineId& constraintEngine,
+                          const ConstraintEngineId constraintEngine,
                           const std::vector<ConstrainedVariableId>& variables);
 
     ~CardinalityConstraint() {
@@ -392,7 +392,7 @@ class CondAllDiffConstraint : public Constraint {
   public:
     CondAllDiffConstraint(const LabelStr& name,
                           const LabelStr& propagatorName,
-                          const ConstraintEngineId& constraintEngine,
+                          const ConstraintEngineId constraintEngine,
                           const std::vector<ConstrainedVariableId>& variables);
 
     ~CondAllDiffConstraint() { }
@@ -412,7 +412,7 @@ class CondAllSameConstraint : public Constraint {
   public:
     CondAllSameConstraint(const LabelStr& name,
                           const LabelStr& propagatorName,
-                          const ConstraintEngineId& constraintEngine,
+                          const ConstraintEngineId constraintEngine,
                           const std::vector<ConstrainedVariableId>& variables);
 
     ~CondAllSameConstraint() { }
@@ -433,7 +433,7 @@ class CondEqualSumConstraint : public Constraint {
   public:
     CondEqualSumConstraint(const LabelStr& name,
                            const LabelStr& propagatorName,
-                           const ConstraintEngineId& constraintEngine,
+                           const ConstraintEngineId constraintEngine,
                            const std::vector<ConstrainedVariableId>& variables);
 
     ~CondEqualSumConstraint() {
@@ -460,7 +460,7 @@ class CountNonZerosConstraint : public Constraint {
   public:
     CountNonZerosConstraint(const LabelStr& name,
                             const LabelStr& propagatorName,
-                            const ConstraintEngineId& constraintEngine,
+                            const ConstraintEngineId constraintEngine,
                             const std::vector<ConstrainedVariableId>& variables);
 
     ~CountNonZerosConstraint() {
@@ -497,7 +497,7 @@ class CountZerosConstraint : public Constraint {
   public:
     CountZerosConstraint(const LabelStr& name,
                          const LabelStr& propagatorName,
-                         const ConstraintEngineId& constraintEngine,
+                         const ConstraintEngineId constraintEngine,
                          const std::vector<ConstrainedVariableId>& variables);
 
     ~CountZerosConstraint() { }
@@ -516,7 +516,7 @@ class CountZerosConstraint : public Constraint {
   public:
     DistanceFromSquaresConstraint(const LabelStr& name,
 		       const LabelStr& propagatorName,
-		       const ConstraintEngineId& constraintEngine,
+		       const ConstraintEngineId constraintEngine,
 		       const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
@@ -532,7 +532,7 @@ class CountZerosConstraint : public Constraint {
   public:
     EqualConstraint(const LabelStr& name,
 		    const LabelStr& propagatorName,
-		    const ConstraintEngineId& constraintEngine,
+		    const ConstraintEngineId constraintEngine,
 		    const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
@@ -540,10 +540,10 @@ class CountZerosConstraint : public Constraint {
     /**
      * @brief Accessor required for EqualityConstraintPropagator.
      */
-    static Domain& getCurrentDomain(const ConstrainedVariableId& var);
+    static Domain& getCurrentDomain(const ConstrainedVariableId var);
 
   private:
-    bool equate(const ConstrainedVariableId& v1, const ConstrainedVariableId& v2, bool& isEmpty);
+    bool equate(const ConstrainedVariableId v1, const ConstrainedVariableId v2, bool& isEmpty);
     const unsigned long m_argCount;
   };
   CREATE_CONSTRAINT_TYPE(AllSameArgumentsCT, EqualCT, EqualConstraint);
@@ -557,7 +557,7 @@ class CountZerosConstraint : public Constraint {
   public:
     EqualMaximumConstraint(const LabelStr& name,
                            const LabelStr& propagatorName,
-                           const ConstraintEngineId& constraintEngine,
+                           const ConstraintEngineId constraintEngine,
                            const std::vector<ConstrainedVariableId>& variables);
 
     ~EqualMaximumConstraint() { }
@@ -574,7 +574,7 @@ class EqualMinimumConstraint : public Constraint {
   public:
     EqualMinimumConstraint(const LabelStr& name,
                            const LabelStr& propagatorName,
-                           const ConstraintEngineId& constraintEngine,
+                           const ConstraintEngineId constraintEngine,
                            const std::vector<ConstrainedVariableId>& variables);
 
     ~EqualMinimumConstraint() { }
@@ -592,7 +592,7 @@ class EqualProductConstraint : public Constraint {
   public:
     EqualProductConstraint(const LabelStr& name,
                            const LabelStr& propagatorName,
-                           const ConstraintEngineId& constraintEngine,
+                           const ConstraintEngineId constraintEngine,
                            const std::vector<ConstrainedVariableId>& variables);
 
     ~EqualProductConstraint();
@@ -619,7 +619,7 @@ class EqualSumConstraint : public Constraint {
   public:
     EqualSumConstraint(const LabelStr& name,
                        const LabelStr& propagatorName,
-                       const ConstraintEngineId& constraintEngine,
+                       const ConstraintEngineId constraintEngine,
                        const std::vector<ConstrainedVariableId>& variables);
 
     ~EqualSumConstraint();
@@ -647,7 +647,7 @@ class GreaterOrEqThanSumConstraint : public Constraint {
   public:
     GreaterOrEqThanSumConstraint(const LabelStr& name,
                                  const LabelStr& propagatorName,
-                                 const ConstraintEngineId& constraintEngine,
+                                 const ConstraintEngineId constraintEngine,
                                  const std::vector<ConstrainedVariableId>& variables);
 
     ~GreaterOrEqThanSumConstraint() {
@@ -674,13 +674,13 @@ class LessThanConstraint : public Constraint {
   public:
     LessThanConstraint(const LabelStr& name,
                        const LabelStr& propagatorName,
-                       const ConstraintEngineId& constraintEngine,
+                       const ConstraintEngineId constraintEngine,
                        const std::vector<ConstrainedVariableId>& variables);
 
 
     void handleExecute();
 
-    bool canIgnore(const ConstrainedVariableId& variable,
+    bool canIgnore(const ConstrainedVariableId variable,
 		   unsigned int argIndex,
 		   const DomainListener::ChangeType& changeType);
 
@@ -703,7 +703,7 @@ class GreaterThanSumConstraint : public Constraint {
   public:
     GreaterThanSumConstraint(const LabelStr& name,
                              const LabelStr& propagatorName,
-                             const ConstraintEngineId& constraintEngine,
+                             const ConstraintEngineId constraintEngine,
                              const std::vector<ConstrainedVariableId>& variables);
 
     ~GreaterThanSumConstraint() {
@@ -736,7 +736,7 @@ class LessOrEqThanSumConstraint : public Constraint {
   public:
     LessOrEqThanSumConstraint(const LabelStr& name,
                               const LabelStr& propagatorName,
-                              const ConstraintEngineId& constraintEngine,
+                              const ConstraintEngineId constraintEngine,
                               const std::vector<ConstrainedVariableId>& variables);
 
     ~LessOrEqThanSumConstraint();
@@ -759,7 +759,7 @@ class LessOrEqThanSumConstraint : public Constraint {
   public:
     LessThanSumConstraint(const LabelStr& name,
                           const LabelStr& propagatorName,
-                          const ConstraintEngineId& constraintEngine,
+                          const ConstraintEngineId constraintEngine,
                           const std::vector<ConstrainedVariableId>& variables);
 
     ~LessThanSumConstraint() {
@@ -787,7 +787,7 @@ class LockConstraint : public Constraint {
   public:
     LockConstraint(const LabelStr& name,
 		   const LabelStr& propagatorName,
-		   const ConstraintEngineId& constraintEngine,
+		   const ConstraintEngineId constraintEngine,
 		   const std::vector<ConstrainedVariableId>& variables);
 
     ~LockConstraint();
@@ -805,7 +805,7 @@ class NegateConstraint : public Constraint {
   public:
     NegateConstraint(const LabelStr& name,
 		    const LabelStr& propagatorName,
-		    const ConstraintEngineId& constraintEngine,
+		    const ConstraintEngineId constraintEngine,
 		    const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
@@ -818,12 +818,12 @@ class NotEqualConstraint : public Constraint {
   public:
     NotEqualConstraint(const LabelStr& name,
 		       const LabelStr& propagatorName,
-		       const ConstraintEngineId& constraintEngine,
+		       const ConstraintEngineId constraintEngine,
 		       const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
 
-    bool canIgnore(const ConstrainedVariableId& variable,
+    bool canIgnore(const ConstrainedVariableId variable,
 		   unsigned int argIndex,
 		   const DomainListener::ChangeType& changeType);
     /**
@@ -849,7 +849,7 @@ class NotEqualConstraint : public Constraint {
   public:
     MemberImplyConstraint(const LabelStr& name,
                           const LabelStr& propagatorName,
-                          const ConstraintEngineId& constraintEngine,
+                          const ConstraintEngineId constraintEngine,
                           const std::vector<ConstrainedVariableId>& variables);
 
     ~MemberImplyConstraint() { }
@@ -871,7 +871,7 @@ class NotEqualConstraint : public Constraint {
   public:
     OrConstraint(const LabelStr& name,
                  const LabelStr& propagatorName,
-                 const ConstraintEngineId& constraintEngine,
+                 const ConstraintEngineId constraintEngine,
                  const std::vector<ConstrainedVariableId>& variables);
 
     ~OrConstraint() {
@@ -900,7 +900,7 @@ class NotEqualConstraint : public Constraint {
   public:
     RandConstraint(const LabelStr& name,
           const LabelStr& propagatorName,
-          const ConstraintEngineId& constraintEngine,
+          const ConstraintEngineId constraintEngine,
           const std::vector<ConstrainedVariableId>& variables);
     void handleExecute();
   private:
@@ -919,7 +919,7 @@ class NotEqualConstraint : public Constraint {
   public:
     RotateScopeRightConstraint(const LabelStr& name,
                                const LabelStr& propagatorName,
-                               const ConstraintEngineId& constraintEngine,
+                               const ConstraintEngineId constraintEngine,
                                const std::vector<ConstrainedVariableId>& variables) __attribute__((noreturn))
       : Constraint(name, propagatorName, constraintEngine, variables) {
       // Called via REGISTER_NARY() macro's factory rather than via the
@@ -930,7 +930,7 @@ class NotEqualConstraint : public Constraint {
 
     RotateScopeRightConstraint(const LabelStr& name,
                                const LabelStr& propagatorName,
-                               const ConstraintEngineId& constraintEngine,
+                               const ConstraintEngineId constraintEngine,
                                const std::vector<ConstrainedVariableId>& variables,
                                const LabelStr& otherName,
                                const int& rotateCount);
@@ -964,7 +964,7 @@ class NotEqualConstraint : public Constraint {
   public:
     SineFunction(const LabelStr& name,
 		 const LabelStr& propagatorName,
-		 const ConstraintEngineId& constraintEngine,
+		 const ConstraintEngineId constraintEngine,
 		 const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
@@ -985,7 +985,7 @@ class SquareOfDifferenceConstraint : public Constraint {
   public:
     SquareOfDifferenceConstraint(const LabelStr& name,
 		       const LabelStr& propagatorName,
-		       const ConstraintEngineId& constraintEngine,
+		       const ConstraintEngineId constraintEngine,
 		       const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
@@ -1006,14 +1006,14 @@ class SubsetOfConstraint : public Constraint {
   public:
     SubsetOfConstraint(const LabelStr& name,
 		       const LabelStr& propagatorName,
-		       const ConstraintEngineId& constraintEngine,
+		       const ConstraintEngineId constraintEngine,
 		       const std::vector<ConstrainedVariableId>& variables);
 
     ~SubsetOfConstraint();
 
     void handleExecute();
 
-    bool canIgnore(const ConstrainedVariableId& variable,
+    bool canIgnore(const ConstrainedVariableId variable,
 		   unsigned int argIndex,
 		   const DomainListener::ChangeType& changeType);
 
@@ -1026,7 +1026,7 @@ class SwapTwoVarsConstraint : public Constraint {
  public:
   SwapTwoVarsConstraint(const LabelStr& name,
                         const LabelStr& propagatorName,
-                        const ConstraintEngineId& constraintEngine,
+                        const ConstraintEngineId constraintEngine,
                         const std::vector<ConstrainedVariableId>& variables) __attribute__((noreturn))
       : Constraint(name, propagatorName, constraintEngine, variables) {
     // Called via REGISTER_NARY() macro's factory rather than via the
@@ -1037,7 +1037,7 @@ class SwapTwoVarsConstraint : public Constraint {
   
     SwapTwoVarsConstraint(const LabelStr& name,
                           const LabelStr& propagatorName,
-                          const ConstraintEngineId& constraintEngine,
+                          const ConstraintEngineId constraintEngine,
                           const std::vector<ConstrainedVariableId>& variables,
                           const LabelStr& otherName,
                           int firstIndex, int secondIndex);
@@ -1062,7 +1062,7 @@ class SwapTwoVarsConstraint : public Constraint {
   public:
     TestAnd(const LabelStr& name,
 	    const LabelStr& propagatorName,
-	    const ConstraintEngineId& constraintEngine,
+	    const ConstraintEngineId constraintEngine,
 	    const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
@@ -1079,7 +1079,7 @@ class SwapTwoVarsConstraint : public Constraint {
   public:
     TestEQ(const LabelStr& name,
 	   const LabelStr& propagatorName,
-	   const ConstraintEngineId& constraintEngine,
+	   const ConstraintEngineId constraintEngine,
 	   const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
@@ -1096,7 +1096,7 @@ class SwapTwoVarsConstraint : public Constraint {
   public:
     TestLessThan(const LabelStr& name,
 		 const LabelStr& propagatorName,
-		 const ConstraintEngineId& constraintEngine,
+		 const ConstraintEngineId constraintEngine,
 		 const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
@@ -1113,7 +1113,7 @@ class SwapTwoVarsConstraint : public Constraint {
   public:
     TestLEQ(const LabelStr& name,
 	    const LabelStr& propagatorName,
-	    const ConstraintEngineId& constraintEngine,
+	    const ConstraintEngineId constraintEngine,
 	    const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
@@ -1131,7 +1131,7 @@ class SwapTwoVarsConstraint : public Constraint {
   public:
     TestNEQ(const LabelStr& name,
 	    const LabelStr& propagatorName,
-	    const ConstraintEngineId& constraintEngine,
+	    const ConstraintEngineId constraintEngine,
 	    const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
@@ -1148,7 +1148,7 @@ class TestOr : public Constraint {
   public:
     TestOr(const LabelStr& name,
 	   const LabelStr& propagatorName,
-	   const ConstraintEngineId& constraintEngine,
+	   const ConstraintEngineId constraintEngine,
 	   const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
@@ -1166,7 +1166,7 @@ class TestSingleton : public Constraint {
   public:
     TestSingleton(const LabelStr& name,
 	   const LabelStr& propagatorName,
-	   const ConstraintEngineId& constraintEngine,
+	   const ConstraintEngineId constraintEngine,
 	   const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
@@ -1185,7 +1185,7 @@ class TestSpecified : public Constraint {
   public:
     TestSpecified(const LabelStr& name,
 	   const LabelStr& propagatorName,
-	   const ConstraintEngineId& constraintEngine,
+	   const ConstraintEngineId constraintEngine,
 	   const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
@@ -1202,14 +1202,14 @@ class UnaryConstraint : public Constraint {
     /**
      * @brief Specialized constructor
      */
-    UnaryConstraint(const Domain& dom, const ConstrainedVariableId& var);
+    UnaryConstraint(const Domain& dom, const ConstrainedVariableId var);
 
     /**
      * @brief Standard constructor
      */
     UnaryConstraint(const LabelStr& name,
             const LabelStr& propagatorName,
-            const ConstraintEngineId& constraintEngine,
+            const ConstraintEngineId constraintEngine,
             const std::vector<ConstrainedVariableId>& variables);
 
     ~UnaryConstraint();
@@ -1220,11 +1220,11 @@ class UnaryConstraint : public Constraint {
 
     void handleDiscard();
 
-    bool canIgnore(const ConstrainedVariableId& variable,
+    bool canIgnore(const ConstrainedVariableId variable,
                    unsigned int argIndex,
            const DomainListener::ChangeType& changeType);
 
-    void setSource(const ConstraintId& sourceConstraint);
+    void setSource(const ConstraintId sourceConstraint);
 
     Domain* m_x;
     Domain* m_y;
@@ -1240,7 +1240,7 @@ class UnaryConstraint : public Constraint {
   public:
     WithinBounds(const LabelStr& name,
          const LabelStr& propagatorName,
-         const ConstraintEngineId& constraintEngine,
+         const ConstraintEngineId constraintEngine,
          const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();

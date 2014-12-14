@@ -25,9 +25,9 @@ namespace EUROPA{
   template <class DomainType>
   class TokenVariable : public Variable<DomainType> {
   public:
-    TokenVariable(const TokenId& parent,
+    TokenVariable(const TokenId parent,
 		  unsigned long index,
-		  const ConstraintEngineId& constraintEngine,
+		  const ConstraintEngineId constraintEngine,
 		  const Domain& baseDomain,
 		  const bool internal = false,
 		  bool canBeSpecified = true,
@@ -55,9 +55,9 @@ namespace EUROPA{
 
     void handleReset();
 
-    bool isCompatible(const ConstrainedVariableId& var) const;
+    bool isCompatible(const ConstrainedVariableId var) const;
 
-    const TokenId& getParentToken() const;
+    const TokenId getParentToken() const;
 
   private:
     // Internal methods for specification that circumvent test for canBeSpeciifed()
@@ -67,9 +67,9 @@ namespace EUROPA{
 
     bool computeBaseDomain();
 
-    void handleConstraintAdded(const ConstraintId& constraint);
+    void handleConstraintAdded(const ConstraintId constraint);
 
-    void handleConstraintRemoved(const ConstraintId& constraint);
+    void handleConstraintRemoved(const ConstraintId constraint);
 
     DomainType* m_integratedBaseDomain; /**< The integrated base domain over this and all supported tokens. */
     bool m_isLocallySpecified;
@@ -78,12 +78,12 @@ namespace EUROPA{
   };
 
   template <class DomainType>
-  const TokenId& TokenVariable<DomainType>::getParentToken() const { return m_parentToken; }
+  const TokenId TokenVariable<DomainType>::getParentToken() const { return m_parentToken; }
 
   template <class DomainType>
-  TokenVariable<DomainType>::TokenVariable(const TokenId& parent,
+  TokenVariable<DomainType>::TokenVariable(const TokenId parent,
 					   unsigned long index,
-					   const ConstraintEngineId& constraintEngine,
+					   const ConstraintEngineId constraintEngine,
 					   const Domain& baseDomain,
 					   const bool internal,
 					   bool canBeSpecified,
@@ -253,7 +253,7 @@ namespace EUROPA{
   }
 
   template <class DomainType>
-  void TokenVariable<DomainType>::handleConstraintAdded(const ConstraintId& constraint){
+  void TokenVariable<DomainType>::handleConstraintAdded(const ConstraintId constraint){
     // Not valid to add a constraint if token is rejected
     //check_error(!this->m_parentToken->isRejected());
 
@@ -265,7 +265,7 @@ namespace EUROPA{
   }
 
   template <class DomainType>
-  void TokenVariable<DomainType>::handleConstraintRemoved(const ConstraintId& constraint){
+  void TokenVariable<DomainType>::handleConstraintRemoved(const ConstraintId constraint){
     // If the Token has been merged, then have to handle the migrated constraint also. For
     // Example, suppose a constraint was posted on the token.
     if(this->m_parentToken->isMerged() && !constraint->isActive())
@@ -273,7 +273,7 @@ namespace EUROPA{
   }
 
   template<class DomainType>
-  bool TokenVariable<DomainType>::isCompatible(const ConstrainedVariableId& var) const {
+  bool TokenVariable<DomainType>::isCompatible(const ConstrainedVariableId var) const {
     Id<TokenVariable <DomainType> > id(var);
 
     if(id.isNoId() || this->m_index != id->getIndex() || TokenVariable<DomainType>::getBaseDomain() != id->getBaseDomain())

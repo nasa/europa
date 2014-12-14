@@ -10,19 +10,19 @@
 
 namespace EUROPA {
 
-ConstrainedVariableListener::ConstrainedVariableListener(const ConstrainedVariableId& var)
+ConstrainedVariableListener::ConstrainedVariableListener(const ConstrainedVariableId var)
     : m_id(this), m_var(var) {
   var->notifyAdded(m_id);
 }
 
-const ConstrainedVariableListenerId& ConstrainedVariableListener::getId() const {
+const ConstrainedVariableListenerId ConstrainedVariableListener::getId() const {
   return(m_id);
 }
 
 void ConstrainedVariableListener::notifyDiscard() {}
-void ConstrainedVariableListener::notifyConstraintAdded(const ConstraintId&,
+void ConstrainedVariableListener::notifyConstraintAdded(const ConstraintId,
                                                         unsigned int) {}
-void ConstrainedVariableListener::notifyConstraintRemoved(const ConstraintId&,
+void ConstrainedVariableListener::notifyConstraintRemoved(const ConstraintId,
                                                           unsigned int) {}
 
 ConstrainedVariableListener::~ConstrainedVariableListener() {
@@ -30,11 +30,11 @@ ConstrainedVariableListener::~ConstrainedVariableListener() {
   m_id.remove();
 }
 
-  ConstrainedVariable::ConstrainedVariable(const ConstraintEngineId& constraintEngine,
+  ConstrainedVariable::ConstrainedVariable(const ConstraintEngineId constraintEngine,
                                            const bool internal,
                                            bool canBeSpecified,
                                            const LabelStr& name,
-                                           const EntityId& parent,
+                                           const EntityId parent,
                                            unsigned long index)
     : Entity(), m_id(this), m_lastRelaxed(0), m_constraintEngine(constraintEngine), m_name(name),
       m_internal(internal), m_canBeSpecified(canBeSpecified), m_specifiedFlag(false), m_specifiedValue(0),
@@ -115,7 +115,7 @@ ConstrainedVariableListener::~ConstrainedVariableListener() {
     Entity::handleDiscard();
   }
 
-  const ConstrainedVariableId& ConstrainedVariable::getId() const {
+  const ConstrainedVariableId ConstrainedVariable::getId() const {
     return(m_id);
   }
 
@@ -188,15 +188,15 @@ unsigned long ConstrainedVariable::getIndex() const {
     m_constraintEngine->propagate();
   }
 
-  const EntityId& ConstrainedVariable::parent() const {
+  const EntityId ConstrainedVariable::parent() const {
     return m_parent;
   }
 
-  const ConstraintEngineId& ConstrainedVariable::getConstraintEngine() const {
+  const ConstraintEngineId ConstrainedVariable::getConstraintEngine() const {
     return m_constraintEngine;
   }
 
-void ConstrainedVariable::addConstraint(const ConstraintId& constraint,
+void ConstrainedVariable::addConstraint(const ConstraintId constraint,
                                         unsigned int argIndex) {
   check_error(!Entity::isPurging());
   check_error(constraint.isValid());
@@ -210,7 +210,7 @@ void ConstrainedVariable::addConstraint(const ConstraintId& constraint,
   check_error(isConstrainedBy(constraint));
 }
 
-void ConstrainedVariable::removeConstraint(const ConstraintId& constraint,
+void ConstrainedVariable::removeConstraint(const ConstraintId constraint,
                                            unsigned int argIndex) {
   if(m_deleted) // Nothing to do
     return;
@@ -256,7 +256,7 @@ void ConstrainedVariable::removeConstraint(const ConstraintId& constraint,
     return validate();
   }
 
-  bool ConstrainedVariable::isConstrainedBy(const ConstraintId& constraint) {
+  bool ConstrainedVariable::isConstrainedBy(const ConstraintId constraint) {
     ConstraintList::const_iterator it = m_constraints.begin();
     for ( ; it !=  m_constraints.end(); ++it)
       if (it->first == constraint)
@@ -293,7 +293,7 @@ void ConstrainedVariable::removeConstraint(const ConstraintId& constraint,
     return m_constraints.size();
   }
 
-  const ConstraintId& ConstrainedVariable::getFirstConstraint() const {
+  const ConstraintId ConstrainedVariable::getFirstConstraint() const {
     check_error(!Entity::isPurging());
     if (m_constraints.empty())
       return(ConstraintId::noId());
@@ -444,12 +444,12 @@ void ConstrainedVariable::handleSpecified(edouble) {}
     return(true);
   }
 
-  void ConstrainedVariable::notifyAdded(const ConstrainedVariableListenerId& listener){
+  void ConstrainedVariable::notifyAdded(const ConstrainedVariableListenerId listener){
     check_error(m_listeners.find(listener) == m_listeners.end());
     m_listeners.insert(listener);
   }
 
-  void ConstrainedVariable::notifyRemoved(const ConstrainedVariableListenerId& listener) {
+  void ConstrainedVariable::notifyRemoved(const ConstrainedVariableListenerId listener) {
     check_error(m_listeners.find(listener) != m_listeners.end());
     m_listeners.erase(listener);
   }
@@ -489,7 +489,7 @@ void ConstrainedVariable::handleSpecified(edouble) {}
   	  return os.str();
   }
 
-  const DataTypeId& ConstrainedVariable::getDataType() const
+  const DataTypeId ConstrainedVariable::getDataType() const
   {
 	  return baseDomain().getDataType();
   }

@@ -12,7 +12,7 @@ namespace EUROPA
 		return dynamic_cast<PSResource*>(obj);
 	}
 
-	PSGenericProfile::PSGenericProfile(const ExplicitProfileId& profile)
+	PSGenericProfile::PSGenericProfile(const ExplicitProfileId profile)
 		: m_profile(profile)
 	{
 	}
@@ -46,7 +46,7 @@ namespace EUROPA
 		return cast_double(m_profile->getValue(time).second);
 	}
 
-	PSUsageProfile::PSUsageProfile(const ProfileId& profile)
+	PSUsageProfile::PSUsageProfile(const ProfileId profile)
 	: m_profile(profile)
 	{
 	}
@@ -65,17 +65,15 @@ namespace EUROPA
 		return times;
 	}
 
-	double PSUsageProfile::getLowerBound(TimePoint time)
-	{
-		IntervalDomain dom;
-		m_profile->getLevel((eint) time, dom);
-		return cast_double(dom.getLowerBound());
-	}
+double PSUsageProfile::getLowerBound(TimePoint time) {
+  IntervalDomain dom;
+  m_profile->getLevel(static_cast<eint>(time), dom);
+  return cast_double(dom.getLowerBound());
+}
 
-	double PSUsageProfile::getUpperBound(TimePoint time)
-	{
-		IntervalDomain dom;
-		m_profile->getLevel((eint) time, dom);
-		return cast_double(dom.getUpperBound());
-	}
+double PSUsageProfile::getUpperBound(TimePoint time) {
+  IntervalDomain dom;
+  m_profile->getLevel(static_cast<eint>(time), dom);
+  return cast_double(dom.getUpperBound());
+}
 }

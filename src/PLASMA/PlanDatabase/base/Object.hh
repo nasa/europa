@@ -35,9 +35,9 @@ namespace EUROPA {
                  COMPLETE /**< All variables have been added. */
     };
 
-    Object(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open = false);
+    Object(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open = false);
 
-    Object(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open = false);
+    Object(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open = false);
 
     virtual ~Object();
 
@@ -52,16 +52,16 @@ namespace EUROPA {
      */
     virtual ConstrainedVariableId addVariable(const Domain& baseDomain, const char* name);
 
-    const ObjectId& getId() const;
+    const ObjectId getId() const;
 
-    const ObjectId& getParent() const;
+    const ObjectId getParent() const;
 
-    const PlanDatabaseId& getPlanDatabase() const;
+    const PlanDatabaseId getPlanDatabase() const;
 
     /**
      * @brief Access a variable which includes this object only.
      */
-    const ConstrainedVariableId& getThis() const;
+    const ConstrainedVariableId getThis() const;
 
     /**
      * @brief Access the type name for which this object is an instance
@@ -103,7 +103,7 @@ namespace EUROPA {
      * @brief Test if the given token is actually assigned to this object.
      * @see constrain
      */
-    virtual bool hasToken(const TokenId& token) const;
+    virtual bool hasToken(const TokenId token) const;
 
     /**
      * @brief Get all possible active tokens on this object which may be used to order the given token.
@@ -111,7 +111,7 @@ namespace EUROPA {
      * @param results Will be populated with the choices for constraining this token.
      * @see constrain
      */
-    virtual void getOrderingChoices( const TokenId& token,
+    virtual void getOrderingChoices( const TokenId token,
 				     std::vector< std::pair< TokenId, TokenId > >& results,
 #ifdef _MSC_VER
 				     unsigned long limit = UINT_MAX //std::numeric_limits<unsigned int>::max()
@@ -124,14 +124,14 @@ namespace EUROPA {
      * @param token The Token for which we want to count possible choices
      * @param limit The max we don't want to count past
      */
-    unsigned long countOrderingChoices(const TokenId& token, unsigned long limit);
+    unsigned long countOrderingChoices(const TokenId token, unsigned long limit);
 
     /**
      * @brief Retrieve the last computed value when a call was made to countOrderingChoices.
      * @param token The token for which we want choice count.
      * @return The last value obtained from countOrderingChoices
      */
-    unsigned long lastOrderingChoiceCount(const TokenId& token) const;
+    unsigned long lastOrderingChoiceCount(const TokenId token) const;
 
     /**
      * @brief Get all possible active tokens on this object which require ordering.
@@ -153,7 +153,7 @@ namespace EUROPA {
      * @param successor The token to be the successor.
      * @see free
      */
-    virtual void constrain(const TokenId& predecessor, const TokenId& successor);
+    virtual void constrain(const TokenId predecessor, const TokenId successor);
 
     /**
      * @brief Removes the specific constraint which must have been created by calling 'constrain'. May
@@ -162,7 +162,7 @@ namespace EUROPA {
      * @param successor The token that is the successor
      * @see constrain
      */
-    virtual void free(const TokenId& predecessor, const TokenId& successor);
+    virtual void free(const TokenId predecessor, const TokenId successor);
 
     /**
      * @brief Get the collection of all member variables of this object in the order in which they
@@ -176,7 +176,7 @@ namespace EUROPA {
      *        found.
      * @param name The name for the requested variable.
      */
-    const ConstrainedVariableId& getVariable(const LabelStr& name) const;
+    const ConstrainedVariableId getVariable(const LabelStr& name) const;
 
     /**
      * @brief Obtain the variable by traversing a path. Requires that all contained members along the way
@@ -204,7 +204,7 @@ namespace EUROPA {
      * @param token The token of interest.
      * @return true if constrain(token) has been called. Othwerwise false.
      */
-    bool isConstrainedToThisObject(const TokenId& token) const;
+    bool isConstrainedToThisObject(const TokenId token) const;
 
 
     /**
@@ -212,34 +212,34 @@ namespace EUROPA {
      * @param predecessor Candidate token constrained to precede successor
      * @param successor Candidate token constrained to succeed predecessor
      */
-    bool isConstrainedToPrecede(const TokenId& predecessor, const TokenId& successor) const;
+    bool isConstrainedToPrecede(const TokenId predecessor, const TokenId successor) const;
 
     /**
      * @brief Tests if the given entity can be compared to an object
      */
-     bool canBeCompared(const EntityId& entity) const;
+     bool canBeCompared(const EntityId entity) const;
 
     /**
      * @brief Notify the object that a token that might have been added to this object has been merged.
      */
-    virtual void notifyMerged(const TokenId& token);
+    virtual void notifyMerged(const TokenId token);
 
     /**
      * @brief Notify the object that a token that might have been added to this object has been rejected.
      */
-    virtual void notifyRejected(const TokenId& token);
+    virtual void notifyRejected(const TokenId token);
 
     /**
      * @brief Notify the object that a token that might have been added to this object has been deleted
      */
-    virtual void notifyDeleted(const TokenId& token);
+    virtual void notifyDeleted(const TokenId token);
 
   /*
    * Hack! Code generation currently skips the factories and directly calls the constructor that specifies the parent,
    * so this is necessary for the interpreter to provide the same behavior
    * Everybody should be going through the factories
    */
-    void setParent(const ObjectId& parent);
+    void setParent(const ObjectId parent);
 
 
     /**
@@ -250,9 +250,9 @@ namespace EUROPA {
     std::string toLongString() const;
 
     // Looking for pairwise precedence constraints
-    ConstraintId getPrecedenceConstraint(const TokenId& predecessor, const TokenId& successor) const;
+    ConstraintId getPrecedenceConstraint(const TokenId predecessor, const TokenId successor) const;
 
-    void getPrecedenceConstraints(const TokenId& token,  std::vector<ConstraintId>& results) const;
+    void getPrecedenceConstraints(const TokenId token,  std::vector<ConstraintId>& results) const;
 
     // PS Methods:
     virtual const std::string& getEntityType() const;
@@ -276,33 +276,33 @@ namespace EUROPA {
      */
     void handleDiscard();
 
-    Object(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool hasVariables, bool notify);
+    Object(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool hasVariables, bool notify);
 
     // Calls for managing object - token connections
     friend class ObjectTokenRelation;
-    virtual void add(const TokenId& token);
-    virtual void remove(const TokenId& token);
+    virtual void add(const TokenId token);
+    virtual void remove(const TokenId token);
 
     // Calls for managing object composition
-    virtual void add(const ObjectId& component);
-    virtual void remove(const ObjectId& component);
+    virtual void add(const ObjectId component);
+    virtual void remove(const ObjectId component);
     void cascadeDelete();
 
     /**
      * @brief Determine if this token participates in any explicit constraints on the timeline
      */
-    bool hasExplicitConstraint(const TokenId& token) const;
+    bool hasExplicitConstraint(const TokenId token) const;
 
     /**
      * @brief Remove constraints added implicitly which include this token.
      * @see free, constrain
      */
-    void freeImplicitConstraints(const TokenId& token);
+    void freeImplicitConstraints(const TokenId token);
 
     // Other utilities
     bool isValid() const;
-    void notifyOrderingRequired(const TokenId& token);
-    void notifyOrderingNoLongerRequired(const TokenId& token);
+    void notifyOrderingRequired(const TokenId token);
+    void notifyOrderingNoLongerRequired(const TokenId token);
 
     /**
      * @brief Provides the meat of the constrain behaviour. Allows for useage internally
@@ -311,7 +311,7 @@ namespace EUROPA {
      * @param successor The token to be ordered second
      * @param isExplicit true if the source is outside the elements of the plan database, false.
      */
-    void constrain(const TokenId& predecessor, const TokenId& successor, bool isExplicit);
+    void constrain(const TokenId predecessor, const TokenId successor, bool isExplicit);
 
     /**
      * @brief Provides the meat of the free behaviour. Allows for useage internally
@@ -320,9 +320,9 @@ namespace EUROPA {
      * @param successor The token to be ordered second
      * @param isExplicit true if the source is outside the elements of the plan database, false.
      */
-    void free(const TokenId& predecessor, const TokenId& successor, bool isExplicit);
+    void free(const TokenId predecessor, const TokenId successor, bool isExplicit);
 
-    void removePrecedenceConstraint(const ConstraintId& constraint);
+    void removePrecedenceConstraint(const ConstraintId constraint);
 
     ObjectId m_id;
     ObjectId m_parent;
@@ -343,9 +343,9 @@ namespace EUROPA {
 
   private:
 
-    void clean(const TokenId& token);
-    void clean(const ConstraintId& constraint, eint tokenKey);
-    void constrainToThisObjectAsNeeded(const TokenId& token);
+    void clean(const TokenId token);
+    void clean(const ConstraintId constraint, eint tokenKey);
+    void constrainToThisObjectAsNeeded(const TokenId token);
 
     Object(const Object&); /**< NO IMPL - Prevent use of copy constructor. */
   };
@@ -368,9 +368,9 @@ namespace EUROPA {
 
   class ObjectDomain: public EnumeratedDomain {
   public:
-    ObjectDomain(const DataTypeId& dt);
-    ObjectDomain(const DataTypeId& dt, const std::list<ObjectId>& initialValues);
-    ObjectDomain(const DataTypeId& dt, const ObjectId& initialValue);
+    ObjectDomain(const DataTypeId dt);
+    ObjectDomain(const DataTypeId dt, const std::list<ObjectId>& initialValues);
+    ObjectDomain(const DataTypeId dt, const ObjectId initialValue);
     ObjectDomain(const Domain& org);
 
     /**
@@ -395,10 +395,10 @@ namespace EUROPA {
     virtual std::string toString() const;
     std::string toString(edouble value) const;
 
-    void remove(const ObjectId& obj);
+    void remove(const ObjectId obj);
     void remove(edouble value);
 
-    bool isMember(const ObjectId& obj) const;
+    bool isMember(const ObjectId obj) const;
     bool isMember(edouble value) const; //because of the reference-casting rules...
   };
 }

@@ -8,7 +8,7 @@
 namespace EUROPA {
 
     ProfilePropagator::ProfilePropagator(const LabelStr& name,
-					 const ConstraintEngineId& constraintEngine)
+					 const ConstraintEngineId constraintEngine)
     : DefaultPropagator(name, constraintEngine)
     , m_updateRequired(false)
     , m_inBatchMode(false)
@@ -20,7 +20,7 @@ namespace EUROPA {
     {
     }
 
-    void ProfilePropagator::handleConstraintAdded(const ConstraintId& constraint) {
+    void ProfilePropagator::handleConstraintAdded(const ConstraintId constraint) {
     	check_error(constraint.isValid());
     	if(constraint->getName() == Profile::VariableListener::CONSTRAINT_NAME()) {
     		m_newConstraints.insert(constraint);
@@ -29,7 +29,7 @@ namespace EUROPA {
     	DefaultPropagator::handleConstraintAdded(constraint);
     }
 
-    void ProfilePropagator::handleConstraintRemoved(const ConstraintId& constraint) {
+    void ProfilePropagator::handleConstraintRemoved(const ConstraintId constraint) {
     	check_error(constraint.isValid());
     	if(m_newConstraints.erase(constraint) > 0)
     		m_updateRequired = true;
@@ -71,7 +71,8 @@ namespace EUROPA {
     	  check_error(constraint.isValid());
     	  check_error(Id<Profile::VariableListener>::convertable(constraint));
     	  debugMsg("ProfilePropagator:execute", "Handling addition of constraint " << constraint->toString());
-    	  Profile::VariableListener* listener = (Profile::VariableListener*) constraint;
+    	  Profile::VariableListener* listener =
+              id_cast<Profile::VariableListener>(constraint);
     	  check_error(listener != NULL);
     	  check_error(listener->getProfile().isValid());
     	  debugMsg("ProfilePropagator:execute", "Adding profile " << listener->getProfile());
@@ -98,14 +99,14 @@ namespace EUROPA {
       debugMsg("ProfilePropagator:execute", "Executed ProfilePropagator");
     }
 
-    void ProfilePropagator::execute(const ConstraintId& constraint) {
-    	Propagator::execute(constraint);
-    	if(constraint->getName() == Profile::VariableListener::CONSTRAINT_NAME()) {
-    		Profile::VariableListener* listener = (Profile::VariableListener*) constraint;
-    		if(listener->getProfile()->needsRecompute())
-    			m_updateRequired = true;
-    	}
-    }
+void ProfilePropagator::execute(const ConstraintId constraint) {
+  Propagator::execute(constraint);
+  if(constraint->getName() == Profile::VariableListener::CONSTRAINT_NAME()) {
+    Profile::VariableListener* listener = id_cast<Profile::VariableListener>(constraint);
+    if(listener->getProfile()->needsRecompute())
+      m_updateRequired = true;
+  }
+}
 
     bool ProfilePropagator::updateRequired() const {
       return DefaultPropagator::updateRequired() || m_updateRequired;
@@ -114,7 +115,7 @@ namespace EUROPA {
 	class BatchModeListener : public ConstraintEngineListener
 	{
 	public:
-		BatchModeListener(const ConstraintEngineId& constraintEngine, ProfilePropagator* propagator)
+		BatchModeListener(const ConstraintEngineId constraintEngine, ProfilePropagator* propagator)
 		: ConstraintEngineListener(constraintEngine)
 		, m_propagator(propagator)
 		{
@@ -125,7 +126,7 @@ namespace EUROPA {
 			debugMsg("ProfilePropagator:BatchModeListener", "BatchModeListener destroyed");
 		}
 
-		virtual void notifyAdded(const ConstraintId& constraint)
+		virtual void notifyAdded(const ConstraintId constraint)
 		{
 			if (m_propagator->inBatchMode() &&
 				(constraint->getName()==ResourceTokenRelation::CONSTRAINT_NAME())) {
@@ -141,52 +142,50 @@ namespace EUROPA {
 		ProfilePropagator* m_propagator;
 	};
 
-    void ProfilePropagator::enterBatchMode()
-    {
-    	if (m_inBatchMode)
-    		return;
+void ProfilePropagator::enterBatchMode() {
+  if (m_inBatchMode)
+    return;
 
-		debugMsg("ProfilePropagator:BatchMode", "Entering Batch Mode");
+  debugMsg("ProfilePropagator:BatchMode", "Entering Batch Mode");
 
-    	const std::set<ConstraintId>& constraints = getConstraints();
-    	std::set<ConstraintId>::const_iterator it;
-    	for(it=constraints.begin();it != constraints.end(); ++it) {
-    		if ((*it)->getName() == ResourceTokenRelation::CONSTRAINT_NAME()) {
-    			ResourceTokenRelation* c = (ResourceTokenRelation*)(*it);
-    			c->disable();
-    		}
-    	}
-
-    	disable();
-
-    	m_batchListener = new BatchModeListener(getConstraintEngine(),this);
-    	m_inBatchMode = true;
-
-		debugMsg("ProfilePropagator:BatchMode", "Entered Batch Mode");
+  const std::set<ConstraintId>& constraints = getConstraints();
+  std::set<ConstraintId>::const_iterator it;
+  for(it=constraints.begin();it != constraints.end(); ++it) {
+    if ((*it)->getName() == ResourceTokenRelation::CONSTRAINT_NAME()) {
+      ResourceTokenRelation* c = id_cast<ResourceTokenRelation>(*it);
+      c->disable();
     }
+  }
 
-    void ProfilePropagator::exitBatchMode()
-    {
-    	if (!m_inBatchMode)
-    		return;
+  disable();
 
-		debugMsg("ProfilePropagator:BatchMode", "Exiting Batch Mode");
+  m_batchListener = new BatchModeListener(getConstraintEngine(),this);
+  m_inBatchMode = true;
 
-    	m_inBatchMode = false;
-    	delete m_batchListener;
-    	m_batchListener = NULL;
+  debugMsg("ProfilePropagator:BatchMode", "Entered Batch Mode");
+}
 
-    	enable();
+void ProfilePropagator::exitBatchMode() {
+  if (!m_inBatchMode)
+    return;
 
-    	const std::set<ConstraintId>& constraints = getConstraints();
-    	std::set<ConstraintId>::const_iterator it;
-    	for(it=constraints.begin();it != constraints.end(); ++it) {
-    		if ((*it)->getName() == ResourceTokenRelation::CONSTRAINT_NAME()) {
-    			ResourceTokenRelation* c = (ResourceTokenRelation*)(*it);
-    			c->enable();
-    		}
-    	}
+  debugMsg("ProfilePropagator:BatchMode", "Exiting Batch Mode");
 
-		debugMsg("ProfilePropagator:BatchMode", "Exited Batch Mode");
+  m_inBatchMode = false;
+  delete m_batchListener;
+  m_batchListener = NULL;
+
+  enable();
+
+  const std::set<ConstraintId>& constraints = getConstraints();
+  std::set<ConstraintId>::const_iterator it;
+  for(it=constraints.begin();it != constraints.end(); ++it) {
+    if ((*it)->getName() == ResourceTokenRelation::CONSTRAINT_NAME()) {
+      ResourceTokenRelation* c = id_cast<ResourceTokenRelation>(*it);
+      c->enable();
     }
+  }
+
+  debugMsg("ProfilePropagator:BatchMode", "Exited Batch Mode");
+}
 }

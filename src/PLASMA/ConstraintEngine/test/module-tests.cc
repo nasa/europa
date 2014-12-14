@@ -7,7 +7,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION( ConstraintEngineModuleTests );
 
 using namespace EUROPA;
 
-int main( int argc, char **argv)
+int main( int, char **)
 {
     // Init data types so that id counts don't fail
     VoidDT::instance();

@@ -5,8 +5,8 @@
 
 namespace EUROPA {
 
-  VariableChangeListener::VariableChangeListener(const ConstrainedVariableId& variable,
-						 const ConstraintEngineId& constraintEngine)
+  VariableChangeListener::VariableChangeListener(const ConstrainedVariableId variable,
+						 const ConstraintEngineId constraintEngine)
     :DomainListener(), m_variable(variable), m_constraintEngine(constraintEngine){}
 
   void VariableChangeListener::notifyChange(const ChangeType& changeType){

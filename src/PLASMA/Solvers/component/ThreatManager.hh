@@ -23,13 +23,13 @@ namespace EUROPA {
 
       virtual ~ThreatManager();
 
-      bool staticMatch(const EntityId& entity);
+      bool staticMatch(const EntityId entity);
 
-      bool dynamicMatch(const EntityId& entity);
+      bool dynamicMatch(const EntityId entity);
 
       IteratorId createIterator();
 
-      std::string toString(const EntityId& entity) const;
+      std::string toString(const EntityId entity) const;
 
       bool noMoreFlaws();
 

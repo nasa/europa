@@ -41,7 +41,7 @@ namespace EUROPA {
   class ExprVarDeclaration : public Expr
   {
   public:
-      ExprVarDeclaration(const char* name, const DataTypeId& type, Expr* initValue, bool canBeSpecified);
+      ExprVarDeclaration(const char* name, const DataTypeId type, Expr* initValue, bool canBeSpecified);
       virtual ~ExprVarDeclaration();
 
       virtual DataRef eval(EvalContext& context) const;
@@ -66,7 +66,7 @@ namespace EUROPA {
   class ExprVarRef : public Expr
   {
   	public:
-  	    ExprVarRef(const char* name, const DataTypeId& type);
+  	    ExprVarRef(const char* name, const DataTypeId type);
   	    virtual ~ExprVarRef();
 
   	    virtual DataRef eval(EvalContext& context) const;
@@ -118,7 +118,7 @@ namespace EUROPA {
   class ExprTypedef : public Expr
   {
   public:
-      ExprTypedef(const DataTypeId& baseType, const char* name, Domain* baseDomain);
+      ExprTypedef(const DataTypeId baseType, const char* name, Domain* baseDomain);
       virtual ~ExprTypedef();
 
       virtual DataRef eval(EvalContext& context) const;
@@ -160,7 +160,7 @@ namespace EUROPA {
   class ExprObjectTypeDefinition : public Expr
   {
   public:
-      ExprObjectTypeDefinition(const ObjectTypeId& objType);
+      ExprObjectTypeDefinition(const ObjectTypeId objType);
       virtual ~ExprObjectTypeDefinition();
 
       virtual DataRef eval(EvalContext& context) const;
@@ -174,7 +174,7 @@ namespace EUROPA {
   class ExprRuleTypeDefinition : public Expr
   {
   public:
-      ExprRuleTypeDefinition(const RuleId& rf);
+      ExprRuleTypeDefinition(const RuleId rf);
       virtual ~ExprRuleTypeDefinition();
 
       virtual DataRef eval(EvalContext& context) const;
@@ -187,7 +187,7 @@ namespace EUROPA {
   class ExprMethodCall : public Expr
   {
   public:
-      ExprMethodCall(const MethodId& method, Expr* varExpr, const std::vector<Expr*>& argExprs);
+      ExprMethodCall(const MethodId method, Expr* varExpr, const std::vector<Expr*>& argExprs);
       virtual ~ExprMethodCall();
 
       virtual DataRef eval(EvalContext& context) const;
@@ -213,7 +213,7 @@ namespace EUROPA {
       Expr* m_varExpr;
       std::vector<Expr*> m_argExprs;
 
-      DataRef eval(EvalContext& context, ConstrainedVariableId& var, const std::vector<ConstrainedVariableId>& args) const;
+      DataRef eval(EvalContext& context, ConstrainedVariableId var, const std::vector<ConstrainedVariableId>& args) const;
   };
 
   class ExprObjectMethod : public Expr
@@ -230,7 +230,7 @@ namespace EUROPA {
       Expr* m_objExpr;
       std::vector<Expr*> m_argExprs;
 
-      DataRef eval(EvalContext& context, ObjectId& var, const std::vector<ConstrainedVariableId>& args) const;
+      DataRef eval(EvalContext& context, ObjectId var, const std::vector<ConstrainedVariableId>& args) const;
   };
 
   class ExprTokenMethod : public Expr
@@ -247,7 +247,7 @@ namespace EUROPA {
       LabelStr m_tokenName;
       std::vector<Expr*> m_argExprs;
 
-      DataRef eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const;
+      DataRef eval(EvalContext& context, TokenId tok, const std::vector<ConstrainedVariableId>& args) const;
   };
 
   class ExprNewObject : public Expr
@@ -274,7 +274,7 @@ namespace EUROPA {
   class PredicateInstanceRef
   {
   public:
-      PredicateInstanceRef(const TokenTypeId& tokenType, const char* predInstance, const char* predName, const char* annotation);
+      PredicateInstanceRef(const TokenTypeId tokenType, const char* predInstance, const char* predName, const char* annotation);
       virtual ~PredicateInstanceRef();
 
       TokenId getToken(EvalContext& ctx, const char* relationName, bool isFact=false, bool isRejectable=false);
@@ -304,7 +304,7 @@ namespace EUROPA {
       LabelStr m_name;
       std::vector<PredicateInstanceRef*> m_tokens;
 
-      DataRef eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const;
+      DataRef eval(EvalContext& context, TokenId tok, const std::vector<ConstrainedVariableId>& args) const;
   };
 
   class InterpretedTokenType;
@@ -355,7 +355,7 @@ namespace EUROPA {
   class CExprFunction : public CExpr
   {
     public:
-        CExprFunction(const CFunctionId& func, const std::vector<CExpr*>& args);
+        CExprFunction(const CFunctionId func, const std::vector<CExpr*>& args);
         virtual ~CExprFunction() { /* TODO: release memory */ }
 
         // Expr methods
@@ -440,14 +440,14 @@ namespace EUROPA {
   class InterpretedToken : public IntervalToken  {
   	public:
   	    // Same Constructor signatures as NddlToken, TODO: see if both are needed
-  	    InterpretedToken(const PlanDatabaseId& planDatabase,
+  	    InterpretedToken(const PlanDatabaseId planDatabase,
   	                     const LabelStr& predicateName,
   	                     const std::vector<Expr*>& body,
                          const bool& rejectable = false,
                          const bool& isFact = false,
   	                     const bool& close = false);
 
-        InterpretedToken(const TokenId& master,
+        InterpretedToken(const TokenId master,
                          const LabelStr& predicateName,
                          const LabelStr& relation,
                          const std::vector<Expr*>& body,
@@ -468,19 +468,19 @@ namespace EUROPA {
   class InterpretedTokenType: public TokenType
   {
     public:
-	  InterpretedTokenType(const ObjectTypeId& ot,const LabelStr& predicateName, const std::string& kind);
+	  InterpretedTokenType(const ObjectTypeId ot,const LabelStr& predicateName, const std::string& kind);
 	  virtual ~InterpretedTokenType();
 
 	  void addBodyExpr(Expr* e);
 	  void addRule(InterpretedRuleFactory* rf);
 
-	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const;
-	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
+	  virtual TokenId createInstance(const PlanDatabaseId planDb, const LabelStr& name, bool rejectable, bool isFact) const;
+	  virtual TokenId createInstance(const TokenId master, const LabelStr& name, const LabelStr& relation) const;
 
     protected:
       std::vector<Expr*> m_body;
       std::vector<InterpretedRuleFactory*> m_rules;
-      TokenTypeId getParentType(const PlanDatabaseId& planDb) const;
+      TokenTypeId getParentType(const PlanDatabaseId planDb) const;
       void processExpr(Expr* e);
 
     friend class ExprRelation;
@@ -488,7 +488,7 @@ namespace EUROPA {
 
 class TokenEvalContext : public EvalContext {
  public:
-  TokenEvalContext(EvalContext* parent, const TokenId& tok);
+  TokenEvalContext(EvalContext* parent, const TokenId tok);
   virtual ~TokenEvalContext();
 
   virtual ConstrainedVariableId getVar(const char* name);
@@ -507,25 +507,25 @@ class TokenEvalContext : public EvalContext {
   class InterpretedRuleInstance : public RuleInstance
   {
   	public:
-  	    InterpretedRuleInstance(const RuleId& rule,
-  	                            const TokenId& token,
-  	                            const PlanDatabaseId& planDb,
+  	    InterpretedRuleInstance(const RuleId rule,
+  	                            const TokenId token,
+  	                            const PlanDatabaseId planDb,
                                 const std::vector<Expr*>& body);
 
-        InterpretedRuleInstance(const RuleInstanceId& parent,
-                                const ConstrainedVariableId& var,
+        InterpretedRuleInstance(const RuleInstanceId parent,
+                                const ConstrainedVariableId var,
                                 const Domain& domain,
                                 const bool positive,
                                 const std::vector<Expr*>& body);
 
-        InterpretedRuleInstance(const RuleInstanceId& parent,
-                                const ConstrainedVariableId& var,
+        InterpretedRuleInstance(const RuleInstanceId parent,
+                                const ConstrainedVariableId var,
                                 const Domain& domain,
                                 const bool positive,
                                 const std::vector<ConstrainedVariableId>& guardComponents,
                                 const std::vector<Expr*>& body);
 
-        InterpretedRuleInstance(const RuleInstanceId& parent,
+        InterpretedRuleInstance(const RuleInstanceId parent,
                                 const std::vector<ConstrainedVariableId>& vars,
                                 const bool positive,
                                 const std::vector<Expr*>& body);
@@ -538,7 +538,7 @@ class TokenEvalContext : public EvalContext {
                    const LabelStr& predicateInstance,
                    const LabelStr& relation,
                    bool isConstrained,
-                   ConstrainedVariableId& owner);
+                   ConstrainedVariableId owner);
 
         ConstrainedVariableId addLocalVariable(
                        const Domain& baseDomain,
@@ -574,8 +574,8 @@ class TokenEvalContext : public EvalContext {
         InterpretedRuleFactory(const LabelStr& predicate, const LabelStr& source, const std::vector<Expr*>& ruleBody);
         virtual ~InterpretedRuleFactory();
 
-        virtual RuleInstanceId createInstance(const TokenId& token,
-                                              const PlanDatabaseId& planDb,
+        virtual RuleInstanceId createInstance(const TokenId token,
+                                              const PlanDatabaseId planDb,
                                               const RulesEngineId &rulesEngine) const;
 
         const std::vector<Expr*>& getBody() const;
@@ -587,13 +587,13 @@ class TokenEvalContext : public EvalContext {
   class RuleInstanceEvalContext : public EvalContext
   {
     public:
-        RuleInstanceEvalContext(EvalContext* parent, const InterpretedRuleInstanceId& ruleInstance);
+        RuleInstanceEvalContext(EvalContext* parent, const InterpretedRuleInstanceId ruleInstance);
         virtual ~RuleInstanceEvalContext();
 
         virtual void* getElement(const char* name) const;
 
         virtual ConstrainedVariableId getVar(const char* name);
-        virtual InterpretedRuleInstanceId& getRuleInstance() { return m_ruleInstance; }
+        virtual InterpretedRuleInstanceId getRuleInstance() { return m_ruleInstance; }
 
         virtual TokenId getToken(const char* name);
 
@@ -674,10 +674,10 @@ class RuleExpr  : public Expr {
   class NativeTokenType: public TokenType
   {
     public:
-	  NativeTokenType(const ObjectTypeId& ot,const LabelStr& predicateName) : TokenType(ot,predicateName) {}
+	  NativeTokenType(const ObjectTypeId ot,const LabelStr& predicateName) : TokenType(ot,predicateName) {}
 
-	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const = 0;
-	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const = 0;
+	  virtual TokenId createInstance(const PlanDatabaseId planDb, const LabelStr& name, bool rejectable, bool isFact) const = 0;
+	  virtual TokenId createInstance(const TokenId master, const LabelStr& name, const LabelStr& relation) const = 0;
   };
 
 void getVariableReferences(const Expr* expr, EvalContext& ctx, std::vector<ConstrainedVariableId>& dest);

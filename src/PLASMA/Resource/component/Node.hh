@@ -14,7 +14,7 @@
 namespace EUROPA
 {
     /**
-     * @brief
+     * @brief A node in the maximum flow graph.
      */
     class Node
     {
@@ -32,36 +32,24 @@ namespace EUROPA
        */
       ~Node();
       /**
-       * @brief
+       * @brief This node.
        */
       inline const NodeIdentity& getIdentity() const;
       /**
        * @brief Returns true if the invoking node is enabled otherwise returns false.
        */
       inline bool isEnabled() const;
-      /**
-       * @brief
-       */
+
       inline const EdgeList& getOutEdges() const;
-      /**
-       * @brief
-       */
+
       inline const EdgeList& getInEdges() const;
-      /**
-       * @brief
-       */
+
       inline void setDisabled();
-      /**
-       * @brief
-       */
+
       inline void setEnabled();
-      /**
-       * @brief
-       */
+
       inline int getVisit();
-      /**
-       * @brief
-       */
+
       inline void setVisit( int v );
     private:
       /**
@@ -72,13 +60,9 @@ namespace EUROPA
        * @brief Adds \a edge to the ingoing edges of the invoking node.
        */
       void addInEdge( Edge* edge );
-      /**
-       * @brief
-       */
+
       void removeOutEdge( Edge* edge );
-      /**
-       * @brief
-       */
+
       void removeInEdge( Edge* edge );
 
       bool m_Enabled;
@@ -88,9 +72,6 @@ namespace EUROPA
       EdgeList m_OutEdges;
     };
 
-    /**
-     * @brief
-     */
     std::ostream& operator<<( std::ostream& os, const Node& fn ) ;
 
     int Node::getVisit() {

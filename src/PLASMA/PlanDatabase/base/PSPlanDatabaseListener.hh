@@ -44,26 +44,26 @@ class PSPlanDatabaseListener : public PlanDatabaseListener {
   /* We override these base class methods (called by PlanDatabase)
    * to call the above PS interface versions of the same methods.
    */
-  virtual void notifyAdded(const ObjectId& object);
-  virtual void notifyRemoved(const ObjectId& object);
-  virtual void notifyActivated(const TokenId& token);
-  virtual void notifyDeactivated(const TokenId& token);
-  virtual void notifyRejected(const TokenId& token);
-  virtual void notifyMerged(const TokenId& token);
-  virtual void notifySplit(const TokenId& token);
-  virtual void notifyAdded(const ObjectId& object, const TokenId& token);
-  virtual void notifyRemoved(const ObjectId& object, const TokenId& token);
+  virtual void notifyAdded(const ObjectId object);
+  virtual void notifyRemoved(const ObjectId object);
+  virtual void notifyActivated(const TokenId token);
+  virtual void notifyDeactivated(const TokenId token);
+  virtual void notifyRejected(const TokenId token);
+  virtual void notifyMerged(const TokenId token);
+  virtual void notifySplit(const TokenId token);
+  virtual void notifyAdded(const ObjectId object, const TokenId token);
+  virtual void notifyRemoved(const ObjectId object, const TokenId token);
 
   /* These methods are likely unnecessary to a user.  We override the base
    * class version only to make private (they still don't do anything)
    */
-  virtual void notifyAdded(const TokenId&) {}
-  virtual void notifyRemoved(const TokenId&) {}
-  virtual void notifyReinstated(const TokenId&) {}
-  virtual void notifyConstrained(const ObjectId&, const TokenId&, const TokenId&) {}
-  virtual void notifyFreed(const ObjectId&, const TokenId&, const TokenId&) {}
-  virtual void notifyCommitted(const TokenId&) {}
-  virtual void notifyTerminated(const TokenId&) {}
+  virtual void notifyAdded(const TokenId) {}
+  virtual void notifyRemoved(const TokenId) {}
+  virtual void notifyReinstated(const TokenId) {}
+  virtual void notifyConstrained(const ObjectId, const TokenId, const TokenId) {}
+  virtual void notifyFreed(const ObjectId, const TokenId, const TokenId) {}
+  virtual void notifyCommitted(const TokenId) {}
+  virtual void notifyTerminated(const TokenId) {}
 };
 
 }

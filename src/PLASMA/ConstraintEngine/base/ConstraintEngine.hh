@@ -152,7 +152,7 @@ namespace EUROPA {
     /**
      * @brief Constructor currently creates a basic configuration of propagators.
      */
-    ConstraintEngine(const CESchemaId& schema);
+    ConstraintEngine(const CESchemaId schema);
 
     /**
      * @brief Destructor.
@@ -162,7 +162,7 @@ namespace EUROPA {
     /**
      * @brief Id self reference.
      */
-    const ConstraintEngineId& getId() const;
+    const ConstraintEngineId getId() const;
 
     /**
      * @brief purge all elements from the Engine. Will delete all variables, constraints, and propagators.
@@ -232,7 +232,7 @@ namespace EUROPA {
      * @brief Get index based on its position in the set of variables.
      * @note This is not a const in-case it manages some internal cache to optimize later
      */
-    unsigned int getIndex(const ConstrainedVariableId& var);
+    unsigned int getIndex(const ConstrainedVariableId var);
 
     /**
      * @brief Accessor for all constraints.
@@ -247,12 +247,12 @@ namespace EUROPA {
     /**
      * @brief Get index based on its position in the set of constraints.
      */
-    unsigned int getIndex(const ConstraintId& constr);
+    unsigned int getIndex(const ConstraintId constr);
 
     /**
      * @brief Accessor for all propagators
      */
-    const PropagatorId& getPropagatorByName(const LabelStr& name)  const;
+    const PropagatorId getPropagatorByName(const LabelStr& name)  const;
 
     /**
      * @see If AutoPropagation is enabled, the constraint engine will automatically invoke propagate()
@@ -306,7 +306,7 @@ namespace EUROPA {
      */
     bool isRelaxed() const;
 
-    const CESchemaId& getCESchema() const;
+    const CESchemaId getCESchema() const;
 
     // PSConstraintEngine methods
     virtual PSVariable* getVariableByKey(PSEntityKey id);
@@ -320,7 +320,7 @@ namespace EUROPA {
                                          const bool internal = false,
                                          bool canBeSpecified = true,
                                          const char* name = NO_VAR_NAME,
-                                         const EntityId& parent = EntityId::noId(),
+                                         const EntityId parent = EntityId::noId(),
                                          unsigned int index = ConstrainedVariable::NO_INDEX);
     
     /**
@@ -331,7 +331,7 @@ namespace EUROPA {
                                          const bool internal = false,
                                          bool canBeSpecified = true,
                                          const char* name = NO_VAR_NAME,
-                                         const EntityId& parent = EntityId::noId(),
+                                         const EntityId parent = EntityId::noId(),
                                          unsigned int index = ConstrainedVariable::NO_INDEX);
 
 
@@ -339,15 +339,15 @@ namespace EUROPA {
                      const std::vector<ConstrainedVariableId>& scope,
                      const char* violationExpl=NULL);
 
-    void deleteConstraint(const ConstraintId& c);
+    void deleteConstraint(const ConstraintId c);
 
     /**
      * @brief Create a value for a string
      */
     edouble createValue(const char* typeName, const std::string& value);
 
-    void addCallback(const PostPropagationCallbackId& callback);
-    void removeCallback(const PostPropagationCallbackId& callback);
+    void addCallback(const PostPropagationCallbackId callback);
+    void removeCallback(const PostPropagationCallbackId callback);
 
   protected:
 
@@ -361,7 +361,7 @@ namespace EUROPA {
      * @param constraints the reference to the list of constraints of the variable.
      * @return A reference to the listener to be registered with the variable.
      */
-    DomainListenerId allocateVariableListener(const ConstrainedVariableId& variable,
+    DomainListenerId allocateVariableListener(const ConstrainedVariableId variable,
                                               const ConstraintList& constraints) const;
 
     ViolationMgr& getViolationMgr() { return *m_violationMgr; }
@@ -378,13 +378,13 @@ namespace EUROPA {
      * @brief Constraint Constructor will call this method to establish linkage with the ConstraintEngine.
      * @param constraint The constraint to be added.
      */
-    void add(const ConstraintId& constraint, const LabelStr& propagatorName);
+    void add(const ConstraintId constraint, const LabelStr& propagatorName);
 
     /**
      * @brief Constraint destructor will call this method to withdraw links with the ConstraintEngine.
      * @param constraint The constraint to be removed.
      */
-    void remove(const ConstraintId& constraint);
+    void remove(const ConstraintId constraint);
 
     /**
      * @brief Called by the VariableListener when a change occurs on its varible.
@@ -394,60 +394,60 @@ namespace EUROPA {
      * @param changeType Type the type of change that occured on the variable.
      * @see DomainListener::ChangeType, handleEmptied, handleRelaxed, Propagator::handleNotification(), Constraint::canIgnore()
      */
-    void notify(const ConstrainedVariableId& source, const DomainListener::ChangeType& changeType);
+    void notify(const ConstrainedVariableId source, const DomainListener::ChangeType& changeType);
 
     /**
      * @brief Update appropriately when a variabe domain has been emptied.
      * @param variable The variable that has been emptied.
-     * @see notify(const ConstrainedVariableId& source, const DomainListener::ChangeType& changeType)
+     * @see notify(const ConstrainedVariableId source, const DomainListener::ChangeType& changeType)
      */
-    void handleEmpty(const ConstrainedVariableId& variable);
+    void handleEmpty(const ConstrainedVariableId variable);
 
     /**
      * @brief Update appropriately when a variable has been relaxed.
      * @param variable The variable that has been relaxed.
-     * @see notify(const ConstrainedVariableId& source, const DomainListener::ChangeType& changeType)
+     * @see notify(const ConstrainedVariableId source, const DomainListener::ChangeType& changeType)
      */
-    void handleRelax(const ConstrainedVariableId& variable);
+    void handleRelax(const ConstrainedVariableId variable);
 
     
     /**
      * @brief Update appropriately when a variable has been restricted but not emptied.
      * @param variable The variable that has been restricted.
-     * @see notify(const ConstrainedVariableId& source, const DomainListener::ChangeType& changeType)
+     * @see notify(const ConstrainedVariableId source, const DomainListener::ChangeType& changeType)
      */
-    void handleRestrict(const ConstrainedVariableId& variable);
+    void handleRestrict(const ConstrainedVariableId variable);
 
     /**
      * @brief Propagator constructor will call this method to register the Propagator with the ConstraintEngine.
      * @param propagator the propagator to be added.
      */
-    void add(const PropagatorId& propagator);
+    void add(const PropagatorId propagator);
 
     /**
      * @brief Notification from a constraint when it has been deactivated.
      */
-    void notifyDeactivated(const ConstraintId& deactivatedConstraint);
+    void notifyDeactivated(const ConstraintId deactivatedConstraint);
 
     /**
      * @brief Notification from a constraint when it has been activated.
      */
-    void notifyActivated(const ConstraintId& activatedConstraint);
+    void notifyActivated(const ConstraintId activatedConstraint);
 
     /**
      * @brief Notification that a constraint has become redundant.
      */
-    void notifyRedundant(const ConstraintId& redundantConstraint);
+    void notifyRedundant(const ConstraintId redundantConstraint);
 
     /**
      * @brief Notification from a variable when it has been deactivated
      */
-    void notifyDeactivated(const ConstrainedVariableId& var);
+    void notifyDeactivated(const ConstrainedVariableId var);
 
     /**
      * @brief Notification from a variable when it has been activated
      */
-    void notifyActivated(const ConstrainedVariableId& var);
+    void notifyActivated(const ConstrainedVariableId var);
 
     /**
      * @brief Invokes execution event handler on the designated constraint.
@@ -456,7 +456,7 @@ namespace EUROPA {
      * unavailable.
      * @param constraint the constraint to be executed.
      */
-    void execute(const ConstraintId& constraint);
+    void execute(const ConstraintId constraint);
 
     /**
      * @brief Invokes execution event handler on the designated constraint.
@@ -467,8 +467,8 @@ namespace EUROPA {
      * @param argIndex the position of the variable in the scope of the constraint.
      * @param changeType the nature of change that occurred on the domain.
      */
-    void execute(const ConstraintId& constraint,
-                 const ConstrainedVariableId& variable,
+    void execute(const ConstraintId constraint,
+                 const ConstrainedVariableId variable,
                  unsigned int argIndex,
                  const DomainListener::ChangeType& changeType);
 
@@ -478,25 +478,25 @@ namespace EUROPA {
      * @brief Called by ConstrainedVariable constructor to link the variable with the constraint.
      * @param variable the variable to be constrained.
      */
-    void add(const ConstrainedVariableId& variable);
+    void add(const ConstrainedVariableId variable);
 
     /**
      * @brief Called by ConstrainedVariable destructor to unlink the variable with the constraint.
      * @param variable the variable to be removed.
      */
-    void remove(const ConstrainedVariableId& variable);
+    void remove(const ConstrainedVariableId variable);
 
     /**
      * @brief Called by ConstraintEngineListener constructor.
      * @param listener The listener to add
      */
-    void add(const ConstraintEngineListenerId& listener);
+    void add(const ConstraintEngineListenerId listener);
 
     /**
      * @brief Called by ConstraintEngineListener destructor.
      * @param listener The listener to remove.
      */
-    void remove(const ConstraintEngineListenerId& listener);
+    void remove(const ConstraintEngineListenerId listener);
 
     /**
      * @brief Accessor to retrieve the next active propagator in the
@@ -535,7 +535,7 @@ namespace EUROPA {
     // debug methods
     std::string dumpPropagatorState(const PropagatorSet& propagators) const;
 
-    int addLinkedVarsForRelaxation(const ConstrainedVariableId& var,
+    int addLinkedVarsForRelaxation(const ConstrainedVariableId var,
 				   std::list<ConstrainedVariableId>& dest,
 				   std::list<ConstrainedVariableId>::iterator pos,
 				   ConstrainedVariableSet& visitedVars);
@@ -569,7 +569,7 @@ namespace EUROPA {
     ViolationMgr* m_violationMgr;
     bool m_autoPropagate;
 
-    const CESchemaId& m_schema;
+    const CESchemaId m_schema;
     std::list<PostPropagationCallbackId> m_callbacks; /*!< Post-propagation callbacks */
   };
 
@@ -590,7 +590,7 @@ namespace EUROPA {
      * 
      * @param ce The constraint engine to register with
      */
-    PostPropagationCallback(const ConstraintEngineId& ce) : m_id(this), m_ce(ce) {ce->addCallback(m_id);}
+    PostPropagationCallback(const ConstraintEngineId ce) : m_id(this), m_ce(ce) {ce->addCallback(m_id);}
 
     virtual ~PostPropagationCallback() {
       if(m_ce.isId())
@@ -606,10 +606,10 @@ namespace EUROPA {
      */
     virtual bool operator()() {return false;}
 
-    const PostPropagationCallbackId& getId() const {return m_id;}
+    const PostPropagationCallbackId getId() const {return m_id;}
   protected:
     friend class ConstraintEngine;
-    void setConstraintEngine(const ConstraintEngineId& ce) {m_ce = ce;}
+    void setConstraintEngine(const ConstraintEngineId ce) {m_ce = ce;}
 
     PostPropagationCallbackId m_id;
     ConstraintEngineId m_ce;

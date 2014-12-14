@@ -83,7 +83,7 @@ namespace EUROPA{
     /**
      * @brief Id accessor
      */
-    const DomainListenerId& getId() const;
+    const DomainListenerId getId() const;
 
     /**
      * @brief The critical method to implement in order to define how events are to be propagated.

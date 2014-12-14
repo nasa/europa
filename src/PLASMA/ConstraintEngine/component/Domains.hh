@@ -28,7 +28,7 @@ namespace EUROPA {
 	   * @param dt Indicate the type to use as a specialization of enumeration types
 	   * @see Domain::isDynamic()
 	   */
-	  EnumeratedDomain(const DataTypeId& dt);
+	  EnumeratedDomain(const DataTypeId dt);
 
 	  /**
 	   * @brief Constructor.
@@ -36,21 +36,21 @@ namespace EUROPA {
 	   * @param values The initial set of values to populate the domain.
 	   * @see Domain::isDynamic()
 	   */
-	  EnumeratedDomain(const DataTypeId& dt, const std::list<edouble>& values);
+	  EnumeratedDomain(const DataTypeId dt, const std::list<edouble>& values);
 
 	  /**
 	   * @brief Constructor.
 	   * @param dt Indicate the type to use as a specialization of enumeration types
 	   * @param value Constructs a singleton domain. Closed on construction.
 	   */
-	  EnumeratedDomain(const DataTypeId& dt, edouble value);
+	  EnumeratedDomain(const DataTypeId dt, edouble value);
 
 	  /**
 	   * @brief Constructor.
 	   * @param dt Indicate the type to use as a specialization of enumeration types
 	   * @param value Constructs a singleton domain. Closed on construction.
 	   */
-	  EnumeratedDomain(const DataTypeId& dt, double value);
+	  EnumeratedDomain(const DataTypeId dt, double value);
 
 	  /**
 	   * @brief Copy constructor.
@@ -309,11 +309,11 @@ namespace EUROPA {
      */
     void operator>>(ostream& os) const;
 
-    IntervalDomain(const DataTypeId& dt = FloatDT::instance());
-    IntervalDomain(edouble lb, edouble ub, const DataTypeId& dt = FloatDT::instance());
-    IntervalDomain(double lb, double ub, const DataTypeId& dt = FloatDT::instance());
-    IntervalDomain(edouble value, const DataTypeId& dt = FloatDT::instance());
-    IntervalDomain(double value, const DataTypeId& dt = FloatDT::instance());
+    IntervalDomain(const DataTypeId dt = FloatDT::instance());
+    IntervalDomain(edouble lb, edouble ub, const DataTypeId dt = FloatDT::instance());
+    IntervalDomain(double lb, double ub, const DataTypeId dt = FloatDT::instance());
+    IntervalDomain(edouble value, const DataTypeId dt = FloatDT::instance());
+    IntervalDomain(double value, const DataTypeId dt = FloatDT::instance());
     IntervalDomain(const Domain& org);
 
     /**
@@ -568,12 +568,12 @@ namespace EUROPA {
   class StringDomain : public EnumeratedDomain {
   public:
 
-    StringDomain(const DataTypeId& dt = StringDT::instance());
-    StringDomain(edouble value, const DataTypeId& dt = StringDT::instance());
-    StringDomain(double value, const DataTypeId& dt = StringDT::instance());
-    StringDomain(const std::string& value, const DataTypeId& dt = StringDT::instance());
-    StringDomain(const std::list<edouble>& values, const DataTypeId& dt = StringDT::instance());
-    StringDomain(const std::list<LabelStr>& values, const DataTypeId& dt = StringDT::instance());
+    StringDomain(const DataTypeId dt = StringDT::instance());
+    StringDomain(edouble value, const DataTypeId dt = StringDT::instance());
+    StringDomain(double value, const DataTypeId dt = StringDT::instance());
+    StringDomain(const std::string& value, const DataTypeId dt = StringDT::instance());
+    StringDomain(const std::list<edouble>& values, const DataTypeId dt = StringDT::instance());
+    StringDomain(const std::list<LabelStr>& values, const DataTypeId dt = StringDT::instance());
     StringDomain(const Domain& org);
 
     virtual StringDomain *copy() const;
@@ -600,10 +600,10 @@ namespace EUROPA {
    */
   class SymbolDomain : public EnumeratedDomain {
   public:
-    SymbolDomain(const DataTypeId& dt = SymbolDT::instance());
-    SymbolDomain(edouble value,const DataTypeId& dt = SymbolDT::instance());
-    SymbolDomain(double value,const DataTypeId& dt = SymbolDT::instance());
-    SymbolDomain(const std::list<edouble>& values,const DataTypeId& dt = SymbolDT::instance());
+    SymbolDomain(const DataTypeId dt = SymbolDT::instance());
+    SymbolDomain(edouble value,const DataTypeId dt = SymbolDT::instance());
+    SymbolDomain(double value,const DataTypeId dt = SymbolDT::instance());
+    SymbolDomain(const std::list<edouble>& values,const DataTypeId dt = SymbolDT::instance());
     SymbolDomain(const Domain& org);
 
     virtual SymbolDomain *copy() const;
@@ -612,10 +612,10 @@ namespace EUROPA {
   class NumericDomain : public EnumeratedDomain {
   public:
 
-    NumericDomain(const DataTypeId& dt = FloatDT::instance());
-    NumericDomain(edouble value, const DataTypeId& dt = FloatDT::instance());
-    NumericDomain(double value, const DataTypeId& dt = FloatDT::instance());
-    NumericDomain(const std::list<edouble>& values, const DataTypeId& dt = FloatDT::instance());
+    NumericDomain(const DataTypeId dt = FloatDT::instance());
+    NumericDomain(edouble value, const DataTypeId dt = FloatDT::instance());
+    NumericDomain(double value, const DataTypeId dt = FloatDT::instance());
+    NumericDomain(const std::list<edouble>& values, const DataTypeId dt = FloatDT::instance());
     NumericDomain(const Domain& org);
 
     virtual NumericDomain *copy() const;
@@ -634,11 +634,11 @@ namespace EUROPA {
   class IntervalIntDomain: public IntervalDomain {
   public:
 
-    IntervalIntDomain(const DataTypeId& dt = IntDT::instance());
-    IntervalIntDomain(eint lb, eint ub, const DataTypeId& dt = IntDT::instance());
-    IntervalIntDomain(eint::basis_type lb, eint::basis_type ub, const DataTypeId& dt = IntDT::instance());
-    IntervalIntDomain(eint value, const DataTypeId& dt = IntDT::instance());
-    IntervalIntDomain(eint::basis_type value, const DataTypeId& dt = IntDT::instance());
+    IntervalIntDomain(const DataTypeId dt = IntDT::instance());
+    IntervalIntDomain(eint lb, eint ub, const DataTypeId dt = IntDT::instance());
+    IntervalIntDomain(eint::basis_type lb, eint::basis_type ub, const DataTypeId dt = IntDT::instance());
+    IntervalIntDomain(eint value, const DataTypeId dt = IntDT::instance());
+    IntervalIntDomain(eint::basis_type value, const DataTypeId dt = IntDT::instance());
     IntervalIntDomain(const Domain& org);
 
     virtual ~IntervalIntDomain();
@@ -705,8 +705,8 @@ namespace EUROPA {
   class BoolDomain : public IntervalIntDomain {
   public:
 
-    BoolDomain(const DataTypeId& dt = BoolDT::instance());
-    BoolDomain(bool value, const DataTypeId& dt = BoolDT::instance());
+    BoolDomain(const DataTypeId dt = BoolDT::instance());
+    BoolDomain(bool value, const DataTypeId dt = BoolDT::instance());
     BoolDomain(const Domain& org);
 
     bool isFinite() const;

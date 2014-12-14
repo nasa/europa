@@ -10,13 +10,13 @@ namespace EUROPA {
 
   RuleVariableListener::RuleVariableListener(const LabelStr& name,
 					     const LabelStr& propagatorName,
-					     const ConstraintEngineId& constraintEngine,
+					     const ConstraintEngineId constraintEngine,
 					     const std::vector<ConstrainedVariableId>& scope)
     : Constraint(name, propagatorName, constraintEngine, scope){}
 
 
-  RuleVariableListener::RuleVariableListener(const ConstraintEngineId& constraintEngine,
-					     const RuleInstanceId& ruleInstance,
+  RuleVariableListener::RuleVariableListener(const ConstraintEngineId constraintEngine,
+					     const RuleInstanceId ruleInstance,
 					     const std::vector<ConstrainedVariableId>& scope)
     : Constraint(CONSTRAINT_NAME(), PROPAGATOR_NAME(), constraintEngine, scope),
       m_ruleInstance(ruleInstance){
@@ -30,7 +30,7 @@ namespace EUROPA {
   /**
    * @see Mergemento::merge
    */
-  void RuleVariableListener::setSource(const ConstraintId& sourceConstraint){
+  void RuleVariableListener::setSource(const ConstraintId sourceConstraint){
     check_error(sourceConstraint.isValid());
 
     checkError(sourceConstraint->getName() == getName(),
@@ -44,7 +44,7 @@ namespace EUROPA {
    * so that rule execution is not subject to the vagaries of propagtion timing
    * @return true
    */
-  bool RuleVariableListener::canIgnore(const ConstrainedVariableId&,
+  bool RuleVariableListener::canIgnore(const ConstrainedVariableId,
 				       unsigned int,
 				       const DomainListener::ChangeType&){
     checkError(getRuleInstance().isValid(), getKey() << " has lost its rule instance:" << getRuleInstance());
@@ -59,7 +59,7 @@ namespace EUROPA {
     return false;
   }
 
-  const RuleInstanceId& RuleVariableListener::getRuleInstance() {
+  const RuleInstanceId RuleVariableListener::getRuleInstance() {
     if(m_ruleInstance.isNoId()){
       checkError(m_sourceConstraint.isValid(), "Must be able to get this from a source constraint.");
 
@@ -111,7 +111,7 @@ namespace EUROPA {
    * @brief If the base class test passes, then we need to see if there is any more information contained in the rule that
    * has not been applied. This will be the case if the rule has not fired yet and the test indicates it could.
    */
-  bool RuleVariableListener::testIsRedundant(const ConstrainedVariableId& var) const{
+  bool RuleVariableListener::testIsRedundant(const ConstrainedVariableId var) const{
     return Constraint::testIsRedundant(var) && (m_ruleInstance.isNoId() || m_ruleInstance->isExecuted() || !m_ruleInstance->test(getScope()));
   }
 }

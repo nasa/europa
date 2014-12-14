@@ -13,7 +13,7 @@
 
 namespace EUROPA {
 
-ObjectType::ObjectType(const char* name, const ObjectTypeId& parent, bool isNative)
+ObjectType::ObjectType(const char* name, const ObjectTypeId parent, bool isNative)
     : m_id(this)
     , m_varType((new ObjectDT(name))->getId())
     , m_name(name)
@@ -29,7 +29,7 @@ ObjectType::~ObjectType() {
   m_id.remove();
 }
 
-const DataTypeId& ObjectType::getVarType() const
+const DataTypeId ObjectType::getVarType() const
 {
     return m_varType;
 }
@@ -40,7 +40,7 @@ void ObjectType::purgeAll() {
 }
 
 
-const ObjectTypeId& ObjectType::getId() const
+const ObjectTypeId ObjectType::getId() const
 {
     return m_id;
 }
@@ -54,7 +54,7 @@ const std::string& ObjectType::getNameString() const {
 	return m_name.toString();
 }
 
-const ObjectTypeId& ObjectType::getParent() const
+const ObjectTypeId ObjectType::getParent() const
 {
     return m_parent;
 }
@@ -94,12 +94,12 @@ bool ObjectType::isNative() const
     return m_isNative;
 }
 
-void ObjectType::addMember(const DataTypeId& type, const char* name)
+void ObjectType::addMember(const DataTypeId type, const char* name)
 {
     m_members[name] = type;
 }
 
-const DataTypeId& ObjectType::getMemberType(const char* name) const
+const DataTypeId ObjectType::getMemberType(const char* name) const
 {
     std::map<std::string,DataTypeId>::const_iterator it = m_members.find(name);
 
@@ -119,17 +119,17 @@ PSDataType* ObjectType::getMemberTypeRef(const std::string& name) const {
 	return getMemberType(name.c_str());
 }
 
-void ObjectType::addObjectFactory(const ObjectFactoryId& factory) {
+void ObjectType::addObjectFactory(const ObjectFactoryId factory) {
   // TODO: allow redefinition of old one
   m_objectFactories[static_cast<edouble>(factory->getSignature())] = factory;
 }
 
-void ObjectType::addTokenType(const TokenTypeId& factory) {
+void ObjectType::addTokenType(const TokenTypeId factory) {
   // TODO: allow redefinition of old one
   m_tokenTypes[static_cast<edouble>(factory->getSignature())] = factory;
 }
 
-const TokenTypeId& ObjectType::getTokenType(const LabelStr& signature) const {
+const TokenTypeId ObjectType::getTokenType(const LabelStr& signature) const {
   check_error(signature.getElement(0,".")==getName(),
               "Can't look for a token factory I don't own");
 
@@ -163,7 +163,7 @@ PSList<PSTokenType*> ObjectType::getPSTokenTypesByAttr( int attrMask ) const {
 	  return retval;
 }
 
-const TokenTypeId& ObjectType::getParentType(const TokenTypeId& type) const
+const TokenTypeId ObjectType::getParentType(const TokenTypeId type) const
 {
     if (m_parent.isId()) {
         std::string parentSignature = m_parent->getName().toString()+"."+type->getPredicateName().toString();
@@ -236,20 +236,20 @@ std::string ObjectType::toString() const
     m_id.remove();
   }
 
-  const ObjectFactoryId& ObjectFactory::getId() const {return m_id;}
+  const ObjectFactoryId ObjectFactory::getId() const {return m_id;}
 
   const LabelStr& ObjectFactory::getSignature() const {return m_signature;}
 
   const std::vector<LabelStr>& ObjectFactory::getSignatureTypes() const {return m_signatureTypes;}
 
-ObjectId ObjectFactory::makeNewObject(const PlanDatabaseId&,
+ObjectId ObjectFactory::makeNewObject(const PlanDatabaseId,
                                       const LabelStr&,
                                       const LabelStr&,
                                       const std::vector<const Domain*>&) const {
   return ObjectId::noId();
 }
 
-void ObjectFactory::evalConstructorBody(ObjectId&,
+void ObjectFactory::evalConstructorBody(ObjectId,
                                         const std::vector<const Domain*>&) const {
 }
 
@@ -265,7 +265,7 @@ void ObjectFactory::evalConstructorBody(ObjectId&,
       m_id.remove();
   }
 
-  const ObjectTypeMgrId& ObjectTypeMgr::getId() const
+  const ObjectTypeMgrId ObjectTypeMgr::getId() const
   {
       return m_id;
   }
@@ -287,7 +287,7 @@ void ObjectTypeMgr::purgeAll(){
 }
 
 
-  void ObjectTypeMgr::registerObjectType(const ObjectTypeId& objType)
+  void ObjectTypeMgr::registerObjectType(const ObjectTypeId objType)
   {
 	  // TODO: instead of keeping separate map, we should probably just delegate to the ObjectType
       {
@@ -301,7 +301,7 @@ void ObjectTypeMgr::purgeAll(){
       debugMsg("Schema:registerObjectType","Registered object type:" << std::endl << objType->toString());
   }
 
-const ObjectTypeId& ObjectTypeMgr::getObjectType(const LabelStr& objType) const {
+const ObjectTypeId ObjectTypeMgr::getObjectType(const LabelStr& objType) const {
   std::map<edouble,ObjectTypeId>::const_iterator it =
       m_objTypes.find(static_cast<edouble>(objType));
 
@@ -340,7 +340,7 @@ const ObjectTypeId& ObjectTypeMgr::getObjectType(const LabelStr& objType) const 
    * matches(descendant, ancestor)
    * matches(x, x)
    */
-  ObjectFactoryId ObjectTypeMgr::getFactory(const SchemaId& schema,
+  ObjectFactoryId ObjectTypeMgr::getFactory(const SchemaId schema,
                                             const LabelStr& objectType,
                                             const std::vector<const Domain*>& arguments,
 					    const bool doCheckError)
@@ -404,7 +404,7 @@ const ObjectTypeId& ObjectTypeMgr::getObjectType(const LabelStr& objType) const 
     return ObjectFactoryId::noId();
   }
 
-  void ObjectTypeMgr::registerFactory(const ObjectFactoryId& factory){
+  void ObjectTypeMgr::registerFactory(const ObjectFactoryId factory){
     check_error(factory.isValid());
 
     debugMsg("ObjectFactory:registerFactory", "Registering factory with signature " << factory->getSignature().toString());
@@ -433,7 +433,7 @@ const ObjectTypeId& ObjectTypeMgr::getObjectType(const LabelStr& objType) const 
   class ObjectEvalContext : public EvalContext
   {
     public:
-        ObjectEvalContext(EvalContext* parent, const ObjectId& objInstance);
+        ObjectEvalContext(EvalContext* parent, const ObjectId objInstance);
         virtual ~ObjectEvalContext();
 
         virtual ConstrainedVariableId getVar(const char* name);
@@ -444,7 +444,7 @@ const ObjectTypeId& ObjectTypeMgr::getObjectType(const LabelStr& objType) const 
         ObjectId m_obj;
   };
 
-  ObjectEvalContext::ObjectEvalContext(EvalContext* parent, const ObjectId& objInstance)
+  ObjectEvalContext::ObjectEvalContext(EvalContext* parent, const ObjectId objInstance)
     : EvalContext(parent)
     , m_obj(objInstance)
   {
@@ -479,7 +479,7 @@ void* ObjectEvalContext::getElement(const char* name) const {
 }
 
   InterpretedObjectFactory::InterpretedObjectFactory(
-                             const ObjectTypeId& objType,
+                             const ObjectTypeId objType,
                              const LabelStr& signature,
                              const std::vector<std::string>& constructorArgNames,
                              const std::vector<std::string>& constructorArgTypes,
@@ -512,7 +512,7 @@ void* ObjectEvalContext::getElement(const char* name) const {
   class ObjectFactoryEvalContext : public EvalContext
   {
   public:
-    ObjectFactoryEvalContext(const PlanDatabaseId& planDb,
+    ObjectFactoryEvalContext(const PlanDatabaseId planDb,
                  const std::vector<std::string>& argNames,
                  const std::vector<std::string>& argTypes,
                  const std::vector<const Domain*>& args);
@@ -526,7 +526,7 @@ void* ObjectEvalContext::getElement(const char* name) const {
     std::vector<ConstrainedVariableId> m_tmpVars;
   };
 
-  ObjectFactoryEvalContext::ObjectFactoryEvalContext(const PlanDatabaseId& planDb,
+  ObjectFactoryEvalContext::ObjectFactoryEvalContext(const PlanDatabaseId planDb,
                const std::vector<std::string>& argNames,
                const std::vector<std::string>& argTypes,
                const std::vector<const Domain*>& args)
@@ -566,7 +566,7 @@ void* ObjectFactoryEvalContext::getElement(const char* name) const {
 }
 
   ObjectId InterpretedObjectFactory::createInstance(
-                            const PlanDatabaseId& planDb,
+                            const PlanDatabaseId planDb,
                             const LabelStr& objectType,
                             const LabelStr& objectName,
                             const std::vector<const Domain*>& arguments) const
@@ -598,7 +598,7 @@ void* ObjectFactoryEvalContext::getElement(const char* name) const {
    *
    */
   ObjectId InterpretedObjectFactory::makeNewObject(
-                           const PlanDatabaseId& planDb,
+                           const PlanDatabaseId planDb,
                            const LabelStr& objectType,
                            const LabelStr& objectName,
                            const std::vector<const Domain*>& arguments) const
@@ -638,7 +638,7 @@ void* ObjectFactoryEvalContext::getElement(const char* name) const {
   }
 
     void InterpretedObjectFactory::evalConstructorBody(
-                                               ObjectId& instance,
+                                               ObjectId instance,
                                                const std::vector<const Domain*>& arguments) const
     {
         // TODO: should pass in eval context from outside to have access to globals

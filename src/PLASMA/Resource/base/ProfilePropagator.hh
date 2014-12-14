@@ -10,7 +10,7 @@ namespace EUROPA {
     class ProfilePropagator : public DefaultPropagator {
     public:
       ProfilePropagator(const LabelStr& name,
-			const ConstraintEngineId& constraintEngine);
+			const ConstraintEngineId constraintEngine);
 
       virtual ~ProfilePropagator();
 
@@ -24,10 +24,10 @@ namespace EUROPA {
       void setUpdateRequired(const bool update) {m_updateRequired = update;}
     private:
       void execute();
-      void execute(const ConstraintId& constraint);
+      void execute(const ConstraintId constraint);
       bool updateRequired() const;
-      void handleConstraintAdded(const ConstraintId& constraint);
-      void handleConstraintRemoved(const ConstraintId& constraint);
+      void handleConstraintAdded(const ConstraintId constraint);
+      void handleConstraintRemoved(const ConstraintId constraint);
 
       std::set<ProfileId> m_profiles;
       std::set<ConstraintId> m_newConstraints;

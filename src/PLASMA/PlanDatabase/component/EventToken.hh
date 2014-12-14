@@ -12,7 +12,7 @@ namespace EUROPA {
    */
   class EventToken: public Token {
   public:
-    EventToken(const PlanDatabaseId& planDatabase,
+    EventToken(const PlanDatabaseId planDatabase,
 	       const LabelStr& predicateName,
 	       bool rejectable,
 	       bool isFact,
@@ -20,16 +20,16 @@ namespace EUROPA {
 	       const LabelStr& objectName = Token::noObject(),
 	       bool closed = true);
 
-    EventToken(const TokenId& master,
+    EventToken(const TokenId master,
 	       const LabelStr& relation,
 	       const LabelStr& predicateName,
 	       const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
 	       const LabelStr& objectName = Token::noObject(),
 	       bool closed = true);
 
-    const TempVarId& start() const;
-    const TempVarId& end() const;
-    const TempVarId& getTime() const;
+    const TempVarId start() const;
+    const TempVarId end() const;
+    const TempVarId getTime() const;
   private:
     void commonInit(const IntervalIntDomain& timeBaseDomain);
     TempVarId m_time;

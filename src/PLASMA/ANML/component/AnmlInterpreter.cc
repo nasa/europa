@@ -14,7 +14,7 @@
 
 namespace EUROPA {
 
-AnmlInterpreter::AnmlInterpreter(EngineId& engine)
+AnmlInterpreter::AnmlInterpreter(EngineId engine)
 	: m_engine(engine)
 {
 }

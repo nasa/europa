@@ -62,7 +62,7 @@ namespace EUROPA {
   /**
    * @brief Execute the tests described by the test cases.
    */
-  bool executeTestCases(const ConstraintEngineId& engine, std::list<ConstraintTestCase>& testCases);
+  bool executeTestCases(const ConstraintEngineId engine, std::list<ConstraintTestCase>& testCases);
 
 }; /* namespace EUROPA */
 #endif // ifndef..

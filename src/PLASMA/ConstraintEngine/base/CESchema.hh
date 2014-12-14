@@ -26,23 +26,23 @@ namespace EUROPA {
       CESchema();
       virtual ~CESchema();
 
-      const CESchemaId& getId() const;
+      const CESchemaId getId() const;
 
       // Methods to Manage Data Types
-      void registerDataType(const DataTypeId& dt);
+      void registerDataType(const DataTypeId dt);
       DataTypeId getDataType(const char* typeName);
       bool isDataType(const char* typeName) const;
       const Domain & baseDomain(const char* typeName);
       void purgeDataTypes();
 
       // Methods to Manage Constraint Factories
-      void registerConstraintType(const ConstraintTypeId& ct);
-      const ConstraintTypeId& getConstraintType(const LabelStr& name);
+      void registerConstraintType(const ConstraintTypeId ct);
+      const ConstraintTypeId getConstraintType(const LabelStr& name);
       bool isConstraintType(const LabelStr& name, const bool& warn = false);
       void purgeConstraintTypes();
 
       // Methods to manage CFunctions
-      void registerCFunction(const CFunctionId& cf);
+      void registerCFunction(const CFunctionId cf);
       CFunctionId getCFunction(const LabelStr& name);
       void purgeCFunctions();
 

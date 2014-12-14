@@ -8,8 +8,8 @@
 
 namespace EUROPA {
 
-BoostFlowProfileGraph::BoostFlowProfileGraph(const TransactionId& source, 
-                                             const TransactionId& sink, 
+BoostFlowProfileGraph::BoostFlowProfileGraph(const TransactionId source, 
+                                             const TransactionId sink, 
                                              bool lowerLevel)
     : FlowProfileGraph(source, sink, lowerLevel), m_graph(), m_transactionToVertex(), 
       m_vertexToTransaction(), m_activeTransactions(), m_source(), m_sink(),
@@ -18,8 +18,8 @@ BoostFlowProfileGraph::BoostFlowProfileGraph(const TransactionId& source,
   initializeGraph(source, sink);
 }
 
-void BoostFlowProfileGraph::initializeGraph(const TransactionId& source, 
-                                            const TransactionId& sink) {
+void BoostFlowProfileGraph::initializeGraph(const TransactionId source, 
+                                            const TransactionId sink) {
 
   m_graph.clear();
   m_transactionToVertex.clear();
@@ -30,7 +30,7 @@ void BoostFlowProfileGraph::initializeGraph(const TransactionId& source,
 }
 
 BoostFlowProfileGraph::Vertex 
-BoostFlowProfileGraph::addNode(const TransactionId& t) {
+BoostFlowProfileGraph::addNode(const TransactionId t) {
   std::map<TransactionId, Vertex>::const_iterator found = m_transactionToVertex.find(t);
   if(found != m_transactionToVertex.end())
     return found->second;
@@ -42,7 +42,7 @@ BoostFlowProfileGraph::addNode(const TransactionId& t) {
 }
 
 BoostFlowProfileGraph::Vertex 
-BoostFlowProfileGraph::getNode(const TransactionId& t) const {
+BoostFlowProfileGraph::getNode(const TransactionId t) const {
   std::map<TransactionId, Vertex>::const_iterator it = m_transactionToVertex.find(t);
   checkError(it != m_transactionToVertex.end(), 
              "Failed to find a vertex for " << t);
@@ -56,8 +56,8 @@ TransactionId BoostFlowProfileGraph::getTransaction(const Vertex& v) const {
   return it->second;
 }
 
-BoostFlowProfileGraph::Edge BoostFlowProfileGraph::addEdge(const TransactionId& t1,
-                                                           const TransactionId& t2,
+BoostFlowProfileGraph::Edge BoostFlowProfileGraph::addEdge(const TransactionId t1,
+                                                           const TransactionId t2,
                                                            const edouble capacity, 
                                                            const edouble reverseCapacity) {
   debugMsg("BoostFlowProfileGraph:addEdge", 
@@ -94,7 +94,7 @@ BoostFlowProfileGraph::Edge BoostFlowProfileGraph::addEdge(const TransactionId& 
   return e1;
 }
 
-void BoostFlowProfileGraph::enableAt(const TransactionId& t1, const TransactionId& t2) {
+void BoostFlowProfileGraph::enableAt(const TransactionId t1, const TransactionId t2) {
   if(m_transactionToVertex.find(t1) == m_transactionToVertex.end() ||
      m_transactionToVertex.find(t2) == m_transactionToVertex.end())
     return;
@@ -102,8 +102,8 @@ void BoostFlowProfileGraph::enableAt(const TransactionId& t1, const TransactionI
   addEdge(t1, t2, PLUS_INFINITY, PLUS_INFINITY);
 }
 
-void BoostFlowProfileGraph::enableAtOrBefore(const TransactionId& t1,
-                                             const TransactionId& t2) {
+void BoostFlowProfileGraph::enableAtOrBefore(const TransactionId t1,
+                                             const TransactionId t2) {
   if(m_transactionToVertex.find(t1) == m_transactionToVertex.end() ||
      m_transactionToVertex.find(t2) == m_transactionToVertex.end())
     return;
@@ -111,14 +111,14 @@ void BoostFlowProfileGraph::enableAtOrBefore(const TransactionId& t1,
   addEdge(t1, t2, 0, PLUS_INFINITY);
 }
 
-void BoostFlowProfileGraph::disable(const TransactionId& transaction) {
+void BoostFlowProfileGraph::disable(const TransactionId transaction) {
   std::vector<TransactionId>::iterator it = 
       std::find(m_activeTransactions.begin(), m_activeTransactions.end(), transaction);
   if(it != m_activeTransactions.end())
     m_activeTransactions.erase(it);
 }
 
-void BoostFlowProfileGraph::addTransactionToGraph(const TransactionId& t) {
+void BoostFlowProfileGraph::addTransactionToGraph(const TransactionId t) {
   if(t == getTransaction(m_sink) || t == getTransaction(m_source))
     return;
   debugMsg("BoostFlowProfileGraph:addTransactionToGraph", 
@@ -145,9 +145,9 @@ void BoostFlowProfileGraph::addTransactionToGraph(const TransactionId& t) {
   addEdge(source, target, edgeCapacity, 0.0);
 }
 
-void BoostFlowProfileGraph::enableTransaction(const TransactionId& t,
-                                              const InstantId& inst,
-                                              TransactionId2InstantId& contributions) {
+void BoostFlowProfileGraph::enableTransaction(const TransactionId t,
+                                              const InstantId inst,
+                                              TransactionId2InstantId ) {
   debugMsg("BoostFlowProfileGraph:enableTransaction", 
            (isLowerLevel() ? "<lower>" : "<upper>") << "Enabling " << 
            (t->isConsumer() ? "consumer " : "producer ") << t << "" << t->toString() <<
@@ -195,8 +195,6 @@ edouble BoostFlowProfileGraph::getResidualFromSource(const TransactionIdTransact
         enableAt(it->first.first, it->first.second);
       case UNKNOWN:
         break;
-      default:
-        break;
     }
   }
   return getResidualFromSource();
@@ -240,7 +238,7 @@ edouble BoostFlowProfileGraph::getResidualFromSource() {
   return residual;
 }
 
-void BoostFlowProfileGraph::removeTransaction(const TransactionId& id) {
+void BoostFlowProfileGraph::removeTransaction(const TransactionId id) {
   using namespace boost;
   debugMsg("BoostFlowProfileGraph:removeTransaction", 
            (isLowerLevel() ? "<lower>" : "<upper>") << "Removing " << id);

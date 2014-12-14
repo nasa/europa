@@ -21,7 +21,7 @@ public:
   CFunction(const char* name);
   virtual ~CFunction();
   
-  const CFunctionId& getId() const;
+  const CFunctionId getId() const;
   
   const LabelStr& getName();
   

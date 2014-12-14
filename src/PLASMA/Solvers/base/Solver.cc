@@ -20,17 +20,35 @@
  * @todo Generate notifications for Solver to publish (i.e. for the SearchListener).
  */
 
-#define publish(m,dp) {                                                 \
+#if 0
+#define publish3(m,n,o) {                                                \
     debugMsg("Solver:publish", "Publishing message " << #m);		\
     for(std::list<SearchListenerId>::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it) { \
-      (*it)->m(dp);                                                     \
+      (*it)->m(n, o);                                                   \
     }                                                                   \
   }
+#endif
+#define publish2(m,n) {                                                 \
+    debugMsg("Solver:publish", "Publishing message " << #m);		\
+    for(std::list<SearchListenerId>::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it) { \
+      (*it)->m(n);                                                     \
+    }                                                                   \
+  }
+
+#define publish1(m) {                                                   \
+    debugMsg("Solver:publish", "Publishing message " << #m);		\
+    for(std::list<SearchListenerId>::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it) { \
+      (*it)->m();                                                       \
+    }                                                                   \
+  }
+#define __publish(N, ...) publish ## N(__VA_ARGS__)
+#define _publish(N, ...) __publish(N, __VA_ARGS__)
+#define publish(...) _publish(NARG3(__VA_ARGS__), __VA_ARGS__)
 
 namespace EUROPA {
 namespace SOLVERS {
 
-Solver::Solver(const PlanDatabaseId& db, const TiXmlElement& configData)
+Solver::Solver(const PlanDatabaseId db, const TiXmlElement& configData)
     : m_baseConflictLevel(0.0),
       m_id(this), m_db(db),
       m_stepCountFloor(0), m_depthFloor(0), m_stepCount(0),
@@ -67,9 +85,10 @@ Solver::Solver(const PlanDatabaseId& db, const TiXmlElement& configData)
         child->SetAttribute("component", child->Value());
 
       // Now allocate the particular flaw manager using an abstract factory pattern.
-      EngineId& engine = db->getEngine();
-      ComponentFactoryMgr* cfm = (ComponentFactoryMgr*)engine->getComponent("ComponentFactoryMgr");
-      FlawManagerId flawManager = cfm->createInstance(*child);
+      EngineId engine = db->getEngine();
+      ComponentFactoryMgr* cfm =
+          reinterpret_cast<ComponentFactoryMgr*>(engine->getComponent("ComponentFactoryMgr"));
+      FlawManagerId flawManager = cfm->createComponentInstance(*child);
       debugMsg("Solver:Solver", "Created FlawManager with id " << flawManager);
       flawManager->initialize(*child, m_db, m_context, m_masterFlawFilter.getId());
       m_flawManagers.push_back(flawManager);
@@ -77,18 +96,18 @@ Solver::Solver(const PlanDatabaseId& db, const TiXmlElement& configData)
   }
 }
 
-    Solver::~Solver(){
-      cleanupDecisions();
-      EUROPA::cleanup(m_flawManagers);
-      delete (Context*) m_context;
-      m_id.remove();
-    }
+Solver::~Solver(){
+  cleanupDecisions();
+  EUROPA::cleanup(m_flawManagers);
+  delete static_cast<Context*>(m_context);
+  m_id.remove();
+}
 
-    void Solver::addListener(const SearchListenerId& sl) {
+    void Solver::addListener(const SearchListenerId sl) {
       m_listeners.push_back(sl);
     }
 
-    void Solver::removeListener(const SearchListenerId& sl) {
+    void Solver::removeListener(const SearchListenerId sl) {
       for(std::list<SOLVERS::SearchListenerId>::iterator it = m_listeners.begin();
           it != m_listeners.end(); ++it)
         if(*it == sl) {
@@ -119,11 +138,11 @@ Solver::Solver(const PlanDatabaseId& db, const TiXmlElement& configData)
       return m_noFlawsFound;
     }
 
-    const SolverId& Solver::getId() const{ return m_id;}
+    const SolverId Solver::getId() const{ return m_id;}
 
     const LabelStr& Solver::getName() const { return m_name;}
 
-    unsigned int Solver::getDepth() const {return m_decisionStack.size();}
+    unsigned long Solver::getDepth() const {return m_decisionStack.size();}
 
     unsigned int Solver::getStepCount() const {return m_stepCount;}
 
@@ -275,7 +294,7 @@ Solver::Solver(const PlanDatabaseId& db, const TiXmlElement& configData)
       if(!conflictLevelOk()){
         m_exhausted = true;
         debugMsg("Solver:step", "No solution prior to stepping. Conflict before propagation: " << m_baseConflictLevel << ", after propagation:" << m_db->getConstraintEngine()->getViolation());
-        publish(notifyExhausted,);
+        publish(notifyExhausted);
         return;
       }
 
@@ -294,7 +313,7 @@ Solver::Solver(const PlanDatabaseId& db, const TiXmlElement& configData)
 
       if(m_activeDecision.isNoId()){
         m_noFlawsFound = true;
-        publish(notifyCompleted,);
+        publish(notifyCompleted);
         return;
       }
 
@@ -305,7 +324,7 @@ Solver::Solver(const PlanDatabaseId& db, const TiXmlElement& configData)
                  getStepCount() - m_stepCountFloor <<
                  " Max depth: " << m_maxDepth << " depth (above floor) " << getDepth() - m_depthFloor);
 
-        publish(notifyTimedOut,);
+        publish(notifyTimedOut);
         m_timedOut = true;
         return;
       }
@@ -342,7 +361,7 @@ Solver::Solver(const PlanDatabaseId& db, const TiXmlElement& configData)
       if(m_exhausted) {
         checkError(m_decisionStack.empty(), "Must be exhausted if we failed to backtrack out.");
         debugMsg("Solver:step", "Solver exhausted at step " << getStepCount());
-        publish(notifyExhausted,);
+        publish(notifyExhausted);
       }
     }
 
@@ -396,7 +415,7 @@ Solver::Solver(const PlanDatabaseId& db, const TiXmlElement& configData)
       reset(m_decisionStack.size());
     }
 
-    void Solver::reset(unsigned int depth){
+    void Solver::reset(unsigned long depth){
       checkError(depth <= getDepth(), "Cannot reset past current depth: " << depth << " exceeds " << getDepth());
 
       if(m_activeDecision.isId()){
@@ -442,9 +461,7 @@ Solver::Solver(const PlanDatabaseId& db, const TiXmlElement& configData)
       m_timedOut = false;
     }
 
-    bool Solver::backjump(unsigned int stepCount){
-      checkError(stepCount > 0, "Should not be allowed to backjump 0 steps.");
-
+    bool Solver::backjump(unsigned long stepCount){
       // If we have an active decision, then reset it
       if(m_activeDecision.isId()){
         if(m_activeDecision->canUndo()) {
@@ -522,7 +539,7 @@ Solver::Solver(const PlanDatabaseId& db, const TiXmlElement& configData)
 
     Solver::FlawIterator::~FlawIterator() {
       for(m_it = m_iterators.begin(); m_it != m_iterators.end(); ++m_it)
-        delete (Iterator*) (*m_it);
+        delete static_cast<Iterator*>(*m_it);
     }
 
     bool Solver::FlawIterator::done() const
@@ -563,7 +580,7 @@ Solver::Solver(const PlanDatabaseId& db, const TiXmlElement& configData)
       }                                                                 \
     }
 
-    bool Solver::isDecided(const EntityId& entity) {
+    bool Solver::isDecided(const EntityId entity) {
       for(DecisionStack::const_iterator it = m_decisionStack.begin(); it != m_decisionStack.end(); ++it) {
         if((*it)->getFlawedEntityKey() == entity->getKey())
           return true;
@@ -571,7 +588,7 @@ Solver::Solver(const PlanDatabaseId& db, const TiXmlElement& configData)
       return false;
     }
 
-    bool Solver::hasDecidedParameter(const TokenId& token) {
+    bool Solver::hasDecidedParameter(const TokenId token) {
       for(std::vector<ConstrainedVariableId>::const_iterator it = token->parameters().begin(); it != token->parameters().end(); ++it) {
         if(isDecided(*it))
           return true;
@@ -579,29 +596,38 @@ Solver::Solver(const PlanDatabaseId& db, const TiXmlElement& configData)
       return false;
     }
 
-    void Solver::notifyRemoved(const ConstrainedVariableId& variable){
+    void Solver::notifyRemoved(const ConstrainedVariableId variable){
       checkError(!isDecided(variable),"Attempt to remove decided variable "<< variable->toString());
       notify(notifyRemoved(variable));
     }
 
-    void Solver::notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType){
+void Solver::notifyChanged(const ConstrainedVariableId variable,
+                           const DomainListener::ChangeType& changeType){
 
-      switch(changeType){
-      case DomainListener::UPPER_BOUND_DECREASED:
-      case DomainListener::LOWER_BOUND_INCREASED:
-      case DomainListener::VALUE_REMOVED:
-      case DomainListener::EMPTIED:
-        return;
-      default:
-        notify(notifyChanged(variable, changeType));
-      }
-    }
+  switch(changeType){
+    case DomainListener::UPPER_BOUND_DECREASED:
+    case DomainListener::LOWER_BOUND_INCREASED:
+    case DomainListener::VALUE_REMOVED:
+    case DomainListener::EMPTIED:
+      return;
+    case DomainListener::REFTIME_CHANGED:
+    case DomainListener::BOUNDS_RESTRICTED:
+    case DomainListener::RESTRICT_TO_SINGLETON:
+    case DomainListener::SET_TO_SINGLETON:
+    case DomainListener::RESET:
+    case DomainListener::RELAXED:
+    case DomainListener::CLOSED:
+    case DomainListener::OPENED:
+    default:
+      notify(notifyChanged(variable, changeType));
+  }
+}
 
-    void Solver::notifyAdded(const ConstraintId& constraint){
+    void Solver::notifyAdded(const ConstraintId constraint){
       notify(notifyAdded(constraint));
     }
 
-    void Solver::notifyRemoved(const ConstraintId& constraint){
+    void Solver::notifyRemoved(const ConstraintId constraint){
       //notify(notifyRemoved(constraint));
       m_masterFlawFilter.notifyRemoved(constraint);
       for(FlawManagers::const_iterator it = m_flawManagers.begin(); it != m_flawManagers.end(); ++it) {
@@ -609,17 +635,17 @@ Solver::Solver(const PlanDatabaseId& db, const TiXmlElement& configData)
       }
     }
 
-    void Solver::notifyAdded(const TokenId& token) {
+    void Solver::notifyAdded(const TokenId token) {
       notify(notifyAdded(token));
     }
 
-    void Solver::notifyRemoved(const TokenId& token) {
+    void Solver::notifyRemoved(const TokenId token) {
       checkError(!isDecided(token),"Attempt to remove decided token "<< token->toString());
       checkError(!hasDecidedParameter(token),"Attempt to remove token with decided parameters "<< token->toString());
       notify(notifyRemoved(token));
     }
 
-    bool Solver::inScope(const EntityId& entity){
+    bool Solver::inScope(const EntityId entity){
       for(FlawManagers::const_iterator it = m_flawManagers.begin();
           it != m_flawManagers.end(); ++it){
         FlawManagerId fm = *it;
@@ -667,7 +693,7 @@ Solver::Solver(const PlanDatabaseId& db, const TiXmlElement& configData)
           priorityQueue.insert(std::pair<Priority, std::string>(priority + adjustment, fm->toString(flaw)));
         }
 
-        delete (Iterator*) flawIterator;
+        delete static_cast<Iterator*>(flawIterator);
       }
 
       return priorityQueue;
@@ -720,34 +746,34 @@ Solver::Solver(const PlanDatabaseId& db, const TiXmlElement& configData)
       return true;
     }
 
-    Solver::CeListener::CeListener(const ConstraintEngineId& ce, Solver& solver)
+    Solver::CeListener::CeListener(const ConstraintEngineId ce, Solver& solver)
       : ConstraintEngineListener(ce), m_solver(solver) {}
 
-    void Solver::CeListener::notifyRemoved(const ConstrainedVariableId& variable){
+    void Solver::CeListener::notifyRemoved(const ConstrainedVariableId variable){
       m_solver.notifyRemoved(variable);
     }
 
-    void Solver::CeListener::notifyChanged(const ConstrainedVariableId& variable,
+    void Solver::CeListener::notifyChanged(const ConstrainedVariableId variable,
                                            const DomainListener::ChangeType& changeType){
       m_solver.notifyChanged(variable, changeType);
     }
 
-    void Solver::CeListener::notifyAdded(const ConstraintId& constraint){
+    void Solver::CeListener::notifyAdded(const ConstraintId constraint){
       m_solver.notifyAdded(constraint);
     }
 
-    void Solver::CeListener::notifyRemoved(const ConstraintId& constraint){
+    void Solver::CeListener::notifyRemoved(const ConstraintId constraint){
       m_solver.notifyRemoved(constraint);
     }
 
-    Solver::DbListener::DbListener(const PlanDatabaseId& db, Solver& solver)
+    Solver::DbListener::DbListener(const PlanDatabaseId db, Solver& solver)
       : PlanDatabaseListener(db), m_solver(solver) {}
 
-    void Solver::DbListener::notifyRemoved(const TokenId& token) {
+    void Solver::DbListener::notifyRemoved(const TokenId token) {
       m_solver.notifyRemoved(token);
     }
 
-    void Solver::DbListener::notifyAdded(const TokenId& token) {
+    void Solver::DbListener::notifyAdded(const TokenId token) {
       m_solver.notifyAdded(token);
     }
   }

@@ -187,19 +187,19 @@ public:
    * algorithm. Propagation limited to reach nodes within a bound
    * distance from source with given min/max potential.
    */
-  Void boundedDijkstraForward (const DnodeId& source,
+  Void boundedDijkstraForward (const DnodeId source,
                                               Time bound,
                                               Time minPotential) {
     boundedDijkstra (source, bound, minPotential, +1);
   }
 
-  Void boundedDijkstraBackward (const DnodeId& source,
+  Void boundedDijkstraBackward (const DnodeId source,
                                               Time bound,
                                               Time maxPotential) {
     boundedDijkstra (source, bound, maxPotential, -1);
   }
 private:
-  Void boundedDijkstra (const DnodeId& source,
+  Void boundedDijkstra (const DnodeId source,
                                        Time bound,
                                        Time destPotential,
                                        int direction);
@@ -280,7 +280,7 @@ protected:
    * @brief Allow subclass to take action when a node is updated
    * @param node node updated
    */
-  virtual void handleNodeUpdate(const DnodeId& node);
+  virtual void handleNodeUpdate(const DnodeId node);
 
 private:
   Void deleteEdge(DedgeId edge);
@@ -335,7 +335,7 @@ public:
    * @brief get node's id
    * @return node's id
    */
-  inline const DnodeId& getId() const {return m_id;}
+  inline const DnodeId getId() const {return m_id;}
   DnodeId link;        // For creating linked-list of nodes (for Dqueue)
 protected:
   DedgeId predecessor;      // For reconstructing negative cycles.
@@ -409,7 +409,7 @@ public:
    * @brief get id of edge
    * @return id of edge
    */
-  const DedgeId& getId() const {return m_id;}
+  const DedgeId getId() const {return m_id;}
 };
 
  /**
@@ -426,7 +426,7 @@ public:
   Time key;
 
 private:
-  Bucket (const DnodeId& n, Time distance) { node=n ; key=distance; }
+  Bucket (const DnodeId n, Time distance) { node=n ; key=distance; }
 
   friend class BucketQueue;
 };

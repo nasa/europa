@@ -14,7 +14,7 @@ namespace EUROPA {
 
   ObjectTokenRelation::ObjectTokenRelation(const LabelStr& name,
 					   const LabelStr& propagatorName,
-					   const ConstraintEngineId& constraintEngine,
+					   const ConstraintEngineId constraintEngine,
 					   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_token(variables[STATE_VAR]->parent()),
@@ -56,7 +56,7 @@ namespace EUROPA {
     check_error(isValid());
   }
 
-  void ObjectTokenRelation::handleExecute(const ConstrainedVariableId&,
+  void ObjectTokenRelation::handleExecute(const ConstrainedVariableId,
 					  unsigned int,
 					  const DomainListener::ChangeType&){
     handleExecute();
@@ -65,7 +65,7 @@ namespace EUROPA {
   /**
    * Will handle changes immediately as long as the domain is open
    */
-  bool ObjectTokenRelation::canIgnore(const ConstrainedVariableId& variable,
+  bool ObjectTokenRelation::canIgnore(const ConstrainedVariableId variable,
 				      unsigned int,
 				      const DomainListener::ChangeType& changeType){
 
@@ -168,7 +168,7 @@ namespace EUROPA {
   }
 
 const std::vector<ConstrainedVariableId>&
-ObjectTokenRelation::getModifiedVariables(const ConstrainedVariableId&) const {
+ObjectTokenRelation::getModifiedVariables(const ConstrainedVariableId) const {
   static std::vector<ConstrainedVariableId> s_emptyScope;
   return s_emptyScope;
 }

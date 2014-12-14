@@ -18,17 +18,17 @@ namespace EUROPA {
   class DefaultPropagator: public Propagator
   {
   public:
-    DefaultPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine, int priority=USER_PRIORITY);
+    DefaultPropagator(const LabelStr& name, const ConstraintEngineId constraintEngine, int priority=USER_PRIORITY);
     virtual void execute();
     virtual bool updateRequired() const;
   protected:
-    virtual void handleConstraintAdded(const ConstraintId& constrain);
-    virtual void handleConstraintRemoved(const ConstraintId& constraint);
-    virtual void handleConstraintActivated(const ConstraintId& constrain);
-    virtual void handleConstraintDeactivated(const ConstraintId& constraint);
-    virtual void handleNotification(const ConstrainedVariableId& variable,
+    virtual void handleConstraintAdded(const ConstraintId constrain);
+    virtual void handleConstraintRemoved(const ConstraintId constraint);
+    virtual void handleConstraintActivated(const ConstraintId constrain);
+    virtual void handleConstraintDeactivated(const ConstraintId constraint);
+    virtual void handleNotification(const ConstrainedVariableId variable,
 				    unsigned int argIndex,
-				    const ConstraintId& constraint,
+				    const ConstraintId constraint,
 				    const DomainListener::ChangeType& changeType);
 
     ConstraintSet m_agenda;
@@ -55,7 +55,7 @@ namespace EUROPA {
   class EqualityConstraintPropagator: public Propagator {
   public:
 
-    EqualityConstraintPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine);
+    EqualityConstraintPropagator(const LabelStr& name, const ConstraintEngineId constraintEngine);
 
     ~EqualityConstraintPropagator();
 
@@ -65,17 +65,17 @@ namespace EUROPA {
 
   private:
 
-    void handleConstraintAdded(const ConstraintId& constraint);
+    void handleConstraintAdded(const ConstraintId constraint);
 
-    void handleConstraintRemoved(const ConstraintId& constraint);
+    void handleConstraintRemoved(const ConstraintId constraint);
 
-    void handleConstraintActivated(const ConstraintId& constrain);
+    void handleConstraintActivated(const ConstraintId constrain);
 
-    void handleConstraintDeactivated(const ConstraintId& constraint);
+    void handleConstraintDeactivated(const ConstraintId constraint);
 
-    void handleNotification(const ConstrainedVariableId& variable,
+    void handleNotification(const ConstrainedVariableId variable,
 			    unsigned int argIndex,
-			    const ConstraintId& constraint,
+			    const ConstraintId constraint,
 			    const DomainListener::ChangeType& changeType);
 
     /**

@@ -104,37 +104,37 @@ namespace EUROPA {
           return dom;
       }
       else if(strcmp(tagname, "SymbolDomain") == 0) {
-          const char * type = element.Attribute("type");
-          DataTypeId dt;
+        const char * type = element.Attribute("type");
+        DataTypeId dt;
 
-          if (ce->getCESchema()->isDataType(type))
-              dt = ce->getCESchema()->getDataType(type);
-          else {
-              dt = (new RestrictedDT(type,SymbolDT::instance(),SymbolDomain()))->getId();
-              ce->getCESchema()->registerDataType(dt);
-          }
+        if (ce->getCESchema()->isDataType(type))
+          dt = ce->getCESchema()->getDataType(type);
+        else {
+          dt = (new RestrictedDT(type,SymbolDT::instance(),SymbolDomain()))->getId();
+          ce->getCESchema()->registerDataType(dt);
+        }
 
-          SymbolDomain * dom = new SymbolDomain((edouble)LabelStr("foo"),dt);
-          dom->empty(); dom->open();
+        SymbolDomain * dom = new SymbolDomain(LabelStr("foo").getKey(),dt);
+        dom->empty(); dom->open();
 
-          SymbolDomain * base = ConstraintTestCase::symbolDomainsMap()[std::string(type)];
-          if(!base) {
-              base = new SymbolDomain((edouble)LabelStr("foo"),dt->getId());
-              base->empty(); base->open();
-              ConstraintTestCase::symbolDomainsMap()[std::string(type)] = base;
-          }
+        SymbolDomain * base = ConstraintTestCase::symbolDomainsMap()[std::string(type)];
+        if(!base) {
+          base = new SymbolDomain(LabelStr("foo").getKey(),dt->getId());
+          base->empty(); base->open();
+          ConstraintTestCase::symbolDomainsMap()[std::string(type)] = base;
+        }
 
-          for (const TiXmlElement * child = element.FirstChildElement() ;
-          child != NULL ; child = child->NextSiblingElement()) {
-              check_error(strcmp(child->Value(), "element") == 0);
+        for (const TiXmlElement * child = element.FirstChildElement() ;
+             child != NULL ; child = child->NextSiblingElement()) {
+          check_error(strcmp(child->Value(), "element") == 0);
 
-              const char * value = child->Attribute("value");
+          const char * value = child->Attribute("value");
 
-              dom->insert(LabelStr(value));
-              base->insert(LabelStr(value));
-          }
-          dom->close();
-          return dom;
+          dom->insert(LabelStr(value));
+          base->insert(LabelStr(value));
+        }
+        dom->close();
+        return dom;
       }
       else {
           check_error(false);
@@ -250,7 +250,7 @@ namespace EUROPA {
     return true;
   }
 
-  bool executeTestCases(const ConstraintEngineId& engine,
+  bool executeTestCases(const ConstraintEngineId engine,
 			std::list<ConstraintTestCase>& testCases) {
     // Run each test, in the same order they appear in the list,
     //   keeping a count of failed test cases.
@@ -353,11 +353,11 @@ namespace EUROPA {
       }
 
       // Print that the test succeeded, count the successes for this constraint function, or whatever.
-      delete (Constraint*) constraint;
+      delete static_cast<Constraint*>(constraint);
       while (!scope.empty()) {
         cVarId = scope.back();
         scope.pop_back();
-        delete (ConstrainedVariable*) cVarId;
+        delete static_cast<ConstrainedVariable*>(cVarId);
       }
     }
     if (problemCount > 0) {

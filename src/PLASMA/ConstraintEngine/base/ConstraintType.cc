@@ -23,7 +23,7 @@ ConstraintType::~ConstraintType()
 {
 }
 
-const ConstraintTypeId& ConstraintType::getId() const {return m_id;}
+const ConstraintTypeId ConstraintType::getId() const {return m_id;}
 
 const LabelStr& ConstraintType::getName() const { return m_name; }
 

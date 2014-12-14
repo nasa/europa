@@ -29,7 +29,7 @@ public:
 
     virtual ~DataType();
 
-    const DataTypeId& getId() const;
+    const DataTypeId getId() const;
 
     /**
      * @brief Get the data type's name.
@@ -74,7 +74,7 @@ public:
      * For example, one cannot compare a string with and int
      * This is useful to enforce type checking, in constraints in particular.
      */
-    virtual bool canBeCompared(const DataTypeId& rhs) const;
+    virtual bool canBeCompared(const DataTypeId rhs) const;
 
     /*
      * @brief Tests if this variables with this data type
@@ -85,7 +85,7 @@ public:
      * but assignment only goes one way, in general.
      * isAssignableFrom + a explicit cast/convert method should cover all use cases
      */
-    virtual bool isAssignableFrom(const DataTypeId& rhs) const;
+    virtual bool isAssignableFrom(const DataTypeId rhs) const;
 
     /**
      * is the original definition for this domain restricted?, for instance : int [3 10], float {3.0,4.0}, etc
@@ -120,12 +120,12 @@ public:
     /**
      * @brief Create a variable
      */
-  virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine,
+  virtual ConstrainedVariableId createVariable(const ConstraintEngineId constraintEngine,
                                                const Domain& baseDomain,
                                                const bool internal = false,
                                                bool canBeSpecified = true,
                                                const char* name = NO_VAR_NAME,
-                                               const EntityId& parent = EntityId::noId(),
+                                               const EntityId parent = EntityId::noId(),
                                                unsigned int index = ConstrainedVariable::NO_INDEX) const;
 
 protected:

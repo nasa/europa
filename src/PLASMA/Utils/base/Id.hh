@@ -210,7 +210,7 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
      * @param org The constant reference to original Id to be assigned to.
      * @return A reference to self.
      */
-    inline Id& operator=(const Id& org) {
+    inline Id operator=(const Id org) {
       m_ptr = org.m_ptr;
 #ifndef EUROPA_FAST
       m_key = org.m_key;
@@ -234,7 +234,7 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
      * @return A reference to self.
      */
     template <class X>
-    inline Id& operator=(const Id<X>& org) {
+    inline Id operator=(const Id<X>& org) {
       copyAndCastFromId(org);
       return(*this);
     }
@@ -279,7 +279,7 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
      * @brief Handy static method to check for the "empty" id.
      * @return A reference to an Id created as Id(). This is a static member of the class.
      */
-    static inline const Id& noId() {
+    static inline const Id noId() {
       static const Id s_noId;
       return(s_noId);
     }
@@ -341,7 +341,7 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
      * @return true if the Id's point to the same pointer, and have the same key (non fast version only).
      * @see Id::isValid()
      */
-    inline bool operator==(const Id& comp) const {
+    inline bool operator==(const Id comp) const {
 #ifndef EUROPA_FAST
       return(m_ptr == comp.m_ptr && m_key == comp.m_key);
 #else
@@ -354,7 +354,7 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
      * @param comp The Id to be compared against.
      * @return false if ==, true otherwise.
      */
-    inline bool operator!=(const Id& comp) const {
+    inline bool operator!=(const Id comp) const {
 #ifndef EUROPA_FAST
       return (!(operator==(comp)));
 #else
@@ -367,7 +367,7 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
      * @param comp The Id to be compared against.
      * @return true if the address of this object is greater than comp.
      */
-    inline bool operator>(const Id& comp) const {
+    inline bool operator>(const Id comp) const {
       return(m_ptr > comp.m_ptr);
     }
 
@@ -376,7 +376,7 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
      * @param comp The Id to be compared against.
      * @return true if the address of this object is less than comp.
      */
-    inline bool operator<(const Id& comp) const {
+    inline bool operator<(const Id comp) const {
       return(m_ptr < comp.m_ptr);
     }
 

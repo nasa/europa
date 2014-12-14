@@ -58,7 +58,7 @@ namespace EUROPA {
     /**
      * @brief Get the internal Id.
      */
-    const TokenId& getId() const;
+    const TokenId getId() const;
 
     /**
      * @brief Get the name
@@ -75,7 +75,7 @@ namespace EUROPA {
      * @return TokenId::noId() if this is a Master Token, otherwise returns the Token from
      * which this token was sub-goaled.
      */
-    const TokenId& master() const;
+    const TokenId master() const;
 
     /**
      * @brief Accessor for the relation to the master token.
@@ -87,19 +87,19 @@ namespace EUROPA {
      * @brief Obtain a slave token using a positional offset from this token
      * @return TokenId::noId() if no token is found at that location
      */
-    const TokenId& getSlave(unsigned int slavePosition) const;
+    const TokenId getSlave(unsigned int slavePosition) const;
 
     /**
      * @brief Obtain the position of the given slave token in its ordered set of slaves.
      * @param slave The slave token to be found. It must be present.
      * @return Will return -1 if not found, otherwise will give the 0 based position.
      */
-    int getSlavePosition(const TokenId& slave) const;
+    int getSlavePosition(const TokenId slave) const;
 
     /**
      * @brief All tokens are part of exactly one PlanDatabase
      */
-    const PlanDatabaseId& getPlanDatabase() const;
+    const PlanDatabaseId getPlanDatabase() const;
 
     /**
      * @brief Access to the base type of the predicate.
@@ -128,30 +128,30 @@ namespace EUROPA {
      * Operations controlling the lifecyle of the token control this variable. It cannot be specified directly.
      * @see close, activate, merge, reject, cancel.
      */
-    const StateVarId& getState() const;
+    const StateVarId getState() const;
 
     /**
      * @brief In a fully grounded plan, a Token is assigned to a single object. The domain of this variable indicates
      * the possible assigments remaining.
      */
-    const ObjectVarId& getObject() const;
+    const ObjectVarId getObject() const;
 
     /**
      * @brief The start variable is a pure virtual function since we derived classes with no duration
      * may have an optimized implementation that shares start and end variable as the same variable.
      */
-    virtual const TempVarId& start() const = 0;
+    virtual const TempVarId start() const = 0;
 
     /**
      * @brief The end variable is a pure virtual function since we derived classes with no duration
      * may have an optimized implementation that shares start and end variable as the same variable.
      */
-    virtual const TempVarId& end() const = 0;
+    virtual const TempVarId end() const = 0;
 
     /**
      * @brief All Tokens will have a temporal duration.
      */
-    const TempVarId& duration() const;
+    const TempVarId duration() const;
 
     /**
      * @brief Access all Parameter variables for the token. May be empty.
@@ -181,17 +181,17 @@ namespace EUROPA {
     /**
      * @brief Access the active token supporting this token, if this is a merged token.
      */
-    const TokenId& getActiveToken() const;
+    const TokenId getActiveToken() const;
 
     /**
      * @brief add a built in constraint for the token
      */
-    void addStandardConstraint(const ConstraintId& constraint);
+    void addStandardConstraint(const ConstraintId constraint);
 
     /**
      * @brief Test if a given constraint is a built in constraint for the token
      */
-    bool isStandardConstraint(const ConstraintId& constraint) const;
+    bool isStandardConstraint(const ConstraintId constraint) const;
 
     /**
      * @brief Internally generated constraints that are standard across Token instances of the same type.
@@ -298,7 +298,7 @@ namespace EUROPA {
      * @pre isInactive
      * @post isMerged
      */
-    void doMerge(const TokenId& activeToken);
+    void doMerge(const TokenId activeToken);
 
     /**
      * @brief Activate a token, thereby inserting it into the plan.
@@ -331,12 +331,12 @@ namespace EUROPA {
     /**
      * @brief Invoked when a constraint is added to a merged token
      */
-    void handleAdditionOfInactiveConstraint(const ConstraintId& constraint);
+    void handleAdditionOfInactiveConstraint(const ConstraintId constraint);
 
     /**
      * @brief Invoked when a constaint is removed from a merged token
      */
-    void handleRemovalOfInactiveConstraint(const ConstraintId& constraint);
+    void handleRemovalOfInactiveConstraint(const ConstraintId constraint);
 
     /**
      * @brief Test of the token is assigned to an object.
@@ -361,10 +361,10 @@ namespace EUROPA {
     /**
      * @brief Test if the variable is a token state variable
      */
-    static bool isStateVariable(const ConstrainedVariableId& var);
+    static bool isStateVariable(const ConstrainedVariableId var);
 
-    void addLocalVariable(const ConstrainedVariableId& var);
-    void removeLocalVariable(const ConstrainedVariableId& var);
+    void addLocalVariable(const ConstrainedVariableId var);
+    void removeLocalVariable(const ConstrainedVariableId var);
     const ConstrainedVariableSet& getLocalVariables();
 
     static const LabelStr& noObject();
@@ -408,14 +408,14 @@ namespace EUROPA {
     /**
      * @brief Tests if the given entity can be compared to this token
      */
-    bool canBeCompared(const EntityId& entity) const;
+    bool canBeCompared(const EntityId entity) const;
 
     /**
      * @brief Indicates the master token is being removed. Token may self-destruct.
      * @param token The token just unmerged
      * @return true if the token self-destructed
      */
-    bool removeMaster(const TokenId& token);
+    bool removeMaster(const TokenId token);
 
     virtual std::string toLongString() const;
 
@@ -451,7 +451,7 @@ namespace EUROPA {
     /**
      * @brief Constructor for master token creation.
      */
-    Token(const PlanDatabaseId& planDatabase,
+    Token(const PlanDatabaseId planDatabase,
           const LabelStr& predicateName,
           bool rejectable,
           bool isFact,
@@ -462,7 +462,7 @@ namespace EUROPA {
     /**
      * @brief Constructor for slave token creation.
      */
-    Token(const TokenId& master,
+    Token(const TokenId master,
 	  const LabelStr& relation,
 	  const LabelStr& predicateName,
           const IntervalIntDomain& durationBaseDomain,
@@ -476,8 +476,8 @@ namespace EUROPA {
     void deactivate();
     void reinstate();
 
-    void add(const TokenId& slave);
-    void remove(const TokenId& slave);
+    void add(const TokenId slave);
+    void remove(const TokenId slave);
 
     /**
      * Used to allow derived classes to restrict state on creation.
@@ -488,14 +488,14 @@ namespace EUROPA {
      * @brief Will insert token in set of merged tokens.
      * @param token The merged token
      */
-    void addMergedToken(const TokenId& token);
+    void addMergedToken(const TokenId token);
 
     /**
      * @brief Will remove the token from the set of merged tokens. Token may self-destruct.
      * @param token The token just unmerged
      * @return true if the token self-destructed
      */
-    bool removeMergedToken(const TokenId& token);
+    bool removeMergedToken(const TokenId token);
 
     TokenId m_id;
     LabelStr m_name;

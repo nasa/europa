@@ -12,7 +12,7 @@ namespace EUROPA {
   class IntervalToken: public Token {
   public:
 
-    IntervalToken(const PlanDatabaseId& planDatabase, 
+    IntervalToken(const PlanDatabaseId planDatabase, 
 		  const LabelStr& predicateName, 
 		  bool rejectable,
 		  bool isFact,
@@ -22,7 +22,7 @@ namespace EUROPA {
 		  const LabelStr& objectName = Token::noObject(),
 		  bool closed = true);
 
-    IntervalToken(const TokenId& master, 
+    IntervalToken(const TokenId master, 
 		  const LabelStr& relation,
 		  const LabelStr& predicateName, 
 		  const IntervalIntDomain& startBaseDomain = IntervalIntDomain(),
@@ -31,8 +31,8 @@ namespace EUROPA {
 		  const LabelStr& objectName = Token::noObject(),
 		  bool closed = true);
 
-    const TempVarId& start() const;
-    const TempVarId& end() const;
+    const TempVarId start() const;
+    const TempVarId end() const;
 
   private:
     void commonInit(const IntervalIntDomain& startBaseDomain,

@@ -11,7 +11,7 @@
  */
 namespace EUROPA {
 
-  DefaultTemporalAdvisor::DefaultTemporalAdvisor(const ConstraintEngineId& ce): m_id(this), m_ce(ce){
+  DefaultTemporalAdvisor::DefaultTemporalAdvisor(const ConstraintEngineId ce): m_id(this), m_ce(ce){
     //    std::cout << "Default Advisor being constructed" << m_id << std::endl;
   }
 
@@ -20,7 +20,7 @@ namespace EUROPA {
     m_id.remove();
   }
 
-  bool DefaultTemporalAdvisor::canPrecede(const TokenId& first, const TokenId& second){    
+  bool DefaultTemporalAdvisor::canPrecede(const TokenId first, const TokenId second){    
     //    std::cout << "DefaultTemporalAdvisor canPrecede (" << first->getKey() << ") and (" << second->getKey() << ")" << std::endl;
 
     eint earliest_end = cast_int(first->end()->getDerivedDomain().getLowerBound());
@@ -29,11 +29,11 @@ namespace EUROPA {
     return (earliest_end <= latest_start);
   }
 
-  bool DefaultTemporalAdvisor::canPrecede(const TimeVarId& first, const TimeVarId& second) {
+  bool DefaultTemporalAdvisor::canPrecede(const TimeVarId first, const TimeVarId second) {
     return first->getDerivedDomain().getLowerBound() <= second->getDerivedDomain().getUpperBound();
   }
 
-  bool DefaultTemporalAdvisor::canFitBetween(const TokenId& token, const TokenId& predecessor, const TokenId& successor){
+  bool DefaultTemporalAdvisor::canFitBetween(const TokenId token, const TokenId predecessor, const TokenId successor){
     check_error(token.isValid());
     check_error(predecessor.isValid());
     check_error(successor.isValid());
@@ -56,17 +56,17 @@ namespace EUROPA {
  * @brief Trivially return true since basic domain intersection tests have been done in
  * the plan database already
  */
-bool DefaultTemporalAdvisor::canBeConcurrent(const TokenId&, const TokenId&){
+bool DefaultTemporalAdvisor::canBeConcurrent(const TokenId, const TokenId){
   return true;
 }
 
-  const TemporalAdvisorId& DefaultTemporalAdvisor::getId() const {return m_id;}
+  const TemporalAdvisorId DefaultTemporalAdvisor::getId() const {return m_id;}
 
 /**
  * @brief Default return that the distance is infinite
  */
-const IntervalIntDomain DefaultTemporalAdvisor::getTemporalDistanceDomain(const TimeVarId& first, 
-                                                                          const TimeVarId& second,
+const IntervalIntDomain DefaultTemporalAdvisor::getTemporalDistanceDomain(const TimeVarId first, 
+                                                                          const TimeVarId second,
                                                                           const bool){ 
   if( first->getExternalEntity().isNoId() 
       ||
@@ -96,7 +96,7 @@ const IntervalIntDomain DefaultTemporalAdvisor::getTemporalDistanceDomain(const 
   return(IntervalIntDomain(-g_infiniteTime(), g_infiniteTime()));
 }
 
-  void DefaultTemporalAdvisor::getTemporalDistanceDomains(const ConstrainedVariableId& first,
+  void DefaultTemporalAdvisor::getTemporalDistanceDomains(const ConstrainedVariableId first,
                                                           const std::vector<ConstrainedVariableId>&
                                                           seconds,
                                                           std::vector<IntervalIntDomain>& domains){
@@ -105,7 +105,7 @@ const IntervalIntDomain DefaultTemporalAdvisor::getTemporalDistanceDomain(const 
     }
   }
 
-  void DefaultTemporalAdvisor::getTemporalDistanceSigns(const ConstrainedVariableId& first,
+  void DefaultTemporalAdvisor::getTemporalDistanceSigns(const ConstrainedVariableId first,
                                                         const std::vector<ConstrainedVariableId>&
                                                         seconds,
                                                         std::vector<eint>& lbs,

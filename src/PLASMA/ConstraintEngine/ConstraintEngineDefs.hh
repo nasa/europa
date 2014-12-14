@@ -53,7 +53,7 @@ namespace EUROPA {
    * @brief Helper method to cast singleton values
    */
   template<class T>
-  Id<T> id(const ConstrainedVariableId& var);
+  Id<T> id(const ConstrainedVariableId var);
 
   class StringDomain;
   typedef StringDomain LabelSet;

@@ -44,7 +44,7 @@ namespace EUROPA {
     typedef std::map<edouble, ValueSet > LabelStr_ValueSet_Map;
     typedef std::map<edouble,LabelStr_LabelStr_Map> LabelStr_LabelStrLabelStrMap_Map;
 
-    Schema(const LabelStr& name, const CESchemaId& cesch);
+    Schema(const LabelStr& name, const CESchemaId cesch);
     ~Schema();
 
     /**
@@ -65,7 +65,7 @@ namespace EUROPA {
     static const LabelStr& rootObject();
 
 
-    const SchemaId& getId() const;
+    const SchemaId getId() const;
 
     const LabelStr& getName() const;
 
@@ -348,21 +348,21 @@ namespace EUROPA {
      */
     void write (ostream& os) const;
 
-    const CESchemaId& getCESchema() const { return m_ceSchema; }
+    const CESchemaId getCESchema() const { return m_ceSchema; }
 
     // TODO: ObjectType is replacing ObjectFactory
-    void registerObjectType(const ObjectTypeId& objType);
-    const ObjectTypeId& getObjectType(const LabelStr& objType);
+    void registerObjectType(const ObjectTypeId objType);
+    const ObjectTypeId getObjectType(const LabelStr& objType);
     ObjectFactoryId getObjectFactory(const LabelStr& objectType, const std::vector<const Domain*>& arguments, const bool doCheckError = true);
 
-    void registerTokenType(const TokenTypeId& tokenType);
+    void registerTokenType(const TokenTypeId tokenType);
     TokenTypeId getTokenType(const LabelStr& tokenType);
     TokenTypeId getParentTokenType( const LabelStr& tokenType, const LabelStr& parentObjType);
 
     bool hasTokenTypes() const;
 
-    void registerMethod(const MethodId& m);
-    MethodId getMethod(const LabelStr& methodName, const DataTypeId& targetType, const std::vector<DataTypeId>& argTypes);
+    void registerMethod(const MethodId m);
+    MethodId getMethod(const LabelStr& methodName, const DataTypeId targetType, const std::vector<DataTypeId>& argTypes);
 
     std::vector<TokenTypeId> getTypeSupporters( TokenTypeId type );
 
@@ -377,7 +377,7 @@ namespace EUROPA {
   protected:
     SchemaId m_id;
     const LabelStr m_name;
-    const CESchemaId& m_ceSchema;
+    const CESchemaId m_ceSchema;
     const ObjectTypeMgrId m_objectTypeMgr;
     const TokenTypeMgrId m_tokenTypeMgr;
     std::map<edouble, MethodId> m_methods; // TODO: define methodMgr instead of keeping a map here

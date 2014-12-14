@@ -47,11 +47,11 @@ namespace EUROPA {
     /**
      * Filter out if not a variable
      */
-    bool UnboundVariableManager::staticMatch(const EntityId& entity){
+    bool UnboundVariableManager::staticMatch(const EntityId entity){
       return !ConstrainedVariableId::convertable(entity) || FlawManager::staticMatch(entity);
     }
 
-    bool UnboundVariableManager::dynamicMatch(const EntityId& entity){
+    bool UnboundVariableManager::dynamicMatch(const EntityId entity){
       ConstrainedVariableId var = entity;
 
       if (FlawManager::dynamicMatch(entity))
@@ -79,7 +79,7 @@ namespace EUROPA {
     /**
      * We may filter based on static information only.
      */
-    void UnboundVariableManager::updateFlaw(const ConstrainedVariableId& var){
+    void UnboundVariableManager::updateFlaw(const ConstrainedVariableId var){
       debugMsg("UnboundVariableManager:updateFlaw", var->toLongString());
       m_flawCandidates.erase(var);
 
@@ -97,7 +97,7 @@ namespace EUROPA {
       m_flawCandidates.insert(var);
     }
 
-    void UnboundVariableManager::removeFlaw(const ConstrainedVariableId& var){
+    void UnboundVariableManager::removeFlaw(const ConstrainedVariableId var){
       condDebugMsg(m_flawCandidates.find(var) != m_flawCandidates.end(),
 		   "UnboundVariableManager:removeFlaw",
 		   "Removing " << var->getKey() << ". " << var->toString() << " as a flaw.");
@@ -105,7 +105,7 @@ namespace EUROPA {
       m_flawCandidates.erase(var);
     }
 
-    bool UnboundVariableManager::variableOfNonActiveToken(const ConstrainedVariableId& var){
+    bool UnboundVariableManager::variableOfNonActiveToken(const ConstrainedVariableId var){
       // If var parent is a token and the state is active, then true.
       if(TokenId::convertable(var->parent())){
 	TokenId token(var->parent());
@@ -117,12 +117,12 @@ namespace EUROPA {
     }
 
 
-    void UnboundVariableManager::notifyRemoved(const ConstrainedVariableId& variable){
+    void UnboundVariableManager::notifyRemoved(const ConstrainedVariableId variable){
       removeFlaw(variable);
       FlawManager::notifyRemoved(variable);
     }
 
-    void UnboundVariableManager::notifyChanged(const ConstrainedVariableId& variable,
+    void UnboundVariableManager::notifyChanged(const ConstrainedVariableId variable,
 					       const DomainListener::ChangeType& changeType){
 
       // In the event it is bound to a singleton, we remove it altogether as a flaw.
@@ -167,7 +167,7 @@ namespace EUROPA {
     //reordered FROM guard, key pref TO choice count, guard
     //re-reordered from choice count, guard TO guard, choice count
     //completely removed guard
-    bool UnboundVariableManager::betterThan(const EntityId& a, const EntityId& b, LabelStr& explanation){
+    bool UnboundVariableManager::betterThan(const EntityId a, const EntityId b, LabelStr& explanation){
       //we only ever get here because the priority is equal
       //Added to duplicate behavior from HTX.  This may not be the best idea ever. ~MJI
       const ConstrainedVariableId va = a;
@@ -190,7 +190,7 @@ namespace EUROPA {
       return false;
     }
 
-    std::string UnboundVariableManager::toString(const EntityId& entity) const {
+    std::string UnboundVariableManager::toString(const EntityId entity) const {
       checkError(ConstrainedVariableId::convertable(entity), entity->toString());
       ConstrainedVariableId var = entity;
       std::stringstream os;

@@ -28,7 +28,7 @@ namespace NDDL {
     return values;
   }
 
-  TokenId allocateOnSameObject(const TokenId& master, const LabelStr& predicateSuffix, const LabelStr& relationToMaster){
+  TokenId allocateOnSameObject(const TokenId master, const LabelStr& predicateSuffix, const LabelStr& relationToMaster){
     std::string tokenType = master->getBaseObjectType().toString() + "." + predicateSuffix.toString();
     TokenId slave = master->getPlanDatabase()->createSlaveToken(master, tokenType, relationToMaster);
     return slave;

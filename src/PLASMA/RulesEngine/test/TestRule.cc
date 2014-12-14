@@ -16,7 +16,7 @@ namespace EUROPA {
    */
   class TestRule_Root: public RuleInstance{
   public:
-    TestRule_Root(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    TestRule_Root(const RuleId rule, const TokenId token, const PlanDatabaseId planDb)
       : RuleInstance(rule, token, planDb, makeScope(token->getObject())){}
     void handleExecute();
   };
@@ -26,7 +26,7 @@ namespace EUROPA {
    */
   class TestRule_0: public RuleInstance{
   public:
-    TestRule_0(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard)
+    TestRule_0(const RuleInstanceId parentInstance, const ConstrainedVariableId guard)
       : RuleInstance(parentInstance, makeScope(guard)), m_localGuard(guard){}
 
     void handleExecute();
@@ -37,7 +37,7 @@ namespace EUROPA {
   TestRule::TestRule(const LabelStr& name, const IntervalIntDomain& guardBaseDomain)
     : Rule(name), m_guardBaseDomain(guardBaseDomain){}
 
-  RuleInstanceId TestRule::createInstance(const TokenId& token, const PlanDatabaseId& planDb,
+  RuleInstanceId TestRule::createInstance(const TokenId token, const PlanDatabaseId planDb,
                                           const RulesEngineId &rulesEngine) const{
     RuleInstanceId rootInstance = (new TestRule_Root(m_id, token, planDb))->getId();
     rootInstance->setRulesEngine(rulesEngine);

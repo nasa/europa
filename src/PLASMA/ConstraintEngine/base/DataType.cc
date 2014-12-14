@@ -29,7 +29,7 @@ DataType::~DataType()
         delete m_baseDomain;
 }
 
-const DataTypeId& DataType::getId() const { return m_id; }
+const DataTypeId DataType::getId() const { return m_id; }
 
 const LabelStr& DataType::getName() const { return m_name; }
 void DataType::setName(const LabelStr& name) { m_name = name; }
@@ -42,7 +42,7 @@ bool DataType::getIsRestricted() const { return m_isRestricted; }
 void DataType::setIsRestricted(bool b) { m_isRestricted = b; }
 
 // TODO: this can be more sophisticated
-bool DataType::canBeCompared(const DataTypeId& rhs) const
+bool DataType::canBeCompared(const DataTypeId rhs) const
 {
     // Assumes type names don't matter for now
 
@@ -59,7 +59,7 @@ bool DataType::canBeCompared(const DataTypeId& rhs) const
 }
 
 // TODO: make this more sophisticated, may have to delegate to each type
-bool DataType::isAssignableFrom(const DataTypeId& rhs) const
+bool DataType::isAssignableFrom(const DataTypeId rhs) const
 {
 
     if (isNumeric()) {
@@ -86,12 +86,12 @@ edouble DataType::minDelta() const
 }
 
 ConstrainedVariableId
-DataType::createVariable(const ConstraintEngineId& constraintEngine,
+DataType::createVariable(const ConstraintEngineId constraintEngine,
                          const Domain& baseDomain,
                          const bool internal,
                          bool canBeSpecified,
                          const char* name,
-                         const EntityId& parent,
+                         const EntityId parent,
                          unsigned int index) const
 {
     // TODO: perform stronger checks here

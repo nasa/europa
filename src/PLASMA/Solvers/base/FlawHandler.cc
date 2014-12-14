@@ -56,7 +56,7 @@ namespace EUROPA {
       checkError(configData.Parent() != NULL, "Must have a parent to get the default properties.");
 
       TiXmlElement* element = static_cast<TiXmlElement*>(configData.Clone());
-      TiXmlElement* parent = (TiXmlElement*) configData.Parent();
+      TiXmlElement* parent = static_cast<TiXmlElement*>(configData.Parent());
 
       if(element->Attribute("priority") == NULL){
         if(parent->Attribute("defaultPriority") != NULL)
@@ -77,13 +77,13 @@ namespace EUROPA {
       delete m_configData;
     }
 
-    Priority FlawHandler::getPriority(const EntityId&) { return m_priority;}
+    Priority FlawHandler::getPriority(const EntityId) { return m_priority;}
  
     double FlawHandler::getWeight() const {return m_weight;}
     
   unsigned int FlawHandler::getMaxChoices() const {return m_maxChoices;}
 
-  bool FlawHandler::customStaticMatch(const EntityId&) const {return true;}
+  bool FlawHandler::customStaticMatch(const EntityId) const {return true;}
 
     std::string FlawHandler::toString() const{
       std::stringstream sstr;
@@ -131,8 +131,8 @@ namespace EUROPA {
       return sstr.str();
     }
 
-    edouble FlawHandler::convertValueIfNecessary(const PlanDatabaseId& db,
-                                                const ConstrainedVariableId& guardVar,
+    edouble FlawHandler::convertValueIfNecessary(const PlanDatabaseId db,
+                                                const ConstrainedVariableId guardVar,
                                                 const edouble& testValue){
       // Convert if an object variable. Make it the object id.
       if(db->getSchema()->isObjectType(guardVar->baseDomain().getTypeName())){
@@ -181,7 +181,7 @@ namespace EUROPA {
         else {
           LabelStr lblStr(data);
           // Cast to a double
-          value = (edouble) lblStr;
+          value = lblStr.getKey();
         }
       }
 
@@ -195,7 +195,7 @@ namespace EUROPA {
       return sl_noGuards;
     }
 
-    bool FlawHandler::makeConstraintScope(const EntityId& entity, std::vector<ConstrainedVariableId>& scope) const {
+    bool FlawHandler::makeConstraintScope(const EntityId entity, std::vector<ConstrainedVariableId>& scope) const {
       checkError(hasGuards(), "Should not call unless there are guards on the handler.");
 
       TokenId token = getTokenFromEntity(entity);
@@ -266,11 +266,11 @@ namespace EUROPA {
     }
 
     /* Have to convert if it is an object variable */
-    bool FlawHandler::matches(const ConstrainedVariableId& guardVar, const edouble& testValue){
+    bool FlawHandler::matches(const ConstrainedVariableId guardVar, const edouble& testValue){
       if(!guardVar->lastDomain().isSingleton())
         return false;
 
-      const PlanDatabaseId& pdb = getPlanDatabase(guardVar);
+      const PlanDatabaseId pdb = getPlanDatabase(guardVar);
       edouble convertedValue = convertValueIfNecessary(pdb, guardVar, testValue);
 
       condDebugMsg(pdb->getSchema()->isObjectType(guardVar->baseDomain().getTypeName()),"FlawHandler:matches",
@@ -283,7 +283,7 @@ namespace EUROPA {
       return guardVar->lastDomain().getSingletonValue() == convertedValue;
     }
 
-    const PlanDatabaseId& FlawHandler::getPlanDatabase(const ConstrainedVariableId& tokenVar){
+    const PlanDatabaseId FlawHandler::getPlanDatabase(const ConstrainedVariableId tokenVar){
       if(m_db.isNoId()){
         checkError(tokenVar->parent().isId() && TokenId::convertable(tokenVar->parent()),
                    tokenVar->toString() << " should have a parent token.");
@@ -294,7 +294,7 @@ namespace EUROPA {
       return m_db;
     }
 
-    TokenId FlawHandler::getTokenFromEntity(const EntityId& entity){
+    TokenId FlawHandler::getTokenFromEntity(const EntityId entity){
       if(TokenId::convertable(entity))
         return entity;
 
@@ -315,14 +315,14 @@ namespace EUROPA {
 
     FlawHandler::VariableListener::VariableListener(const LabelStr& name,
                                                     const LabelStr& propagatorName,
-                                                    const ConstraintEngineId& constraintEngine, 
+                                                    const ConstraintEngineId constraintEngine, 
                                                     const std::vector<ConstrainedVariableId>& variables)
       : Constraint(name, propagatorName, constraintEngine, variables), m_isApplied(false) {}
 
-    FlawHandler::VariableListener::VariableListener(const ConstraintEngineId& ce,
-                                                    const EntityId& target,
-                                                    const FlawManagerId& flawManager,
-                                                    const FlawHandlerId& flawHandler,
+    FlawHandler::VariableListener::VariableListener(const ConstraintEngineId ce,
+                                                    const EntityId target,
+                                                    const FlawManagerId flawManager,
+                                                    const FlawHandlerId flawHandler,
                                                     const std::vector<ConstrainedVariableId>& scope)
       : Constraint(CONSTRAINT_NAME(), PROPAGATOR_NAME(), ce, scope),
         m_target(target), m_flawManager(flawManager), m_flawHandler(flawHandler), m_isApplied(false) {}

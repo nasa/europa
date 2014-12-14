@@ -22,9 +22,9 @@ namespace EUROPA{
      * @param second Candidate to be successor
      * @return true if temporal distance first.end to second.start can be >= 0
      */
-    virtual bool canPrecede(const TokenId& first, const TokenId& second) = 0;
+    virtual bool canPrecede(const TokenId first, const TokenId second) = 0;
 
-    virtual bool canPrecede(const TimeVarId& first, const TimeVarId& second) = 0;
+    virtual bool canPrecede(const TimeVarId first, const TimeVarId second) = 0;
 
     /**
      * @brief test if the given token can fit between the predecessor and successor.
@@ -34,8 +34,8 @@ namespace EUROPA{
      * @return True if sumultaneously the temporal distance between predecessor.end and successor.start >= minimum token.duration and
      * canPrecede(predecessor, token) and canPrecede(token, successor)
      */
-    virtual bool canFitBetween(const TokenId& token, const TokenId& predecessor,
-			       const TokenId& successor) = 0;
+    virtual bool canFitBetween(const TokenId token, const TokenId predecessor,
+			       const TokenId successor) = 0;
 
     /**
      * @brief test of the given tokens can have a zero temporal distance between their respective timepoints. Particularly
@@ -44,7 +44,7 @@ namespace EUROPA{
      * @param second A token to consider
      * @return true if distance beteen start times includes 0 and distance between end times includes 0.
      */
-    virtual bool canBeConcurrent(const TokenId& first, const TokenId& second) = 0;
+    virtual bool canBeConcurrent(const TokenId first, const TokenId second) = 0;
 
 
     /**
@@ -54,8 +54,8 @@ namespace EUROPA{
      * @param exact if true, it will enforce most rigourous test and give tightest bounds. If false, it can use
      * previously calcuated results but may be quite wrong.
      */
-    virtual const IntervalIntDomain getTemporalDistanceDomain(const TimeVarId& first, 
-							      const TimeVarId& second,
+    virtual const IntervalIntDomain getTemporalDistanceDomain(const TimeVarId first, 
+							      const TimeVarId second,
 							      const bool exact) = 0;
 
      /**
@@ -64,7 +64,7 @@ namespace EUROPA{
      * @param seconds The other time points
      * @param domains The returned calculated domains.
      */
-    virtual void getTemporalDistanceDomains(const ConstrainedVariableId& first,
+    virtual void getTemporalDistanceDomains(const ConstrainedVariableId first,
                                             const std::vector<ConstrainedVariableId>&
                                             seconds,
                                             std::vector<IntervalIntDomain>& domains) = 0;
@@ -78,7 +78,7 @@ namespace EUROPA{
      * @param ubs The returned upper-bound signs as numbers with correct signs but arbitrary values.
      */
     //it's posible that these numbers don't need to be eints
-    virtual void getTemporalDistanceSigns(const ConstrainedVariableId& first,
+    virtual void getTemporalDistanceSigns(const ConstrainedVariableId first,
                                           const std::vector<ConstrainedVariableId>&
                                           seconds,
                                           std::vector<eint>& lbs,

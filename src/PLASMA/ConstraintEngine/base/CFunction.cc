@@ -20,7 +20,7 @@ namespace EUROPA {
 	  m_id.remove();
   }
 
-  const CFunctionId& CFunction::getId() const
+  const CFunctionId CFunction::getId() const
   {
 	  return m_id;
   }

@@ -13,7 +13,7 @@
 
 #define DT_STATIC_MEMBERS(dataType,dtName) \
 const std::string& dataType::NAME() { static std::string sl_name(#dtName); return sl_name; } \
-const DataTypeId& dataType::instance() { static dataType sl_instance; return sl_instance.getId(); }
+const DataTypeId dataType::instance() { static dataType sl_instance; return sl_instance.getId(); }
 
 
 namespace EUROPA
@@ -47,12 +47,12 @@ edouble VoidDT::createValue(const std::string&) const
 }
 
 ConstrainedVariableId
-VoidDT::createVariable(const ConstraintEngineId&,
+VoidDT::createVariable(const ConstraintEngineId,
                                 const Domain&,
                                 const bool,
                                 bool,
                                 const char*,
-                                const EntityId&,
+                                const EntityId,
                                 unsigned int) const
 {
     check_error(ALWAYS_FAILS, "can't create void variable");
@@ -191,7 +191,7 @@ edouble SymbolDT::createValue(const std::string& value) const
   return LabelStr(value);
 }
 
-RestrictedDT::RestrictedDT(const char* name, const DataTypeId& baseType, const Domain& baseDomain)
+RestrictedDT::RestrictedDT(const char* name, const DataTypeId baseType, const Domain& baseDomain)
     : DataType(name)
     , m_baseType(baseType)
 {

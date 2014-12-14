@@ -154,10 +154,10 @@ namespace EUROPA {
        * @param maxCumulativeConsumption The greatest amount of consumption that can have happened by this instant.
        * @param minCumulativeProduction The least amount of production that can have happened by this instant.
        * @param maxCumulativeProduction The greatest amount of production that can have happened by this instant.
-       * @param minPrevConsumption
-       * @param maxPrevConsumption
-       * @param minPrevProduction
-       * @param maxPrevProduction
+       * @param minPrevConsumption The lower bound of consumption before this instant.
+       * @param maxPrevConsumption The upper bound of consumption before this instant.
+       * @param minPrevProduction The lower bound of production before this instant.
+       * @param maxPrevProduction The upper bound of production before this instant.
        */
       void update(edouble lowerLevelMin, edouble lowerLevelMax, edouble upperLevelMin, edouble upperLevelMax,
 		  edouble minInstConsumption, edouble maxInstConsumption, edouble minInstProduction, edouble maxInstProduction,
@@ -200,13 +200,13 @@ namespace EUROPA {
 
       /**
        * @brief Set the violation status of this instant.
-       * @param violationed True if there is a violation, false otherwise.
+       * @param violated True if there is a violation, false otherwise.
        */
       void setViolated(const bool violated) {m_violated = violated;}
 
       std::string toString() const;
 
-      const ProfileId& getProfile() const {return m_profile;}
+      const ProfileId getProfile() const {return m_profile;}
     protected:
     private:
       friend class Profile;
@@ -246,17 +246,17 @@ namespace EUROPA {
       void applyBoundsDelta(const edouble& lbDelta, const edouble& ubDelta);
 
       InstantId m_id;
-      eint m_time; /*<! The time of the Instant */
-      ProfileId m_profile; /*<! The Profile the Instant is on */
-      edouble m_lowerLevel, m_lowerLevelMax, m_upperLevelMin, m_upperLevel; /*<! The four bounds of the level. */
-      edouble m_maxInstProduction, m_maxInstConsumption, m_minInstProduction, m_minInstConsumption; /*<! The bounds around instantaneous consumption and production */
-      edouble m_maxCumulativeProduction, m_maxCumulativeConsumption, m_minCumulativeProduction, m_minCumulativeConsumption; /*<! The bounds around cumulative consumption and production */
-      edouble m_maxPrevProduction, m_maxPrevConsumption, m_minPrevProduction, m_minPrevConsumption; /*<! The bounds on consumption and production necessarily before this instant*/
-      edouble m_upperFlawMagnitude, m_lowerFlawMagnitude; /*<! The magnitude of the differences between the levels and the limits */
-      bool m_violated, m_flawed, m_upperFlaw, m_lowerFlaw; /*<! Flaw and violation flags */
-      std::set<TransactionId> m_transactions; /*<! The complete set of transactions */
-      std::set<TransactionId> m_endingTransactions; /*<! The set of transactions whose upper bound is equal to the current time. */
-      std::set<TransactionId> m_startingTransactions; /*<! The set of transactions whose lower bound is equal to the current time. */
+      eint m_time; /**< The time of the Instant */
+      ProfileId m_profile; /**< The Profile the Instant is on */
+      edouble m_lowerLevel, m_lowerLevelMax, m_upperLevelMin, m_upperLevel; /**< The four bounds of the level. */
+      edouble m_maxInstProduction, m_maxInstConsumption, m_minInstProduction, m_minInstConsumption; /**< The bounds around instantaneous consumption and production */
+      edouble m_maxCumulativeProduction, m_maxCumulativeConsumption, m_minCumulativeProduction, m_minCumulativeConsumption; /**< The bounds around cumulative consumption and production */
+      edouble m_maxPrevProduction, m_maxPrevConsumption, m_minPrevProduction, m_minPrevConsumption; /**< The bounds on consumption and production necessarily before this instant*/
+      edouble m_upperFlawMagnitude, m_lowerFlawMagnitude; /**< The magnitude of the differences between the levels and the limits */
+      bool m_violated, m_flawed, m_upperFlaw, m_lowerFlaw; /**< Flaw and violation flags */
+      std::set<TransactionId> m_transactions; /**< The complete set of transactions */
+      std::set<TransactionId> m_endingTransactions; /**< The set of transactions whose upper bound is equal to the current time. */
+      std::set<TransactionId> m_startingTransactions; /**< The set of transactions whose lower bound is equal to the current time. */
     };
 }
 

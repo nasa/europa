@@ -37,7 +37,7 @@ namespace EUROPA {
      * @brief Retrieve the ConstraintEngine to which this Propagator belongs.
      * @return A valid ConstraintEngine reference
      */
-    const ConstraintEngineId& getConstraintEngine() const;
+    const ConstraintEngineId getConstraintEngine() const;
 
     /**
      * @brief Name of propagator. Used for configuration
@@ -66,7 +66,7 @@ namespace EUROPA {
     /**
      * @brief Reference to self
      */
-    const PropagatorId& getId() const;
+    const PropagatorId getId() const;
 
     int getPriority() const;
 
@@ -78,7 +78,7 @@ namespace EUROPA {
      * @brief Constructor guarantees the Propagator belongs to exactly one ConstraintEngine
      * @param constraintEngine The engine to place it in. Must be a valid id.
      */
-    Propagator(const LabelStr& name, const ConstraintEngineId& constraintEngine, int priority=USER_PRIORITY);
+    Propagator(const LabelStr& name, const ConstraintEngineId constraintEngine, int priority=USER_PRIORITY);
 
     /**
      * @brief Destructor - will remove the Propagator from the ConstraintEngine.
@@ -89,13 +89,13 @@ namespace EUROPA {
      * @brief Constraint may be added to the Propagator by the ConstraintEngine.
      * @param constraint The Constraint to be added.
      */
-    void addConstraint(const ConstraintId& constraint);
+    void addConstraint(const ConstraintId constraint);
 
     /**
      * @brief Constraint may be removed from the Propagator by the ConstraintEngine.
      * @param constraint The Constraint to be removed. It must be present.
      */
-    void removeConstraint(const ConstraintId& constraint);
+    void removeConstraint(const ConstraintId constraint);
 
     /**
      * @brief Handler interface for variable change events. 
@@ -109,9 +109,9 @@ namespace EUROPA {
      * @param changeType The nature of the change on the variable. Will always be a restriction
      * @see ConstraintEngine::notify()
      */
-    virtual void handleNotification(const ConstrainedVariableId& variable, 
+    virtual void handleNotification(const ConstrainedVariableId variable, 
                                     unsigned int argIndex, 
-                                    const ConstraintId& constraint, 
+                                    const ConstraintId constraint, 
                                     const DomainListener::ChangeType& changeType) = 0;
     /**
      * @brief Instruction from ConstraintEngine to commence execution of pending propagation events.
@@ -130,39 +130,39 @@ namespace EUROPA {
      * @param constraint The Constraint to be added.
      * @see addConstraint()
      */
-    virtual void handleConstraintAdded(const ConstraintId& constraint) = 0;
+    virtual void handleConstraintAdded(const ConstraintId constraint) = 0;
 
     /**
      * @brief Allow custom processing when a Constraint is removed from the Propagator.
      * @param constraint The Constraint to be removed.
      * @see removeConstraint()
      */
-    virtual void handleConstraintRemoved(const ConstraintId& constraint) = 0;
+    virtual void handleConstraintRemoved(const ConstraintId constraint) = 0;
 
     /**
      * @brief Hook to allow a Propagator to update state if one of its constraints has been deactivated.
      * @param constraint The constraint that has been deactivated.
      */
-    virtual void handleConstraintDeactivated(const ConstraintId& constraint) = 0;
+    virtual void handleConstraintDeactivated(const ConstraintId constraint) = 0;
 
     /**
      * @brief Hook to allow a Propagator to update state if one of its constraints has been activated.
      * @param constraint The constraint that has been activated.
      */
-    virtual void handleConstraintActivated(const ConstraintId& constraint) = 0;
+    virtual void handleConstraintActivated(const ConstraintId constraint) = 0;
 
     //TODO: Figure out why these aren't pure virtual but the other functions are
     /**
      * @brief Handle a variable deactivation.
      * @param var The inactive variable
      */
-    virtual void handleVariableDeactivated(const ConstrainedVariableId& var);
+    virtual void handleVariableDeactivated(const ConstrainedVariableId var);
 
     /**
      * @brief Handle a variable Activation.
      * @param var The active variable
      */
-    virtual void handleVariableActivated(const ConstrainedVariableId& var);
+    virtual void handleVariableActivated(const ConstrainedVariableId var);
 
     /**
      * @brief Request execution of a Constraint.
@@ -171,9 +171,9 @@ namespace EUROPA {
      * can be enforced and not circumvented in derived classes. This call will delegate execution to the ConstraintEngine.
      * @param constraint The constraint to be executed. It must be part in m_constraints.
      */
-    virtual void execute(const ConstraintId& constraint);
+    virtual void execute(const ConstraintId constraint);
 
-    static Domain& getCurrentDomain(const ConstrainedVariableId& var);
+    static Domain& getCurrentDomain(const ConstrainedVariableId var);
     
     // Constraint Violation Mgmt
     virtual void notifyConstraintViolated(ConstraintId c);
@@ -185,7 +185,7 @@ namespace EUROPA {
     std::set<ConstraintId> m_constraints; /**< The list of all constraints (should be a set) managed by this Propagator. */
     PropagatorId m_id; /**< Self reference. */
     const LabelStr m_name;
-    const ConstraintEngineId& m_constraintEngine; /**< The ConstraintEngine to which this Propagator belongs. Must be valid. */
+    const ConstraintEngineId m_constraintEngine; /**< The ConstraintEngine to which this Propagator belongs. Must be valid. */
     bool m_enabled; /**< Indicates if the propagator is enabled or not */
     int m_priority;
   };
@@ -193,7 +193,7 @@ namespace EUROPA {
   class PropagatorComparator
   {
   public:
-	  bool operator()(const PropagatorId& x, const PropagatorId& y) const
+	  bool operator()(const PropagatorId x, const PropagatorId y) const
 	  {
 		  if (x->getPriority() == y->getPriority())
 			  return x->getKey() < y->getKey();

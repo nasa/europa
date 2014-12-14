@@ -120,7 +120,7 @@ namespace EUROPA {
       }
     }
 
-    void TimetableProfile::getTransactionsToOrder(const InstantId& inst, std::vector<TransactionId>& results) {
+    void TimetableProfile::getTransactionsToOrder(const InstantId inst, std::vector<TransactionId>& results) {
       check_error(inst.isValid());
       check_error(results.empty());
       results.insert(results.end(), inst->getTransactions().begin(), inst->getTransactions().end());

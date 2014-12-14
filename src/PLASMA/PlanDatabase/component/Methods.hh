@@ -24,7 +24,7 @@ public:
     virtual DataRef eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const;
 
     virtual const std::vector<DataTypeId>& getSignature();
-    virtual const DataTypeId& getReturnType();
+    virtual const DataTypeId getReturnType();
 };
 
 class VariableMethod : public Method
@@ -36,10 +36,10 @@ public:
     virtual DataRef eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const;
 
     virtual const std::vector<DataTypeId>& getSignature();
-    virtual const DataTypeId& getReturnType();
+    virtual const DataTypeId getReturnType();
 
 protected:
-    virtual DataRef eval(EvalContext& context, ConstrainedVariableId& var, const std::vector<ConstrainedVariableId>& args) const = 0;
+    virtual DataRef eval(EvalContext& context, ConstrainedVariableId var, const std::vector<ConstrainedVariableId>& args) const = 0;
 };
 
 class SpecifyVariable : public VariableMethod
@@ -49,7 +49,7 @@ public:
     virtual ~SpecifyVariable() {}
 
 protected:
-    virtual DataRef eval(EvalContext& context, ConstrainedVariableId& var, const std::vector<ConstrainedVariableId>& args) const;
+    virtual DataRef eval(EvalContext& context, ConstrainedVariableId var, const std::vector<ConstrainedVariableId>& args) const;
 };
 
 class ResetVariable : public VariableMethod
@@ -59,7 +59,7 @@ public:
     virtual ~ResetVariable() {}
 
 protected:
-    virtual DataRef eval(EvalContext& context, ConstrainedVariableId& var, const std::vector<ConstrainedVariableId>& args) const;
+    virtual DataRef eval(EvalContext& context, ConstrainedVariableId var, const std::vector<ConstrainedVariableId>& args) const;
 };
 
 class CloseVariable : public VariableMethod
@@ -69,7 +69,7 @@ public:
     virtual ~CloseVariable() {}
 
 protected:
-    virtual DataRef eval(EvalContext& context, ConstrainedVariableId& var, const std::vector<ConstrainedVariableId>& args) const;
+    virtual DataRef eval(EvalContext& context, ConstrainedVariableId var, const std::vector<ConstrainedVariableId>& args) const;
 };
 
 
@@ -82,10 +82,10 @@ public:
     virtual DataRef eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const;
 
     virtual const std::vector<DataTypeId>& getSignature();
-    virtual const DataTypeId& getReturnType();
+    virtual const DataTypeId getReturnType();
 
 protected:
-    virtual DataRef eval(EvalContext& context, ObjectId& obj, const std::vector<ConstrainedVariableId>& args) const = 0;
+    virtual DataRef eval(EvalContext& context, ObjectId obj, const std::vector<ConstrainedVariableId>& args) const = 0;
 };
 
 class ConstrainToken : public ObjectMethod
@@ -95,7 +95,7 @@ public:
     virtual ~ConstrainToken() {}
 
 protected:
-    virtual DataRef eval(EvalContext& context, ObjectId& obj, const std::vector<ConstrainedVariableId>& args) const;
+    virtual DataRef eval(EvalContext& context, ObjectId obj, const std::vector<ConstrainedVariableId>& args) const;
 };
 
 class FreeToken : public ObjectMethod
@@ -105,7 +105,7 @@ public:
     virtual ~FreeToken() {}
 
 protected:
-    virtual DataRef eval(EvalContext& context, ObjectId& obj, const std::vector<ConstrainedVariableId>& args) const;
+    virtual DataRef eval(EvalContext& context, ObjectId obj, const std::vector<ConstrainedVariableId>& args) const;
 };
 
 
@@ -118,10 +118,10 @@ public:
     virtual DataRef eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const;
 
     virtual const std::vector<DataTypeId>& getSignature();
-    virtual const DataTypeId& getReturnType();
+    virtual const DataTypeId getReturnType();
 
 protected:
-    virtual DataRef eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const = 0;
+    virtual DataRef eval(EvalContext& context, TokenId tok, const std::vector<ConstrainedVariableId>& args) const = 0;
 };
 
 class ActivateToken : public TokenMethod
@@ -131,7 +131,7 @@ public:
     virtual ~ActivateToken() {}
 
 protected:
-    virtual DataRef eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const;
+    virtual DataRef eval(EvalContext& context, TokenId tok, const std::vector<ConstrainedVariableId>& args) const;
 };
 
 class MergeToken : public TokenMethod
@@ -141,7 +141,7 @@ public:
     virtual ~MergeToken() {}
 
 protected:
-    virtual DataRef eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const;
+    virtual DataRef eval(EvalContext& context, TokenId tok, const std::vector<ConstrainedVariableId>& args) const;
 };
 
 class RejectToken : public TokenMethod
@@ -151,7 +151,7 @@ public:
     virtual ~RejectToken() {}
 
 protected:
-    virtual DataRef eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const;
+    virtual DataRef eval(EvalContext& context, TokenId tok, const std::vector<ConstrainedVariableId>& args) const;
 };
 
 class CancelToken : public TokenMethod
@@ -161,7 +161,7 @@ public:
     virtual ~CancelToken() {}
 
 protected:
-    virtual DataRef eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const;
+    virtual DataRef eval(EvalContext& context, TokenId tok, const std::vector<ConstrainedVariableId>& args) const;
 };
 
 class CloseClass : public Method
@@ -173,7 +173,7 @@ public:
     virtual DataRef eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const;
 
     virtual const std::vector<DataTypeId>& getSignature();
-    virtual const DataTypeId& getReturnType();
+    virtual const DataTypeId getReturnType();
 };
 
 }

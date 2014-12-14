@@ -15,5 +15,5 @@ AnmlTestEngine::~AnmlTestEngine()
 void AnmlTestEngine::createModules()
 {
 	NddlTestEngine::createModules();
-    addModule((new ModuleAnml())->getId());
+        addModule((new EUROPA::ModuleAnml())->getId());
 }

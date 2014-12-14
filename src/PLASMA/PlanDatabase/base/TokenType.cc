@@ -7,7 +7,7 @@
 
 namespace EUROPA {
 
-  TokenType::TokenType(const ObjectTypeId& ot, const LabelStr& signature)
+  TokenType::TokenType(const ObjectTypeId ot, const LabelStr& signature)
     : m_id(this)
     , m_objType(ot)
     , m_signature(signature)
@@ -21,12 +21,12 @@ namespace EUROPA {
     m_id.remove();
   }
 
-  const TokenTypeId& TokenType::getId() const {return m_id;}
+  const TokenTypeId TokenType::getId() const {return m_id;}
 
   // TODO: should probably cache this?, maybe in the constructor?
-  const TokenTypeId& TokenType::getParentType() const { return m_objType->getParentType(getId()); }
+  const TokenTypeId TokenType::getParentType() const { return m_objType->getParentType(getId()); }
 
-  const ObjectTypeId& TokenType::getObjectType() const { return m_objType; }
+  const ObjectTypeId TokenType::getObjectType() const { return m_objType; }
 
   const LabelStr& TokenType::getPredicateName() const { return m_predicateName; }
 
@@ -37,7 +37,7 @@ namespace EUROPA {
   // TODO: this should live in one place only
   static RestrictedDT StateDT("TokenStates",SymbolDT::instance(),StateDomain());
 
-  const DataTypeId& TokenType::getArgType(const char* argName) const
+  const DataTypeId TokenType::getArgType(const char* argName) const
   {
     std::map<LabelStr,DataTypeId>::const_iterator it = m_args.find(argName);
 
@@ -63,7 +63,7 @@ namespace EUROPA {
   }
 
 
-  void TokenType::addArg(const DataTypeId& type, const LabelStr& name)
+  void TokenType::addArg(const DataTypeId type, const LabelStr& name)
   {
     checkRuntimeError(m_args.find(name) == m_args.end(),
 		      m_objType->getName().toString() << "." << m_predicateName.toString()

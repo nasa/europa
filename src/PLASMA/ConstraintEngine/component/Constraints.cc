@@ -132,7 +132,7 @@ void requireAllSame(std::string name, const std::vector<DataTypeId>& argTypes) {
 
 
   UnaryConstraint::UnaryConstraint(const Domain& dom,
-				   const ConstrainedVariableId& var)
+				   const ConstrainedVariableId var)
     : Constraint("UNARY", "Default", var->getConstraintEngine(), makeScope(var)),
       m_x(dom.copy()),
       m_y(static_cast<Domain*>(& (getCurrentDomain(var)))) {
@@ -140,7 +140,7 @@ void requireAllSame(std::string name, const std::vector<DataTypeId>& argTypes) {
 
   UnaryConstraint::UnaryConstraint(const LabelStr& name,
 				   const LabelStr& propagatorName,
-				   const ConstraintEngineId& constraintEngine,
+				   const ConstraintEngineId constraintEngine,
 				   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_x(0),
@@ -166,7 +166,7 @@ void requireAllSame(std::string name, const std::vector<DataTypeId>& argTypes) {
     m_x = 0;
   }
 
-  bool UnaryConstraint::canIgnore(const ConstrainedVariableId&,
+  bool UnaryConstraint::canIgnore(const ConstrainedVariableId,
 				  unsigned int argIndex,
 				  const DomainListener::ChangeType& changeType){
     checkError(argIndex == 0, "Cannot have more than one variable in scope.");
@@ -179,7 +179,7 @@ void requireAllSame(std::string name, const std::vector<DataTypeId>& argTypes) {
       return true;
   }
 
-  void UnaryConstraint::setSource(const ConstraintId& sourceConstraint){
+  void UnaryConstraint::setSource(const ConstraintId sourceConstraint){
     checkError(m_x == 0, "Already set domain for " << toString() << " and not using " << sourceConstraint->toString());
     UnaryConstraint* source = id_cast<UnaryConstraint>(sourceConstraint);
     m_x = source->m_x->copy();
@@ -216,7 +216,7 @@ void requireAllSame(std::string name, const std::vector<DataTypeId>& argTypes) {
 
   AddEqualConstraint::AddEqualConstraint(const LabelStr& name,
 					 const LabelStr& propagatorName,
-					 const ConstraintEngineId& constraintEngine,
+					 const ConstraintEngineId constraintEngine,
 					 const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_x(getCurrentDomain(m_variables[X])),
@@ -297,7 +297,7 @@ void requireAllSame(std::string name, const std::vector<DataTypeId>& argTypes) {
   /*********** MultEqualConstraint: X*Y = Z *************/
   MultEqualConstraint::MultEqualConstraint(const LabelStr& name,
                                            const LabelStr& propagatorName,
-                                           const ConstraintEngineId& constraintEngine,
+                                           const ConstraintEngineId constraintEngine,
                                            const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
     check_error(variables.size() ==  ARG_COUNT);
@@ -547,7 +547,7 @@ bool updateDivBounds(IntervalDomain& domZ,
   /*********** DivEqualConstraint: X/Y = Z *************/
   DivEqualConstraint::DivEqualConstraint(const LabelStr& name,
                                            const LabelStr& propagatorName,
-                                           const ConstraintEngineId& constraintEngine,
+                                           const ConstraintEngineId constraintEngine,
                                            const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables)
   {
@@ -592,13 +592,13 @@ bool updateDivBounds(IntervalDomain& domZ,
   /*********** EqualConstraint *************/
   EqualConstraint::EqualConstraint(const LabelStr& name,
 				   const LabelStr& propagatorName,
-				   const ConstraintEngineId& constraintEngine,
+				   const ConstraintEngineId constraintEngine,
 				   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables), m_argCount(variables.size()) {}
 
   /**
    * @brief Restrict all variables to the intersection of their domains.
-   * @see equate(const ConstrainedVariableId& v1, const ConstrainedVariableId& v2, bool& isEmpty) for details of handling
+   * @see equate(const ConstrainedVariableId v1, const ConstrainedVariableId v2, bool& isEmpty) for details of handling
    * issues with open and closed domains.
    */
   void EqualConstraint::handleExecute() {
@@ -630,7 +630,7 @@ bool updateDivBounds(IntervalDomain& domZ,
     }
   }
 
-  bool EqualConstraint::equate(const ConstrainedVariableId& v1, const ConstrainedVariableId& v2, bool& isEmpty){
+  bool EqualConstraint::equate(const ConstrainedVariableId v1, const ConstrainedVariableId v2, bool& isEmpty){
     checkError(isEmpty == false, "Should be initially false.");
     Domain& d1 = getCurrentDomain(v1);
     Domain& d2 = getCurrentDomain(v2);
@@ -682,14 +682,14 @@ bool updateDivBounds(IntervalDomain& domZ,
     return changed;
   }
 
-  Domain& EqualConstraint::getCurrentDomain(const ConstrainedVariableId& var) {
+  Domain& EqualConstraint::getCurrentDomain(const ConstrainedVariableId var) {
     return(Constraint::getCurrentDomain(var));
   }
 
   /************ SubsetOfConstraint ******************/
   SubsetOfConstraint::SubsetOfConstraint(const LabelStr& name,
 					 const LabelStr& propagatorName,
-					 const ConstraintEngineId& constraintEngine,
+					 const ConstraintEngineId constraintEngine,
 					 const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_currentDomain(getCurrentDomain(variables[0])),
@@ -704,7 +704,7 @@ bool updateDivBounds(IntervalDomain& domZ,
     m_currentDomain.intersect(m_superSetDomain);
   }
 
-bool SubsetOfConstraint::canIgnore(const ConstrainedVariableId&,
+bool SubsetOfConstraint::canIgnore(const ConstrainedVariableId,
                                    unsigned int argIndex,
                                    const DomainListener::ChangeType& changeType){
   // If not a relaxation, and if it is the first argument, then we can ignore it as it will already be a subset
@@ -719,7 +719,7 @@ bool SubsetOfConstraint::canIgnore(const ConstrainedVariableId&,
   /*********** LessThanEqualConstraint *************/
   LessThanEqualConstraint::LessThanEqualConstraint(const LabelStr& name,
 						   const LabelStr& propagatorName,
-						   const ConstraintEngineId& constraintEngine,
+						   const ConstraintEngineId constraintEngine,
 						   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_x(getCurrentDomain(variables[X])),
@@ -754,7 +754,7 @@ bool SubsetOfConstraint::canIgnore(const ConstrainedVariableId&,
     m_y.intersect(m_x.getLowerBound(), m_y.getUpperBound());
   }
 
-bool LessThanEqualConstraint::canIgnore(const ConstrainedVariableId&,
+bool LessThanEqualConstraint::canIgnore(const ConstrainedVariableId,
                                         unsigned int argIndex,
                                         const DomainListener::ChangeType& changeType) {
   return((argIndex == X &&
@@ -763,7 +763,7 @@ bool LessThanEqualConstraint::canIgnore(const ConstrainedVariableId&,
           (changeType == DomainListener::LOWER_BOUND_INCREASED)));
 }
 
-bool LessThanEqualConstraint::testIsRedundant(const ConstrainedVariableId& var) const{
+bool LessThanEqualConstraint::testIsRedundant(const ConstrainedVariableId var) const{
   if(Constraint::testIsRedundant(var))
     return true;
   
@@ -777,7 +777,7 @@ bool LessThanEqualConstraint::testIsRedundant(const ConstrainedVariableId& var) 
   /*********** NotEqualConstraint *************/
   NotEqualConstraint::NotEqualConstraint(const LabelStr& name,
 					 const LabelStr& propagatorName,
-					 const ConstraintEngineId& constraintEngine,
+					 const ConstraintEngineId constraintEngine,
 					 const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
     check_error(variables.size() == ARG_COUNT);
@@ -834,7 +834,7 @@ bool LessThanEqualConstraint::testIsRedundant(const ConstrainedVariableId& var) 
     return(false);
   }
 
-bool NotEqualConstraint::canIgnore(const ConstrainedVariableId& variable,
+bool NotEqualConstraint::canIgnore(const ConstrainedVariableId variable,
                                    unsigned int,
                                    const DomainListener::ChangeType& changeType) {
   if(changeType==DomainListener::RESET || changeType == DomainListener::RELAXED)
@@ -852,7 +852,7 @@ bool NotEqualConstraint::canIgnore(const ConstrainedVariableId& variable,
   /*********** LessThanConstraint *************/
   LessThanConstraint::LessThanConstraint(const LabelStr& name,
                                          const LabelStr& propagatorName,
-                                         const ConstraintEngineId& constraintEngine,
+                                         const ConstraintEngineId constraintEngine,
                                          const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
     check_error(variables.size() == ARG_COUNT);
@@ -895,7 +895,7 @@ bool NotEqualConstraint::canIgnore(const ConstrainedVariableId& variable,
     }
   }
 
-bool LessThanConstraint::canIgnore(const ConstrainedVariableId&,
+bool LessThanConstraint::canIgnore(const ConstrainedVariableId,
                                    unsigned int argIndex,
                                    const DomainListener::ChangeType& changeType) {
   return((argIndex == X &&
@@ -907,7 +907,7 @@ bool LessThanConstraint::canIgnore(const ConstrainedVariableId&,
 
   AddMultEqualConstraint::AddMultEqualConstraint(const LabelStr& name,
                                                  const LabelStr& propagatorName,
-                                                 const ConstraintEngineId& constraintEngine,
+                                                 const ConstraintEngineId constraintEngine,
                                                  const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_interimVariable(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalConstraintVariable"), getId()),
@@ -930,7 +930,7 @@ bool LessThanConstraint::canIgnore(const ConstrainedVariableId&,
   /*********** EqualSumConstraint *************/
 EqualSumConstraint::EqualSumConstraint(const LabelStr& name,
                                        const LabelStr& propagatorName,
-                                       const ConstraintEngineId& constraintEngine,
+                                       const ConstraintEngineId constraintEngine,
                                        const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       ARG_COUNT(variables.size()),
@@ -1048,7 +1048,7 @@ EqualSumConstraint::EqualSumConstraint(const LabelStr& name,
   /*********** EqualProductConstraint *************/
   EqualProductConstraint::EqualProductConstraint(const LabelStr& name,
                                                  const LabelStr& propagatorName,
-                                                 const ConstraintEngineId& constraintEngine,
+                                                 const ConstraintEngineId constraintEngine,
                                                  const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       ARG_COUNT(variables.size()),
@@ -1166,7 +1166,7 @@ EqualSumConstraint::EqualSumConstraint(const LabelStr& name,
   /*********** LessOrEqualThanSumConstraint *************/
   LessOrEqThanSumConstraint::LessOrEqThanSumConstraint(const LabelStr& name,
                                                        const LabelStr& propagatorName,
-                                                       const ConstraintEngineId& constraintEngine,
+                                                       const ConstraintEngineId constraintEngine,
                                                        const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_interimVariable(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalConstraintVariable"), getId()),
@@ -1195,7 +1195,7 @@ EqualSumConstraint::EqualSumConstraint(const LabelStr& name,
   /*********** LessThanSumConstraint *************/
   LessThanSumConstraint::LessThanSumConstraint(const LabelStr& name,
                                                const LabelStr& propagatorName,
-                                               const ConstraintEngineId& constraintEngine,
+                                               const ConstraintEngineId constraintEngine,
                                                const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_interimVariable(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalConstraintVariable"), getId()),
@@ -1211,7 +1211,7 @@ EqualSumConstraint::EqualSumConstraint(const LabelStr& name,
   /*********** GreaterOrEqThanSumConstraint *************/
   GreaterOrEqThanSumConstraint::GreaterOrEqThanSumConstraint(const LabelStr& name,
                                                        const LabelStr& propagatorName,
-                                                       const ConstraintEngineId& constraintEngine,
+                                                       const ConstraintEngineId constraintEngine,
                                                        const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_interimVariable(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalConstraintVariable"), getId()),
@@ -1226,7 +1226,7 @@ EqualSumConstraint::EqualSumConstraint(const LabelStr& name,
   /*********** GreaterThanSumConstraint *************/
   GreaterThanSumConstraint::GreaterThanSumConstraint(const LabelStr& name,
                                                      const LabelStr& propagatorName,
-                                                     const ConstraintEngineId& constraintEngine,
+                                                     const ConstraintEngineId constraintEngine,
                                                      const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_interimVariable(constraintEngine, constraintEngine->getCESchema()->baseDomain(m_variables[0]->baseDomain().getTypeName().c_str()),
@@ -1244,7 +1244,7 @@ EqualSumConstraint::EqualSumConstraint(const LabelStr& name,
   /*********** CondAllSameConstraint *************/
   CondAllSameConstraint::CondAllSameConstraint(const LabelStr& name,
                                                const LabelStr& propagatorName,
-                                               const ConstraintEngineId& constraintEngine,
+                                               const ConstraintEngineId constraintEngine,
                                                const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       ARG_COUNT(variables.size()) {
@@ -1394,7 +1394,7 @@ EqualSumConstraint::EqualSumConstraint(const LabelStr& name,
   /*********** CondAllDiffConstraint *************/
   CondAllDiffConstraint::CondAllDiffConstraint(const LabelStr& name,
                                                const LabelStr& propagatorName,
-                                               const ConstraintEngineId& constraintEngine,
+                                               const ConstraintEngineId constraintEngine,
                                                const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       ARG_COUNT(variables.size()) {
@@ -1626,7 +1626,7 @@ void addToUnion(Domain **unionOfDomains,
 
   AllDiffConstraint::AllDiffConstraint(const LabelStr& name,
                                        const LabelStr& propagatorName,
-                                       const ConstraintEngineId& constraintEngine,
+                                       const ConstraintEngineId constraintEngine,
                                        const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_condVar(constraintEngine, BoolDomain(true), true, false, LabelStr("Internal:AllDiff:cond"), getId())
@@ -1642,7 +1642,7 @@ void addToUnion(Domain **unionOfDomains,
 
   MemberImplyConstraint::MemberImplyConstraint(const LabelStr& name,
                                                const LabelStr& propagatorName,
-                                               const ConstraintEngineId& constraintEngine,
+                                               const ConstraintEngineId constraintEngine,
                                                const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       ARG_COUNT(variables.size()) {
@@ -1671,7 +1671,7 @@ void addToUnion(Domain **unionOfDomains,
 
   CountZerosConstraint::CountZerosConstraint(const LabelStr& name,
                                              const LabelStr& propagatorName,
-                                             const ConstraintEngineId& constraintEngine,
+                                             const ConstraintEngineId constraintEngine,
                                              const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
     for (unsigned int i = 0; i < m_variables.size(); i++)
@@ -1748,7 +1748,7 @@ void addToUnion(Domain **unionOfDomains,
 
   CountNonZerosConstraint::CountNonZerosConstraint(const LabelStr& name,
                                                    const LabelStr& propagatorName,
-                                                   const ConstraintEngineId& constraintEngine,
+                                                   const ConstraintEngineId constraintEngine,
                                                    const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_zeros(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalCountNonZerosVar"), getId()),
@@ -1768,7 +1768,7 @@ void addToUnion(Domain **unionOfDomains,
 
   CardinalityConstraint::CardinalityConstraint(const LabelStr& name,
                                                const LabelStr& propagatorName,
-                                               const ConstraintEngineId& constraintEngine,
+                                               const ConstraintEngineId constraintEngine,
                                                const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_nonZeros(constraintEngine, IntervalIntDomain(0, PLUS_INFINITY), true, false, LabelStr("InternalCardinalityVar"), getId()),
@@ -1784,7 +1784,7 @@ void addToUnion(Domain **unionOfDomains,
 
   OrConstraint::OrConstraint(const LabelStr& name,
                              const LabelStr& propagatorName,
-                             const ConstraintEngineId& constraintEngine,
+                             const ConstraintEngineId constraintEngine,
                              const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_nonZeros(constraintEngine, IntervalIntDomain(1, PLUS_INFINITY), true, false, LabelStr("InternalVar:Or:nonZeros"), getId()),
@@ -1803,7 +1803,7 @@ void addToUnion(Domain **unionOfDomains,
 
   EqualMinimumConstraint::EqualMinimumConstraint(const LabelStr& name,
                                                  const LabelStr& propagatorName,
-                                                 const ConstraintEngineId& constraintEngine,
+                                                 const ConstraintEngineId constraintEngine,
                                                  const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
     check_error(m_variables.size() > 1);
@@ -1887,7 +1887,7 @@ void addToUnion(Domain **unionOfDomains,
 
   EqualMaximumConstraint::EqualMaximumConstraint(const LabelStr& name,
                                                  const LabelStr& propagatorName,
-                                                 const ConstraintEngineId& constraintEngine,
+                                                 const ConstraintEngineId constraintEngine,
                                                  const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
     check_error(m_variables.size() > 1);
@@ -1971,7 +1971,7 @@ void addToUnion(Domain **unionOfDomains,
 
   CondEqualSumConstraint::CondEqualSumConstraint(const LabelStr& name,
                                                  const LabelStr& propagatorName,
-                                                 const ConstraintEngineId& constraintEngine,
+                                                 const ConstraintEngineId constraintEngine,
                                                  const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_sumVar(constraintEngine, constraintEngine->getCESchema()->baseDomain(m_variables[1]->baseDomain().getTypeName().c_str()),
@@ -1996,7 +1996,7 @@ void addToUnion(Domain **unionOfDomains,
 
   RotateScopeRightConstraint::RotateScopeRightConstraint(const LabelStr& name,
                                                          const LabelStr& propagatorName,
-                                                         const ConstraintEngineId& constraintEngine,
+                                                         const ConstraintEngineId constraintEngine,
                                                          const std::vector<ConstrainedVariableId>& variables,
                                                          const LabelStr& otherName,
                                                          const int& rotateCount)
@@ -2028,7 +2028,7 @@ void addToUnion(Domain **unionOfDomains,
 
   SwapTwoVarsConstraint::SwapTwoVarsConstraint(const LabelStr& name,
                                                const LabelStr& propagatorName,
-                                               const ConstraintEngineId& constraintEngine,
+                                               const ConstraintEngineId constraintEngine,
                                                const std::vector<ConstrainedVariableId>& variables,
                                                const LabelStr& otherName,
                                                int firstIndex, int secondIndex)
@@ -2053,7 +2053,7 @@ void addToUnion(Domain **unionOfDomains,
 
   LockConstraint::LockConstraint(const LabelStr& name,
 				 const LabelStr& propagatorName,
-				 const ConstraintEngineId& constraintEngine,
+				 const ConstraintEngineId constraintEngine,
 				 const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_currentDomain(getCurrentDomain(variables[0])),
@@ -2085,7 +2085,7 @@ void addToUnion(Domain **unionOfDomains,
   // Enforces X >=0, Y<=0, X+Y==0
   NegateConstraint::NegateConstraint(const LabelStr& name,
 				   const LabelStr& propagatorName,
-				   const ConstraintEngineId& constraintEngine,
+				   const ConstraintEngineId constraintEngine,
 				   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
     check_error(variables.size() == 2);
@@ -2119,7 +2119,7 @@ void addToUnion(Domain **unionOfDomains,
 
   TestEQ::TestEQ(const LabelStr& name,
                            const LabelStr& propagatorName,
-                           const ConstraintEngineId& constraintEngine,
+                           const ConstraintEngineId constraintEngine,
                            const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_test(getCurrentDomain(variables[0])),
@@ -2151,7 +2151,7 @@ void addToUnion(Domain **unionOfDomains,
 
   TestSingleton::TestSingleton(const LabelStr& name,
 			   const LabelStr& propagatorName,
-			   const ConstraintEngineId& constraintEngine,
+			   const ConstraintEngineId constraintEngine,
 			   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_test(getCurrentDomain(variables[0])),
@@ -2177,7 +2177,7 @@ void addToUnion(Domain **unionOfDomains,
 
   TestSpecified::TestSpecified(const LabelStr& name,
 			   const LabelStr& propagatorName,
-			   const ConstraintEngineId& constraintEngine,
+			   const ConstraintEngineId constraintEngine,
 			   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_test(getCurrentDomain(variables[0])),
@@ -2198,7 +2198,7 @@ void addToUnion(Domain **unionOfDomains,
 
   TestNEQ::TestNEQ(const LabelStr& name,
 			   const LabelStr& propagatorName,
-			   const ConstraintEngineId& constraintEngine,
+			   const ConstraintEngineId constraintEngine,
 			   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_test(getCurrentDomain(variables[0])),
@@ -2238,7 +2238,7 @@ void addToUnion(Domain **unionOfDomains,
 
   TestOr::TestOr(const LabelStr& name,
 		 const LabelStr& propagatorName,
-		 const ConstraintEngineId& constraintEngine,
+		 const ConstraintEngineId constraintEngine,
 		 const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_test(getCurrentDomain(variables[0])),
@@ -2281,7 +2281,7 @@ void addToUnion(Domain **unionOfDomains,
 
   TestAnd::TestAnd(const LabelStr& name,
 		   const LabelStr& propagatorName,
-		   const ConstraintEngineId& constraintEngine,
+		   const ConstraintEngineId constraintEngine,
 		   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_test(getCurrentDomain(variables[0])),
@@ -2324,7 +2324,7 @@ void addToUnion(Domain **unionOfDomains,
 
   TestLessThan::TestLessThan(const LabelStr& name,
 			     const LabelStr& propagatorName,
-			     const ConstraintEngineId& constraintEngine,
+			     const ConstraintEngineId constraintEngine,
 			     const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_test(getCurrentDomain(variables[0])),
@@ -2358,7 +2358,7 @@ void addToUnion(Domain **unionOfDomains,
 
   TestLEQ::TestLEQ(const LabelStr& name,
 			     const LabelStr& propagatorName,
-			     const ConstraintEngineId& constraintEngine,
+			     const ConstraintEngineId constraintEngine,
 			     const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_test(getCurrentDomain(variables[0])),
@@ -2398,7 +2398,7 @@ void addToUnion(Domain **unionOfDomains,
    */
   WithinBounds::WithinBounds(const LabelStr& name,
 			     const LabelStr& propagatorName,
-			     const ConstraintEngineId& constraintEngine,
+			     const ConstraintEngineId constraintEngine,
 			     const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_x(static_cast<IntervalDomain&>(getCurrentDomain(variables[0]))),
@@ -2439,7 +2439,7 @@ void addToUnion(Domain **unionOfDomains,
 
   AbsoluteValue::AbsoluteValue(const LabelStr& name,
 			       const LabelStr& propagatorName,
-			       const ConstraintEngineId& constraintEngine,
+			       const ConstraintEngineId constraintEngine,
 			       const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_x(static_cast<IntervalDomain&>(getCurrentDomain(variables[0]))),
@@ -2484,7 +2484,7 @@ void addToUnion(Domain **unionOfDomains,
 
   SquareOfDifferenceConstraint::SquareOfDifferenceConstraint(const LabelStr& name,
 							     const LabelStr& propagatorName,
-							     const ConstraintEngineId& constraintEngine,
+							     const ConstraintEngineId constraintEngine,
 							     const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
     check_error(variables.size() == ARG_COUNT);
@@ -2517,7 +2517,7 @@ void addToUnion(Domain **unionOfDomains,
 
   DistanceFromSquaresConstraint::DistanceFromSquaresConstraint(const LabelStr& name,
 					 const LabelStr& propagatorName,
-					 const ConstraintEngineId& constraintEngine,
+					 const ConstraintEngineId constraintEngine,
 					 const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
     check_error(variables.size() == ARG_COUNT);
@@ -2551,7 +2551,7 @@ void addToUnion(Domain **unionOfDomains,
 
   CalcDistanceConstraint::CalcDistanceConstraint(const LabelStr& name,
 						 const LabelStr& propagatorName,
-						 const ConstraintEngineId& constraintEngine,
+						 const ConstraintEngineId constraintEngine,
 						 const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_distance(getCurrentDomain(variables[DISTANCE])),
@@ -2610,7 +2610,7 @@ void addToUnion(Domain **unionOfDomains,
 
   SineFunction::SineFunction(const LabelStr& name,
 			     const LabelStr& propagatorName,
-			     const ConstraintEngineId& constraintEngine,
+			     const ConstraintEngineId constraintEngine,
 			     const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_target(getCurrentDomain(variables[0])),
@@ -2637,7 +2637,7 @@ void addToUnion(Domain **unionOfDomains,
 
   RandConstraint::RandConstraint(const LabelStr& name,
 			     const LabelStr& propagatorName,
-			     const ConstraintEngineId& constraintEngine,
+			     const ConstraintEngineId constraintEngine,
 			     const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables), m_rvalue(rand() % 32768) {}
 
@@ -2646,7 +2646,7 @@ void addToUnion(Domain **unionOfDomains,
   }
 
 namespace {
-eint mod(eint a, eint b) { return a % b; }
+//eint mod(eint a, eint b) { return a % b; }
 eint mod(edouble a, edouble b) {return static_cast<eint::basis_type>(std::fmod(cast_basis(a), cast_basis(b)));}
 }
   CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Max, std::max, edouble);

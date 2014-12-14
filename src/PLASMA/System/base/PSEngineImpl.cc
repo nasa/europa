@@ -193,7 +193,7 @@ PSEngineImpl::PSEngineImpl() : m_started(false) {}
   PSSolver* PSEngineImpl::createSolver(const std::string& configurationFile)
   {
     check_runtime_error(isStarted(),"PSEngine has not been started");
-    return ((PSSolverManager*)getComponent("PSSolverManager"))->createSolver(configurationFile);
+    return boost::polymorphic_cast<PSSolverManager*>(getComponent("PSSolverManager"))->createSolver(configurationFile);
   }
 
 }

@@ -80,7 +80,7 @@ namespace EUROPA
 
         for( ; iter != end; ++iter )
           {
-            const TransactionId& transaction = (*iter);
+            const TransactionId transaction = (*iter);
 
 	    InstantId startLowerLevel;
             bool isContributingToLowerLevel = getEarliestLowerLevelInstant( transaction, startLowerLevel );
@@ -118,13 +118,13 @@ namespace EUROPA
 
         for( ; iter != end; ++iter )
           {
-            const TransactionId& transaction1 = (*iter);
+            const TransactionId transaction1 = (*iter);
 
             std::set<TransactionId>::const_iterator iter2 = iter;
 
             for( ; iter2 != end; ++iter2 )
               {
-                const TransactionId& transaction2 = (*iter2);
+                const TransactionId transaction2 = (*iter2);
 
                 if( transaction1 != transaction2 )
                   {
@@ -160,13 +160,13 @@ namespace EUROPA
 
         for( ; iter != end; ++iter )
           {
-            const TransactionId& transaction1 = (*iter);
+            const TransactionId transaction1 = (*iter);
 
             std::set<TransactionId>::const_iterator iter2 = iter;
 
             for( ; iter2 != end; ++iter2 )
               {
-                const TransactionId& transaction2 = (*iter2);
+                const TransactionId transaction2 = (*iter2);
 
                 if( transaction1 != transaction2 )
                   {
@@ -212,112 +212,111 @@ namespace EUROPA
       m_upperClosedLevel = getInitCapacityUb();
     }
 
-    bool IncrementalFlowProfile::enableOrderings( const InstantId& inst  )
+bool IncrementalFlowProfile::enableOrderings( const InstantId inst  ) {
+  debugMsg("IncrementalFlowProfile:enableOrderings","Instant Id (" << inst->getId() << ")");
+
+  bool returnValue = false;
+
+  const std::set<TransactionId>& startingTransactions = inst->getStartingTransactions();
+
+  std::set<TransactionId>::const_iterator ite = startingTransactions.begin();
+  std::set<TransactionId>::const_iterator end = startingTransactions.end();
+
+  for( ; ite != end; ++ite )
+  {
+    const TransactionId transaction1 = (*ite);
+
+    if( !transaction1->time()->lastDomain().isSingleton() )
     {
-      debugMsg("IncrementalFlowProfile:enableOrderings","Instant Id (" << inst->getId() << ")");
+      enableTransaction( transaction1, inst );
 
-      bool returnValue = false;
+      returnValue = true;
 
-      const std::set<TransactionId>& startingTransactions = inst->getStartingTransactions();
+      const std::set<TransactionId>& transactions = inst->getTransactions();
 
-      std::set<TransactionId>::const_iterator ite = startingTransactions.begin();
-      std::set<TransactionId>::const_iterator end = startingTransactions.end();
+      std::set<TransactionId>::const_iterator iter = transactions.begin();
+      std::set<TransactionId>::const_iterator iterEnd = transactions.end();
 
-      for( ; ite != end; ++ite )
+      for( ; iter != iterEnd; ++iter )
+      {
+        const TransactionId transaction2 = (*iter);
+
+        bool ordering12Calculated = false;
+        Order ordering12 = UNKNOWN;
+
+        if( m_recalculateLowerLevel )
         {
-          const TransactionId& transaction1 = (*ite);
+          if( transaction1 != transaction2
+              &&
+              !transaction2->time()->lastDomain().isSingleton()
+              &&
+              transaction2->time()->lastDomain().getUpperBound() != inst->getTime()
+              &&
+              (transaction2->time()->lastDomain().getLowerBound() == inst->getTime() || m_lowerLevelGraph->isEnabled( transaction2 ) ) )
+          {
+            ordering12 = getOrdering( transaction1, transaction2 );
+            ordering12Calculated = true;
 
-          if( !transaction1->time()->lastDomain().isSingleton() )
+            if( STRICTLY_AT == ordering12 )
             {
-              enableTransaction( transaction1, inst );
-
-              returnValue = true;
-
-              const std::set<TransactionId>& transactions = inst->getTransactions();
-
-              std::set<TransactionId>::const_iterator iter = transactions.begin();
-              std::set<TransactionId>::const_iterator end = transactions.end();
-
-              for( ; iter != end; ++iter )
-                {
-                  const TransactionId& transaction2 = (*iter);
-
-                  bool ordering12Calculated = false;
-                  Order ordering12 = UNKNOWN;
-
-                  if( m_recalculateLowerLevel )
-                    {
-                      if( transaction1 != transaction2
-                          &&
-                          !transaction2->time()->lastDomain().isSingleton()
-                          &&
-                          transaction2->time()->lastDomain().getUpperBound() != inst->getTime()
-                          &&
-                          (transaction2->time()->lastDomain().getLowerBound() == inst->getTime() || m_lowerLevelGraph->isEnabled( transaction2 ) ) )
-                        {
-                          ordering12 = getOrdering( transaction1, transaction2 );
-                          ordering12Calculated = true;
-
-                          if( STRICTLY_AT == ordering12 )
-                            {
-                              m_lowerLevelGraph->enableAt( transaction1, transaction2 );
-                            }
-                          else if( BEFORE_OR_AT == ordering12 )
-                            {
-                              m_lowerLevelGraph->enableAtOrBefore( transaction1, transaction2 );
-                            }
-                          else if( AFTER_OR_AT == ordering12  )
-                            {
-                              m_lowerLevelGraph->enableAtOrBefore( transaction2, transaction1 );
-                            }
-                          else
-                            {
-                              debugMsg("IncrementalFlowProfile:enableOrderings","Transaction ("
-                                       << transaction1->getId() << ") and Transaction ("
-                                       << transaction2->getId() << ") not constrained");
-                            }
-                        }
-                    }
-
-                  if( m_recalculateUpperLevel )
-                    {
-                      if( transaction1 != transaction2
-                          &&
-                          !transaction2->time()->lastDomain().isSingleton()
-                          &&
-                          transaction2->time()->lastDomain().getUpperBound() != inst->getTime()
-                          &&
-                          ( transaction2->time()->lastDomain().getLowerBound() == inst->getTime() || m_upperLevelGraph->isEnabled( transaction2 ) ) )
-                        {
-                          if( !ordering12Calculated )
-                            ordering12 = getOrdering( transaction1, transaction2 );
-
-                          if( STRICTLY_AT == ordering12 )
-                            {
-                              m_upperLevelGraph->enableAt( transaction1, transaction2 );
-                            }
-                          else if( BEFORE_OR_AT == ordering12 )
-                            {
-                              m_upperLevelGraph->enableAtOrBefore( transaction1, transaction2 );
-                            }
-                          else if( AFTER_OR_AT == ordering12  )
-                            {
-                              m_upperLevelGraph->enableAtOrBefore( transaction2, transaction1 );
-                            }
-                          else
-                            {
-                              debugMsg("IncrementalFlowProfile:enableOrderings","Transaction ("
-                                       << transaction1->getId() << ") and Transaction ("
-                                       << transaction2->getId() << ") not constrained");
-                            }
-                        }
-                    }
-                }
+              m_lowerLevelGraph->enableAt( transaction1, transaction2 );
             }
+            else if( BEFORE_OR_AT == ordering12 )
+            {
+              m_lowerLevelGraph->enableAtOrBefore( transaction1, transaction2 );
+            }
+            else if( AFTER_OR_AT == ordering12  )
+            {
+              m_lowerLevelGraph->enableAtOrBefore( transaction2, transaction1 );
+            }
+            else
+            {
+              debugMsg("IncrementalFlowProfile:enableOrderings","Transaction ("
+                       << transaction1->getId() << ") and Transaction ("
+                       << transaction2->getId() << ") not constrained");
+            }
+          }
         }
 
-      return returnValue;
+        if( m_recalculateUpperLevel )
+        {
+          if( transaction1 != transaction2
+              &&
+              !transaction2->time()->lastDomain().isSingleton()
+              &&
+              transaction2->time()->lastDomain().getUpperBound() != inst->getTime()
+              &&
+              ( transaction2->time()->lastDomain().getLowerBound() == inst->getTime() || m_upperLevelGraph->isEnabled( transaction2 ) ) )
+          {
+            if( !ordering12Calculated )
+              ordering12 = getOrdering( transaction1, transaction2 );
+
+            if( STRICTLY_AT == ordering12 )
+            {
+              m_upperLevelGraph->enableAt( transaction1, transaction2 );
+            }
+            else if( BEFORE_OR_AT == ordering12 )
+            {
+              m_upperLevelGraph->enableAtOrBefore( transaction1, transaction2 );
+            }
+            else if( AFTER_OR_AT == ordering12  )
+            {
+              m_upperLevelGraph->enableAtOrBefore( transaction2, transaction1 );
+            }
+            else
+            {
+              debugMsg("IncrementalFlowProfile:enableOrderings","Transaction ("
+                       << transaction1->getId() << ") and Transaction ("
+                       << transaction2->getId() << ") not constrained");
+            }
+          }
+        }
+      }
     }
+  }
+
+  return returnValue;
+}
 
     void IncrementalFlowProfile::recomputeLevels( InstantId prev, InstantId inst )
     {
@@ -389,7 +388,7 @@ void IncrementalFlowProfile::recomputeLevels( InstantId inst, edouble lowerLevel
 
     for( ; ite != end; ++ite )
     {
-      const TransactionId& ended = (*ite);
+      const TransactionId ended = (*ite);
 
       if( m_recalculateLowerLevel )
       {

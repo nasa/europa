@@ -50,11 +50,11 @@ namespace EUROPA {
       void handleResourceFlaws(const InstantId inst);
       virtual void handleResourceLevelFlaws(const InstantId inst);
 
-      virtual void getLimitBounds(const InstantId& inst, edouble& lb, edouble& ub) const;
-      void getDefaultLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const;
+      virtual void getLimitBounds(const InstantId inst, edouble& lb, edouble& ub) const;
+      void getDefaultLevelBounds(const InstantId inst, edouble& lb, edouble& ub) const;
       // Requires sub-classing to handle open vs. closed world assumption
-      virtual void getFDLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const = 0; // Level Bounds for FlawDetection
-      virtual void getVDLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const = 0; // Level Bounds for ViolationDetection
+      virtual void getFDLevelBounds(const InstantId inst, edouble& lb, edouble& ub) const = 0; // Level Bounds for FlawDetection
+      virtual void getVDLevelBounds(const InstantId inst, edouble& lb, edouble& ub) const = 0; // Level Bounds for ViolationDetection
 
       friend class GenericFVProfile;
     };
@@ -62,7 +62,7 @@ namespace EUROPA {
     class GenericFVProfile : public PSResourceProfile
     {
     public:
-    	GenericFVProfile(GenericFVDetector* fvd, const ProfileId& profile, bool isFDProfile);
+    	GenericFVProfile(GenericFVDetector* fvd, const ProfileId profile, bool isFDProfile);
 		virtual ~GenericFVProfile() {}
 
 		virtual PSList<TimePoint> getTimes();

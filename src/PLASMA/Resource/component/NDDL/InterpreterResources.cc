@@ -4,7 +4,7 @@
 
 namespace EUROPA {
 
-  ReusableObjectFactory::ReusableObjectFactory(const ObjectTypeId& objType, const LabelStr& signature)
+  ReusableObjectFactory::ReusableObjectFactory(const ObjectTypeId objType, const LabelStr& signature)
     : NativeObjectFactory(objType,signature)
   {
   }
@@ -14,7 +14,7 @@ namespace EUROPA {
   }
 
   ObjectId ReusableObjectFactory::makeNewObject(
-						const PlanDatabaseId& planDb,
+						const PlanDatabaseId planDb,
 						const LabelStr& objectType,
 						const LabelStr& objectName,
 						const std::vector<const Domain*>& arguments) const
@@ -45,27 +45,27 @@ namespace EUROPA {
     return instance;
   }
 
-  ReusableUsesTokenType::ReusableUsesTokenType(const ObjectTypeId& ot,const LabelStr& predicateName)
+  ReusableUsesTokenType::ReusableUsesTokenType(const ObjectTypeId ot,const LabelStr& predicateName)
       : NativeTokenType(ot,predicateName)
   {
       addArg(FloatDT::instance(),"quantity");
       addArg(IntDT::instance(),"time");
   }
 
-  TokenId ReusableUsesTokenType::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
+  TokenId ReusableUsesTokenType::createInstance(const PlanDatabaseId planDb, const LabelStr& name, bool rejectable, bool isFact) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reusable.uses");
     return (new NDDL::NddlReusable::uses(planDb,name,rejectable,isFact,true))->getId();
   }
 
-  TokenId ReusableUsesTokenType::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
+  TokenId ReusableUsesTokenType::createInstance(const TokenId master, const LabelStr& name, const LabelStr& relation) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reusable.uses");
     return (new NDDL::NddlReusable::uses(master,name,relation,true))->getId();
   }
 
 
-  CBReusableObjectFactory::CBReusableObjectFactory(const ObjectTypeId& objType, const LabelStr& signature)
+  CBReusableObjectFactory::CBReusableObjectFactory(const ObjectTypeId objType, const LabelStr& signature)
     : NativeObjectFactory(objType,signature)
   {
   }
@@ -75,7 +75,7 @@ namespace EUROPA {
   }
 
   ObjectId CBReusableObjectFactory::makeNewObject(
-                        const PlanDatabaseId& planDb,
+                        const PlanDatabaseId planDb,
                         const LabelStr& objectType,
                         const LabelStr& objectName,
                         const std::vector<const Domain*>& arguments) const
@@ -106,7 +106,7 @@ namespace EUROPA {
     return instance;
   }
 
-  ReservoirObjectFactory::ReservoirObjectFactory(const ObjectTypeId& objType, const LabelStr& signature)
+  ReservoirObjectFactory::ReservoirObjectFactory(const ObjectTypeId objType, const LabelStr& signature)
     : NativeObjectFactory(objType,signature)
   {
   }
@@ -116,7 +116,7 @@ namespace EUROPA {
   }
 
   ObjectId ReservoirObjectFactory::makeNewObject(
-						const PlanDatabaseId& planDb,
+						const PlanDatabaseId planDb,
 						const LabelStr& objectType,
 						const LabelStr& objectName,
 						const std::vector<const Domain*>& arguments) const
@@ -147,46 +147,46 @@ namespace EUROPA {
     return instance;
   }
 
-  ReservoirProduceTokenType::ReservoirProduceTokenType(const ObjectTypeId& ot,const LabelStr& predicateName)
+  ReservoirProduceTokenType::ReservoirProduceTokenType(const ObjectTypeId ot,const LabelStr& predicateName)
       : NativeTokenType(ot,predicateName)
   {
       addArg(FloatDT::instance(),"quantity");
       addArg(IntDT::instance(),"time");
   }
 
-  TokenId ReservoirProduceTokenType::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
+  TokenId ReservoirProduceTokenType::createInstance(const PlanDatabaseId planDb, const LabelStr& name, bool rejectable, bool isFact) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reservoir.produce");
     return (new NDDL::NddlReservoir::produce(planDb,name,rejectable,isFact,true))->getId();
   }
 
-  TokenId ReservoirProduceTokenType::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
+  TokenId ReservoirProduceTokenType::createInstance(const TokenId master, const LabelStr& name, const LabelStr& relation) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reservoir.produce");
     return (new NDDL::NddlReservoir::produce(master,name,relation,true))->getId();
   }
 
-  ReservoirConsumeTokenType::ReservoirConsumeTokenType(const ObjectTypeId& ot,const LabelStr& predicateName)
+  ReservoirConsumeTokenType::ReservoirConsumeTokenType(const ObjectTypeId ot,const LabelStr& predicateName)
       : NativeTokenType(ot,predicateName)
   {
       addArg(FloatDT::instance(),"quantity");
       addArg(IntDT::instance(),"time");
   }
 
-  TokenId ReservoirConsumeTokenType::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
+  TokenId ReservoirConsumeTokenType::createInstance(const PlanDatabaseId planDb, const LabelStr& name, bool rejectable, bool isFact) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reservoir.consume");
     return (new NDDL::NddlReservoir::consume(planDb,name,rejectable,isFact,true))->getId();
   }
 
-  TokenId ReservoirConsumeTokenType::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
+  TokenId ReservoirConsumeTokenType::createInstance(const TokenId master, const LabelStr& name, const LabelStr& relation) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reservoir.consume");
     return (new NDDL::NddlReservoir::consume(master,name,relation,true))->getId();
   }
 
 
-  UnaryObjectFactory::UnaryObjectFactory(const ObjectTypeId& objType, const LabelStr& signature)
+  UnaryObjectFactory::UnaryObjectFactory(const ObjectTypeId objType, const LabelStr& signature)
     : NativeObjectFactory(objType,signature)
   {
   }
@@ -196,7 +196,7 @@ namespace EUROPA {
   }
 
   ObjectId UnaryObjectFactory::makeNewObject(
-                        const PlanDatabaseId& planDb,
+                        const PlanDatabaseId planDb,
                         const LabelStr& objectType,
                         const LabelStr& objectName,
                         const std::vector<const Domain*>& arguments) const
@@ -223,19 +223,19 @@ namespace EUROPA {
     return instance;
   }
 
-  TokenId UnaryUseTokenType::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
+  TokenId UnaryUseTokenType::createInstance(const PlanDatabaseId planDb, const LabelStr& name, bool rejectable, bool isFact) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Unary.Use");
     return (new NDDL::NddlUnary::use(planDb,name,rejectable,isFact,true))->getId();
   }
 
-  TokenId UnaryUseTokenType::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
+  TokenId UnaryUseTokenType::createInstance(const TokenId master, const LabelStr& name, const LabelStr& relation) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Unary.Use");
     return (new NDDL::NddlUnary::use(master,name,relation,true))->getId();
   }
 
-  DataRef SetCapacity::eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const
+DataRef SetCapacity::eval(EvalContext& , const std::vector<ConstrainedVariableId>& args) const
   {
 	  check_runtime_error(args.size()==4,"SetCapacity expects 4 parameters");
 
@@ -268,12 +268,12 @@ namespace EUROPA {
 	  return signature;
   }
 
-  const DataTypeId& SetCapacity::getReturnType()
+  const DataTypeId SetCapacity::getReturnType()
   {
 	  return VoidDT::instance();
   }
 
-  DataRef SetLimit::eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const
+DataRef SetLimit::eval(EvalContext& , const std::vector<ConstrainedVariableId>& args) const
   {
 	  check_runtime_error(args.size()==4,"SetLimit expects 4 parameters");
 
@@ -306,7 +306,7 @@ namespace EUROPA {
 	  return signature;
   }
 
-  const DataTypeId& SetLimit::getReturnType()
+  const DataTypeId SetLimit::getReturnType()
   {
 	  return VoidDT::instance();
   }

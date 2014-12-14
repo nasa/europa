@@ -16,40 +16,40 @@
 
 namespace EUROPA {
 
-  DefaultPropagator::DefaultPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine, int priority)
+  DefaultPropagator::DefaultPropagator(const LabelStr& name, const ConstraintEngineId constraintEngine, int priority)
   	  : Propagator(name, constraintEngine, priority)
   	  , m_activeConstraint(0)
   {
   }
 
-  void DefaultPropagator::handleConstraintAdded(const ConstraintId& constraint){
+  void DefaultPropagator::handleConstraintAdded(const ConstraintId constraint){
     debugMsg("DefaultPropagator:handleConstraintAdded", "Adding to the agenda: " << constraint->getName().toString() << "(" << constraint->getKey() << ")");
     m_agenda.insert(constraint);
   }
 
-  void DefaultPropagator::handleConstraintRemoved(const ConstraintId& constraint){
+  void DefaultPropagator::handleConstraintRemoved(const ConstraintId constraint){
     // Remove from agenda
     debugMsg("DefaultPropagator:handleConstraintRemoved", "Removing from the agenda: " << constraint->getName().toString() << "(" << constraint->getKey() << ")");
     m_agenda.erase(constraint);
     check_error(isValid());
   }
 
-  void DefaultPropagator::handleConstraintActivated(const ConstraintId& constraint){
+  void DefaultPropagator::handleConstraintActivated(const ConstraintId constraint){
     debugMsg("DefaultPropagator:handleConstraintActivated", "Adding to the agenda: " << constraint->getName().toString() << "(" << constraint->getKey() << ")");
     m_agenda.insert(constraint);
     check_error(isValid());
   }
 
-  void DefaultPropagator::handleConstraintDeactivated(const ConstraintId& constraint){
+  void DefaultPropagator::handleConstraintDeactivated(const ConstraintId constraint){
     // Remove from agenda
     debugMsg("DefaultPropagator:handleConstraintDeactivated", "Removing from the agenda: " << constraint->getName().toString() << "(" << constraint->getKey() << ")");
     m_agenda.erase(constraint);
     check_error(isValid());
   }
 
-  void DefaultPropagator::handleNotification(const ConstrainedVariableId& variable,
+  void DefaultPropagator::handleNotification(const ConstrainedVariableId variable,
 					     unsigned int,
-					     const ConstraintId& constraint,
+					     const ConstraintId constraint,
 					     const DomainListener::ChangeType& changeType){
     checkError(!constraint->isDiscarded(), constraint);
     if(constraint->getKey() != m_activeConstraint) {
@@ -107,7 +107,7 @@ namespace EUROPA {
   }
 
 
-  EqualityConstraintPropagator::EqualityConstraintPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine)
+  EqualityConstraintPropagator::EqualityConstraintPropagator(const LabelStr& name, const ConstraintEngineId constraintEngine)
     : Propagator(name, constraintEngine), m_fullReprop(false), m_active(false){}
 
   EqualityConstraintPropagator::~EqualityConstraintPropagator(){}
@@ -134,10 +134,10 @@ namespace EUROPA {
     return (!m_eqClassAgenda.empty() || m_fullReprop);
   }
 
-  void EqualityConstraintPropagator::handleConstraintAdded(const ConstraintId& constraint){
+  void EqualityConstraintPropagator::handleConstraintAdded(const ConstraintId constraint){
     check_error(!m_active);
-    const ConstrainedVariableId& x = constraint->getScope()[0];
-    const ConstrainedVariableId& y = constraint->getScope()[1];
+    const ConstrainedVariableId x = constraint->getScope()[0];
+    const ConstrainedVariableId y = constraint->getScope()[1];
 
     // Remove old equivalence classes for these variables from the agenda since they are abut to be merged.
     m_eqClassAgenda.erase(m_eqClassCollection.getGraphKey(x));
@@ -148,25 +148,25 @@ namespace EUROPA {
     m_eqClassAgenda.insert(m_eqClassCollection.getGraphKey(x));
   }
 
-  void EqualityConstraintPropagator::handleConstraintRemoved(const ConstraintId& constraint){
+  void EqualityConstraintPropagator::handleConstraintRemoved(const ConstraintId constraint){
     check_error(!m_active);
-    const ConstrainedVariableId& x = constraint->getScope()[0];
-    const ConstrainedVariableId& y = constraint->getScope()[1];
+    const ConstrainedVariableId x = constraint->getScope()[0];
+    const ConstrainedVariableId y = constraint->getScope()[1];
     m_eqClassCollection.removeConnection(x, y);
     m_fullReprop = true;
   }
 
-  void EqualityConstraintPropagator::handleConstraintActivated(const ConstraintId& constraint){
+  void EqualityConstraintPropagator::handleConstraintActivated(const ConstraintId constraint){
     handleConstraintAdded(constraint);
   }
 
-  void EqualityConstraintPropagator::handleConstraintDeactivated(const ConstraintId& constraint){
+  void EqualityConstraintPropagator::handleConstraintDeactivated(const ConstraintId constraint){
     handleConstraintRemoved(constraint);
   }
 
-  void EqualityConstraintPropagator::handleNotification(const ConstrainedVariableId& variable,
+  void EqualityConstraintPropagator::handleNotification(const ConstrainedVariableId variable,
                                                         unsigned int,
-                                                        const ConstraintId& constraint,
+                                                        const ConstraintId constraint,
                                                         const DomainListener::ChangeType&){
     check_error(Id<EqualConstraint>::convertable(constraint));
 
