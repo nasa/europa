@@ -33,7 +33,7 @@ public:
   {
   }
 
-  RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb,
+  RuleInstanceId createInstance(const TokenId token, const PlanDatabaseId planDb,
                                 const RulesEngineId &rulesEngine) const{
     RuleInstanceId rootInstance = (new RootInstance(m_id, token, planDb))->getId();
     std::vector<ConstrainedVariableId> vars = rootInstance->getVariables("start:end:duration:object:state");
@@ -47,7 +47,7 @@ public:
 private:
   class RootInstance: public RuleInstance{
   public:
-    RootInstance(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    RootInstance(const RuleId rule, const TokenId token, const PlanDatabaseId planDb)
       : RuleInstance(rule, token, planDb) {}
 
     void handleExecute(){
@@ -77,27 +77,27 @@ private:
 class NestedGuards_0: public Rule {
 public:
   NestedGuards_0();
-  RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb,
+  RuleInstanceId createInstance(const TokenId token, const PlanDatabaseId planDb,
                                 const RulesEngineId &rulesEngine) const;
 };
 
 class NestedGuards_0_Root: public RuleInstance{
 public:
-  NestedGuards_0_Root(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb);
+  NestedGuards_0_Root(const RuleId rule, const TokenId token, const PlanDatabaseId planDb);
   void handleExecute();
   TokenId m_onlySlave;
 };
 
 class NestedGuards_0_0: public RuleInstance{
 public:
-  NestedGuards_0_0(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard, const Domain& domain);
+  NestedGuards_0_0(const RuleInstanceId parentInstance, const ConstrainedVariableId guard, const Domain& domain);
   void handleExecute();
   TokenId m_onlySlave;
 };
 
 class NestedGuards_0_1: public RuleInstance{
 public:
-  NestedGuards_0_1(const RuleInstanceId& parentInstance, const std::vector<ConstrainedVariableId>& guards);
+  NestedGuards_0_1(const RuleInstanceId parentInstance, const std::vector<ConstrainedVariableId>& guards);
   void handleExecute();
   TokenId m_onlySlave;
 };
@@ -107,15 +107,15 @@ NestedGuards_0::NestedGuards_0()
     : Rule(LabelStr("AllObjects.Predicate"))
 {
 }
-RuleInstanceId NestedGuards_0::createInstance(const TokenId& token, const PlanDatabaseId& planDb,
+RuleInstanceId NestedGuards_0::createInstance(const TokenId token, const PlanDatabaseId planDb,
                                               const RulesEngineId &rulesEngine) const{
   RuleInstanceId rootInstance = (new NestedGuards_0_Root(m_id, token, planDb))->getId();
   rootInstance->setRulesEngine(rulesEngine);
   return rootInstance;
 }
 
-NestedGuards_0_Root::NestedGuards_0_Root(const RuleId& rule, const TokenId& token,
-                                         const PlanDatabaseId& planDb)
+NestedGuards_0_Root::NestedGuards_0_Root(const RuleId rule, const TokenId token,
+                                         const PlanDatabaseId planDb)
   : RuleInstance(rule, token, planDb, makeScope(token->getObject())) {}
 
 void NestedGuards_0_Root::handleExecute(){
@@ -125,7 +125,7 @@ void NestedGuards_0_Root::handleExecute(){
   addChildRule(new NestedGuards_0_1(m_id, makeScope(m_onlySlave->getObject()))); /*!< Add child context with guards - object set to singleton */
 }
 
-NestedGuards_0_0::NestedGuards_0_0(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard, const Domain& domain)
+NestedGuards_0_0::NestedGuards_0_0(const RuleInstanceId parentInstance, const ConstrainedVariableId guard, const Domain& domain)
   : RuleInstance(parentInstance, guard, domain){}
 
 void NestedGuards_0_0::handleExecute(){
@@ -133,7 +133,7 @@ void NestedGuards_0_0::handleExecute(){
   addConstraint(LabelStr("eq"), makeScope(m_token->start(), m_onlySlave->end())); // Place before
 }
 
-NestedGuards_0_1::NestedGuards_0_1(const RuleInstanceId& parentInstance, const std::vector<ConstrainedVariableId>& guards)
+NestedGuards_0_1::NestedGuards_0_1(const RuleInstanceId parentInstance, const std::vector<ConstrainedVariableId>& guards)
   : RuleInstance(parentInstance, guards){}
 
 void NestedGuards_0_1::handleExecute(){
@@ -144,21 +144,21 @@ void NestedGuards_0_1::handleExecute(){
 class LocalVariableGuard_0: public Rule {
 public:
   LocalVariableGuard_0();
-  RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb,
+  RuleInstanceId createInstance(const TokenId token, const PlanDatabaseId planDb,
                                 const RulesEngineId &rulesEngine) const;
 };
 
 class LocalVariableGuard_0_Root: public RuleInstance{
 public:
-  LocalVariableGuard_0_Root(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb);
+  LocalVariableGuard_0_Root(const RuleId rule, const TokenId token, const PlanDatabaseId planDb);
   void handleExecute();
-  static const ConstrainedVariableId& getGuard() {return s_guard;}
+  static const ConstrainedVariableId getGuard() {return s_guard;}
   static ConstrainedVariableId s_guard;
 };
 
 class LocalVariableGuard_0_0: public RuleInstance{
 public:
-  LocalVariableGuard_0_0(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard, const Domain& domain)
+  LocalVariableGuard_0_0(const RuleInstanceId parentInstance, const ConstrainedVariableId guard, const Domain& domain)
     : RuleInstance(parentInstance, guard, domain){}
   void handleExecute();
 };
@@ -170,16 +170,16 @@ LocalVariableGuard_0::LocalVariableGuard_0()
 {
 }
 
-RuleInstanceId LocalVariableGuard_0::createInstance(const TokenId& token,
-                                                    const PlanDatabaseId& planDb,
+RuleInstanceId LocalVariableGuard_0::createInstance(const TokenId token,
+                                                    const PlanDatabaseId planDb,
                                                     const RulesEngineId &rulesEngine) const{
   RuleInstanceId rootInstance = (new LocalVariableGuard_0_Root(m_id, token, planDb))->getId();
   rootInstance->setRulesEngine(rulesEngine);
   return rootInstance;
 }
 
-LocalVariableGuard_0_Root::LocalVariableGuard_0_Root(const RuleId& rule, const TokenId& token,
-                                                     const PlanDatabaseId& planDb)
+LocalVariableGuard_0_Root::LocalVariableGuard_0_Root(const RuleId rule, const TokenId token,
+                                                     const PlanDatabaseId planDb)
   : RuleInstance(rule, token, planDb){}
 
 void LocalVariableGuard_0_Root::handleExecute(){
@@ -214,10 +214,10 @@ class RETestEngine : public EngineBase
     RETestEngine();
     virtual ~RETestEngine();
 
-    const ConstraintEngineId& getConstraintEngine() const;
-    const SchemaId& getSchema() const;
-    const PlanDatabaseId& getPlanDatabase() const;
-    const RulesEngineId& getRulesEngine() const;
+    const ConstraintEngineId getConstraintEngine() const;
+    const SchemaId getSchema() const;
+    const PlanDatabaseId getPlanDatabase() const;
+    const RulesEngineId getRulesEngine() const;
 
   protected:
     void createModules();
@@ -247,7 +247,7 @@ RETestEngine::RETestEngine()
     Object& object = *objectPtr;
     assert(objectPtr->getId() == object.getId());
 
-    CESchema* ces = (CESchema*)getComponent("CESchema");
+    CESchema* ces = boost::polymorphic_cast<CESchema*>(getComponent("CESchema"));
     REGISTER_SYSTEM_CONSTRAINT(ces,EqualConstraint, "concurrent", "Default");
     REGISTER_SYSTEM_CONSTRAINT(ces,LessThanEqualConstraint, "precedes", "Default");
     REGISTER_SYSTEM_CONSTRAINT(ces,AddEqualConstraint, "temporaldistance", "Default");
@@ -259,24 +259,20 @@ RETestEngine::~RETestEngine()
     doShutdown();
 }
 
-const ConstraintEngineId& RETestEngine::getConstraintEngine() const
-{
-    return ((ConstraintEngine*)getComponent("ConstraintEngine"))->getId();
+const ConstraintEngineId RETestEngine::getConstraintEngine() const {
+  return boost::polymorphic_cast<const ConstraintEngine*>(getComponent("ConstraintEngine"))->getId();
 }
 
-const SchemaId& RETestEngine::getSchema() const
-{
-    return ((Schema*)getComponent("Schema"))->getId();
+const SchemaId RETestEngine::getSchema() const {
+  return boost::polymorphic_cast<const Schema*>(getComponent("Schema"))->getId();
 }
 
-const PlanDatabaseId& RETestEngine::getPlanDatabase() const
-{
-    return ((PlanDatabase*)getComponent("PlanDatabase"))->getId();
+const PlanDatabaseId RETestEngine::getPlanDatabase() const {
+  return boost::polymorphic_cast<const PlanDatabase*>(getComponent("PlanDatabase"))->getId();
 }
 
-const RulesEngineId& RETestEngine::getRulesEngine() const
-{
-    return ((RulesEngine*)getComponent("RulesEngine"))->getId();
+const RulesEngineId RETestEngine::getRulesEngine() const {
+  return boost::polymorphic_cast<const RulesEngine*>(getComponent("RulesEngine"))->getId();
 }
 
 void RETestEngine::createModules()
@@ -287,10 +283,12 @@ void RETestEngine::createModules()
     addModule((new ModuleRulesEngine())->getId());
 }
 
+namespace {
 ConstraintEngineId ce;
 SchemaId schema;
 PlanDatabaseId db;
 RulesEngineId re;
+}
 
 #define RE_DEFAULT_SETUP(ce, db, autoClose) \
     RETestEngine testEngine; \
@@ -566,7 +564,7 @@ private:
       CPPUNIT_ASSERT(t0.end()->getDerivedDomain() == slaveToken->start()->getDerivedDomain());
 
       t0.commit();
-      delete (Token*) slaveToken;
+      delete static_cast<Token*>(slaveToken);
       Entity::garbageCollect();
     }
 
@@ -596,7 +594,7 @@ private:
       }
 
       Entity::garbageCollect();
-      delete (Token*) slaveToken;
+      delete static_cast<Token*>(slaveToken);
     }
 
     RE_DEFAULT_TEARDOWN();

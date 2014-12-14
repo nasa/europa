@@ -6,13 +6,13 @@
 
 namespace EUROPA {
 namespace SOLVERS {
-    DecisionPoint::DecisionPoint(const DbClientId& client, eint entityKey, const LabelStr& explanation) 
+    DecisionPoint::DecisionPoint(const DbClientId client, eint entityKey, const LabelStr& explanation) 
       : Entity(), m_client(client),  m_entityKey(entityKey), m_id(this), 
 	m_explanation(explanation), m_isExecuted(false), m_initialized(false), m_maxChoices(0), m_counter(0) {}
 
     DecisionPoint::~DecisionPoint() {m_id.remove();}
 
-    const DecisionPointId& DecisionPoint::getId() const {return m_id;}
+    const DecisionPointId DecisionPoint::getId() const {return m_id;}
 
     void DecisionPoint::initialize(){
       if(!m_initialized){
@@ -53,6 +53,6 @@ namespace SOLVERS {
       return m_initialized;
     }
 
-bool SolverDecisionPoint::customStaticMatch(const EntityId& entity) {return true;}
+bool DecisionPoint::customStaticMatch(const EntityId) {return true;}
 }
 }

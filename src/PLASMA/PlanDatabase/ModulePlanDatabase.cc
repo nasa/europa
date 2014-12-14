@@ -36,7 +36,7 @@ namespace EUROPA {
   class NddlXmlTxnInterpreter : public LanguageInterpreter
   {
     public:
-      NddlXmlTxnInterpreter(const DbClientId& client) : m_interpreter(client) {}
+      NddlXmlTxnInterpreter(const DbClientId client) : m_interpreter(client) {}
       virtual ~NddlXmlTxnInterpreter() {}
       virtual std::string interpret(std::istream& input, const std::string& source);
 

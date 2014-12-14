@@ -16,8 +16,8 @@ namespace EUROPA {
     /**
      * @brief Constructor used for initial allocation
      */
-    ProxyVariableRelation(const ConstrainedVariableId& objectVar,
-			  const ConstrainedVariableId& proxyVar,
+    ProxyVariableRelation(const ConstrainedVariableId objectVar,
+			  const ConstrainedVariableId proxyVar,
 			  const std::vector<unsigned int>& path);
 
     /**
@@ -25,7 +25,7 @@ namespace EUROPA {
      */
     ProxyVariableRelation(const LabelStr& name,
 			  const LabelStr& propagatorName,
-			  const ConstraintEngineId& constraintEngine,
+			  const ConstraintEngineId constraintEngine,
 			  const std::vector<ConstrainedVariableId>& variables);
 
   private:
@@ -35,14 +35,14 @@ namespace EUROPA {
     /**
      * @brief Used to only track set and reset events. Will not be subject to propagation
      */
-    bool canIgnore(const ConstrainedVariableId& variable, 
+    bool canIgnore(const ConstrainedVariableId variable, 
 		   unsigned int argIndex, 
 		   const DomainListener::ChangeType& changeType);
 
     /**
      * @brief Required to support copying. Will assign the source constraint id, triggering a path update.
      */
-    void setSource(const ConstraintId& sourceConstraint);
+    void setSource(const ConstraintId sourceConstraint);
 
     /**
      * @brief Used to handle lazy copy if we migrate a constraint

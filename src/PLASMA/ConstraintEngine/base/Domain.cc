@@ -41,11 +41,11 @@ namespace EUROPA {
     m_id.remove();
   }
 
-  const DomainListenerId& DomainListener::getId() const {
+  const DomainListenerId DomainListener::getId() const {
     return(m_id);
   }
 
-  Domain::Domain(const DataTypeId& dt, bool enumerated, bool closed)
+  Domain::Domain(const DataTypeId dt, bool enumerated, bool closed)
     : m_dataType(dt)
     , m_enumerated(enumerated)
     , m_closed(closed)
@@ -96,7 +96,7 @@ namespace EUROPA {
   bool Domain::isInterval()   const { return(!m_enumerated); }
   bool Domain::isInfinite()   const { return(!isFinite()); }
 
-  void Domain::setListener(const DomainListenerId& listener) {
+  void Domain::setListener(const DomainListenerId listener) {
     check_error(m_listener.isNoId()); // Only set once
     m_listener = listener;
 
@@ -108,7 +108,7 @@ namespace EUROPA {
     }
   }
 
-  const DomainListenerId& Domain::getListener() const {
+  const DomainListenerId Domain::getListener() const {
     return(m_listener);
   }
 
@@ -183,8 +183,8 @@ namespace EUROPA {
   }
 
 
-  const DataTypeId& Domain::getDataType() const { return m_dataType; }
-  void Domain::setDataType(const DataTypeId& dt) { m_dataType=dt; }
+  const DataTypeId Domain::getDataType() const { return m_dataType; }
+  void Domain::setDataType(const DataTypeId dt) { m_dataType=dt; }
 
   // TODO: all these just delegate to the data type, should be dropped eventually, preserved for now for backwards compatibility
   const LabelStr& Domain::getTypeName() const { return getDataType()->getName(); }

@@ -18,7 +18,7 @@ namespace EUROPA {
     class ParameterFilter : public FlawFilter {
     public:
       ParameterFilter(const TiXmlElement& configData);
-      virtual bool test(const EntityId& entity);
+      virtual bool test(const EntityId entity);
     };
 
     /**
@@ -27,7 +27,7 @@ namespace EUROPA {
     class LocalVariableFilter : public FlawFilter{
     public:
       LocalVariableFilter(const TiXmlElement& configData);
-      bool test(const EntityId& entity);
+      bool test(const EntityId entity);
     };
 
     /**
@@ -36,7 +36,7 @@ namespace EUROPA {
     class GuardFilter : public FlawFilter {
     public:
       GuardFilter(const TiXmlElement& configData);
-      virtual bool test(const EntityId& entity);
+      virtual bool test(const EntityId entity);
     };
 
     /**
@@ -45,7 +45,7 @@ namespace EUROPA {
     class NotGuardFilter : public GuardFilter {
     public:
       NotGuardFilter(const TiXmlElement& configData);
-      bool test(const EntityId& entity);
+      bool test(const EntityId entity);
     };
 
     /**
@@ -55,7 +55,7 @@ namespace EUROPA {
     class InfiniteDynamicFilter : public FlawFilter {
     public:
       InfiniteDynamicFilter(const TiXmlElement& configData);
-      bool test(const EntityId& entity);
+      bool test(const EntityId entity);
     };
 
     /**
@@ -64,7 +64,7 @@ namespace EUROPA {
     class SingletonFilter: public FlawFilter {
     public:
       SingletonFilter(const TiXmlElement& configData);
-      bool test(const EntityId& entity);
+      bool test(const EntityId entity);
     };
 
     /**
@@ -73,7 +73,7 @@ namespace EUROPA {
     class TokenMustBeAssignedFilter: public FlawFilter {
     public:
       TokenMustBeAssignedFilter(const TiXmlElement& configData);
-      bool test(const EntityId& entity);
+      bool test(const EntityId entity);
     };
 
 
@@ -83,7 +83,7 @@ namespace EUROPA {
     class MasterMustBeAssignedFilter : public FlawFilter {
     public:
       MasterMustBeAssignedFilter(const TiXmlElement& configData);
-      bool test(const EntityId& entity);
+      bool test(const EntityId entity);
     };
 
     /**
@@ -100,7 +100,7 @@ namespace EUROPA {
     class HorizonFilter: public FlawFilter {
     public:
       HorizonFilter(const TiXmlElement& configData);
-      bool test(const EntityId& entity);
+      bool test(const EntityId entity);
       std::string toString() const;
       /**
        * @brief Allowed policy strings for customization
@@ -122,7 +122,7 @@ namespace EUROPA {
     class HorizonVariableFilter: public FlawFilter {
     public:
       HorizonVariableFilter(const TiXmlElement& configData);
-      bool test(const EntityId& entity);
+      bool test(const EntityId entity);
       std::string toString() const;
       void setContext(ContextId ctx);
     private:

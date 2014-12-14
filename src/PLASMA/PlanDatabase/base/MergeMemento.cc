@@ -25,7 +25,7 @@ namespace EUROPA{
    * an algorithm to migrate consequenecs rather than force additional splits. This is similar to deactivation
    * of a token in its simple, robust, and potentially inefficient treatment of such non-chronological retractions.
    */
-//   ConstrainedVariableId checkForReplacement(const std::map<edouble, ConstrainedVariableId>& lookup, const ConstrainedVariableId& var){
+//   ConstrainedVariableId checkForReplacement(const std::map<edouble, ConstrainedVariableId>& lookup, const ConstrainedVariableId var){
 //     std::map<edouble, ConstrainedVariableId>::const_iterator it = lookup.find((edouble) var);
 //     if(it == lookup.end())
 //       return var;
@@ -33,7 +33,7 @@ namespace EUROPA{
 //       return (it->second);
 //   }
 
-  MergeMemento::MergeMemento(const TokenId& inactiveToken, const TokenId& activeToken)
+  MergeMemento::MergeMemento(const TokenId inactiveToken, const TokenId activeToken)
     :m_inactiveToken(inactiveToken), m_activeToken(activeToken), m_undoing(false){
 
     checkError(inactiveToken.isValid(), inactiveToken);
@@ -117,12 +117,12 @@ namespace EUROPA{
     m_undoing = false;
   }
 
-  void MergeMemento::handleAdditionOfInactiveConstraint(const ConstraintId& constraint){
+  void MergeMemento::handleAdditionOfInactiveConstraint(const ConstraintId constraint){
     debugMsg("europa:merging:handleAdditionOfInactiveConstraint", constraint->toString());
     migrateConstraint(constraint);
   }
 
-  void MergeMemento::handleRemovalOfInactiveConstraint(const ConstraintId& constraint){
+  void MergeMemento::handleRemovalOfInactiveConstraint(const ConstraintId constraint){
     check_error(m_deactivatedConstraints.size() + m_inactiveToken->getVariables().size() >= m_newConstraints.size());
     checkError(!constraint->isActive(), constraint->toString());
 
@@ -157,7 +157,7 @@ namespace EUROPA{
     }
   }
 
-  void MergeMemento::migrateConstraint(const ConstraintId& constraint){
+  void MergeMemento::migrateConstraint(const ConstraintId constraint){
     checkError(constraint.isValid(), constraint);
     checkError(m_activeToken.isValid(), m_activeToken);
     checkError(m_activeToken->isActive(), m_activeToken->toString());

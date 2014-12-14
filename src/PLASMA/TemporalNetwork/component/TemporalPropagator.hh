@@ -21,7 +21,7 @@ namespace EUROPA {
   class TemporalPropagator: public Propagator
   {
   public:
-    TemporalPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine);
+    TemporalPropagator(const LabelStr& name, const ConstraintEngineId constraintEngine);
     virtual ~TemporalPropagator();
     void execute();
     bool updateRequired() const;
@@ -29,29 +29,29 @@ namespace EUROPA {
     /**
      * @see TemporalAdvisor::canPrecede
      */
-    bool canPrecede(const ConstrainedVariableId& first, const ConstrainedVariableId& second);
-    bool mustPrecede(const ConstrainedVariableId& first, const ConstrainedVariableId& second);
+    bool canPrecede(const ConstrainedVariableId first, const ConstrainedVariableId second);
+    bool mustPrecede(const ConstrainedVariableId first, const ConstrainedVariableId second);
 
     /**
      * @see TemporalAdvisor::canFitBetween
      */
-    bool canFitBetween(const ConstrainedVariableId& start, const ConstrainedVariableId& end,
-		       const ConstrainedVariableId& predend, const ConstrainedVariableId& succstart);
+    bool canFitBetween(const ConstrainedVariableId start, const ConstrainedVariableId end,
+		       const ConstrainedVariableId predend, const ConstrainedVariableId succstart);
 
     /**
      * @see TemporalAdvisor::canBeConcurrent
      */
-    bool canBeConcurrent(const ConstrainedVariableId& first, const ConstrainedVariableId& second);
+    bool canBeConcurrent(const ConstrainedVariableId first, const ConstrainedVariableId second);
 
     /**
      * @see TemporalAdvisor::getTemporalDistanceDomain
      */
-    const IntervalIntDomain getTemporalDistanceDomain(const ConstrainedVariableId& first,
-						      const ConstrainedVariableId& second, const bool exact);
+    const IntervalIntDomain getTemporalDistanceDomain(const ConstrainedVariableId first,
+						      const ConstrainedVariableId second, const bool exact);
     /**
      * @see STNTemporalAdvisor::getTemporalDistanceDomains
      */
-    void getTemporalDistanceDomains(const ConstrainedVariableId& first,
+    void getTemporalDistanceDomains(const ConstrainedVariableId first,
                                     const std::vector<ConstrainedVariableId>&
                                     seconds,
                                     std::vector<IntervalIntDomain>& domains);
@@ -59,7 +59,7 @@ namespace EUROPA {
      /**
      * @see STNTemporalAdvisor::getTemporalDistanceSigns
      */
-    void getTemporalDistanceSigns(const ConstrainedVariableId& first,
+    void getTemporalDistanceSigns(const ConstrainedVariableId first,
                                   const std::vector<ConstrainedVariableId>&
                                   seconds,
                                   std::vector<Time>& lbs,
@@ -72,14 +72,14 @@ namespace EUROPA {
      * Support for reftime calculations.)
      */
 
-    Time getReferenceTime(const ConstrainedVariableId& var);
+    Time getReferenceTime(const ConstrainedVariableId var);
 
     /**
      * @brief Designate the refpoint var.  The noId() default removes
      * a previous designation. (PHM Support for reftime calculations.)
      */
 
-    void setRefpointVar(const ConstrainedVariableId&
+    void setRefpointVar(const ConstrainedVariableId
 			var = ConstrainedVariableId::noId());
 
     /**
@@ -87,7 +87,7 @@ namespace EUROPA {
      */
     unsigned int mostRecentRepropagation() const;
 
-    void getTemporalNogood(const ConstrainedVariableId& useAsOrigin,
+    void getTemporalNogood(const ConstrainedVariableId useAsOrigin,
                            std::vector<ConstrainedVariableId>& fromvars,
                            std::vector<ConstrainedVariableId>& tovars,
                            //std::vector<long>& lengths
@@ -99,35 +99,35 @@ namespace EUROPA {
                             const std::vector<Time>& oldreftimes,
                             std::vector<Time>& newreftimes);
 
-    void addListener(const TemporalNetworkListenerId& listener);
+    void addListener(const TemporalNetworkListenerId listener);
 
   protected:
     void handleDiscard();
-    void handleConstraintAdded(const ConstraintId& constraint);
-    void handleConstraintRemoved(const ConstraintId& constraint);
-    void handleConstraintActivated(const ConstraintId& constraint);
-    void handleConstraintDeactivated(const ConstraintId& constraint);
-    void handleVariableDeactivated(const ConstrainedVariableId& var);
-    void handleVariableActivated(const ConstrainedVariableId& var);
-    void handleNotification(const ConstrainedVariableId& variable,
+    void handleConstraintAdded(const ConstraintId constraint);
+    void handleConstraintRemoved(const ConstraintId constraint);
+    void handleConstraintActivated(const ConstraintId constraint);
+    void handleConstraintDeactivated(const ConstraintId constraint);
+    void handleVariableDeactivated(const ConstrainedVariableId var);
+    void handleVariableActivated(const ConstrainedVariableId var);
+    void handleNotification(const ConstrainedVariableId variable,
 			    unsigned int argIndex,
-			    const ConstraintId& constraint,
+			    const ConstraintId constraint,
 			    const DomainListener::ChangeType& changeType);
 
   private:
     friend class TimepointWrapper;
 
-    TemporalConstraintId addSpecificationConstraint(const TemporalConstraintId& tc, const TimepointId& tp, const Time lb, const Time ub);
+    TemporalConstraintId addSpecificationConstraint(const TemporalConstraintId tc, const TimepointId tp, const Time lb, const Time ub);
 
-    void notifyDeleted(const ConstrainedVariableId& tempVar, const TimepointId& tp);
+    void notifyDeleted(const ConstrainedVariableId tempVar, const TimepointId tp);
 
-    void addTimepoint(const ConstrainedVariableId& var);
-    void addTemporalConstraint(const ConstraintId& constraint);
+    void addTimepoint(const ConstrainedVariableId var);
+    void addTemporalConstraint(const ConstraintId constraint);
 
     bool isEqualToConstraintNetwork();
     bool isConsistentWithConstraintNetwork();
 
-    inline static const TimepointId& getTimepoint(const ConstrainedVariableId& var) {
+    inline static const TimepointId getTimepoint(const ConstrainedVariableId var) {
       static const TimepointId sl_noId;
       check_error(var->getExternalEntity().isNoId() || var->getExternalEntity().isValid());
       const TimepointWrapperId wrapper(var->getExternalEntity());
@@ -138,8 +138,8 @@ namespace EUROPA {
       return wrapper->getTimepoint();
     }
 
-    void handleTemporalAddition(const ConstraintId& constraint);
-    void handleTemporalDeletion(const ConstraintId& constraint);
+    void handleTemporalAddition(const ConstraintId constraint);
+    void handleTemporalDeletion(const ConstraintId constraint);
 
     /**
      * @brief update timepoints in the Temporal Network with changes in the Constraint Engine's variables.
@@ -154,12 +154,12 @@ namespace EUROPA {
     /**
      * @brief Update the time point in the tnet from the given CE variable
      */
-    void updateTimepoint(const ConstrainedVariableId& var);
+    void updateTimepoint(const ConstrainedVariableId var);
 
     /**
      * @brief update a constraint in the tnet - before, concurrent, startEndDuration
      */
-    void updateTemporalConstraint(const ConstraintId& constraint);
+    void updateTemporalConstraint(const ConstraintId constraint);
 
     /**
      * @brief Shared method to handle update to a constraint in the temporal network.
@@ -170,8 +170,8 @@ namespace EUROPA {
      * @return TemporalConstraintId::noId() if the constrant is not deleted. Otherwise it will return the
      * new replacement constraint.
      */
-    TemporalConstraintId updateConstraint(const ConstrainedVariableId& var,
-					  const TemporalConstraintId& tnetConstraint,
+    TemporalConstraintId updateConstraint(const ConstrainedVariableId var,
+					  const TemporalConstraintId tnetConstraint,
 					  Time lb,
 					  Time ub);
 
@@ -179,7 +179,7 @@ namespace EUROPA {
      * @brief Buffer the variable in either the new variable buffer or the change variable buffer
      * depending on its state - i.e. if timepoint already created or not.
      */
-    void buffer(const ConstrainedVariableId& var);
+    void buffer(const ConstrainedVariableId var);
 
     /**
      * @brief Test that the buffer status is correct prior to propagation
@@ -189,13 +189,13 @@ namespace EUROPA {
     /**
      * @brief Update duration bounds
      */
-    void updateTnetDuration(const ConstraintId& c);  // incoming bounds from cnet
-    void updateCnetDuration(const TokenId& token) const; // outgoing bounds after tnet propagation
+    void updateTnetDuration(const ConstraintId c);  // incoming bounds from cnet
+    void updateCnetDuration(const TokenId token) const; // outgoing bounds after tnet propagation
 
-    bool wasRelaxed(const ConstrainedVariableId& var);
+    bool wasRelaxed(const ConstrainedVariableId var);
 
     void handleViolations();
-    void collectViolations(ConstrainedVariableId& var);
+    void collectViolations(ConstrainedVariableId var);
 
     TemporalNetworkId m_tnet; /*!< Temporal Network does all the propagation */
 

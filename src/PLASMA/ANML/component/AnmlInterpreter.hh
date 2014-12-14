@@ -15,7 +15,7 @@ namespace EUROPA {
 class AnmlInterpreter : public LanguageInterpreter
 {
 public:
-    AnmlInterpreter(EngineId& engine);
+    AnmlInterpreter(EngineId engine);
     virtual ~AnmlInterpreter();
     virtual std::string interpret(std::istream& input, const std::string& source);
 

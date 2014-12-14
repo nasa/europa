@@ -31,15 +31,15 @@ namespace EUROPA {
       /**
        * @brief Accessor
        */
-      const RuleSchemaId& getId() const;
+      const RuleSchemaId getId() const;
 
-      void registerRule(const RuleId& rule);
+      void registerRule(const RuleId rule);
 
       /**
        * @brief Retrieve all registered rules for the given predicate. This will include rules
        * defined in ancestors of the current predicate also.
        */
-      void getRules(const PlanDatabaseId& pdb, const LabelStr& predicate, std::vector<RuleId>& results);
+      void getRules(const PlanDatabaseId pdb, const LabelStr& predicate, std::vector<RuleId>& results);
 
       const std::multimap<edouble, RuleId>& getRules();
 
@@ -66,7 +66,7 @@ namespace EUROPA {
       /**
        * @brief Accessor
        */
-      const RuleId& getId() const;
+      const RuleId getId() const;
 
       /**
        * @brief Accessor
@@ -76,8 +76,8 @@ namespace EUROPA {
 
       const LabelStr& getSource() const;
 
-      virtual RuleInstanceId createInstance(const TokenId& token,
-                                            const PlanDatabaseId& planDb,
+      virtual RuleInstanceId createInstance(const TokenId token,
+                                            const PlanDatabaseId planDb,
                                             const RulesEngineId &rulesEngine) const = 0;
 
       virtual std::string toString() const;

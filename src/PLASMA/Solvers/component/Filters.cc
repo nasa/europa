@@ -17,7 +17,7 @@ namespace EUROPA {
       debugMsg("ParameterFilter:constructor", "Constructing a parameter filter.");
     }
 
-    bool ParameterFilter::test(const EntityId& entity) {
+    bool ParameterFilter::test(const EntityId entity) {
       if(!ConstrainedVariableId::convertable(entity))
         return false;
       ConstrainedVariableId var = entity;
@@ -31,7 +31,7 @@ namespace EUROPA {
       debugMsg("LocalVariableFilter:constructor", "Constructing a local variable filter.");
     }
 
-    bool LocalVariableFilter::test(const EntityId& entity) {
+    bool LocalVariableFilter::test(const EntityId entity) {
       if(!ConstrainedVariableId::convertable(entity))
         return false;
       ConstrainedVariableId var = entity;
@@ -45,7 +45,7 @@ namespace EUROPA {
       debugMsg("GuardFilter:constructor", "Constructing a guard filter.");
     }
 
-    bool GuardFilter::test(const EntityId& entity) {
+    bool GuardFilter::test(const EntityId entity) {
       if(!ConstrainedVariableId::convertable(entity))
         return false;
       ConstrainedVariableId var = entity;
@@ -72,7 +72,7 @@ namespace EUROPA {
       debugMsg("NotGuardFilter:constructor", "Constructing a not guard filter.");
     }
 
-    bool NotGuardFilter::test(const EntityId& entity) {
+    bool NotGuardFilter::test(const EntityId entity) {
       if(!ConstrainedVariableId::convertable(entity))
         return false;
       debugMsg("NotGuardFilter:test", "Testing " << entity->toLongString() << " for not-guard-ness.");
@@ -85,7 +85,7 @@ namespace EUROPA {
       setExpression(toString() + ":infinite/dynamic");
     }
 
-    bool InfiniteDynamicFilter::test(const EntityId& entity){
+    bool InfiniteDynamicFilter::test(const EntityId entity){
       if(!ConstrainedVariableId::convertable(entity))
         return false;
 
@@ -101,7 +101,7 @@ namespace EUROPA {
       setExpression(toString() + ":singleton");
     }
 
-    bool SingletonFilter::test(const EntityId& entity) {
+    bool SingletonFilter::test(const EntityId entity) {
       if(!ConstrainedVariableId::convertable(entity))
         return false;
 
@@ -118,7 +118,7 @@ namespace EUROPA {
       setExpression(toString() + ":tokenMustBeAssigned");
     }
 
-    bool TokenMustBeAssignedFilter::test(const EntityId& entity) {
+    bool TokenMustBeAssignedFilter::test(const EntityId entity) {
       checkError(ConstrainedVariableId::convertable(entity), 
                  "Configuration Error. Cannot apply to " << entity->toString());
 
@@ -144,7 +144,7 @@ namespace EUROPA {
       setExpression(toString() + ":masterMustBeAssigned");
     }
 
-    bool MasterMustBeAssignedFilter::test(const EntityId& entity) {
+    bool MasterMustBeAssignedFilter::test(const EntityId entity) {
       checkError(TokenId::convertable(entity), 
                  "Configuration error.  Cannot apply to " << entity->toString());
       TokenId tok = entity;
@@ -171,7 +171,7 @@ namespace EUROPA {
       setExpression(toString() + ":horizonFilter:" + m_policy.toString());
     }
 
-    bool HorizonFilter::test(const EntityId& entity) {
+    bool HorizonFilter::test(const EntityId entity) {
       static const LabelStr sl_possiblyContained("PossiblyContained");
       static const LabelStr sl_partiallyContained("PartiallyContained");
       static const LabelStr sl_totallyContained("TotallyContained");
@@ -193,8 +193,9 @@ namespace EUROPA {
       checkRuntimeError(getContext() != ContextId::noId(), 
                         "HorizonFilter::test called without a valid context on " <<
                         MatchingRule::getId());
-      const IntervalIntDomain horizon = IntervalIntDomain(getContext()->get("horizonStart"),
-                                                          getContext()->get("horizonEnd"));
+      const IntervalIntDomain horizon =
+          IntervalIntDomain(static_cast<eint::basis_type>(getContext()->get("horizonStart")),
+                            static_cast<eint::basis_type>(getContext()->get("horizonEnd")));
       checkError(horizon.isFinite(), "Infinite Horizon not permitted." << horizon.toString());
       const IntervalIntDomain& startTime = token->start()->lastDomain();
       const IntervalIntDomain& endTime = token->end()->lastDomain();
@@ -226,8 +227,9 @@ namespace EUROPA {
       std::string expr = 
           FlawFilter::toString() + " Policy='" + m_policy.toString() + "' Horizon=";
       if(getContext().isValid()) {
-        const IntervalIntDomain horizon = IntervalIntDomain(getContext()->get("horizonStart"),
-                                                            getContext()->get("horizonEnd"));
+        const IntervalIntDomain horizon =
+            IntervalIntDomain(static_cast<long>(getContext()->get("horizonStart")),
+                              static_cast<long>(getContext()->get("horizonEnd")));
         expr = expr + horizon.toString();
       }
       else {
@@ -246,7 +248,7 @@ namespace EUROPA {
     m_horizonFilter.setContext(ctx);
   }
 
-    bool HorizonVariableFilter::test(const EntityId& entity) {
+    bool HorizonVariableFilter::test(const EntityId entity) {
       if(!ConstrainedVariableId::convertable(entity))
         return false;
 
@@ -266,7 +268,7 @@ namespace EUROPA {
       else {
         checkError(TokenId::convertable(parent), 
                    "If we have covered our bases, it must be a token, but it ain't:" << var->toString());
-        token = (TokenId) parent;
+        token = static_cast<TokenId>(parent);
       }
 
       // Now simply delegate to the filter stored internally.

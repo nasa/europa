@@ -32,12 +32,12 @@ namespace EUROPA {
      * @param parent owner if appropriate.
      * @param index position in parent collection.
      */
-    Variable(const ConstraintEngineId& constraintEngine,
+    Variable(const ConstraintEngineId constraintEngine,
              const Domain& baseDomain,
              const bool internal = false,
              bool canBeSpecified = true,
              const LabelStr& name = ConstrainedVariable::NO_NAME(),
-             const EntityId& parent = EntityId::noId(),
+             const EntityId parent = EntityId::noId(),
              unsigned long index = ConstrainedVariable::NO_INDEX);
 
     /**
@@ -106,12 +106,12 @@ namespace EUROPA {
   };
 
   template<class DomainType>
-  Variable<DomainType>::Variable(const ConstraintEngineId& constraintEngine,
+  Variable<DomainType>::Variable(const ConstraintEngineId constraintEngine,
                                  const Domain& baseDomain,
                                  const bool internal,
                                  bool canBeSpecified,
                                  const LabelStr& name,
-                                 const EntityId& parent,
+                                 const EntityId parent,
                                  unsigned long index)
     : ConstrainedVariable(constraintEngine, internal, canBeSpecified, name, parent, index),
     m_baseDomain(static_cast<DomainType*>(baseDomain.copy())),

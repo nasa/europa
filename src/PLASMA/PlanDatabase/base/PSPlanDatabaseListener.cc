@@ -16,39 +16,39 @@ void PSPlanDatabaseListener::notifyRemoved(PSObject*, PSToken*) {}
 
 
 // Methods to convert notifications involving internal Europa types to notifications involving 'PS' types:
-void PSPlanDatabaseListener::notifyAdded(const ObjectId& object) {
+void PSPlanDatabaseListener::notifyAdded(const ObjectId object) {
   notifyAdded(id_cast<PSObject>(object));
 }
 
-void PSPlanDatabaseListener::notifyRemoved(const ObjectId& object) {
+void PSPlanDatabaseListener::notifyRemoved(const ObjectId object) {
 	notifyRemoved(id_cast<PSObject>(object));
 }
 
-void PSPlanDatabaseListener::notifyActivated(const TokenId& token) {
+void PSPlanDatabaseListener::notifyActivated(const TokenId token) {
 	notifyActivated(id_cast<PSToken>(token));
 }
 
-void PSPlanDatabaseListener::notifyDeactivated(const TokenId& token) {
+void PSPlanDatabaseListener::notifyDeactivated(const TokenId token) {
 	notifyDeactivated(id_cast<PSToken>(token));
 }
 
-void PSPlanDatabaseListener::notifyRejected(const TokenId& token) {
+void PSPlanDatabaseListener::notifyRejected(const TokenId token) {
 	notifyRejected(id_cast<PSToken>(token));
 }
 
-void PSPlanDatabaseListener::notifyMerged(const TokenId& token) {
+void PSPlanDatabaseListener::notifyMerged(const TokenId token) {
 	notifyMerged(id_cast<PSToken>(token));
 }
 
-void PSPlanDatabaseListener::notifySplit(const TokenId& token) {
+void PSPlanDatabaseListener::notifySplit(const TokenId token) {
 	notifySplit(id_cast<PSToken>(token));
 }
 
-void PSPlanDatabaseListener::notifyAdded(const ObjectId& object, const TokenId& token) {
+void PSPlanDatabaseListener::notifyAdded(const ObjectId object, const TokenId token) {
 	notifyAdded(id_cast<PSObject>(object), id_cast<PSToken>(token));
 }
 
-void PSPlanDatabaseListener::notifyRemoved(const ObjectId& object, const TokenId& token) {
+void PSPlanDatabaseListener::notifyRemoved(const ObjectId object, const TokenId token) {
 	notifyRemoved(id_cast<PSObject>(object), id_cast<PSToken>(token));
 
 }

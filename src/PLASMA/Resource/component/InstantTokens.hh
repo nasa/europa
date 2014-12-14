@@ -7,7 +7,7 @@
 namespace EUROPA {
     class ReservoirToken : public EventToken {
     public:
-      ReservoirToken(const PlanDatabaseId& planDatabase,
+      ReservoirToken(const PlanDatabaseId planDatabase,
 		     const LabelStr& predicateName,
 		     const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
 		     const IntervalDomain& quantityBaseDomain = IntervalDomain(0, PLUS_INFINITY),
@@ -15,7 +15,7 @@ namespace EUROPA {
 		     bool closed = true,
 		     bool activate = true);
 
-      ReservoirToken(const PlanDatabaseId& planDatabase,
+      ReservoirToken(const PlanDatabaseId planDatabase,
 		     const LabelStr& predicateName,
 		     bool rejectable,
 		     bool isFact,
@@ -25,7 +25,7 @@ namespace EUROPA {
 		     bool closed,
 		     bool activate = true);
 
-      ReservoirToken(const TokenId& parent,
+      ReservoirToken(const TokenId parent,
 		     const LabelStr& relation,
 		     const LabelStr& predicateName,
 		     const IntervalIntDomain& timeBaseDomain,
@@ -34,7 +34,7 @@ namespace EUROPA {
 		     bool closed,
 		     bool activate = true);
 
-      const ConstrainedVariableId& getQuantity() const;
+      const ConstrainedVariableId getQuantity() const;
       bool isConsumer() const;
       void print(std::ostream& os);
       virtual void close();
@@ -48,7 +48,7 @@ namespace EUROPA {
 
     class ConsumerToken : public ReservoirToken {
     public:
-      ConsumerToken(const PlanDatabaseId& planDatabase,
+      ConsumerToken(const PlanDatabaseId planDatabase,
 		    const LabelStr& predicateName,
 		    const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
 		    const IntervalDomain quantityBaseDomain = IntervalDomain(0, PLUS_INFINITY),
@@ -56,7 +56,7 @@ namespace EUROPA {
 		    bool activate = true)
 	: ReservoirToken(planDatabase, predicateName, timeBaseDomain, quantityBaseDomain, true, closed, activate) {
       }
-      ConsumerToken(const PlanDatabaseId& planDatabase,
+      ConsumerToken(const PlanDatabaseId planDatabase,
 		    const LabelStr& predicateName,
 		    bool rejectable,
 		    bool isFact,
@@ -67,7 +67,7 @@ namespace EUROPA {
 	: ReservoirToken(planDatabase, predicateName, rejectable, isFact, timeBaseDomain, objectName, true, closed, activate) {
       }
 
-      ConsumerToken(const TokenId& parent,
+      ConsumerToken(const TokenId parent,
 		    const LabelStr& relation,
 		    const LabelStr& predicateName,
 		    const IntervalIntDomain& timeBaseDomain,
@@ -80,7 +80,7 @@ namespace EUROPA {
 
     class ProducerToken : public ReservoirToken {
     public:
-      ProducerToken(const PlanDatabaseId& planDatabase,
+      ProducerToken(const PlanDatabaseId planDatabase,
 		    const LabelStr& predicateName,
 		    const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
 		    const IntervalDomain quantityBaseDomain = IntervalDomain(0, PLUS_INFINITY),
@@ -88,7 +88,7 @@ namespace EUROPA {
 		    bool activate = true)
 	: ReservoirToken(planDatabase, predicateName, timeBaseDomain, quantityBaseDomain, false, closed, activate) {
       }
-      ProducerToken(const PlanDatabaseId& planDatabase,
+      ProducerToken(const PlanDatabaseId planDatabase,
 		    const LabelStr& predicateName,
 		    bool rejectable,
 		    bool isFact,
@@ -99,7 +99,7 @@ namespace EUROPA {
 	: ReservoirToken(planDatabase, predicateName, rejectable, isFact, timeBaseDomain, objectName, false, closed, activate) {
       }
 
-      ProducerToken(const TokenId& parent,
+      ProducerToken(const TokenId parent,
 		    const LabelStr& relation,
 		    const LabelStr& predicateName,
 		    const IntervalIntDomain& timeBaseDomain,

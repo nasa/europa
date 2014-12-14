@@ -12,6 +12,6 @@ namespace EUROPA {
 
     bool FlawFilter::isDynamic() const {return m_isDynamic;}
 
-    bool FlawFilter::test(const EntityId& entity) {return true;}
+    bool FlawFilter::test(const EntityId) {return true;}
   }
 }

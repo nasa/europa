@@ -5,7 +5,7 @@
 using namespace EUROPA;
 namespace NDDL {
 
-  NddlToken::NddlToken(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, const bool& rejectable, const bool& isFact, const bool& close)
+  NddlToken::NddlToken(const PlanDatabaseId planDatabase, const LabelStr& predicateName, const bool& rejectable, const bool& isFact, const bool& close)
     : EUROPA::IntervalToken(planDatabase, 
                             predicateName,
                             rejectable,
@@ -18,7 +18,7 @@ namespace NDDL {
     commonInit(close);
   }
 
-  NddlToken::NddlToken(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, const bool& close)
+  NddlToken::NddlToken(const TokenId master, const LabelStr& predicateName, const LabelStr& relation, const bool& close)
     : EUROPA::IntervalToken(master, 
                             relation,
                             predicateName,

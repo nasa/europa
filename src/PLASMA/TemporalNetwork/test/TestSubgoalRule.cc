@@ -9,12 +9,12 @@ namespace EUROPA {
 
   class TestSubgoalRuleRoot : public RuleInstance {
   public:
-    TestSubgoalRuleRoot(const RuleId& rule, const TokenId& token, const PlanDatabaseId& pdb) : RuleInstance(rule, token, pdb) { 
+    TestSubgoalRuleRoot(const RuleId rule, const TokenId token, const PlanDatabaseId pdb) : RuleInstance(rule, token, pdb) { 
     }
     void handleExecute();
   }; 
 
-  RuleInstanceId TestSubgoalRule::createInstance(const TokenId& token, const PlanDatabaseId& pdb,
+  RuleInstanceId TestSubgoalRule::createInstance(const TokenId token, const PlanDatabaseId pdb,
                                                  const RulesEngineId &rulesEngine) const {
     RuleInstanceId rootInstance = (new TestSubgoalRuleRoot(m_id, token, pdb))->getId();
     rootInstance->setRulesEngine(rulesEngine);

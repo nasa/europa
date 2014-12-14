@@ -60,29 +60,29 @@ namespace EUROPA {
 
       const std::multimap<eint, ConstraintId> getFlawHandlerGuards() const {return m_flawHandlerGuards;}
 
-      const PlanDatabaseId& getPlanDatabase() const {return m_db;}
+      const PlanDatabaseId getPlanDatabase() const {return m_db;}
       /**
        * @brief Initialize the constructed FlawManager.
        * @see handleInitialize for extension point.
        */
-      void initialize(const TiXmlElement& configData, const PlanDatabaseId& db, const ContextId& ctx = ContextId::noId(), const FlawManagerId& parent = FlawManagerId::noId());
+      void initialize(const TiXmlElement& configData, const PlanDatabaseId db, const ContextId ctx = ContextId::noId(), const FlawManagerId parent = FlawManagerId::noId());
 
 
       /**
        * @brief True if the given entity is in scope. This is expensive.
        */
-      bool inScope(const EntityId& entity);
+      bool inScope(const EntityId entity);
 
       /**
        * @brief True if the filter criteria are matched
        * @see inScope, staticMatch, dynamicMatch
        */
-      bool matches(const EntityId& entity);
+      bool matches(const EntityId entity);
 
       /**
        * @brief Obtain the priority for the given entity
        */
-      Priority getPriority(const EntityId& entity);
+      Priority getPriority(const EntityId entity);
 
       /**
        * @brief Obtains the first avaialble flaw that is forced i.e. a unit decision or a dead-end
@@ -106,33 +106,33 @@ namespace EUROPA {
        */
       virtual IteratorId createIterator();
 
-      virtual void notifyAdded(const ConstraintId& constraint);
-      virtual void notifyRemoved(const ConstraintId& constraint);
-      virtual void notifyRemoved(const ConstrainedVariableId& var);
-      virtual void notifyChanged(const ConstrainedVariableId& variable,
+      virtual void notifyAdded(const ConstraintId constraint);
+      virtual void notifyRemoved(const ConstraintId constraint);
+      virtual void notifyRemoved(const ConstrainedVariableId var);
+      virtual void notifyChanged(const ConstrainedVariableId variable,
                                  const DomainListener::ChangeType& changeType);
-      virtual void notifyAdded(const TokenId& token);
-      virtual void notifyRemoved(const TokenId& token);
+      virtual void notifyAdded(const TokenId token);
+      virtual void notifyRemoved(const TokenId token);
 
       /**
        * @brief Indicates that a flaw handler is now active, passing its guards
        */
-      void notifyActivated(const EntityId& target, const FlawHandlerId& flawHandler);
+      void notifyActivated(const EntityId target, const FlawHandlerId flawHandler);
 
       /**
        * @brief Indicates that a flaw handelr is no longer active
        */
-      void notifyDeactivated(const EntityId& target, const FlawHandlerId& flawhandler);
+      void notifyDeactivated(const EntityId target, const FlawHandlerId flawhandler);
 
       /**
        * @brief Retrieve the Flaw Handler for a given entity.
        */
-      FlawHandlerId getFlawHandler(const EntityId& entity);
+      FlawHandlerId getFlawHandler(const EntityId entity);
 
       /**
        * @brief Generates a flaw manager specific string description for an entity contained by the flaw.
        */
-      virtual std::string toString(const EntityId& entity) const;
+      virtual std::string toString(const EntityId entity) const;
 
       /**
        * @brief test if the timestamp is current
@@ -147,12 +147,12 @@ namespace EUROPA {
       /**
        * Helper method to evaluate entity w.r.t static conditions only. Encapslates condition access.
        */
-      virtual bool staticMatch(const EntityId& entity);
+      virtual bool staticMatch(const EntityId entity);
 
       /**
        * Helper method to evaluate entity w.r.t dynamic conditions only. Encapslates condition access.
        */
-      virtual bool dynamicMatch(const EntityId& entity);
+      virtual bool dynamicMatch(const EntityId entity);
 
       ContextId getContext() const {return m_context;}
 
@@ -165,19 +165,19 @@ namespace EUROPA {
       /**
        * @brief Factory method to allocate instance for selected decision point
        */
-      DecisionPointId allocateDecisionPoint(const EntityId& entity, const LabelStr& explanation);      
+      DecisionPointId allocateDecisionPoint(const EntityId entity, const LabelStr& explanation);      
 
       /**
        * @brief Subclass to implement in order to trigger database dependent data
        */
       virtual void handleInitialize() = 0;
 
-      virtual bool betterThan(const EntityId& a, const EntityId& b, LabelStr& explanation);
+      virtual bool betterThan(const EntityId a, const EntityId b, LabelStr& explanation);
 
       PlanDatabaseId m_db;
 
     private:
-      bool staticallyExcluded(const EntityId& entity) const;
+      bool staticallyExcluded(const EntityId entity) const;
       bool isValid() const;
 
       FlawManagerId m_parent;

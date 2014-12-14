@@ -22,9 +22,9 @@ TokenTypeMgr::~TokenTypeMgr()
 	m_id.remove();
 }
 
-const TokenTypeMgrId& TokenTypeMgr::getId() const {return m_id;}
+const TokenTypeMgrId TokenTypeMgr::getId() const {return m_id;}
 
-void TokenTypeMgr::registerType(const TokenTypeId& type) {
+void TokenTypeMgr::registerType(const TokenTypeId type) {
 	check_error(type.isValid());
 
 	// Ensure it is not present already
@@ -38,7 +38,7 @@ void TokenTypeMgr::registerType(const TokenTypeId& type) {
  * First try a hit for the predicate name as provided. If that does not work, extract the object,
  * and try each parent object until we get a hit.
  */
-TokenTypeId TokenTypeMgr::getType(const SchemaId& schema, const LabelStr& predicateName){
+TokenTypeId TokenTypeMgr::getType(const SchemaId schema, const LabelStr& predicateName){
 	check_error(schema->isPredicate(predicateName), predicateName.toString() + " is undefined.");
 
 	// Confirm it is present

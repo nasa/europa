@@ -15,10 +15,10 @@ namespace EUROPA {
   {
   	public :
   	    DataRef();
-  	    DataRef(const ConstrainedVariableId& v);
+  	    DataRef(const ConstrainedVariableId v);
   	    virtual ~DataRef();
 
-  	    const ConstrainedVariableId& getValue();
+  	    const ConstrainedVariableId getValue();
 
   	    static DataRef null;
 
@@ -31,10 +31,10 @@ class EvalContext {
   EvalContext(EvalContext* parent);
   virtual ~EvalContext();
 
-  virtual void addVar(const char* name,const ConstrainedVariableId& v);
+  virtual void addVar(const char* name,const ConstrainedVariableId v);
   virtual ConstrainedVariableId getVar(const char* name);
 
-  virtual void addToken(const char* name,const TokenId& t);
+  virtual void addToken(const char* name,const TokenId t);
   virtual TokenId getToken(const char* name);
 
   virtual void* getElement(const char* name) const;

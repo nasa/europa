@@ -13,7 +13,7 @@ namespace EUROPA {
 
   // bool PlanDatabaseWriter::s_useStandardKeys = true;
 
-    std::string PlanDatabaseWriter::toString(const PlanDatabaseId& db, bool _useStandardKeys){
+    std::string PlanDatabaseWriter::toString(const PlanDatabaseId db, bool _useStandardKeys){
       useStandardKeys() = _useStandardKeys;
       checkError(useStandardKeys() == _useStandardKeys, "Failed to set standardKeys to method's input values");
       std::stringstream sstr;
@@ -172,13 +172,13 @@ namespace EUROPA {
     return ss.str();
   }
 
-  std::string PlanDatabaseWriter::simpleTokenSummary(const TokenId& token) {
+  std::string PlanDatabaseWriter::simpleTokenSummary(const TokenId token) {
     std::stringstream ss;
     ss << token->toString() << timeDomain(token->start()->lastDomain()) <<  " --> " << timeDomain(token->end()->lastDomain());
     return ss.str();
 
   }
-    void PlanDatabaseWriter::writeToken(const TokenId& t, std::ostream& os) {
+    void PlanDatabaseWriter::writeToken(const TokenId t, std::ostream& os) {
       indent()++;
       check_error(t.isValid());
       TempVarId st = t->start();
@@ -224,14 +224,14 @@ namespace EUROPA {
       indent()--;
     }
 
-    void PlanDatabaseWriter::writeVariable(const ConstrainedVariableId& var, std::ostream& os) {
+    void PlanDatabaseWriter::writeVariable(const ConstrainedVariableId var, std::ostream& os) {
       check_error(var.isValid());
       indent()++;
       os << indentation() << var->getName().toString() << "=" << var->lastDomain() << std::endl;
       indent()--;
     }
 
-    std::string PlanDatabaseWriter::getKey(const TokenId& token){
+    std::string PlanDatabaseWriter::getKey(const TokenId token){
       if(useStandardKeys())
 	return EUROPA::toString(token->getKey());
       else

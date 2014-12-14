@@ -27,8 +27,8 @@ namespace EUROPA {
     class Component : public FactoryObj {
     public:
       virtual ~Component();
-      ComponentId& getId();
-      const ComponentId& getId() const;
+      ComponentId getId();
+      const ComponentId getId() const;
       const LabelStr& getName() const;
       void setName(const LabelStr& name);
 
@@ -63,11 +63,11 @@ namespace EUROPA {
     public:
       ComponentFactory(const LabelStr& name) : Factory(name) {}
 
-      virtual EUROPA::FactoryObjId& createInstance(const EUROPA::FactoryArgs& fa) {
+      virtual EUROPA::FactoryObjId createInstance(const EUROPA::FactoryArgs& fa) {
 	const ComponentArgs& args = dynamic_cast<const ComponentArgs&>(fa);
 	ComponentType* ct = new ComponentType(args.configData);
 	ct->setName(getName());
-	return static_cast<EUROPA::FactoryObjId&>(ct->getId());
+	return static_cast<EUROPA::FactoryObjId>(ct->getId());
       }
     };
 

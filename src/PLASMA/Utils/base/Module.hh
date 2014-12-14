@@ -17,7 +17,7 @@ namespace EUROPA {
 	  Module(const std::string& name) : m_id(this), m_name(name) {}
 	  virtual ~Module() {}
 	  
-	  ModuleId& getId() { return m_id; }
+	  ModuleId getId() { return m_id; }
 	  const std::string getName() const { return m_name; }
 	  
 	  virtual void initialize() = 0;                  // module initialization  

@@ -39,9 +39,9 @@ namespace EUROPA {
 
       /**
        * @brief Constructor.  This is primarily a convenience constructor for resource interactions outside of a model.
-       * @param planDatabase @see Object
-       * @param type @see Object
-       * @param name @see Object
+       * @param planDatabase The plan database
+       * @param type The type of the resource
+       * @param name The name of the instance
        * @param initCapacityLb The lower bound of the Resource's initial level. (For example, a battery may be only half charged initially.)
        * @param initCapacityUb The upper bound of the Resource's initial level. (For example, a battery may be only half charged initially.)
        * @param lowerLimit The lower capacity limit. (For example, a battery can't have less than no energy stored, or it might be considered unsafe to allow
@@ -51,8 +51,9 @@ namespace EUROPA {
        * @param maxInstConsumption The maximum amount of consumption possible at an instant. (For example, a power bus might only allow 2.5A to be drawn at one instant.)
        * @param maxProduction The maximum amount of production possible on this resource.
        * @param maxConsumption The maximum amount of consumption possible on this resource.
+       * @see Object
        */
-      Resource(const PlanDatabaseId& planDatabase,
+      Resource(const PlanDatabaseId planDatabase,
                const LabelStr& type,
                const LabelStr& name,
                const LabelStr& detectorName,
@@ -82,25 +83,25 @@ namespace EUROPA {
        * @brief Constructor
        * @see Object
        */
-      Resource(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open);
+      Resource(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open);
 
       /**
        * @brief Constructor
        * @see Object
        */
-      Resource(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open);
+      Resource(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open);
 
       virtual ~Resource();
 
       /**
        * @brief Accessor for the lower limit on level
        */
-      edouble getLowerLimit(const InstantId& inst) const;
+      edouble getLowerLimit(const InstantId inst) const;
 
       /**
        * @brief Accessor for the upper limit on level
        */
-      edouble getUpperLimit(const InstantId& inst) const;
+      edouble getUpperLimit(const InstantId inst) const;
 
       /**
        * @brief Accessor for the maximum consumption possible at an instant.
@@ -132,7 +133,7 @@ namespace EUROPA {
 
       void setLimit(const eint& time, const edouble& lb, const edouble &ub);
 
-      virtual void add(const TokenId& token);
+      virtual void add(const TokenId token);
 
       /** 
        * @brief Remove a token from the resource.
@@ -144,23 +145,23 @@ namespace EUROPA {
        * 
        * @param token The token to remove.
        */      
-      virtual void remove(const TokenId& token);
+      virtual void remove(const TokenId token);
 
-      virtual void getOrderingChoices(const TokenId& token,
+      virtual void getOrderingChoices(const TokenId token,
 				      std::vector<std::pair<TokenId, TokenId> >& results,
 #ifdef _MSC_VER
-				      unsigned int limit = UINT_MAX
+				      unsigned long limit = UINT_MAX
 #else
-                                      unsigned int limit = std::numeric_limits<unsigned int>::max()
+                                      unsigned long limit = std::numeric_limits<unsigned long>::max()
 #endif //_MSC_VER
 				      );
 
-      virtual void getOrderingChoices(const InstantId& inst,
+      virtual void getOrderingChoices(const InstantId inst,
                                       std::vector<std::pair<TransactionId, TransactionId> >& results,
 #ifdef _MSC_VER
-				      unsigned int limit = UINT_MAX
+				      unsigned long limit = UINT_MAX
 #else
-                                      unsigned int limit = std::numeric_limits<unsigned int>::max()
+                                      unsigned long limit = std::numeric_limits<unsigned long>::max()
 #endif //_MSC_VER
 				      );
 
@@ -172,7 +173,7 @@ namespace EUROPA {
       //ResourceId getId() {return m_id;}
       //subclasses will need to override getOrderingChoices, getTokensToOrder
 
-      int getFlawCount(const TokenId& token) const;
+      int getFlawCount(const TokenId token) const;
 
       static const char* getProblemString(ProblemType t) { return problemLabels[t]; }
 
@@ -209,6 +210,7 @@ namespace EUROPA {
        * @param inst The deleted Instant.
        */
       virtual void notifyDeleted(const InstantId inst);
+      void notifyDeleted(const TokenId token);
 
       /**
        * @brief Receive notification of a violation at an instant.  The subclass should take appropriate
@@ -239,21 +241,21 @@ namespace EUROPA {
       void resetViolations(InstantId inst);
       void resetViolations();
 
-      virtual void addToProfile(const TokenId& tok) = 0;
-      virtual void removeFromProfile(const TokenId& tok);
-      virtual void createTransactions(const TokenId& tok) = 0;
-      virtual void removeTransactions(const TokenId& tok) = 0;
+      virtual void addToProfile(const TokenId tok) = 0;
+      virtual void removeFromProfile(const TokenId tok);
+      virtual void createTransactions(const TokenId tok) = 0;
+      virtual void removeTransactions(const TokenId tok) = 0;
 
     protected:
-      FVDetectorId m_detector; /*<! The flaw and violation detector for this resource. */
-      ExplicitProfileId m_capacityProfile; /*<! The capacity profile for this resource. */
-      ExplicitProfileId m_limitProfile; /*<! The limit profile for this resource. */
-      ProfileId m_profile; /*<! The usage profile for this resource. */
+      FVDetectorId m_detector; /**< The flaw and violation detector for this resource. */
+      ExplicitProfileId m_capacityProfile; /**< The capacity profile for this resource. */
+      ExplicitProfileId m_limitProfile; /**< The limit profile for this resource. */
+      ProfileId m_profile; /**< The usage profile for this resource. */
       std::map<TransactionId, TokenId> m_transactionsToTokens;
       std::map<TokenId, std::set<InstantId> > m_flawedTokens;
       std::map<eint, InstantId> m_flawedInstants;
-      edouble m_maxInstProduction, m_maxInstConsumption; /*<! The maximum production and consumption allowed at an instant */
-      edouble m_maxProduction, m_maxConsumption; /*<! The maximum production and consumption allowed over the lifetime of the resource */
+      edouble m_maxInstProduction, m_maxInstConsumption; /**< The maximum production and consumption allowed at an instant */
+      edouble m_maxProduction, m_maxConsumption; /**< The maximum production and consumption allowed over the lifetime of the resource */
 
       TokenId getTokenForTransaction(TransactionId t);
       ResourceTokenRelationId getRTRConstraint(TokenId tok);
@@ -263,9 +265,9 @@ namespace EUROPA {
     private:
       friend class ResourceTokenRelation;
 
-      virtual bool transConstrainedToPrecede(const TransactionId& predecessor, const TransactionId& successor);
+      virtual bool transConstrainedToPrecede(const TransactionId predecessor, const TransactionId successor);
 
-      bool noFlawedTokensForInst(const InstantId& inst) const;
+      bool noFlawedTokensForInst(const InstantId inst) const;
     };
 }
 #endif

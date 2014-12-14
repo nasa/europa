@@ -7,7 +7,7 @@
 namespace EUROPA {
     class ReusableToken : public IntervalToken {
     public:
-      ReusableToken(const PlanDatabaseId& planDatabase,
+      ReusableToken(const PlanDatabaseId planDatabase,
 		    const LabelStr& predicateName,
 		    const IntervalIntDomain& startBaseDomain = IntervalIntDomain(),
 		    const IntervalIntDomain& endBaseDomain = IntervalIntDomain(),
@@ -17,7 +17,7 @@ namespace EUROPA {
 		    bool closed = true,
 		    bool activate = true);
 
-      ReusableToken(const PlanDatabaseId& planDatabase,
+      ReusableToken(const PlanDatabaseId planDatabase,
 		    const LabelStr& predicateName,
 		    const IntervalIntDomain& startBaseDomain,
 		    const IntervalIntDomain& endBaseDomain,
@@ -26,7 +26,7 @@ namespace EUROPA {
 		    bool closed,
 		    bool activate = true);
 
-      ReusableToken(const TokenId& master,
+      ReusableToken(const TokenId master,
 		    const LabelStr& relation,
 		    const LabelStr& predicateName,
 		    const IntervalIntDomain& startBaseDomain,
@@ -36,7 +36,7 @@ namespace EUROPA {
 		    bool closed,
 		    bool activate = true);
 
-      ReusableToken(const TokenId& master,
+      ReusableToken(const TokenId master,
 		    const LabelStr& relation,
 		    const LabelStr& predicateName,
 		    const IntervalIntDomain& startBaseDomain,
@@ -47,7 +47,7 @@ namespace EUROPA {
 		    bool closed,
 		    bool activate = true);
 
-      ReusableToken(const PlanDatabaseId& planDatabase,
+      ReusableToken(const PlanDatabaseId planDatabase,
 		    const LabelStr& predicateName,
 		    bool rejectable,
 		    bool isFact,
@@ -59,7 +59,7 @@ namespace EUROPA {
 		    bool closed = true,
 		    bool activate = true);
 
-      ReusableToken(const PlanDatabaseId& planDatabase,
+      ReusableToken(const PlanDatabaseId planDatabase,
 		    const LabelStr& predicateName,
 		    bool rejectable,
 		    bool isFact,
@@ -70,7 +70,7 @@ namespace EUROPA {
 		    bool closed,
 		    bool activate = true);
 
-      const ConstrainedVariableId& getQuantity() const;
+      const ConstrainedVariableId getQuantity() const;
       void print(std::ostream& os);
       virtual void close();
     protected:
@@ -81,7 +81,7 @@ namespace EUROPA {
 
     class UnaryToken : public ReusableToken {
     public:
-      UnaryToken(const PlanDatabaseId& planDatabase,
+      UnaryToken(const PlanDatabaseId planDatabase,
 		 const LabelStr& predicateName,
 		 const IntervalIntDomain& startBaseDomain = IntervalIntDomain(),
 		 const IntervalIntDomain& endBaseDomain = IntervalIntDomain(),
@@ -90,7 +90,7 @@ namespace EUROPA {
 		 bool closed = true,
 		 bool activate = true);
 
-      UnaryToken(const PlanDatabaseId& planDatabase,
+      UnaryToken(const PlanDatabaseId planDatabase,
 		 const LabelStr& predicateName,
 		 bool rejectable,
 		 bool isFact,
@@ -101,7 +101,7 @@ namespace EUROPA {
 		 bool closed = true,
 		 bool activate = true);
 
-      UnaryToken(const TokenId& master,
+      UnaryToken(const TokenId master,
 		 const LabelStr& relation,
 		 const LabelStr& predicateName,
 		 const IntervalIntDomain& startBaseDomain,

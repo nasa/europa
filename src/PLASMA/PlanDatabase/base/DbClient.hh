@@ -30,7 +30,7 @@ namespace EUROPA {
    */
   class DbClient {
   public:
-    const DbClientId& getId() const;
+    const DbClientId getId() const;
 
     /**
      * @brief Create a variable
@@ -52,7 +52,7 @@ namespace EUROPA {
     /**
      * @brief Delete a variable.  By way of symmetry with createVariable().
      */
-    void deleteVariable(const ConstrainedVariableId& var);
+    void deleteVariable(const ConstrainedVariableId var);
 
     /**
      * @brief Create an object instance in the dabatase.
@@ -76,7 +76,7 @@ namespace EUROPA {
     /**
      * @brief Delete an object.  By way of symmetry with createObject().
      */
-    void deleteObject(const ObjectId& obj);
+    void deleteObject(const ObjectId obj);
 
     /**
      * @brief Close the database. This will prohibit any further insertion of objects.
@@ -104,7 +104,7 @@ namespace EUROPA {
     /**
      * @brief Deletes a token instance.  By way of symmetry with createToken().
      */
-    void deleteToken(const TokenId& token, const std::string& name = "");
+    void deleteToken(const TokenId token, const std::string& name = "");
 
     /**
      * @brief imposes a constraint such that token comes before successor, on the given object.
@@ -113,7 +113,7 @@ namespace EUROPA {
      * @param successor The token to be the successor. If 0, the Token is constrained to succeed all
      * other ordered tokens.
      */
-    void constrain(const ObjectId& object, const TokenId& predecessor, const TokenId& successor);
+    void constrain(const ObjectId object, const TokenId predecessor, const TokenId successor);
 
     /**
      * @brief Frees any constraints imposed on a Token arising from calls to constrain.
@@ -121,32 +121,32 @@ namespace EUROPA {
      * @param predecessor The token that is the predecessor
      * @param successor The token that is the successor.
      */
-    void free(const ObjectId& object, const TokenId& predecessor, const TokenId& successor);
+    void free(const ObjectId object, const TokenId predecessor, const TokenId successor);
 
     /**
      * @brief Activate the given token
      * @param token The token to be activated. It must be inactive.
      */
-    void activate(const TokenId& token);
+    void activate(const TokenId token);
 
     /**
      * @brief Merge the given token
      * @param token The token to be merged. It must be inactive.
      * @param activeToken The token to be merged onto.
      */
-    void merge(const TokenId& token, const TokenId& activeToken);
+    void merge(const TokenId token, const TokenId activeToken);
 
     /**
      * @brief Reject the given token
      * @param token The token to be rejected. It must be inactive.
      */
-    void reject(const TokenId& token);
+    void reject(const TokenId token);
 
     /**
      * @brief Cancel restriction to Token Variables state through activate, merge, or reject
      * @param token The target token
      */
-    void cancel(const TokenId& token);
+    void cancel(const TokenId token);
 
     /**
      * @brief The initial state may include constraints, even if the planner does not express any decisions
@@ -165,13 +165,13 @@ namespace EUROPA {
      * @param domain The domain to restrict against.
      */
     ConstraintId createConstraint(const char* name,
-				  const ConstrainedVariableId& variable,
+				  const ConstrainedVariableId variable,
 				  const Domain& domain);
 
     /**
      * @brief Delete a constraint.  By way of symmetry with createConstraint().
      */
-    void deleteConstraint(const ConstraintId& constr);
+    void deleteConstraint(const ConstraintId constr);
 
     /**
      * @brief Restricts the base domain of a variable
@@ -179,7 +179,7 @@ namespace EUROPA {
      * @param domain The new base domain of the variable.
      * @see getEntityByKey
      */
-    void restrict(const ConstrainedVariableId& variable, const Domain& domain);
+    void restrict(const ConstrainedVariableId variable, const Domain& domain);
 
     /**
      * @brief Binds the value of a variable
@@ -189,19 +189,19 @@ namespace EUROPA {
      * value to specify.
      * @see getEntityByKey
      */
-    void specify(const ConstrainedVariableId& variable, edouble value);
+    void specify(const ConstrainedVariableId variable, edouble value);
 
     /**
      * @brief Close the domains of a dynamic variable.
      * @param variable The dynamic variable to be closed.=
      */
-    void close(const ConstrainedVariableId& variable);
+    void close(const ConstrainedVariableId variable);
 
     /**
      * @brief resets the specified domain of the target variable to its base domain
      * @param variable The variable to be reset
      */
-    void reset(const ConstrainedVariableId& variable);
+    void reset(const ConstrainedVariableId variable);
 
     /*!< Support for interaction with ConsistencyManagement */
 
@@ -261,7 +261,7 @@ namespace EUROPA {
      * @see getTokenByPath
      * @see enableTransactionLogging
      */
-    std::vector<int> getPathByToken(const TokenId& targetToken) const;
+    std::vector<unsigned int> getPathByToken(const TokenId targetToken) const;
 
     /**
      * @brief Retrieve the relative path for obtaining the target token from a given root token.
@@ -271,7 +271,7 @@ namespace EUROPA {
      * @see getPathByToken
      * @see enableTransactionLogging
      */
-    std::string getPathAsString(const TokenId& targetToken) const;
+    std::string getPathAsString(const TokenId targetToken) const;
 
     /**
      * @brief Retrieve a constrained variable of any type based on its 'index'
@@ -282,21 +282,21 @@ namespace EUROPA {
      * @brief Retrieve an index for a variable. Required for logging. Tricks will have to be done to make
      * this fast!
      */
-    unsigned int getIndexByVariable(const ConstrainedVariableId& var);
+    unsigned int getIndexByVariable(const ConstrainedVariableId var);
 
     ConstraintId getConstraintByIndex(unsigned int index);
 
-    unsigned int getIndexByConstraint(const ConstraintId& constr);
+    unsigned int getIndexByConstraint(const ConstraintId constr);
 
     /**
      * @brief Adds a listener to operations invoked on the client
      */
-    void notifyAdded(const DbClientListenerId& listener);
+    void notifyAdded(const DbClientListenerId listener);
 
     /**
      * @brief Removes a listener
      */
-    void notifyRemoved(const DbClientListenerId& listener);
+    void notifyRemoved(const DbClientListenerId listener);
 
 
     /**
@@ -334,13 +334,13 @@ namespace EUROPA {
     edouble createValue(const char* typeName, const std::string& value);
         
     // Temporarily exposing these to remove singletons, need to review DbClient concept in general
-    const CESchemaId& getCESchema() const;
-    const SchemaId& getSchema() const;
+    const CESchemaId getCESchema() const;
+    const SchemaId getSchema() const;
 
   private:
     friend class PlanDatabase;
 
-    DbClient(const PlanDatabaseId& db);
+    DbClient(const PlanDatabaseId db);
     ~DbClient();
     DbClient(); /* NO IMPL */
     DbClient(const DbClient&); /* NO IMPL */
@@ -362,7 +362,7 @@ namespace EUROPA {
   class PSPlanDatabaseClientImpl : public PSPlanDatabaseClient
   {
     public:
-      PSPlanDatabaseClientImpl(const DbClientId& c);
+      PSPlanDatabaseClientImpl(const DbClientId c);
 
       virtual PSVariable* createVariable(const std::string& typeName, const std::string& name, bool isTmpVar);
       virtual void deleteVariable( PSVariable* var);

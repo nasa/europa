@@ -58,7 +58,7 @@ using namespace EUROPA::SOLVERS;
 using namespace EUROPA::SOLVERS::HSTS;
 using namespace boost;
 
-void registerTestElements(EngineId& engine);
+void registerTestElements(EngineId engine);
 
 class SolversTestEngine : public EngineBase
 {
@@ -66,10 +66,10 @@ class SolversTestEngine : public EngineBase
   SolversTestEngine();
   virtual ~SolversTestEngine();
   
-  const SchemaId&           getSchema()           { return static_cast<Schema*>(getComponent("Schema"))->getId(); }
-  const ConstraintEngineId& getConstraintEngine() { return static_cast<ConstraintEngine*>(getComponent("ConstraintEngine"))->getId(); }
-  const PlanDatabaseId&     getPlanDatabase()     { return static_cast<PlanDatabase*>(getComponent("PlanDatabase"))->getId(); }
-  const RulesEngineId&      getRulesEngine()      { return static_cast<RulesEngine*>(getComponent("RulesEngine"))->getId(); }
+  const SchemaId           getSchema()           { return static_cast<Schema*>(getComponent("Schema"))->getId(); }
+  const ConstraintEngineId getConstraintEngine() { return static_cast<ConstraintEngine*>(getComponent("ConstraintEngine"))->getId(); }
+  const PlanDatabaseId     getPlanDatabase()     { return static_cast<PlanDatabase*>(getComponent("PlanDatabase"))->getId(); }
+  const RulesEngineId      getRulesEngine()      { return static_cast<RulesEngine*>(getComponent("RulesEngine"))->getId(); }
 
   protected:
     void createModules();
@@ -127,7 +127,7 @@ class LazyAllDiff: public Constraint {
 public:
   LazyAllDiff(const LabelStr& name,
               const LabelStr& propagatorName,
-              const ConstraintEngineId& constraintEngine,
+              const ConstraintEngineId constraintEngine,
               const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
   }
@@ -155,7 +155,7 @@ class LazyAlwaysFails: public Constraint {
 public:
   LazyAlwaysFails(const LabelStr& name,
                   const LabelStr& propagatorName,
-                  const ConstraintEngineId& constraintEngine,
+                  const ConstraintEngineId constraintEngine,
                   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
   }
@@ -207,7 +207,7 @@ private:
       ComponentFactoryMgr* cfm = 
           dynamic_cast<ComponentFactoryMgr*>(testEngine.getComponent("ComponentFactoryMgr"));
       TestComponent * testComponent = 
-          static_cast<TestComponent*>(cfm->createInstance(*child));
+          static_cast<TestComponent*>(cfm->createComponentInstance(*child));
       delete testComponent;
     }
 
@@ -219,8 +219,8 @@ private:
   }
 };
 
-void nukeToken(const DbClientId& dbClient,const TokenId& token)
-{
+namespace {
+void nukeToken(const DbClientId dbClient,const TokenId token) {
     if (token->isCommitted()) {
         token->discard();
         return;
@@ -231,6 +231,7 @@ void nukeToken(const DbClientId& dbClient,const TokenId& token)
 
     checkError(token->isInactive(),"Couldn't make inactive:" << token->toLongString());
     dbClient->deleteToken(token);
+}
 }
 
 class FilterTests {
@@ -445,7 +446,7 @@ private:
       std::vector<MatchingRuleId> rules;
       me.getMatches(ConstrainedVariableId(E_predicateC->duration()), rules);
       CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getPredicateName().toString(), rules.size() == 4);
-      for(int i=0;i<4; i++) {//? {
+      for(unsigned long i=0;i<4; i++) {//? {
         CPPUNIT_ASSERT_MESSAGE(rules[i]->toString(),
                                expectedRules.find(LabelStr(rules[i]->toString())) != expectedRules.end());
       }
@@ -1720,10 +1721,10 @@ private:
       debugMsg("SolverTests:testExhaustinveSearch", "Step count == " << solver.getStepCount());
 
       const ConstrainedVariableSet& allVars = testEngine.getPlanDatabase()->getGlobalVariables();
-      unsigned int stepCount = 0;
-      unsigned int product = 1;
+      unsigned long stepCount = 0;
+      unsigned long product = 1;
       for(ConstrainedVariableSet::const_iterator it = allVars.begin(); it != allVars.end(); ++it){
-        static const unsigned int baseDomainSize = (*it)->baseDomain().getSize();
+        static const unsigned long baseDomainSize = (*it)->baseDomain().getSize();
         stepCount = stepCount + (product*baseDomainSize);
         product = product*baseDomainSize;
       }
@@ -1838,11 +1839,11 @@ private:
     unsigned int solutionCount = 1;
     unsigned int timeoutCount = 0;
     unsigned int iterationCount = 0;
-    unsigned int backjumpDistance = 1;
+    unsigned long backjumpDistance = 1;
     while(iterationCount < solutionLimit && !solver.isExhausted()){
       debugMsg("SolverTests:testMultipleSolutionsSearch", "Solving for iteration " << iterationCount);
 
-      unsigned int priorDepth = solver.getDepth();
+      unsigned long priorDepth = solver.getDepth();
       iterationCount++;
       solver.backjump(backjumpDistance);
       solver.solve(10);
@@ -2029,7 +2030,8 @@ private:
     ConstrainedVariableSet variables = testEngine.getConstraintEngine()->getVariables();
     IteratorId flawIterator = fm.createIterator();
     while(!flawIterator->done()) {
-      const ConstrainedVariableId var = (const ConstrainedVariableId) flawIterator->next();
+      // const ConstrainedVariableId var = (const ConstrainedVariableId) flawIterator->next();
+      const ConstrainedVariableId var = flawIterator->next();
       if(var.isNoId())
         continue;
       CPPUNIT_ASSERT(fm.inScope(var));
@@ -2042,7 +2044,7 @@ private:
     for(ConstrainedVariableSet::const_iterator it = variables.begin(); it != variables.end(); ++it)
       CPPUNIT_ASSERT(!fm.inScope(*it));
 
-    delete (Iterator*) flawIterator;
+    delete static_cast<Iterator*>(flawIterator);
     delete root;
     return true;
   }
@@ -2063,7 +2065,7 @@ private:
     IteratorId flawIterator = fm.createIterator();
 
     while(!flawIterator->done()) {
-      const TokenId token = (const TokenId) flawIterator->next();
+      const TokenId token = flawIterator->next();
       if(token.isNoId())
         continue;
       CPPUNIT_ASSERT(fm.inScope(token));
@@ -2076,7 +2078,7 @@ private:
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it)
       CPPUNIT_ASSERT(!fm.inScope(*it));
 
-    delete (Iterator*) flawIterator;
+    delete static_cast<Iterator*>(flawIterator);
     delete root;
 
     return true;
@@ -2097,7 +2099,7 @@ private:
     IteratorId flawIterator = fm.createIterator();
 
     while(!flawIterator->done()) {
-      const TokenId token = (const TokenId) flawIterator->next();
+      const TokenId token = flawIterator->next();
       if(token.isNoId())
         continue;
       CPPUNIT_ASSERT(fm.inScope(token));
@@ -2110,7 +2112,7 @@ private:
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it)
       CPPUNIT_ASSERT(!fm.inScope(*it));
 
-    delete (Iterator*) flawIterator;
+    delete static_cast<Iterator*>(flawIterator);
     delete root;
     return true;
   }
@@ -2142,13 +2144,13 @@ private:
       if(entity.isNoId())
         continue;
       if(TokenId::convertable(entity)) {
-        const TokenId tok = (const TokenId) entity;
+        const TokenId tok = entity;
         CPPUNIT_ASSERT(tm.inScope(tok) || ocm.inScope(tok));
         CPPUNIT_ASSERT(tokens.find(tok) != tokens.end());
         tokens.erase(tok);
       }
       else if(ConstrainedVariableId::convertable(entity)) {
-        const ConstrainedVariableId var = (const ConstrainedVariableId) entity;
+        const ConstrainedVariableId var = entity;
         CPPUNIT_ASSERT(uvm.inScope(var));
         CPPUNIT_ASSERT(vars.find(var) != vars.end());
         std::cerr << var->toString() << std::endl;
@@ -2166,7 +2168,7 @@ private:
       CPPUNIT_ASSERT(!uvm.inScope(*it));
     }
 
-    delete (Iterator*) flawIterator;
+    delete static_cast<Iterator*>(flawIterator);
     delete root;
 
     return true;
@@ -2176,9 +2178,9 @@ private:
 
 class FlawManagerListener : public ConstraintEngineListener {
  public:
-  FlawManagerListener(const ConstraintEngineId& ce, FlawManager& fm) 
+  FlawManagerListener(const ConstraintEngineId ce, FlawManager& fm) 
       : ConstraintEngineListener(ce), m_fm(fm) {}
-  void notifyChanged(const ConstrainedVariableId& var, const DomainListener::ChangeType& change) {
+  void notifyChanged(const ConstrainedVariableId var, const DomainListener::ChangeType& change) {
     m_fm.notifyChanged(var, change);
   }
  private:
@@ -2302,10 +2304,11 @@ public:
   }
 };
 
-void registerTestElements(EngineId& engine)
+void registerTestElements(EngineId engine)
 {
-   CESchema* ces = (CESchema*)engine->getComponent("CESchema");
-   EUROPA::SOLVERS::ComponentFactoryMgr* cfm = (EUROPA::SOLVERS::ComponentFactoryMgr*)engine->getComponent("ComponentFactoryMgr");
+  CESchema* ces = reinterpret_cast<CESchema*>(engine->getComponent("CESchema"));
+  EUROPA::SOLVERS::ComponentFactoryMgr* cfm =
+      reinterpret_cast<EUROPA::SOLVERS::ComponentFactoryMgr*>(engine->getComponent("ComponentFactoryMgr"));
 
    // For tests on the matching engine
    REGISTER_COMPONENT_FACTORY(cfm,MatchingRule, MatchingRule);

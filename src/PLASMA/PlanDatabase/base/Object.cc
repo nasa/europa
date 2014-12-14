@@ -19,7 +19,7 @@
  */
 namespace EUROPA {
 
-  Object::Object(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)
+  Object::Object(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open)
     : m_id(this), m_type(type), m_name(name), m_planDatabase(planDatabase),
       m_state(INCOMPLETE), m_lastOrderingChoiceCount(0),
       m_thisVar((new Variable< ObjectDomain>(m_planDatabase->getConstraintEngine(),
@@ -30,7 +30,7 @@ namespace EUROPA {
       close();
   }
 
-  Object::Object(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open)
+  Object::Object(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open)
     : m_id(this), m_parent(parent),
       m_type(type),
       m_name(std::string(parent->getName().toString() + "." + localName.toString())),
@@ -63,7 +63,7 @@ void Object::constructor(const std::vector<const Domain*>&) {}
    * so this is necessary for the interpreter to provide the same behavior
    * Everybody should be going through the factories
    */
-  void Object::setParent(const ObjectId& parent)
+  void Object::setParent(const ObjectId parent)
   {
   	m_parent = parent;
   	m_parent->add(m_id);
@@ -104,11 +104,11 @@ void Object::constructor(const std::vector<const Domain*>&) {}
     Entity::handleDiscard();
   }
 
-  const ObjectId& Object::getId() const {
+  const ObjectId Object::getId() const {
     return(m_id);
   }
 
-  const ObjectId& Object::getParent() const {
+  const ObjectId Object::getParent() const {
     return(m_parent);
   }
 
@@ -131,11 +131,11 @@ void Object::constructor(const std::vector<const Domain*>&) {}
     return(m_name);
   }
 
-  const PlanDatabaseId& Object::getPlanDatabase() const {
+  const PlanDatabaseId Object::getPlanDatabase() const {
     return(m_planDatabase);
   }
 
-  const ConstrainedVariableId& Object::getThis() const {
+  const ConstrainedVariableId Object::getThis() const {
     return m_thisVar;
   }
 
@@ -147,27 +147,27 @@ void Object::constructor(const std::vector<const Domain*>&) {}
     return(m_variables);
   }
 
-  void Object::add(const ObjectId& component) {
+  void Object::add(const ObjectId component) {
     check_error(m_components.find(component) == m_components.end());
     check_error(component->getPlanDatabase() == m_planDatabase);
     check_error(component->getParent() == m_id);
     m_components.insert(component);
   }
 
-  void Object::remove(const ObjectId& component) {
+  void Object::remove(const ObjectId component) {
     check_error(!Entity::isPurging());
     check_error(m_components.find(component) != m_components.end());
     m_components.erase(component);
   }
 
-  void Object::add(const TokenId& token) {
+  void Object::add(const TokenId token) {
     check_error(isComplete());
     debugMsg("Object:add:token", "Adding token " << token->getPredicateName().toString() << "(" << token->getKey() << ")");
     m_tokens.insert(token);
     m_planDatabase->notifyAdded(m_id, token);
   }
 
-  void Object::remove(const TokenId& token) {
+  void Object::remove(const TokenId token) {
     check_error(token.isValid());
 
     debugMsg("Object:remove:token", "Removing token " << token->getPredicateName().toString() << "(" << token->getKey() << ")  from " << toString());
@@ -228,11 +228,11 @@ void Object::constructor(const std::vector<const Domain*>&) {}
     return(m_tokens);
   }
 
-  bool Object::hasToken(const TokenId& token) const {
+  bool Object::hasToken(const TokenId token) const {
     return m_tokens.find(token) != m_tokens.end() && token->getObject()->lastDomain().isSingleton();
   }
 
-  void Object::getOrderingChoices( const TokenId& token,
+  void Object::getOrderingChoices( const TokenId token,
 				   std::vector< std::pair<TokenId, TokenId> >& results,
 #ifdef _MSC_VER
 				   unsigned long limit
@@ -244,14 +244,14 @@ void Object::constructor(const std::vector<const Domain*>&) {}
     results.push_back(std::make_pair(token, token));
   }
 
-unsigned long Object::countOrderingChoices(const TokenId& token, unsigned long limit){
+unsigned long Object::countOrderingChoices(const TokenId token, unsigned long limit){
   std::vector< std::pair<TokenId, TokenId> > results;
   getOrderingChoices(token, results, limit);
   m_lastOrderingChoiceCount = results.size();
   return m_lastOrderingChoiceCount;
 }
 
-unsigned long Object::lastOrderingChoiceCount(const TokenId&) const{
+unsigned long Object::lastOrderingChoiceCount(const TokenId) const{
   return m_lastOrderingChoiceCount;
 }
 
@@ -261,11 +261,11 @@ void Object::getTokensToOrder(std::vector<TokenId>&) {}
     return(false);
   }
 
-  void Object::constrain(const TokenId& predecessor, const TokenId& successor){
+  void Object::constrain(const TokenId predecessor, const TokenId successor){
     constrain(predecessor, successor, true);
   }
 
-void Object::constrain(const TokenId& predecessor, const TokenId& successor, bool isExplicit) {
+void Object::constrain(const TokenId predecessor, const TokenId successor, bool isExplicit) {
   check_error(predecessor.isValid());
   checkError(predecessor->isActive(), predecessor->toString() << ": " << predecessor->getState()->toString());
   check_error(successor.isValid());
@@ -317,11 +317,11 @@ void Object::constrain(const TokenId& predecessor, const TokenId& successor, boo
 
 }
 
-  void Object::free(const TokenId& predecessor, const TokenId& successor){
+  void Object::free(const TokenId predecessor, const TokenId successor){
     free(predecessor, successor, true);
   }
 
-  void Object::free(const TokenId& predecessor, const TokenId& successor, bool isExplicit) {
+  void Object::free(const TokenId predecessor, const TokenId successor, bool isExplicit) {
     check_error(!Entity::isPurging());
     check_error(predecessor.isValid());
     check_error(successor.isValid());
@@ -372,10 +372,10 @@ void Object::constrain(const TokenId& predecessor, const TokenId& successor, boo
     delete this;
   }
 
-  const ConstrainedVariableId& Object::getVariable(const LabelStr& name) const {
+  const ConstrainedVariableId Object::getVariable(const LabelStr& name) const {
     for (std::vector<ConstrainedVariableId>::const_iterator it = m_variables.begin();
          it != m_variables.end(); ++it) {
-      const ConstrainedVariableId& var = *it;
+      const ConstrainedVariableId var = *it;
       check_error(var.isValid());
       if (var->getName() == name)
         return(var);
@@ -415,7 +415,7 @@ void Object::constrain(const TokenId& predecessor, const TokenId& successor, boo
    * Will only delete a constraint if there is exactly one constraint for this token and it is
    * there through implication, rather explicit user action.
    */
-  void Object::clean(const TokenId& token) {
+  void Object::clean(const TokenId token) {
     check_error(token.isValid());
 
     // Find the first constraint on this token
@@ -438,14 +438,14 @@ void Object::constrain(const TokenId& predecessor, const TokenId& successor, boo
    * Implementation relies on the internal store of constraints by token key. There will
    * be at least one constraint present for this token for it to be true.
    */
-  bool Object::isConstrainedToThisObject(const TokenId& token) const {
+  bool Object::isConstrainedToThisObject(const TokenId token) const {
     check_error(token.isValid());
 
     // Must be at least one entry for this token
     return m_constraintsByTokenKey.find(token->getKey()) != m_constraintsByTokenKey.end();
   }
 
-  ConstraintId Object::getPrecedenceConstraint(const TokenId& predecessor, const TokenId& successor) const{
+  ConstraintId Object::getPrecedenceConstraint(const TokenId predecessor, const TokenId successor) const{
     std::pair<eint, eint> encodedKey = std::make_pair(predecessor->getKey(), successor->getKey());
     std::multimap<std::pair<eint, eint>, ConstraintId>::const_iterator it =
         m_constraintsByKeyPair.find(encodedKey);
@@ -463,14 +463,14 @@ void Object::constrain(const TokenId& predecessor, const TokenId& successor, boo
   /**
    * Use encoded lookup
    */
-  bool Object::isConstrainedToPrecede(const TokenId& predecessor, const TokenId& successor) const{
+  bool Object::isConstrainedToPrecede(const TokenId predecessor, const TokenId successor) const{
     return getPrecedenceConstraint(predecessor, successor).isId();
   }
 
   /**
    * Get all constraints for this token. And the accompanying encoded key pair
    */
-  void Object::getPrecedenceConstraints(const TokenId& token,
+  void Object::getPrecedenceConstraints(const TokenId token,
 					std::vector<ConstraintId>& results) const{
     check_error(isValid());
     check_error(results.empty());
@@ -496,7 +496,7 @@ void Object::constrain(const TokenId& predecessor, const TokenId& successor, boo
   }
 
 
-  bool Object::hasExplicitConstraint(const TokenId& token) const {
+  bool Object::hasExplicitConstraint(const TokenId token) const {
     // Get all the constraints for this token
     std::vector<ConstraintId> constraints;
     getPrecedenceConstraints(token, constraints);
@@ -518,7 +518,7 @@ void Object::constrain(const TokenId& predecessor, const TokenId& successor, boo
     return m_explicitConstraints.find(token->getKey()) != m_explicitConstraints.end();
   }
 
-  bool Object::canBeCompared(const EntityId& entity) const {
+  bool Object::canBeCompared(const EntityId entity) const {
     return(ObjectId::convertable(entity));
   }
 
@@ -529,7 +529,7 @@ void Object::constrain(const TokenId& predecessor, const TokenId& successor, boo
     }
   }
 
-  void Object::clean(const ConstraintId& constraint, eint tokenKey) {
+  void Object::clean(const ConstraintId constraint, eint tokenKey) {
     // Remove the entry in the predecessor list if necessary
     std::multimap<eint, ConstraintId>::iterator it = m_constraintsByTokenKey.find(tokenKey);
     while(it != m_constraintsByTokenKey.end() && it->first == tokenKey && it->second != constraint)
@@ -538,7 +538,7 @@ void Object::constrain(const TokenId& predecessor, const TokenId& successor, boo
       m_constraintsByTokenKey.erase(it);
   }
 
-  void Object::constrainToThisObjectAsNeeded(const TokenId& token) {
+  void Object::constrainToThisObjectAsNeeded(const TokenId token) {
     check_error(token.isValid());
     check_error(token->isActive());
     check_error(token->getObject()->lastDomain().isMember(getKey()),
@@ -555,7 +555,7 @@ void Object::constrain(const TokenId& predecessor, const TokenId& successor, boo
   }
 
 
-  void Object::freeImplicitConstraints(const TokenId& token){
+  void Object::freeImplicitConstraints(const TokenId token){
     // Get all the constraints for this token
     std::vector<ConstraintId> constraints;
     getPrecedenceConstraints(token, constraints);
@@ -652,21 +652,21 @@ ConstrainedVariableId Object::addVariable(const Domain& baseDomain, const char* 
 }
 
 
-  void Object::notifyOrderingRequired(const TokenId& token){
+  void Object::notifyOrderingRequired(const TokenId token){
     m_planDatabase->notifyOrderingRequired(m_id, token);
   }
 
-  void Object::notifyOrderingNoLongerRequired(const TokenId& token){
+  void Object::notifyOrderingNoLongerRequired(const TokenId token){
     m_planDatabase->notifyOrderingNoLongerRequired(m_id, token);
   }
 
 
   /** Stubs for notification handlers **/
-  void Object::notifyMerged(const TokenId&){}
+  void Object::notifyMerged(const TokenId){}
 
-  void Object::notifyRejected(const TokenId&){}
+  void Object::notifyRejected(const TokenId){}
 
-  void Object::notifyDeleted(const TokenId& token){
+  void Object::notifyDeleted(const TokenId token){
     remove(token);
   }
 
@@ -696,7 +696,7 @@ ConstrainedVariableId Object::addVariable(const Domain& baseDomain, const char* 
     return sstr.str();
   }
 
-  void Object::removePrecedenceConstraint(const ConstraintId& constraint){
+  void Object::removePrecedenceConstraint(const ConstraintId constraint){
     TokenId predecessor = constraint->getScope()[0]->parent();
     TokenId successor = constraint->getScope()[1]->parent();
 
@@ -836,13 +836,13 @@ PSList<PSToken*> Object::getTokens() const {
   }
 
 
-  ObjectDomain::ObjectDomain(const DataTypeId& dt)
+  ObjectDomain::ObjectDomain(const DataTypeId dt)
   : EnumeratedDomain(dt)
   {
     check_error(!isNumeric());
   }
 
-  ObjectDomain::ObjectDomain(const DataTypeId& dt, const std::list<ObjectId>& initialValues)
+  ObjectDomain::ObjectDomain(const DataTypeId dt, const std::list<ObjectId>& initialValues)
   : EnumeratedDomain(dt)
   {
     check_error(!isNumeric());
@@ -854,7 +854,7 @@ PSList<PSToken*> Object::getTokens() const {
     close();
   }
 
-  ObjectDomain::ObjectDomain(const DataTypeId& dt, const ObjectId& initialValue)
+  ObjectDomain::ObjectDomain(const DataTypeId dt, const ObjectId initialValue)
     : EnumeratedDomain(dt, initialValue->getKey())
   {
       check_error(!isNumeric());
@@ -907,7 +907,7 @@ PSList<PSToken*> Object::getTokens() const {
     return(ptr);
   }
 
-  bool ObjectDomain::isMember(const ObjectId& obj) const {
+  bool ObjectDomain::isMember(const ObjectId obj) const {
     return isMember(obj->getKey());
   }
   bool ObjectDomain::isMember(edouble value) const {
@@ -915,7 +915,7 @@ PSList<PSToken*> Object::getTokens() const {
   }
   
 
-  void ObjectDomain::remove(const ObjectId& obj) {
+  void ObjectDomain::remove(const ObjectId obj) {
     remove(obj->getKey());
   }
   void ObjectDomain::remove(edouble value) {

@@ -21,6 +21,8 @@
 #include "Filters.hh"
 #include "PlanDatabaseWriter.hh"
 
+#include <boost/cast.hpp>
+
 namespace EUROPA {
 //namespace System { //TODO: mcr
 
@@ -60,13 +62,13 @@ EuropaEngine::EuropaEngine() : m_totalNodes(0), m_finalDepth(0) {
 #endif
     }
 
-    ConstraintEngineId& EuropaEngine::getConstraintEngine() { return (ConstraintEngineId&)((ConstraintEngine*)getComponent("ConstraintEngine"))->getId(); }
-    PlanDatabaseId&     EuropaEngine::getPlanDatabase()     { return (PlanDatabaseId&)((PlanDatabase*)getComponent("PlanDatabase"))->getId(); }
-    RulesEngineId&      EuropaEngine::getRulesEngine()      { return (RulesEngineId&)((RulesEngine*)getComponent("RulesEngine"))->getId(); }
+ConstraintEngineId EuropaEngine::getConstraintEngine() const { return boost::polymorphic_cast<const ConstraintEngine*>(getComponent("ConstraintEngine"))->getId(); }
+PlanDatabaseId     EuropaEngine::getPlanDatabase()     const { return boost::polymorphic_cast<const PlanDatabase*>(getComponent("PlanDatabase"))->getId(); }
+RulesEngineId      EuropaEngine::getRulesEngine()      const { return boost::polymorphic_cast<const RulesEngine*>(getComponent("RulesEngine"))->getId(); }
 
-    const ConstraintEngine* EuropaEngine::getConstraintEnginePtr() const { return (const ConstraintEngine*)getComponent("ConstraintEngine"); }
-    const PlanDatabase*     EuropaEngine::getPlanDatabasePtr()     const { return (const PlanDatabase*)getComponent("PlanDatabase"); }
-    const RulesEngine*      EuropaEngine::getRulesEnginePtr()      const { return (const RulesEngine*)getComponent("RulesEngine"); }
+const ConstraintEngine* EuropaEngine::getConstraintEnginePtr() const { return static_cast<const ConstraintEngine*>(getConstraintEngine());}
+const PlanDatabase*     EuropaEngine::getPlanDatabasePtr()     const { return static_cast<const PlanDatabase*>(getPlanDatabase());}
+const RulesEngine*      EuropaEngine::getRulesEnginePtr()      const { return static_cast<const RulesEngine*>(getComponent("RulesEngine")); }
 
     // TODO: remains of the old Assemblies, these are only used by test code, should be dropped, eventually.
     bool EuropaEngine::playTransactions(const char* txSource, const char* language)
@@ -134,21 +136,23 @@ EuropaEngine::EuropaEngine() : m_totalNodes(0), m_finalDepth(0) {
       solver->getContext()->put("horizonEnd", cast_double(end));
 
       // Now get planner step max
-      int steps = cast_int(plannerSteps->baseDomain().getSingletonValue());
-      int depth = cast_int(maxDepth->baseDomain().getSingletonValue());
+      unsigned int steps =
+          static_cast<unsigned int>(cast_int(plannerSteps->baseDomain().getSingletonValue()));
+      unsigned int depth =
+          static_cast<unsigned int>(cast_int(maxDepth->baseDomain().getSingletonValue()));
 
       bool retval = solver->solve(steps, depth);
 
       m_totalNodes = solver->getStepCount();
       m_finalDepth = solver->getDepth();
 
-      delete (SOLVERS::Solver*) solver;
+      delete static_cast<SOLVERS::Solver*>(solver);
 
       return retval;
     }
 
-    unsigned int EuropaEngine::getTotalNodesSearched() const { return m_totalNodes; }
+    unsigned long EuropaEngine::getTotalNodesSearched() const { return m_totalNodes; }
 
-    unsigned int EuropaEngine::getDepthReached() const { return m_finalDepth; }
+    unsigned long EuropaEngine::getDepthReached() const { return m_finalDepth; }
 }
 

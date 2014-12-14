@@ -20,7 +20,7 @@ Method::~Method()
     m_id.remove();
 }
 
-const MethodId& Method::getId() const
+const MethodId Method::getId() const
 {
     return m_id;
 }

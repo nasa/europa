@@ -185,7 +185,7 @@ const std::string& Entity::getEntityType() const {
 	  return NO_NAME;
   }
 
-  bool Entity::canBeCompared(const EntityId&) const{ return true;}
+  bool Entity::canBeCompared(const EntityId) const{ return true;}
 
   EntityId Entity::getEntity(const eint key){
     return internals().second.get().getEntity(key);
@@ -195,7 +195,7 @@ const std::string& Entity::getEntityType() const {
     return internals().second.get().getEntities(resultSet);
   }
 
-  void Entity::setExternalEntity(const EntityId& externalEntity){
+  void Entity::setExternalEntity(const EntityId externalEntity){
     check_error(m_externalEntity.isNoId());
     check_error(externalEntity.isValid());
     m_externalEntity = externalEntity;
@@ -213,7 +213,7 @@ const std::string& Entity::getEntityType() const {
     clearExternalEntity();
   }
 
-const EntityId& Entity::getExternalEntity() const{
+const EntityId Entity::getExternalEntity() const{
   check_error(m_externalEntity.isNoId() || m_externalEntity.isValid());
   return m_externalEntity;
 }

@@ -6,7 +6,7 @@
 
 namespace EUROPA{
 
-  IntervalToken::IntervalToken(const PlanDatabaseId& planDatabase,
+  IntervalToken::IntervalToken(const PlanDatabaseId planDatabase,
 			       const LabelStr& predicateName,
 			       bool rejectable,
 			       bool isFact,
@@ -25,7 +25,7 @@ namespace EUROPA{
     commonInit(startBaseDomain, endBaseDomain, closed);
   }
 
-  IntervalToken::IntervalToken(const TokenId& m_master,
+  IntervalToken::IntervalToken(const TokenId m_master,
 			       const LabelStr& m_relation,
 			       const LabelStr& predicateName,
 			       const IntervalIntDomain& startBaseDomain,
@@ -42,11 +42,11 @@ namespace EUROPA{
     commonInit(startBaseDomain, endBaseDomain, closed);
   }
 
-  const TempVarId& IntervalToken::start() const{
+  const TempVarId IntervalToken::start() const{
     checkError(m_start.isValid(), m_start);
     return m_start;}
 
-  const TempVarId& IntervalToken::end() const{
+  const TempVarId IntervalToken::end() const{
     checkError(m_end.isValid(), m_end);
     return m_end;
   }

@@ -22,7 +22,8 @@ namespace EUROPA {
     
       class ValueEnum : public UnboundVariableDecisionPoint {
       public:
-        ValueEnum(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
+        ValueEnum(const DbClientId client, const ConstrainedVariableId flawedVariable,
+                  const TiXmlElement& configData, const LabelStr& explanation = "unknown");
         edouble getNext();
         bool hasNext() const;
       private:
@@ -35,7 +36,7 @@ namespace EUROPA {
 
       class OpenConditionDecisionPoint : public SOLVERS::OpenConditionDecisionPoint {
       public:
-        OpenConditionDecisionPoint(const DbClientId& client, const TokenId& flawedToken, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
+        OpenConditionDecisionPoint(const DbClientId client, const TokenId flawedToken, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
         void handleInitialize();
         ~OpenConditionDecisionPoint();
         const std::vector<LabelStr>& getStateChoices(){return m_choices;}
@@ -54,7 +55,7 @@ namespace EUROPA {
 
       class ThreatDecisionPoint : public SOLVERS::ThreatDecisionPoint {
       public:
-        ThreatDecisionPoint(const DbClientId& client, const TokenId& tokenToOrder, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
+        ThreatDecisionPoint(const DbClientId client, const TokenId tokenToOrder, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
         void handleInitialize();
         ~ThreatDecisionPoint();
         const std::vector<std::pair<ObjectId, std::pair<TokenId, TokenId> > >& getOrderingChoices(){return m_choices;}
@@ -62,7 +63,7 @@ namespace EUROPA {
         std::string choicesToString();
         class ThreatComparator {
         public:
-          ThreatComparator(TokenComparator* comparator, const TokenId& tok);
+          ThreatComparator(TokenComparator* comparator, const TokenId tok);
           ThreatComparator(const ThreatComparator& other);
           ~ThreatComparator();
           bool operator() (const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
@@ -84,7 +85,7 @@ namespace EUROPA {
         virtual TokenComparator* copy() = 0;
         void extractTokens(const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
                            const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2,
-                           TokenId& t1, TokenId& t2);
+                           TokenId t1, TokenId t2);
         TokenId m_flawedTok;
       };
 
@@ -125,8 +126,8 @@ namespace EUROPA {
         NearTokenComparator(TokenId tok) : TokenComparator(tok) {}
         virtual bool compare(const TokenId x, const TokenId y);
         virtual TokenComparator* copy();
-        static eint absoluteDistance(const TokenId& a, const TokenId& b);
-        static eint midpoint(const TokenId& token);
+        static eint absoluteDistance(const TokenId a, const TokenId b);
+        static eint midpoint(const TokenId token);
       };
 
       class FarTokenComparator : public NearTokenComparator {

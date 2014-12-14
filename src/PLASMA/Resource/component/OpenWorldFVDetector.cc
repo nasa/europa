@@ -28,7 +28,7 @@ Resource::ProblemType OpenWorldFVDetector::getResourceLevelViolation(const Insta
 	return retval;
 }
 
-void OpenWorldFVDetector::getFDLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const
+void OpenWorldFVDetector::getFDLevelBounds(const InstantId inst, edouble& lb, edouble& ub) const
 {
 	const std::pair<edouble,edouble>& capacityBounds = m_res->getCapacityProfile()->getValue(inst->getTime());
 
@@ -39,7 +39,7 @@ void OpenWorldFVDetector::getFDLevelBounds(const InstantId& inst, edouble& lb, e
 	ub = capacityBounds.second + usageUb;
 }
 
-void OpenWorldFVDetector::getVDLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const
+void OpenWorldFVDetector::getVDLevelBounds(const InstantId inst, edouble& lb, edouble& ub) const
 {
 	getDefaultLevelBounds(inst,lb,ub);
 	ub += (m_maxCumulativeProduction - inst->getMinCumulativeProduction());

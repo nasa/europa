@@ -20,7 +20,7 @@ namespace EUROPA {
   TokenTypeMgr();
   ~TokenTypeMgr();
 
-  const TokenTypeMgrId& getId() const;
+  const TokenTypeMgrId getId() const;
 
   void purgeAll();
 
@@ -32,12 +32,12 @@ namespace EUROPA {
   /**
    * @brief Add a factory to provide instantiation of particular concrete types based on a label.
    */
-  void registerType(const TokenTypeId& type );
+  void registerType(const TokenTypeId type );
 
   /**
    * @brief Obtain the factory based on the predicate name
    */
-  TokenTypeId getType(const SchemaId& schema, const LabelStr& predicateName);
+  TokenTypeId getType(const SchemaId schema, const LabelStr& predicateName);
 
   protected:
 	  TokenTypeMgrId m_id;

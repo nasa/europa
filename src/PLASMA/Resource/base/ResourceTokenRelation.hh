@@ -17,9 +17,9 @@ namespace EUROPA {
     //when the state is singleton and ACTIVE and object is singleton, then adds the token to the profile
     class ResourceTokenRelation : public Constraint {
     public:
-      ResourceTokenRelation(const ConstraintEngineId& constraintEngine,
+      ResourceTokenRelation(const ConstraintEngineId constraintEngine,
 			    const std::vector<ConstrainedVariableId>& scope,
-			    const TokenId& tok);
+			    const TokenId tok);
       ~ResourceTokenRelation();
       static const LabelStr& CONSTRAINT_NAME() {
 	static const LabelStr sl_const("ResourceObjectRelation");
@@ -39,10 +39,11 @@ namespace EUROPA {
       std::pair<eint,Resource::ProblemType> getViolationInfo() const;
 
       // This constraint doesn't modify any variables through inference
-      virtual const std::vector<ConstrainedVariableId>& getModifiedVariables(const ConstrainedVariableId& variable) const;
+      virtual const std::vector<ConstrainedVariableId>& getModifiedVariables(const ConstrainedVariableId variable) const;
       virtual const std::vector<ConstrainedVariableId>& getModifiedVariables() const;
 
     protected:
+      virtual void notifyViolated();
       virtual void notifyViolated(Resource::ProblemType problem, const InstantId inst);
       virtual void notifyNoLongerViolated();
 
@@ -59,8 +60,8 @@ namespace EUROPA {
 
     private:
       void handleDiscard();
-      bool canIgnore(const ConstrainedVariableId& variable,
-		     int argIndex,
+      bool canIgnore(const ConstrainedVariableId variable,
+		     unsigned int argIndex,
 		     const DomainListener::ChangeType& changeType);
       void handleExecute(){}
       TokenId m_token;

@@ -3,20 +3,17 @@
 
 #include "Engine.hh"
 
-using namespace EUROPA;
+class NddlTestEngine : public EUROPA::EngineBase {
+ public:
+  NddlTestEngine();
+  virtual ~NddlTestEngine();
 
-class NddlTestEngine : public EngineBase
-{
-  public:
-	NddlTestEngine();
-	virtual ~NddlTestEngine();
+  virtual void init();
+  int run(int argc,const char **argv);
+  int run(const char* txSource, const char* language);
 
-	virtual void init();
-	int run(int argc,const char **argv);
-	int run(const char* txSource, const char* language);
-
-  protected:
-	virtual void createModules();
+ protected:
+  virtual void createModules();
 };
 
 #endif // _H_NDDL_TEST_ENGINE_

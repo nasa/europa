@@ -36,9 +36,9 @@ private:
   /* We override these base class methods (called by ConstraintEngine)
    * to call the above PS interface versions of the same methods.
    */
-  virtual void notifyViolationAdded(const ConstraintId& variable);
-  virtual void notifyViolationRemoved(const ConstraintId& variable);
-  virtual void notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType);
+  virtual void notifyViolationAdded(const ConstraintId variable);
+  virtual void notifyViolationRemoved(const ConstraintId variable);
+  virtual void notifyChanged(const ConstrainedVariableId variable, const DomainListener::ChangeType& changeType);
   
   /* These methods are likely unnecessary to a user.  We override the base
    * class version only to make private (they still don't do anything)
@@ -46,16 +46,16 @@ private:
   virtual void notifyPropagationCommenced() {}
   virtual void notifyPropagationCompleted() {}
   virtual void notifyPropagationPreempted() {}
-  virtual void notifyAdded(const ConstraintId& constraint);
-  virtual void notifyActivated(const ConstraintId& constraint);
-  virtual void notifyDeactivated(const ConstraintId& constraint);
-  virtual void notifyRemoved(const ConstraintId& constraint);
-  virtual void notifyExecuted(const ConstraintId& constraint);
+  virtual void notifyAdded(const ConstraintId constraint);
+  virtual void notifyActivated(const ConstraintId constraint);
+  virtual void notifyDeactivated(const ConstraintId constraint);
+  virtual void notifyRemoved(const ConstraintId constraint);
+  virtual void notifyExecuted(const ConstraintId constraint);
 
-  virtual void notifyDeactivated(const ConstrainedVariableId& variable);
-  virtual void notifyActivated(const ConstrainedVariableId& variable);
-  virtual void notifyAdded(const ConstrainedVariableId& variable);
-  virtual void notifyRemoved(const ConstrainedVariableId& variable);
+  virtual void notifyDeactivated(const ConstrainedVariableId variable);
+  virtual void notifyActivated(const ConstrainedVariableId variable);
+  virtual void notifyAdded(const ConstrainedVariableId variable);
+  virtual void notifyRemoved(const ConstrainedVariableId variable);
 };
 }
 

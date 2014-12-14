@@ -7,13 +7,13 @@
 #include "Number.hh"
 
 namespace EUROPA {
-FlowProfileGraph::FlowProfileGraph(const TransactionId& source,
-                                   const TransactionId& sink,
+FlowProfileGraph::FlowProfileGraph(const TransactionId ,
+                                   const TransactionId ,
                                    bool lowerLevel)
     : m_lowerLevel(lowerLevel), m_recalculate(false) {}
 
-FlowProfileGraphImpl::FlowProfileGraphImpl(const TransactionId& source, 
-                                           const TransactionId& sink, bool lowerLevel)
+FlowProfileGraphImpl::FlowProfileGraphImpl(const TransactionId source, 
+                                           const TransactionId sink, bool lowerLevel)
     : FlowProfileGraph(source, sink, lowerLevel), m_graph( 0 ), m_source( 0 ), m_sink( 0 ) {
   m_graph = new Graph();
   m_source = m_graph->createNode( source );
@@ -33,7 +33,7 @@ FlowProfileGraphImpl::~FlowProfileGraphImpl()
   m_sink = 0;
 }
 
-void FlowProfileGraphImpl::enableAt( const TransactionId& t1, const TransactionId& t2 )
+void FlowProfileGraphImpl::enableAt( const TransactionId t1, const TransactionId t2 )
 {
   debugMsg("FlowProfileGraph:enableAt","Transaction "
            << t1->time()->toString() << " and transaction "
@@ -53,7 +53,7 @@ void FlowProfileGraphImpl::enableAt( const TransactionId& t1, const TransactionI
   m_graph->createEdge( t2, t1, Edge::getMaxCapacity() );
 }
 
-void FlowProfileGraphImpl::enableAtOrBefore( const TransactionId& t1, const TransactionId& t2 )
+void FlowProfileGraphImpl::enableAtOrBefore( const TransactionId t1, const TransactionId t2 )
 {
   debugMsg("FlowProfileGraph:enableAtOrBefore","Transaction "
            << t1->time()->toString() << " and transaction "
@@ -73,14 +73,14 @@ void FlowProfileGraphImpl::enableAtOrBefore( const TransactionId& t1, const Tran
   m_graph->createEdge( t2, t1, Edge::getMaxCapacity() );
 }
 
-bool FlowProfileGraphImpl::isEnabled(  const TransactionId& transaction ) const
+bool FlowProfileGraphImpl::isEnabled(  const TransactionId transaction ) const
 {
   Node* node = m_graph->getNode( transaction );
 
   return 0 == node ? false : node->isEnabled();
 }
 
-void FlowProfileGraphImpl::enableTransaction( const TransactionId& t, const InstantId& i, TransactionId2InstantId& contributions )
+void FlowProfileGraphImpl::enableTransaction( const TransactionId t, const InstantId i, TransactionId2InstantId contributions )
 {
   debugMsg("FlowProfileGraph:enableTransaction","Transaction ("
            << t->getId() << ") "
@@ -132,7 +132,7 @@ void FlowProfileGraphImpl::enableTransaction( const TransactionId& t, const Inst
   m_graph->createEdge( target, source, 0 );
 }
 
-void FlowProfileGraphImpl::removeTransaction( const TransactionId& id )
+void FlowProfileGraphImpl::removeTransaction( const TransactionId id )
 {
   debugMsg("FlowProfileGraph:removeTransaction","Transaction ("
            << id->getId() << ") lower level: "
@@ -177,7 +177,7 @@ edouble FlowProfileGraphImpl::getResidualFromSource()
   return residual;
 }
 
-void FlowProfileGraphImpl::disable(  const TransactionId& id )
+void FlowProfileGraphImpl::disable(  const TransactionId id )
 {
   debugMsg("FlowProfileGraph:disable","Transaction ("
            << id->getId() << ") lower level: "
@@ -191,7 +191,7 @@ void FlowProfileGraphImpl::disable(  const TransactionId& id )
   node->setDisabled();
 }
 
-void FlowProfileGraphImpl::pushFlow( const TransactionId& id )
+void FlowProfileGraphImpl::pushFlow( const TransactionId id )
 {
   Node* node = m_graph->getNode( id );
 
@@ -222,7 +222,7 @@ void FlowProfileGraphImpl::restoreFlow()
 }
 
 
-edouble FlowProfileGraphImpl::disableReachableResidualGraph( TransactionId2InstantId& contributions, const InstantId& instant )
+edouble FlowProfileGraphImpl::disableReachableResidualGraph( TransactionId2InstantId contributions, const InstantId instant )
 {
   debugMsg("FlowProfileGraph:disableReachableResidualGraph","Lower level: "
            << std::boolalpha << m_lowerLevel );
@@ -248,8 +248,8 @@ edouble FlowProfileGraphImpl::disableReachableResidualGraph( TransactionId2Insta
 
 void FlowProfileGraphImpl::visitNeighbors(const Node* node, edouble& residual,
                                       Node2Bool& visited, 
-                                      TransactionId2InstantId& contributions,
-                                      const InstantId& instant) {
+                                      TransactionId2InstantId contributions,
+                                      const InstantId instant) {
   EdgeOutIterator ite( *node );
 
   for( ; ite.ok(); ++ite )
@@ -273,7 +273,7 @@ void FlowProfileGraphImpl::visitNeighbors(const Node* node, edouble& residual,
 
           target->setDisabled();
 
-          const TransactionId& t = target->getIdentity();
+          const TransactionId t = target->getIdentity();
 
           debugMsg("FlowProfileGraph::visitNeighbors","Transaction "
                    << t << " starts contributing at "

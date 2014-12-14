@@ -17,16 +17,16 @@ namespace EUROPA {
 class NddlSymbolTable : public EvalContext
 {
 public:
-    NddlSymbolTable(const EngineId& engine);
+    NddlSymbolTable(const EngineId engine);
     NddlSymbolTable(NddlSymbolTable* parent);
     virtual ~NddlSymbolTable();
 
     NddlSymbolTable* getParentST();
 
-    const PlanDatabaseId& getPlanDatabase() const;
+    const PlanDatabaseId getPlanDatabase() const;
 
-    virtual void addLocalVar(const char* name,const DataTypeId& type);
-    virtual void addLocalToken(const char* name,const TokenTypeId& type);
+    virtual void addLocalVar(const char* name,const DataTypeId type);
+    virtual void addLocalToken(const char* name,const TokenTypeId type);
 
     virtual DataTypeId getDataType(const char* name) const;
     virtual ObjectTypeId getObjectType(const char* name) const;
@@ -70,7 +70,7 @@ protected:
     std::map<std::string,DataTypeId> m_localVars;
     std::map<std::string,TokenTypeId> m_localTokens;
 
-    const EngineId& engine() const;
+    const EngineId engine() const;
     std::vector<std::string>& errors();
     const std::vector<std::string>& errors() const;
 };
@@ -93,7 +93,7 @@ protected:
 class NddlTokenSymbolTable : public NddlSymbolTable
 {
 public:
-    NddlTokenSymbolTable(NddlSymbolTable* parent, const TokenTypeId& tt, const ObjectTypeId& ot);
+    NddlTokenSymbolTable(NddlSymbolTable* parent, const TokenTypeId tt, const ObjectTypeId ot);
     virtual ~NddlTokenSymbolTable();
 
     virtual DataTypeId getTypeForVar(const char* varName);
@@ -109,7 +109,7 @@ protected:
 class NddlInterpreter : public LanguageInterpreter
 {
 public:
-    NddlInterpreter(EngineId& engine);
+    NddlInterpreter(EngineId engine);
     virtual ~NddlInterpreter();
     virtual std::string interpret(std::istream& input, const std::string& source);
 
@@ -130,31 +130,30 @@ protected:
 class NddlToASTInterpreter : public NddlInterpreter
 {
 public:
-    NddlToASTInterpreter(EngineId& engine);
+    NddlToASTInterpreter(EngineId engine);
     virtual ~NddlToASTInterpreter();
     virtual std::string interpret(std::istream& input, const std::string& source);
 };
 
-class PSLanguageException
-{
-public:
-	PSLanguageException(const char *fileName, int line, int offset, int length,
-			const char *message);
-	friend ostream &operator<<(ostream &, const PSLanguageException &);
-	/** Prepare this exception for shipping with AST */
-	std::string asString() const;
+class PSLanguageException {
+ public:
+  PSLanguageException(const char *fileName, unsigned int line, int offset,
+                      unsigned int length, const char *message);
+  friend ostream &operator<<(ostream &, const PSLanguageException &);
+  /** Prepare this exception for shipping with AST */
+  std::string asString() const;
 
-	const std::string& getFileName() const { return m_fileName; }
-	int getLine() const { return m_line; }
-	int getOffset() const { return m_offset; }
-	int getLength() const { return m_length; }
-	const std::string& getMessage() const { return m_message; }
-protected:
-	std::string m_fileName;
-	int m_line;
-	int m_offset;
-	int m_length;
-	std::string m_message;
+  const std::string& getFileName() const { return m_fileName; }
+  unsigned int getLine() const { return m_line; }
+  int getOffset() const { return m_offset; }
+  unsigned int getLength() const { return m_length; }
+  const std::string& getMessage() const { return m_message; }
+ protected:
+  std::string m_fileName;
+  unsigned int m_line;
+  int m_offset;
+  unsigned int m_length;
+  std::string m_message;
 };
 
 class PSLanguageExceptionList

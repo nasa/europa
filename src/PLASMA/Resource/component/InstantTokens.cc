@@ -3,7 +3,7 @@
 #include "ResourceTokenRelation.hh"
 
 namespace EUROPA {
-    ReservoirToken::ReservoirToken(const PlanDatabaseId& planDatabase,
+    ReservoirToken::ReservoirToken(const PlanDatabaseId planDatabase,
 				   const LabelStr& predicateName,
 				   const IntervalIntDomain& timeBaseDomain,
 				   const IntervalDomain& quantityBaseDomain,
@@ -19,7 +19,7 @@ namespace EUROPA {
       //m_quantity->restrictBaseDomain(quantityBaseDomain);
     }
 
-    ReservoirToken::ReservoirToken(const PlanDatabaseId& planDatabase,
+    ReservoirToken::ReservoirToken(const PlanDatabaseId planDatabase,
 				   const LabelStr& predicateName,
 				   bool rejectable,
 				   bool isFact,
@@ -33,7 +33,7 @@ namespace EUROPA {
       commonInit(closed, activate, IntervalDomain( 0, PLUS_INFINITY ) );
     }
 
-    ReservoirToken::ReservoirToken(const TokenId& parent,
+    ReservoirToken::ReservoirToken(const TokenId parent,
 				   const LabelStr& relation,
 				   const LabelStr& predicateName,
 				   const IntervalIntDomain& timeBaseDomain,
@@ -71,7 +71,7 @@ namespace EUROPA {
 	activateInternal();
     }
 
-    const ConstrainedVariableId& ReservoirToken::getQuantity() const {
+    const ConstrainedVariableId ReservoirToken::getQuantity() const {
       return m_quantity;
     }
 

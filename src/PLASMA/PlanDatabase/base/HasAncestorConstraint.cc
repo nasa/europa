@@ -5,7 +5,7 @@ namespace EUROPA{
 
   HasAncestorConstraint::HasAncestorConstraint(const LabelStr& name,
 						     const LabelStr& propagatorName,
-						     const ConstraintEngineId& constraintEngine,
+						     const ConstraintEngineId constraintEngine,
 						     const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_first(static_cast<ObjectDomain&>(getCurrentDomain(variables[0]))),
@@ -23,13 +23,13 @@ namespace EUROPA{
     apply();
   }
 
-void HasAncestorConstraint::handleExecute(const ConstrainedVariableId&,
+void HasAncestorConstraint::handleExecute(const ConstrainedVariableId,
                                           unsigned int,
                                           const DomainListener::ChangeType&){
   handleExecute();
 }
 
-bool HasAncestorConstraint::canIgnore(const ConstrainedVariableId&,
+bool HasAncestorConstraint::canIgnore(const ConstrainedVariableId,
                                       unsigned int argIndex,
                                       const DomainListener::ChangeType&){
   check_error(argIndex <= 1);
@@ -56,7 +56,7 @@ bool HasAncestorConstraint::canIgnore(const ConstrainedVariableId&,
 
     allAncestors.unique();
     ObjectId object = allAncestors.front();
-    const DataTypeId& dt = m_constraintEngine->getCESchema()->getDataType(object->getRootType().c_str());
+    const DataTypeId dt = m_constraintEngine->getCESchema()->getDataType(object->getRootType().c_str());
     ObjectDomain setOfAncestors(dt,allAncestors);
     // Prune this set for those elements in the set of restrictions imposed
     setOfAncestors.intersect(m_restrictions);

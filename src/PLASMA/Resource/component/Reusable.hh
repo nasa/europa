@@ -10,23 +10,23 @@ namespace EUROPA {
     class Reusable : public Resource {
     public:
       //initial capacity is the upper limit, maxInstConsumption == maxInstProduction, maxConsumption == maxProduction
-      Reusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, const LabelStr& detectorName, const LabelStr& profileName,
+      Reusable(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, const LabelStr& detectorName, const LabelStr& profileName,
 	       edouble initCapacityLb = 0, edouble initCapacityUb = 0, edouble lowerLimit = MINUS_INFINITY,
 	       edouble maxInstConsumption = PLUS_INFINITY,
 	       edouble maxConsumption = PLUS_INFINITY);
-      Reusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open);
-      Reusable(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open);
+      Reusable(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open);
+      Reusable(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open);
       virtual ~Reusable();
 
-      virtual void getOrderingChoices(const TokenId& token,
+      virtual void getOrderingChoices(const TokenId token,
 				      std::vector<std::pair<TokenId, TokenId> >& results,
-				      unsigned int limit = std::numeric_limits<unsigned int>::max());
+				      unsigned long limit = std::numeric_limits<unsigned long>::max());
 
     protected:
-      void createTransactions(const TokenId& tok);
-      void removeTransactions(const TokenId& tok);
-      void addToProfile(const TokenId& tok);
-      void removeFromProfile(const TokenId& tok);
+      void createTransactions(const TokenId tok);
+      void removeTransactions(const TokenId tok);
+      void addToProfile(const TokenId tok);
+      void removeFromProfile(const TokenId tok);
 
       std::map<TokenId, std::pair<TransactionId, TransactionId> > m_tokensToTransactions;
     };
@@ -35,8 +35,8 @@ namespace EUROPA {
 
     class UnaryTimeline : public Reusable {
     public:
-      UnaryTimeline(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open = false);
-      UnaryTimeline(const ObjectId& parent, const LabelStr& type, const LabelStr& name, bool open = false);
+      UnaryTimeline(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open = false);
+      UnaryTimeline(const ObjectId parent, const LabelStr& type, const LabelStr& name, bool open = false);
       virtual ~UnaryTimeline();
     };
 
@@ -49,12 +49,12 @@ namespace EUROPA {
     class CBReusable : public Resource {
     public:
       //initial capacity is the upper limit, maxInstConsumption == maxInstProduction, maxConsumption == maxProduction
-      CBReusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, const LabelStr& detectorName, const LabelStr& profileName,
+      CBReusable(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, const LabelStr& detectorName, const LabelStr& profileName,
            edouble initCapacityLb = 0, edouble initCapacityUb = 0, edouble lowerLimit = MINUS_INFINITY,
            edouble maxInstConsumption = PLUS_INFINITY,
            edouble maxConsumption = PLUS_INFINITY);
-      CBReusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open);
-      CBReusable(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open);
+      CBReusable(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open);
+      CBReusable(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open);
       virtual ~CBReusable();
 
       virtual void notifyViolated(const InstantId inst, Resource::ProblemType problem);
@@ -63,18 +63,18 @@ namespace EUROPA {
       virtual void notifyNoLongerFlawed(const InstantId inst);
 
     protected:
-      void addToProfile(const ConstraintId& c);
-      void removeFromProfile(const ConstraintId& c);
-      std::set<UsesId> getConstraintsForInstant(const InstantId& instant);
+      void addToProfile(const ConstraintId c);
+      void removeFromProfile(const ConstraintId c);
+      std::set<UsesId> getConstraintsForInstant(const InstantId instant);
 
-      void addToProfile(TransactionId& t);
-      void removeFromProfile(TransactionId& t);
+      void addToProfile(TransactionId t);
+      void removeFromProfile(TransactionId t);
 
       // TODO: only needed for backwards compatibility with Resource API, rework hierarchy to fix this.
-      void addToProfile(const TokenId& tok);
-      void removeFromProfile(const TokenId& tok);
-      void createTransactions(const TokenId& tok) {}
-      void removeTransactions(const TokenId& tok) {}
+      void addToProfile(const TokenId tok);
+      void removeFromProfile(const TokenId tok);
+      void createTransactions(const TokenId) {}
+      void removeTransactions(const TokenId) {}
 
       std::map<UsesId, std::pair<TransactionId, TransactionId> > m_constraintsToTransactions;
 
@@ -86,7 +86,7 @@ namespace EUROPA {
     public:
       Uses(const LabelStr& name,
            const LabelStr& propagatorName,
-           const ConstraintEngineId& constraintEngine,
+           const ConstraintEngineId constraintEngine,
            const std::vector<ConstrainedVariableId>& scope);
 
       static const LabelStr& CONSTRAINT_NAME();
@@ -99,7 +99,7 @@ namespace EUROPA {
 
       virtual std::string getViolationExpl() const;
 
-      const TransactionId& getTransaction(int var) const;
+      const TransactionId getTransaction(int var) const;
 
       CBReusableId getResource() const;
 
@@ -119,9 +119,9 @@ namespace EUROPA {
       std::map<InstantId,Resource::ProblemType> m_violationProblems; // instant->problem map
 
     private:
-      virtual bool canIgnore(const ConstrainedVariableId& variable,
-             int argIndex,
-             const DomainListener::ChangeType& changeType);
+      virtual bool canIgnore(const ConstrainedVariableId variable,
+                             unsigned int argIndex,
+                             const DomainListener::ChangeType& changeType);
 
       virtual void handleExecute();
 

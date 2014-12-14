@@ -26,51 +26,18 @@
 
 namespace EUROPA
 {
-/**
- * @brief
- */
 class MaximumFlowAlgorithm
 {
  public:
-  /**
-   * @brief
-   */
   MaximumFlowAlgorithm( Graph* g, Node* source, Node* sink  );
-  /**
-   * @brief
-   */
   Graph* getGraph() const { return m_Graph; }
-  /**
-   * @brief
-   */
   Node* getSource() const { return m_Source; }
-  /**
-   * @brief
-   */
   Node* getSink() const { return m_Sink; }
-  /**
-   * @brief
-   */
   inline void execute( bool reset = true );
-  /**
-   * @brief
-   */
   void print( std::ostream& os ) const;
-  /**
-   * @brief
-   */
   inline edouble getMaxFlow() const;
-  /**
-   * @brief
-   */
   inline edouble getFlow( Edge* edge ) const;
-  /**
-   * @brief
-   */
   inline void pushFlowBack( Node* node );
-  /**
-   * @brief
-   */
   inline edouble getResidual( Edge* edge ) const;
  private:
 
@@ -79,33 +46,13 @@ class MaximumFlowAlgorithm
   edouble getExcess(Node* n) const;
   EdgeList::const_iterator currentOutEdgeOnNode(Node* n) const;
   EdgeList::const_iterator endOutEdgeOnNode(Node* n) const;
-   /**
-    * @brief
-    */
+
    inline void disCharge( Node* node );
-   /**
-    * @brief
-    */ 
    inline void initializePre( bool reset = true );
-   /**
-    * @brief
-    */
    inline bool isAdmissible( Edge* edge ) const;
-   /**
-    * @brief
-    */
    inline void push( Edge* edge );
-   /**
-    * @brief
-    */
    inline void reLabel( Node* n );
-   /**
-    * @brief
-    */
    inline Node* getNextInList();
-   /**
-    * @brief
-    */
    inline void resetToFront();
 
  #ifdef _MSC_VER
@@ -296,7 +243,7 @@ class MaximumFlowAlgorithm
   }
 
   m_DistanceOnNode[ m_Sink ] = 0;
-  m_DistanceOnNode[ m_Source ] = (long) m_Nodes.size();
+  m_DistanceOnNode[ m_Source ] = static_cast<long>(m_Nodes.size());
 
   m_NodeListIterator = m_Nodes.end();
 

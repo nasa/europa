@@ -3,7 +3,7 @@
 #include "ResourceTokenRelation.hh"
 
 namespace EUROPA {
-    ReusableToken::ReusableToken(const PlanDatabaseId& planDatabase,
+    ReusableToken::ReusableToken(const PlanDatabaseId planDatabase,
 				 const LabelStr& predicateName,
 				 const IntervalIntDomain& startBaseDomain,
 				 const IntervalIntDomain& endBaseDomain,
@@ -18,7 +18,7 @@ namespace EUROPA {
       commonInit(closed, activate, quantityBaseDomain);
     }
 
-    ReusableToken::ReusableToken(const PlanDatabaseId& planDatabase,
+    ReusableToken::ReusableToken(const PlanDatabaseId planDatabase,
 				 const LabelStr& predicateName,
 				 const IntervalIntDomain& startBaseDomain,
 				 const IntervalIntDomain& endBaseDomain,
@@ -30,7 +30,7 @@ namespace EUROPA {
       commonInit(closed, activate, IntervalDomain(0, PLUS_INFINITY));
     }
 
-    ReusableToken::ReusableToken(const PlanDatabaseId& planDatabase,
+    ReusableToken::ReusableToken(const PlanDatabaseId planDatabase,
 				 const LabelStr& predicateName,
 				 bool rejectable,
 				 bool isFact,
@@ -47,7 +47,7 @@ namespace EUROPA {
       commonInit(closed, activate, quantityBaseDomain);
     }
 
-    ReusableToken::ReusableToken(const PlanDatabaseId& planDatabase,
+    ReusableToken::ReusableToken(const PlanDatabaseId planDatabase,
 				 const LabelStr& predicateName,
 				 bool rejectable,
 				 bool isFact,
@@ -61,7 +61,7 @@ namespace EUROPA {
       commonInit(closed, activate, IntervalDomain(0, PLUS_INFINITY));
     }
 
-    ReusableToken::ReusableToken(const TokenId& master,
+    ReusableToken::ReusableToken(const TokenId master,
 				 const LabelStr& relation,
 				 const LabelStr& predicateName,
 				 const IntervalIntDomain& startBaseDomain,
@@ -74,7 +74,7 @@ namespace EUROPA {
       commonInit(closed, activate, IntervalDomain(0, PLUS_INFINITY));
     }
 
-  ReusableToken::ReusableToken(const TokenId& master,
+  ReusableToken::ReusableToken(const TokenId master,
 			       const LabelStr& relation,
 			       const LabelStr& predicateName,
 			       const IntervalIntDomain& startBaseDomain,
@@ -114,11 +114,11 @@ namespace EUROPA {
 	activateInternal();
     }
 
-    const ConstrainedVariableId& ReusableToken::getQuantity() const {
+    const ConstrainedVariableId ReusableToken::getQuantity() const {
       return m_quantity;
     }
 
-    UnaryToken::UnaryToken(const PlanDatabaseId& planDatabase,
+    UnaryToken::UnaryToken(const PlanDatabaseId planDatabase,
 			   const LabelStr& predicateName,
 			   const IntervalIntDomain& startBaseDomain,
 			   const IntervalIntDomain& endBaseDomain,
@@ -128,7 +128,7 @@ namespace EUROPA {
 			   bool activate)
       : ReusableToken(planDatabase, predicateName, startBaseDomain, endBaseDomain, durationBaseDomain, IntervalDomain(1), objectName, closed, activate) {}
 
-    UnaryToken::UnaryToken(const PlanDatabaseId& planDatabase,
+    UnaryToken::UnaryToken(const PlanDatabaseId planDatabase,
 			   const LabelStr& predicateName,
 			   bool rejectable,
 			   bool isFact,
@@ -140,7 +140,7 @@ namespace EUROPA {
 			   bool activate)
       : ReusableToken(planDatabase, predicateName, rejectable, isFact, startBaseDomain, endBaseDomain, durationBaseDomain, IntervalDomain(1), objectName, closed, activate) {}
 
-    UnaryToken::UnaryToken(const TokenId& master,
+    UnaryToken::UnaryToken(const TokenId master,
 			   const LabelStr& relation,
 			   const LabelStr& predicateName,
 			   const IntervalIntDomain& startBaseDomain,

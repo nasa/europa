@@ -39,7 +39,7 @@ namespace EUROPA {
      */
     virtual unsigned int visited() const = 0;
 
-    const IteratorId& getId() {return m_id;}
+    const IteratorId getId() {return m_id;}
  
   private:
     IteratorId m_id;

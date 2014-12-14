@@ -77,19 +77,19 @@ class Node;
        */
       virtual ~FlowProfile();
       /**
-       * @brief Retrieves the first (earliest) instant the transaction \t starts contributing to
+       * @brief Retrieves the first (earliest) instant the transaction starts contributing to
        * lower level. Will return true in case a instant has been associated with a transaction
-       * and will in that case store the instant in parameter \i. Returns false if no instant
+       * and will in that case store the instant in parameter. Returns false if no instant
        * has been associated with transaction t.
        */
-      bool getEarliestLowerLevelInstant( const TransactionId& t, InstantId& i );
+      bool getEarliestLowerLevelInstant( const TransactionId t, InstantId i );
       /**
-       * @brief Retrieves the first (earliest) instant the transaction \t starts contributing to
+       * @brief Retrieves the first (earliest) instant the transaction starts contributing to
        * upper level. Will return true in case a instant has been associated with a transaction
-       * and will in that case store the instant in parameter \i. Returns false if no instant
+       * and will in that case store the instant in parameter. Returns false if no instant
        * has been associated with transaction t.
        */
-      bool getEarliestUpperLevelInstant( const TransactionId& t, InstantId& i );
+      bool getEarliestUpperLevelInstant( const TransactionId t, InstantId i );
       /**
        * @brief Deletes pre-existing FlowProfileGraphs for the lower and upper level and allocates new ones.
        */
@@ -108,9 +108,6 @@ class Node;
 
 
     protected:
-      /**
-       * @brief
-       */
       virtual void postHandleRecompute(const eint& endTime, const std::pair<edouble,edouble>& endDiff);
       /**
        * @brief Enables a transaction t. A transaction is enabled a time T to calculate the
@@ -122,19 +119,19 @@ class Node;
       void enableTransaction( const TransactionId t, const InstantId i );
       /**
        * @brief Helper method for subclasses to respond to a temporal constraint being added between two transactions.
-       * @param e The transaction whose timepoint has been constrained.
-       * @param argIndex The index of the timepoint in the constraint.
        */
-      void handleTemporalConstraintAdded(const TransactionId predecessor, const int preArgIndex,
-					 const TransactionId successor, const int sucArgIndex);
+      void handleTemporalConstraintAdded(const TransactionId predecessor,
+                                         const unsigned int preArgIndex,
+					 const TransactionId successor,
+                                         const unsigned int sucArgIndex);
 
       /**
        * @brief Helper method for subclasses to respond to a temporal constraint being removed between two transactions.
-       * @param e The transaction whose timepoint has been removed from the constraint.
-       * @param argIndex The index of the timepoint in the constraint.
        */
-      void handleTemporalConstraintRemoved(const TransactionId predecessor, const int preArgIndex,
-					   const TransactionId successor, const int sucArgIndex);
+      void handleTemporalConstraintRemoved(const TransactionId predecessor,
+                                           const unsigned int preArgIndex,
+					   const TransactionId successor,
+                                           const unsigned int sucArgIndex);
       /**
        * @brief Updates the maximum flow graphs in case transactions t1 and t2 are now strictly ordered.
        */
@@ -143,44 +140,16 @@ class Node;
        * @brief Updates the maximum flow graphs in case transactions t1 and t2 are now weakly ordered.
        */
       void handleOrderedAtOrBefore( const TransactionId t1, const TransactionId t2 );
-      /**
-       * @brief
-       */
+
       void handleTransactionAdded( const TransactionId t);
-      /**
-       * @brief
-       * @return
-       */
       void handleTransactionRemoved( const TransactionId t);
-      /**
-       * @brief
-       * @return
-       */
-      void handleTransactionTimeChanged( const TransactionId t, const DomainListener::ChangeType& type );
-      /**
-       * @brief
-       * @return
-       */
-      void handleTransactionQuantityChanged( const TransactionId t, const DomainListener::ChangeType& type );
-      /**
-       * @brief
-       * @return
-       */
+      void handleTransactionTimeChanged( const TransactionId t,
+                                         const DomainListener::ChangeType& type );
+      void handleTransactionQuantityChanged( const TransactionId t,
+                                             const DomainListener::ChangeType& type );
       void initRecompute(InstantId inst);
-      /**
-       * @brief
-       * @return
-       */
       void initRecompute();
-      /**
-       * @brief
-       * @return
-       */
       Order getOrdering( const TransactionId t1, const TransactionId t2 );
-      /**
-       * @brief
-       * @return
-       */
       void recomputeLevels(InstantId prev, InstantId inst);
 
       typedef std::pair< eint, eint > IntIntPair;

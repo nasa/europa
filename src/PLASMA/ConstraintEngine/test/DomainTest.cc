@@ -65,7 +65,7 @@ static void outerLoopForTestEquate() {
     testEquate(ls_a, ls_b);
 }
 
-static void testLabelSetEqualityPerformance(const ConstraintEngineId& ce) {
+static void testLabelSetEqualityPerformance(const ConstraintEngineId ce) {
   // std::list<EUROPA::LabelStr> values;
   // values.push_back(EUROPA::LabelStr("V0"));
   // values.push_back(EUROPA::LabelStr("V1"));
@@ -175,7 +175,7 @@ static void outerLoopLabelSetEqualConstraint(bool useEquivalenceClasses) {
   //   testLabelSetEqualityPerformance(ce.getId());
 }
 
-static void testIntervalEqualityPerformance(const ConstraintEngineId& ce) {
+static void testIntervalEqualityPerformance(const ConstraintEngineId ce) {
   // IntervalIntDomain intSort(-1000, 1000);
   // Variable<IntervalIntDomain> v0(ce, intSort);
   // Variable<IntervalIntDomain> v1(ce, intSort);

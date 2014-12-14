@@ -21,7 +21,7 @@ namespace EUROPA {
    */
   class TestRule: public Rule {
   public:
-    RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb,
+    RuleInstanceId createInstance(const TokenId token, const PlanDatabaseId planDb,
                                   const RulesEngineId &rulesEngine) const;
     TestRule(const LabelStr& name, const IntervalIntDomain& guardBaseDomain = IntervalIntDomain(1,1));
     const IntervalIntDomain& getGuardBaseDomain() const {return m_guardBaseDomain;}

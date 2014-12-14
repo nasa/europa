@@ -23,7 +23,7 @@ namespace EUROPA {
       /**
        * @brief Sets link to matching engine to obtain cycle count
        */
-      void initialize(const MatchingEngineId& matchingEngine);
+      void initialize(const MatchingEngineId matchingEngine);
 
       /**
        * @brief Test if all conditions have been met for this rule, in this iteration of the matching engine

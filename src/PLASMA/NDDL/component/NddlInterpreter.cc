@@ -17,9 +17,11 @@
 #include "Debug.hh"
 #include "Utils.hh"
 
+#include <boost/cast.hpp>
+
 namespace EUROPA {
 
-NddlInterpreter::NddlInterpreter(EngineId& engine)
+NddlInterpreter::NddlInterpreter(EngineId engine)
   : m_engine(engine)
 {
 }
@@ -37,19 +39,22 @@ pANTLR3_INPUT_STREAM getInputStream(std::istream& input, const std::string& sour
       strInput = is->str(); // This makes a copy of the original string that could be avoided
       
       debugMsg("NddlInterpreter", "INPUT SCRIPT:" << std::endl << strInput);
-      return antlr3NewAsciiStringInPlaceStream((pANTLR3_UINT8)strInput.c_str(),(ANTLR3_UINT32)strInput.size(),(pANTLR3_UINT8)source.c_str());
+      return antlr3NewAsciiStringInPlaceStream(reinterpret_cast<pANTLR3_UINT8>(const_cast<char*>(strInput.c_str())),
+                                               static_cast<ANTLR3_UINT32>(strInput.size()),
+                                               reinterpret_cast<pANTLR3_UINT8>(const_cast<char*>(source.c_str())));
     }
   }
   else {
-    return antlr3AsciiFileStreamNew((pANTLR3_UINT8)source.c_str());
+    return antlr3AsciiFileStreamNew(reinterpret_cast<pANTLR3_UINT8>(const_cast<char*>(source.c_str())));
   }
   return NULL;
 }
 
-bool isFile(const std::string& filename)
-{
-    struct stat my_stat;
-    return (stat(filename.c_str(), &my_stat) == 0);
+namespace {
+bool isFile(const std::string& filename) {
+  struct stat my_stat;
+  return (stat(filename.c_str(), &my_stat) == 0);
+}
 }
 
 bool NddlInterpreter::queryIncludeGuard(const std::string& f)
@@ -82,8 +87,8 @@ std::vector<std::string> NddlInterpreter::getIncludePath()
     const std::string& configPathStr = getEngine()->getConfig()->getProperty("nddl.includePath");
     if (configPathStr.size() > 0) {
         LabelStr configPath=configPathStr;
-        unsigned int cnt = configPath.countElements(PATH_SEPARATOR_STR.c_str());
-        for (unsigned int i=0;i<cnt;i++)
+        unsigned long cnt = configPath.countElements(PATH_SEPARATOR_STR.c_str());
+        for (unsigned long i=0;i<cnt;i++)
             includePath.push_back(configPath.getElement(i,PATH_SEPARATOR_STR.c_str()).c_str());
     }
 
@@ -149,7 +154,8 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
 
     // Build he AST
     NDDL3Parser_nddl_return result = parser->nddl(parser);
-    int errorCount = parser->pParser->rec->state->errorCount + lexer->pLexer->rec->state->errorCount;
+    unsigned int errorCount = parser->pParser->rec->state->errorCount +
+        lexer->pLexer->rec->state->errorCount;
     if (errorCount > 0) {
         // Since errors are no longer printed during parsing, print them here
         // to debugMsg
@@ -194,7 +200,7 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
         treeParser->nddl(treeParser);
         // TODO: report treeParser antlr errors the same way we do it for tree builder lexer and parser
     }
-    catch (const std::string& error) {
+    catch (const std::string&) {
         debugMsg("NddlInterpreter:error","nddl parser halted on error:" << symbolTable.getErrors());
         return symbolTable.getErrors();
     }
@@ -227,7 +233,7 @@ NddlSymbolTable::NddlSymbolTable(NddlSymbolTable* parent)
 {
 }
 
-NddlSymbolTable::NddlSymbolTable(const EngineId& engine)
+NddlSymbolTable::NddlSymbolTable(const EngineId engine)
     : EvalContext(NULL)
     , m_parentST(NULL)
     , m_engine(engine)
@@ -240,7 +246,7 @@ NddlSymbolTable::~NddlSymbolTable()
 
 NddlSymbolTable* NddlSymbolTable::getParentST() { return m_parentST; }
 
-const EngineId& NddlSymbolTable::engine() const { return (m_parentST==NULL ? m_engine : m_parentST->engine()); }
+const EngineId NddlSymbolTable::engine() const { return (m_parentST==NULL ? m_engine : m_parentST->engine()); }
 std::vector<std::string>& NddlSymbolTable::errors() { return (m_parentST==NULL ? m_errors : m_parentST->errors()); }
 const std::vector<std::string>& NddlSymbolTable::errors() const { return (m_parentST==NULL ? m_errors : m_parentST->errors()); }
 
@@ -270,58 +276,55 @@ void* NddlSymbolTable::getElement(const char* name) const
     return EvalContext::getElement(name);
 }
 
-const PlanDatabaseId& NddlSymbolTable::getPlanDatabase() const
+const PlanDatabaseId NddlSymbolTable::getPlanDatabase() const
 {
-    return ((PlanDatabase*)getElement("PlanDatabase"))->getId();
+  return (reinterpret_cast<PlanDatabase*>(getElement("PlanDatabase")))->getId();
 }
 
-DataTypeId NddlSymbolTable::getDataType(const char* name) const
-{
-    CESchemaId ces = ((CESchema*)getElement("CESchema"))->getId();
+DataTypeId NddlSymbolTable::getDataType(const char* name) const {
+  CESchemaId ces = (reinterpret_cast<CESchema*>(getElement("CESchema")))->getId();
 
-    if (ces->isDataType(name))
-        return ces->getDataType(name);
+  if (ces->isDataType(name))
+    return ces->getDataType(name);
 
-    debugMsg("NddlInterpreter:SymbolTable","Unknown type " << name);
-    return DataTypeId::noId();
+  debugMsg("NddlInterpreter:SymbolTable","Unknown type " << name);
+  return DataTypeId::noId();
 }
 
-ObjectTypeId NddlSymbolTable::getObjectType(const char* name) const
-{
-    if (m_parentST != NULL)
-        return m_parentST->getObjectType(name);
-    else {
-        SchemaId s = ((Schema*)(engine()->getComponent("Schema")))->getId();
+ObjectTypeId NddlSymbolTable::getObjectType(const char* name) const {
+  if (m_parentST != NULL)
+    return m_parentST->getObjectType(name);
+  else {
+    SchemaId s = (boost::polymorphic_cast<Schema*>(engine()->getComponent("Schema")))->getId();
 
-        if (s->isObjectType(name))
-            return s->getObjectType(name);
-    }
+    if (s->isObjectType(name))
+      return s->getObjectType(name);
+  }
 
-    return ObjectTypeId::noId();
+  return ObjectTypeId::noId();
 }
 
-TokenTypeId NddlSymbolTable::getTokenType(const char* name) const
-{
-    if (m_parentST != NULL)
-        return m_parentST->getTokenType(name);
-    else {
-        SchemaId s = ((Schema*)(engine()->getComponent("Schema")))->getId();
+TokenTypeId NddlSymbolTable::getTokenType(const char* name) const {
+  if (m_parentST != NULL)
+    return m_parentST->getTokenType(name);
+  else {
+    SchemaId s = (boost::polymorphic_cast<Schema*>(engine()->getComponent("Schema")))->getId();
 
-        if (s->isPredicate(name))
-            return s->getTokenType(name);
-    }
+    if (s->isPredicate(name))
+      return s->getTokenType(name);
+  }
 
-    return TokenTypeId::noId();
+  return TokenTypeId::noId();
 }
 
 
-void NddlSymbolTable::addLocalVar(const char* name,const DataTypeId& type)
+void NddlSymbolTable::addLocalVar(const char* name,const DataTypeId type)
 {
     m_localVars[name]=type;
     debugMsg("NddlSymbolTable:addLocalVar","Added local var "+std::string(name));
 }
 
-void NddlSymbolTable::addLocalToken(const char* name,const TokenTypeId& type)
+void NddlSymbolTable::addLocalToken(const char* name,const TokenTypeId type)
 {
     m_localTokens[name]=type;
     debugMsg("NddlSymbolTable:addLocalToken","Added local token "+std::string(name));
@@ -435,91 +438,89 @@ TokenTypeId NddlSymbolTable::getTypeForToken(const char* name)
 }
 
 
-TokenTypeId NddlSymbolTable::getTypeForToken(const char* qualifiedName,std::string& errorMsg)
-{
-    std::string parentName;
-    std::string tokenType;
-    std::vector<std::string> vars;
-    std::string fullName(qualifiedName);
-    tokenize(fullName,vars,".");
+TokenTypeId NddlSymbolTable::getTypeForToken(const char* qualifiedName,
+                                             std::string& errorMsg) {
+  std::string parentName;
+  std::string tokenType;
+  std::vector<std::string> vars;
+  std::string fullName(qualifiedName);
+  tokenize(fullName,vars,".");
 
-    if (vars.size() > 1) {
-      parentName = vars[0];
-      vars.erase(vars.begin());
-      fullName = fullName.substr(parentName.length()+1);
+  if (vars.size() > 1) {
+    parentName = vars[0];
+    vars.erase(vars.begin());
+    fullName = fullName.substr(parentName.length()+1);
 
-      tokenType = vars.back();
-      vars.erase(--vars.end());
-      fullName = fullName.substr(0,fullName.length()-(tokenType.length()));
+    tokenType = vars.back();
+    vars.erase(--vars.end());
+    fullName = fullName.substr(0,fullName.length()-(tokenType.length()));
 
-      debugMsg("NddlSymbolTable:getTypeForToken","Split " << qualifiedName
-                                                           << " into " << parentName
-                                                           << " , " << tokenType
-                                                           << " and " << fullName);
-    }
-    else {
-      parentName = "";
-      debugMsg("NddlSymbolTable:getTypeForToken","Didn't split " << qualifiedName);
-    }
+    debugMsg("NddlSymbolTable:getTypeForToken","Split " << qualifiedName
+             << " into " << parentName
+             << " , " << tokenType
+             << " and " << fullName);
+  }
+  else {
+    parentName = "";
+    debugMsg("NddlSymbolTable:getTypeForToken","Didn't split " << qualifiedName);
+  }
 
-    TokenTypeId tt;
+  TokenTypeId tt;
 
-    if (parentName == "") {
-        tt = getTokenType(qualifiedName);
-        if (tt.isNoId())
-            errorMsg = fullName + " is not a predicate type";
-
-        return tt;
-    }
-    else {
-        DataTypeId dt;
-        ObjectTypeId ot = getObjectType(parentName.c_str());
-        if (ot.isId()) {
-            if (vars.size() > 1) {
-                errorMsg = std::string(qualifiedName)+" is not a predicate type";
-                return tt;
-            }
-            return getTokenType(qualifiedName);
-        }
-        else {
-            dt = getTypeForVar(parentName.c_str());
-            if (dt.isNoId()) {
-                errorMsg = parentName + " is not defined";
-                return tt;
-            }
-            ot = getObjectType(dt->getName().c_str());
-            if (ot.isNoId()) {
-                errorMsg = parentName+"("+dt->getName().c_str()+") is not a reference to an object";
-                return tt;
-            }
-        }
-
-        std::string curVarName=parentName;
-        std::string curVarType = dt->getName().toString();
-        unsigned int idx = 0;
-        for (;idx<vars.size();idx++) {
-            dt = ot->getMemberType(vars[idx].c_str());
-            if (dt.isNoId()) {
-                errorMsg = curVarName+"("+curVarType+") doesn't have a member called "+vars[idx];
-                return TokenTypeId::noId();
-            }
-
-            ot = getObjectType(dt->getName().c_str());
-            if (ot.isNoId()) {
-                errorMsg = curVarName+"("+curVarType+") is not a reference to an object";
-                return TokenTypeId::noId();
-            }
-
-            curVarName = vars[idx];
-            curVarType = dt->getName().toString();
-        }
-
-        tokenType = ot->getName().toString()+"."+tokenType;
-        debugMsg("NddlSymbolTable:getTypeForToken","looking for tokenType " << tokenType);
-        return getTokenType(tokenType.c_str());
-    }
+  if (parentName == "") {
+    tt = getTokenType(qualifiedName);
+    if (tt.isNoId())
+      errorMsg = fullName + " is not a predicate type";
 
     return tt;
+  }
+  else {
+    DataTypeId dt;
+    ObjectTypeId ot = getObjectType(parentName.c_str());
+    if (ot.isId()) {
+      if (vars.size() > 1) {
+        errorMsg = std::string(qualifiedName)+" is not a predicate type";
+        return tt;
+      }
+      return getTokenType(qualifiedName);
+    }
+    else {
+      dt = getTypeForVar(parentName.c_str());
+      if (dt.isNoId()) {
+        errorMsg = parentName + " is not defined";
+        return tt;
+      }
+      ot = getObjectType(dt->getName().c_str());
+      if (ot.isNoId()) {
+        errorMsg = parentName+"("+dt->getName().c_str()+") is not a reference to an object";
+        return tt;
+      }
+    }
+
+    std::string curVarName=parentName;
+    std::string curVarType = dt->getName().toString();
+    unsigned int idx = 0;
+    for (;idx<vars.size();idx++) {
+      dt = ot->getMemberType(vars[idx].c_str());
+      if (dt.isNoId()) {
+        errorMsg = curVarName+"("+curVarType+") doesn't have a member called "+vars[idx];
+        return TokenTypeId::noId();
+      }
+
+      ot = getObjectType(dt->getName().c_str());
+      if (ot.isNoId()) {
+        errorMsg = curVarName+"("+curVarType+") is not a reference to an object";
+        return TokenTypeId::noId();
+      }
+
+      curVarName = vars[idx];
+      curVarType = dt->getName().toString();
+    }
+
+    tokenType = ot->getName().toString()+"."+tokenType;
+    debugMsg("NddlSymbolTable:getTypeForToken","looking for tokenType " << tokenType);
+    return getTokenType(tokenType.c_str());
+  }
 }
 
 MethodId NddlSymbolTable::getMethod(const char* methodName,Expr* target,const std::vector<Expr*>& args)
@@ -553,15 +554,14 @@ CFunctionId NddlSymbolTable::getCFunction(const char* name,const std::vector<CEx
 }
 
 Domain* NddlSymbolTable::makeNumericDomainFromLiteral(const std::string& type,
-                                                              const std::string& value)
-{
-    // TODO: only one copy should be kept for each literal, domains should be marked as constant
-    CESchemaId ces = ((CESchema*)getElement("CESchema"))->getId();
-    Domain* retval = ces->baseDomain(type.c_str()).copy();
-    edouble v = getPlanDatabase()->getClient()->createValue(type.c_str(), value);
-    retval->set(v);
+                                                      const std::string& value) {
+  // TODO: only one copy should be kept for each literal, domains should be marked as constant
+  CESchemaId ces = (reinterpret_cast<CESchema*>(getElement("CESchema")))->getId();
+  Domain* retval = ces->baseDomain(type.c_str()).copy();
+  edouble v = getPlanDatabase()->getClient()->createValue(type.c_str(), value);
+  retval->set(v);
 
-    return retval;
+  return retval;
 }
 
 ConstrainedVariableId NddlSymbolTable::getVar(const char* name)
@@ -608,10 +608,9 @@ Expr* NddlSymbolTable::makeEnumRef(const char* value) const
 }
 
 std::string getErrorLocation(pNDDL3Tree treeWalker);
-void NddlSymbolTable::reportError(void* tw, const std::string& msg)
-{
-    pNDDL3Tree treeWalker = (pNDDL3Tree) tw;
-    addError(getErrorLocation(treeWalker) + "\n" + msg);
+void NddlSymbolTable::reportError(void* tw, const std::string& msg) {
+  pNDDL3Tree treeWalker = reinterpret_cast<pNDDL3Tree>(tw);
+  addError(getErrorLocation(treeWalker) + "\n" + msg);
 }
 
 void NddlSymbolTable::checkConstraint(const char* name,const std::vector<Expr*>& args)
@@ -684,8 +683,8 @@ DataTypeId NddlClassSymbolTable::getTypeForVar(const char* varName)
 
 
 NddlTokenSymbolTable::NddlTokenSymbolTable(NddlSymbolTable* parent,
-                                           const TokenTypeId& tt,
-                                           const ObjectTypeId& ot)
+                                           const TokenTypeId tt,
+                                           const ObjectTypeId ot)
     : NddlSymbolTable(parent)
     , m_tokenType(tt)
     , m_objectType(ot)
@@ -731,7 +730,7 @@ TokenTypeId NddlTokenSymbolTable::getTypeForToken(const char* name)
 
 
 
-NddlToASTInterpreter::NddlToASTInterpreter(EngineId& engine)
+NddlToASTInterpreter::NddlToASTInterpreter(EngineId engine)
     : NddlInterpreter(engine)
 {
 }
@@ -770,7 +769,7 @@ std::string NddlToASTInterpreter::interpret(std::istream& ins, const std::string
     // Warnings, if any, should go here
 
     // Calling static helper functions to get a verbose version of AST
-    const char* ast = (char*)(toVerboseStringTree(result.tree)->chars);
+    const char* ast = reinterpret_cast<char*>(toVerboseStringTree(result.tree)->chars);
     os << "AST " << ast;
 
     debugMsg("NddlToASTInterpreter:interpret",os.str());
@@ -784,129 +783,128 @@ std::string NddlToASTInterpreter::interpret(std::istream& ins, const std::string
 }
 
 // Antlr functions
-std::string getErrorLocation(pNDDL3Tree treeWalker)
-{
-    std::ostringstream os;
+std::string getErrorLocation(pNDDL3Tree treeWalker) {
+  std::ostringstream os;
 
-    // get location. see displayRecognitionError() in antlr3baserecognizer.c
-    pANTLR3_BASE_RECOGNIZER rec = treeWalker->pTreeParser->rec;
-    if (rec->state->exception == NULL) {
-        antlr3RecognitionExceptionNew(rec);
-        //rec->state->exception->type = ANTLR3_RECOGNITION_EXCEPTION;
-        //rec->state->exception->message = (char*)msg.c_str();
-    }
-    //rec->reportError(rec);
+  // get location. see displayRecognitionError() in antlr3baserecognizer.c
+  pANTLR3_BASE_RECOGNIZER rec = treeWalker->pTreeParser->rec;
+  if (rec->state->exception == NULL) {
+    antlr3RecognitionExceptionNew(rec);
+    //rec->state->exception->type = ANTLR3_RECOGNITION_EXCEPTION;
+    //rec->state->exception->message = (char*)msg.c_str();
+  }
+  //rec->reportError(rec);
 
-    pANTLR3_EXCEPTION ex = rec->state->exception;
-    if  (ex->streamName == NULL) {
-        if  (((pANTLR3_COMMON_TOKEN)(ex->token))->type == ANTLR3_TOKEN_EOF)
-            os << "-end of input-(";
-        else
-            os << "-unknown source-(";
-    }
-    else {
-        pANTLR3_STRING ftext = ex->streamName->to8(ex->streamName);
-        os << ftext->chars << "(";
-    }
+  pANTLR3_EXCEPTION ex = rec->state->exception;
+  if  (ex->streamName == NULL) {
+    if  ((static_cast<pANTLR3_COMMON_TOKEN>(ex->token))->type == ANTLR3_TOKEN_EOF)
+      os << "-end of input-(";
+    else
+      os << "-unknown source-(";
+  }
+  else {
+    pANTLR3_STRING ftext = ex->streamName->to8(ex->streamName);
+    os << ftext->chars << "(";
+  }
 
-    // Next comes the line number
-    os << "line:" << rec->state->exception->line << ")";
+  // Next comes the line number
+  os << "line:" << rec->state->exception->line << ")";
 
-    pANTLR3_BASE_TREE theBaseTree = (pANTLR3_BASE_TREE)(rec->state->exception->token);
-    pANTLR3_STRING ttext       = theBaseTree->toStringTree(theBaseTree);
+  pANTLR3_BASE_TREE theBaseTree = static_cast<pANTLR3_BASE_TREE>(rec->state->exception->token);
+  pANTLR3_STRING ttext       = theBaseTree->toStringTree(theBaseTree);
 
-    os << ", at offset " << theBaseTree->getCharPositionInLine(theBaseTree);
-    os << ", near " <<  ttext->chars;
+  os << ", at offset " << theBaseTree->getCharPositionInLine(theBaseTree);
+  os << ", near " <<  ttext->chars;
 
-    return os.str();
+  return os.str();
 }
 
 /**
  *  Create a verbose string for a single tree node:
  *  "text":token-type:"file":line:offset-in-line
  */
-pANTLR3_STRING toVerboseString(pANTLR3_BASE_TREE tree)
-{
-	if  (tree->isNilNode(tree) == ANTLR3_TRUE)
-	{
-		pANTLR3_STRING  nilNode;
-		nilNode	= tree->strFactory->newPtr(tree->strFactory, (pANTLR3_UINT8)"nil", 3);
-		return nilNode;
-	}
+pANTLR3_STRING toVerboseString(pANTLR3_BASE_TREE tree) {
+  if  (tree->isNilNode(tree) == ANTLR3_TRUE)
+  {
+    pANTLR3_STRING  nilNode;
+    nilNode	= tree->strFactory->newPtr(tree->strFactory,
+                                           reinterpret_cast<pANTLR3_UINT8>(const_cast<char*>("nil")), 3);
+    return nilNode;
+  }
 
-	pANTLR3_COMMON_TOKEN ptoken = tree->getToken(tree);
-	pANTLR3_INPUT_STREAM pstream = ptoken->input;
-	pANTLR3_STRING  string = tree->strFactory->newRaw(tree->strFactory);
+  pANTLR3_COMMON_TOKEN ptoken = tree->getToken(tree);
+  pANTLR3_INPUT_STREAM pstream = ptoken->input;
+  pANTLR3_STRING  string = tree->strFactory->newRaw(tree->strFactory);
 
-	// "text":token-type:"file":line:offset-in-line
-	string->append8 (string, "\""); // "text"
-	string->appendS	(string, ((pANTLR3_COMMON_TREE)(tree->super))->token->
-			getText(((pANTLR3_COMMON_TREE)(tree->super))->token));
-	string->append8	(string, "\"");
-	string->append8 (string, ":");
-	string->addi (string, tree->getType(tree)); // type
+  // "text":token-type:"file":line:offset-in-line
+  string->append8 (string, "\""); // "text"
+  string->appendS	(string, (static_cast<pANTLR3_COMMON_TREE>(tree->super))->token->
+                         getText((static_cast<pANTLR3_COMMON_TREE>(tree->super))->token));
+  string->append8	(string, "\"");
+  string->append8 (string, ":");
+  string->addi (string, static_cast<ANTLR3_INT32>(tree->getType(tree))); // type
 
-	// if no file (e.g., root NDDL node), last three items are dropped
-	if (pstream) {
-		string->append8 (string, ":");
-		string->append8	(string, "\""); // "file", full path
-		string->appendS(string, pstream->fileName);
-		string->append8	(string, "\"");
-		string->append8 (string, ":");
-		string->addi (string, tree->getLine(tree)); // line
-		string->append8 (string, ":");
-		string->addi (string, ptoken->charPosition); // offset in line
-	}
+  // if no file (e.g., root NDDL node), last three items are dropped
+  if (pstream) {
+    string->append8 (string, ":");
+    string->append8	(string, "\""); // "file", full path
+    string->appendS(string, pstream->fileName);
+    string->append8	(string, "\"");
+    string->append8 (string, ":");
+    string->addi (string, static_cast<ANTLR3_INT32>(tree->getLine(tree))); // line
+    string->append8 (string, ":");
+    string->addi (string, ptoken->charPosition); // offset in line
+  }
 
-	return string;
+  return string;
 }
 
 /** Create a verbose string for the whole tree */
-pANTLR3_STRING toVerboseStringTree(pANTLR3_BASE_TREE tree)
-{
-	pANTLR3_STRING  string;
-	ANTLR3_UINT32   i;
-	ANTLR3_UINT32   n;
-	pANTLR3_BASE_TREE   t;
+  pANTLR3_STRING toVerboseStringTree(pANTLR3_BASE_TREE tree) {
+    pANTLR3_STRING  string;
+    ANTLR3_UINT32   i;
+    ANTLR3_UINT32   n;
+    pANTLR3_BASE_TREE   t;
 
-	if	(tree->children == NULL || tree->children->size(tree->children) == 0)
-		return	toVerboseString(tree);
+    if	(tree->children == NULL || tree->children->size(tree->children) == 0)
+      return	toVerboseString(tree);
 
-	/* Need a new string with nothing at all in it.
-	*/
-	string	= tree->strFactory->newRaw(tree->strFactory);
+    /* Need a new string with nothing at all in it.
+     */
+    string	= tree->strFactory->newRaw(tree->strFactory);
 
-	if	(tree->isNilNode(tree) == ANTLR3_FALSE)
-	{
-		string->append8	(string, "(");
-		string->appendS	(string, toVerboseString(tree));
-		string->append8	(string, " ");
-	}
-	if	(tree->children != NULL)
-	{
-		n = tree->children->size(tree->children);
+    if	(tree->isNilNode(tree) == ANTLR3_FALSE)
+    {
+      string->append8	(string, "(");
+      string->appendS	(string, toVerboseString(tree));
+      string->append8	(string, " ");
+    }
+    if	(tree->children != NULL)
+    {
+      n = tree->children->size(tree->children);
 
-		for	(i = 0; i < n; i++)
-		{
-			t   = (pANTLR3_BASE_TREE) tree->children->get(tree->children, i);
+      for	(i = 0; i < n; i++)
+      {
+        t   = static_cast<pANTLR3_BASE_TREE>(tree->children->get(tree->children, i));
 
-			if  (i > 0)
-			{
-				string->append8(string, " ");
-			}
-			string->appendS(string, toVerboseStringTree(t));
-		}
-	}
-	if	(tree->isNilNode(tree) == ANTLR3_FALSE)
-	{
-		string->append8(string,")");
-	}
+        if  (i > 0)
+        {
+          string->append8(string, " ");
+        }
+        string->appendS(string, toVerboseStringTree(t));
+      }
+    }
+    if	(tree->isNilNode(tree) == ANTLR3_FALSE)
+    {
+      string->append8(string,")");
+    }
 
-	return  string;
-}
+    return  string;
+  }
 
-PSLanguageException::PSLanguageException(const char *fileName, int line,
-		int offset, int length, const char *message) :
+PSLanguageException::PSLanguageException(const char *fileName, unsigned int line,
+                                         int offset, unsigned int length,
+                                         const char *message) :
   m_line(line), m_offset(offset), m_length(length), m_message(message) {
   if (fileName) m_fileName = fileName;
   else fileName = "No_File";
@@ -938,64 +936,64 @@ ostream &operator<<(ostream &os, const PSLanguageExceptionList &ex) {
 }
 
 
-void reportParserError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 *tokenNames) {
-	pANTLR3_EXCEPTION ex = recognizer->state->exception;
+void reportParserError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 *) {
+  pANTLR3_EXCEPTION ex = recognizer->state->exception;
 
-	const char *fileName = NULL;
-	if (ex->streamName)
-		fileName = (const char *)(ex->streamName->to8(ex->streamName)->chars);
+  const char *fileName = NULL;
+  if (ex->streamName)
+    fileName = reinterpret_cast<char *>(ex->streamName->to8(ex->streamName)->chars);
 
-	int line = recognizer->state->exception->line;
-	const char* message = static_cast<const char *>(recognizer->state->exception->message);
+  unsigned int line = recognizer->state->exception->line;
+  const char* message = static_cast<const char *>(recognizer->state->exception->message);
 
-	int offset = -1; // to signal something is wrong (like recognizer type)
-	int length = 0; // in case there is no token
-	if (recognizer->type == ANTLR3_TYPE_PARSER) {
-		offset = recognizer->state->exception->charPositionInLine;
+  int offset = -1; // to signal something is wrong (like recognizer type)
+  unsigned int length = 0; // in case there is no token
+  if (recognizer->type == ANTLR3_TYPE_PARSER) {
+    offset = recognizer->state->exception->charPositionInLine;
 
-		// Look for a token
-		pANTLR3_COMMON_TOKEN token = (pANTLR3_COMMON_TOKEN)(recognizer->state->exception->token);
-		line = token->getLine(token);
-		pANTLR3_STRING text = token->getText(token);
-		if (text != NULL) {
-			// It looks like when an extra token is present, message is
-			// empty and the token points to the actual thing. When a token
-			// is missing, the token text contains the message and the length
-			// is irrelevant
-			if (message == NULL || !message[0])
-				length = text->len;
-			message = (const char *)(text->chars);
-		}
-	}
+    // Look for a token
+    pANTLR3_COMMON_TOKEN token = static_cast<pANTLR3_COMMON_TOKEN>(recognizer->state->exception->token);
+    line = token->getLine(token);
+    pANTLR3_STRING text = token->getText(token);
+    if (text != NULL) {
+      // It looks like when an extra token is present, message is
+      // empty and the token points to the actual thing. When a token
+      // is missing, the token text contains the message and the length
+      // is irrelevant
+      if (message == NULL || !message[0])
+        length = text->len;
+      message = reinterpret_cast<char *>(text->chars);
+    }
+  }
 
-	PSLanguageException exception(fileName, line, offset, length, message);
+  PSLanguageException exception(fileName, line, offset, length, message);
 
-	pANTLR3_PARSER parser = (pANTLR3_PARSER) recognizer->super;
-	pNDDL3Parser ctx = (pNDDL3Parser) parser->super;
-	std::vector<PSLanguageException> *errors = ctx->parserErrors;
-	errors->push_back(exception);
+  pANTLR3_PARSER parser = static_cast<pANTLR3_PARSER>(recognizer->super);
+  pNDDL3Parser ctx = static_cast<pNDDL3Parser>(parser->super);
+  std::vector<PSLanguageException> *errors = ctx->parserErrors;
+  errors->push_back(exception);
 
-	// std::cout << errors->size() << "; " << (*errors)[errors->size()-1];
+  // std::cout << errors->size() << "; " << (*errors)[errors->size()-1];
 }
 
-void reportLexerError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 *tokenNames) {
-    pANTLR3_LEXER lexer = (pANTLR3_LEXER)(recognizer->super);
-    pANTLR3_EXCEPTION ex = lexer->rec->state->exception;
+void reportLexerError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 *) {
+  pANTLR3_LEXER lexer = static_cast<pANTLR3_LEXER>(recognizer->super);
+  pANTLR3_EXCEPTION ex = lexer->rec->state->exception;
 
-	const char *fileName = NULL;
-	if (ex->streamName)
-		fileName = (const char *)(ex->streamName->to8(ex->streamName)->chars);
+  const char *fileName = NULL;
+  if (ex->streamName)
+    fileName = reinterpret_cast<char *>(ex->streamName->to8(ex->streamName)->chars);
 
-	int line = recognizer->state->exception->line;
-	const char* message = static_cast<const char *>(recognizer->state->exception->message);
-	int offset = ex->charPositionInLine+1;
+  unsigned int line = recognizer->state->exception->line;
+  const char* message = static_cast<const char *>(recognizer->state->exception->message);
+  int offset = ex->charPositionInLine+1;
 
-	PSLanguageException exception(fileName, line, offset, 1, message);
+  PSLanguageException exception(fileName, line, offset, 1, message);
 
-	pNDDL3Lexer ctx = (pNDDL3Lexer) lexer->ctx;
-	std::vector<PSLanguageException> *errors = ctx->lexerErrors;
-	errors->push_back(exception);
+  pNDDL3Lexer ctx = static_cast<pNDDL3Lexer>(lexer->ctx);
+  std::vector<PSLanguageException> *errors = ctx->lexerErrors;
+  errors->push_back(exception);
 
-	// std::cout << errors->size() << "; " << (*errors)[errors->size()-1];
+  // std::cout << errors->size() << "; " << (*errors)[errors->size()-1];
 }
 }

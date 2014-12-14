@@ -17,19 +17,19 @@ class DummyDT : public DataType {
   bool isBool() const {return false;}
   bool isString() const {return false;}
 
-  edouble createValue(const std::string& value) const {return 1.0;}
+  edouble createValue(const std::string& ) const {return 1.0;}
   
   static const std::string& NAME() {
     static std::string sl_name("DummyDT"); 
     return sl_name;
   }
-  static const DataTypeId& instance();
+  static const DataTypeId instance();
   
 };
 
 class DummyDomain : public Domain {
  public:
-  DummyDomain(const DataTypeId& id = DummyDT::instance()) : Domain(id, false, true) {}
+  DummyDomain(const DataTypeId id = DummyDT::instance()) : Domain(id, false, true) {}
   bool isEmpty() const {return false;}
   bool isFinite() const {return true;}
   bool isSingleton() const {return true;}
@@ -40,31 +40,31 @@ class DummyDomain : public Domain {
   void getValues(std::list<edouble>& results) const {results.clear(); results.push_back(1.0);}
   edouble getSingletonValue() const {return 1.0;}
   void empty() {}
-  void set(edouble value) {}
-  void reset(const Domain& dom) {}
-  void relax(const Domain& dom) {}
-  void relax(edouble value) {}
-  void insert(edouble value) {}
-  void insert(const std::list<edouble>& values) {}
-  void remove(edouble value) {}
-  bool intersect(const Domain& dom) {return false;}
-  bool intersect(const edouble lb, const edouble ub) {return false;}
-  bool difference(const Domain& dom) {return false;}
-  bool equate(Domain& dom) {return false;}
+  void set(edouble) {}
+  void reset(const Domain&) {}
+  void relax(const Domain&) {}
+  void relax(edouble ) {}
+  void insert(edouble ) {}
+  void insert(const std::list<edouble>& ) {}
+  void remove(edouble ) {}
+  bool intersect(const Domain& ) {return false;}
+  bool intersect(const edouble , const edouble ) {return false;}
+  bool difference(const Domain& ) {return false;}
+  bool equate(Domain& ) {return false;}
   bool isMember(edouble value) const {return value == 1.0;}
   bool isSubsetOf(const Domain& dom) const {return dom.isMember(1.0);}
   bool intersects(const Domain& dom) const {return isSubsetOf(dom);}
   Domain* copy() const;
-  bool convertToMemberValue(const std::string& strValue, edouble& dblValue) const {
+  bool convertToMemberValue(const std::string& , edouble& ) const {
     return false;
   }
-  void testPrecision(const edouble& value) const {}
+  void testPrecision(const edouble& ) const {}
  private:
 };
 
 Domain* DummyDomain::copy() const {return new DummyDomain(DummyDT::instance());}
 
-const DataTypeId& DummyDT::instance() { 
+const DataTypeId DummyDT::instance() { 
   static DummyDT sl_instance; 
   return sl_instance.getId(); 
 }
@@ -77,7 +77,7 @@ DummyDT::DummyDT() : DataType(DummyDT::NAME().c_str()) {
 class IntrinsicsTest {
  public:
   static bool test() {
-    DataTypeId dt = DummyDT::instance();
+    unused(DataTypeId dt) = DummyDT::instance();
     EUROPA_runTest(lessThanTest);
     EUROPA_runTest(equalTest);
     EUROPA_runTest(lessThanOrEqualTest);
@@ -183,7 +183,8 @@ class IntrinsicsTest {
       IntervalDomain realDomain(10.2 ,20.4);
       CPPUNIT_ASSERT(!realDomain.isEmpty());
       CPPUNIT_ASSERT(!realDomain.isFinite());
-      CPPUNIT_ASSERT_EQUAL((Domain::size_type) cast_int(PLUS_INFINITY), realDomain.getSize());
+      CPPUNIT_ASSERT_EQUAL(static_cast<Domain::size_type>(cast_int(PLUS_INFINITY)),
+                           realDomain.getSize());
 
       IntervalIntDomain intDomain(10, 20);
       CPPUNIT_ASSERT(intDomain.isFinite());
@@ -963,7 +964,7 @@ class IntrinsicsTest {
     }
 
     static bool testBasicLabelOperations() {
-      int initialCount = EUROPA::LabelStr::getSize();
+      unsigned long initialCount = EUROPA::LabelStr::getSize();
       EUROPA::LabelStr dt_l1("DT_L1");
       EUROPA::LabelStr dt_l2("DT_L2");
       EUROPA::LabelStr dt_l3("DT_L3");
@@ -1777,7 +1778,7 @@ class IntrinsicsTest {
     public:
       BogusComparator(): DomainComparator(){}
 
-      bool canCompare(const Domain& domx, const Domain& domy) const {
+      bool canCompare(const Domain& , const Domain&) const {
 	return false;
       }
 

@@ -10,6 +10,7 @@
 #include "Instant.hh"
 #include "Profile.hh"
 
+using namespace EUROPA;
 namespace NDDL {
 
 // -------------------------------------------------------------------------------------------------------
@@ -19,12 +20,12 @@ namespace NDDL {
 static const std::string PARAM_PROFILE_TYPE("profileType");
 static const std::string PARAM_DETECTOR_TYPE("detectorType");
 
-bool isValidCombo(const std::string& profileName, const std::string& detectorName)
-{
-	if(profileName == "GroundedProfile" && detectorName != "GroundedFVDetector")
-		return false;
+namespace {
+bool isValidCombo(const std::string& profileName, const std::string& detectorName) {
+  if(profileName == "GroundedProfile" && detectorName != "GroundedFVDetector")
+    return false;
 
-	return true;
+  return true;
 }
 
 
@@ -54,16 +55,16 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 	check_error(isValidCombo(pName.toString(), dName.toString()), "Invalid combination of profile " + pName.toString() + " and detector " + dName.toString());
 	return std::make_pair(pName, dName);
 }
-
+}
 // -------------------------------------------------------------------------------------------------------
 
-  NddlUnaryToken::NddlUnaryToken(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, const bool& rejectable, const bool& isFact, const bool& close)
+  NddlUnaryToken::NddlUnaryToken(const PlanDatabaseId planDatabase, const LabelStr& predicateName, const bool& rejectable, const bool& isFact, const bool& close)
     : EUROPA::UnaryToken(planDatabase, predicateName, rejectable, isFact, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY),
 			       EUROPA::Token::noObject(), false, false) {
     commonInit(close);
   }
 
-  NddlUnaryToken::NddlUnaryToken(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, const bool& close)
+  NddlUnaryToken::NddlUnaryToken(const TokenId master, const LabelStr& predicateName, const LabelStr& relation, const bool& close)
     : EUROPA::UnaryToken(master, relation, predicateName, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY),
 			       EUROPA::Token::noObject(), false, false) {
     commonInit(close);
@@ -81,13 +82,13 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
       close();
   }
 
-  NddlUnary::NddlUnary(const PlanDatabaseId& planDatabase,
+  NddlUnary::NddlUnary(const PlanDatabaseId planDatabase,
 			     const LabelStr& type,
 			     const LabelStr& name,
 			     bool open)
     : EUROPA::Reusable(planDatabase, type, name, open) {}
 
-  NddlUnary::NddlUnary(const ObjectId& parent,
+  NddlUnary::NddlUnary(const ObjectId parent,
 			     const LabelStr& type,
 			     const LabelStr& name,
 			     bool open)
@@ -130,17 +131,17 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
     consumptionMax = addVariable(IntervalDomain(PLUS_INFINITY, PLUS_INFINITY, FloatDT::instance()), "consumptionMax");
   }
 
-  NddlUnary::use::use(const PlanDatabaseId& planDatabase,
+  NddlUnary::use::use(const PlanDatabaseId planDatabase,
                       const LabelStr& predicateName,
-                      bool rejectable,
-                      bool isFact,
+                      bool ,
+                      bool ,
                       bool close)
     : EUROPA::ReusableToken(planDatabase, predicateName, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY),
                                   IntervalDomain(1.0), Token::noObject(), false) {
     handleDefaults(close);
   }
 
-  NddlUnary::use::use(const TokenId& master,
+  NddlUnary::use::use(const TokenId master,
 				const LabelStr& predicateName,
 				const LabelStr& relation,
 				bool close)
@@ -166,13 +167,13 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 
   /*===============*/
 
-  NddlReusable::NddlReusable(const PlanDatabaseId& planDatabase,
+  NddlReusable::NddlReusable(const PlanDatabaseId planDatabase,
 			     const LabelStr& type,
 			     const LabelStr& name,
 			     bool open)
     : EUROPA::Reusable(planDatabase, type, name, open) {}
 
-  NddlReusable::NddlReusable(const ObjectId& parent,
+  NddlReusable::NddlReusable(const ObjectId parent,
 			     const LabelStr& type,
 			     const LabelStr& name,
 			     bool open)
@@ -259,17 +260,17 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
     consumptionMax = addVariable(IntervalDomain(PLUS_INFINITY, PLUS_INFINITY, FloatDT::instance()), "consumptionMax");
   }
 
-  NddlReusable::uses::uses(const PlanDatabaseId& planDatabase,
+  NddlReusable::uses::uses(const PlanDatabaseId planDatabase,
 				const LabelStr& predicateName,
-				bool rejectable,
-				bool isFact,
+				bool ,
+				bool ,
 				bool close)
     : EUROPA::ReusableToken(planDatabase, predicateName, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY),
 				  Token::noObject(), false) {
     handleDefaults(close);
   }
 
-  NddlReusable::uses::uses(const TokenId& master,
+  NddlReusable::uses::uses(const TokenId master,
 				const LabelStr& predicateName,
 				const LabelStr& relation,
 				bool close)
@@ -296,13 +297,13 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 
   /*===============*/
 
-  NddlCBReusable::NddlCBReusable(const PlanDatabaseId& planDatabase,
+  NddlCBReusable::NddlCBReusable(const PlanDatabaseId planDatabase,
                  const LabelStr& type,
                  const LabelStr& name,
                  bool open)
     : EUROPA::CBReusable(planDatabase, type, name, open) {}
 
-  NddlCBReusable::NddlCBReusable(const ObjectId& parent,
+  NddlCBReusable::NddlCBReusable(const ObjectId parent,
                  const LabelStr& type,
                  const LabelStr& name,
                  bool open)
@@ -396,7 +397,7 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 
   /*===============*/
 
-  NddlReservoir::NddlReservoir(const PlanDatabaseId& planDatabase,
+  NddlReservoir::NddlReservoir(const PlanDatabaseId planDatabase,
 			       const LabelStr& type,
 			       const LabelStr& name,
 			       bool open)
@@ -524,7 +525,7 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
   }
 
 
-  NddlReservoir::produce::produce(const PlanDatabaseId& planDatabase,
+  NddlReservoir::produce::produce(const PlanDatabaseId planDatabase,
 				    const LabelStr& predicateName,
 				    bool rejectable,
 				    bool isFact,
@@ -533,7 +534,7 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
     handleDefaults(close);
   }
 
-  NddlReservoir::produce::produce(const TokenId& master,
+  NddlReservoir::produce::produce(const TokenId master,
 			       const LabelStr& predicateName,
 			       const LabelStr& relation,
 			       bool close)
@@ -558,7 +559,7 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
       close();
   }
 
-  NddlReservoir::consume::consume(const PlanDatabaseId& planDatabase,
+  NddlReservoir::consume::consume(const PlanDatabaseId planDatabase,
 				    const LabelStr& predicateName,
 				    bool rejectable,
 				    bool isFact,
@@ -567,7 +568,7 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
     handleDefaults(close);
   }
 
-  NddlReservoir::consume::consume(const TokenId& master,
+  NddlReservoir::consume::consume(const TokenId master,
 			       const LabelStr& predicateName,
 			       const LabelStr& relation,
 			       bool close)

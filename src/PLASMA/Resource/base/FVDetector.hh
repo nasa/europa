@@ -54,9 +54,9 @@ namespace EUROPA {
        */
       virtual bool detect(const InstantId inst) = 0;
 
-      FVDetectorId& getId() {return m_id;}
+      FVDetectorId getId() {return m_id;}
 
-      const ResourceId& getResource() const {return m_res;}
+      const ResourceId getResource() const {return m_res;}
 
       virtual PSResourceProfile* getFDLevelProfile() = 0;
       virtual PSResourceProfile* getVDLevelProfile() = 0;
@@ -93,8 +93,8 @@ namespace EUROPA {
     class FVDetectorArgs : public FactoryArgs
     {
     public:
-        const ResourceId& resource;
-        FVDetectorArgs(const ResourceId& r) : resource(r) {}
+        const ResourceId resource;
+        FVDetectorArgs(const ResourceId r) : resource(r) {}
     };
 
     template<class FVDetectorType>
@@ -103,9 +103,9 @@ namespace EUROPA {
     public:
       FVDetectorFactory(const EUROPA::LabelStr& name) : Factory(name) {}
 
-      virtual EUROPA::FactoryObjId& createInstance(const EUROPA::FactoryArgs& fa) {
-          const FVDetectorArgs& args = (const FVDetectorArgs&)fa;
-          return (EUROPA::FactoryObjId&)(new FVDetectorType(args.resource))->getId();
+      virtual EUROPA::FactoryObjId createInstance(const EUROPA::FactoryArgs& fa) {
+        const FVDetectorArgs& args = dynamic_cast<const FVDetectorArgs&>(fa);
+        return (new FVDetectorType(args.resource))->getId();
       }
     };
 

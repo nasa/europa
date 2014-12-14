@@ -23,12 +23,12 @@ namespace EUROPA {
     };
 
     UnifyMemento();
-    UnifyMemento(const TokenId& inactiveToken, const TokenId& activeToken);
+    UnifyMemento(const TokenId inactiveToken, const TokenId activeToken);
 
     void undo(bool activeTokenDeleted);
 
-    void handleAdditionOfInactiveConstraint(const ConstraintId& constraint);
-    void handleRemovalOfInactiveConstraint(const ConstraintId& constraint);
+    void handleAdditionOfInactiveConstraint(const ConstraintId constraint);
+    void handleRemovalOfInactiveConstraint(const ConstraintId constraint);
 
   private:
     UnifyMethod m_method;

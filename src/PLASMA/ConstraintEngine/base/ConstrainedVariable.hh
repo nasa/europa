@@ -25,12 +25,12 @@ namespace EUROPA {
   class ConstrainedVariableListener{
   public:
     virtual ~ConstrainedVariableListener();
-    const ConstrainedVariableListenerId& getId() const;
+    const ConstrainedVariableListenerId getId() const;
     virtual void notifyDiscard();  // message for listener creator to immediately delete listener
-    virtual void notifyConstraintAdded(const ConstraintId& constr, unsigned int argIndex);
-    virtual void notifyConstraintRemoved(const ConstraintId& constr, unsigned int argIndex);
+    virtual void notifyConstraintAdded(const ConstraintId constr, unsigned int argIndex);
+    virtual void notifyConstraintRemoved(const ConstraintId constr, unsigned int argIndex);
   protected:
-    ConstrainedVariableListener(const ConstrainedVariableId& var);
+    ConstrainedVariableListener(const ConstrainedVariableId var);
     ConstrainedVariableListenerId m_id;
     ConstrainedVariableId m_var;
   };
@@ -71,11 +71,11 @@ namespace EUROPA {
     /**
      * @brief Simple accessor.
      */
-    const ConstrainedVariableId& getId() const;
+    const ConstrainedVariableId getId() const;
 
     const std::string& getEntityType() const;
 
-    const DataTypeId& getDataType() const;
+    const DataTypeId getDataType() const;
 
     /**
      * @brief Validates the relationships of the class.
@@ -106,7 +106,7 @@ namespace EUROPA {
     /**
      * @brief Retrieve one constraint on this variable.  Returns noId if there are none.
      */
-    const ConstraintId& getFirstConstraint() const;
+    const ConstraintId getFirstConstraint() const;
 
     /**
      * @brief Test of the variable has at least one active constraint
@@ -209,12 +209,12 @@ namespace EUROPA {
      * variables may not have a parent entity, so the default implementation
      * is to return noId.
      */
-    const EntityId& parent() const;
+    const EntityId parent() const;
 
     /**
      * @brief Accessor for the ConstraintEngine
      */
-    const ConstraintEngineId& getConstraintEngine() const;
+    const ConstraintEngineId getConstraintEngine() const;
 
     /**
      * @brief Utility to capture the state of the constraint.
@@ -338,12 +338,12 @@ namespace EUROPA {
     /**
      * @brief Hook up a listener to propagate notifications of deletion
      */
-    void notifyAdded(const ConstrainedVariableListenerId& listener);
+    void notifyAdded(const ConstrainedVariableListenerId listener);
 
     /**
      * @brief Remove a listener
      */
-    void notifyRemoved(const ConstrainedVariableListenerId& listener);
+    void notifyRemoved(const ConstrainedVariableListenerId listener);
     /**
      * @brief Utility to obtain a display version of a double encoded value.
      */
@@ -397,11 +397,11 @@ namespace EUROPA {
      * @param parent An optional parent entity reference.
      * @param index An optional index indicating the position in the parent entity collection.
      */
-    ConstrainedVariable(const ConstraintEngineId& constraintEngine,
+    ConstrainedVariable(const ConstraintEngineId constraintEngine,
 			const bool internal,
 			bool canBeSpecified,
 			const LabelStr& name,
-			const EntityId& parent = EntityId::noId(),
+			const EntityId parent = EntityId::noId(),
 			unsigned long index = NO_INDEX);
 
     /**
@@ -457,26 +457,26 @@ namespace EUROPA {
      * @param constraint - must be a valid id.
      * @param argIndex - the position of this variable in the scope of the constraint.
      */
-    void addConstraint(const ConstraintId& constraint, unsigned int argIndex);
+    void addConstraint(const ConstraintId constraint, unsigned int argIndex);
 
     /**
      * @brief Called by Constraint on destruction to retract the constraint from the variable.
      * @param constraint - must be a valid id.
      * @param argIndex - the position of this variable in the scope of the constraint.
      */
-    void removeConstraint(const ConstraintId& constraint, unsigned int argIndex);
+    void removeConstraint(const ConstraintId constraint, unsigned int argIndex);
 
     /**
      * @brief Allow derived class to implement additional functionality for
      * addition of a constraint.
      */
-    virtual void handleConstraintAdded(const ConstraintId&){}
+    virtual void handleConstraintAdded(const ConstraintId){}
 
     /**
      * @brief Allow derived class to implement additional functionality for
      *  removal of a constraint.
      */
-    virtual void handleConstraintRemoved(const ConstraintId&){}
+    virtual void handleConstraintRemoved(const ConstraintId){}
 
     /**
      * @brief Helper method to reset to a specific domain
@@ -493,7 +493,7 @@ namespace EUROPA {
      * @return true if present in the list, otherwise false.
      * @see Constraint::isVariableOf()
      */
-    bool isConstrainedBy(const ConstraintId& constraint);
+    bool isConstrainedBy(const ConstraintId constraint);
 
     /**
      * @brief Called by the ConstraintEngine to update the cycle count.
@@ -535,7 +535,7 @@ namespace EUROPA {
    * @brief Helper method to cast singleton values
    */
   template<class T>
-  Id<T> id(const ConstrainedVariableId& var){
+  Id<T> id(const ConstrainedVariableId var){
     return var->baseDomain().getSingletonValue();
   }
 

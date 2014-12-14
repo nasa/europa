@@ -15,8 +15,8 @@
 
 namespace EUROPA {
 
-RuleInstance::RuleInstance(const RuleId& rule, const TokenId& token, 
-                           const PlanDatabaseId& planDb)
+RuleInstance::RuleInstance(const RuleId rule, const TokenId token, 
+                           const PlanDatabaseId planDb)
     : m_id(this), m_rule(rule), m_token(token), m_planDb(planDb), m_rulesEngine(), 
       m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
   check_error(rule.isValid(), "Parent must be a valid rule id.");
@@ -24,8 +24,8 @@ RuleInstance::RuleInstance(const RuleId& rule, const TokenId& token,
   commonInit();
 }
 
-RuleInstance::RuleInstance(const RuleId& rule, const TokenId& token, 
-                           const PlanDatabaseId& planDb,
+RuleInstance::RuleInstance(const RuleId rule, const TokenId token, 
+                           const PlanDatabaseId planDb,
                            const std::vector<ConstrainedVariableId>& guards)
     : m_id(this), m_rule(rule), m_token(token), m_planDb(planDb), m_rulesEngine(),
       m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
@@ -34,9 +34,9 @@ RuleInstance::RuleInstance(const RuleId& rule, const TokenId& token,
   commonInit();
 }
 
-RuleInstance::RuleInstance(const RuleId& rule, const TokenId& token,
-                           const PlanDatabaseId& planDb,
-                           const ConstrainedVariableId& guard, const Domain& domain)
+RuleInstance::RuleInstance(const RuleId rule, const TokenId token,
+                           const PlanDatabaseId planDb,
+                           const ConstrainedVariableId guard, const Domain& domain)
     : m_id(this), m_rule(rule), m_token(token), m_planDb(planDb), m_rulesEngine(),
       m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
   check_error(isValid());
@@ -47,7 +47,7 @@ RuleInstance::RuleInstance(const RuleId& rule, const TokenId& token,
 /**
  * @brief Constructor refers to parent for tokens, and variables that are accessible in its scope.
  */
-RuleInstance::RuleInstance(const RuleInstanceId& parent, 
+RuleInstance::RuleInstance(const RuleInstanceId parent, 
                            const std::vector<ConstrainedVariableId>& guards)
     : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
       m_planDb(parent->getPlanDatabase()),m_rulesEngine() , m_parent(parent), 
@@ -59,7 +59,7 @@ RuleInstance::RuleInstance(const RuleInstanceId& parent,
 /**
  * @brief Constructor refers to parent for tokens, and variables that are accessible in its scope.
  */
-RuleInstance::RuleInstance(const RuleInstanceId& parent, 
+RuleInstance::RuleInstance(const RuleInstanceId parent, 
                            const std::vector<ConstrainedVariableId>& guards, 
                            const bool positive)
     : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
@@ -72,8 +72,8 @@ RuleInstance::RuleInstance(const RuleInstanceId& parent,
 /**
  * @brief Constructor refers to parent for tokens, and variables that are accessible in its scope.
  */
-RuleInstance::RuleInstance(const RuleInstanceId& parent,
-                           const ConstrainedVariableId& guard, const Domain& domain)
+RuleInstance::RuleInstance(const RuleInstanceId parent,
+                           const ConstrainedVariableId guard, const Domain& domain)
     : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
       m_planDb(parent->getPlanDatabase()), m_rulesEngine(), m_parent(parent),
       m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
@@ -84,8 +84,8 @@ RuleInstance::RuleInstance(const RuleInstanceId& parent,
   /**
    * @brief Constructor refers to parent for tokens, and variables that are accessible in its scope.
    */
-RuleInstance::RuleInstance(const RuleInstanceId& parent, 
-                           const ConstrainedVariableId& guard,
+RuleInstance::RuleInstance(const RuleInstanceId parent, 
+                           const ConstrainedVariableId guard,
                            const Domain& domain, const bool positive)
     : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
       m_planDb(parent->getPlanDatabase()), m_rulesEngine(), m_parent(parent), 
@@ -94,8 +94,8 @@ RuleInstance::RuleInstance(const RuleInstanceId& parent,
   setGuard(guard, domain);
 }
 
-RuleInstance::RuleInstance(const RuleInstanceId& parent, 
-                           const ConstrainedVariableId& guard,
+RuleInstance::RuleInstance(const RuleInstanceId parent, 
+                           const ConstrainedVariableId guard,
                            const Domain& domain, const bool positive,
                            const std::vector<ConstrainedVariableId>& guardComponents)
     : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
@@ -141,13 +141,13 @@ RuleInstance::RuleInstance(const RuleInstanceId& parent,
     Entity::handleDiscard();
   }
 
-  const RuleInstanceId& RuleInstance::getId() const{return m_id;}
+  const RuleInstanceId RuleInstance::getId() const{return m_id;}
 
-  const RuleId& RuleInstance::getRule() const {return m_rule;}
+  const RuleId RuleInstance::getRule() const {return m_rule;}
 
-  const PlanDatabaseId& RuleInstance::getPlanDatabase() const {return m_planDb;}
+  const PlanDatabaseId RuleInstance::getPlanDatabase() const {return m_planDb;}
 
-  const TokenId& RuleInstance::getToken() const {return m_token;}
+  const TokenId RuleInstance::getToken() const {return m_token;}
 
   const std::vector<TokenId> RuleInstance::getSlaves() const
   {return std::vector<TokenId>(m_slaves);}
@@ -348,7 +348,7 @@ RuleInstance::RuleInstance(const RuleInstanceId& parent,
     debugMsg("RuleInstance:setGuard", "Added guard: " << m_guardListener->toLongString());
   }
 
-  void RuleInstance::setGuard(const ConstrainedVariableId& guard, const Domain& domain){
+  void RuleInstance::setGuard(const ConstrainedVariableId guard, const Domain& domain){
     check_error(m_guards.empty());
     check_error(guard.isValid());
     m_guards.push_back(guard);
@@ -361,7 +361,7 @@ RuleInstance::RuleInstance(const RuleInstanceId& parent,
     debugMsg("RuleInstance:setGuard", "Added guard: " << m_guardListener->toLongString());
   }
 
-void RuleInstance::setGuard(const ConstrainedVariableId& guard, const Domain& domain,
+void RuleInstance::setGuard(const ConstrainedVariableId guard, const Domain& domain,
                             const std::vector<ConstrainedVariableId>& guardComponents){
   check_error(m_guards.empty());
   check_error(guard.isValid());
@@ -422,7 +422,7 @@ TokenId RuleInstance::addSlave(Token* slave){
     return localVariable;
   }
 
-  void RuleInstance::addVariable(const ConstrainedVariableId& var, const LabelStr& name){
+  void RuleInstance::addVariable(const ConstrainedVariableId var, const LabelStr& name){
     check_error(var.isValid(), "Tried to add invalid variable " + name.toString());
     m_variablesByName.insert(std::make_pair(name, var));
     getToken()->addLocalVariable(var);
@@ -436,7 +436,7 @@ TokenId RuleInstance::addSlave(Token* slave){
     std::map<edouble, ConstrainedVariableId>::iterator it = m_variablesByName.begin();
     while (it != m_variablesByName.end()){
       const LabelStr& name = it->first;
-      const ConstrainedVariableId& var = it->second;
+      const ConstrainedVariableId var = it->second;
       // If we get a match straight away, remove the entry.
       if(var->parent() == getId() && (name == loopVarName ||	(name.countElements(".") > 0 && loopVarName == name.getElement(0, "."))))
 	m_variablesByName.erase(it++);
@@ -470,7 +470,7 @@ TokenId RuleInstance::addSlave(Token* slave){
     addConstraint(constraint);
   }
 
-void RuleInstance::addConstraint(const ConstraintId& constraint){
+void RuleInstance::addConstraint(const ConstraintId constraint){
   m_constraints.push_back(constraint);
   const LabelStr& name = constraint->getName();
   m_constraintsByName.erase(name.getKey());
@@ -583,7 +583,7 @@ void RuleInstance::addConstraint(const ConstraintId& constraint){
     return retVar;
   }
 
-ConstrainedVariableId RuleInstance::varFromObject(const ConstrainedVariableId& obj,
+ConstrainedVariableId RuleInstance::varFromObject(const ConstrainedVariableId obj,
                                                   const std::string& varString,
                                                   const std::string& fullName,
                                                   bool canBeSpecified){
@@ -667,7 +667,7 @@ ConstrainedVariableId RuleInstance::varFromObject(const ConstrainedVariableId& o
   return proxyVariable;
 }
 
-  ConstrainedVariableId RuleInstance::varfromtok(const TokenId& token, const std::string varstring) {
+  ConstrainedVariableId RuleInstance::varfromtok(const TokenId token, const std::string varstring) {
     std::string local_name = varstring.substr(0, varstring.find(Schema::getDelimiter()));
     checkError(token.isValid(), "Cannot get variable : " << varstring << " from token with id " << token);
     ConstrainedVariableId retVar;
@@ -723,7 +723,7 @@ ConstrainedVariableId RuleInstance::varFromObject(const ConstrainedVariableId& o
     }
   }
 
-  bool RuleInstance::connectedToToken(const ConstraintId& constraint, const TokenId& token) const{
+  bool RuleInstance::connectedToToken(const ConstraintId constraint, const TokenId token) const{
     // If the constrant is actually a rule variable listener then it is part of the context of the rule instance
     // and thus part of the context of the token
     if(RuleVariableListenerId::convertable(constraint))

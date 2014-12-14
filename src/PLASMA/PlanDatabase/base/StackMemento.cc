@@ -9,7 +9,7 @@
 
 namespace EUROPA{
 
-  StackMemento::StackMemento(const TokenId& activeTokenToStack, const TokenId& activeToken)
+  StackMemento::StackMemento(const TokenId activeTokenToStack, const TokenId activeToken)
     :m_activeTokenToStack(activeTokenToStack), m_activeToken(activeToken){
 
     // Iterate over all variables and impose equivalence constraints
@@ -42,7 +42,7 @@ namespace EUROPA{
     cleanup(m_stackConstraints);
   }
 
-  void StackMemento::handleAdditionOfInactiveConstraint(const ConstraintId&){ }
+  void StackMemento::handleAdditionOfInactiveConstraint(const ConstraintId){ }
 
-  void StackMemento::handleRemovalOfInactiveConstraint(const ConstraintId&){ }
+  void StackMemento::handleRemovalOfInactiveConstraint(const ConstraintId){ }
 }

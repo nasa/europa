@@ -12,7 +12,7 @@ namespace EUROPA {
 
   Constraint::Constraint(const LabelStr& name,
 			 const LabelStr& propagatorName,
-			 const ConstraintEngineId& constraintEngine,
+			 const ConstraintEngineId constraintEngine,
 			 const std::vector<ConstrainedVariableId>& variables)
     : Entity()
     , m_name(name)
@@ -144,26 +144,26 @@ PSList<PSVariable*> Constraint::getVariables() const {
   return retval;
 }
 
-  const ConstraintId& Constraint::getId() const {
+  const ConstraintId Constraint::getId() const {
     return m_id;
   }
 
   const LabelStr& Constraint::getName() const {return m_name;}
 
-  const PropagatorId& Constraint::getPropagator() const {return m_propagator;}
+  const PropagatorId Constraint::getPropagator() const {return m_propagator;}
 
   const std::vector<ConstrainedVariableId>& Constraint::getScope() const {return m_variables;}
 
   const LabelStr& Constraint::getCreatedBy() const {return m_createdBy;}
 
-  void Constraint::setPropagator(const PropagatorId& propagator){
+  void Constraint::setPropagator(const PropagatorId propagator){
     check_error(m_propagator.isNoId());
     check_error(propagator->getConstraintEngine() == m_constraintEngine);
 
     m_propagator = propagator;
   }
 
-  bool Constraint::isVariableOf(const ConstrainedVariableId& variable){
+  bool Constraint::isVariableOf(const ConstrainedVariableId variable){
     std::vector<ConstrainedVariableId>::iterator it = m_variables.begin();
     while(it !=  m_variables.end()){
       if (*it == variable)
@@ -184,7 +184,7 @@ PSList<PSVariable*> Constraint::getVariables() const {
     	m_variables[i]->setCurrentPropagatingConstraint(ConstraintId::noId());
   }
 
-  void Constraint::execute(const ConstrainedVariableId& variable,
+  void Constraint::execute(const ConstrainedVariableId variable,
                            unsigned int argIndex,
                            const DomainListener::ChangeType& changeType) {
 
@@ -197,20 +197,20 @@ PSList<PSVariable*> Constraint::getVariables() const {
     	m_variables[i]->setCurrentPropagatingConstraint(ConstraintId::noId());
   }
 
-  void Constraint::handleExecute(const ConstrainedVariableId&,
+  void Constraint::handleExecute(const ConstrainedVariableId,
 				 unsigned int,
 				 const DomainListener::ChangeType&) {
     handleExecute();
   }
 
-  bool Constraint::canIgnore(const ConstrainedVariableId&,
+  bool Constraint::canIgnore(const ConstrainedVariableId,
 			     unsigned int,
 			     const DomainListener::ChangeType&) {
     return false;
   }
 
 const std::vector<ConstrainedVariableId>&
-Constraint::getModifiedVariables(const ConstrainedVariableId&) const {
+Constraint::getModifiedVariables(const ConstrainedVariableId) const {
   return getScope();
 }
 
@@ -222,7 +222,7 @@ Constraint::getModifiedVariables(const ConstrainedVariableId&) const {
    * @todo Figure a way to propagate first and deactivate only after safe
    * propagation.
    */
-  void Constraint::notifyBaseDomainRestricted(const ConstrainedVariableId& var) {
+  void Constraint::notifyBaseDomainRestricted(const ConstrainedVariableId var) {
     debugMsg("Constraint:notifyBaseDomainRestricted",
 	     "Base domain of " << var->toString() << " restricted in " << m_id->toString());
 
@@ -241,7 +241,7 @@ Constraint::getModifiedVariables(const ConstrainedVariableId&) const {
   /**
    * @brief Passed the variable to allow a quick exit test
    */
-  bool Constraint::testIsRedundant(const ConstrainedVariableId& var) const {
+  bool Constraint::testIsRedundant(const ConstrainedVariableId var) const {
 
     if(var.isId() && (!var->baseDomain().isSingleton() || var->baseDomain().isOpen()))
       return false;
@@ -260,7 +260,7 @@ Constraint::getModifiedVariables(const ConstrainedVariableId&) const {
     return true;
   }
 
-  Domain& Constraint::getCurrentDomain(const ConstrainedVariableId& var) {
+  Domain& Constraint::getCurrentDomain(const ConstrainedVariableId var) {
     check_error(var.isValid());
 
     return var->getCurrentDomain();
@@ -322,7 +322,7 @@ Constraint::getModifiedVariables(const ConstrainedVariableId&) const {
 	  m_propagator->getConstraintEngine()->getViolationMgr().removeViolatedConstraint(m_id);
   }
 
-  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1){
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId arg1){
     std::vector<ConstrainedVariableId> scope;
     check_error(arg1.isValid());
 
@@ -331,8 +331,8 @@ Constraint::getModifiedVariables(const ConstrainedVariableId&) const {
     return scope;
   }
 
-  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
-						const ConstrainedVariableId& arg2){
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId arg1,
+						const ConstrainedVariableId arg2){
     check_error(arg1.isValid());
     check_error(arg2.isValid());
 
@@ -341,88 +341,88 @@ Constraint::getModifiedVariables(const ConstrainedVariableId&) const {
     return scope;
   }
 
-  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
-					       const ConstrainedVariableId& arg2,
-					       const ConstrainedVariableId& arg3){
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId arg1,
+					       const ConstrainedVariableId arg2,
+					       const ConstrainedVariableId arg3){
     check_error(arg3.isValid());
     std::vector<ConstrainedVariableId> scope =  makeScope(arg1, arg2);
     scope.push_back(arg3);
     return scope;
   }
 
-  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
-					       const ConstrainedVariableId& arg2,
-					       const ConstrainedVariableId& arg3,
-					       const ConstrainedVariableId& arg4){
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId arg1,
+					       const ConstrainedVariableId arg2,
+					       const ConstrainedVariableId arg3,
+					       const ConstrainedVariableId arg4){
     check_error(arg4.isValid());
     std::vector<ConstrainedVariableId> scope =  makeScope(arg1, arg2, arg3);
     scope.push_back(arg4);
     return scope;
   }
 
-  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
-					       const ConstrainedVariableId& arg2,
-					       const ConstrainedVariableId& arg3,
-					       const ConstrainedVariableId& arg4,
-					       const ConstrainedVariableId& arg5){
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId arg1,
+					       const ConstrainedVariableId arg2,
+					       const ConstrainedVariableId arg3,
+					       const ConstrainedVariableId arg4,
+					       const ConstrainedVariableId arg5){
     check_error(arg5.isValid());
     std::vector<ConstrainedVariableId> scope =  makeScope(arg1, arg2, arg3, arg4);
     scope.push_back(arg5);
     return scope;
   }
 
-  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
-					       const ConstrainedVariableId& arg2,
-					       const ConstrainedVariableId& arg3,
-					       const ConstrainedVariableId& arg4,
-					       const ConstrainedVariableId& arg5,
-					       const ConstrainedVariableId& arg6){
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId arg1,
+					       const ConstrainedVariableId arg2,
+					       const ConstrainedVariableId arg3,
+					       const ConstrainedVariableId arg4,
+					       const ConstrainedVariableId arg5,
+					       const ConstrainedVariableId arg6){
     check_error(arg6.isValid());
     std::vector<ConstrainedVariableId> scope =  makeScope(arg1, arg2, arg3, arg4, arg5);
     scope.push_back(arg6);
     return scope;
   }
 
-  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
-					       const ConstrainedVariableId& arg2,
-					       const ConstrainedVariableId& arg3,
-					       const ConstrainedVariableId& arg4,
-					       const ConstrainedVariableId& arg5,
-					       const ConstrainedVariableId& arg6,
-					       const ConstrainedVariableId& arg7){
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId arg1,
+					       const ConstrainedVariableId arg2,
+					       const ConstrainedVariableId arg3,
+					       const ConstrainedVariableId arg4,
+					       const ConstrainedVariableId arg5,
+					       const ConstrainedVariableId arg6,
+					       const ConstrainedVariableId arg7){
     check_error(arg7.isValid());
     std::vector<ConstrainedVariableId> scope =  makeScope(arg1, arg2, arg3, arg4, arg5, arg6);
     scope.push_back(arg7);
     return scope;
   }
 
-  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
-					       const ConstrainedVariableId& arg2,
-					       const ConstrainedVariableId& arg3,
-					       const ConstrainedVariableId& arg4,
-					       const ConstrainedVariableId& arg5,
-					       const ConstrainedVariableId& arg6,
-					       const ConstrainedVariableId& arg7,
-					       const ConstrainedVariableId& arg8){
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId arg1,
+					       const ConstrainedVariableId arg2,
+					       const ConstrainedVariableId arg3,
+					       const ConstrainedVariableId arg4,
+					       const ConstrainedVariableId arg5,
+					       const ConstrainedVariableId arg6,
+					       const ConstrainedVariableId arg7,
+					       const ConstrainedVariableId arg8){
     check_error(arg8.isValid());
     std::vector<ConstrainedVariableId> scope =  makeScope(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
     scope.push_back(arg8);
     return scope;
   }
 
-  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
-  					       const ConstrainedVariableId& arg2,
-  					       const ConstrainedVariableId& arg3,
-  					       const ConstrainedVariableId& arg4,
-  					       const ConstrainedVariableId& arg5,
-  					       const ConstrainedVariableId& arg6,
-  					       const ConstrainedVariableId& arg7,
-  					       const ConstrainedVariableId& arg8,
-					       const ConstrainedVariableId& arg9,
-					       const ConstrainedVariableId& arg10,
-					       const ConstrainedVariableId& arg11,
-					       const ConstrainedVariableId& arg12,
-					       const ConstrainedVariableId& arg13){
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId arg1,
+  					       const ConstrainedVariableId arg2,
+  					       const ConstrainedVariableId arg3,
+  					       const ConstrainedVariableId arg4,
+  					       const ConstrainedVariableId arg5,
+  					       const ConstrainedVariableId arg6,
+  					       const ConstrainedVariableId arg7,
+  					       const ConstrainedVariableId arg8,
+					       const ConstrainedVariableId arg9,
+					       const ConstrainedVariableId arg10,
+					       const ConstrainedVariableId arg11,
+					       const ConstrainedVariableId arg12,
+					       const ConstrainedVariableId arg13){
       check_error(arg13.isValid());
       std::vector<ConstrainedVariableId> scope =  makeScope(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
       scope.push_back(arg9);

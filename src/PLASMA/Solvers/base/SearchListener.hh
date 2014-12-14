@@ -42,45 +42,45 @@ namespace EUROPA {
       /**
        * @brief Get the Id for this SearchListener instance.
        */
-      SearchListenerId& getId() {return m_id;};
+      SearchListenerId getId() {return m_id;};
 
       /**
        * @brief Notify that a new decision point was created.
        * @param dp The new decision point.
        */
-      virtual void notifyCreated(DecisionPointId& dp) {};
+      virtual void notifyCreated(DecisionPointId dp);
 
       /**
        * @brief Notify that a decision point was removed for some reason (i.e. backtracked over).
        * @param dp The removed decision point.
        */
-      virtual void notifyDeleted(DecisionPointId& dp) {};
+      virtual void notifyDeleted(DecisionPointId dp);
 
       /**
        * @brief Notify that a decision point was undone (the decision was retracted).
        * @param dp The retracted decision.
        */
-      virtual void notifyUndone(DecisionPointId& dp) {};
+      virtual void notifyUndone(DecisionPointId dp);
 
       /**
        * @brief Notify of a successful step (a decision followed by constraint propagation to quiescence).
        */
-      virtual void notifyStepSucceeded(DecisionPointId& dp) {};
+      virtual void notifyStepSucceeded(DecisionPointId dp);
 
       /**
        * @brief Notify of a failed step (a decision led to an inconsistency).
        */
-      virtual void notifyStepFailed(DecisionPointId& dp) {};
+      virtual void notifyStepFailed(DecisionPointId dp);
 
       /**
        * @brief Notify of a successful retraction.
        */
-      virtual void notifyRetractSucceeded(DecisionPointId& dp) {};
+      virtual void notifyRetractSucceeded(DecisionPointId dp);
 
       /**
        * @brief Notify of a retraction that requires further retraction
        */
-      virtual void notifyRetractNotDone(DecisionPointId& dp) {};
+      virtual void notifyRetractNotDone(DecisionPointId dp);
 
       /**
        * @brief Notify of a completed search (a consistent plan was found).

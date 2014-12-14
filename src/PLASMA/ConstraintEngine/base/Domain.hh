@@ -343,13 +343,13 @@ namespace EUROPA {
      * Will error out if that is not the case.
      * @param listener the listener to attach.
      */
-    virtual void setListener(const DomainListenerId& listener);
+    virtual void setListener(const DomainListenerId listener);
 
     /**
      * @brief Accessor for the listener.
      * @return the listener. May be noId() if no listener attached
      */
-    virtual const DomainListenerId& getListener() const;
+    virtual const DomainListenerId getListener() const;
 
     /**
      * "Deeply" copy the concrete C++ object into new memory and return a pointer to it.
@@ -374,7 +374,7 @@ namespace EUROPA {
      */
     static bool canBeCompared(const Domain& domx, const Domain& domy);
 
-    const DataTypeId& getDataType() const;
+    const DataTypeId getDataType() const;
 
     // TODO: all these just delegate to the data type, should be dropped eventually, preserved for now for backwards compatibility
     const LabelStr& getTypeName() const;
@@ -430,7 +430,7 @@ namespace EUROPA {
      * additions to extend the contents of the domain will be permitted.
      * @todo Review how semantics of closed can be enforced in operations.
      */
-    Domain(const DataTypeId& dataType, bool enumerated, bool closed);
+    Domain(const DataTypeId dataType, bool enumerated, bool closed);
 
     /**
      * @brief Copy Constructor
@@ -461,7 +461,7 @@ namespace EUROPA {
      */
     static void assertSafeComparison(const Domain& domA, const Domain& domB);
 
-    void setDataType(const DataTypeId& dt);
+    void setDataType(const DataTypeId dt);
     friend class RestrictedDT;
 
     DataTypeId m_dataType;

@@ -7,6 +7,8 @@
 #include "Constraint.hh"
 #include "DbClient.hh"
 
+#include <boost/cast.hpp>
+
 namespace EUROPA {
   using namespace SOLVERS;
 
@@ -51,7 +53,7 @@ namespace EUROPA {
 
     class DefaultChoiceFilter : public ChoiceFilter {
     public:
-      DefaultChoiceFilter(Profile* profile, const LabelStr& explanation, const InstantId& inst)
+      DefaultChoiceFilter(Profile* profile, const LabelStr& explanation, const InstantId inst)
         : ChoiceFilter(), m_profile(profile), m_explanation(explanation), m_inst(inst) {
         m_treatAsLowerFlaw = true;
         debugMsg("ResourceThreatDecisionPoint:filter", "Creating filter for " << inst->getTime() << " on " << inst->getProfile()->getResource()->toString());
@@ -82,7 +84,7 @@ namespace EUROPA {
           debugMsg("ResourceThreatDecisionPoint:filter", "Instant is only flawed on the " << (m_treatAsLowerFlaw ? "lower" : "upper") << " level.");
         }
       }
-      virtual bool operator()(const std::pair<TransactionId, TransactionId>& p) const {
+      virtual bool operator()(const std::pair<TransactionId, TransactionId>&) const {
         return true;
       }
       virtual std::string toString() const {return "DefaultFilter";}
@@ -96,10 +98,10 @@ namespace EUROPA {
 class PredecessorNotContributingChoiceFilter : public DefaultChoiceFilter {
  public:
   PredecessorNotContributingChoiceFilter(Profile* profile, const LabelStr& explanation,
-                                         const InstantId& inst)
+                                         const InstantId inst)
       : DefaultChoiceFilter(profile, explanation, inst) {
     // For this ChoiceFilter, we need the profile to be a subclass of FlowProfile:
-    FlowProfile * fProfile = dynamic_cast <FlowProfile*>((Profile*) profile);
+    FlowProfile * fProfile = boost::polymorphic_cast<FlowProfile*>(profile);
     checkRuntimeError(fProfile != 0,
                       "Cannot create PredecessorNotContributingChoiceFilter for " <<
                       "profile not derived from FlowProfile (choice of " <<
@@ -119,7 +121,7 @@ class PredecessorNotContributingChoiceFilter : public DefaultChoiceFilter {
         return false;
       }
       contributing = 
-          ((FlowProfile*) m_profile)->getEarliestLowerLevelInstant(p.first, inst);
+          (boost::polymorphic_cast<FlowProfile*>(m_profile))->getEarliestLowerLevelInstant(p.first, inst);
     }
     else {
       if(!p.first->isConsumer()) {
@@ -129,7 +131,7 @@ class PredecessorNotContributingChoiceFilter : public DefaultChoiceFilter {
         return false;
       }
       contributing = 
-          ((FlowProfile*) m_profile)->getEarliestUpperLevelInstant(p.first, inst);
+          (boost::polymorphic_cast<FlowProfile*>(m_profile))->getEarliestUpperLevelInstant(p.first, inst);
     }
     checkError(contributing,
                "Should always have an instant for transaction " << 
@@ -142,47 +144,50 @@ class PredecessorNotContributingChoiceFilter : public DefaultChoiceFilter {
   std::string toString() const {return "PredecessorNotContributingFilter";}
 };
 
-    class SuccessorContributingChoiceFilter : public DefaultChoiceFilter {
-    public:
-      SuccessorContributingChoiceFilter(Profile* profile, const LabelStr& explanation, const InstantId& inst)
-        : DefaultChoiceFilter(profile, explanation, inst) {
-    	  // For this ChoiceFilter, we need the profile to be a subclass of FlowProfile:
-    	  FlowProfile * fProfile = dynamic_cast <FlowProfile*>((Profile*) profile);
-    	  check_runtime_error(fProfile != 0,
-    			  "Cannot create SuccessorContributingChoiceFilter for profile not derived from FlowProfile " \
-    			  " (choice of ResourceThreatHandler filter in PlannerConfig.xml probably conflicts with choice of profileType in NDDL)");
-      }
+class SuccessorContributingChoiceFilter : public DefaultChoiceFilter {
+ public:
+  SuccessorContributingChoiceFilter(Profile* profile, const LabelStr& explanation, const InstantId inst)
+      : DefaultChoiceFilter(profile, explanation, inst) {
+    // For this ChoiceFilter, we need the profile to be a subclass of FlowProfile:
+    FlowProfile * fProfile = boost::polymorphic_cast<FlowProfile*>(profile);
+    check_runtime_error(fProfile != 0,
+                        "Cannot create SuccessorContributingChoiceFilter for profile not derived from FlowProfile " \
+                        " (choice of ResourceThreatHandler filter in PlannerConfig.xml probably conflicts with choice of profileType in NDDL)");
+  }
 
-      bool operator()(const std::pair<TransactionId, TransactionId>& p) const {
-        InstantId inst = InstantId::noId();
-        bool contributing = false;
+  bool operator()(const std::pair<TransactionId, TransactionId>& p) const {
+    InstantId inst = InstantId::noId();
+    bool contributing = false;
 
-        if(m_treatAsLowerFlaw) {
-          if(!p.second->isConsumer()) {
-            debugMsg("ResourceThreatDecisionPoint:filter:successor", "Rejecting choice because flaw is lower level and successor is a producer.");
-            return false;
-          }
-          contributing = ((FlowProfile*) m_profile)->getEarliestLowerLevelInstant(p.second, inst);
-        }
-        else {
-          if(p.second->isConsumer()) {
-            debugMsg("ResourceThreatDecisionPoint:filter:successor", "Rejecting choice because flaw is upper level and successor is a consumer.");
-            return false;
-          }
-          contributing = ((FlowProfile*) m_profile)->getEarliestUpperLevelInstant(p.second, inst);
-        }
-        checkError(contributing, "Should always have an instant for transaction " << p.second->toString());
-        condDebugMsg(inst->getTime() > m_inst->getTime(), "ResourceThreatDecisionPoint:filter:successor",
-                     "Rejecting choice because successor is not contributing at this instant.");
-        return inst->getTime() <= m_inst->getTime();
+    if(m_treatAsLowerFlaw) {
+      if(!p.second->isConsumer()) {
+        debugMsg("ResourceThreatDecisionPoint:filter:successor", "Rejecting choice because flaw is lower level and successor is a producer.");
+        return false;
       }
-      std::string toString() const {return "SuccessorContributingFilter";}
-    };
+      contributing =
+          boost::polymorphic_cast<FlowProfile*>(m_profile)->getEarliestLowerLevelInstant(p.second, inst);
+    }
+    else {
+      if(p.second->isConsumer()) {
+        debugMsg("ResourceThreatDecisionPoint:filter:successor", "Rejecting choice because flaw is upper level and successor is a consumer.");
+        return false;
+      }
+      contributing =
+          boost::polymorphic_cast<FlowProfile*>(m_profile)->getEarliestUpperLevelInstant(p.second, inst);
+    }
+    checkError(contributing, "Should always have an instant for transaction " << p.second->toString());
+    condDebugMsg(inst->getTime() > m_inst->getTime(), "ResourceThreatDecisionPoint:filter:successor",
+                 "Rejecting choice because successor is not contributing at this instant.");
+    return inst->getTime() <= m_inst->getTime();
+  }
+  std::string toString() const {return "SuccessorContributingFilter";}
+};
 
     class ChoiceComparator {
     public:
       virtual ~ChoiceComparator() {}
-      virtual bool operator()(const std::pair<TransactionId, TransactionId>& p1, const std::pair<TransactionId, TransactionId>& p2) const {
+      virtual bool operator()(const std::pair<TransactionId, TransactionId>&,
+                              const std::pair<TransactionId, TransactionId>& ) const {
         check_error(ALWAYS_FAIL, "This used to be a pure virtual method.");
         return false;
       }
@@ -245,7 +250,7 @@ class PredecessorNotContributingChoiceFilter : public DefaultChoiceFilter {
     class TransactionComparator {
     public:
       virtual ~TransactionComparator() {}
-      virtual bool operator()(const TransactionId& t1, const TransactionId& t2) const = 0;
+      virtual bool operator()(const TransactionId t1, const TransactionId t2) const = 0;
       virtual std::string toString() const = 0;
       virtual TransactionComparator* copy() const = 0;
     private:
@@ -297,7 +302,7 @@ class PredecessorNotContributingChoiceFilter : public DefaultChoiceFilter {
 
     class EarliestTransactionComparator : public TransactionComparator {
     public:
-      bool operator()(const TransactionId& t1, const TransactionId& t2) const {
+      bool operator()(const TransactionId t1, const TransactionId t2) const {
         return t1->time()->lastDomain().getLowerBound() < t2->time()->lastDomain().getLowerBound();
       }
       std::string toString() const {return "earliest";}
@@ -306,7 +311,7 @@ class PredecessorNotContributingChoiceFilter : public DefaultChoiceFilter {
 
     class LatestTransactionComparator : public TransactionComparator {
     public:
-      bool operator()(const TransactionId& t1, const TransactionId& t2) const {
+      bool operator()(const TransactionId t1, const TransactionId t2) const {
         debugMsg("ResourceThreatDecisionPoint:sort:latest", "Comparing upper bounds of timepoints for " << t1->toString() << " and " << t2->toString());
         return t1->time()->lastDomain().getUpperBound() > t2->time()->lastDomain().getUpperBound();
       }
@@ -316,7 +321,7 @@ class PredecessorNotContributingChoiceFilter : public DefaultChoiceFilter {
 
     class LongestTransactionComparator : public TransactionComparator {
     public:
-      bool operator()(const TransactionId& t1, const TransactionId& t2) const {
+      bool operator()(const TransactionId t1, const TransactionId t2) const {
         return
           (t1->time()->lastDomain().getUpperBound() - t1->time()->lastDomain().getLowerBound()) >
           (t2->time()->lastDomain().getUpperBound() - t2->time()->lastDomain().getLowerBound());
@@ -327,7 +332,7 @@ class PredecessorNotContributingChoiceFilter : public DefaultChoiceFilter {
 
     class ShortestTransactionComparator : public TransactionComparator {
     public:
-      bool operator()(const TransactionId& t1, const TransactionId& t2) const {
+      bool operator()(const TransactionId t1, const TransactionId t2) const {
         return
           (t1->time()->lastDomain().getUpperBound() - t1->time()->lastDomain().getLowerBound()) <
           (t2->time()->lastDomain().getUpperBound() - t2->time()->lastDomain().getLowerBound());
@@ -338,7 +343,7 @@ class PredecessorNotContributingChoiceFilter : public DefaultChoiceFilter {
 
     class AscendingKeyTransactionComparator : public TransactionComparator {
     public:
-      bool operator()(const TransactionId& t1, const TransactionId& t2) const {
+      bool operator()(const TransactionId t1, const TransactionId t2) const {
         return t1->time()->getKey() < t2->time()->getKey();
       }
       std::string toString() const {return "ascendingKey";}
@@ -347,7 +352,7 @@ class PredecessorNotContributingChoiceFilter : public DefaultChoiceFilter {
 
     class DescendingKeyTransactionComparator : public TransactionComparator {
     public:
-      bool operator()(const TransactionId& t1, const TransactionId& t2) const {
+      bool operator()(const TransactionId t1, const TransactionId t2) const {
         return t1->time()->getKey() > t2->time()->getKey();
       }
       std::string toString() const {return "descendingKey";}
@@ -355,7 +360,7 @@ class PredecessorNotContributingChoiceFilter : public DefaultChoiceFilter {
     };
 
 
-    bool ResourceThreatDecisionPoint::test(const EntityId& entity) {
+    bool ResourceThreatDecisionPoint::test(const EntityId entity) {
       return InstantId::convertable(entity);
     }
 
@@ -388,7 +393,7 @@ class PredecessorNotContributingChoiceFilter : public DefaultChoiceFilter {
        order="leastImpact" will order choices by last estimated temporal impact
 
      */
-    ResourceThreatDecisionPoint::ResourceThreatDecisionPoint(const DbClientId& client, const InstantId& flawedInstant, const TiXmlElement& configData, const LabelStr& explanation)
+    ResourceThreatDecisionPoint::ResourceThreatDecisionPoint(const DbClientId client, const InstantId flawedInstant, const TiXmlElement& configData, const LabelStr& explanation)
       : DecisionPoint(client, flawedInstant->getKey(), explanation), m_flawedInstant(flawedInstant), m_index(0) {
       m_instTime = m_flawedInstant->getTime();
       m_resName = m_flawedInstant->getProfile()->getResource()->getName();
@@ -424,7 +429,7 @@ class PredecessorNotContributingChoiceFilter : public DefaultChoiceFilter {
 
     ResourceThreatDecisionPoint::~ResourceThreatDecisionPoint() {}
 
-    void ResourceThreatDecisionPoint::createFilter(ChoiceFilters& filters, const std::string& filter, ProfileId& profile) {
+    void ResourceThreatDecisionPoint::createFilter(ChoiceFilters& filters, const std::string& filter, ProfileId profile) {
       checkError(filter == "none" || filter == "predecessorNot" || filter == "successor" || filter == "both",
                  "Unknown filter attribute '" << filter << "'");
       if(filter == "successor" || filter == "both")
@@ -481,7 +486,7 @@ class PredecessorNotContributingChoiceFilter : public DefaultChoiceFilter {
 
       //filter based on the configuration
       ChoiceFilters filter;
-      createFilter(filter, m_filter, const_cast<ProfileId&>(m_flawedInstant->getProfile()));
+      createFilter(filter, m_filter, static_cast<ProfileId>(m_flawedInstant->getProfile()));
       //order based ont he configuration
       ChoiceOrder order;
       createOrder(order);

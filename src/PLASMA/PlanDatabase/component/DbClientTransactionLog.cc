@@ -8,7 +8,7 @@
 #include "DbClientTransactionLog.hh"
 
 namespace EUROPA {
-  DbClientTransactionLog::DbClientTransactionLog(const DbClientId& client, bool chronologicalBacktracking)
+  DbClientTransactionLog::DbClientTransactionLog(const DbClientId client, bool chronologicalBacktracking)
     : DbClientListener(client)
     , m_client(client)
   {
@@ -45,7 +45,7 @@ namespace EUROPA {
     popTransaction();
   }
 
-  void DbClientTransactionLog::notifyVariableCreated(const ConstrainedVariableId& variable) {
+  void DbClientTransactionLog::notifyVariableCreated(const ConstrainedVariableId variable) {
     if(!variable->isInternal()) {
       TiXmlElement * element = allocateXmlElement("var");
       const Domain& baseDomain = variable->baseDomain();
@@ -71,7 +71,7 @@ namespace EUROPA {
     }
   }
 
-void DbClientTransactionLog::notifyVariableDeleted(const ConstrainedVariableId& variable) {
+void DbClientTransactionLog::notifyVariableDeleted(const ConstrainedVariableId variable) {
   if(!variable->isInternal()) {
     TiXmlElement* element = allocateXmlElement("deletevar");
     element->SetAttribute("index", static_cast<int>(m_client->getIndexByVariable(variable)));
@@ -81,12 +81,12 @@ void DbClientTransactionLog::notifyVariableDeleted(const ConstrainedVariableId& 
   }
 }
 
-  void DbClientTransactionLog::notifyObjectCreated(const ObjectId& object){
+  void DbClientTransactionLog::notifyObjectCreated(const ObjectId object){
     const std::vector<const Domain*> noArguments;
     notifyObjectCreated(object, noArguments);
   }
 
-  void DbClientTransactionLog::notifyObjectCreated(const ObjectId& object, const std::vector<const Domain*>& arguments){
+  void DbClientTransactionLog::notifyObjectCreated(const ObjectId object, const std::vector<const Domain*>& arguments){
     TiXmlElement * element = allocateXmlElement("new");
     if (LabelStr::isString(object->getName())) {
       element->SetAttribute("name", object->getName().toString());
@@ -99,7 +99,7 @@ void DbClientTransactionLog::notifyVariableDeleted(const ConstrainedVariableId& 
     pushTransaction(element);
   }
 
-  void DbClientTransactionLog::notifyObjectDeleted(const ObjectId& object) {
+  void DbClientTransactionLog::notifyObjectDeleted(const ObjectId object) {
     TiXmlElement* element = allocateXmlElement("deleteobject");
     element->SetAttribute("name", object->getName().toString());
     pushTransaction(element);
@@ -118,7 +118,7 @@ void DbClientTransactionLog::notifyVariableDeleted(const ConstrainedVariableId& 
     pushTransaction(element);
   }
 
-  void DbClientTransactionLog::notifyTokenCreated(const TokenId& token){
+  void DbClientTransactionLog::notifyTokenCreated(const TokenId token){
     TiXmlElement * element = (token->isFact() ? allocateXmlElement("fact") :
                               allocateXmlElement("goal"));
     TiXmlElement * instance = allocateXmlElement("predicateinstance");
@@ -130,7 +130,7 @@ void DbClientTransactionLog::notifyVariableDeleted(const ConstrainedVariableId& 
     pushTransaction(element);
   }
 
-  void DbClientTransactionLog::notifyTokenDeleted(const TokenId& token,
+  void DbClientTransactionLog::notifyTokenDeleted(const TokenId token,
                                                   const std::string& name) {
     TiXmlElement* element = allocateXmlElement("deletetoken");
     element->SetAttribute("type", token->getPredicateName().toString());
@@ -140,7 +140,7 @@ void DbClientTransactionLog::notifyVariableDeleted(const ConstrainedVariableId& 
     pushTransaction(element);
   }
 
-  void DbClientTransactionLog::notifyConstrained(const ObjectId& object, const TokenId& predecessor, const TokenId& successor){
+  void DbClientTransactionLog::notifyConstrained(const ObjectId object, const TokenId predecessor, const TokenId successor){
     TiXmlElement * element = allocateXmlElement("constrain");
     TiXmlElement * object_el = allocateXmlElement("object");
     object_el->SetAttribute("name", object->getName().toString());
@@ -151,7 +151,7 @@ void DbClientTransactionLog::notifyVariableDeleted(const ConstrainedVariableId& 
   }
 
 
-  void DbClientTransactionLog::notifyFreed(const ObjectId& object, const TokenId& predecessor, const TokenId& successor){
+  void DbClientTransactionLog::notifyFreed(const ObjectId object, const TokenId predecessor, const TokenId successor){
     if(m_chronologicalBacktracking) {
       check_error(strcmp(m_bufferedTransactions.back()->Value(), "constrain") == 0,
                   "Chronological backtracking assumption violated");
@@ -167,32 +167,32 @@ void DbClientTransactionLog::notifyVariableDeleted(const ConstrainedVariableId& 
     pushTransaction(element);
   }
 
-  void DbClientTransactionLog::notifyActivated(const TokenId& token){
+  void DbClientTransactionLog::notifyActivated(const TokenId token){
     TiXmlElement * element = allocateXmlElement("activate");
     element->LinkEndChild(tokenAsXml(token));
     pushTransaction(element);
   }
 
-  void DbClientTransactionLog::notifyMerged(const TokenId& token, const TokenId& activeToken){
+  void DbClientTransactionLog::notifyMerged(const TokenId token, const TokenId activeToken){
     TiXmlElement * element = allocateXmlElement("merge");
     element->LinkEndChild(tokenAsXml(token));
     element->LinkEndChild(tokenAsXml(activeToken));
     pushTransaction(element);
   }
 
-  void DbClientTransactionLog::notifyMerged(const TokenId& token){
+  void DbClientTransactionLog::notifyMerged(const TokenId token){
     TiXmlElement * element = allocateXmlElement("merge");
     element->LinkEndChild(tokenAsXml(token));
     pushTransaction(element);
   }
 
-  void DbClientTransactionLog::notifyRejected(const TokenId& token){
+  void DbClientTransactionLog::notifyRejected(const TokenId token){
     TiXmlElement * element = allocateXmlElement("reject");
     element->LinkEndChild(tokenAsXml(token));
     pushTransaction(element);
   }
 
-  void DbClientTransactionLog::notifyCancelled(const TokenId& token){
+  void DbClientTransactionLog::notifyCancelled(const TokenId token){
     if (m_chronologicalBacktracking) {
       check_error((strcmp(m_bufferedTransactions.back()->Value(), "activate") == 0) ||
                   (strcmp(m_bufferedTransactions.back()->Value(), "reject") == 0) ||
@@ -206,7 +206,7 @@ void DbClientTransactionLog::notifyVariableDeleted(const ConstrainedVariableId& 
     pushTransaction(element);
   }
 
-void DbClientTransactionLog::notifyConstraintCreated(const ConstraintId& constraint){
+void DbClientTransactionLog::notifyConstraintCreated(const ConstraintId constraint){
   TiXmlElement * element = allocateXmlElement("invoke");
   element->SetAttribute("name", constraint->getName().toString());
   element->SetAttribute("index", static_cast<int>(m_client->getIndexByConstraint(constraint)));
@@ -219,7 +219,7 @@ void DbClientTransactionLog::notifyConstraintCreated(const ConstraintId& constra
   pushTransaction(element);
 }
 
-void DbClientTransactionLog::notifyConstraintDeleted(const ConstraintId& constraint) {
+void DbClientTransactionLog::notifyConstraintDeleted(const ConstraintId constraint) {
   TiXmlElement* element = allocateXmlElement("deleteconstraint");
   element->SetAttribute("name", constraint->getName().toString());
   element->SetAttribute("index", static_cast<int>(m_client->getIndexByConstraint(constraint)));
@@ -232,7 +232,7 @@ void DbClientTransactionLog::notifyConstraintDeleted(const ConstraintId& constra
   pushTransaction(element);
 }
 
-	void DbClientTransactionLog::notifyVariableSpecified(const ConstrainedVariableId& variable){
+	void DbClientTransactionLog::notifyVariableSpecified(const ConstrainedVariableId variable){
 		if(!variable->isInternal()) {
 			checkError(variable->lastDomain().isSingleton(), variable->toString() << " is not a singleton.");
 			TiXmlElement * element = allocateXmlElement("specify");
@@ -242,7 +242,7 @@ void DbClientTransactionLog::notifyConstraintDeleted(const ConstraintId& constra
 		}
 	}
 
-	void DbClientTransactionLog::notifyVariableRestricted(const ConstrainedVariableId& variable){
+	void DbClientTransactionLog::notifyVariableRestricted(const ConstrainedVariableId variable){
 		if(!variable->isInternal()) {
 			TiXmlElement * element = allocateXmlElement("restrict");
 			element->LinkEndChild(variableAsXml(variable));
@@ -251,7 +251,7 @@ void DbClientTransactionLog::notifyConstraintDeleted(const ConstraintId& constra
 		}
   }
 
-  void DbClientTransactionLog::notifyVariableReset(const ConstrainedVariableId& variable){
+  void DbClientTransactionLog::notifyVariableReset(const ConstrainedVariableId variable){
 		if(!variable->isInternal()) {
 			if (m_chronologicalBacktracking) {
 				check_error(strcmp(m_bufferedTransactions.back()->Value(), "specify") == 0,
@@ -363,7 +363,7 @@ void DbClientTransactionLog::notifyConstraintDeleted(const ConstraintId& constra
   }
 
   TiXmlElement *
-  DbClientTransactionLog::tokenAsXml(const TokenId& token) const
+  DbClientTransactionLog::tokenAsXml(const TokenId token) const
   {
     TiXmlElement * token_el = allocateXmlElement("token");
     token_el->SetAttribute("path", m_client->getPathAsString(token));
@@ -371,9 +371,9 @@ void DbClientTransactionLog::notifyConstraintDeleted(const ConstraintId& constra
   }
 
 TiXmlElement *
-DbClientTransactionLog::variableAsXml(const ConstrainedVariableId& variable) const {
+DbClientTransactionLog::variableAsXml(const ConstrainedVariableId variable) const {
   TiXmlElement * var_el = allocateXmlElement("variable");
-  const EntityId& parent = variable->parent();
+  const EntityId parent = variable->parent();
   if (parent != EntityId::noId()) {
     if (TokenId::convertable(parent)) {
       TokenId token = parent;

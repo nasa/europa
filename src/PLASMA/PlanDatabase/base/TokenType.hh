@@ -48,11 +48,11 @@ namespace EUROPA {
    */
   class TokenType: public PSTokenType {
   public:
-    TokenType(const ObjectTypeId& ot,const LabelStr& signature);
+    TokenType(const ObjectTypeId ot,const LabelStr& signature);
 
     virtual ~TokenType();
 
-    void addArg(const DataTypeId& type, const LabelStr& name);
+    void addArg(const DataTypeId type, const LabelStr& name);
 
     const LabelStr& getPredicateName() const;
     std::string toString() const;
@@ -61,13 +61,13 @@ namespace EUROPA {
     // From PSTokenType
     const std::string& getName() const { return getPredicateName().toString(); }
     const std::map<LabelStr,DataTypeId>& getArgs() const;
-    const DataTypeId& getArgType(const char* argName) const;
+    const DataTypeId getArgType(const char* argName) const;
 
-    const TokenTypeId& getId() const;
+    const TokenTypeId getId() const;
 
-    const TokenTypeId& getParentType() const;
+    const TokenTypeId getParentType() const;
 
-    const ObjectTypeId& getObjectType() const;
+    const ObjectTypeId getObjectType() const;
 
     /**
      * @brief Return the type for which this type is registered.
@@ -78,7 +78,7 @@ namespace EUROPA {
      * @brief Create a root token instance
      * @see DbClient::createInstance(const LabelStr& type, const LabelStr& name)
      */
-    virtual TokenId createInstance(const PlanDatabaseId& planDb,
+    virtual TokenId createInstance(const PlanDatabaseId planDb,
                                    const LabelStr& name,
                                    bool rejectable = false,
                                    bool isFact = false) const = 0;
@@ -86,7 +86,7 @@ namespace EUROPA {
     /**
      * @brief Create a slave token
      */
-    virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const = 0;
+    virtual TokenId createInstance(const TokenId master, const LabelStr& name, const LabelStr& relation) const = 0;
 
     // From PSTokenType
     virtual PSList<std::string> getParameterNames() const;

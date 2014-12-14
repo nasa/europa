@@ -10,20 +10,20 @@
 #include "TokenVariable.hh"
 
 namespace EUROPA {
-  Reservoir::Reservoir(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, const LabelStr& detectorName,
+  Reservoir::Reservoir(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, const LabelStr& detectorName,
                        const LabelStr& profileName, edouble initCapacityLb, edouble initCapacityUb, edouble lowerLimit,
                        edouble upperLimit, edouble maxInstProduction, edouble maxInstConsumption, edouble maxProduction,
                        edouble maxConsumption) :
     Resource(planDatabase, type, name, detectorName, profileName, initCapacityLb, initCapacityUb, lowerLimit, upperLimit,
              maxInstProduction, maxInstConsumption, maxProduction, maxConsumption) {}
 
-  Reservoir::Reservoir(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open) :
+  Reservoir::Reservoir(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open) :
     Resource(planDatabase, type, name, open) {}
 
-  Reservoir::Reservoir(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open) :
+  Reservoir::Reservoir(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open) :
     Resource(parent, type, localName, open) {}
 
-  void Reservoir::createTransactions(const TokenId& tok) {
+  void Reservoir::createTransactions(const TokenId tok) {
     if(m_tokensToTransactions.find(tok) != m_tokensToTransactions.end()) {
       debugMsg("Reservoir:createTransactions",
                "Token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ") already has transactions.");
@@ -39,7 +39,7 @@ namespace EUROPA {
     m_tokensToTransactions.insert(std::pair<TokenId, TransactionId>(tok, trans));
   }
 
-  void Reservoir::addToProfile(const TokenId& tok) {
+  void Reservoir::addToProfile(const TokenId tok) {
     checkError(m_tokensToTransactions.find(tok) != m_tokensToTransactions.end(),
                "No transaction for " << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
     TransactionId trans = m_tokensToTransactions.find(tok)->second;
@@ -47,17 +47,17 @@ namespace EUROPA {
     m_profile->addTransaction(trans);
   }
 
-  void Reservoir::removeTransactions(const TokenId& tok) {
+  void Reservoir::removeTransactions(const TokenId tok) {
     if(m_tokensToTransactions.find(tok) == m_tokensToTransactions.end())
       return;
     TransactionId trans = m_tokensToTransactions.find(tok)->second;
     debugMsg("Reservoir:removeTransactions", "For " << tok->toString() << " deleting transaction " << trans->toString());
     m_tokensToTransactions.erase(tok);
     m_transactionsToTokens.erase(trans);
-    delete (Transaction*) trans;
+    delete static_cast<Transaction*>(trans);
   }
 
-  void Reservoir::removeFromProfile(const TokenId& tok) {
+  void Reservoir::removeFromProfile(const TokenId tok) {
     //       checkError(m_tokensToTransactions.find(tok) != m_tokensToTransactions.end(),
     // 		 "Token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ") isn't in the profile.");
     if(m_tokensToTransactions.find(tok) == m_tokensToTransactions.end())
@@ -69,9 +69,9 @@ namespace EUROPA {
     Resource::removeFromProfile(tok);
   }
 
-  void Reservoir::getOrderingChoices(const TokenId& token,
+  void Reservoir::getOrderingChoices(const TokenId token,
                                      std::vector<std::pair<TokenId, TokenId> >& results,
-                                     unsigned int limit) {
+                                     unsigned long limit) {
     checkError(m_tokensToTransactions.find(token) != m_tokensToTransactions.end(), "Token " << token->getPredicateName().toString() <<
                "(" << token->getKey() << ") not in profile.");
     Resource::getOrderingChoices(token, results, limit);

@@ -34,7 +34,7 @@ namespace EUROPA {
 
 namespace {
 // TODO: keep using pdbClient?
-const DbClientId& getPDB(EvalContext& context)
+const DbClientId getPDB(EvalContext& context)
 {
   // TODO: Add this behavior to EvalContext instead?
   DbClient* dbClient = reinterpret_cast<DbClient*>(context.getElement("DbClient"));
@@ -46,7 +46,7 @@ const DbClientId& getPDB(EvalContext& context)
   return pdb->getClient();
 }
 
-const SchemaId& getSchema(EvalContext& context)
+const SchemaId getSchema(EvalContext& context)
 {
   /* TODO why doesn't this work???
      Schema* schema = (Schema*)context.getElement("Schema");
@@ -177,7 +177,7 @@ std::string getAutoName(const char* prefix) {
   /*
    * ExprVarRef
    */
-  ExprVarRef::ExprVarRef(const char* varName, const DataTypeId& type)
+  ExprVarRef::ExprVarRef(const char* varName, const DataTypeId type)
     : m_varName(varName)
     , m_varType(type)
   {
@@ -372,7 +372,7 @@ std::string getAutoName(const char* prefix) {
       return m_value->eval(context);
   }
 
-  CExprFunction::CExprFunction(const CFunctionId& func, const std::vector<CExpr*>& args)
+  CExprFunction::CExprFunction(const CFunctionId func, const std::vector<CExpr*>& args)
     : m_func(func)
     , m_args(args)
   {
@@ -709,7 +709,7 @@ LabelStr checkPredicateType(EvalContext& ctx,const LabelStr& type) {
 }
 
 LabelStr getObjectVarClass(EvalContext& ctx,const LabelStr& className,const LabelStr& var) {
-  const SchemaId& schema = getSchema(ctx);
+  const SchemaId schema = getSchema(ctx);
   check_runtime_error(schema->hasMember(className,var),className.toString()+" has no member called "+var.toString());
   return schema->getMemberType(className,var);
 }
@@ -718,7 +718,7 @@ LabelStr getTokenVarClass(EvalContext& ctx,const LabelStr& className,const Label
   if (strcmp(var.c_str(),"object") == 0) // is it the object variable?
     return className;
   else { // look through the parameters to the token
-    const SchemaId& schema = getSchema(ctx);
+    const SchemaId schema = getSchema(ctx);
     if (schema->hasMember(predName,var))
       return schema->getMemberType(predName,var);
   }
@@ -792,7 +792,7 @@ LabelStr predicateInstanceToType(
 }
 }
 
-  PredicateInstanceRef::PredicateInstanceRef(const TokenTypeId& tokenType, const char* predInstance, const char* predName, const char* annotation)
+  PredicateInstanceRef::PredicateInstanceRef(const TokenTypeId tokenType, const char* predInstance, const char* predName, const char* annotation)
       : m_tokenType(tokenType)
   	  , m_predicateInstance(predInstance != NULL ? predInstance : "")
       , m_predicateName(predName != NULL ? predName : "")
@@ -1207,7 +1207,7 @@ void createRelation(EvalContext& context,
      * InterpretedToken
      */
     InterpretedToken::InterpretedToken(
-                     const PlanDatabaseId& planDatabase,
+                     const PlanDatabaseId planDatabase,
                      const LabelStr& predicateName,
                      const std::vector<Expr*>& body,
                      const bool& rejectable,
@@ -1228,7 +1228,7 @@ void createRelation(EvalContext& context,
     }
 
   InterpretedToken::InterpretedToken(
-                     const TokenId& master,
+                     const TokenId master,
 				     const LabelStr& predicateName,
 				     const LabelStr& relation,
                      const std::vector<Expr*>& body,
@@ -1268,7 +1268,7 @@ void createRelation(EvalContext& context,
    * InterpretedTokenType
    */
     InterpretedTokenType::InterpretedTokenType(
-            const ObjectTypeId& ot,
+            const ObjectTypeId ot,
             const LabelStr& predicateName,
             const std::string& kind)
         : TokenType(ot,predicateName)
@@ -1316,7 +1316,7 @@ void createRelation(EvalContext& context,
 	er->populateCausality( this );
     }
 
-    TokenTypeId InterpretedTokenType::getParentType(const PlanDatabaseId& planDb) const
+    TokenTypeId InterpretedTokenType::getParentType(const PlanDatabaseId planDb) const
     {
         // TODO: cache this?
         // TODO: drop planDb parameter, ObjectType must be able to answer this without reference to schema
@@ -1329,7 +1329,7 @@ void createRelation(EvalContext& context,
      * this method takes advantage of that hack to pass the original type up the class hierarchy
      * a cleaner implementation that explicitly keeps track of the original token type is needed
      */
-    TokenId InterpretedTokenType::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
+    TokenId InterpretedTokenType::createInstance(const PlanDatabaseId planDb, const LabelStr& name, bool rejectable, bool isFact) const
 	{
 	    TokenTypeId parentType = getParentType(planDb);
 
@@ -1355,7 +1355,7 @@ void createRelation(EvalContext& context,
 	    return token;
 	}
 
-  TokenId InterpretedTokenType::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
+  TokenId InterpretedTokenType::createInstance(const TokenId master, const LabelStr& name, const LabelStr& relation) const
   {
       TokenTypeId parentType = getParentType(master->getPlanDatabase());
 
@@ -1386,7 +1386,7 @@ void createRelation(EvalContext& context,
    * RuleInstanceEvalContext
    * Puts RuleInstance variables like duration, start, end, in context
    */
-  RuleInstanceEvalContext::RuleInstanceEvalContext(EvalContext* parent, const InterpretedRuleInstanceId& ruleInstance)
+  RuleInstanceEvalContext::RuleInstanceEvalContext(EvalContext* parent, const InterpretedRuleInstanceId ruleInstance)
     : EvalContext(parent)
     , m_ruleInstance(ruleInstance)
   {
@@ -1461,7 +1461,7 @@ void createRelation(EvalContext& context,
    * RuleInstanceEvalContext
    * Puts Token variables like duration, start, end, in context
    */
-  TokenEvalContext::TokenEvalContext(EvalContext* parent, const TokenId& token)
+  TokenEvalContext::TokenEvalContext(EvalContext* parent, const TokenId token)
     : EvalContext(parent)
     , m_token(token)
   {
@@ -1505,9 +1505,9 @@ void* TokenEvalContext::getElement(const char* name) const {
   /*
    * InterpretedRuleInstance
    */
-  InterpretedRuleInstance::InterpretedRuleInstance(const RuleId& rule,
-						   const TokenId& token,
-						   const PlanDatabaseId& planDb,
+  InterpretedRuleInstance::InterpretedRuleInstance(const RuleId rule,
+						   const TokenId token,
+						   const PlanDatabaseId planDb,
 						   const std::vector<Expr*>& body)
     : RuleInstance(rule, token, planDb)
     , m_body(body)
@@ -1515,8 +1515,8 @@ void* TokenEvalContext::getElement(const char* name) const {
   }
 
   InterpretedRuleInstance::InterpretedRuleInstance(
-						   const RuleInstanceId& parent,
-						   const ConstrainedVariableId& var,
+						   const RuleInstanceId parent,
+						   const ConstrainedVariableId var,
 						   const Domain& domain,
 						   const bool positive,
 						   const std::vector<Expr*>& body)
@@ -1525,8 +1525,8 @@ void* TokenEvalContext::getElement(const char* name) const {
   {
   }
 
-InterpretedRuleInstance::InterpretedRuleInstance(const RuleInstanceId& parent,
-                                                 const ConstrainedVariableId& var,
+InterpretedRuleInstance::InterpretedRuleInstance(const RuleInstanceId parent,
+                                                 const ConstrainedVariableId var,
                                                  const Domain& domain,
                                                  const bool positive,
                                                  const std::vector<ConstrainedVariableId>& guardComponents,
@@ -1537,7 +1537,7 @@ InterpretedRuleInstance::InterpretedRuleInstance(const RuleInstanceId& parent,
   }
 
   InterpretedRuleInstance::InterpretedRuleInstance(
-						   const RuleInstanceId& parent,
+						   const RuleInstanceId parent,
 						   const std::vector<ConstrainedVariableId>& vars,
 						   const bool positive,
 						   const std::vector<Expr*>& body)
@@ -1581,7 +1581,7 @@ InterpretedRuleInstance::InterpretedRuleInstance(const RuleInstanceId& parent,
 						 const LabelStr& predicateInstance,
 						 const LabelStr& relation,
 						 bool isConstrained,
-						 ConstrainedVariableId& owner)
+						 ConstrainedVariableId owner)
   {
     TokenId slave;
 
@@ -1740,8 +1740,8 @@ InterpretedRuleInstance::InterpretedRuleInstance(const RuleInstanceId& parent,
   }
 
   RuleInstanceId InterpretedRuleFactory::createInstance(
-							const TokenId& token,
-							const PlanDatabaseId& planDb,
+							const TokenId token,
+							const PlanDatabaseId planDb,
 							const RulesEngineId &rulesEngine) const
   {
     InterpretedRuleInstance *foo = new InterpretedRuleInstance(m_id, token, planDb, m_body);
@@ -1754,7 +1754,7 @@ InterpretedRuleInstance::InterpretedRuleInstance(const RuleInstanceId& parent,
 	  return m_body;
   }
 
-  ExprTypedef::ExprTypedef(const DataTypeId& baseType, const char* name, Domain* baseDomain)
+  ExprTypedef::ExprTypedef(const DataTypeId baseType, const char* name, Domain* baseDomain)
       : m_baseType(baseType)
       , m_name(name)
       , m_baseDomain(baseDomain)
@@ -1846,7 +1846,7 @@ InterpretedRuleInstance::InterpretedRuleInstance(const RuleInstanceId& parent,
       return os.str();
   }
 
-  ExprVarDeclaration::ExprVarDeclaration(const char* name, const DataTypeId& type, Expr* initValue, bool canBeSpecified)
+  ExprVarDeclaration::ExprVarDeclaration(const char* name, const DataTypeId type, Expr* initValue, bool canBeSpecified)
       : m_name(name)
       , m_type(type)
       , m_initValue(initValue)
@@ -1890,7 +1890,7 @@ InterpretedRuleInstance::InterpretedRuleInstance(const RuleInstanceId& parent,
       const LabelStr& name = getName();
       const LabelStr& type = getDataType()->getName();
       const Expr* initValue = getInitValue();
-      const DbClientId& pdb = getPDB(context);
+      const DbClientId pdb = getPDB(context);
 
       ConstrainedVariableId v;
 
@@ -1925,7 +1925,7 @@ InterpretedRuleInstance::InterpretedRuleInstance(const RuleInstanceId& parent,
 
       // This is a hack needed because TokenVariable is parametrized by the domain arg to addParameter
       ConstrainedVariableId parameter;
-      const DataTypeId& parameterDataType = getDataType();
+      const DataTypeId parameterDataType = getDataType();
 
       // same as completeObjectParam in NddlRules.hh
       if(initValue != NULL) {
@@ -1968,7 +1968,7 @@ InterpretedRuleInstance::InterpretedRuleInstance(const RuleInstanceId& parent,
 
 	  ConstrainedVariableId localVar;
 	  if (context.isClass(typeName)) {
-		  const DataTypeId& dt = context.getRuleInstance()->getPlanDatabase()->getSchema()->getCESchema()->getDataType(typeName.c_str());
+		  const DataTypeId dt = context.getRuleInstance()->getPlanDatabase()->getSchema()->getCESchema()->getDataType(typeName.c_str());
 		  localVar = context.getRuleInstance()->addObjectVariable(
 				  getDataType()->getName(),
 				  ObjectDomain(dt),
@@ -2040,7 +2040,7 @@ InterpretedRuleInstance::InterpretedRuleInstance(const RuleInstanceId& parent,
 
           if (m_rhs != NULL) {
               DataRef rhs = m_rhs->eval(context);
-              const DbClientId& pdb = getPDB(context);
+              const DbClientId pdb = getPDB(context);
 
               if (rhs.getValue()->lastDomain().isSingleton()) {
                   pdb->restrict(lhs.getValue(),rhs.getValue()->lastDomain());
@@ -2095,7 +2095,7 @@ InterpretedRuleInstance::InterpretedRuleInstance(const RuleInstanceId& parent,
   }
 
 
-  ExprObjectTypeDefinition::ExprObjectTypeDefinition(const ObjectTypeId& objType)
+  ExprObjectTypeDefinition::ExprObjectTypeDefinition(const ObjectTypeId objType)
       : m_registered(false)
       , m_objType(objType)
   {
@@ -2138,7 +2138,7 @@ InterpretedRuleInstance::InterpretedRuleInstance(const RuleInstanceId& parent,
       return os.str();
   }
 
-  ExprRuleTypeDefinition::ExprRuleTypeDefinition(const RuleId& rf)
+  ExprRuleTypeDefinition::ExprRuleTypeDefinition(const RuleId rf)
       : m_ruleFactory(rf)
   {
   }
@@ -2172,7 +2172,7 @@ void evalArgs(EvalContext& context,
 }
 }
 
-  ExprMethodCall::ExprMethodCall(const MethodId& m, Expr* varExpr, const std::vector<Expr*>& argExprs)
+  ExprMethodCall::ExprMethodCall(const MethodId m, Expr* varExpr, const std::vector<Expr*>& argExprs)
       : m_method(m)
       , m_varExpr(varExpr)
       , m_argExprs(argExprs)
@@ -2247,7 +2247,7 @@ void evalArgs(EvalContext& context,
       return eval(context,var,args);
   }
 
-  DataRef ExprVariableMethod::eval(EvalContext& context, ConstrainedVariableId& var, const std::vector<ConstrainedVariableId>& args) const
+  DataRef ExprVariableMethod::eval(EvalContext& context, ConstrainedVariableId var, const std::vector<ConstrainedVariableId>& args) const
   {
       std::string method(m_methodName.toString());
       DbClientId pdb = getPDB(context); // TODO: keep using db client?
@@ -2312,7 +2312,7 @@ void evalArgs(EvalContext& context,
       return eval(context,obj,args);
   }
 
-  DataRef ExprObjectMethod::eval(EvalContext& context, ObjectId& obj, const std::vector<ConstrainedVariableId>& args) const
+  DataRef ExprObjectMethod::eval(EvalContext& context, ObjectId obj, const std::vector<ConstrainedVariableId>& args) const
   {
       std::string method(m_methodName.toString());
       DbClientId pdb = getPDB(context); // TODO: keep using db client?
@@ -2366,7 +2366,7 @@ void evalArgs(EvalContext& context,
       return eval(context,tok,args);
   }
 
-  DataRef ExprTokenMethod::eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const
+  DataRef ExprTokenMethod::eval(EvalContext& context, TokenId tok, const std::vector<ConstrainedVariableId>& args) const
   {
       checkError(tok.isId(),"Can't evaluate method on null token");
       std::string method(m_methodName.toString());

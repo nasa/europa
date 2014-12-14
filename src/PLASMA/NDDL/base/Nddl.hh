@@ -17,7 +17,7 @@ namespace EUROPA {
     /**
      * @brief Allocator function to be implemented by code generated from the model.
      */
-    SchemaId loadSchema(const SchemaId& schema, const RuleSchemaId& ruleSchema);
+    SchemaId loadSchema(const SchemaId schema, const RuleSchemaId ruleSchema);
   }
 }
 

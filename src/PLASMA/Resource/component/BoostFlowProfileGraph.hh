@@ -15,11 +15,11 @@ namespace EUROPA {
 class BoostFlowProfileGraph : public FlowProfileGraph {
  public:
   /**
-   * @brief Creates a directed graph with a \a source and a \sink intended to calculate the
-   * lower level envelope in case \a lowerLevel is true otherwise intended to calculate the
+   * @brief Creates a directed graph with a a source and a sink intended to calculate the
+   * lower level envelope in case a lowerLevel is true otherwise intended to calculate the
    * upper level envelope.
    */
-  BoostFlowProfileGraph(const TransactionId& source, const TransactionId& sink, bool lowerLevel);
+  BoostFlowProfileGraph(const TransactionId source, const TransactionId sink, bool lowerLevel);
   /**
    * @brief Destructor
    */
@@ -28,13 +28,13 @@ class BoostFlowProfileGraph : public FlowProfileGraph {
    * @brief Creates bi-directional edge between \a t1 and \a t2 with infinite capacity
    * as a result of a concurrent constraint between the two transactions
    */
-   void enableAt(const TransactionId& t1, const TransactionId& t2);
+   void enableAt(const TransactionId t1, const TransactionId t2);
   /**
    * @brief Creates directed edge between \a t1 and \a t2 with infinite capacity
    * as a result of a before or at constraint between the two transactions (reverse
    * capacity set to zero)
    */
-  void enableAtOrBefore(const TransactionId& t1, const TransactionId& t2);
+  void enableAtOrBefore(const TransactionId t1, const TransactionId t2);
   /**
    * @brief Creates a node in the network and creates an edge:
    *
@@ -47,17 +47,17 @@ class BoostFlowProfileGraph : public FlowProfileGraph {
    *   ---------------------------------------------------------------------------------------------------------
    * \endverbatim
    */
-  void enableTransaction(const TransactionId& transaction, const InstantId& inst,
-                         TransactionId2InstantId& contributions);
+  void enableTransaction(const TransactionId transaction, const InstantId inst,
+                         TransactionId2InstantId contributions);
   /**
    * @brief Returns true if \a transaction is enabled in the invoking
    * instance
    */
-  bool isEnabled(const TransactionId& transaction) const {return true;}
+  bool isEnabled(const TransactionId ) const {return true;}
   /**
    * @brief Disables \a transaction, if enabled, for the invoking instance
    */
-  void disable( const TransactionId& transaction );
+  void disable( const TransactionId transaction );
   /**
    * @brief Will push any flow wich flows through the node corresponding with \a transaction
    * back to the source of the edge the flow originates from.
@@ -73,7 +73,7 @@ class BoostFlowProfileGraph : public FlowProfileGraph {
    * If a recalculation of the maximum flow is required this method will do nothing.
    * \todo verify if this is really required or perhaps we should error out?
    */
-  void pushFlow( const TransactionId& transaction ) {return;}
+  void pushFlow( const TransactionId  ) {return;}
   /**
    * @brief Returns the cummulative residual capacity originating from the source.
    *
@@ -100,11 +100,11 @@ class BoostFlowProfileGraph : public FlowProfileGraph {
    * contributions, which maps a TransactionId to a InstantId is maps every transaction associated with a disabled
    * node to \a instant.
    */
-  edouble disableReachableResidualGraph( TransactionId2InstantId& contributions, const InstantId& instant  ) {return 0.0;}
+  edouble disableReachableResidualGraph( TransactionId2InstantId, const InstantId  ) {return 0.0;}
   /**
    * @brief Removes transaction \a id from the network.
    */
-  void removeTransaction(const TransactionId& id);
+  void removeTransaction(const TransactionId id);
   /**
    * @brief Resets the invoking instance.
    *
@@ -140,13 +140,13 @@ class BoostFlowProfileGraph : public FlowProfileGraph {
                                 boost::property<boost::edge_reverse_t, Edge > > > > > Graph;
 
   // do these need to return references?
-  Vertex addNode(const TransactionId& t);
-  Vertex getNode(const TransactionId& t) const;
+  Vertex addNode(const TransactionId t);
+  Vertex getNode(const TransactionId t) const;
   TransactionId getTransaction(const Vertex& v) const;
-  Edge addEdge(const TransactionId& t1, const TransactionId& t2, const edouble capacity,
+  Edge addEdge(const TransactionId t1, const TransactionId t2, const edouble capacity,
                const edouble reverseCapacity);
-  void initializeGraph(const TransactionId& source, const TransactionId& sink);
-  void addTransactionToGraph(const TransactionId& t);
+  void initializeGraph(const TransactionId source, const TransactionId sink);
+  void addTransactionToGraph(const TransactionId t);
 
   Graph m_graph;
   std::map<TransactionId, Vertex> m_transactionToVertex;

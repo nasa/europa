@@ -3,8 +3,8 @@
 
 namespace EUROPA {
 
-  ProxyVariableRelation::ProxyVariableRelation(const ConstrainedVariableId& objectVar,
-					       const ConstrainedVariableId& proxyVar,
+  ProxyVariableRelation::ProxyVariableRelation(const ConstrainedVariableId objectVar,
+					       const ConstrainedVariableId proxyVar,
 					       const std::vector<unsigned int>& path)
     : Constraint("proxyRelation", "Default", objectVar->getConstraintEngine(), makeScope(objectVar, proxyVar)),
       m_objectDomain(static_cast<ObjectDomain&>(getCurrentDomain(objectVar))),
@@ -16,7 +16,7 @@ namespace EUROPA {
 
   ProxyVariableRelation::ProxyVariableRelation(const LabelStr& name,
 					       const LabelStr& propagatorName,
-					       const ConstraintEngineId& constraintEngine,
+					       const ConstraintEngineId constraintEngine,
 					       const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_objectDomain(static_cast<ObjectDomain&>(getCurrentDomain(variables[0]))),
@@ -69,7 +69,7 @@ namespace EUROPA {
   }
 
 
-  bool ProxyVariableRelation::canIgnore(const ConstrainedVariableId& variable,
+  bool ProxyVariableRelation::canIgnore(const ConstrainedVariableId variable,
 					unsigned int argIndex,
 					const DomainListener::ChangeType& changeType){
     // If the object variable is specified to a singleton, and the proxy variable can be specified, then
@@ -108,7 +108,7 @@ namespace EUROPA {
     return false;
   }
 
-  void ProxyVariableRelation::setSource(const ConstraintId& sourceConstraint){
+  void ProxyVariableRelation::setSource(const ConstraintId sourceConstraint){
     checkError(sourceConstraint->getName() == LabelStr("proxyRelation"), sourceConstraint->toString());
     checkError(m_path.empty(), "Should be empty when setting up the source from " << sourceConstraint->toString());
     m_sourceConstraint = sourceConstraint;

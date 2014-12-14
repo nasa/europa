@@ -95,9 +95,6 @@ namespace EUROPA
       Node* m_Target;
     };
 
-    /**
-     * @brief
-     */
     std::ostream& operator<<( std::ostream& os, const Edge& fe );
 
     edouble Edge::getCapacity() const

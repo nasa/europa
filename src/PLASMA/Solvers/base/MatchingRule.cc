@@ -86,7 +86,7 @@ namespace EUROPA {
       setExpression(expr);
     }
 
-    void MatchingRule::initialize(const MatchingEngineId& matchingEngine){
+    void MatchingRule::initialize(const MatchingEngineId matchingEngine){
       m_matchingEngine = matchingEngine;
       m_matchingEngine->registerRule(getId());
     }

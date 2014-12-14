@@ -29,12 +29,12 @@ namespace EUROPA {
       /**
        * @brief Main factory method
        */
-      virtual DecisionPointId create(const DbClientId& client, const EntityId& flawedEntity, const LabelStr& explanation) const = 0;
+      virtual DecisionPointId create(const DbClientId client, const EntityId flawedEntity, const LabelStr& explanation) const = 0;
 
       /**
        * @brief Get the prority
        */
-      virtual Priority getPriority(const EntityId& entity = EntityId::noId());
+      virtual Priority getPriority(const EntityId entity = EntityId::noId());
 
       /**
        * @brief Retrieves a weight based on the number of criteria satisfied. Used to select the most specific
@@ -56,7 +56,7 @@ namespace EUROPA {
       /**
        * @brief Tests for a match between this factory and the entity
        */
-      virtual bool customStaticMatch(const EntityId& entity) const;
+      virtual bool customStaticMatch(const EntityId entity) const;
 
       /**
        * @brief Tests how many costm static filters should be applied. Factors into comparative weights
@@ -77,7 +77,7 @@ namespace EUROPA {
        * @brief Helper method to make the scope from guard data
        * @return true if successful in obtaining all the guards required.
        */
-      bool makeConstraintScope(const EntityId& entity, std::vector<ConstrainedVariableId>& scope) const;
+      bool makeConstraintScope(const EntityId entity, std::vector<ConstrainedVariableId>& scope) const;
 
       /**
        * @brief Useful utility for eye-balling what the heuristic actually is.
@@ -92,8 +92,8 @@ namespace EUROPA {
       /**
        * @brief Helper method to do value conversions for object domains. This one does the work.
        */
-      static edouble convertValueIfNecessary(const PlanDatabaseId& db,
-                                             const ConstrainedVariableId& guardVar,
+      static edouble convertValueIfNecessary(const PlanDatabaseId db,
+                                             const ConstrainedVariableId guardVar,
                                              const edouble& testValue);
 
       static unsigned int WEIGHT_BASE() {return 100000;} /*!< Used to weight active instances. 
@@ -111,16 +111,16 @@ namespace EUROPA {
          */
         VariableListener(const LabelStr& name,
                          const LabelStr& propagatorName,
-                         const ConstraintEngineId& constraintEngine, 
+                         const ConstraintEngineId constraintEngine, 
                          const std::vector<ConstrainedVariableId>& variables);
 
         /**
          * @brief Specilized constructor also provided to create from the Heuristics Engine
          */
-        VariableListener(const ConstraintEngineId& ce,
-                         const EntityId& target,
-                         const FlawManagerId& flawManager,
-                         const FlawHandlerId& flawHandler,
+        VariableListener(const ConstraintEngineId ce,
+                         const EntityId target,
+                         const FlawManagerId flawManager,
+                         const FlawHandlerId flawHandler,
                          const std::vector<ConstrainedVariableId>& scope);
 
         /**
@@ -191,16 +191,16 @@ namespace EUROPA {
       /**
        * @brief Helper method to test a guard value
        */
-      bool matches(const ConstrainedVariableId& guardVar, const edouble& testValue);
+      bool matches(const ConstrainedVariableId guardVar, const edouble& testValue);
 
       /**
        * @brief Helper to get a token, if possible, from an entity (token, or variable)
        */
-      static TokenId getTokenFromEntity(const EntityId& entity);
+      static TokenId getTokenFromEntity(const EntityId entity);
 
       static TiXmlElement* makeConfigData(const TiXmlElement& configData);
 
-      const PlanDatabaseId& getPlanDatabase(const ConstrainedVariableId& tokenVar);
+      const PlanDatabaseId getPlanDatabase(const ConstrainedVariableId tokenVar);
 
       PlanDatabaseId m_db;
       
@@ -216,7 +216,7 @@ namespace EUROPA {
       ConcreteFlawHandler(const TiXmlElement& config)
         : FlawHandler(config){}
 
-      DecisionPointId create(const DbClientId& client, const EntityId& flaw, const LabelStr& explanation) const {
+      DecisionPointId create(const DbClientId client, const EntityId flaw, const LabelStr& explanation) const {
         DecisionPoint* dp = new CLASS(client, flaw, *FlawHandler::m_configData, explanation);
         dp->setContext(m_context);
         return dp->getId();
@@ -225,7 +225,7 @@ namespace EUROPA {
       /**
        * @brief Tests for a match between this factory and the entity
        */
-      bool customStaticMatch(const EntityId& entity) const {
+      bool customStaticMatch(const EntityId entity) const {
         return CLASS::customStaticMatch(entity);
       }
 

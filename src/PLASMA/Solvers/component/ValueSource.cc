@@ -15,7 +15,7 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    ValueSource* ValueSource::getSource(const SchemaId& schema, const ConstrainedVariableId& var, bool externalOrder) {
+    ValueSource* ValueSource::getSource(const SchemaId schema, const ConstrainedVariableId var, bool externalOrder) {
       if(externalOrder)
 	return new OrderedValueSource(var->lastDomain());
       if(var->lastDomain().isEnumerated())
@@ -32,7 +32,7 @@ namespace EUROPA {
 
     Domain::size_type ValueSource::getCount() const { return m_count;}
 
-    EnumValueSource::EnumValueSource(const SchemaId& schema, const Domain& dom)
+    EnumValueSource::EnumValueSource(const SchemaId, const Domain& dom)
       : ValueSource(dom.getSize()) {
       std::list<edouble> values;
       dom.getValues(values);
@@ -74,7 +74,7 @@ namespace EUROPA {
     edouble IntervalValueSource::getValue(Domain::size_type index) const {return m_lb + (m_step * index);}
 
     Domain::size_type IntervalValueSource::calculateSize(const Domain& dom){
-      return cast_int(((dom.getUpperBound() - dom.getLowerBound())/dom.minDelta()) + 1);
+      return static_cast<unsigned>(cast_int(((dom.getUpperBound() - dom.getLowerBound())/dom.minDelta()) + 1));
     }
   }
 }

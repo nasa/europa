@@ -14,24 +14,15 @@
 
 namespace EUROPA
 {
-    /**
-     * @brief
-     */
     class EdgeIterator
     {
     public:
-      /**
-       * @brief
-       */
       inline bool ok() const;
-      /**
-       * @brief
-       */
       inline Edge* operator*() const;
     protected:
       /**
-       * @brief
-       * @par edges
+       * @brief Edge iterator
+       * @par edges The edges to iterate over
        * @par mustBeEnabled If true iterates over enabled edges otherwise iterates over all edges
        */
       EdgeIterator( const EdgeList& edges, bool mustBeEnabled ):
@@ -59,17 +50,13 @@ namespace EUROPA
 
       return 0;
     }
-
-    /**
-     * @brief
-     */
     class EdgeOutIterator:
       public EdgeIterator
     {
     public:
       /**
-       * @brief
-       * @par node
+       * @brief Out edge iterator
+       * @par node The node to iterate from
        * @par mustBeEnabled If true iterates over enabled edges otherwise iterates over all edges
        */
       EdgeOutIterator( const Node& node, bool mustBeEnabled = true ):
@@ -95,16 +82,13 @@ namespace EUROPA
 
     };
 
-    /**
-     * @brief
-     */
     class EdgeInIterator:
       public EdgeIterator
     {
     public:
       /**
-       * @brief
-       * @par node
+       * @brief In-edge iterator
+       * @par node The node to iterate from
        * @par mustBeEnabled If true iterates over enabled edges otherwise iterates over all edges
        */
       EdgeInIterator( const Node& node, bool mustBeEnabled = true  ):

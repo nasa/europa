@@ -34,28 +34,28 @@
 using namespace EUROPA;
 
 class DefaultEngineAccessor {
-	public:
-	  static const ConstraintEngineId& instance() {
-	    if (s_instance.isNoId()) {
-	        CESchema* ces = new CESchema();
-	      s_instance = (new ConstraintEngine(ces->getId()))->getId();
-	      new DefaultPropagator(LabelStr("Default"), s_instance);
-	      new DefaultPropagator(LabelStr("Temporal"), s_instance);
-	    }
-	    return s_instance;
-	  }
+ public:
+  static const ConstraintEngineId instance() {
+    if (s_instance.isNoId()) {
+      CESchema* ces = new CESchema();
+      s_instance = (new ConstraintEngine(ces->getId()))->getId();
+      new DefaultPropagator(LabelStr("Default"), s_instance);
+      new DefaultPropagator(LabelStr("Temporal"), s_instance);
+    }
+    return s_instance;
+  }
 
-	  static void reset() {
-	    if (!s_instance.isNoId()) {
-	        const CESchemaId& tfm = s_instance->getCESchema();
-	      delete (ConstraintEngine*) s_instance;
-	      delete (CESchema*) tfm;
-	      s_instance = ConstraintEngineId::noId();
-	     }
-	  }
+  static void reset() {
+    if (!s_instance.isNoId()) {
+      const CESchemaId tfm = s_instance->getCESchema();
+      delete static_cast<ConstraintEngine*>(s_instance);
+      delete static_cast<CESchema*>(tfm);
+      s_instance = ConstraintEngineId::noId();
+    }
+  }
 
-	private:
-	  static ConstraintEngineId s_instance;
+ private:
+  static ConstraintEngineId s_instance;
 };
 
 ConstraintEngineId DefaultEngineAccessor::s_instance;
@@ -63,42 +63,42 @@ ConstraintEngineId DefaultEngineAccessor::s_instance;
 #define ENGINE DefaultEngineAccessor::instance()
 
 // TODO: getting rid of the ENGINE shortcut would allow us to use the macro from Utils.hh
-#define EUROPA_runCETest(test, args...) { \
-  try { \
-      DefaultEngineAccessor::instance(); \
-      unsigned int id_count = EUROPA::IdTable::size(); \
-      bool result = test(args); \
-      DefaultEngineAccessor::reset(); \
-      EUROPA::IdTable::checkResult(result,id_count); \
-  } \
-  catch (Error err){ \
-      err.print(std::cout); \
-  } \
-  catch(std::exception e) {                     \
-    std::cout << e.what() << std::endl;         \
-    CPPUNIT_FAIL(e.what());                     \
- } \
-}
+#define EUROPA_runCETest(test) {                        \
+    try {                                               \
+      DefaultEngineAccessor::instance();                \
+      unsigned long id_count = EUROPA::IdTable::size(); \
+      bool result = test();                             \
+      DefaultEngineAccessor::reset();                   \
+      EUROPA::IdTable::checkResult(result,id_count);    \
+    }                                                   \
+    catch (Error err){                                  \
+      err.print(std::cout);                             \
+    }                                                   \
+    catch(std::exception e) {                           \
+      std::cout << e.what() << std::endl;               \
+      CPPUNIT_FAIL(e.what());                           \
+    }                                                   \
+  }
 
 class DelegationTestConstraint : public Constraint {
 public:
-  DelegationTestConstraint(const LabelStr& name,
-               const LabelStr& propagatorName,
-               const ConstraintEngineId& constraintEngine,
-               const std::vector<ConstrainedVariableId>& variables)
+DelegationTestConstraint(const LabelStr& name,
+                           const LabelStr& propagatorName,
+                           const ConstraintEngineId constraintEngine,
+                           const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables){s_instanceCount++;}
-  ~DelegationTestConstraint(){s_instanceCount--;}
+~DelegationTestConstraint(){s_instanceCount--;}
 
-  void handleExecute(){
-    s_executionCount++;
-    ConstrainedVariableId var = getScope().front();
-    CPPUNIT_ASSERT_MESSAGE("Should be able to access derived domain during propagation safely.", !var->derivedDomain().isSingleton());
-  }
+void handleExecute(){
+s_executionCount++;
+ConstrainedVariableId var = getScope().front();
+CPPUNIT_ASSERT_MESSAGE("Should be able to access derived domain during propagation safely.", !var->derivedDomain().isSingleton());
+}
 
-  void handleExecute(const ConstrainedVariableId&,int, const DomainListener::ChangeType&){}
+void handleExecute(const ConstrainedVariableId, unsigned int, const DomainListener::ChangeType&){}
 
-  static int s_executionCount;
-  static int s_instanceCount;
+static int s_executionCount;
+static int s_instanceCount;
 };
 
 int DelegationTestConstraint::s_executionCount = 0;
@@ -108,31 +108,30 @@ typedef SymbolDomain Locations;
 
 class CETestEngine : public EngineBase
 {
-  public:
-	CETestEngine();
-	virtual ~CETestEngine();
-	const ConstraintEngineId& getConstraintEngine() const;
+public:
+CETestEngine();
+virtual ~CETestEngine();
+const ConstraintEngineId getConstraintEngine() const;
 
-  protected:
-	void createModules();
+protected:
+void createModules();
 };
 
-CETestEngine::CETestEngine()
-{
-    createModules();
-    doStart();
-    ConstraintEngine* ce = (ConstraintEngine*)getComponent("ConstraintEngine");
+CETestEngine::CETestEngine() {
+createModules();
+doStart();
+ConstraintEngine* ce = reinterpret_cast<ConstraintEngine*>(getComponent("ConstraintEngine"));
 
-    SymbolDomain locationsBaseDomain;
-    locationsBaseDomain.insert(LabelStr("Hill"));
-    locationsBaseDomain.insert(LabelStr("Rock"));
-    locationsBaseDomain.insert(LabelStr("Lander"));
-    locationsBaseDomain.close();
+SymbolDomain locationsBaseDomain;
+locationsBaseDomain.insert(LabelStr("Hill"));
+locationsBaseDomain.insert(LabelStr("Rock"));
+locationsBaseDomain.insert(LabelStr("Lander"));
+locationsBaseDomain.close();
 
-    ce->getCESchema()->registerDataType(
-        (new RestrictedDT("Locations",SymbolDT::instance(),locationsBaseDomain))->getId()
-    );
-    REGISTER_CONSTRAINT(ce->getCESchema(),DelegationTestConstraint, "TestOnly", "Default");
+ce->getCESchema()->registerDataType(
+(new RestrictedDT("Locations",SymbolDT::instance(),locationsBaseDomain))->getId()
+);
+REGISTER_CONSTRAINT(ce->getCESchema(),DelegationTestConstraint, "TestOnly", "Default");
 }
 
 CETestEngine::~CETestEngine()
@@ -146,25 +145,24 @@ void CETestEngine::createModules()
     addModule((new ModuleConstraintLibrary())->getId());
 }
 
-const ConstraintEngineId& CETestEngine::getConstraintEngine() const
-{
-    return ((ConstraintEngine*)getComponent("ConstraintEngine"))->getId();
+const ConstraintEngineId CETestEngine::getConstraintEngine() const {
+  return (boost::polymorphic_cast<const ConstraintEngine*>(getComponent("ConstraintEngine")))->getId();
 }
 
 class TestListener: public ConstraintEngineListener{
 public:
-  TestListener(const ConstraintEngineId& ce):ConstraintEngineListener(ce){
+  TestListener(const ConstraintEngineId ce):ConstraintEngineListener(ce){
     for (int i=0;i<ConstraintEngine::EVENT_COUNT;i++) m_events[i] = 0;
   }
   void notifyPropagationCommenced(){increment(ConstraintEngine::PROPAGATION_COMMENCED);}
   void notifyPropagationCompleted(){increment(ConstraintEngine::PROPAGATION_COMPLETED);}
   void notifyPropagationPreempted(){increment(ConstraintEngine::PROPAGATION_PREEMPTED);}
-  void notifyAdded(const ConstraintId& constraint){increment(ConstraintEngine::CONSTRAINT_ADDED);}
-  void notifyRemoved(const ConstraintId& constraint){increment(ConstraintEngine::CONSTRAINT_REMOVED);}
-  void notifyExecuted(const ConstraintId& constraint){increment(ConstraintEngine::CONSTRAINT_EXECUTED);}
-  void notifyAdded(const ConstrainedVariableId& variable){increment(ConstraintEngine::VARIABLE_ADDED);}
-  void notifyRemoved(const ConstrainedVariableId& variable){increment(ConstraintEngine::VARIABLE_REMOVED);}
-  void notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType){increment(changeType);}
+  void notifyAdded(const ConstraintId){increment(ConstraintEngine::CONSTRAINT_ADDED);}
+  void notifyRemoved(const ConstraintId){increment(ConstraintEngine::CONSTRAINT_REMOVED);}
+  void notifyExecuted(const ConstraintId){increment(ConstraintEngine::CONSTRAINT_EXECUTED);}
+  void notifyAdded(const ConstrainedVariableId){increment(ConstraintEngine::VARIABLE_ADDED);}
+  void notifyRemoved(const ConstrainedVariableId){increment(ConstraintEngine::VARIABLE_REMOVED);}
+  void notifyChanged(const ConstrainedVariableId, const DomainListener::ChangeType& changeType){increment(changeType);}
 
   int getCount(ConstraintEngine::Event event){return m_events[event];}
   void reset() {for(int i=0; i<ConstraintEngine::EVENT_COUNT;i++) m_events[i] = 0;}
@@ -187,7 +185,8 @@ public:
 
   static bool testValueCreation(){
       CETestEngine engine;
-      ConstraintEngine* ce = (ConstraintEngine*)engine.getComponent("ConstraintEngine");
+      ConstraintEngine* ce =
+          boost::polymorphic_cast<ConstraintEngine*>(engine.getComponent("ConstraintEngine"));
 
     IntervalIntDomain d0(5);
     eint v0 = cast_int(ce->createValue(d0.getTypeName().c_str(), "5"));
@@ -198,16 +197,16 @@ public:
     CPPUNIT_ASSERT(d1.compareEqual(d1.getSingletonValue(), v1));
 
     BoolDomain d2(true);
-    bool v2 = (bool) cast_int(ce->createValue(d2.getTypeName().c_str(), "true"));
+    bool v2 = static_cast<bool>(cast_int(ce->createValue(d2.getTypeName().c_str(), "true")));
     CPPUNIT_ASSERT(d2.compareEqual(d2.getSingletonValue(), v2));
 
     return true;
   }
 
   static bool testDomainCreation() {
-      CETestEngine engine;
-      CESchema* tfm = (CESchema*)engine.getComponent("CESchema");
-      const Domain& locationsBaseDomain = tfm->getDataType("Locations")->baseDomain();
+    CETestEngine engine;
+    CESchema* tfm = boost::polymorphic_cast<CESchema*>(engine.getComponent("CESchema"));
+    const Domain& locationsBaseDomain = tfm->getDataType("Locations")->baseDomain();
 
     const IntervalIntDomain & bd0 = dynamic_cast<const IntervalIntDomain &>(tfm->baseDomain(IntervalIntDomain().getTypeName().c_str()));
     CPPUNIT_ASSERT(bd0.isMember(0));
@@ -264,16 +263,17 @@ public:
   }
 
   static bool testVariableCreation(){
-      CETestEngine engine;
+    CETestEngine engine;
 
-      ConstraintEngineId ce = ((ConstraintEngine*)engine.getComponent("ConstraintEngine"))->getId();
-      ConstrainedVariableId cv0 = ce->createVariable(IntervalIntDomain().getTypeName().c_str());
-      CPPUNIT_ASSERT(cv0->baseDomain().getTypeName() == IntervalIntDomain().getTypeName());
-      ConstrainedVariableId cv1 = ce->createVariable(IntervalDomain().getTypeName().c_str());
-      CPPUNIT_ASSERT(cv1->baseDomain().getTypeName() == IntervalDomain().getTypeName());
-      ConstrainedVariableId cv2 = ce->createVariable(BoolDomain().getTypeName().c_str());
-      CPPUNIT_ASSERT(cv2->baseDomain().getTypeName() == BoolDomain().getTypeName());
-      return true;
+    ConstraintEngineId ce =
+        boost::polymorphic_cast<ConstraintEngine*>(engine.getComponent("ConstraintEngine"))->getId();
+    ConstrainedVariableId cv0 = ce->createVariable(IntervalIntDomain().getTypeName().c_str());
+    CPPUNIT_ASSERT(cv0->baseDomain().getTypeName() == IntervalIntDomain().getTypeName());
+    ConstrainedVariableId cv1 = ce->createVariable(IntervalDomain().getTypeName().c_str());
+    CPPUNIT_ASSERT(cv1->baseDomain().getTypeName() == IntervalDomain().getTypeName());
+    ConstrainedVariableId cv2 = ce->createVariable(BoolDomain().getTypeName().c_str());
+    CPPUNIT_ASSERT(cv2->baseDomain().getTypeName() == BoolDomain().getTypeName());
+    return true;
   }
 
   static bool testVariableWithDomainCreation(){
@@ -283,7 +283,8 @@ public:
       IntervalDomain d1(2.3);
       BoolDomain d2(true);
 
-      ConstraintEngineId ce = ((ConstraintEngine*)engine.getComponent("ConstraintEngine"))->getId();
+      ConstraintEngineId ce =
+          boost::polymorphic_cast<ConstraintEngine*>(engine.getComponent("ConstraintEngine"))->getId();
       ConstrainedVariableId cv0 = ce->createVariable(d0.getTypeName().c_str(), d0);
       CPPUNIT_ASSERT(cv0->baseDomain() == d0);
       ConstrainedVariableId cv1 = ce->createVariable(d1.getTypeName().c_str(), d1);
@@ -304,7 +305,7 @@ public:
 class TwicePropagator : public PostPropagationCallback {
 public:
   TwicePropagator(int& counter) : PostPropagationCallback(), m_counter(counter) {counter = 0;}
-  TwicePropagator(const ConstraintEngineId& ce, int& counter) : PostPropagationCallback(ce), m_counter(counter) {counter = 0;}
+  TwicePropagator(const ConstraintEngineId ce, int& counter) : PostPropagationCallback(ce), m_counter(counter) {counter = 0;}
   bool operator()() {
     ++m_counter;
     return m_counter < 2;
@@ -315,7 +316,7 @@ private:
 
 class PropagationCounter : public ConstraintEngineListener {
 public:
-  PropagationCounter(const ConstraintEngineId& ce) : ConstraintEngineListener(ce), m_counter(0) {}
+  PropagationCounter(const ConstraintEngineId ce) : ConstraintEngineListener(ce), m_counter(0) {}
   void notifyPropagationCompleted() {++m_counter;}
   int counter() const {return m_counter;}
 private:
@@ -336,7 +337,8 @@ public:
 
   static bool testPostPropagation() {
     CETestEngine engine;
-    ConstraintEngineId ce = ((ConstraintEngine*)engine.getComponent("ConstraintEngine"))->getId();
+    ConstraintEngineId ce =
+        boost::polymorphic_cast<ConstraintEngine*>(engine.getComponent("ConstraintEngine"))->getId();
 
     int postProp = 0;
     PropagationCounter* counter = new PropagationCounter(ce);
@@ -366,8 +368,9 @@ public:
   }
 
   static bool testDeallocationWithPurging(){
-      CETestEngine engine;
-      ConstraintEngineId ce = ((ConstraintEngine*)engine.getComponent("ConstraintEngine"))->getId();
+    CETestEngine engine;
+    ConstraintEngineId ce =
+        boost::polymorphic_cast<ConstraintEngine*>(engine.getComponent("ConstraintEngine"))->getId();
 
     // Set up a base domain
     NumericDomain intBaseDomain;
@@ -457,11 +460,11 @@ public:
     v3.specify(3);
 
     // Now delete constraints in the order that relaxes the empty variable last
-    delete (Constraint*) c1;
+    delete static_cast<Constraint*>(c1);
     CPPUNIT_ASSERT(!ENGINE->propagate());
-    delete (Constraint*) c2;
+    delete static_cast<Constraint*>(c2);
     CPPUNIT_ASSERT(!ENGINE->propagate());
-    delete (Constraint*) c0;
+    delete static_cast<Constraint*>(c0);
     CPPUNIT_ASSERT(ENGINE->propagate());
 
     return true;
@@ -475,7 +478,7 @@ public:
 // Assumes listener has been created using new
 class TestVariableListener: public ConstrainedVariableListener{
 public:
-  TestVariableListener(const ConstrainedVariableId& observedVar)
+  TestVariableListener(const ConstrainedVariableId observedVar)
     : ConstrainedVariableListener(observedVar) {}
   void notifyDiscard() {
 	  delete this;
@@ -673,7 +676,7 @@ private:
   static bool testListener(){
     ConstrainedVariableId v0 = (new Variable<IntervalIntDomain>(ENGINE, IntervalIntDomain()))->getId();
     new TestVariableListener(v0); // deletes itself when v0 deleted
-    delete (ConstrainedVariable*) v0;
+    delete static_cast<ConstrainedVariable*>(v0);
     return true;
   }
 
@@ -1218,7 +1221,7 @@ private:
 
     int emptyCount(0);
     for(std::vector<ConstrainedVariableId>::iterator it = variables.begin(); it != variables.end(); ++it){
-      Variable<IntervalIntDomain>* id = (Variable<IntervalIntDomain>*) (*it);
+      Variable<IntervalIntDomain>* id = id_cast<Variable<IntervalIntDomain> >(*it);
       if(id->lastDomain().isEmpty())
 	emptyCount++;
     }
@@ -1292,7 +1295,7 @@ private:
     CPPUNIT_ASSERT(ENGINE->constraintConsistent());
 
     /* Show that we can simply delete a constraint and confirm that the system is still consistent. */
-    delete (Constraint*) c1;
+    delete static_cast<Constraint*>(c1);
     ENGINE->propagate();
     CPPUNIT_ASSERT(ENGINE->constraintConsistent());
 
@@ -1305,7 +1308,7 @@ private:
     CPPUNIT_ASSERT(ENGINE->constraintConsistent());
     CPPUNIT_ASSERT(v1.getDerivedDomain().getSingletonValue() == 1);
 
-    delete (Constraint*) c2;
+    delete static_cast<Constraint*>(c2);
     ENGINE->propagate();
     CPPUNIT_ASSERT(ENGINE->constraintConsistent());
     CPPUNIT_ASSERT(v1.getDerivedDomain().getUpperBound() == 10);
@@ -1319,20 +1322,21 @@ private:
     ConstraintId c3((new EqualConstraint(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, variables))->getId());
     ENGINE->propagate();
     CPPUNIT_ASSERT(ENGINE->provenInconsistent());
-    delete (Constraint*) c3;
+    delete static_cast<Constraint*>(c3);
     ENGINE->propagate();
     CPPUNIT_ASSERT(ENGINE->constraintConsistent());
 
     // Clean up remaining constraint
-    delete (Constraint*) c0;
+    delete static_cast<Constraint*>(c0);
     ENGINE->propagate();
     CPPUNIT_ASSERT(ENGINE->constraintConsistent());
     return true;
   }
 
   static bool testDelegation(){
-      CETestEngine eng;
-      const ConstraintEngineId& engine=((ConstraintEngine*)eng.getComponent("ConstraintEngine"))->getId();
+    CETestEngine eng;
+    const ConstraintEngineId engine=
+        boost::polymorphic_cast<ConstraintEngine*>(eng.getComponent("ConstraintEngine"))->getId();
 
     Variable<IntervalIntDomain> v0(engine, IntervalIntDomain(0, 1000));
     ConstraintId c0 = engine->createConstraint(LabelStr("TestOnly"), makeScope(v0.getId()));
@@ -1355,7 +1359,7 @@ private:
     CPPUNIT_ASSERT(DelegationTestConstraint::s_executionCount == 9);
 
     // Delete the delegate and verify instance counts and that the prior delegate has been reinstated and executed.
-    delete (Constraint*) c1;
+    delete static_cast<Constraint*>(c1);
     c0->undoDeactivation();
     engine->propagate();
     CPPUNIT_ASSERT(engine->constraintConsistent());
@@ -1378,11 +1382,11 @@ private:
     CPPUNIT_ASSERT(DelegationTestConstraint::s_executionCount == 12);
 
     // Now confirm correct handling of constraint deletions
-    delete (Constraint*) c5;
-    delete (Constraint*) c4;
-    delete (Constraint*) c3;
-    delete (Constraint*) c2;
-    delete (Constraint*) c0;
+    delete static_cast<Constraint*>(c5);
+    delete static_cast<Constraint*>(c4);
+    delete static_cast<Constraint*>(c3);
+    delete static_cast<Constraint*>(c2);
+    delete static_cast<Constraint*>(c0);
     CPPUNIT_ASSERT(DelegationTestConstraint::s_instanceCount == 0);
     return true;
   }
@@ -2158,14 +2162,14 @@ private:
 
     // Reset, and delete constraint, but it should not matter
     v1.reset();
-    delete (Constraint*) c2;
+    delete static_cast<Constraint*>(c2);
 
     // Confirm still inconsistent
     res = ENGINE->propagate();
     CPPUNIT_ASSERT(!res);
 
-    delete (Constraint*) c0;
-    delete (Constraint*) c1;
+    delete static_cast<Constraint*>(c0);
+    delete static_cast<Constraint*>(c1);
     return true;
   }
 
@@ -2174,9 +2178,10 @@ private:
    * comparing the propagated domains with the expected output domains.
    */
   static bool testArbitraryConstraints() {
-      CETestEngine testEngine;
+    CETestEngine testEngine;
 
-      ConstraintEngineId ce = ((ConstraintEngine*)testEngine.getComponent("ConstraintEngine"))->getId();
+    ConstraintEngineId ce =
+        boost::polymorphic_cast<ConstraintEngine*>(testEngine.getComponent("ConstraintEngine"))->getId();
 
     // Input to this test: a list of constraint calls and expected output domains.
     std::list<ConstraintTestCase> tests;
@@ -2593,7 +2598,8 @@ public:
 private:
   static bool testAllocation(){
       CETestEngine testEngine;
-      const ConstraintEngineId& ce=((ConstraintEngine*)testEngine.getComponent("ConstraintEngine"))->getId();
+      const ConstraintEngineId ce=
+          boost::polymorphic_cast<ConstraintEngine*>(testEngine.getComponent("ConstraintEngine"))->getId();
 
     std::vector<ConstrainedVariableId> variables;
     // v0 == v1
@@ -2604,7 +2610,7 @@ private:
     ConstraintId c0 = ce->createConstraint(LabelStr("Equal"), variables);
     ce->propagate();
     CPPUNIT_ASSERT(v0.getDerivedDomain().getSingletonValue() == 1);
-    delete (Constraint*) c0;
+    delete static_cast<Constraint*>(c0);
     return true;
   }
 };
@@ -2734,8 +2740,9 @@ private:
   }
 
   static bool testEqualityConstraintPropagator(){
-      CETestEngine engine;
-      ConstraintEngineId ce = ((ConstraintEngine*)engine.getComponent("ConstraintEngine"))->getId();
+    CETestEngine engine;
+    ConstraintEngineId ce =
+        boost::polymorphic_cast<ConstraintEngine*>(engine.getComponent("ConstraintEngine"))->getId();
 
     new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce);
     {
@@ -2776,7 +2783,7 @@ private:
       ce->propagate();
       CPPUNIT_ASSERT(ce->provenInconsistent());
 
-      delete (Constraint*) c3;
+      delete static_cast<Constraint*>(c3);
       CPPUNIT_ASSERT(ce->pending());
       ce->propagate();
       CPPUNIT_ASSERT(ce->constraintConsistent());

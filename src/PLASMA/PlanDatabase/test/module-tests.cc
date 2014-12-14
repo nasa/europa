@@ -5,8 +5,9 @@
 
 CPPUNIT_TEST_SUITE_REGISTRATION( PlanDatabaseModuleTests );
 
-int main( int argc, char **argv)
+int main( int , char **)
 {
+  using namespace EUROPA;
     // Init data types so that id counts don't fail
     VoidDT::instance();
     BoolDT::instance();

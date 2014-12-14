@@ -18,11 +18,11 @@ class FlowProfileGraph
 {
  public:
   /**
-   * @brief Creates a directed graph with a \a source and a \sink intended to calculate the
-   * lower level envelope in case \a lowerLevel is true otherwise intended to calculate the
+   * @brief Creates a directed graph with a source and a sink intended to calculate the
+   * lower level envelope in case lowerLevel is true otherwise intended to calculate the
    * upper level envelope.
    */
-  FlowProfileGraph( const TransactionId& source, const TransactionId& sink, bool lowerLevel );
+  FlowProfileGraph( const TransactionId source, const TransactionId sink, bool lowerLevel );
   /**
    * @brief Destructor
    */
@@ -31,13 +31,13 @@ class FlowProfileGraph
    * @brief Creates bi-directional edge between \a t1 and \a t2 with infinite capacity
    * as a result of a concurrent constraint between the two transactions
    */
-  virtual void enableAt( const TransactionId& t1, const TransactionId& t2 ) = 0;
+  virtual void enableAt( const TransactionId t1, const TransactionId t2 ) = 0;
   /**
    * @brief Creates directed edge between \a t1 and \a t2 with infinite capacity
    * as a result of a before or at constraint between the two transactions (reverse
    * capacity set to zero)
    */
-  virtual void enableAtOrBefore( const TransactionId& t1, const TransactionId& t2 ) = 0;
+  virtual void enableAtOrBefore( const TransactionId t1, const TransactionId t2 ) = 0;
   /**
    * @brief Creates a node in the network and creates an edge:
    *
@@ -50,16 +50,16 @@ class FlowProfileGraph
    *   ---------------------------------------------------------------------------------------------------------
    * \endverbatim
    */
-  virtual void enableTransaction( const TransactionId& transaction, const InstantId& inst, TransactionId2InstantId& contributions ) = 0;
+  virtual void enableTransaction( const TransactionId transaction, const InstantId inst, TransactionId2InstantId contributions ) = 0;
   /**
    * @brief Returns true if \a transaction is enabled in the invoking
    * instance
    */
-  virtual bool isEnabled(  const TransactionId& transaction ) const = 0;
+  virtual bool isEnabled(  const TransactionId transaction ) const = 0;
   /**
    * @brief Disables \a transaction, if enabled, for the invoking instance
    */
-  virtual void disable( const TransactionId& transaction ) = 0;
+  virtual void disable( const TransactionId transaction ) = 0;
   /**
    * @brief Will push any flow wich flows through the node corresponding with \a transaction
    * back to the source of the edge the flow originates from.
@@ -75,7 +75,7 @@ class FlowProfileGraph
    * If a recalculation of the maximum flow is required this method will do nothing.
    * \todo verify if this is really required or perhaps we should error out?
    */
-  virtual void pushFlow( const TransactionId& transaction ) = 0;
+  virtual void pushFlow( const TransactionId transaction ) = 0;
   /**
    * @brief Returns the cummulative residual capacity originating from the source.
    *
@@ -101,7 +101,7 @@ class FlowProfileGraph
    * contributions, which maps a TransactionId to a InstantId is maps every transaction associated with a disabled
    * node to \a instant.
    */
-  virtual edouble disableReachableResidualGraph( TransactionId2InstantId& contributions, const InstantId& instant  ) = 0;
+  virtual edouble disableReachableResidualGraph( TransactionId2InstantId contributions, const InstantId instant  ) = 0;
   /**
    * @brief Returns true if the invoking instance calculates the lower level, otherwise returns false which indicates
    * the invoking instance is calculating the upper level.
@@ -110,7 +110,7 @@ class FlowProfileGraph
   /**
    * @brief Removes transaction \a id from the network.
    */
-  virtual void removeTransaction( const TransactionId& id ) = 0;
+  virtual void removeTransaction( const TransactionId id ) = 0;
   /**
    * @brief Resets the invoking instance.
    *
@@ -140,33 +140,31 @@ class FlowProfileGraph
 
 class FlowProfileGraphImpl : public FlowProfileGraph {
  public:
-  FlowProfileGraphImpl(const TransactionId& source, const TransactionId& sink, bool lowerLevel);
+  FlowProfileGraphImpl(const TransactionId source, const TransactionId sink, bool lowerLevel);
   ~FlowProfileGraphImpl();
-  void enableAt( const TransactionId& t1, const TransactionId& t2 );
-  void enableAtOrBefore(const TransactionId& t1, const TransactionId& t2);
-  void enableTransaction(const TransactionId& transaction, const InstantId& inst,
-                         TransactionId2InstantId& contributions);
-  bool isEnabled(const TransactionId& transaction) const;
-  void disable(const TransactionId& transaction);
-  void pushFlow( const TransactionId& transaction );
+  void enableAt( const TransactionId t1, const TransactionId t2 );
+  void enableAtOrBefore(const TransactionId t1, const TransactionId t2);
+  void enableTransaction(const TransactionId transaction, const InstantId inst,
+                         TransactionId2InstantId contributions);
+  bool isEnabled(const TransactionId transaction) const;
+  void disable(const TransactionId transaction);
+  void pushFlow( const TransactionId transaction );
   edouble getResidualFromSource();
-  edouble getResidualFromSource(const TransactionIdTransactionIdPair2Order& at,
-                                const TransactionIdTransactionIdPair2Order& other) {
+  edouble getResidualFromSource(const TransactionIdTransactionIdPair2Order&,
+                                const TransactionIdTransactionIdPair2Order&) {
     return getResidualFromSource();
   }
 
-  edouble disableReachableResidualGraph(TransactionId2InstantId& contributions, const InstantId& instant);
-  void removeTransaction(const TransactionId& id);
+  edouble disableReachableResidualGraph(TransactionId2InstantId contributions, const InstantId instant);
+  void removeTransaction(const TransactionId id);
   void reset();
   void restoreFlow();
  private:
   /**
    * @brief Helper function for disableReachableResidualGraph
    */
-  void visitNeighbors( const Node* node, edouble& residual, Node2Bool& visited, TransactionId2InstantId& contributions, const InstantId& instant  );
-  /*!
-   * @brief
-   */
+  void visitNeighbors( const Node* node, edouble& residual, Node2Bool& visited, TransactionId2InstantId contributions, const InstantId instant  );
+
   MaximumFlowAlgorithm* m_maxflow;
   /*!
    * @brief Bi directional graph datastructure

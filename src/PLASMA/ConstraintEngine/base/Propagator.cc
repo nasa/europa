@@ -5,7 +5,7 @@
 
 namespace EUROPA
 {
-  Propagator::Propagator(const LabelStr& name, const ConstraintEngineId& constraintEngine, int priority)
+  Propagator::Propagator(const LabelStr& name, const ConstraintEngineId constraintEngine, int priority)
   	  : Entity()
   	  , m_id(this)
   	  , m_name(name)
@@ -24,11 +24,11 @@ namespace EUROPA
 
   int Propagator::getPriority() const { return m_priority; }
 
-  const PropagatorId& Propagator::getId() const {return m_id;}
+  const PropagatorId Propagator::getId() const {return m_id;}
 
   const LabelStr& Propagator::getName() const {return m_name;}
 
-  const ConstraintEngineId& Propagator::getConstraintEngine() const {return m_constraintEngine;}
+  const ConstraintEngineId Propagator::getConstraintEngine() const {return m_constraintEngine;}
 
   bool Propagator::isEnabled() const {return m_enabled;}
 
@@ -38,25 +38,25 @@ namespace EUROPA
 
   const std::set<ConstraintId>& Propagator::getConstraints() const {return m_constraints;}
 
-  void Propagator::execute(const ConstraintId& constraint){
+  void Propagator::execute(const ConstraintId constraint){
     check_error(constraint.isValid());
     m_constraintEngine->execute(constraint);
   }
 
-  void Propagator::addConstraint(const ConstraintId& constraint){
+  void Propagator::addConstraint(const ConstraintId constraint){
     check_error(constraint->getPropagator().isNoId());
     checkError(!constraint->isDiscarded(), constraint);
     m_constraints.insert(constraint);
     handleConstraintAdded(constraint);
   }
 
-  void Propagator::removeConstraint(const ConstraintId& constraint){
+  void Propagator::removeConstraint(const ConstraintId constraint){
     check_error(constraint->getPropagator() == m_id);
     m_constraints.erase(constraint);
     handleConstraintRemoved(constraint);
   }
 
-  Domain& Propagator::getCurrentDomain(const ConstrainedVariableId& var) {
+  Domain& Propagator::getCurrentDomain(const ConstrainedVariableId var) {
     check_error(var.isValid());
     return var->getCurrentDomain();
   }
@@ -71,8 +71,8 @@ namespace EUROPA
       getConstraintEngine()->getViolationMgr().addEmptyVariable(v);
   }
 
-void Propagator::handleVariableDeactivated(const ConstrainedVariableId&){}
-void Propagator::handleVariableActivated(const ConstrainedVariableId&){}
+void Propagator::handleVariableDeactivated(const ConstrainedVariableId){}
+void Propagator::handleVariableActivated(const ConstrainedVariableId){}
 
 
 }

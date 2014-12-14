@@ -22,23 +22,23 @@ namespace EUROPA
 
     ObjectTokenRelation(const LabelStr& name,
 			const LabelStr& propagatorName,
-			const ConstraintEngineId& constraintEngine,
+			const ConstraintEngineId constraintEngine,
 			const std::vector<ConstrainedVariableId>& variables);
 
     ~ObjectTokenRelation();
 
     void handleExecute();
 
-    void handleExecute(const ConstrainedVariableId& variable, 
+    void handleExecute(const ConstrainedVariableId variable, 
 		       unsigned int argIndex, 
 		       const DomainListener::ChangeType& changeType);
 
-    bool canIgnore(const ConstrainedVariableId& variable, 
+    bool canIgnore(const ConstrainedVariableId variable, 
 		   unsigned int argIndex, 
 		   const DomainListener::ChangeType& changeType);
 
     // This constraint doesn't modify any variables through inference
-    virtual const std::vector<ConstrainedVariableId>& getModifiedVariables(const ConstrainedVariableId& variable) const;
+    virtual const std::vector<ConstrainedVariableId>& getModifiedVariables(const ConstrainedVariableId variable) const;
     virtual const std::vector<ConstrainedVariableId>& getModifiedVariables() const;
 
   private:

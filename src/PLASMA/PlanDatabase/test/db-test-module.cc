@@ -26,13 +26,17 @@
 #include "ModuleConstraintEngine.hh"
 #include "ModulePlanDatabase.hh"
 
+#include "unused.hh"
+
 #include <iostream>
 #include <sstream>
 #include <iomanip>
 #include <string>
-
+using namespace EUROPA;
+namespace {
 const char* DEFAULT_OBJECT_TYPE = "TestObject";
 const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
+}
 
 #define GET_DEFAULT_OBJECT_TYPE(ce) ce->getCESchema()->getDataType(DEFAULT_OBJECT_TYPE)
 #define GET_DATA_TYPE(pdb,dt) pdb->getSchema()->getCESchema()->getDataType(dt)
@@ -42,22 +46,23 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
 
   class DBFoo : public Timeline {
   public:
-    DBFoo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
-    DBFoo(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    DBFoo(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name);
+    DBFoo(const ObjectId parent, const LabelStr& type, const LabelStr& name);
     void handleDefaults(bool autoClose = true); // default variable initialization
 
     // test/simple-predicate.nddl:4 DBFoo
+    void constructor(const std::vector<const Domain*>&) {constructor();}
     void constructor();
     void constructor(eint arg0, LabelStr& arg1);
     ConstrainedVariableId m_0;
     ConstrainedVariableId m_1;
   };
 
-  DBFoo::DBFoo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+  DBFoo::DBFoo(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name)
     : Timeline(planDatabase, type, name, true) {
   }
 
-  DBFoo::DBFoo(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+  DBFoo::DBFoo(const ObjectId parent, const LabelStr& type, const LabelStr& name)
     : Timeline(parent, type, name, true) {}
 
   // default initialization of member variables
@@ -74,7 +79,7 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
     m_1 = addVariable(LabelSet(LabelStr("Hello World")), "LabelSetVar");
   }
 
-  void DBFoo::constructor(eint arg0, LabelStr& arg1) {
+  void DBFoo::constructor(eint arg0, LabelStr&) {
     m_0 = addVariable(IntervalIntDomain(arg0), "IntervalIntVar");
     m_1 = addVariable(LabelSet(LabelStr("Hello World")), "LabelSetVar");
   }
@@ -84,7 +89,7 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
     StandardDBFooFactory(): ObjectFactory(LabelStr(DEFAULT_OBJECT_TYPE)){}
 
   private:
-    ObjectId createInstance(const PlanDatabaseId& planDb,
+    ObjectId createInstance(const PlanDatabaseId planDb,
                             const LabelStr& objectType,
                             const LabelStr& objectName,
                             const std::vector<const Domain*>& arguments) const {
@@ -104,7 +109,7 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
     {}
 
   private:
-    ObjectId createInstance(const PlanDatabaseId& planDb,
+    ObjectId createInstance(const PlanDatabaseId planDb,
                             const LabelStr& objectType,
                             const LabelStr& objectName,
                             const std::vector<const Domain*>& arguments) const {
@@ -124,7 +129,7 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
 
   class IntervalTokenType: public TokenType {
   public:
-    IntervalTokenType(const ObjectTypeId& ot)
+    IntervalTokenType(const ObjectTypeId ot)
       : TokenType(ot,LabelStr(DEFAULT_PREDICATE)) {
         addArg(FloatDT::instance(), "IntervalParam");
         addArg(IntDT::instance(), "IntervalIntParam");
@@ -133,17 +138,18 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
         addArg(FloatDT::instance(), "EnumeratedParam");
     }
   private:
-    TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false, bool isFact = false) const {
+    TokenId createInstance(const PlanDatabaseId planDb, const LabelStr& name, bool rejectable = false, bool isFact = false) const {
       TokenId token = (new IntervalToken(planDb, name, rejectable, isFact))->getId();
       return(token);
     }
-    TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const{
+    TokenId createInstance(const TokenId master, const LabelStr& name, const LabelStr& relation) const{
       TokenId token = (new IntervalToken(master, relation, name))->getId();
       return(token);
     }
   };
 
-void initDbTestSchema(const SchemaId& schema) {
+namespace {
+void initDbTestSchema(const SchemaId schema) {
   // Set up object types and compositions for testing - builds a recursive structure
   ObjectType* objType = new ObjectType(DEFAULT_OBJECT_TYPE,schema->getObjectType(Schema::rootObject()));
 
@@ -193,6 +199,7 @@ void initDbTestSchema(const SchemaId& schema) {
 
   schema->registerEnum("Locations",locationsBaseDomain);
 }
+}
 
 class PDBTestEngine  : public EngineBase
 {
@@ -200,9 +207,9 @@ class PDBTestEngine  : public EngineBase
     PDBTestEngine();
     virtual ~PDBTestEngine();
 
-    const ConstraintEngineId& getConstraintEngine() const;
-    const SchemaId& getSchema() const;
-    const PlanDatabaseId& getPlanDatabase() const;
+    const ConstraintEngineId getConstraintEngine() const;
+    const SchemaId getSchema() const;
+    const PlanDatabaseId getPlanDatabase() const;
 
   protected:
     void createModules();
@@ -212,11 +219,11 @@ PDBTestEngine::PDBTestEngine()
 {
     createModules();
     doStart();
-    const SchemaId& schema = ((Schema*)getComponent("Schema"))->getId();
+    const SchemaId schema = boost::polymorphic_cast<Schema*>(getComponent("Schema"))->getId();
     initDbTestSchema(schema);
 
     // Tokens require temporal distance constraints
-    CESchema* ces = (CESchema*)getComponent("CESchema");
+    CESchema* ces = boost::polymorphic_cast<CESchema*>(getComponent("CESchema"));
     REGISTER_SYSTEM_CONSTRAINT(ces,EqualConstraint, "concurrent", "Default");
     REGISTER_SYSTEM_CONSTRAINT(ces,LessThanEqualConstraint, "precedes", "Default");
     REGISTER_SYSTEM_CONSTRAINT(ces,AddEqualConstraint, "temporaldistance", "Default");
@@ -228,19 +235,19 @@ PDBTestEngine::~PDBTestEngine()
     doShutdown();
 }
 
-const ConstraintEngineId& PDBTestEngine::getConstraintEngine() const
+const ConstraintEngineId PDBTestEngine::getConstraintEngine() const
 {
-    return ((ConstraintEngine*)getComponent("ConstraintEngine"))->getId();
+  return boost::polymorphic_cast<const ConstraintEngine*>(getComponent("ConstraintEngine"))->getId();
 }
 
-const SchemaId& PDBTestEngine::getSchema() const
+const SchemaId PDBTestEngine::getSchema() const
 {
-    return ((Schema*)getComponent("Schema"))->getId();
+  return boost::polymorphic_cast<const Schema*>(getComponent("Schema"))->getId();
 }
 
-const PlanDatabaseId& PDBTestEngine::getPlanDatabase() const
+const PlanDatabaseId PDBTestEngine::getPlanDatabase() const
 {
-    return ((PlanDatabase*)getComponent("PlanDatabase"))->getId();
+  return boost::polymorphic_cast<const PlanDatabase*>(getComponent("PlanDatabase"))->getId();
 }
 
 void PDBTestEngine::createModules()
@@ -250,9 +257,11 @@ void PDBTestEngine::createModules()
     addModule((new ModulePlanDatabase())->getId());
 }
 
+namespace {
 ConstraintEngineId ce;
 SchemaId schema;
 PlanDatabaseId db;
+}
 
 #define DEFAULT_SETUP(ce, db, autoClose) \
     PDBTestEngine testEngine; \
@@ -266,9 +275,6 @@ PlanDatabaseId db;
 #define DEFAULT_TEARDOWN() \
     } \
 
-#define DEFAULT_TEARDOWN_MULTI(ce, db) \
-    }\
-
   /**
    * @brief Declaration and definition for test constraint to force a failure when the domain becomes a singleton
    */
@@ -276,7 +282,7 @@ PlanDatabaseId db;
   public:
     ForceFailureConstraint(const LabelStr& name,
                            const LabelStr& propagatorName,
-                           const ConstraintEngineId& constraintEngine,
+                           const ConstraintEngineId constraintEngine,
 			   const std::vector<ConstrainedVariableId>& variables)
       : Constraint(name, propagatorName, constraintEngine, variables){}
 
@@ -289,14 +295,14 @@ PlanDatabaseId db;
 class DummyTokenType : public TokenType{
 
 public:
-  DummyTokenType(const ObjectTypeId& ot,const LabelStr& predicateName) : TokenType(ot, predicateName){}
+  DummyTokenType(const ObjectTypeId ot,const LabelStr& predicateName) : TokenType(ot, predicateName){}
   virtual ~DummyTokenType(){}
 
-  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const{
+  virtual TokenId createInstance(const PlanDatabaseId, const LabelStr&, bool, bool) const{
     TokenId token;
     return token;
   }
-  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const{
+  virtual TokenId createInstance(const TokenId, const LabelStr&, const LabelStr&) const{
     TokenId token;
     return token;
   }
@@ -384,9 +390,9 @@ private:
 
 
   static bool testObjectTypeRelationships() {
-      DEFAULT_SETUP(ce, db, true);
+    DEFAULT_SETUP(ce, db, true);
 
-      unsigned int initOTcnt = schema->getAllObjectTypes().size();
+    unsigned long initOTcnt = schema->getAllObjectTypes().size();
 
     schema->addObjectType(LabelStr("Foo"));
     schema->addObjectType(LabelStr("Baz"));
@@ -661,7 +667,7 @@ private:
     CPPUNIT_ASSERT(db->getObjects().size() == 4);
     CPPUNIT_ASSERT(o1.getComponents().size() == 1);
     CPPUNIT_ASSERT(o3.getParent() == o2.getId());
-    delete (Object*) id0;
+    delete static_cast<Object*>(id0);
     CPPUNIT_ASSERT(db->getObjects().size() == 3);
     CPPUNIT_ASSERT(o1.getComponents().empty());
 
@@ -679,7 +685,7 @@ private:
     CPPUNIT_ASSERT(ancestors.back() == id1);
 
     // Force cascaded delete
-    delete (Object*) id1;
+    delete static_cast<Object*>(id1);
     CPPUNIT_ASSERT(db->getObjects().size() == 3);
 
     // Now allocate dynamically and allow the plan database to clean it up when it deallocates
@@ -758,8 +764,8 @@ private:
     CPPUNIT_ASSERT(o1.getVariables()[0]->lastDomain() == o1.getVariables()[0]->lastDomain());
 
     // Delete one of the constraints to force automatic clean-up path and explciit clean-up
-    delete (Constraint*) constraint;
-    delete (Constraint*) subsetConstraint;
+    delete static_cast<Constraint*>(constraint);
+    delete static_cast<Constraint*>(subsetConstraint);
 
     DEFAULT_TEARDOWN();
 
@@ -1010,7 +1016,7 @@ private:
     CPPUNIT_ASSERT(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getKey());
 
     // Now delete the variable. This should remove the listener
-    delete (ConstrainedVariable*) v0;
+    delete static_cast<ConstrainedVariable*>(v0);
 
     DEFAULT_TEARDOWN();
     return true;
@@ -1052,8 +1058,8 @@ private:
 	       v1->lastDomain().isMember(o2.getKey()));
 
     // Now delete the variables.
-    delete (ConstrainedVariable*) v0;
-    delete (ConstrainedVariable*) v1;
+    delete static_cast<ConstrainedVariable*>(v0);
+    delete static_cast<ConstrainedVariable*>(v1);
 
     DEFAULT_TEARDOWN();
     return true;
@@ -1190,9 +1196,9 @@ public:
 private:
 
   static bool testBasicTokenAllocation() {
-      DEFAULT_SETUP(ce, db, false);
-      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
-      db->close();
+    DEFAULT_SETUP(ce, db, false);
+    unused(ObjectId timeline) = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+    db->close();
     // Event Token
     EventToken eventToken(db, LabelStr(DEFAULT_PREDICATE), true, false, IntervalIntDomain(0, 1000), Token::noObject(), false);
     CPPUNIT_ASSERT(eventToken.start()->getDerivedDomain() == eventToken.end()->getDerivedDomain());
@@ -1237,7 +1243,7 @@ private:
                                        IntervalIntDomain(2, 10),
                                        Token::noObject(), true))->getId();
 
-    delete (Token*) token; // It is inComplete
+    delete static_cast<Token*>(token); // It is inComplete
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -1261,7 +1267,7 @@ private:
 
   static bool testStateModel(){
       DEFAULT_SETUP(ce, db, false);
-      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+      unused(ObjectId timeline) = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
     IntervalToken t0(db,
                      LabelStr(DEFAULT_PREDICATE),
@@ -1316,9 +1322,9 @@ private:
   }
 
   static bool testMasterSlaveRelationship(){
-      DEFAULT_SETUP(ce, db, false);
-      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
-      db->close();
+    DEFAULT_SETUP(ce, db, false);
+    unused(ObjectId timeline) = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+    db->close();
     IntervalToken t0(db,
                      LabelStr(DEFAULT_PREDICATE),
                      false,
@@ -1371,13 +1377,13 @@ private:
 
     // Delete slave only - master must be committed to allow this
     t0.commit();
-    delete (Token*) t2;
+    delete static_cast<Token*>(t2);
     CPPUNIT_ASSERT(t0.slaves().size() == 3);
 
     // Should verify correct count of tokens remain. --wedgingt 2004 Feb 27
 
     // Delete master & slaves
-    delete (Token*) t1;
+    delete static_cast<Token*>(t1);
     // Should verify correct count of tokens remain. --wedgingt 2004 Feb 27
     DEFAULT_TEARDOWN();
     // Remainder should be cleaned up automatically.
@@ -1389,10 +1395,10 @@ private:
    * without causing prpagation.
    */
   static bool testTermination(){
-      DEFAULT_SETUP(ce, db, false);
-      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
-      db->close();
-
+    DEFAULT_SETUP(ce, db, false);
+    unused(ObjectId timeline) = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+    db->close();
+    
     {
       IntervalToken t0(db,
 		       LabelStr(DEFAULT_PREDICATE),
@@ -1474,7 +1480,7 @@ private:
     CPPUNIT_ASSERT(ce->constraintConsistent());
     CPPUNIT_ASSERT(t1->master().isNoId());
     t1->terminate();
-    delete (Token*) t1;
+    delete static_cast<Token*>(t1);
     CPPUNIT_ASSERT(ce->constraintConsistent());
 
     DEFAULT_TEARDOWN();
@@ -1484,7 +1490,7 @@ private:
   // Added for GNATS 3077
   static bool testMergingWithEmptyDomains() {
       DEFAULT_SETUP(ce, db, false);
-      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+      unused(ObjectId timeline) = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
     // Create 2 mergeable tokens.
 
@@ -1533,7 +1539,7 @@ private:
 
   static bool testBasicMerging(){
       DEFAULT_SETUP(ce, db, false);
-      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+      unused(ObjectId timeline) = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
     // Create 2 mergeable tokens - predicates, types and base domaiuns match
     IntervalToken t0(db,
@@ -1611,7 +1617,7 @@ private:
     t1.doMerge(t0.getId());
 
     // Confirm deletion of the constraint is handled correctly
-    delete (Constraint*) equalityConstraint;
+    delete static_cast<Constraint*>(equalityConstraint);
     CPPUNIT_ASSERT(t0.end()->getDerivedDomain() != t2.end()->getDerivedDomain());
 
 
@@ -1623,7 +1629,7 @@ private:
                                                                           makeScope(t1.duration(), superset.getId()));
     t1.doMerge(t0.getId());
     CPPUNIT_ASSERT(t0.duration()->getDerivedDomain().getUpperBound() == 6);
-    delete (Constraint*) subsetOfConstraint;
+    delete static_cast<Constraint*>(subsetOfConstraint);
 
     DEFAULT_TEARDOWN();
     // Deletion will now occur and test proper cleanup.
@@ -1701,7 +1707,7 @@ private:
    */
   static bool testConstraintAdditionAfterMerging(){
     DEFAULT_SETUP(ce, db, false);
-    ObjectId timeline1 = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "timeline1"))->getId();
+    unused(ObjectId timeline1) = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "timeline1"))->getId();
     new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "timeline2");
     db->close();
 
@@ -1905,24 +1911,24 @@ private:
 
     typedef Id<IntervalToken> IntervalTokenId;
 
-    static const int NUMTOKS=3;
-    static const int UNIFIED=1;
-    static const int NUMPARAMS=1;
+    static const unsigned int NUMTOKS=3;
+    static const unsigned int UNIFIED=1;
+    static const unsigned int NUMPARAMS=1;
 
     //Create tokens with the same domains.  We will impose a constraint on
     //each token variable.  Tokens will have 5 parameter variables.
     std::vector< std::vector<IntervalTokenId> > tokens;
 
     // Add parameters to schema
-    for(int i=0;i< UNIFIED; i++) {
+    for(unsigned int i=0;i< UNIFIED; i++) {
       std::stringstream str;
       str << "P" << i;
       schema->addMember(LabelStr(DEFAULT_PREDICATE), IntDT::NAME(), LabelStr(str.str()).c_str());
     }
 
-    for (int i=0; i < NUMTOKS; i++) {
+    for (unsigned int i=0; i < NUMTOKS; i++) {
       std::vector<IntervalTokenId> tmp;
-      for (int j=0; j < UNIFIED; j++) {
+      for (unsigned int j=0; j < UNIFIED; j++) {
         IntervalTokenId t = (new IntervalToken(db,
                                                LabelStr(DEFAULT_PREDICATE),
                                                true,
@@ -1931,7 +1937,7 @@ private:
                                                IntervalIntDomain(0, 220),
                                                IntervalIntDomain(1, 110),
                                                Token::noObject(), false))->getId();
-        for (int k=0; k < NUMPARAMS; k++) {
+        for (unsigned int k=0; k < NUMPARAMS; k++) {
           std::stringstream str;
           str << "P" << k;
           t->addParameter(IntervalIntDomain(500+j,1000), LabelStr(str.str()).c_str());
@@ -1957,7 +1963,7 @@ private:
 
     TokenId predecessor = tokens[0][0];
     predecessor->activate();
-    for (int i=1; i < NUMTOKS; i++) {
+    for (unsigned int i=1; i < NUMTOKS; i++) {
       tokens[i][0]->activate();
       timeline->constrain(tokens[i-1][0], tokens[i][0]);
     }
@@ -1975,8 +1981,8 @@ private:
     CPPUNIT_ASSERT(pdom2.getLowerBound() == 500);
     CPPUNIT_ASSERT(pdom2.getUpperBound() == 1000);
 
-    for (int i=0; i < NUMTOKS; i++)
-      for (int j=1; j < UNIFIED; j++) {
+    for (unsigned int i=0; i < NUMTOKS; i++)
+      for (unsigned int j=1; j < UNIFIED; j++) {
         tokens[i][j]->doMerge(tokens[i][0]);
         ce->propagate();
       }
@@ -1994,8 +2000,8 @@ private:
     CPPUNIT_ASSERT(pdom3.getLowerBound() == 500+UNIFIED-1);
     CPPUNIT_ASSERT(pdom3.getUpperBound() == 1000);
 
-    for (int i=0; i < NUMTOKS; i++)
-      for (int j=1; j < UNIFIED; j++) {
+    for (unsigned int i=0; i < NUMTOKS; i++)
+      for (unsigned int j=1; j < UNIFIED; j++) {
         tokens[i][j]->cancel();
         ce->propagate();
       }
@@ -2019,7 +2025,7 @@ private:
 
   static bool testTokenCompatibility(){
       DEFAULT_SETUP(ce, db, false);
-      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+      unused(ObjectId timeline) = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
 
     // Create 2 mergeable tokens - predicates, types and base domaiuns match
@@ -2276,7 +2282,7 @@ private:
 
   static bool testTokenType(){
       DEFAULT_SETUP(ce, db, false);
-      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+      unused(ObjectId timeline) = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
 
       TokenId master = db->createToken(DEFAULT_PREDICATE, NULL, true);
@@ -2297,7 +2303,7 @@ private:
    */
   static bool testCorrectSplit_Gnats2450(){
     DEFAULT_SETUP(ce, db, false);
-    ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+    unused(ObjectId timeline) = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
     db->close();
 
     IntervalToken tokenA(db,
@@ -2358,7 +2364,7 @@ private:
 
   static bool testOpenMerge() {
       DEFAULT_SETUP(ce, db, false);
-      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+      unused(ObjectId timeline) = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
 
     schema->addMember(LabelStr(DEFAULT_PREDICATE),"int",LabelStr("FOO"));
@@ -2470,7 +2476,7 @@ private:
 
   static bool testGNATS_3086() {
       DEFAULT_SETUP(ce, db, false);
-      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+      unused(ObjectId timeline) = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
 
     LabelSet lbl;
@@ -2524,7 +2530,7 @@ private:
 
   static bool testCompatCacheReset() {
       DEFAULT_SETUP(ce, db, false);
-      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+      unused(ObjectId timeline) = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
     //create a regular token
     IntervalToken t0(db,
@@ -2569,7 +2575,7 @@ private:
     //shouldn't be able to merge with anything
     CPPUNIT_ASSERT(db->countCompatibleTokens(t2.getId(), std::numeric_limits<unsigned int>::max(), true) == 0);
 
-    delete (Constraint *) eq; //remove the constraint
+    delete static_cast<Constraint *>(eq); //remove the constraint
 
     ce->propagate();
 
@@ -2668,11 +2674,11 @@ private:
 
     // Now delete the master and expect the uncommitted slave to be discarded but the committed slave to
     // be retained.
-    delete (Token*) master;
+    delete static_cast<Token*>(master);
     CPPUNIT_ASSERT(slaveA->isDiscarded());
     CPPUNIT_ASSERT(slaveB->isCommitted());
 
-    delete (Token*) slaveB;
+    delete static_cast<Token*>(slaveB);
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -2738,16 +2744,16 @@ private:
     orphan->doMerge(slaveC);
 
     // Now delete the master - should force slaves A and B to be deleted
-    delete (Token*) master;
+    delete static_cast<Token*>(master);
     CPPUNIT_ASSERT(slaveA->isDiscarded());
     CPPUNIT_ASSERT(slaveB->isDiscarded());
     CPPUNIT_ASSERT(slaveC->isCommitted());
     CPPUNIT_ASSERT(orphan->isMerged());
 
-    delete (Token*) slaveC;
+    delete static_cast<Token*>(slaveC);
     CPPUNIT_ASSERT(orphan->isInactive());
 
-    delete (Token*) orphan;
+    delete static_cast<Token*>(orphan);
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -2778,7 +2784,7 @@ private:
     CPPUNIT_ASSERT(db->getActiveTokens(LabelStr(DEFAULT_PREDICATE)).size() == 1);
 
     // Delete the token and ensure that we no longer have active tokens
-    delete (Token*) a;
+    delete static_cast<Token*>(a);
     CPPUNIT_ASSERT(db->getActiveTokens(LabelStr(DEFAULT_PREDICATE)).empty());
 
     DEFAULT_TEARDOWN();
@@ -2930,7 +2936,7 @@ private:
     CPPUNIT_ASSERT(tokens.size() == 4);
     CPPUNIT_ASSERT(timeline.getTokenSequence().size() == 0);
     CPPUNIT_ASSERT(timeline.hasTokensToOrder());
-    unsigned int num_constraints = ce->getConstraints().size();
+    unsigned long num_constraints = ce->getConstraints().size();
 
     /**
      * BASE CASE - end insertion and retraction
@@ -3134,11 +3140,11 @@ private:
     Id<Timeline> timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
     db->close();
 
-    const int COUNT = 5;
-    const int DURATION = 10;
+    const unsigned int COUNT = 5;
+    const unsigned int DURATION = 10;
 
-    for (int i=0;i<COUNT;i++){
-      int start = i*DURATION;
+    for (unsigned int i=0;i<COUNT;i++){
+      unsigned int start = i*DURATION;
       TokenId token = (new IntervalToken(db,
                                          LabelStr(LabelStr(DEFAULT_PREDICATE)),
                                          true,
@@ -3151,17 +3157,17 @@ private:
       token->activate();
     }
 
-    CPPUNIT_ASSERT(timeline->tokens().size() == (unsigned int) COUNT);
+    CPPUNIT_ASSERT(timeline->tokens().size() ==  COUNT);
     ce->propagate(); // Should not alter the count. Relationship updated eagerly
-    CPPUNIT_ASSERT(timeline->tokens().size() == (unsigned int) COUNT);
+    CPPUNIT_ASSERT(timeline->tokens().size() ==  COUNT);
 
-    int i = 0;
+    unsigned int i = 0;
     std::vector<TokenId> tokensToOrder;
     timeline->getTokensToOrder(tokensToOrder);
 
     while(!tokensToOrder.empty()){
-      CPPUNIT_ASSERT(timeline->getTokenSequence().size() == (unsigned int) i);
-      CPPUNIT_ASSERT(tokensToOrder.size() == (unsigned int) (COUNT - i));
+      CPPUNIT_ASSERT(timeline->getTokenSequence().size() ==  i);
+      CPPUNIT_ASSERT(tokensToOrder.size() ==  (COUNT - i));
       std::vector< std::pair<TokenId, TokenId> > choices;
       TokenId toConstrain = tokensToOrder.front();
       timeline->getOrderingChoices(toConstrain, choices);
@@ -3530,7 +3536,7 @@ private:
     CPPUNIT_ASSERT(ce->propagate());
 
     // Now delete t4 to leave a hole which will require repair
-    delete (Token*) t4;
+    delete static_cast<Token*>(t4);
     CPPUNIT_ASSERT(ce->propagate());
     DEFAULT_TEARDOWN();
     return true;
@@ -3570,7 +3576,7 @@ private:
       ce->propagate();
 
       // Now nuke the master and make sure we safely delete both.
-      delete (Token*) master;
+      delete static_cast<Token*>(master);
 
       CPPUNIT_ASSERT(db->getTokens().empty());
     }
@@ -3601,7 +3607,7 @@ private:
       ce->propagate();
 
       // Now nuke the master and make sure we safely delete both.
-      delete (Token*) master;
+      delete static_cast<Token*>(master);
 
       CPPUNIT_ASSERT(db->getTokens().empty());
     }
@@ -3800,7 +3806,7 @@ private:
     const unsigned int TOKENS_PER_TICK(1);
     for(unsigned int i=startTick;i<endTick;i++){
       CPPUNIT_ASSERT(db->getTokens().size() == (endTick - i) * TOKENS_PER_TICK);
-      unsigned int deletionCount = db->archive(i+1);
+      unsigned long deletionCount = db->archive(i+1);
       CPPUNIT_ASSERT_MESSAGE(toString(deletionCount), deletionCount == TOKENS_PER_TICK);
       CPPUNIT_ASSERT(ce->constraintConsistent());
     }
@@ -3909,7 +3915,7 @@ private:
 
   static bool testPathBasedRetrieval(){
       DEFAULT_SETUP(ce, db, false);
-      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+      unused(ObjectId timeline) = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
 
     db->getClient()->enableTransactionLogging();
@@ -3958,7 +3964,7 @@ private:
     t0_1_1->activate();
 
     // Test paths
-    std::vector<int> path;
+    std::vector<unsigned int> path;
     path.push_back(0); // Start with the index of the token key in the path
 
 
@@ -4165,16 +4171,16 @@ public:
 
   class TestClass2 : public Timeline {
   public:
-    TestClass2(const PlanDatabaseId& planDatabase, const LabelStr& name)
+    TestClass2(const PlanDatabaseId planDatabase, const LabelStr& name)
       : Timeline(planDatabase, "TestClass2", name, true) {
     }
-    TestClass2(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+    TestClass2(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name)
       : Timeline(planDatabase, type, name, true) {
     }
-    TestClass2(const ObjectId& parent, const LabelStr& name)
+    TestClass2(const ObjectId parent, const LabelStr& name)
       : Timeline(parent, "TestClass2", name, true) {
     }
-    TestClass2(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+    TestClass2(const ObjectId parent, const LabelStr& type, const LabelStr& name)
       : Timeline(parent, type, name, true) {
     }
     void handleDefaults(bool autoClose = false) {
@@ -4187,6 +4193,7 @@ public:
       if (autoClose || LocationsBaseDomain().isClosed())
         close();
     }
+    void constructor(const std::vector<const Domain*>&) {constructor();}
     void constructor() {
       handleDefaults();
     }
@@ -4201,12 +4208,12 @@ public:
     // Borrowed from System/test/backtr.{nddl,cc,hh,xml}
     class Sample : public IntervalToken {
     public:
-      Sample(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false, bool isFact = false)
+      Sample(const PlanDatabaseId planDb, const LabelStr& name, bool rejectable = false, bool isFact = false)
         : IntervalToken(planDb, name, rejectable, isFact, IntervalIntDomain(), IntervalIntDomain(),
                         IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false) {
         handleDefaults();
       }
-      Sample(const TokenId& parent, const LabelStr& name, const LabelStr& relation)
+      Sample(const TokenId parent, const LabelStr& name, const LabelStr& relation)
         : IntervalToken(parent, relation, name, IntervalIntDomain(), IntervalIntDomain(),
                         IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false) {
         handleDefaults();
@@ -4222,15 +4229,15 @@ public:
       }
       class Factory : public TokenType {
       public:
-        Factory(const ObjectTypeId& ot)
+        Factory(const ObjectTypeId ot)
           : TokenType(ot,LabelStr("TestClass2.Sample")) {
         }
       private:
-        TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false, bool isFact = false) const {
+        TokenId createInstance(const PlanDatabaseId planDb, const LabelStr& name, bool rejectable = false, bool isFact = false) const {
           TokenId token = (new Sample(planDb, name, rejectable, isFact))->getId();
           return(token);
         }
-        TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const {
+        TokenId createInstance(const TokenId master, const LabelStr& name, const LabelStr& relation) const {
           TokenId token = (new Sample(master, name, relation))->getId();
           return(token);
         }
@@ -4249,7 +4256,7 @@ public:
       : ObjectFactory(name) {
     }
   private:
-    ObjectId createInstance(const PlanDatabaseId& planDb,
+    ObjectId createInstance(const PlanDatabaseId planDb,
                             const LabelStr& objectType,
                             const LabelStr& objectName,
                             const std::vector<const Domain*>& arguments) const {
@@ -4464,7 +4471,7 @@ public:
     CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
     std::vector<ConstrainedVariableId> obj2vars = obj2a->getVariables();
     CPPUNIT_ASSERT(obj2vars.size() == 3);
-    for (int i = 0; i < 3; i++) {
+    for (unsigned int i = 0; i < 3; i++) {
       ConstrainedVariableId var = obj2vars[i];
       CPPUNIT_ASSERT(!var.isNoId() && var.isValid());
       CPPUNIT_ASSERT(var->isValid());
@@ -4481,9 +4488,9 @@ public:
         CPPUNIT_ASSERT(var->lastDomain() == IntervalDomain(1.414));
         break;
       case 2: {
-          Locations* ld1 = new Locations(LocationsBaseDomain());
-          ld1->set(LabelStr("Hill"));
-        CPPUNIT_ASSERT(var->lastDomain() == *ld1);
+          Locations* ld2 = new Locations(LocationsBaseDomain());
+          ld2->set(LabelStr("Hill"));
+        CPPUNIT_ASSERT(var->lastDomain() == *ld2);
         break;
       }
       default:
@@ -4507,7 +4514,7 @@ public:
     CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b"));
     obj2vars = obj2b->getVariables();
     CPPUNIT_ASSERT(obj2vars.size() == 3);
-    for (int i = 0; i < 3; i++) {
+    for (unsigned int i = 0; i < 3; i++) {
       ConstrainedVariableId var = obj2vars[i];
       CPPUNIT_ASSERT(!var.isNoId() && var.isValid());
       CPPUNIT_ASSERT(var->isValid());
@@ -4817,8 +4824,8 @@ public:
    * than 'if (!cond) return(false);', making which condition failed
    * obvious.
    */
-  static bool checkToken(const TokenId& token, const LabelStr& name, const LabelStr& predName,
-                         const TokenId& master, const StateDomain& stateDom) {
+  static bool checkToken(const TokenId token, const LabelStr& name, const LabelStr& predName,
+                         const TokenId, const StateDomain& stateDom) {
     if (token.isNoId() || !token.isValid())
       return(false);
     if ((name.toString() != "_auto_") && (token->getName() != name))
@@ -4914,7 +4921,8 @@ public:
     TEST_REWINDING_XML(transactions.str());
     TokenSet::size_type newTokenCount = s_db->getTokens().size();
     CPPUNIT_ASSERT(newTokenCount < oldTokenCount);
-    CPPUNIT_ASSERT((oldTokenCount - newTokenCount) == (TokenSet::size_type)(s_tempRels.size() + 1));
+    CPPUNIT_ASSERT((oldTokenCount - newTokenCount) ==
+                   static_cast<TokenSet::size_type>(s_tempRels.size() + 1));
 
     TEST_PLAYING_XML(transactions.str());
     CPPUNIT_ASSERT(oldTokenCount == s_db->getTokens().size());
@@ -4932,7 +4940,7 @@ public:
     CPPUNIT_ASSERT(!obj2b.isNoId() && obj2b.isValid());
     CPPUNIT_ASSERT(obj2b->getType() == LabelStr("TestClass2"));
     CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b"));
-    const unsigned int initialObjectTokenCount_B = obj2b->tokens().size();
+    const unsigned long initialObjectTokenCount_B = obj2b->tokens().size();
 
     TokenId constrainedToken = createToken("constrainedSample", true);
     TEST_PLAYING_XML(buildXMLObjTokTokStr("activate", "", "constrainedSample", ""));
@@ -4975,7 +4983,7 @@ public:
     CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
     CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
     ObjectDomain objDom2a(GET_DATA_TYPE(s_db,"TestClass2"),obj2a);
-    const unsigned int initialObjectTokenCount_A = obj2a->tokens().size();
+    const unsigned long initialObjectTokenCount_A = obj2a->tokens().size();
 
     TokenId rejectable = createToken("rejectableConstrainedSample", false);
     debugMsg("testConstraint", __FILE__ << ':' << __LINE__ << ": rejectable is " << rejectable);
@@ -5034,7 +5042,7 @@ public:
     CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
     CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
     ObjectDomain objDom2a(GET_DATA_TYPE(s_db,"TestClass2"),obj2a);
-    const unsigned int initialObjectTokenCount_A = obj2a->tokens().size();
+    const unsigned long initialObjectTokenCount_A = obj2a->tokens().size();
 
     ObjectId obj2b = s_db->getObject("testObj2b");
     CPPUNIT_ASSERT(!obj2b.isNoId() && obj2b.isValid());
@@ -5220,9 +5228,9 @@ public:
   /**
    * Helper function: map relation names to the constraints it implies on the two tokens given.
    * @note I think that this should be part of the base API, not part of the test code.
-   * --wedgingt@email.arc.nasa.gov 2004 Dec 13
+   * --wedgingt 2004 Dec 13
    */
-  static void getConstraintsFromRelations(const TokenId& master, const TokenId& slave, const LabelStr& relation,
+  static void getConstraintsFromRelations(const TokenId master, const TokenId slave, const LabelStr& relation,
                                           std::list<ConstrainedVariableId>& firsts,
                                           std::list<ConstrainedVariableId>& seconds,
                                           std::list<Domain*>& intervals) {
@@ -5327,7 +5335,7 @@ public:
     return;
   }
 
-  static bool verifyTokenRelation(const TokenId& master, const TokenId& slave, const LabelStr& relation) {
+  static bool verifyTokenRelation(const TokenId master, const TokenId slave, const LabelStr& relation) {
     std::list<ConstrainedVariableId> firstVars;
     std::list<ConstrainedVariableId> secondVars;
     std::list<Domain*> intervals;
@@ -5376,19 +5384,19 @@ public:
 
   /** Create an XML string that creates a (complex) model class. */
   static std::string buildXMLCreateClassStr(const std::string& className, const ArgList& args,
-                                            const char *file, const int& line);
+                                            const char *file, const unsigned long& line);
 
   /** Create an XML string that creates a model object. */
   static std::string buildXMLCreateObjectStr(const std::string& className, const std::string& objName,
                                              const std::vector<const Domain*>& args);
 
   /** Create an XML string that specifies a variable's domain. */
-  static std::string buildXMLSpecifyVariableStr(const ConstrainedVariableId& var, const Domain& dom);
+  static std::string buildXMLSpecifyVariableStr(const ConstrainedVariableId var, const Domain& dom);
 
   /**
    * Create an XML string that resets a variable's specified domain.
    */
-  static std::string buildXMLResetVariableStr(const ConstrainedVariableId& var);
+  static std::string buildXMLResetVariableStr(const ConstrainedVariableId var);
 
   /**
    * Create an XML string that creates a constraint between the listed variables.
@@ -5399,7 +5407,7 @@ public:
   /**
    * Create an XML string that specifies the variable's domain via '<invoke>'.
    */
-  static std::string buildXMLInvokeSpecifyVariableStr(const ConstrainedVariableId& var, const Domain& dom);
+  static std::string buildXMLInvokeSpecifyVariableStr(const ConstrainedVariableId var, const Domain& dom);
 
   /**
    * Create an XML string that creates a goal token.
@@ -5424,7 +5432,7 @@ public:
   static std::string buildXMLObjTokTokStr(const LabelStr& tag, const LabelStr& obj, const LabelStr& tok, const LabelStr& tok2);
 
   /** Create an XML string denoting/naming/identifying the variable. */
-  static std::string buildXMLVariableStr(const ConstrainedVariableId& var);
+  static std::string buildXMLVariableStr(const ConstrainedVariableId var);
 
   /** Create an XML string describing the domain. */
   static std::string buildXMLDomainStr(const Domain& dom);
@@ -5493,13 +5501,13 @@ TokenId DbTransPlayerTest::s_rejectedToken;
 std::set<LabelStr> DbTransPlayerTest::s_tempRels;
 
 /** Run a single test, reading the XML from the given string. */
-void DbTransPlayerTest::testPlayingXML(const std::string& xml, const char *file, const int& line) {
+void DbTransPlayerTest::testPlayingXML(const std::string& xml, const char *, const int&) {
   CPPUNIT_ASSERT(s_dbPlayer != 0);
   std::istringstream iss(xml);
   s_dbPlayer->play(iss);
 }
 
-void DbTransPlayerTest::testRewindingXML(const std::string& xml, const char* file, const int & line,
+void DbTransPlayerTest::testRewindingXML(const std::string& xml, const char*, const int &,
 					 bool breakpoint) {
   CPPUNIT_ASSERT(s_dbPlayer != 0);
   std::istringstream iss(xml);
@@ -5568,7 +5576,7 @@ std::string DbTransPlayerTest::buildXMLNameTypeStr(const std::string& tag, const
 }
 
 std::string DbTransPlayerTest::buildXMLCreateClassStr(const std::string& className, const ArgList& args,
-                                                      const char *file, const int& line) {
+                                                      const char *file, const unsigned long& line) {
 std::string str("<class line=\"");
   std::ostringstream oss;
   oss << line;
@@ -5580,7 +5588,7 @@ std::string str("<class line=\"");
   str += "\">";
   ArgIter it = args.begin();
   CPPUNIT_ASSERT(it != args.end());
-  int l_line = line - args.size(); /* "Guess" that args was create line by line in same file. */
+  unsigned long l_line = line - args.size(); /* "Guess" that args was create line by line in same file. */
   for ( ; it != args.end(); it++) {
     str += " <var line=\"";
     std::ostringstream oss2;
@@ -5641,7 +5649,7 @@ std::string DbTransPlayerTest::buildXMLCreateObjectStr(const std::string& classN
   return(str);
 }
 
-std::string DbTransPlayerTest::buildXMLSpecifyVariableStr(const ConstrainedVariableId& var, const Domain& dom) {
+std::string DbTransPlayerTest::buildXMLSpecifyVariableStr(const ConstrainedVariableId var, const Domain& dom) {
   std::string str("<specify>");
   str += buildXMLVariableStr(var);
   str += " ";
@@ -5650,7 +5658,7 @@ std::string DbTransPlayerTest::buildXMLSpecifyVariableStr(const ConstrainedVaria
   return(str);
 }
 
-std::string DbTransPlayerTest::buildXMLResetVariableStr(const ConstrainedVariableId& var) {
+std::string DbTransPlayerTest::buildXMLResetVariableStr(const ConstrainedVariableId var) {
   std::string str("<reset>");
   str += buildXMLVariableStr(var);
   str += " </reset>";
@@ -5669,7 +5677,7 @@ std::string DbTransPlayerTest::buildXMLInvokeConstrainVarsStr(const std::string&
   return(str);
 }
 
-std::string DbTransPlayerTest::buildXMLInvokeSpecifyVariableStr(const ConstrainedVariableId& var,
+std::string DbTransPlayerTest::buildXMLInvokeSpecifyVariableStr(const ConstrainedVariableId var,
                                                                 const Domain& dom) {
   std::string str("<invoke name=\"specify\" identifier=\"");
   //!!Would like to re-use buildXMLVariableStr() here, but this wants a different syntax(!)
@@ -5767,7 +5775,7 @@ std::string DbTransPlayerTest::buildXMLObjTokTokStr(const LabelStr& tag, const L
   return(str);
 }
 
-std::string DbTransPlayerTest::buildXMLVariableStr(const ConstrainedVariableId& var) {
+std::string DbTransPlayerTest::buildXMLVariableStr(const ConstrainedVariableId var) {
   std::string str(" <");
   if (var->parent().isNoId()) {
     str += "id name =\"";

@@ -18,24 +18,24 @@ namespace EUROPA {
     public:
       OpenConditionManager(const TiXmlElement& configData);
 
-      virtual bool staticMatch(const EntityId& entity);
+      virtual bool staticMatch(const EntityId entity);
 
       virtual IteratorId createIterator();
 
       virtual DecisionPointId nextZeroCommitmentDecision();
 
-      virtual std::string toString(const EntityId& entity) const;
+      virtual std::string toString(const EntityId entity) const;
 
       bool noMoreFlaws();
     protected:
-      virtual void addFlaw(const TokenId& token);
-      virtual void removeFlaw(const TokenId& token);
+      virtual void addFlaw(const TokenId token);
+      virtual void removeFlaw(const TokenId token);
       virtual void handleInitialize();
 
     private:
       friend class OpenConditionIterator;
-      void notifyRemoved(const ConstrainedVariableId& variable);
-      void notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType);
+      void notifyRemoved(const ConstrainedVariableId variable);
+      void notifyChanged(const ConstrainedVariableId variable, const DomainListener::ChangeType& changeType);
 
       TokenSet m_flawCandidates; /*!< The set of candidate token flaws */
     };

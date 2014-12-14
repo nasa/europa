@@ -25,8 +25,8 @@ namespace EUROPA {
       virtual ~LanguageInterpreter() {}
       virtual std::string interpret(std::istream& input, const std::string& source) = 0;
 
-      void setEngine(EngineId& engine);
-      EngineId& getEngine();
+      void setEngine(EngineId engine);
+      EngineId getEngine();
 
     protected:
       EngineId m_engine;
@@ -37,8 +37,8 @@ namespace EUROPA {
     public :
 	  virtual ~EngineComponent() {}
 
-	  void setEngine(EngineId& engine);
-	  EngineId& getEngine();
+	  void setEngine(EngineId engine);
+	  EngineId getEngine();
 
     protected:
   	  EngineComponent() {}
@@ -67,7 +67,7 @@ namespace EUROPA {
     public :
 	  virtual ~Engine() { m_id.remove(); }
 
-	  EngineId& getId() { return m_id; }
+	  EngineId getId() { return m_id; }
 
 	  virtual void addComponent(const std::string& name,EngineComponent* component) = 0;
       virtual EngineComponent* removeComponent(const std::string& name) = 0;
@@ -101,7 +101,7 @@ namespace EUROPA {
         virtual void addModule(ModuleId module);
         virtual void loadModule(const std::string& moduleFileName);
         virtual void removeModule(ModuleId module);
-        virtual ModuleId& getModule(const std::string& moduleName);
+        virtual ModuleId getModule(const std::string& moduleName);
         // TODO: add these
         //virtual void removeModule(const std::string& moduleName);
         //virtual void unloadModule(const std::string& moduleName);

@@ -62,12 +62,12 @@ namespace EUROPA{
     virtual std::string toLongString() const;
 
     
-    virtual bool canBeCompared(const EntityId&) const;
+    virtual bool canBeCompared(const EntityId) const;
 
     /**
      * @brief Set an external entity reference, indicating an external entity is shadowing this entity.
      */
-    void setExternalEntity(const EntityId& externalEntity);
+    void setExternalEntity(const EntityId externalEntity);
     void setExternalPSEntity(const PSEntity* externalEntity);
 
     /**
@@ -80,7 +80,7 @@ namespace EUROPA{
      * @brief Retrieve an external entity reference, if present.
      * @return Will return EntityId::noId() if not assigned.
      */
-    const EntityId& getExternalEntity() const;
+    const EntityId getExternalEntity() const;
     const PSEntity* getExternalPSEntity() const;
 
     /**

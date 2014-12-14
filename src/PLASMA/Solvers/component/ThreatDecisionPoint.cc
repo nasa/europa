@@ -14,13 +14,13 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    bool ThreatDecisionPoint::test(const EntityId& entity){ 
+    bool ThreatDecisionPoint::test(const EntityId entity){ 
       return(TokenId::convertable(entity) || TokenId(entity)->isActive());
     }
 
-  ThreatDecisionPoint::ThreatDecisionPoint(const DbClientId& client,
-                                           const TokenId& tokenToOrder,
-                                           const TiXmlElement& configData,
+  ThreatDecisionPoint::ThreatDecisionPoint(const DbClientId client,
+                                           const TokenId tokenToOrder,
+                                           const TiXmlElement&,
                                            const LabelStr& explanation)
       : DecisionPoint(client, tokenToOrder->getKey(), explanation),
         m_tokenToOrder(tokenToOrder), m_choiceCount(0), m_index(0) {
@@ -72,7 +72,7 @@ namespace EUROPA {
 	ObjectId o2 = p2.first;
 	return o1->getKey() < o2->getKey();
       }
-      bool operator==(const ObjectComparator& c){return true;}
+      bool operator==(const ObjectComparator&){return true;}
     };
 
     /**
@@ -113,21 +113,23 @@ namespace EUROPA {
       return strStream.str();
     }
 
-    std::string ThreatDecisionPoint::toString(unsigned int index, const std::pair<ObjectId, std::pair<TokenId, TokenId> >& choice) const {
-      std::stringstream strStream;
-      ObjectId object;
-      TokenId predecessor;
-      TokenId successor;
-      extractParts(index, object, predecessor, successor);
-      strStream << "{" << object->getName().toString() << " " << predecessor->toString() << " < " << successor->toString() << "}";
-      return strStream.str();
-    }
+  std::string ThreatDecisionPoint::toString(unsigned long index,
+                                            const std::pair<ObjectId, std::pair<TokenId, TokenId> >&) const {
+    std::stringstream strStream;
+    ObjectId object;
+    TokenId predecessor;
+    TokenId successor;
+    extractParts(index, object, predecessor, successor);
+    strStream << "{" << object->getName().toString() << " " << predecessor->toString() << " < " << successor->toString() << "}";
+    return strStream.str();
+  }
 
-    void ThreatDecisionPoint::extractParts(unsigned int index, ObjectId& object, TokenId& predecessor, TokenId& successor) const{
-      const std::pair<ObjectId, std::pair<TokenId, TokenId> >& choice = m_choices[index];
-      object = choice.first;
-      predecessor = choice.second.first;
-      successor = choice.second.second;
-    }
+  void ThreatDecisionPoint::extractParts(unsigned long index, ObjectId object,
+                                         TokenId predecessor, TokenId successor) const{
+    const std::pair<ObjectId, std::pair<TokenId, TokenId> >& choice = m_choices[index];
+    object = choice.first;
+    predecessor = choice.second.first;
+    successor = choice.second.second;
+  }
   }
 }

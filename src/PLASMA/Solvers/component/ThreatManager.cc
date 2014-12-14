@@ -47,7 +47,7 @@ ThreatManager::ThreatManager(const TiXmlElement& configData)
     /**
      * Filter out if not a token
      */
-    bool ThreatManager::staticMatch(const EntityId& entity){
+    bool ThreatManager::staticMatch(const EntityId entity){
       return !TokenId::convertable(entity) || FlawManager::staticMatch(entity);
     }
 
@@ -55,7 +55,7 @@ ThreatManager::ThreatManager(const TiXmlElement& configData)
      * Because we do not process threat candidates until we query the database, we have not yet statically matched
      * them. Thus we are able to use the dynamic match case in flaw iteration for all types of flaw managers.
      */
-    bool ThreatManager::dynamicMatch(const EntityId& entity){
+    bool ThreatManager::dynamicMatch(const EntityId entity){
       return staticMatch(entity) || FlawManager::dynamicMatch(entity);
     }
 
@@ -77,7 +77,7 @@ bool ThreatManager::noMoreFlaws() {
 IteratorId ThreatManager::createIterator() {
   return (new ThreatIterator(*this))->getId();
 }
-    std::string ThreatManager::toString(const EntityId& entity) const {
+    std::string ThreatManager::toString(const EntityId entity) const {
       checkError(TokenId::convertable(entity), entity->toString());
       TokenId token = entity;
       std::stringstream os;

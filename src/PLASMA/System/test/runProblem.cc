@@ -40,7 +40,8 @@ class TestEngine : public EuropaEngine
 /**
    TODO: REPLAY IS BROKEN WITH THE INTERPRETER AND NEEDS TO BE FIXED!!!!
  */
-void replay(const std::string& s1,const DbClientTransactionLogId& txLog, const char* language)
+namespace {
+void replay(const std::string& s1,const DbClientTransactionLogId , const char* language)
 {
   TestEngine replayed;
   replayed.playTransactions(TestEngine::TX_LOG(),language);
@@ -127,7 +128,7 @@ bool copyFromFile(const char* language){
 
   return true;
 }
-
+}
 // Args to main()
 #define ARGC 4
 #define MODEL_INDEX 1
@@ -163,11 +164,13 @@ int main(int argc, const char** argv)
 
     if (performanceTest != NULL && strcmp(performanceTest, "1") == 0) {
         replayRequired = false;
-        EUROPA_runTest(runPlanner,modelFile,plannerConfig,language,replayRequired);
+        runPlanner(modelFile, plannerConfig, language, replayRequired);
+        // EUROPA_runTest(runPlanner,modelFile,plannerConfig,language,replayRequired);
     }
     else {
         replayRequired = false; //= true;
-        EUROPA_runTest(runPlanner,modelFile,plannerConfig,language,replayRequired);
+        runPlanner(modelFile, plannerConfig, language, replayRequired);
+        // EUROPA_runTest(runPlanner,modelFile,plannerConfig,language,replayRequired);
         //EUROPA_runTest(copyFromFile,language);
     }
 

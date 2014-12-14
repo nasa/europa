@@ -10,14 +10,14 @@ namespace EUROPA {
 
   public:
 
-    static std::string toString(const PlanDatabaseId& db, bool _useStandardKeys = true);
+    static std::string toString(const PlanDatabaseId db, bool _useStandardKeys = true);
 
     static void write(PlanDatabaseId db, std::ostream& os);
 
     // [lb, ub] or {singleton}
     static std::string timeDomain(const Domain& dom);
 
-    static std::string simpleTokenSummary(const TokenId& token);
+    static std::string simpleTokenSummary(const TokenId token);
 
   private:
 
@@ -25,11 +25,11 @@ namespace EUROPA {
                                   const std::string& name,
                                   const TokenSet& tokens);
 
-    static void writeToken(const TokenId& t, std::ostream& os);
+    static void writeToken(const TokenId t, std::ostream& os);
 
-    static void writeVariable(const ConstrainedVariableId& var, std::ostream& os);
+    static void writeVariable(const ConstrainedVariableId var, std::ostream& os);
 
-    static std::string getKey(const TokenId& token);
+    static std::string getKey(const TokenId token);
 
     static std::string indentation();
 

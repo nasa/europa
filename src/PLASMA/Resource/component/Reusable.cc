@@ -11,7 +11,7 @@
 
 namespace EUROPA {
 
-	Reusable::Reusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, const LabelStr& detectorName, const LabelStr& profileName,
+	Reusable::Reusable(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, const LabelStr& detectorName, const LabelStr& profileName,
 			edouble initCapacityLb, edouble initCapacityUb, edouble lowerLimit, edouble maxInstConsumption,
 			edouble maxConsumption)
 		:Resource(planDatabase,
@@ -26,12 +26,12 @@ namespace EUROPA {
 	{
 	}
 
-	Reusable::Reusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)
+	Reusable::Reusable(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open)
     	: Resource(planDatabase, type, name, open)
 	{
 	}
 
-	Reusable::Reusable(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open)
+	Reusable::Reusable(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open)
     	: Resource(parent, type, localName, open)
 	{
 	}
@@ -40,15 +40,15 @@ namespace EUROPA {
 	{
 	}
 
-  void Reusable::getOrderingChoices(const TokenId& token,
-                                    std::vector<std::pair<TokenId, TokenId> >& results,
-                                    unsigned int limit) {
-    checkError(m_tokensToTransactions.find(token) != m_tokensToTransactions.end(), "Token " << token->getPredicateName().toString() <<
-               "(" << token->getKey() << ") not in profile for " << toString());
-    Resource::getOrderingChoices(token, results, limit);
-  }
+void Reusable::getOrderingChoices(const TokenId token,
+                                  std::vector<std::pair<TokenId, TokenId> >& results,
+                                  unsigned long limit) {
+  checkError(m_tokensToTransactions.find(token) != m_tokensToTransactions.end(), "Token " << token->getPredicateName().toString() <<
+             "(" << token->getKey() << ") not in profile for " << toString());
+  Resource::getOrderingChoices(token, results, limit);
+}
 
-  void Reusable::createTransactions(const TokenId& tok) {
+  void Reusable::createTransactions(const TokenId tok) {
     if(m_tokensToTransactions.find(tok) != m_tokensToTransactions.end()) {
       debugMsg("Reusable:createTransactions",
                toString() << " Token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ") already has transactions.");
@@ -68,7 +68,7 @@ namespace EUROPA {
   }
 
   
-  void Reusable::addToProfile(const TokenId& tok) {
+  void Reusable::addToProfile(const TokenId tok) {
     checkError(tok->isActive(), "Token " << tok->toString() << " is not active.");
     checkError(tok->getObject()->lastDomain().isSingleton(),
                "Token " << tok->toString() << " has a non-singleton object variable " << tok->getObject()->toLongString());
@@ -84,7 +84,7 @@ namespace EUROPA {
     m_profile->addTransaction(it->second.second);
   }
 
-  void Reusable::removeTransactions(const TokenId& tok) {
+  void Reusable::removeTransactions(const TokenId tok) {
     if(m_tokensToTransactions.find(tok) == m_tokensToTransactions.end())
       return;
     debugMsg("Reusable:removeTransactions", toString() << " Removing transactions for " << tok->toString());
@@ -92,11 +92,11 @@ namespace EUROPA {
     m_tokensToTransactions.erase(tok);
     m_transactionsToTokens.erase(trans.first);
     m_transactionsToTokens.erase(trans.second);
-    delete (Transaction*) trans.first;
-    delete (Transaction*) trans.second;
+    delete static_cast<Transaction*>(trans.first);
+    delete static_cast<Transaction*>(trans.second);
   }
 
-  void Reusable::removeFromProfile(const TokenId& tok) {
+  void Reusable::removeFromProfile(const TokenId tok) {
     if(m_tokensToTransactions.find(tok) == m_tokensToTransactions.end()) {
       debugMsg("Reusable:removeFromProfile", 
                toString() << "Failed to find transactions for " << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
@@ -117,10 +117,10 @@ namespace EUROPA {
     Resource::removeFromProfile(tok);
   }
 
-  UnaryTimeline::UnaryTimeline(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)
+  UnaryTimeline::UnaryTimeline(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open)
     : Reusable(planDatabase, type, name, open) {init(1, 1, 0, 1, PLUS_INFINITY, PLUS_INFINITY, PLUS_INFINITY, PLUS_INFINITY, "ClosedWorldFVDetector", "IncrementalFlowProfile");}
 
-  UnaryTimeline::UnaryTimeline(const ObjectId& parent, const LabelStr& type, const LabelStr& name, bool open)
+  UnaryTimeline::UnaryTimeline(const ObjectId parent, const LabelStr& type, const LabelStr& name, bool open)
     : Reusable(parent, type, name, open) {init(1, 1, 0, 1, PLUS_INFINITY, PLUS_INFINITY, PLUS_INFINITY, PLUS_INFINITY, "ClosedWorldFVDetector", "IncrementalFlowProfile");}
 
 
@@ -128,7 +128,7 @@ namespace EUROPA {
   {
   }
 
-    CBReusable::CBReusable(const PlanDatabaseId& planDatabase,
+    CBReusable::CBReusable(const PlanDatabaseId planDatabase,
     		const LabelStr& type,
     		const LabelStr& name,
     		const LabelStr& detectorName,
@@ -154,12 +154,12 @@ namespace EUROPA {
     {
     }
 
-    CBReusable::CBReusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)
+    CBReusable::CBReusable(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open)
     	: Resource(planDatabase, type, name, open)
     {
     }
 
-    CBReusable::CBReusable(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open)
+    CBReusable::CBReusable(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open)
     	: Resource(parent, type, localName, open)
     {
     }
@@ -168,7 +168,7 @@ namespace EUROPA {
     {
     }
 
-  void CBReusable::addToProfile(const ConstraintId& gc)
+  void CBReusable::addToProfile(const ConstraintId gc)
   {
     UsesId c = gc;
     if(m_constraintsToTransactions.find(c) != m_constraintsToTransactions.end()) {
@@ -189,7 +189,7 @@ namespace EUROPA {
     debugMsg("CBReusable:constraints","Resource :" << toString() << " added constraint:" << c->toString());
   }
 
-  void CBReusable::removeFromProfile(const ConstraintId& gc)
+  void CBReusable::removeFromProfile(const ConstraintId gc)
   {
     UsesId c = gc;
 
@@ -208,7 +208,7 @@ namespace EUROPA {
     debugMsg("CBReusable:constraints","Resource :" << toString() << " removed constraint:" << c->toString());
   }
 
-  void CBReusable::addToProfile(TransactionId& t)
+  void CBReusable::addToProfile(TransactionId t)
   {
     m_profile->addTransaction(t);
     // TODO: this is the way to add transactions to the resource, not clean because in this case there is no associated token
@@ -216,7 +216,7 @@ namespace EUROPA {
     debugMsg("CBReusable:constraints", "Added transaction for time " << t->time()->toLongString() << " with quantity " << t->quantity()->toString());
   }
 
-  void CBReusable::removeFromProfile(TransactionId& t)
+  void CBReusable::removeFromProfile(TransactionId t)
   {
     debugMsg("CBReusable:constraints", "Removing transaction " << t << " for time " << t->time()->toLongString() << " with quantity " << t->quantity()->toString());
     m_profile->removeTransaction(t);
@@ -224,33 +224,32 @@ namespace EUROPA {
   }
 
   // TODO: only needed for backwards compatibility with Resource API, rework hierarchy to fix this.
-  void CBReusable::addToProfile(const TokenId& tok)
+  void CBReusable::addToProfile(const TokenId tok)
   {
     debugMsg("CBReusable","Ignored addToProfile for Token:" << tok->toString());
   }
-  void CBReusable::removeFromProfile(const TokenId& tok)
+  void CBReusable::removeFromProfile(const TokenId tok)
   {
     debugMsg("CBReusable","Ignored removeFromProfile for Token:" << tok->toString());
   }
 
-  edouble getLb(ConstrainedVariableId v)
-  {
-    if (v->lastDomain().isSingleton())
-      return v->lastDomain().getSingletonValue();
+namespace {
+edouble getLb(ConstrainedVariableId v) {
+  if (v->lastDomain().isSingleton())
+    return v->lastDomain().getSingletonValue();
 
-    return v->lastDomain().getLowerBound();
-  }
+  return v->lastDomain().getLowerBound();
+}
 
-  edouble getUb(ConstrainedVariableId v)
-  {
-    if (v->lastDomain().isSingleton())
-      return v->lastDomain().getSingletonValue();
+edouble getUb(ConstrainedVariableId v) {
+  if (v->lastDomain().isSingleton())
+    return v->lastDomain().getSingletonValue();
 
-    return v->lastDomain().getUpperBound();
-  }
+  return v->lastDomain().getUpperBound();
+}
+}
 
-
-  std::set<UsesId> CBReusable::getConstraintsForInstant(const InstantId& instant)
+  std::set<UsesId> CBReusable::getConstraintsForInstant(const InstantId instant)
   {
     std::set<UsesId> retval;
 
@@ -334,7 +333,7 @@ namespace EUROPA {
 
   Uses::Uses(const LabelStr& name,
              const LabelStr& propagatorName,
-             const ConstraintEngineId& ce,
+             const ConstraintEngineId ce,
              const std::vector<ConstrainedVariableId>& scope)
     : Constraint(name, propagatorName, ce, scope)
   {
@@ -351,7 +350,7 @@ namespace EUROPA {
     }
   }
 
-  const TransactionId& Uses::getTransaction(int var) const
+  const TransactionId Uses::getTransaction(int var) const
   {
     if (var == Uses::START_VAR)
       return m_txns[0];
@@ -373,45 +372,44 @@ namespace EUROPA {
     // TODO: make sure Resource destructor doesn't get to these first
     for (unsigned int i=0;i<m_txns.size();i++) {
       TransactionId txn = m_txns[i];
-      delete (Transaction*) txn;
+      delete static_cast<Transaction*>(txn);
     }
     m_txns.clear();
 
     Constraint::handleDiscard();
   }
 
-  bool Uses::canIgnore(const ConstrainedVariableId& variable,
-                       int argIndex,
-                       const DomainListener::ChangeType& changeType)
-  {
-    ConstrainedVariableId res = m_variables[RESOURCE_VAR];
+bool Uses::canIgnore(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+  ConstrainedVariableId res = m_variables[RESOURCE_VAR];
 
-    // if this is a singleton message see if we can bind the resource
-    if(changeType == DomainListener::RESTRICT_TO_SINGLETON ||
-       changeType == DomainListener::SET_TO_SINGLETON ||
-       variable->lastDomain().isSingleton()) {
+  // if this is a singleton message see if we can bind the resource
+  if(changeType == DomainListener::RESTRICT_TO_SINGLETON ||
+     changeType == DomainListener::SET_TO_SINGLETON ||
+     variable->lastDomain().isSingleton()) {
 
-      if(m_resource.isNoId() && res->lastDomain().isSingleton()) {
-        m_resource = Entity::getTypedEntity<CBReusable>(res->lastDomain().getSingletonValue());
-        check_error(m_resource.isValid());
-        m_resource->addToProfile(getId());
-        debugMsg("Uses:Uses", "Added " << toString() << " to profile for resource " << m_resource->toString());
-      }
+    if(m_resource.isNoId() && res->lastDomain().isSingleton()) {
+      m_resource = Entity::getTypedEntity<CBReusable>(res->lastDomain().getSingletonValue());
+      check_error(m_resource.isValid());
+      m_resource->addToProfile(getId());
+      debugMsg("Uses:Uses", "Added " << toString() << " to profile for resource " << m_resource->toString());
     }
-    // if this is a relax/reset message, see if we need to unbind the resource
-    else if((changeType == DomainListener::RESET || changeType == DomainListener::RELAXED)
-            && m_resource.isValid()) {
-
-      if((variable->getKey() == res->getKey()) && !(res->lastDomain().isSingleton())) {
-        m_resource->removeFromProfile(getId());
-        debugMsg("Uses:Uses", "Removed " << toString() << " from profile for resource " << m_resource->toString());
-        m_resource = CBReusableId::noId();
-      }
-    }
-
-    // Since we don't do bounds prop, always return true
-    return true;
   }
+  // if this is a relax/reset message, see if we need to unbind the resource
+  else if((changeType == DomainListener::RESET || changeType == DomainListener::RELAXED)
+          && m_resource.isValid()) {
+
+    if((variable->getKey() == res->getKey()) && !(res->lastDomain().isSingleton())) {
+      m_resource->removeFromProfile(getId());
+      debugMsg("Uses:Uses", "Removed " << toString() << " from profile for resource " << m_resource->toString());
+      m_resource = CBReusableId::noId();
+    }
+  }
+
+  // Since we don't do bounds prop, always return true
+  return true;
+}
 
   void Uses::handleExecute()
   {

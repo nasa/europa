@@ -17,30 +17,12 @@ namespace EUROPA
       public FlowProfile
     {
     public:
-      /**
-       * @brief
-       */
       IncrementalFlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector);
-      /**
-       * @brief
-       */
       virtual ~IncrementalFlowProfile();
-      /**
-       * @brief
-       */
       void initRecompute( InstantId inst );
-      /**
-       * @brief
-       */
       void initRecompute();
-      /**
-       * @brief
-       */
       void recomputeLevels( InstantId prev, InstantId inst );
-      /**
-       * @brief
-       */
-      bool enableOrderings(  const InstantId& inst  );
+      bool enableOrderings(  const InstantId inst  );
     private:
       void recomputeLevels( InstantId inst, edouble lowerLevel, edouble upperLevel );
 

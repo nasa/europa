@@ -40,7 +40,7 @@ namespace EUROPA {
       /**
        * @brief Used to prune entities out which are not variables
        */
-      static bool test(const EntityId& entity);
+      static bool test(const EntityId entity);
 
       virtual ~UnboundVariableDecisionPoint();
 
@@ -50,11 +50,11 @@ namespace EUROPA {
       virtual std::string toString() const;
       virtual std::string toShortString() const;
 
-      const ConstrainedVariableId& getFlawedVariable() const;
+      const ConstrainedVariableId getFlawedVariable() const;
 
     protected:
 
-      UnboundVariableDecisionPoint(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData,
+      UnboundVariableDecisionPoint(const DbClientId client, const ConstrainedVariableId flawedVariable, const TiXmlElement& configData,
                                    const LabelStr& explanation = "unknown");
 
       const ConstrainedVariableId m_flawedVariable; /*!< The Flaw to resolve */
@@ -81,13 +81,14 @@ namespace EUROPA {
      */
     class MinValue: public UnboundVariableDecisionPoint {
     public:
-      MinValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
+      MinValue(const DbClientId client, const ConstrainedVariableId flawedVariable,
+               const TiXmlElement& configData, const LabelStr& explanation = "unknown");
       bool hasNext() const;
       edouble getNext();
 
     private:
 
-      unsigned int m_choiceIndex; /*!< The current position in the list of choices. */
+      unsigned long m_choiceIndex; /*!< The current position in the list of choices. */
     };
 
     /**
@@ -95,13 +96,14 @@ namespace EUROPA {
      */
     class MaxValue: public UnboundVariableDecisionPoint {
     public:
-      MaxValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
+      MaxValue(const DbClientId client, const ConstrainedVariableId flawedVariable,
+               const TiXmlElement& configData, const LabelStr& explanation = "unknown");
       bool hasNext() const;
       edouble getNext();
 
     private:
 
-      unsigned int m_choiceIndex; /*!< The current position in the list of choices. */
+      unsigned long m_choiceIndex; /*!< The current position in the list of choices. */
     };
 
 
@@ -112,7 +114,7 @@ namespace EUROPA {
      */
     class RandomValue: public UnboundVariableDecisionPoint {
     public:
-      RandomValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
+      RandomValue(const DbClientId client, const ConstrainedVariableId flawedVariable, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
       bool hasNext() const;
       edouble getNext();
 
@@ -121,7 +123,7 @@ namespace EUROPA {
 
     private:
 
-      std::set<int> m_usedIndeces; /*!< The set of used choices so far. Each is the index of the choice
+      std::set<unsigned long> m_usedIndeces; /*!< The set of used choices so far. Each is the index of the choice
 				     in m_choices. */
       Distribution m_distribution; /*!< Indicates the distribution used in random number selection. */
     };

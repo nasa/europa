@@ -23,16 +23,16 @@ public:
     virtual bool isString() const;
 
     virtual edouble createValue(const std::string& value) const;
-    virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine,
+    virtual ConstrainedVariableId createVariable(const ConstraintEngineId constraintEngine,
                                                  const Domain& baseDomain,
                                                  const bool internal = false,
                                                  bool canBeSpecified = true,
                                                  const char* name = NO_VAR_NAME,
-                                                 const EntityId& parent = EntityId::noId(),
+                                                 const EntityId parent = EntityId::noId(),
                                                  unsigned int index = ConstrainedVariable::NO_INDEX) const;
 
     static const std::string& NAME();
-    static const DataTypeId& instance();
+    static const DataTypeId instance();
 };
 
 class FloatDT : public DataType
@@ -48,7 +48,7 @@ public:
     virtual edouble createValue(const std::string& value) const;
 
     static const std::string& NAME();
-    static const DataTypeId& instance();
+    static const DataTypeId instance();
 };
 
 class IntDT : public DataType
@@ -64,7 +64,7 @@ public:
     virtual edouble createValue(const std::string& value) const;
 
     static const std::string& NAME();
-    static const DataTypeId& instance();
+    static const DataTypeId instance();
 };
 
 class BoolDT : public DataType
@@ -81,7 +81,7 @@ public:
     virtual std::string toString(edouble value) const;
 
     static const std::string& NAME();
-    static const DataTypeId& instance();
+    static const DataTypeId instance();
 };
 
 class StringDT : public DataType
@@ -97,7 +97,7 @@ public:
     virtual edouble createValue(const std::string& value) const;
 
     static const std::string& NAME();
-    static const DataTypeId& instance();
+    static const DataTypeId instance();
 };
 
 class SymbolDT : public DataType
@@ -113,13 +113,13 @@ public:
     virtual edouble createValue(const std::string& value) const;
 
     static const std::string& NAME();
-    static const DataTypeId& instance();
+    static const DataTypeId instance();
 };
 
 class RestrictedDT : public DataType
 {
 public:
-    RestrictedDT(const char* name, const DataTypeId& baseType, const Domain& baseDomain);
+    RestrictedDT(const char* name, const DataTypeId baseType, const Domain& baseDomain);
     virtual ~RestrictedDT();
 
     virtual bool isNumeric() const;

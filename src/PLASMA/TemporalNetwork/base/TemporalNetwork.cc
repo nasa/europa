@@ -20,17 +20,17 @@
 
 namespace EUROPA {
 
-  Bool TemporalNetwork::isValidId(const TimepointId& id){
+  Bool TemporalNetwork::isValidId(const TimepointId id){
     return (id.isValid() &&
 	    id->owner == this && hasNode(id) &&
 	    hasNode(id));
   }
 
-  Bool TemporalNetwork::isValidId(const TemporalConstraintId& id){
+  Bool TemporalNetwork::isValidId(const TemporalConstraintId id){
     return (id.isValid() && id->owner == this);
   }
 
-  bool TemporalNetwork::hasEdgeToOrigin(const TimepointId& timepoint) {
+  bool TemporalNetwork::hasEdgeToOrigin(const TimepointId timepoint) {
     // Order of operands is important for speed. Should be faster to look towards the origin
     DedgeId edgeToTheOrigin = findEdge(timepoint, getOrigin());
     checkError(edgeToTheOrigin.isNoId() || edgeToTheOrigin.isValid(), edgeToTheOrigin);
@@ -76,7 +76,7 @@ namespace EUROPA {
     return (next == this->incrementalSource);
   }
 
-  Void TemporalNetwork::getTimepointBounds(const TimepointId& id, Time& lb, Time& ub)
+  Void TemporalNetwork::getTimepointBounds(const TimepointId id, Time& lb, Time& ub)
   {
     // We need to be up-to-date to get the bounds.  Because of eager
     // prop on consistent additions, we only need to prop if there are
@@ -97,7 +97,7 @@ namespace EUROPA {
     }
   }
 
-  Void TemporalNetwork::getLastTimepointBounds(const TimepointId& node, Time& lb, Time& ub)
+  Void TemporalNetwork::getLastTimepointBounds(const TimepointId node, Time& lb, Time& ub)
   {
     check_error(( this->isValidId(node) ),
                 "TemporalNetwork: Invalid timepoint identifier",
@@ -107,19 +107,19 @@ namespace EUROPA {
     ub = node->upperBound;
   }
 
-  Time TemporalNetwork::getLowerTimepointBound(const TimepointId& id) {
+  Time TemporalNetwork::getLowerTimepointBound(const TimepointId id) {
     Time result, junk;
     getTimepointBounds(id, result, junk);
     return(result);
   }
 
-  Time TemporalNetwork::getUpperTimepointBound(const TimepointId& id) {
+  Time TemporalNetwork::getUpperTimepointBound(const TimepointId id) {
     Time result, junk;
     getTimepointBounds(id, junk, result);
     return(result);
   }
 
-  Bool TemporalNetwork::isDistanceLessThan (const TimepointId& from, const TimepointId& to,
+  Bool TemporalNetwork::isDistanceLessThan (const TimepointId from, const TimepointId to,
 					    Time bound)
   {
     propagate();
@@ -133,15 +133,15 @@ namespace EUROPA {
   }
 
 
-  Bool TemporalNetwork::isDistanceLessThanOrEqual (const TimepointId& from,
-						   const TimepointId& to,
+  Bool TemporalNetwork::isDistanceLessThanOrEqual (const TimepointId from,
+						   const TimepointId to,
 						   Time bound)
   {
     return isDistanceLessThan(from, to, bound + TIME_TICK);
   }
 
-  Bool TemporalNetwork::isDistancePossiblyLessThan (const TimepointId& src,
-						    const TimepointId& dest,
+  Bool TemporalNetwork::isDistancePossiblyLessThan (const TimepointId src,
+						    const TimepointId dest,
 						    Time bound)
   {
     // An efficient approximate version of isDistanceLessThan.
@@ -213,7 +213,7 @@ namespace EUROPA {
     return this->consistent;
   }
 
-  Void TemporalNetwork::calcDistanceBounds(const TimepointId& src, const TimepointId& targ,
+  Void TemporalNetwork::calcDistanceBounds(const TimepointId src, const TimepointId targ,
 					   Time& lb, Time& ub, Bool exact)
   {
     propagate();
@@ -257,7 +257,7 @@ namespace EUROPA {
     lb = - getDistance(src);
   }
 
-  Void TemporalNetwork::propagateBoundsFrom (const TimepointId& src)
+  Void TemporalNetwork::propagateBoundsFrom (const TimepointId src)
   {
     for(std::vector<DnodeId>::const_iterator it = nodes.begin(); it != nodes.end(); ++it){
       TimepointId node = *it;
@@ -274,7 +274,7 @@ namespace EUROPA {
     incDijkstraBackward();
   }
 
-  Void TemporalNetwork::calcDistanceBounds(const TimepointId& src,
+  Void TemporalNetwork::calcDistanceBounds(const TimepointId src,
                                            const std::vector<TimepointId>&
                                            targs,
 					   std::vector<Time>& lbs,
@@ -303,7 +303,7 @@ namespace EUROPA {
     return;
   }
 
-  Void TemporalNetwork::calcDistanceSigns(const TimepointId& src,
+  Void TemporalNetwork::calcDistanceSigns(const TimepointId src,
                                            const std::vector<TimepointId>&
                                            targs,
 					   std::vector<Time>& lbs,
@@ -357,7 +357,7 @@ namespace EUROPA {
 
 
   std::list<TimepointId>
-  TemporalNetwork::getConstraintScope(const TemporalConstraintId& id) {
+  TemporalNetwork::getConstraintScope(const TemporalConstraintId id) {
     std::list<TimepointId> result;
 
     if(id.isInvalid()) {
@@ -372,7 +372,7 @@ namespace EUROPA {
     return(result);
   }
 
-  void TemporalNetwork::getConstraintScope(const TemporalConstraintId& constraint, TimepointId& source, TimepointId& target) const{
+  void TemporalNetwork::getConstraintScope(const TemporalConstraintId constraint, TimepointId source, TimepointId target) const{
     check_error(constraint.isValid());
     Tspec* spec = id_cast<Tspec>(constraint);
     source = spec->head->getId();
@@ -380,7 +380,7 @@ namespace EUROPA {
   }
 
   Time
-  TemporalNetwork::getConstraintUpperBound(const TemporalConstraintId& id) {
+  TemporalNetwork::getConstraintUpperBound(const TemporalConstraintId id) {
     if(id.isInvalid())
       check_error(id.isInvalid(),
                    "Cannot get scope of invalid constraint.",
@@ -392,7 +392,7 @@ namespace EUROPA {
 
 
   Time
-  TemporalNetwork::getConstraintLowerBound(const TemporalConstraintId& id) {
+  TemporalNetwork::getConstraintLowerBound(const TemporalConstraintId id) {
     if(id.isInvalid())
       check_error(id.isInvalid(),
                    "Cannot get scope of invalid constraint.",
@@ -424,8 +424,8 @@ namespace EUROPA {
   }
 #endif
 
-  TemporalConstraintId TemporalNetwork::addTemporalConstraint(const TimepointId& src,
-							      const TimepointId& targ,
+  TemporalConstraintId TemporalNetwork::addTemporalConstraint(const TimepointId src,
+							      const TimepointId targ,
 							      const Time _lb,
 							      const Time _ub,
 							      bool propagate) {
@@ -469,7 +469,7 @@ namespace EUROPA {
     return(spec->getId());
   }
 
-  Void TemporalNetwork::narrowTemporalConstraint(const TemporalConstraintId& tcId,
+  Void TemporalNetwork::narrowTemporalConstraint(const TemporalConstraintId tcId,
 						 const Time newLb, const Time newUb)
   {
     check_error(tcId.isValid());
@@ -519,7 +519,7 @@ namespace EUROPA {
       incPropagate(src, targ);
   }
 
-  Void TemporalNetwork::removeTemporalConstraint(const TemporalConstraintId& tcId, bool markDeleted) {
+  Void TemporalNetwork::removeTemporalConstraint(const TemporalConstraintId tcId, bool markDeleted) {
     // Make sure it is valid, including belonging to this id manager
     check_error(isValidId(tcId),
                 "removeTemporalConstraint: invalid Id",
@@ -554,7 +554,7 @@ TimepointId TemporalNetwork::addTimepoint() {
   return node->getId();
 }
 
-  Void TemporalNetwork::deleteTimepoint(const TimepointId& node)
+  Void TemporalNetwork::deleteTimepoint(const TimepointId node)
   {
     check_error(isValidId(node),
                 "TemporalNetwork:: deleting invalid timepoint.",
@@ -1040,7 +1040,7 @@ Void TemporalNetwork::incDijkstraForward() {
       tpt->ringLeader->ringFollowers.remove(tpt);
   }
 
-  const TemporalNetworkId& TemporalNetwork::getId() const {
+  const TemporalNetworkId TemporalNetwork::getId() const {
     return m_id;
   }
 
@@ -1048,7 +1048,7 @@ Void TemporalNetwork::incDijkstraForward() {
     return m_updatedTimepoints;
   }
 
-  void TemporalNetwork::handleNodeUpdate(const DnodeId& node){
+  void TemporalNetwork::handleNodeUpdate(const DnodeId node){
     checkError(TimepointId::convertable(node), node);
     TimepointId tnode = node;
     if(node != getOrigin())
@@ -1082,11 +1082,11 @@ Tnode::Tnode(TemporalNetwork* t) :
     Dnode::handleDiscard();
   }
 
-  const TemporalConstraintId& Tnode::getBaseDomainConstraint() const { return m_baseDomainConstraint;}
+  const TemporalConstraintId Tnode::getBaseDomainConstraint() const { return m_baseDomainConstraint;}
 
-  void Tnode::setBaseDomainConstraint(const TemporalConstraintId& constraint) {m_baseDomainConstraint = constraint;}
+  void Tnode::setBaseDomainConstraint(const TemporalConstraintId constraint) {m_baseDomainConstraint = constraint;}
 
-  const TemporalConstraintId& Tspec::getId() const {
+  const TemporalConstraintId Tspec::getId() const {
     return m_id;
   }
 

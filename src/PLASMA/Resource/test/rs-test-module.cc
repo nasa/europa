@@ -70,7 +70,7 @@ ResourceTestEngine::ResourceTestEngine()
 {
     createModules();
     doStart();
-    Schema* schema = (Schema*)getComponent("Schema");
+    Schema* schema = boost::polymorphic_cast<Schema*>(getComponent("Schema"));
     schema->addObjectType("Resource");
 }
 
@@ -100,10 +100,12 @@ const double productionMax = 40;
 const double consumptionRateMax = -8;
 const double consumptionMax = -50;
 
+#include <boost/cast.hpp>
+
 #define RESOURCE_DEFAULT_SETUP(ce, db, autoClose) \
     ResourceTestEngine rte; \
-    ConstraintEngine& ce = *((ConstraintEngine*)rte.getComponent("ConstraintEngine")); \
-    PlanDatabase& db = *((PlanDatabase*)rte.getComponent("PlanDatabase")); \
+    ConstraintEngine& ce = *boost::polymorphic_cast<ConstraintEngine*>(rte.getComponent("ConstraintEngine")); \
+    PlanDatabase& db = *boost::polymorphic_cast<PlanDatabase*>(rte.getComponent("PlanDatabase")); \
     if (autoClose) \
       db.close();
 
@@ -137,7 +139,7 @@ public:
   InstantId getInstant(const int time) {
     return getGreatestInstant(time)->second;
   }
-  void getTransactionsToOrder(const InstantId& inst, std::vector<TransactionId>& results) {
+  void getTransactionsToOrder(const InstantId inst, std::vector<TransactionId>& results) {
     check_error(inst.isValid());
     check_error(results.empty());
     results.insert(results.end(), inst->getTransactions().begin(), inst->getTransactions().end());
@@ -145,19 +147,19 @@ public:
   int gotNotified(){return m_receivedNotification;}
   void resetNotified(){m_receivedNotification = 0;}
 private:
-  void handleTemporalConstraintAdded(const TransactionId predecessor, int preArgIndex,
-				     const TransactionId successor, int sucArgIndex) {
+  void handleTemporalConstraintAdded(const TransactionId predecessor, unsigned int preArgIndex,
+				     const TransactionId successor, unsigned int sucArgIndex) {
     Profile::handleTemporalConstraintAdded(predecessor, preArgIndex, successor, sucArgIndex);
     m_receivedNotification++;
   }
-  void handleTemporalConstraintRemoved(const TransactionId predecessor, int preArgIndex,
-				       const TransactionId successor, int sucArgIndex) {
+  void handleTemporalConstraintRemoved(const TransactionId predecessor, unsigned int preArgIndex,
+				       const TransactionId successor, unsigned int sucArgIndex) {
     Profile::handleTemporalConstraintRemoved(predecessor, preArgIndex, successor, sucArgIndex);
     m_receivedNotification++;
   }
-  void initRecompute(InstantId inst){}
+  void initRecompute(InstantId ){}
   void initRecompute(){}
-  void recomputeLevels(InstantId prev, InstantId inst) {
+  void recomputeLevels(InstantId, InstantId) {
   }
   int m_receivedNotification;
 };
@@ -165,8 +167,8 @@ private:
 class DummyDetector : public FVDetector {
 public:
   DummyDetector(const ResourceId res) : FVDetector(res) {};
-  bool detect(const InstantId inst) {return false;}
-  void initialize(const InstantId inst) {}
+  bool detect(const InstantId ) {return false;}
+  void initialize(const InstantId ) {}
   void initialize() {}
 
   virtual PSResourceProfile* getFDLevelProfile() { return NULL; }
@@ -175,7 +177,7 @@ public:
 
 class DummyResource : public Resource {
 public:
-  DummyResource(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name,
+  DummyResource(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name,
 		edouble initCapacityLb = 0, edouble initCapacityUb = 0, edouble lowerLimit = MINUS_INFINITY,
 		edouble upperLimit = PLUS_INFINITY, edouble maxInstProduction = PLUS_INFINITY, edouble maxInstConsumption = PLUS_INFINITY,
 		edouble maxProduction = PLUS_INFINITY, edouble maxConsumption = PLUS_INFINITY)
@@ -191,22 +193,22 @@ public:
     m_profile->removeTransaction(trans);
     // m_profile->recompute();
   }
-  void addToProfile(const TokenId& token) {}
-  void removeFromProfile(const TokenId& token) {}
-  void createTransactions(const TokenId& token) {}
-  void removeTransactions(const TokenId& token) {}
+  void addToProfile(const TokenId ) {}
+  void removeFromProfile(const TokenId) {}
+  void createTransactions(const TokenId) {}
+  void removeTransactions(const TokenId ) {}
 private:
-  void notifyViolated(const InstantId inst) {
+  void notifyViolated(const InstantId inst, ProblemType ) {
     TransactionId trans = *(inst->getTransactions().begin());
     const_cast<Domain&>(trans->time()->lastDomain()).empty();
   }
 
   //no implementation.  no tests for flaw detection
-  void notifyFlawed(const InstantId inst) {
+  void notifyFlawed(const InstantId ) {
   }
 
-  void notifyDeleted(const InstantId inst) {}
-  void notifyNoLongerFlawed(const InstantId inst){}
+  void notifyDeleted(const InstantId ) {}
+  void notifyNoLongerFlawed(const InstantId ){}
 };
 
 class BareTransactionDeleter {
@@ -268,7 +270,7 @@ private:
       ++it;
       ++retval;
     }
-    CPPUNIT_ASSERT((unsigned) retval == times.size());
+    CPPUNIT_ASSERT(static_cast<unsigned>(retval) == times.size());
     return true;
   }
 
@@ -947,10 +949,10 @@ private:
 
     for(std::list<TransactionId>::iterator it = transactions.begin(); it != transactions.end(); ++it) {
       r.removeTransaction(*it);
-      delete (Transaction*) (*it);
+      delete static_cast<Transaction*>(*it);
     }
     for(std::list<ConstrainedVariableId>::iterator it = vars.begin(); it != vars.end(); ++it)
-      delete (ConstrainedVariable*) (*it);
+      delete static_cast<ConstrainedVariable*>(*it);
 
     RESOURCE_DEFAULT_TEARDOWN();
     return(true);
@@ -999,10 +1001,10 @@ private:
 
     for(std::list<TransactionId>::iterator it = transactions.begin(); it != transactions.end(); ++it) {
       r.removeTransaction(*it);
-      delete (Transaction*) (*it);
+      delete static_cast<Transaction*>(*it);
     }
     for(std::list<ConstrainedVariableId>::iterator it = variables.begin(); it != variables.end(); ++it)
-      delete (ConstrainedVariable*) (*it);
+      delete static_cast<ConstrainedVariable*>(*it);
     RESOURCE_DEFAULT_TEARDOWN();
     return(true);
   }
@@ -1078,14 +1080,14 @@ private:
     DummyProfile profile(db.getId(), detector.getId());
     BareTransactionDeleter deleter(profile);
 
-    Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 10), true, "t1");
-    Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(10, 15), true, "t2");
-    Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(5, 15), true, "t3");
-    Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(5, 15), true, "t1");
-    Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(1, 1), true, "q1");
-    Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(1, 1), true, "q2");
-    Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(1, 1), true, "q3");
-    Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(1, 1), true, "q4");
+    Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 10), false, true, "t1");
+    Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(10, 15), false, true, "t2");
+    Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(5, 15), false, true, "t3");
+    Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(5, 15), false, true, "t1");
+    Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(1, 1), false, true, "q1");
+    Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(1, 1), false, true, "q2");
+    Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(1, 1), false, true, "q3");
+    Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(1, 1), false, true, "q4");
 
     TransactionPtr trans1(new Transaction(t1.getId(), q1.getId(), false, EntityId::noId()), deleter);
     TransactionPtr trans2(new Transaction(t2.getId(), q2.getId(), true, EntityId::noId()), deleter);
@@ -1390,7 +1392,7 @@ private:
   }
 
   static bool testDanglingTransaction() {
-    RESOURCE_DEFAULT_SETUP(ce, db, false);
+    RESOURCE_DEFAULT_SETUP(unused(ce), db, false);
     rte.getConfig()->setProperty("nddl.includePath", ".:../component/NDDL");
     rte.executeScript("nddl", "missing-transaction.nddl", true);
 
@@ -1457,8 +1459,8 @@ private:
 
 class ConstraintNameListener : public ConstrainedVariableListener {
 public:
-	ConstraintNameListener(const ConstrainedVariableId& var) : ConstrainedVariableListener(var), m_constraintName("NO_CONSTRAINT") {}
-	void notifyConstraintAdded(const ConstraintId& constr, int argIndex) {
+	ConstraintNameListener(const ConstrainedVariableId var) : ConstrainedVariableListener(var), m_constraintName("NO_CONSTRAINT") {}
+	void notifyConstraintAdded(const ConstraintId constr, unsigned int) {
 		m_constraintName = constr->getName();
 	}
 	~ConstraintNameListener()
@@ -1742,7 +1744,7 @@ class ResourceSolverTest {
     ce->propagate();
     CPPUNIT_ASSERT(nameListener->getName() == LabelStr("precedes"));
     dp18.undo();
-    delete (ConstrainedVariableListener*) nameListener;
+    delete nameListener;
     ce->propagate();
     nameListener = new ConstraintNameListener(dp18.getChoices()[1].first->time());
     dp18.execute();
@@ -1750,7 +1752,7 @@ class ResourceSolverTest {
     CPPUNIT_ASSERT(nameListener->getName() == LabelStr("precedes"));
     dp18.undo();
     ce->propagate();
-    delete (ConstrainedVariableListener*) nameListener;
+    delete nameListener;
 
     std::string concurrentOnly = "<FlawHandler component=\"ResourceThreatDecisionPoint\" filter=\"both\" constraint=\"concurrentOnly\"/>";
     TiXmlElement* concurrentOnlyXml = initXml(concurrentOnly);
@@ -1761,7 +1763,7 @@ class ResourceSolverTest {
     ce->propagate();
     CPPUNIT_ASSERT(nameListener->getName() == LabelStr("concurrent"));
     dp19.undo();
-    delete (ConstrainedVariableListener*) nameListener;
+    delete  nameListener;
     ce->propagate();
     nameListener = new ConstraintNameListener(dp19.getChoices()[1].first->time());
     dp19.execute();
@@ -1769,7 +1771,7 @@ class ResourceSolverTest {
     CPPUNIT_ASSERT(nameListener->getName() == LabelStr("concurrent"));
     dp19.undo();
     ce->propagate();
-    delete (ConstrainedVariableListener*) nameListener;
+    delete  nameListener;
 
     //pair first has already been implicitly tested and constraint first is necessary to make this easy anyway, so it'll get tested as well.
 
@@ -1788,7 +1790,7 @@ class ResourceSolverTest {
     CPPUNIT_ASSERT(nameListener->getName() == LabelStr("concurrent"));
     dp20.undo();
     ce->propagate();
-    delete (ConstrainedVariableListener*) nameListener;
+    delete  nameListener;
     //step once more to test creating a constraint on the next choice
     nameListener = new ConstraintNameListener(dp20.getChoices()[1].first->time());
     dp20.execute();
@@ -1813,7 +1815,7 @@ class ResourceSolverTest {
     CPPUNIT_ASSERT(nameListener->getName() == LabelStr("precedes"));
     dp21.undo();
     ce->propagate();
-    delete (ConstrainedVariableListener*) nameListener;
+    delete  nameListener;
     //step once more to test creating a constraint on the next choice
     nameListener = new ConstraintNameListener(dp21.getChoices()[1].first->time());
     dp21.execute();
@@ -1854,7 +1856,6 @@ class ResourceSolverTest {
 
     PlanDatabaseId db = dbObj.getId();
     ConstraintEngineId ce = ceObj.getId();
-    DbClientId client = db->getClient();
 
     Reusable reusable(db, "Reusable", "myReusable", "ClosedWorldFVDetector", "IncrementalFlowProfile", 1, 1, 0);
 

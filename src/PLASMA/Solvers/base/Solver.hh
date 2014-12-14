@@ -33,7 +33,7 @@ namespace EUROPA {
       /**
        * @brief Constructor
        */
-      Solver(const PlanDatabaseId& db, const TiXmlElement& configData);
+      Solver(const PlanDatabaseId db, const TiXmlElement& configData);
 
       /**
        * @brief Required for safe deletion of subclasses
@@ -75,7 +75,7 @@ namespace EUROPA {
        * in the internal decision stack
        * @param depth The number of decisions to reset.
        */
-      void reset(unsigned int depth);
+      void reset(unsigned long depth);
 
       /**
        * @brief Backjumps a specific number of decisions, in reverse chronological order.
@@ -83,7 +83,7 @@ namespace EUROPA {
        * @return false if there are more choices to make, otherwise true.
        * @see backtrack
        */
-      bool backjump(unsigned int stepCount);
+      bool backjump(unsigned long stepCount);
 
       /**
        * @brief Clears current decisions on the stack without any modifications to the plan.
@@ -95,7 +95,7 @@ namespace EUROPA {
       /**
        * @brief Standard Id accessor.
        */
-      const SolverId& getId() const;
+      const SolverId getId() const;
 
       /**
        * @brief Name accessor
@@ -105,7 +105,7 @@ namespace EUROPA {
       /**
        * @brief The size of the search stack
        */
-      unsigned int getDepth() const;
+      unsigned long getDepth() const;
 
       /**
        * @brief The total number of search steps since the Solver was previously cleared.
@@ -137,12 +137,12 @@ namespace EUROPA {
       /**
        * @brief Register a listener for search actions and status.
        */
-      void addListener(const SearchListenerId& sl);
+      void addListener(const SearchListenerId sl);
 
       /**
        * @brief Unregister a listener for search actions and status.
        */
-      void removeListener(const SearchListenerId& sl);
+      void removeListener(const SearchListenerId sl);
 
       /**
        * @brief Set the maximum number of steps to take when planning under PlanWorks control.
@@ -163,7 +163,7 @@ namespace EUROPA {
        * @brief True if the given entity is in scope.
        * @see FlawManager::inScope
        */
-      bool inScope(const EntityId& entity);
+      bool inScope(const EntityId entity);
 
       /**
        * @brief Retrieve an active flaw handler for the given entity
@@ -223,13 +223,13 @@ namespace EUROPA {
        */
       void cleanupDecisions();
 
-      void notifyAdded(const TokenId& token);
+      void notifyAdded(const TokenId token);
 
-      void notifyRemoved(const TokenId& token);
+      void notifyRemoved(const TokenId token);
 
-			bool isDecided(const EntityId& entity);
+			bool isDecided(const EntityId entity);
 
-			bool hasDecidedParameter(const TokenId& token);
+			bool hasDecidedParameter(const TokenId token);
 
       /**
        * @brief Used to enforce scope restrictions for common filters across all flaw managers
@@ -246,9 +246,9 @@ namespace EUROPA {
 	/**
 	 * @brief Over-ride standard behavior to do nothing
 	 */
-// 	void notifyRemoved(const ConstrainedVariableId& var){}
-// 	void notifyRemoved(const ConstraintId& var) {}
-// 	void notifyRemoved(const TokenId& tok) {FlawManager::notifyRemoved(tok);}
+// 	void notifyRemoved(const ConstrainedVariableId var){}
+// 	void notifyRemoved(const ConstraintId var) {}
+// 	void notifyRemoved(const TokenId tok) {FlawManager::notifyRemoved(tok);}
       };
 
       /* Data Members */
@@ -258,7 +258,7 @@ namespace EUROPA {
       DecisionPointId m_activeDecision; /*!< Stores the decision point we are currently working on.
 					  It should not be in the decision stack. */
       unsigned int m_stepCountFloor; /*!< Stores previous step count where multiple solution iterations are tried. */
-      unsigned int m_depthFloor; /*!< Stores previous depth where multiple solution iterations are tried.*/
+      unsigned long m_depthFloor; /*!< Stores previous depth where multiple solution iterations are tried.*/
       unsigned int m_stepCount; /*!< The aggregate number of steps over one or more calls to solve,
 				  without reseting or clearing. */
       bool m_noFlawsFound; /*!< True when we have no more flaws to work on. */
@@ -293,30 +293,30 @@ namespace EUROPA {
        */
       class CeListener: public ConstraintEngineListener {
       public:
-	CeListener(const ConstraintEngineId& ce, Solver& dm);
+	CeListener(const ConstraintEngineId ce, Solver& dm);
 
-	void notifyRemoved(const ConstrainedVariableId& variable);
-	void notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType);
-	void notifyAdded(const ConstraintId& constraint);
-	void notifyRemoved(const ConstraintId& constraint);
+	void notifyRemoved(const ConstrainedVariableId variable);
+	void notifyChanged(const ConstrainedVariableId variable, const DomainListener::ChangeType& changeType);
+	void notifyAdded(const ConstraintId constraint);
+	void notifyRemoved(const ConstraintId constraint);
 
       private:
 	Solver& m_solver;
       };
 
-      void notifyRemoved(const ConstrainedVariableId& variable);
-      void notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType);
-      void notifyAdded(const ConstraintId& constraint);
-      void notifyRemoved(const ConstraintId& constraint);
+      void notifyRemoved(const ConstrainedVariableId variable);
+      void notifyChanged(const ConstrainedVariableId variable, const DomainListener::ChangeType& changeType);
+      void notifyAdded(const ConstraintId constraint);
+      void notifyRemoved(const ConstraintId constraint);
 
       friend class Solver::CeListener;
       Solver::CeListener m_ceListener; /*!< For Processing constraint engine events */
 
       class DbListener : public PlanDatabaseListener {
       public:
-	DbListener(const PlanDatabaseId& db, Solver& dm);
-	void notifyRemoved(const TokenId& token);
-	void notifyAdded(const TokenId& token);
+	DbListener(const PlanDatabaseId db, Solver& dm);
+	void notifyRemoved(const TokenId token);
+	void notifyAdded(const TokenId token);
       private:
 	Solver& m_solver;
       };

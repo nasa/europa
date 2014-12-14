@@ -16,11 +16,11 @@ namespace EUROPA {
     virtual ~StackMemento();
   private:
     friend class UnifyMemento;
-    StackMemento(const TokenId& activeTokenToStack, const TokenId& activeToken);
+    StackMemento(const TokenId activeTokenToStack, const TokenId activeToken);
     void undo(bool activeTokenDeleted);
 
-    void handleAdditionOfInactiveConstraint(const ConstraintId& constraint);
-    void handleRemovalOfInactiveConstraint(const ConstraintId& constraint);
+    void handleAdditionOfInactiveConstraint(const ConstraintId constraint);
+    void handleRemovalOfInactiveConstraint(const ConstraintId constraint);
     const TokenId m_activeTokenToStack;
     const TokenId m_activeToken;
     std::list<ConstraintId> m_stackConstraints;
