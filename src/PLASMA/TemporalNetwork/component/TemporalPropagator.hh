@@ -145,6 +145,10 @@ namespace EUROPA {
      * @brief update timepoints in the Temporal Network with changes in the Constraint Engine's variables.
      */
     void updateTnet();
+    void processConstraintDeletions();
+    void processVariableDeletions();
+    void processVariableChanges();
+    void processConstraintChanges();
 
     /**
      * @brief update variables in the constraint engine with changes due to Temporal Propagation
@@ -167,8 +171,8 @@ namespace EUROPA {
      * @param tnetConstraint The constraint used to enforce prior (or current) values.
      * @param lb The new lower bound
      * @param ub The new upper bound
-     * @return TemporalConstraintId::noId() if the constrant is not deleted. Otherwise it will return the
-     * new replacement constraint.
+     * @return TemporalConstraintId::noId() if the constrant is not deleted. Otherwise it
+     * will return the new replacement constraint.
      */
     TemporalConstraintId updateConstraint(const ConstrainedVariableId var,
 					  const TemporalConstraintId tnetConstraint,

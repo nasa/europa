@@ -72,7 +72,7 @@ namespace EUROPA
       delete static_cast<Transaction*>(m_dummySourceTransaction);
     }
 
-bool FlowProfile::getEarliestLowerLevelInstant(const TransactionId t, InstantId i) {
+bool FlowProfile::getEarliestLowerLevelInstant(const TransactionId t, InstantId& i) {
   check_error( t.isValid());
 
   if(t->isConsumer()) {
@@ -108,7 +108,7 @@ bool FlowProfile::getEarliestLowerLevelInstant(const TransactionId t, InstantId 
   }
 }
 
-bool FlowProfile::getEarliestUpperLevelInstant(const TransactionId t, InstantId i) {
+bool FlowProfile::getEarliestUpperLevelInstant(const TransactionId t, InstantId& i) {
   check_error( t.isValid());
 
   if(!t->isConsumer()) {

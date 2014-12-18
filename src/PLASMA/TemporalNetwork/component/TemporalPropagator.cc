@@ -241,7 +241,8 @@ ConstraintId getConstraint(ConstrainedVariableId fromvar,
 
   /*
    * The Temporal Propagator has 4 phases :
-   * 1- updateTnet() moves all the pending changes (CRUD operations on constraints and vars) from the cnet to the tnet
+   * 1- updateTnet() moves all the pending changes (CRUD operations on constraints and vars) 
+   *    from the cnet to the tnet
    *    the tnet performs incremental propagation on whatever it can while this happens
    * 2- m_tnet->propagate() performs any inference that couldn't be done incrementally while updateTnet() happened
    * 3- If there are constraint violations, update the cnet with the new constraint violation info
@@ -325,6 +326,7 @@ ConstraintId getConstraint(ConstrainedVariableId fromvar,
           }
           else {
               // TODO: why is this possible? what edges are introduced in the temporal graph that don't correspond to cnet constraints?
+            //The "base domain constraint" edges, representing any unconstrained restrictions
               debugMsg("TemporalPropagator:violations", "No constraint found for edge, skipping");
           }
       }
@@ -364,6 +366,8 @@ ConstraintId getConstraint(ConstrainedVariableId fromvar,
                                                            cast_int(var->lastDomain().getUpperBound()));
     check_error(c.isValid());
 
+    debugMsg("TemporalPropagator:addTimepoint",
+             "Setting base domain constraint for " << var->getKey() << " to " << c);
     timepoint->setBaseDomainConstraint(c);
 
     // Note, this is misleading. It is actually a constraint on the derived domain.
@@ -441,6 +445,85 @@ ConstraintId getConstraint(ConstrainedVariableId fromvar,
              << " --[" << lb << "," << ub << "]--> ");
   }
 
+void TemporalPropagator::processConstraintDeletions() {
+  debugMsg("TemporalPropagator:updateTnet", "Processing constraints for deletion... ");
+  for( TemporalConstraintsSet::const_iterator it = m_constraintsForDeletion.begin(); 
+       it != m_constraintsForDeletion.end(); 
+       ++it) {
+    TemporalConstraintId constraint = *it;
+    publish(notifyConstraintDeleted(constraint->getKey(), constraint));
+    debugMsg("TemporalPropagator:updateTnet",	"DELETED-Constraint " << constraint->getKey());
+    m_tnet->removeTemporalConstraint(constraint);
+  }
+  m_constraintsForDeletion.clear();
+  debugMsg("TemporalPropagator:updateTnet", "DONE Processing constraints for deletion... ");
+}
+
+void TemporalPropagator::processVariableDeletions() {
+  debugMsg("TemporalPropagator:updateTnet", "Processing variables for deletion... ");
+  for(std::set<TimepointId>::const_iterator it = m_variablesForDeletion.begin();
+      it != m_variablesForDeletion.end(); ++it) {
+    TimepointId tp = *it;
+    TemporalConstraintId baseDomainConstraint = tp->getBaseDomainConstraint();
+    check_error(baseDomainConstraint.isValid());
+    check_error(tp->getExternalEntity().isNoId()); // Should have cleared its connection to the TempVar
+    publish(notifyConstraintDeleted(baseDomainConstraint->getKey(), baseDomainConstraint));
+
+    m_tnet->removeTemporalConstraint(baseDomainConstraint, tp->getDeletionMarker());
+    debugMsg("TemporalPropagator:updateTnet",
+             "DELETED-Constraint (Base Domain) " << baseDomainConstraint->getKey());
+    publish(notifyTimepointDeleted(tp));
+    debugMsg("TemporalPropagator:updateTnet", "DELETED-TIMEPOINT " << tp->getKey());
+
+    m_tnet->deleteTimepoint(tp);
+  }
+  m_variablesForDeletion.clear();
+  debugMsg("TemporalPropagator:updateTnet", "DONE Processing variables for deletion... ");
+}
+
+void TemporalPropagator::processVariableChanges() {
+  // Process all relaxations first, so that we don't stump on tnet propagation later
+  debugMsg("TemporalPropagator:updateTnet", "Processing changed variables... ");
+  for(std::map<eint,ConstrainedVariableId>::const_iterator it = m_changedVariables.begin(); it != m_changedVariables.end(); ++it){
+    ConstrainedVariableId var = it->second;
+    if(!var->isActive())
+      continue;
+    if (wasRelaxed(var))
+      updateTimepoint(var);
+  }
+  debugMsg("TemporalPropagator:updateTnet", "DONE Processing relaxed variables... ");
+
+  // Now take care of other changes
+  for(std::map<eint,ConstrainedVariableId>::const_iterator it = m_changedVariables.begin(); it != m_changedVariables.end(); ++it){
+    ConstrainedVariableId var = it->second;
+    if(!var->isActive())
+      continue;
+    if (!wasRelaxed(var))
+      updateTimepoint(var);
+  }
+  m_changedVariables.clear();
+  debugMsg("TemporalPropagator:updateTnet", "DONE Processing changed variables... ");
+}
+
+void TemporalPropagator::processConstraintChanges() {
+  debugMsg("TemporalPropagator:updateTnet", "Processing changed constraints... ");
+  for( ConstraintsSet::const_iterator it = m_changedConstraints.begin(); it != m_changedConstraints.end(); ++it){
+    ConstraintId constraint = *it;
+    if(!constraint->isActive())
+      continue;
+
+    updateTemporalConstraint(constraint);
+
+    // If the cnet has become inconsistent, which can happen since distance bounds may be restricted as we apply
+    // a constraint, then we can skip out.
+    if(getConstraintEngine()->provenInconsistent() && !getConstraintEngine()->getAllowViolations())
+      break;
+  }
+  m_changedConstraints.clear();
+  debugMsg("TemporalPropagator:updateTnet", "DONE Processing changed constraints... ");
+
+}
+
   void TemporalPropagator::updateTnet()
   {
       // When updating, if we have deletions
@@ -448,76 +531,16 @@ ConstraintId getConstraint(ConstrainedVariableId fromvar,
           m_mostRecentRepropagation = getConstraintEngine()->mostRecentRepropagation();
 
       // Process constraints for deletion
-      debugMsg("TemporalPropagator:updateTnet", "Processing constraints for deletion... ");
-      for( TemporalConstraintsSet::const_iterator it = m_constraintsForDeletion.begin(); 
-	   it != m_constraintsForDeletion.end(); 
-	   ++it) {
-          TemporalConstraintId constraint = *it;
-          publish(notifyConstraintDeleted(constraint->getKey(), constraint));
-          debugMsg("TemporalPropagator:updateTnet",	"DELETED-Constraint " << constraint->getKey());
-          m_tnet->removeTemporalConstraint(constraint);
-      }
-      m_constraintsForDeletion.clear();
-      debugMsg("TemporalPropagator:updateTnet", "DONE Processing constraints for deletion... ");
+      processConstraintDeletions();
 
       // Process variables for deletion
-      debugMsg("TemporalPropagator:updateTnet", "Processing variables for deletion... ");
-      for(std::set<TimepointId>::const_iterator it = m_variablesForDeletion.begin(); it != m_variablesForDeletion.end(); ++it) {
-          TimepointId tp = *it;
-          TemporalConstraintId baseDomainConstraint = tp->getBaseDomainConstraint();
-          check_error(baseDomainConstraint.isValid());
-          check_error(tp->getExternalEntity().isNoId()); // Should have cleared its connection to the TempVar
-          publish(notifyConstraintDeleted(baseDomainConstraint->getKey(), baseDomainConstraint));
-
-          m_tnet->removeTemporalConstraint(baseDomainConstraint, tp->getDeletionMarker());
-          debugMsg("TemporalPropagator:updateTnet",	"DELETED-Constraint (Base Domain) " << baseDomainConstraint->getKey());
-          publish(notifyTimepointDeleted(tp));
-          debugMsg("TemporalPropagator:updateTnet", "DELETED-TIMEPOINT " << tp->getKey());
-
-          m_tnet->deleteTimepoint(tp);
-      }
-      m_variablesForDeletion.clear();
-      debugMsg("TemporalPropagator:updateTnet", "DONE Processing variables for deletion... ");
+      processVariableDeletions();
 
       // Process variables that have changed
-      // Process all relaxations first, so that we don't stump on tnet propagation later
-      debugMsg("TemporalPropagator:updateTnet", "Processing changed variables... ");
-      for(std::map<eint,ConstrainedVariableId>::const_iterator it = m_changedVariables.begin(); it != m_changedVariables.end(); ++it){
-          ConstrainedVariableId var = it->second;
-          if(!var->isActive())
-              continue;
-          if (wasRelaxed(var))
-              updateTimepoint(var);
-      }
-      debugMsg("TemporalPropagator:updateTnet", "DONE Processing relaxed variables... ");
-
-      // Now take care of other changes
-      for(std::map<eint,ConstrainedVariableId>::const_iterator it = m_changedVariables.begin(); it != m_changedVariables.end(); ++it){
-          ConstrainedVariableId var = it->second;
-          if(!var->isActive())
-              continue;
-          if (!wasRelaxed(var))
-              updateTimepoint(var);
-      }
-      m_changedVariables.clear();
-      debugMsg("TemporalPropagator:updateTnet", "DONE Processing changed variables... ");
+      processVariableChanges();
 
       // Process constraints that have changed, or been added
-      debugMsg("TemporalPropagator:updateTnet", "Processing changed constraints... ");
-      for( ConstraintsSet::const_iterator it = m_changedConstraints.begin(); it != m_changedConstraints.end(); ++it){
-          ConstraintId constraint = *it;
-          if(!constraint->isActive())
-              continue;
-
-          updateTemporalConstraint(constraint);
-
-          // If the cnet has become inconsistent, which can happen since distance bounds may be restricted as we apply
-          // a constraint, then we can skip out.
-          if(getConstraintEngine()->provenInconsistent() && !getConstraintEngine()->getAllowViolations())
-              break;
-      }
-      m_changedConstraints.clear();
-      debugMsg("TemporalPropagator:updateTnet", "DONE Processing changed constraints... ");
+      processConstraintChanges();
   }
 
 
@@ -727,8 +750,8 @@ ConstraintId getConstraint(ConstrainedVariableId fromvar,
       tnetConstraint->getBounds(lbt, ubt);
 
       const IntervalIntDomain& timeBounds = static_cast<const IntervalIntDomain&>(var->lastDomain());
-      Time lb = cast_int(timeBounds.getLowerBound());
-      Time ub = cast_int(timeBounds.getUpperBound());
+      Time lb = cast_basis(timeBounds.getLowerBound());
+      Time ub = cast_basis(timeBounds.getUpperBound());
 
       //if(lb < lbt || ub > ubt) {
       if(lb ==MINUS_INFINITY && ub==PLUS_INFINITY) {
@@ -764,8 +787,10 @@ ConstraintId getConstraint(ConstrainedVariableId fromvar,
     const TemporalConstraintId baseDomainConstraint = tp->getBaseDomainConstraint();
     TemporalConstraintId newConstraint = updateConstraint(var, baseDomainConstraint, lb, ub);
 
-    if(!newConstraint.isNoId())
-      tp->setBaseDomainConstraint(baseDomainConstraint);
+    if(!newConstraint.isNoId()) {
+      //tp->setBaseDomainConstraint(baseDomainConstraint);
+      tp->setBaseDomainConstraint(newConstraint);
+    }
 
     checkError(!var->lastDomain().areBoundsFinite() || m_tnet->hasEdgeToOrigin(tp),
 	       "Counter:" << sl_counter << ". It should have an edge to the origin, but it doesn't!" <<
@@ -824,90 +849,91 @@ ConstraintId getConstraint(ConstrainedVariableId fromvar,
     }
   }
 
-  TemporalConstraintId TemporalPropagator::updateConstraint(const ConstrainedVariableId var,
-                                                            const TemporalConstraintId tnetConstraint,
-                                                            Time lbc,
-                                                            Time ubc)
-  {
-    debugMsg("TemporalPropagator:updateConstraint", "In updateConstraint for var " << var->getKey());
+TemporalConstraintId TemporalPropagator::updateConstraint(const ConstrainedVariableId var,
+                                                          const TemporalConstraintId tnetConstraint,
+                                                          Time lbc,
+                                                          Time ubc) {
+  debugMsg("TemporalPropagator:updateConstraint",
+           "In updateConstraint for var " << var->getKey());
 
-    static unsigned int sl_counter(0);
-    sl_counter++;
+  static unsigned int sl_counter(0);
+  sl_counter++;
 
-    Time lb = mapToInternalInfinity(lbc);
-    Time ub = mapToInternalInfinity(ubc);
+  Time lb = mapToInternalInfinity(lbc);
+  Time ub = mapToInternalInfinity(ubc);
 
-    if(tnetConstraint.isNoId())
-      return m_tnet->addTemporalConstraint(m_tnet->getOrigin(), getTimepoint(var), lb, ub);
+  if(tnetConstraint.isNoId())
+    return m_tnet->addTemporalConstraint(m_tnet->getOrigin(), getTimepoint(var), lb, ub);
 
-    TemporalConstraintId newConstraint;
+  TemporalConstraintId newConstraint;
 
-    // Initialize the bounds from the current constraint
-    Time lbt, ubt;
-    tnetConstraint->getBounds(lbt, ubt);
-    checkError(lbt <= ubt, lbt << ">" << ubt);
+  // Initialize the bounds from the current constraint
+  Time lbt, ubt;
+  tnetConstraint->getBounds(lbt, ubt);
+  checkError(lbt <= ubt, lbt << ">" << ubt);
 
-    // Note that at this point we may in fact have a case where lbt > ubt in the event of a relaxation.
+  // Note that at this point we may in fact have a case where lbt > ubt in the event of a relaxation.
 
-    checkError(lb <= ub, lb << ">" << ub);
+  checkError(lb <= ub, lb << ">" << ub);
 
-    debugMsg("TemporalPropagator:updateConstraint", "Updating bounds for Variable " << var->getKey()
-             << " tnet bounds : [" << lbt << "," << ubt << "]"
-             << " cnet bounds : [" << lbc << "," << ubc << "]");
+  debugMsg("TemporalPropagator:updateConstraint", "Updating bounds for Variable " << var->getKey()
+           << " tnet bounds : [" << lbt << "," << ubt << "]"
+           << " cnet bounds : [" << lbc << "," << ubc << "]");
 
-    if(lb < lbt || ub > ubt) { // Handle relaxation
-      m_mostRecentRepropagation = getConstraintEngine()->mostRecentRepropagation();
+  if(lb < lbt || ub > ubt) { // Handle relaxation
+    m_mostRecentRepropagation = getConstraintEngine()->mostRecentRepropagation();
 
-      checkError(tnetConstraint.isValid(), tnetConstraint);
-      publish(notifyConstraintDeleted(tnetConstraint->getKey(), tnetConstraint));
-      debugMsg("TemporalPropagator:updateConstraint", "DELETED-Constraint " << tnetConstraint->getKey());
+    checkError(tnetConstraint.isValid(), tnetConstraint);
+    publish(notifyConstraintDeleted(tnetConstraint->getKey(), tnetConstraint));
+    debugMsg("TemporalPropagator:updateConstraint",
+             "DELETED-Constraint " << tnetConstraint->getKey());
 
-      // Now switch it out
-      TimepointId source, target;
-      m_tnet->getConstraintScope(tnetConstraint, source, target); // Pull old timepoints.
-      EntityId cnetConstraint = tnetConstraint->getExternalEntity();
-      tnetConstraint->clearExternalEntity();
-      m_tnet->removeTemporalConstraint(tnetConstraint);
-      newConstraint = m_tnet->addTemporalConstraint(source, target, lb, ub);
-      if(!cnetConstraint.isNoId()){
-        newConstraint->setExternalEntity(cnetConstraint);
-        cnetConstraint->clearExternalEntity();
-        cnetConstraint->setExternalEntity(newConstraint);
-        publish(notifyConstraintAdded(cnetConstraint, newConstraint,  lb, ub));
+    // Now switch it out
+    TimepointId source, target;
+    m_tnet->getConstraintScope(tnetConstraint, source, target); // Pull old timepoints.
+    EntityId cnetConstraint = tnetConstraint->getExternalEntity();
+    tnetConstraint->clearExternalEntity();
+    m_tnet->removeTemporalConstraint(tnetConstraint);
+    newConstraint = m_tnet->addTemporalConstraint(source, target, lb, ub);
+    if(!cnetConstraint.isNoId()){
+      newConstraint->setExternalEntity(cnetConstraint);
+      cnetConstraint->clearExternalEntity();
+      cnetConstraint->setExternalEntity(newConstraint);
+      publish(notifyConstraintAdded(cnetConstraint, newConstraint,  lb, ub));
 
-        debugMsg("TemporalPropagator:updateConstraint",
-                 "ADDED-Constraint (tnet) " << newConstraint->getKey() << " for external constraint " << cnetConstraint->getKey());
-      }
-      else {
-        check_error(target == getTimepoint(var));
-        target->setBaseDomainConstraint(newConstraint);
-        publish(notifyBaseDomainConstraintAdded(var, newConstraint,  lb, ub));
-
-        debugMsg("TemporalPropagator:updateConstraint",
-                 "ADDED-Constraint (Base Domain) " <<  newConstraint << " for Variable " << var->getKey()
-                 << " [" << lb << "," << ub << "]");
-      }
+      debugMsg("TemporalPropagator:updateConstraint",
+               "ADDED-Constraint (tnet) " << newConstraint->getKey() << " for external constraint " << cnetConstraint->getKey());
     }
-    //else if (!tnetConstraint->isComplete() || lb > lbt || ub < ubt) { // Handle restriction. Retain most restricted values
-    else if (lb > lbt || ub < ubt) { // Handle restriction. Retain most restricted values
-      Time newLb = std::max(lb, lbt);
-      Time newUb = std::min(ub, ubt);
-      Time currentLb = 0;
-      Time currentUb = 0;
-      tnetConstraint->getBounds(currentLb, currentUb);
-      //if(!tnetConstraint->isComplete() || currentUb > newUb || currentLb < newLb ){
-      if(currentUb > newUb || currentLb < newLb ){
-          newLb = std::max(newLb, currentLb);
-          newUb = std::min(newUb, currentUb);
-          m_tnet->narrowTemporalConstraint(tnetConstraint, newLb, newUb);
-          publish(notifyBoundsRestricted(var, newLb, newUb));
-          debugMsg("TemporalPropagator:updateConstraint",
-                  "UPDATED-VariableBounds of "  << var->getKey() << " Restricted to [" << newLb << "," << newUb << "]");
-      }
-    }
+    else {
+      check_error(target == getTimepoint(var));
+      target->setBaseDomainConstraint(newConstraint);
+      publish(notifyBaseDomainConstraintAdded(var, newConstraint,  lb, ub));
 
-    return newConstraint;
+      debugMsg("TemporalPropagator:updateConstraint",
+               "ADDED-Constraint (Base Domain) " <<  newConstraint << " for Variable " << var->getKey()
+               << " [" << lb << "," << ub << "]");
+    }
   }
+  //else if (!tnetConstraint->isComplete() || lb > lbt || ub < ubt) { // Handle restriction. Retain most restricted values
+  else if (lb > lbt || ub < ubt) { // Handle restriction. Retain most restricted values
+    Time newLb = std::max(lb, lbt);
+    Time newUb = std::min(ub, ubt);
+    Time currentLb = 0;
+    Time currentUb = 0;
+    tnetConstraint->getBounds(currentLb, currentUb);
+    //if(!tnetConstraint->isComplete() || currentUb > newUb || currentLb < newLb ){
+    if(currentUb > newUb || currentLb < newLb ){
+      newLb = std::max(newLb, currentLb);
+      newUb = std::min(newUb, currentUb);
+      m_tnet->narrowTemporalConstraint(tnetConstraint, newLb, newUb);
+      publish(notifyBoundsRestricted(var, newLb, newUb));
+      debugMsg("TemporalPropagator:updateConstraint",
+               "UPDATED-VariableBounds of "  << var->getKey() << " Restricted to [" << newLb << "," << newUb << "]");
+    }
+  }
+
+  return newConstraint;
+}
 
 
   void TemporalPropagator::buffer(const ConstrainedVariableId var){

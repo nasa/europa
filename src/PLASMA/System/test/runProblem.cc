@@ -164,12 +164,12 @@ int main(int argc, const char** argv)
 
     if (performanceTest != NULL && strcmp(performanceTest, "1") == 0) {
         replayRequired = false;
-        runPlanner(modelFile, plannerConfig, language, replayRequired);
+        assert(runPlanner(modelFile, plannerConfig, language, replayRequired));
         // EUROPA_runTest(runPlanner,modelFile,plannerConfig,language,replayRequired);
     }
     else {
         replayRequired = false; //= true;
-        runPlanner(modelFile, plannerConfig, language, replayRequired);
+        assert(runPlanner(modelFile, plannerConfig, language, replayRequired));
         // EUROPA_runTest(runPlanner,modelFile,plannerConfig,language,replayRequired);
         //EUROPA_runTest(copyFromFile,language);
     }

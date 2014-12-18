@@ -317,7 +317,7 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
     inline bool isValid() const {
 #ifndef EUROPA_FAST
       return(m_ptr != 0 && m_key != 0 &&
-             IdTable::getKey(reinterpret_cast<unsigned long int>(m_ptr)) == m_key);
+             IdTable::getKey(reinterpret_cast<unsigned long>(m_ptr)) == m_key);
 #else
       return(m_ptr != 0);
 #endif

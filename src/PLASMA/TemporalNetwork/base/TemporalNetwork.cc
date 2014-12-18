@@ -372,7 +372,9 @@ namespace EUROPA {
     return(result);
   }
 
-  void TemporalNetwork::getConstraintScope(const TemporalConstraintId constraint, TimepointId source, TimepointId target) const{
+  void TemporalNetwork::getConstraintScope(const TemporalConstraintId constraint,
+                                           TimepointId& source,
+                                           TimepointId& target) const{
     check_error(constraint.isValid());
     Tspec* spec = id_cast<Tspec>(constraint);
     source = spec->head->getId();

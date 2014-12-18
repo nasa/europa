@@ -103,19 +103,29 @@ void Profile::removeTransaction(const TransactionId t) {
     return;
   //       checkError(m_transactions.find(t) != m_transactions.end(), "Attempted to remove a transaction that isn't present!");
 
-  debugMsg("Profile:removeTransaction", "Removing transaction " << t << " for time " << t->time()->toString() << " with quantity " << t->quantity()->toString());
-
-  eint startTime = static_cast<eint>(t->time()->lastDomain().getLowerBound());
-  eint endTime = static_cast<eint>(t->time()->lastDomain().getUpperBound());
+  debugMsg("Profile:removeTransaction",
+           "Removing transaction " << t << " for time " << t->time()->toString() <<
+           " with quantity " << t->quantity()->toString());
+  eint startTime =
+      static_cast<eint>((t->time()->lastDomain().isEmpty() ?
+                         t->time()->baseDomain() : t->time()->lastDomain()).getLowerBound());
+  eint endTime =
+      static_cast<eint>((t->time()->lastDomain().isEmpty() ?
+                         t->time()->baseDomain() : t->time()->lastDomain()).getUpperBound());
+  checkError(startTime <= endTime, startTime << " > " << endTime);
   ProfileIterator profIt(m_id, startTime, endTime);
   std::vector<eint> emptyInstants;
   //remove the transaction from its instants
   while(!profIt.done()) {
-    debugMsg("Profile:removeTransaction", "Removing transaction " << t << " from instant for time " << profIt.getInstant()->getTime());
+    debugMsg("Profile:removeTransaction",
+             "Removing transaction " << t << " from instant for time " <<
+             profIt.getInstant()->getTime());
     profIt.getInstant()->removeTransaction(t);
     //if the instant contains no transactions or doesn't represent the start or end of a transaction, it is empty and should be deleted.
-    if(profIt.getInstant()->getTransactions().empty() || !containsChange(profIt.getInstant())) {
-      debugMsg("Profile:removeTransaction", "Instant for time " << profIt.getInstant()->getTime() << " is empty.");
+    if(profIt.getInstant()->getTransactions().empty() ||
+       !containsChange(profIt.getInstant())) {
+      debugMsg("Profile:removeTransaction",
+               "Instant for time " << profIt.getInstant()->getTime() << " is empty.");
       emptyInstants.push_back(profIt.getInstant()->getTime());
     }
     profIt.next();
@@ -123,7 +133,8 @@ void Profile::removeTransaction(const TransactionId t) {
 
   //remove any constraints on the transaction from the profile.
   std::vector<std::pair<ConstraintId, unsigned long> > removals;
-  for(ConstraintSet::const_iterator it = m_temporalConstraints.begin(); it != m_temporalConstraints.end(); ++it) {
+  for(ConstraintSet::const_iterator it = m_temporalConstraints.begin();
+      it != m_temporalConstraints.end(); ++it) {
     if((*it)->isVariableOf(t->time())) {
       removals.push_back(std::make_pair(*it, 
                                         std::distance((*it)->getScope().begin(), 
@@ -600,22 +611,23 @@ void Profile::handleRecompute() {
   postHandleRecompute(endTime,endDiff);
 }
 
-    void Profile::postHandleRecompute(const eint& endTime, const std::pair<edouble,edouble>& endDiff)
-    {
-    	debugMsg("Profile:postHandleRecompute", endTime << " [" << endDiff.first << "," << endDiff.second << "]");
+void Profile::postHandleRecompute(const eint& endTime,
+                                  const std::pair<edouble,edouble>& endDiff) {
+  debugMsg("Profile:postHandleRecompute",
+           endTime << " [" << endDiff.first << "," << endDiff.second << "]");
 
-    	if ((endDiff.first==0) && (endDiff.second==0))
-    		return;
+  if ((endDiff.first==0) && (endDiff.second==0))
+    return;
 
-    	// Apply endDiff to (endTime,PLUS_INFINITY)
-    	bool violation = false;
-    	std::map<eint, InstantId>::iterator it = m_instants.upper_bound(endTime);
-    	for (;(it != m_instants.end()) && !violation;++it) {
-    		InstantId inst = it->second;
-    		inst->applyBoundsDelta(endDiff.first,endDiff.second);
-    		violation = m_detector->detect(inst);
-    	}
-    }
+  // Apply endDiff to (endTime,PLUS_INFINITY)
+  bool violation = false;
+  std::map<eint, InstantId>::iterator it = m_instants.upper_bound(endTime);
+  for (;(it != m_instants.end()) && !violation;++it) {
+    InstantId inst = it->second;
+    inst->applyBoundsDelta(endDiff.first,endDiff.second);
+    violation = m_detector->detect(inst);
+  }
+}
 
 void Profile::addInstantsForBounds(const TransactionId t) {
   eint first = static_cast<eint>(t->time()->lastDomain().getLowerBound());

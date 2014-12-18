@@ -85,7 +85,7 @@ namespace EUROPA {
         virtual TokenComparator* copy() = 0;
         void extractTokens(const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
                            const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2,
-                           TokenId t1, TokenId t2);
+                           TokenId& t1, TokenId& t2);
         TokenId m_flawedTok;
       };
 
