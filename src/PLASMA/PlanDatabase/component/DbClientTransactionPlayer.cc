@@ -95,15 +95,13 @@ namespace EUROPA {
   }
 
 
-  const SchemaId DbClientTransactionPlayer::getSchema() const
-  {
-      return m_client->getSchema();
-  }
+SchemaId DbClientTransactionPlayer::getSchema() const {
+  return m_client->getSchema();
+}
 
-  const CESchemaId DbClientTransactionPlayer::getCESchema() const
-  {
-      return m_client->getCESchema();
-  }
+CESchemaId DbClientTransactionPlayer::getCESchema() const {
+  return m_client->getCESchema();
+}
 
   void DbClientTransactionPlayer::setFilter(const std::set<std::string>&) {
 
@@ -450,7 +448,7 @@ namespace EUROPA {
           const SchemaId schema,
           const DbClientId client,
           const char* predicate,
-          ObjectId object)
+          ObjectId& object)
   {
     if (!schema->isPredicate(predicate)) {
       LabelStr typeStr(predicate);
@@ -847,9 +845,9 @@ void DbClientTransactionPlayer::playTokenCreated(const TiXmlElement & element) {
   }
 
   void DbClientTransactionPlayer::getElementsFromConstrain(const TiXmlElement& element,
-							   ObjectId object,
-							   TokenId predecessor,
-							   TokenId successor) {
+							   ObjectId& object,
+							   TokenId& predecessor,
+							   TokenId& successor) {
     if(strcmp(element.Value(), "invoke") == 0) {
       check_error(element.Attribute("identifier") != NULL);
       object = m_client->getObject(element.Attribute("identifier"));

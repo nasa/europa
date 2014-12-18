@@ -55,7 +55,6 @@ namespace EUROPA {
     }
 
     void Instant::removeTransaction(const TransactionId t) {
-      checkError(m_transactions.find(t) != m_transactions.end(), "Instant for time " << m_time << " has no transaction " << t);
       m_transactions.erase(t);
       m_endingTransactions.erase(t);
       m_startingTransactions.erase(t);

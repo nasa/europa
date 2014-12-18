@@ -124,8 +124,8 @@ namespace EUROPA {
     return strStream.str();
   }
 
-  void ThreatDecisionPoint::extractParts(unsigned long index, ObjectId object,
-                                         TokenId predecessor, TokenId successor) const{
+  void ThreatDecisionPoint::extractParts(unsigned long index, ObjectId& object,
+                                         TokenId& predecessor, TokenId& successor) const{
     const std::pair<ObjectId, std::pair<TokenId, TokenId> >& choice = m_choices[index];
     object = choice.first;
     predecessor = choice.second.first;

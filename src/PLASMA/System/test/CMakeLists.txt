@@ -58,7 +58,7 @@ run_planner_problem(HTX.1 HTX.1.solverConfig.xml nddl)
 run_planner_problem(HTX.3 HTX.3.solverConfig.xml nddl)
 run_planner_problem(reusable-test-transaction ReusableTestConfig.xml nddl)
 run_planner_problem(unary-resource-test-transaction ReusableTestConfig.xml nddl)
-run_planner_problem(Mini-crew-init.nddl MiniCrewSolverConfig.xml nddl)
+run_planner_problem(Mini-crew-init MiniCrewSolverConfig.xml nddl)
 run_planner_problem(basic-model-transaction RandomPlannerConfig.xml nddl)
 
 file(GLOB models *.nddl)

@@ -55,7 +55,10 @@ namespace EUROPA {
     static const std::set<std::string>& STATE_TRANSACTIONS();
     static const std::set<std::string>& NO_TRANSACTIONS();
 
-    static const char* getObjectAndType(const SchemaId schema, const DbClientId client, const char* predicate,ObjectId object);
+    static const char* getObjectAndType(const SchemaId schema,
+                                        const DbClientId client,
+                                        const char* predicate,
+                                        ObjectId& object);
 
   protected:
     typedef std::multimap<std::pair<ConstrainedVariableId, ConstrainedVariableId>, ConstraintId> TemporalRelations;
@@ -122,11 +125,11 @@ namespace EUROPA {
     void removeTemporalConstraint(const ConstrainedVariableId fvar,
 				  const ConstrainedVariableId svar,
 				  const std::string& name);
-    void getElementsFromConstrain(const TiXmlElement& elem, ObjectId obj, TokenId pred,
-				  TokenId succ);
+    void getElementsFromConstrain(const TiXmlElement& elem, ObjectId& obj, TokenId& pred,
+				  TokenId& succ);
 
-    const CESchemaId getCESchema() const;
-    const SchemaId getSchema() const;
+    CESchemaId getCESchema() const;
+    SchemaId getSchema() const;
 
     DbClientId m_client;
     int m_objectCount;

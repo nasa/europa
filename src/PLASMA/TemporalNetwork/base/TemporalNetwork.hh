@@ -211,7 +211,8 @@ namespace EUROPA {
      * @param source head of temporal constraint
      * @param target foot of temporal constraint
      */
-    void getConstraintScope(const TemporalConstraintId constraint, TimepointId source, TimepointId target) const;
+    void getConstraintScope(const TemporalConstraintId constraint,
+                            TimepointId& source, TimepointId& target) const;
 
     /**
      * @brief Add temporal constraint to the network

@@ -422,7 +422,7 @@ namespace EUROPA {
     std::vector<FlawFilterId> dynamicFilters;
     for(std::vector<MatchingRuleId>::const_iterator fIt = filters.begin();
         fIt != filters.end(); ++fIt){
-      FlawFilterId flawFilter = id_cast<FlawFilter>(*fIt);
+      FlawFilterId flawFilter = *fIt;
       if(flawFilter->isDynamic())
         dynamicFilters.push_back(flawFilter);
       else { // Static so prune and quit

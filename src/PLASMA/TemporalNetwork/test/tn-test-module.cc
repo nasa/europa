@@ -394,7 +394,6 @@ private:
     delete static_cast<Constraint*>(beforeConstraint);
 
     // restrict via specifying the domain
-
     IntervalIntDomain dom(21, 31);
     first.start()->restrictBaseDomain(dom);
     first.end()->restrictBaseDomain(dom);

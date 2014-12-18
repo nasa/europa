@@ -82,14 +82,14 @@ class Node;
        * and will in that case store the instant in parameter. Returns false if no instant
        * has been associated with transaction t.
        */
-      bool getEarliestLowerLevelInstant( const TransactionId t, InstantId i );
+      bool getEarliestLowerLevelInstant( const TransactionId t, InstantId& i );
       /**
        * @brief Retrieves the first (earliest) instant the transaction starts contributing to
        * upper level. Will return true in case a instant has been associated with a transaction
        * and will in that case store the instant in parameter. Returns false if no instant
        * has been associated with transaction t.
        */
-      bool getEarliestUpperLevelInstant( const TransactionId t, InstantId i );
+      bool getEarliestUpperLevelInstant( const TransactionId t, InstantId& i );
       /**
        * @brief Deletes pre-existing FlowProfileGraphs for the lower and upper level and allocates new ones.
        */

@@ -200,7 +200,7 @@ OpenConditionDecisionPoint::~OpenConditionDecisionPoint() {
 
 void TokenComparator::extractTokens(const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
                                     const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2,
-                                    TokenId t1, TokenId t2) {
+                                    TokenId& t1, TokenId& t2) {
   t1 = (p1.second.first == m_flawedTok ? p1.second.second : p1.second.first);
   t2 = (p2.second.first == m_flawedTok ? p2.second.second : p2.second.first);
 }

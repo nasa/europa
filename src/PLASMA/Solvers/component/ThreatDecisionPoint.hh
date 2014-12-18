@@ -35,7 +35,8 @@ namespace EUROPA {
     protected:
       virtual void handleInitialize();
 
-      void extractParts(unsigned long index, ObjectId object, TokenId predecessor, TokenId successor) const;
+      void extractParts(unsigned long index, ObjectId& object, TokenId& predecessor,
+                        TokenId& successor) const;
 
       /** Main Interface for the solver **/
       bool hasNext() const;
