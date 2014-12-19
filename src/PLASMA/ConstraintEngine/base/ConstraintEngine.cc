@@ -1036,7 +1036,7 @@ void ConstraintEngine::notify(const ConstrainedVariableId source,
   void ConstraintEngine::setAllowViolations(bool v)
   {
     if (v)
-      m_violationMgr->setMaxViolationsAllowed(UINT_MAX);
+      m_violationMgr->setMaxViolationsAllowed(std::numeric_limits<unsigned int>::max());
     else
       m_violationMgr->setMaxViolationsAllowed(0);
   }
