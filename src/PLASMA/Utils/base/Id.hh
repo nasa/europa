@@ -120,45 +120,54 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
      * @param ptr The pointer to create a new Id for.
      * @see Id::noId()
      */
-    inline Id(T* ptr) {
+    inline Id(T* ptr) : m_ptr(ptr) 
 #ifndef EUROPA_FAST
-      check_error(ptr != 0, std::string("Cannot generate an Id<") + typeid(T).name() + "> for 0 pointer.",
+		      , m_key(0)
+#endif
+    {
+#ifndef EUROPA_FAST
+      check_error(ptr != 0,
+		  std::string("Cannot generate an Id<") + typeid(T).name() + "> for 0 pointer.",
                   IdErr::IdMgrInvalidItemPtrError());
-      m_key = IdTable::insert(reinterpret_cast<unsigned long int>(ptr), typeid(T).name());
-      check_error(m_key != 0, std::string("Cannot generate an Id<") + typeid(T).name() + "> for a pointer that has not been cleaned up.",
+      m_key = IdTable::insert(reinterpret_cast<unsigned long int>(ptr),
+			      typeid(T).name());
+      check_error(m_key != 0, 
+		  std::string("Cannot generate an Id<") + typeid(T).name() + "> for a pointer that has not been cleaned up.",
                   IdErr::IdMgrInvalidItemPtrError());
 #endif
-      m_ptr = ptr;
     }
 
     /**
      * @brief Copy constructor.
      * @param org The constant reference to original Id from which to copy.
      */
-    inline Id(const Id& org) {
-      m_ptr = org.m_ptr;
+    inline Id(const Id& org) : m_ptr(org.m_ptr)
 #ifndef EUROPA_FAST
-      m_key = org.m_key;
+			     , m_key(org.m_key)
 #endif
-    }
+    {}
 
-    /**
-     * @brief Default Constructor. Results in an object equal to noId().
-     * @see Id::noId()
-     */
-    inline Id() {
-      m_ptr = 0;
+
+      /**
+       * @brief Default Constructor. Results in an object equal to noId().
+       * @see Id::noId()
+       */
+      inline Id() : m_ptr(NULL)
 #ifndef EUROPA_FAST
-      m_key = 0;
+		  , m_key(0)
 #endif
-    }
+    {}
 
-    /**
-     * @brief Permit type casting of eints on construction.
-     * @param val An eint value encoding of the address of the instance to be pointed to.
-     * Must be 0, or an address for which an Id has already been allocated.
-     */
-    inline Id(double val) {
+	/**
+	 * @brief Permit type casting of eints on construction.
+	 * @param val An eint value encoding of the address of the instance to be pointed to.
+	 * Must be 0, or an address for which an Id has already been allocated.
+	 */
+	inline Id(double val) : m_ptr(NULL)
+#ifndef EUROPA_FAST
+			    , m_key(0)
+#endif
+    {
 #ifndef EUROPA_FAST
       if (val == 0)
         m_key = 0;
@@ -174,28 +183,34 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
     }
 
 
-    inline Id(const unsigned long int val) {
+			       inline Id(const unsigned long int val) : m_ptr(reinterpret_cast<T*>(val))
 #ifndef EUROPA_FAST
-      if (val == 0)
-        m_key = 0;
-      else {
-        m_key = IdTable::getKey(val);
-        checkError(m_key != 0,
-                   "Cannot instantiate an Id<" << typeid(T).name() << "> for this address: "  <<
-                   std::hex << val << ". No instance present.", IdErr::IdMgrInvalidItemPtrError());
+      , m_key(0)
+#endif
+    {
+#ifndef EUROPA_FAST
+    if(val != 0) {
+    m_key = IdTable::getKey(val);
+    checkError(m_key != 0,
+      "Cannot instantiate an Id<" << typeid(T).name() << "> for this address: "  <<
+	       std::hex << val << ". No instance present.",
+	       IdErr::IdMgrInvalidItemPtrError());
       }
 #endif
-      m_ptr = reinterpret_cast<T*>(val);
-    }
+}
     /**
      * @brief Copy constructor from an Id of a different type.
      * @param org The constant reference to original Id from which to copy.
      * @note Must be able to cast from X* to T*.
      */
-    template <class X>
-    inline Id(const Id<X>& org) {
-      copyAndCastFromId(org);
-    }
+template <class X>
+inline Id(const Id<X>& org) : m_ptr(NULL)
+#ifndef EUROPA_FAST
+			    , m_key(0)
+#endif
+{
+  copyAndCastFromId(org);
+}
 
     /**
      * @brief Cast the pointer to an int.
@@ -210,7 +225,7 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
      * @param org The constant reference to original Id to be assigned to.
      * @return A reference to self.
      */
-    inline Id operator=(const Id org) {
+    inline Id& operator=(const Id org) {
       m_ptr = org.m_ptr;
 #ifndef EUROPA_FAST
       m_key = org.m_key;
@@ -234,9 +249,9 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
      * @return A reference to self.
      */
     template <class X>
-    inline Id operator=(const Id<X>& org) {
+    inline Id& operator=(const Id<X>& org) {
       copyAndCastFromId(org);
-      return(*this);
+      return *this;
     }
 
     /**

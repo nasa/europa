@@ -49,8 +49,7 @@ pthread_mutex_t& IdTableMutex() {
 }
 }
 
-  IdTable::IdTable() {
-  }
+IdTable::IdTable() : m_collection(), m_typeCnts() {}
 
   IdTable::~IdTable() {
   }

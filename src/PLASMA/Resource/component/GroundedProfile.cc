@@ -29,7 +29,7 @@ void GroundedProfile::handleTransactionStart(bool isConsumer, const edouble & lb
 	}
 }
 
-void GroundedProfile::handleTransactionEnd(bool isConsumer, const edouble & lb, const edouble & ub)
+void GroundedProfile::handleTransactionEnd(bool isConsumer, const edouble & lb, const edouble &)
 {
 	if(isConsumer) {
 		m_upperLevelMax -= lb;

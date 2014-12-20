@@ -60,6 +60,9 @@ namespace EUROPA{
     const TokenId getParentToken() const;
 
   private:
+private:
+    TokenVariable(const TokenVariable<DomainType>&);
+    TokenVariable<DomainType>& operator=(const TokenVariable<DomainType>&);
     // Internal methods for specification that circumvent test for canBeSpeciifed()
     friend class Token;
     void setSpecified(edouble singletonValue);
@@ -80,24 +83,23 @@ namespace EUROPA{
   template <class DomainType>
   const TokenId TokenVariable<DomainType>::getParentToken() const { return m_parentToken; }
 
-  template <class DomainType>
-  TokenVariable<DomainType>::TokenVariable(const TokenId parent,
-					   unsigned long index,
-					   const ConstraintEngineId constraintEngine,
-					   const Domain& baseDomain,
-					   const bool internal,
-					   bool canBeSpecified,
-					   const LabelStr& name)
-    : Variable<DomainType>(constraintEngine, baseDomain, internal, canBeSpecified, name, parent, index),
-      m_integratedBaseDomain(static_cast<DomainType*>(baseDomain.copy())), m_isLocallySpecified(false), m_localSpecifiedValue(0),
-      m_parentToken(parent){
-    check_error(m_parentToken.isValid());
-    check_error(this->getIndex() >= 0);
-    if (this->isSpecified()) {
-    	m_isLocallySpecified = true;
-    	m_localSpecifiedValue = baseDomain.getSingletonValue();
-    }
+template <class DomainType>
+TokenVariable<DomainType>::TokenVariable(const TokenId _parent,
+                                         unsigned long index,
+                                         const ConstraintEngineId constraintEngine,
+                                         const Domain& _baseDomain,
+                                         const bool internal,
+                                         bool _canBeSpecified,
+                                         const LabelStr& name)
+    : Variable<DomainType>(constraintEngine, _baseDomain, internal, _canBeSpecified, name, _parent, index),
+    m_integratedBaseDomain(static_cast<DomainType*>(_baseDomain.copy())), m_isLocallySpecified(false), m_localSpecifiedValue(0),
+    m_parentToken(_parent){
+  check_error(m_parentToken.isValid());
+  if (this->isSpecified()) {
+    m_isLocallySpecified = true;
+    m_localSpecifiedValue = _baseDomain.getSingletonValue();
   }
+}
 
   template <class DomainType>
   TokenVariable<DomainType>::~TokenVariable()

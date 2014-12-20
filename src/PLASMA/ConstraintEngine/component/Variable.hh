@@ -89,7 +89,8 @@ namespace EUROPA {
     virtual void handleRestrictBaseDomain(const Domain& baseDomain);
 
   private:
-    Variable(const Variable&); // Prohibit compiler from generating copy constructor
+    Variable(const Variable<DomainType>&); // Prohibit compiler from generating copy constructor
+    Variable<DomainType>& operator=(const Variable<DomainType>&);
 
     /**
      * @brief returns the current domain without checking for pending propagation first.
@@ -107,18 +108,18 @@ namespace EUROPA {
 
   template<class DomainType>
   Variable<DomainType>::Variable(const ConstraintEngineId constraintEngine,
-                                 const Domain& baseDomain,
+                                 const Domain& _baseDomain,
                                  const bool internal,
-                                 bool canBeSpecified,
+                                 bool _canBeSpecified,
                                  const LabelStr& name,
-                                 const EntityId parent,
+                                 const EntityId _parent,
                                  unsigned long index)
-    : ConstrainedVariable(constraintEngine, internal, canBeSpecified, name, parent, index),
-    m_baseDomain(static_cast<DomainType*>(baseDomain.copy())),
-    m_derivedDomain(static_cast<DomainType*>(baseDomain.copy())) {
+    : ConstrainedVariable(constraintEngine, internal, _canBeSpecified, name, _parent, index),
+    m_baseDomain(static_cast<DomainType*>(_baseDomain.copy())),
+    m_derivedDomain(static_cast<DomainType*>(_baseDomain.copy())) {
 
-	debugMsg("Variable:Variable", "Name " << name.toString());
-    debugMsg("Variable:Variable", "Base Domain = " << baseDomain.toString());
+    debugMsg("Variable:Variable", "Name " << name.toString());
+    debugMsg("Variable:Variable", "Base Domain = " << _baseDomain.toString());
 
     // Note that we permit the domain to be empty initially
     m_derivedDomain->setListener(m_listener);

@@ -6,41 +6,41 @@
 
 namespace EUROPA{
 
-  IntervalToken::IntervalToken(const PlanDatabaseId planDatabase,
-			       const LabelStr& predicateName,
-			       bool rejectable,
-			       bool isFact,
-			       const IntervalIntDomain& startBaseDomain,
-			       const IntervalIntDomain& endBaseDomain,
-			       const IntervalIntDomain& durationBaseDomain,
-			       const LabelStr& objectName,
-			       bool closed)
-    :Token(planDatabase,
-	   predicateName,
-	   rejectable,
-	   isFact,
-	   durationBaseDomain,
-	   objectName,
-	   false){
-    commonInit(startBaseDomain, endBaseDomain, closed);
-  }
+IntervalToken::IntervalToken(const PlanDatabaseId planDatabase,
+                             const LabelStr& predicateName,
+                             bool rejectable,
+                             bool _isFact,
+                             const IntervalIntDomain& startBaseDomain,
+                             const IntervalIntDomain& endBaseDomain,
+                             const IntervalIntDomain& durationBaseDomain,
+                             const LabelStr& objectName,
+                             bool closed)
+:Token(planDatabase,
+       predicateName,
+       rejectable,
+       _isFact,
+       durationBaseDomain,
+       objectName,
+       false), m_start(), m_end(){
+  commonInit(startBaseDomain, endBaseDomain, closed);
+}
 
-  IntervalToken::IntervalToken(const TokenId m_master,
-			       const LabelStr& m_relation,
-			       const LabelStr& predicateName,
-			       const IntervalIntDomain& startBaseDomain,
-			       const IntervalIntDomain& endBaseDomain,
-			       const IntervalIntDomain& durationBaseDomain,
-			       const LabelStr& objectName,
-			       bool closed)
-    :Token(m_master,
-	   m_relation,
+IntervalToken::IntervalToken(const TokenId _master,
+                             const LabelStr& _relation,
+                             const LabelStr& predicateName,
+                             const IntervalIntDomain& startBaseDomain,
+                             const IntervalIntDomain& endBaseDomain,
+                             const IntervalIntDomain& durationBaseDomain,
+                             const LabelStr& objectName,
+                             bool closed)
+    :Token(_master,
+	   _relation,
 	   predicateName,
 	   durationBaseDomain,
 	   objectName,
-	   false){
-    commonInit(startBaseDomain, endBaseDomain, closed);
-  }
+	   false), m_start(), m_end() {
+  commonInit(startBaseDomain, endBaseDomain, closed);
+}
 
   const TempVarId IntervalToken::start() const{
     checkError(m_start.isValid(), m_start);

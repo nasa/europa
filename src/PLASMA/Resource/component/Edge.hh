@@ -14,86 +14,88 @@
 
 namespace EUROPA
 {
-    class Edge
-    {
-      friend class Graph;
-      friend class Node;
-    public:
-      /**
-       * @brief Constructor
-       * @arg source
-       * @arg target
-       * @arg capacity
-       * @arg enabled
-       *
-       */
-      Edge( Node* source, Node* target, edouble capacity, bool enabled = true );
-      /**
-       * @brief Destructor
-       *
-       */
-      ~Edge();
-      /*!
-       * @brief Returns the maximum capacity of an Edge (infinity)
-       */
-      static edouble getMaxCapacity();
-      /**
-       * @brief Returns the capacity of the invoking edge
-       *
-       */
-      inline edouble getCapacity() const;
-      /**
-       * @brief Sets the capacity of the invoking edge
-       * @arg cap The new capacity of the invoking edge
-       *
-       */
-      inline void setCapacity( edouble cap );
-      /**
-       * @brief Returns the source of the invoking edge
-       *
-       */
-      inline Node* getSource() const;
-      /**
-       * @brief Returns the target of the invoking edge
-       */
-      inline Node* getTarget() const;
-      /**
-       * @brief Enables the invoking edge
-       *
-       */
-      void setEnabled();
-      /**
-       * @brief Disables the invoking edge
-       *
-       */
-      void setDisabled();
-      /**
-       * @brief Returns true of the invoking edge is enabled otherwise returns false
-       *
-       */
-      inline bool isEnabled() const;
-      /**
-       * @brief Returns the identity of the invoking edge
-       *
-       */
-      EdgeIdentity getIdentity() const;
-      /**
-       * @brief Creates a unique identity for an edge going from \a source to \a target
-       * @arg source Source of the edge
-       * @arg target Target of the edge
-       * @par: Errors:
-       * @li source equals 0
-       * @li target equals 0
-       */
-      static EdgeIdentity getIdentity( Node* source, Node* target );
-    private:
+class Edge {
+private:
+  Edge(const Edge&);
+  Edge& operator=(const Edge&);
+  friend class Graph;
+  friend class Node;
+ public:
+  /**
+   * @brief Constructor
+   * @arg source
+   * @arg target
+   * @arg capacity
+   * @arg enabled
+   *
+   */
+  Edge( Node* source, Node* target, edouble capacity, bool enabled = true );
+  /**
+   * @brief Destructor
+   *
+   */
+  ~Edge();
+  /*!
+   * @brief Returns the maximum capacity of an Edge (infinity)
+   */
+  static edouble getMaxCapacity();
+  /**
+   * @brief Returns the capacity of the invoking edge
+   *
+   */
+  inline edouble getCapacity() const;
+  /**
+   * @brief Sets the capacity of the invoking edge
+   * @arg cap The new capacity of the invoking edge
+   *
+   */
+  inline void setCapacity( edouble cap );
+  /**
+   * @brief Returns the source of the invoking edge
+   *
+   */
+  inline Node* getSource() const;
+  /**
+   * @brief Returns the target of the invoking edge
+   */
+  inline Node* getTarget() const;
+  /**
+   * @brief Enables the invoking edge
+   *
+   */
+  void setEnabled();
+  /**
+   * @brief Disables the invoking edge
+   *
+   */
+  void setDisabled();
+  /**
+   * @brief Returns true of the invoking edge is enabled otherwise returns false
+   *
+   */
+  inline bool isEnabled() const;
+  /**
+   * @brief Returns the identity of the invoking edge
+   *
+   */
+  EdgeIdentity getIdentity() const;
+  /**
+   * @brief Creates a unique identity for an edge going from \a source to \a target
+   * @arg source Source of the edge
+   * @arg target Target of the edge
+   * @par: Errors:
+   * @li source equals 0
+   * @li target equals 0
+   */
+  static EdgeIdentity getIdentity( Node* source, Node* target );
+ private:
 
-      edouble m_Capacity;
-      bool m_Enabled;
+  edouble m_Capacity;
+  bool m_Enabled;
 
-      Node* m_Source;
-      Node* m_Target;
-    };
+  Node* m_Source;
+  Node* m_Target;
+};
 
     std::ostream& operator<<( std::ostream& os, const Edge& fe );
 

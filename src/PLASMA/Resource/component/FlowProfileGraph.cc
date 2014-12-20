@@ -14,7 +14,8 @@ FlowProfileGraph::FlowProfileGraph(const TransactionId ,
 
 FlowProfileGraphImpl::FlowProfileGraphImpl(const TransactionId source, 
                                            const TransactionId sink, bool lowerLevel)
-    : FlowProfileGraph(source, sink, lowerLevel), m_graph( 0 ), m_source( 0 ), m_sink( 0 ) {
+    : FlowProfileGraph(source, sink, lowerLevel), m_maxflow(NULL), m_graph( 0 ),
+      m_source( 0 ), m_sink( 0 ) {
   m_graph = new Graph();
   m_source = m_graph->createNode( source );
   m_sink = m_graph->createNode( sink );

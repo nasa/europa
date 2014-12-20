@@ -18,7 +18,7 @@
 #ifdef _MSC_VER
 #  include <functional>
    using std::select2nd;
-#elif __clang__
+#elif defined __clang__
 #  include <functional>
 template<typename Pair>
 struct select2nd : public std::unary_function<Pair, typename Pair::second_type> {
@@ -33,34 +33,43 @@ struct select2nd : public std::unary_function<Pair, typename Pair::second_type> 
 
 namespace EUROPA {
 
-	Resource::Resource(const PlanDatabaseId planDatabase,
-			const LabelStr& type, const LabelStr& name,
-			const LabelStr& detectorName,
-			const LabelStr& profileName,
-			edouble initCapacityLb, edouble initCapacityUb,
-			edouble lowerLimit, edouble upperLimit,
-			edouble maxInstProduction, edouble maxInstConsumption,
-			edouble maxProduction, edouble maxConsumption)
-		: Object(planDatabase, type, name, false)
-	{
-			init(initCapacityLb, initCapacityUb,
-					lowerLimit, upperLimit,
-					maxInstProduction, maxInstConsumption,
-					maxProduction, maxConsumption,
-					detectorName,
-					profileName
-			);
-	}
+Resource::Resource(const PlanDatabaseId planDatabase,
+                   const LabelStr& type, const LabelStr& name,
+                   const LabelStr& detectorName,
+                   const LabelStr& profileName,
+                   edouble initCapacityLb, edouble initCapacityUb,
+                   edouble lowerLimit, edouble upperLimit,
+                   edouble maxInstProduction, edouble maxInstConsumption,
+                   edouble maxProduction, edouble maxConsumption)
+    : Object(planDatabase, type, name, false),
+  m_detector(), m_capacityProfile(), m_limitProfile(), m_profile(), 
+  m_transactionsToTokens(), m_flawedTokens(), m_flawedInstants(), 
+  m_maxInstProduction(maxInstProduction), m_maxInstConsumption(maxInstConsumption),
+  m_maxProduction(maxProduction), m_maxConsumption(maxConsumption) {
+  init(initCapacityLb, initCapacityUb,
+       lowerLimit, upperLimit,
+       maxInstProduction, maxInstConsumption,
+       maxProduction, maxConsumption,
+       detectorName,
+       profileName
+       );
+}
 
-	Resource::Resource(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open)
-		: Object(planDatabase, type, name, open)
-	{
-	}
+Resource::Resource(const PlanDatabaseId planDatabase, const LabelStr& type,
+                   const LabelStr& name, bool open)
+    : Object(planDatabase, type, name, open),
+      m_detector(), m_capacityProfile(), m_limitProfile(), m_profile(), 
+      m_transactionsToTokens(), m_flawedTokens(), m_flawedInstants(), 
+      m_maxInstProduction(), m_maxInstConsumption(),
+      m_maxProduction(), m_maxConsumption() {}
 
-	Resource::Resource(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open)
-		: Object(parent, type, localName, open)
-	{
-	}
+Resource::Resource(const ObjectId parent, const LabelStr& type, 
+                   const LabelStr& localName, bool open)
+    : Object(parent, type, localName, open),
+      m_detector(), m_capacityProfile(), m_limitProfile(), m_profile(), 
+      m_transactionsToTokens(), m_flawedTokens(), m_flawedInstants(), 
+      m_maxInstProduction(), m_maxInstConsumption(),
+      m_maxProduction(), m_maxConsumption() {}
 
 Resource::~Resource() {
   for(std::map<TransactionId, TokenId>::const_iterator it = m_transactionsToTokens.begin();

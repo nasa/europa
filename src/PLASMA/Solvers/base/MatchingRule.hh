@@ -11,85 +11,85 @@
 #include "ComponentFactory.hh"
 
 namespace EUROPA {
-  namespace SOLVERS {
+namespace SOLVERS {
 
-    class MatchingRule: public Component {
-    public:
-      /**
-       * @brief Construct a matching rule
-       */
-      MatchingRule(const TiXmlElement& configData);
+class MatchingRule: public Component {
+ public:
+  /**
+   * @brief Construct a matching rule
+   */
+  MatchingRule(const TiXmlElement& configData);
 
-      /**
-       * @brief Sets link to matching engine to obtain cycle count
-       */
-      void initialize(const MatchingEngineId matchingEngine);
+  /**
+   * @brief Sets link to matching engine to obtain cycle count
+   */
+  void initialize(const MatchingEngineId matchingEngine);
 
-      /**
-       * @brief Test if all conditions have been met for this rule, in this iteration of the matching engine
-       */
-      bool fire();
+  /**
+   * @brief Test if all conditions have been met for this rule, in this iteration of the matching engine
+   */
+  bool fire();
 
-      /**
-       * @brief Retrieves a string expression for the scope over which this filter is evaluated.
-       */
-      virtual std::string toString() const;
+  /**
+   * @brief Retrieves a string expression for the scope over which this filter is evaluated.
+   */
+  virtual std::string toString() const;
 
-      /**
-       * @brief The number of static filters on this rule
-       */
-      virtual unsigned int staticFilterCount() const;
+  /**
+   * @brief The number of static filters on this rule
+   */
+  virtual unsigned int staticFilterCount() const;
 
-      bool filteredByObjectType() const;
+  bool filteredByObjectType() const;
 
-      const LabelStr& objectTypeFilter() const;
+  const LabelStr& objectTypeFilter() const;
 
-      bool filteredByPredicate() const;
+  bool filteredByPredicate() const;
 
-      const LabelStr& predicateFilter() const;
+  const LabelStr& predicateFilter() const;
 
-      bool filteredByVariable() const;
+  bool filteredByVariable() const;
 
-      const LabelStr& variableFilter() const;
+  const LabelStr& variableFilter() const;
 
-      bool filteredByMasterObjectType() const;
+  bool filteredByMasterObjectType() const;
 
-      const LabelStr& masterObjectTypeFilter() const;
+  const LabelStr& masterObjectTypeFilter() const;
 
-      bool filteredByMasterPredicate() const;
+  bool filteredByMasterPredicate() const;
 
-      const LabelStr& masterPredicateFilter() const;
+  const LabelStr& masterPredicateFilter() const;
 
-      bool filteredByMasterRelation() const;
+  bool filteredByMasterRelation() const;
 
-      const LabelStr& masterRelationFilter() const;
+  const LabelStr& masterRelationFilter() const;
 
-      bool filteredByTokenName() const;
+  bool filteredByTokenName() const;
 
-      const LabelStr& tokenNameFilter() const;
+  const LabelStr& tokenNameFilter() const;
 
-      ContextId getContext() const {return m_context;}
-      virtual void setContext(ContextId ctx) {check_error(ctx != ContextId::noId()); m_context = ctx;}
-    protected:
-      void setExpression(const std::string& expression);
-      ContextId m_context;
-    private:
-      MatchingRule(const MatchingRule&); /*!< NO IMPL */
-      LabelStr m_label; /*!< Stores the label for the rule. Optional to set this. */
-      std::string m_expression; /*!< Stores the matching expression as a string for display */
+  ContextId getContext() const {return m_context;}
+  virtual void setContext(ContextId ctx) {check_error(ctx != ContextId::noId()); m_context = ctx;}
+ protected:
+  void setExpression(const std::string& expression);
+  ContextId m_context;
+ private:
+  MatchingRule(const MatchingRule&); /*!< NO IMPL */
+  LabelStr m_label; /*!< Stores the label for the rule. Optional to set this. */
+  std::string m_expression; /*!< Stores the matching expression as a string for display */
 
-      LabelStr m_objectType;
-      LabelStr m_predicate;
-      LabelStr m_variable;
-      LabelStr m_masterObjectType;
-      LabelStr m_masterPredicate;
-      LabelStr m_masterRelation;
-      LabelStr m_tokenName;
-      unsigned int m_staticFilterCount; /*!< Count of the number of static filters on this rule */
-      unsigned int m_lastCycle; /*!< The last MatchingEngine cycle */
-      unsigned int m_hitCount; /*!< Count of hits in the current matching cycle */
-      MatchingEngineId m_matchingEngine;
-    };
+  LabelStr m_objectType;
+  LabelStr m_predicate;
+  LabelStr m_variable;
+  LabelStr m_masterObjectType;
+  LabelStr m_masterPredicate;
+  LabelStr m_masterRelation;
+  LabelStr m_tokenName;
+  unsigned int m_staticFilterCount; /*!< Count of the number of static filters on this rule */
+  unsigned int m_lastCycle; /*!< The last MatchingEngine cycle */
+  unsigned int m_hitCount; /*!< Count of hits in the current matching cycle */
+  MatchingEngineId m_matchingEngine;
+};
   }
 }
 #endif

@@ -12,9 +12,9 @@
 namespace EUROPA {
 namespace SOLVERS {
 
-Component::Component() : m_id(this) {}
+Component::Component() : m_id(this), m_name() {}
     
-Component::Component(const TiXmlElement&) : m_id(this) {}
+Component::Component(const TiXmlElement&) : m_id(this), m_name() {}
     
 Component::~Component() {
   m_id.remove();

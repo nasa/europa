@@ -133,8 +133,8 @@ void PSSolverImpl::solve(int maxSteps, int maxDepth) {
 
   void PSSolverImpl::configure(eint::basis_type horizonStart, eint::basis_type horizonEnd) {
     check_runtime_error(horizonStart <= horizonEnd);
-    m_solver->getContext()->put("horizonStart", horizonStart);
-    m_solver->getContext()->put("horizonEnd", horizonEnd);
+    m_solver->getContext()->put("horizonStart", static_cast<double>(horizonStart));
+    m_solver->getContext()->put("horizonEnd", static_cast<double>(horizonEnd));
   }
 
 }

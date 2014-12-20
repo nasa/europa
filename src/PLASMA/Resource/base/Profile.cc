@@ -13,15 +13,22 @@
 
 namespace EUROPA {
 
-    Profile::Profile(const PlanDatabaseId db, const FVDetectorId flawDetector)
-    	: 
-        FactoryObj(),
-        m_id(this)
-    	, m_changeCount(0)
-    	, m_needsRecompute(false)
-        , m_constraintKeyLb(0)
-        , m_planDatabase(db)
-        , m_detector(flawDetector)
+Profile::Profile(const PlanDatabaseId db, const FVDetectorId flawDetector)
+    : FactoryObj(),
+      m_id(this)
+    , m_changeCount(0)
+    , m_needsRecompute(false)
+    , m_constraintKeyLb(0)
+    , m_planDatabase(db)
+    , m_detector(flawDetector)
+    , m_transactions()
+    , m_variableListeners()
+    , m_otherListeners()
+    , m_transactionsByTime()
+    , m_temporalConstraints()
+    , m_removalListener()
+    , m_instants()
+    , m_recomputeInterval()
     {
     	m_removalListener = (new ConstraintRemovalListener(db->getConstraintEngine(), m_id))->getId();
     }
@@ -772,7 +779,8 @@ void Profile::ConstraintAdditionListener::notifyConstraintRemoved(const Constrai
     }
 
     ProfileIterator::ProfileIterator(const ProfileId prof, const eint startTime, const eint endTime)
-      : m_id(this), m_profile(prof), m_changeCount(prof->m_changeCount) {
+        : m_id(this), m_profile(prof), m_changeCount(prof->m_changeCount), 
+          m_startTime(), m_endTime(), m_start(), m_end(), m_realEnd() {
       //if(m_profile->m_needsRecompute)
       //m_profile->handleRecompute();
       debugMsg("ProfileIterator:ProfileIterator", "Creating iterator over interval [" << startTime << " " << endTime << "] with change count " <<
@@ -860,11 +868,10 @@ void Profile::ConstraintRemovalListener::notifyRemoved(const ConstraintId constr
   }
 }
 
-    ExplicitProfile::ExplicitProfile(edouble lb, edouble ub)
-    	: m_id(this)
-    {
-    	setValue(MINUS_INFINITY,lb,ub);
-    }
+ExplicitProfile::ExplicitProfile(edouble lb, edouble ub)
+    : m_id(this), m_values() {
+  setValue(MINUS_INFINITY,lb,ub);
+}
 
     ExplicitProfile::~ExplicitProfile()
     {

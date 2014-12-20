@@ -47,6 +47,9 @@ protected:
     std::string m_result;
     bool m_setBaseline;
     NddlTestEngine* m_engine;
+private:
+  NddlTest(const NddlTest&);
+  NddlTest& operator=(const NddlTest&);
 };
 
 class ErrorCheckingTests : public CppUnit::TestSuite

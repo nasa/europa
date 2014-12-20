@@ -139,6 +139,9 @@ class FlowProfileGraph
 };
 
 class FlowProfileGraphImpl : public FlowProfileGraph {
+private:
+  FlowProfileGraphImpl(const FlowProfileGraphImpl&);
+  FlowProfileGraphImpl& operator=(const FlowProfileGraphImpl&);
  public:
   FlowProfileGraphImpl(const TransactionId source, const TransactionId sink, bool lowerLevel);
   ~FlowProfileGraphImpl();

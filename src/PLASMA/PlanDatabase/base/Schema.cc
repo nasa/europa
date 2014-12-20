@@ -52,12 +52,14 @@ namespace EUROPA {
     return LabelStr(fullName.c_str());
   }
 
-  Schema::Schema(const LabelStr& name, const CESchemaId ces)
-      : m_id(this)
-      , m_name(name)
-      , m_ceSchema(ces)
-      , m_objectTypeMgr((new ObjectTypeMgr())->getId())
-      , m_tokenTypeMgr((new TokenTypeMgr())->getId())
+Schema::Schema(const LabelStr& name, const CESchemaId ces)
+    : m_id(this), m_name(name), m_ceSchema(ces)
+    , m_objectTypeMgr((new ObjectTypeMgr())->getId())
+    , m_tokenTypeMgr((new TokenTypeMgr())->getId())
+    , m_methods(), enumValues(), enumValuesToEnums(), objectTypes()
+    , predicates(), primitives(), membershipRelation(), childOfRelation()
+    , objectPredicates(), typesWithNoPredicates(), allObjectTypes()
+    , m_predTrueCache(), m_predFalseCache(), m_hasParentCache()
   {
       reset();
       debugMsg("Schema:constructor", "created Schema:" << name.toString());

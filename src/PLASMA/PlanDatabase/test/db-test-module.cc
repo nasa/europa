@@ -58,12 +58,12 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
     ConstrainedVariableId m_1;
   };
 
-  DBFoo::DBFoo(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name)
-    : Timeline(planDatabase, type, name, true) {
-  }
+DBFoo::DBFoo(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name)
+    : Timeline(planDatabase, type, name, true), m_0(), m_1() {
+}
 
-  DBFoo::DBFoo(const ObjectId parent, const LabelStr& type, const LabelStr& name)
-    : Timeline(parent, type, name, true) {}
+DBFoo::DBFoo(const ObjectId parent, const LabelStr& type, const LabelStr& name)
+    : Timeline(parent, type, name, true), m_0(), m_1() {}
 
   // default initialization of member variables
   void DBFoo::handleDefaults(bool autoClose) {
@@ -4172,16 +4172,16 @@ public:
   class TestClass2 : public Timeline {
   public:
     TestClass2(const PlanDatabaseId planDatabase, const LabelStr& name)
-      : Timeline(planDatabase, "TestClass2", name, true) {
+        : Timeline(planDatabase, "TestClass2", name, true), m_int1(), m_float2(), m_where() {
     }
     TestClass2(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name)
-      : Timeline(planDatabase, type, name, true) {
+      : Timeline(planDatabase, type, name, true), m_int1(), m_float2(), m_where() {
     }
     TestClass2(const ObjectId parent, const LabelStr& name)
-      : Timeline(parent, "TestClass2", name, true) {
+      : Timeline(parent, "TestClass2", name, true), m_int1(), m_float2(), m_where() {
     }
     TestClass2(const ObjectId parent, const LabelStr& type, const LabelStr& name)
-      : Timeline(parent, type, name, true) {
+      : Timeline(parent, type, name, true), m_int1(), m_float2(), m_where() {
     }
     void handleDefaults(bool autoClose = false) {
       if (m_int1.isNoId())
@@ -4208,14 +4208,16 @@ public:
     // Borrowed from System/test/backtr.{nddl,cc,hh,xml}
     class Sample : public IntervalToken {
     public:
-      Sample(const PlanDatabaseId planDb, const LabelStr& name, bool rejectable = false, bool isFact = false)
-        : IntervalToken(planDb, name, rejectable, isFact, IntervalIntDomain(), IntervalIntDomain(),
-                        IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false) {
+      Sample(const PlanDatabaseId planDb, const LabelStr& name, bool rejectable = false, bool _isFact = false)
+        : IntervalToken(planDb, name, rejectable, _isFact, IntervalIntDomain(), IntervalIntDomain(),
+                        IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false),
+          m_x(), m_y(), m_closest(){
         handleDefaults();
       }
       Sample(const TokenId parent, const LabelStr& name, const LabelStr& relation)
         : IntervalToken(parent, relation, name, IntervalIntDomain(), IntervalIntDomain(),
-                        IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false) {
+                        IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false),
+          m_x(), m_y(), m_closest(){
         handleDefaults();
       }
       void handleDefaults() {

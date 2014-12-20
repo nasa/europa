@@ -16,6 +16,12 @@
 namespace EUROPA
 {
 MaximumFlowAlgorithm::MaximumFlowAlgorithm( Graph* g, Node* source, Node* sink  ):
+    m_CurrentOutEdgeOnNode(),
+    m_EndOutEdgeOnNode(),
+    m_ExcessOnNode(),
+    m_DistanceOnNode(),
+    m_OnEdge(),
+    m_Nodes(),
     m_Graph( g ),
     m_Source( source ),
     m_Sink( sink ),
@@ -32,7 +38,7 @@ MaximumFlowAlgorithm::MaximumFlowAlgorithm( Graph* g, Node* source, Node* sink  
              << *sink );
 }
 
-void MaximumFlowAlgorithm::print( std::ostream& os ) const
+void MaximumFlowAlgorithm::print( std::ostream& ) const
 {
 
 }

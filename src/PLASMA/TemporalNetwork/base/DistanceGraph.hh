@@ -283,6 +283,8 @@ protected:
   virtual void handleNodeUpdate(const DnodeId node);
 
 private:
+  DistanceGraph(const DistanceGraph&);
+  DistanceGraph& operator=(const DistanceGraph&);
   Void deleteEdge(DedgeId edge);
   Void eraseEdge(DedgeId edge);
   Void preventNodeMarkOverflow();
@@ -330,6 +332,8 @@ protected:
   Int depth;  // Depth of propagation for testing against the BF limit.
   Time key; // Used for priority ordering */
 private:
+  Dnode(const Dnode&);
+  Dnode& operator=(const Dnode&);
 public:
   /**
    * @brief get node's id
@@ -345,21 +349,9 @@ private:
   Int generation;     // Used for obsoleting Dijkstra-calculated distances.
 public:
 
-  Dnode() : m_id(this) {
-      inArray = nullptr;
-      inArraySize = 0;
-      inCount = 0;
-      outArray = nullptr;
-      outArraySize = 0;
-      outCount = 0;
-      distance = 0;
-      potential = 0;
-      depth = 0;
-      key = 0;
-      link = DnodeId::noId();
-      predecessor = DedgeId::noId();
-      markLocal = 0;
-      generation = 0;
+  Dnode() : m_id(this), inArray(NULL), inArraySize(0), inCount(0), outArray(NULL),
+            outArraySize(0), outCount(0), edgemap(), distance(0), potential(0), depth(0),
+            key(0), link(), predecessor(), markLocal(0), generation(0) {
   }
   virtual ~Dnode() {
     discard(false);
@@ -400,7 +392,7 @@ public:
   /**
    * @brief constructor
    */
-  Dedge ():m_id(this), length(0) {}
+  Dedge ():lengthSpecs(), m_id(this), to(), from(), length(0) {}
   /**
    * @brief destructor
    */
@@ -426,7 +418,7 @@ public:
   Time key;
 
 private:
-  Bucket (const DnodeId n, Time distance) { node=n ; key=distance; }
+  Bucket (const DnodeId n, Time distance) : node(n), key(distance) {}
 
   friend class BucketQueue;
 };
@@ -453,6 +445,9 @@ typedef std::priority_queue<Bucket,std::vector<Bucket>,BucketComparator> DnodePr
  * @ingroup TemporalNetwork
 */
 class BucketQueue {
+private:
+  BucketQueue(const BucketQueue&);
+  BucketQueue& operator=(const BucketQueue&);
   DnodePriorityQueue* buckets;
 public:
 
@@ -510,7 +505,7 @@ class Dqueue {
   DnodeId first;
   DnodeId last;
 public:
-
+  Dqueue() : first(), last() {}
   /**
    * @brief remove all nodes from the queue
    */

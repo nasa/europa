@@ -16,15 +16,17 @@
 #include <math.h>
 
 namespace EUROPA {
-  namespace SOLVERS {
+namespace SOLVERS {
 
-
-
-    FlawHandler::FlawHandler(const TiXmlElement& configData):
-        MatchingRule(configData),
-        m_configData(makeConfigData(configData)),
-      m_guards(readGuards(configData, false)),
-      m_masterGuards(readGuards(configData, true)){
+FlawHandler::FlawHandler(const TiXmlElement& configData): 
+    MatchingRule(configData),
+    m_configData(makeConfigData(configData)),
+    m_priority(0),
+    m_weight(0),
+    m_guards(readGuards(configData, false)),
+    m_masterGuards(readGuards(configData, true)),
+    m_db(),
+    m_maxChoices(0){
 
       // Establish the priority
       const char* priorityStr = m_configData->Attribute("priority");
@@ -44,9 +46,14 @@ namespace EUROPA {
       refreshWeight();
     }
     
-    void FlawHandler::refreshWeight() {
-      m_weight = std::abs(m_priority - (2+staticFilterCount() + customStaticFilterCount() + m_guards.size() + m_masterGuards.size()) * WEIGHT_BASE());
-    }
+void FlawHandler::refreshWeight() {
+  m_weight = 
+      std::abs(m_priority - 
+               (2.0 + staticFilterCount() + customStaticFilterCount() + 
+                static_cast<double>(m_guards.size()) + 
+                static_cast<double>(m_masterGuards.size())) * 
+               WEIGHT_BASE());
+}
 
     /**
      * @brief Process the input element to pull defaults from the parent
@@ -313,11 +320,12 @@ namespace EUROPA {
 
     /** FlawHandler::VariableListener **/
 
-    FlawHandler::VariableListener::VariableListener(const LabelStr& name,
-                                                    const LabelStr& propagatorName,
-                                                    const ConstraintEngineId constraintEngine, 
-                                                    const std::vector<ConstrainedVariableId>& variables)
-      : Constraint(name, propagatorName, constraintEngine, variables), m_isApplied(false) {}
+FlawHandler::VariableListener::VariableListener(const LabelStr& name,
+                                                const LabelStr& propagatorName,
+                                                const ConstraintEngineId constraintEngine, 
+                                                const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables), 
+      m_target(), m_flawManager(), m_flawHandler(), m_isApplied(false) {}
 
     FlawHandler::VariableListener::VariableListener(const ConstraintEngineId ce,
                                                     const EntityId target,

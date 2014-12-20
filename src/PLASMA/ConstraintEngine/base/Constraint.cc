@@ -20,6 +20,7 @@ namespace EUROPA {
     , m_variables(variables)
     , m_violationExpl("")
     , m_id(this)
+    , m_propagator()
     , m_isUnary(true)
     , m_createdBy("UNKNOWN")
     , m_deactivationRefCount(0)

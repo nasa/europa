@@ -470,11 +470,13 @@ private:
      @brief Helper function for addMsg()'s use of STL find_if().
   */
   template<class U>
-  class PatternMatches : public std::unary_function<U, bool> {
+  class PatternMatches {
   private:
     const DebugMessage& dm;
 
   public:
+    typedef U argument_type;
+    typedef bool result_type;
     explicit PatternMatches(const DebugMessage& debugMsg) : dm(debugMsg) {
     }
 
@@ -488,11 +490,14 @@ private:
      @brief Helper class to use markerMatches via STL find_if().
   */
   template<class T>
-  class MatchesPattern : public std::unary_function<T, bool> {
+  class MatchesPattern {
   private:
     const DebugPattern pattern;
 
   public:
+    typedef T argument_type;
+    typedef bool result_type;
+
     explicit MatchesPattern(const std::string& f, const std::string& p)
       : pattern(f, p) {
     }

@@ -934,6 +934,7 @@ EqualSumConstraint::EqualSumConstraint(const LabelStr& name,
                                        const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       ARG_COUNT(variables.size()),
+      m_eqSumC1(), m_eqSumC2(), m_eqSumC3(), m_eqSumC4(), m_eqSumC5(),
       m_sum1(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalEqSumVariable"), getId()),
       m_sum2(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalEqSumVariable"), getId()),
       m_sum3(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalEqSumVariable"), getId()),
@@ -1052,6 +1053,7 @@ EqualSumConstraint::EqualSumConstraint(const LabelStr& name,
                                                  const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       ARG_COUNT(variables.size()),
+      m_eqProductC1(), m_eqProductC2(), m_eqProductC3(), m_eqProductC4(), m_eqProductC5(),
       m_product1(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalEqProductVariable"), getId()),
       m_product2(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalEqProductVariable"), getId()),
       m_product3(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalEqProductVariable"), getId()),
@@ -1164,19 +1166,20 @@ EqualSumConstraint::EqualSumConstraint(const LabelStr& name,
   }
 
   /*********** LessOrEqualThanSumConstraint *************/
-  LessOrEqThanSumConstraint::LessOrEqThanSumConstraint(const LabelStr& name,
-                                                       const LabelStr& propagatorName,
-                                                       const ConstraintEngineId constraintEngine,
-                                                       const std::vector<ConstrainedVariableId>& variables)
+LessOrEqThanSumConstraint::LessOrEqThanSumConstraint(const LabelStr& name,
+                                                     const LabelStr& propagatorName,
+                                                     const ConstraintEngineId constraintEngine,
+                                                     const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_interimVariable(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalConstraintVariable"), getId()),
       m_lessOrEqualConstraint(LabelStr("LessThanEq"), propagatorName, constraintEngine,
-                              makeScope(m_variables[0], m_interimVariable.getId())) {
-    std::vector<ConstrainedVariableId> eqSumScope = m_variables;
-    eqSumScope[0] = m_interimVariable.getId();
-    m_eqSumConstraint = (new EqualSumConstraint(LabelStr("EqualSum"), propagatorName,
-                                                constraintEngine, eqSumScope))->getId();
-  }
+                              makeScope(m_variables[0], m_interimVariable.getId())),
+    m_eqSumConstraint() {
+  std::vector<ConstrainedVariableId> eqSumScope = m_variables;
+  eqSumScope[0] = m_interimVariable.getId();
+  m_eqSumConstraint = (new EqualSumConstraint(LabelStr("EqualSum"), propagatorName,
+                                              constraintEngine, eqSumScope))->getId();
+}
 
   LessOrEqThanSumConstraint::~LessOrEqThanSumConstraint(){
     discard(false);
@@ -1193,53 +1196,55 @@ EqualSumConstraint::EqualSumConstraint(const LabelStr& name,
 
 
   /*********** LessThanSumConstraint *************/
-  LessThanSumConstraint::LessThanSumConstraint(const LabelStr& name,
-                                               const LabelStr& propagatorName,
-                                               const ConstraintEngineId constraintEngine,
-                                               const std::vector<ConstrainedVariableId>& variables)
+LessThanSumConstraint::LessThanSumConstraint(const LabelStr& name,
+                                             const LabelStr& propagatorName,
+                                             const ConstraintEngineId constraintEngine,
+                                             const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_interimVariable(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalConstraintVariable"), getId()),
       m_lessThanConstraint(LabelStr("LessThan"), propagatorName, constraintEngine,
-                           makeScope(m_variables[0], m_interimVariable.getId())) {
-    std::vector<ConstrainedVariableId> eqSumScope = m_variables;
-    eqSumScope[0] = m_interimVariable.getId();
-    m_eqSumConstraint = (new EqualSumConstraint(LabelStr("EqualSum"), propagatorName,
-                                                constraintEngine, eqSumScope))->getId();
-    check_error(m_eqSumConstraint.isValid());
-  }
+                           makeScope(m_variables[0], m_interimVariable.getId())),
+    m_eqSumConstraint() {
+  std::vector<ConstrainedVariableId> eqSumScope = m_variables;
+  eqSumScope[0] = m_interimVariable.getId();
+  m_eqSumConstraint = (new EqualSumConstraint(LabelStr("EqualSum"), propagatorName,
+                                              constraintEngine, eqSumScope))->getId();
+  check_error(m_eqSumConstraint.isValid());
+}
 
   /*********** GreaterOrEqThanSumConstraint *************/
-  GreaterOrEqThanSumConstraint::GreaterOrEqThanSumConstraint(const LabelStr& name,
-                                                       const LabelStr& propagatorName,
-                                                       const ConstraintEngineId constraintEngine,
-                                                       const std::vector<ConstrainedVariableId>& variables)
+GreaterOrEqThanSumConstraint::GreaterOrEqThanSumConstraint(const LabelStr& name,
+                                                           const LabelStr& propagatorName,
+                                                           const ConstraintEngineId constraintEngine,
+                                                           const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_interimVariable(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalConstraintVariable"), getId()),
       m_lessOrEqualConstraint(LabelStr("LessThanEqual"), propagatorName, constraintEngine,
-                              makeScope(m_interimVariable.getId(), m_variables[0])) {
-    std::vector<ConstrainedVariableId> eqSumScope = m_variables;
-    eqSumScope[0] = m_interimVariable.getId();
-    m_eqSumConstraint = (new EqualSumConstraint(LabelStr("EqualSum"), propagatorName,
-                                                constraintEngine, eqSumScope))->getId();
-  }
+                              makeScope(m_interimVariable.getId(), m_variables[0])),
+  m_eqSumConstraint() {
+  std::vector<ConstrainedVariableId> eqSumScope = m_variables;
+  eqSumScope[0] = m_interimVariable.getId();
+  m_eqSumConstraint = (new EqualSumConstraint(LabelStr("EqualSum"), propagatorName,
+                                              constraintEngine, eqSumScope))->getId();
+}
 
   /*********** GreaterThanSumConstraint *************/
-  GreaterThanSumConstraint::GreaterThanSumConstraint(const LabelStr& name,
-                                                     const LabelStr& propagatorName,
-                                                     const ConstraintEngineId constraintEngine,
-                                                     const std::vector<ConstrainedVariableId>& variables)
+GreaterThanSumConstraint::GreaterThanSumConstraint(const LabelStr& name,
+                                                   const LabelStr& propagatorName,
+                                                   const ConstraintEngineId constraintEngine,
+                                                   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_interimVariable(constraintEngine, constraintEngine->getCESchema()->baseDomain(m_variables[0]->baseDomain().getTypeName().c_str()),
 			true, false, LabelStr("InternalConstraintVariable"), getId()),
-      m_lessThanConstraint(LabelStr("LessThan"), propagatorName, constraintEngine,
-                           makeScope(m_interimVariable.getId(), m_variables[0]))
-  {
-    std::vector<ConstrainedVariableId> eqSumScope = m_variables;
-    eqSumScope[0] = m_interimVariable.getId();
-    m_eqSumConstraint = (new EqualSumConstraint(LabelStr("EqualSum"), propagatorName,
-                                                constraintEngine, eqSumScope))->getId();
-    check_error(m_eqSumConstraint.isValid());
-  }
+  m_lessThanConstraint(LabelStr("LessThan"), propagatorName, constraintEngine,
+                       makeScope(m_interimVariable.getId(), m_variables[0])),
+  m_eqSumConstraint() {
+  std::vector<ConstrainedVariableId> eqSumScope = m_variables;
+  eqSumScope[0] = m_interimVariable.getId();
+  m_eqSumConstraint = (new EqualSumConstraint(LabelStr("EqualSum"), propagatorName,
+                                              constraintEngine, eqSumScope))->getId();
+  check_error(m_eqSumConstraint.isValid());
+}
 
   /*********** CondAllSameConstraint *************/
   CondAllSameConstraint::CondAllSameConstraint(const LabelStr& name,
@@ -1365,8 +1370,7 @@ EqualSumConstraint::EqualSumConstraint(const LabelStr& name,
                 && (domj.isMember(domToTrim.getLowerBound())
                     || domj.isMember(domToTrim.getUpperBound()))))
           domToTrim.remove(single);
-        else
-          ; // Can ignore relax events until condition var is relaxed.
+        else {} // Can ignore relax events until condition var is relaxed.
         return;
       } else {
 
@@ -1624,13 +1628,13 @@ void addToUnion(Domain **unionOfDomains,
     } // for changedOne = true; changedOne;
   } // end of CondAllDiffConstraint::handleExecute()
 
-  AllDiffConstraint::AllDiffConstraint(const LabelStr& name,
-                                       const LabelStr& propagatorName,
-                                       const ConstraintEngineId constraintEngine,
-                                       const std::vector<ConstrainedVariableId>& variables)
+AllDiffConstraint::AllDiffConstraint(const LabelStr& name,
+                                     const LabelStr& propagatorName,
+                                     const ConstraintEngineId constraintEngine,
+                                     const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_condVar(constraintEngine, BoolDomain(true), true, false, LabelStr("Internal:AllDiff:cond"), getId())
-  {
+      m_condVar(constraintEngine, BoolDomain(true), true, false, LabelStr("Internal:AllDiff:cond"), getId()),
+      m_condAllDiffConstraint() {
     std::vector<ConstrainedVariableId> condAllDiffScope;
     condAllDiffScope.reserve(m_variables.size() + 1);
     condAllDiffScope.push_back(m_condVar.getId());
@@ -1746,34 +1750,35 @@ void addToUnion(Domain **unionOfDomains,
       countDom.intersect(make_int_int(minZeros, maxZeros));
   }
 
-  CountNonZerosConstraint::CountNonZerosConstraint(const LabelStr& name,
-                                                   const LabelStr& propagatorName,
-                                                   const ConstraintEngineId constraintEngine,
-                                                   const std::vector<ConstrainedVariableId>& variables)
+CountNonZerosConstraint::CountNonZerosConstraint(const LabelStr& name,
+                                                 const LabelStr& propagatorName,
+                                                 const ConstraintEngineId constraintEngine,
+                                                 const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_zeros(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalCountNonZerosVar"), getId()),
       m_otherVars(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalCountNonZerosOtherVars"), getId()),
-      m_superset(constraintEngine, IntervalDomain(static_cast<edouble>(variables.size() - 1)), true, false, LabelStr("InternalCountNonZerosSuperset"), getId()),
-      m_addEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine,
-                           makeScope(m_zeros.getId(), m_variables[0], m_otherVars.getId()))
-  {
-    m_subsetConstraint = (new SubsetOfConstraint(LabelStr("SubsetOf"), propagatorName, constraintEngine,
-                                                 makeScope(m_otherVars.getId(), m_superset.getId())))->getId();
-    std::vector<ConstrainedVariableId> cZCScope = m_variables;
-    cZCScope[0] = m_zeros.getId();
-    check_error(m_variables.size() == cZCScope.size());
-    m_countZerosConstraint = (new CountZerosConstraint(LabelStr("CountZeros"),
-                                                       propagatorName, constraintEngine, cZCScope))->getId();
-  }
+    m_superset(constraintEngine, IntervalDomain(edouble(variables.size() - 1)), true, false, LabelStr("InternalCountNonZerosSuperset"), getId()),
+    m_addEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine,
+                         makeScope(m_zeros.getId(), m_variables[0], m_otherVars.getId())),
+    m_subsetConstraint(), m_countZerosConstraint() {
+  m_subsetConstraint = (new SubsetOfConstraint(LabelStr("SubsetOf"), propagatorName, constraintEngine,
+                                               makeScope(m_otherVars.getId(), m_superset.getId())))->getId();
+  std::vector<ConstrainedVariableId> cZCScope = m_variables;
+  cZCScope[0] = m_zeros.getId();
+  check_error(m_variables.size() == cZCScope.size());
+  m_countZerosConstraint = (new CountZerosConstraint(LabelStr("CountZeros"),
+                                                     propagatorName, constraintEngine, cZCScope))->getId();
+}
 
-  CardinalityConstraint::CardinalityConstraint(const LabelStr& name,
-                                               const LabelStr& propagatorName,
-                                               const ConstraintEngineId constraintEngine,
-                                               const std::vector<ConstrainedVariableId>& variables)
+CardinalityConstraint::CardinalityConstraint(const LabelStr& name,
+                                             const LabelStr& propagatorName,
+                                             const ConstraintEngineId constraintEngine,
+                                             const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_nonZeros(constraintEngine, IntervalIntDomain(0, PLUS_INFINITY), true, false, LabelStr("InternalCardinalityVar"), getId()),
       m_lessThanEqualConstraint(LabelStr("LessThanEqual"), propagatorName,
-                                constraintEngine, makeScope(m_nonZeros.getId(), m_variables[0]))
+                                constraintEngine, makeScope(m_nonZeros.getId(), m_variables[0])),
+                     m_countNonZerosConstraint()
   {
     std::vector<ConstrainedVariableId> cCScope = m_variables;
     cCScope[0] = m_nonZeros.getId();
@@ -1788,7 +1793,8 @@ void addToUnion(Domain **unionOfDomains,
                              const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_nonZeros(constraintEngine, IntervalIntDomain(1, PLUS_INFINITY), true, false, LabelStr("InternalVar:Or:nonZeros"), getId()),
-      m_superset(constraintEngine, IntervalIntDomain(1, eint(variables.size())), true, false, LabelStr("InternalVar:Or:superset"), getId())
+      m_superset(constraintEngine, IntervalIntDomain(1, eint(variables.size())), true, false, LabelStr("InternalVar:Or:superset"), getId()),
+                     m_subsetConstraint(), m_countNonZerosConstraint()
   {
     m_subsetConstraint = (new SubsetOfConstraint(LabelStr("SubsetOf"), propagatorName, constraintEngine,
                                                  makeScope(m_nonZeros.getId(), m_superset.getId())))->getId();
@@ -1969,15 +1975,16 @@ void addToUnion(Domain **unionOfDomains,
     }
   }
 
-  CondEqualSumConstraint::CondEqualSumConstraint(const LabelStr& name,
-                                                 const LabelStr& propagatorName,
-                                                 const ConstraintEngineId constraintEngine,
-                                                 const std::vector<ConstrainedVariableId>& variables)
+CondEqualSumConstraint::CondEqualSumConstraint(const LabelStr& name,
+                                               const LabelStr& propagatorName,
+                                               const ConstraintEngineId constraintEngine,
+                                               const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_sumVar(constraintEngine, constraintEngine->getCESchema()->baseDomain(m_variables[1]->baseDomain().getTypeName().c_str()),
 	       true, false, LabelStr("InternalConstraintVariable"), getId()),
-      m_condAllSameConstraint(LabelStr("CondAllSame"), propagatorName, constraintEngine,
-                              makeScope(m_variables[0], m_variables[1], m_sumVar.getId()))
+    m_condAllSameConstraint(LabelStr("CondAllSame"), propagatorName, constraintEngine,
+                            makeScope(m_variables[0], m_variables[1], m_sumVar.getId())),
+    m_eqSumConstraint()
   {
     check_error(m_variables.size() > 2);
     std::vector<ConstrainedVariableId> eqSumScope;
@@ -1994,13 +2001,13 @@ void addToUnion(Domain **unionOfDomains,
 
 
 
-  RotateScopeRightConstraint::RotateScopeRightConstraint(const LabelStr& name,
-                                                         const LabelStr& propagatorName,
-                                                         const ConstraintEngineId constraintEngine,
-                                                         const std::vector<ConstrainedVariableId>& variables,
-                                                         const LabelStr& otherName,
-                                                         const int& rotateCount)
-    : Constraint(name, propagatorName, constraintEngine, variables)
+RotateScopeRightConstraint::RotateScopeRightConstraint(const LabelStr& name,
+                                                       const LabelStr& propagatorName,
+                                                       const ConstraintEngineId constraintEngine,
+                                                       const std::vector<ConstrainedVariableId>& variables,
+                                                       const LabelStr& otherName,
+                                                       const int& rotateCount)
+    : Constraint(name, propagatorName, constraintEngine, variables), m_otherConstraint()
   {
     check_error(static_cast<unsigned>(abs(rotateCount)) < m_variables.size());
     std::vector<ConstrainedVariableId> otherScope;
@@ -2026,13 +2033,13 @@ void addToUnion(Domain **unionOfDomains,
     m_otherConstraint = constraintEngine->createConstraint(otherName, otherScope);
   }
 
-  SwapTwoVarsConstraint::SwapTwoVarsConstraint(const LabelStr& name,
-                                               const LabelStr& propagatorName,
-                                               const ConstraintEngineId constraintEngine,
-                                               const std::vector<ConstrainedVariableId>& variables,
-                                               const LabelStr& otherName,
-                                               int firstIndex, int secondIndex)
-    : Constraint(name, propagatorName, constraintEngine, variables)
+SwapTwoVarsConstraint::SwapTwoVarsConstraint(const LabelStr& name,
+                                             const LabelStr& propagatorName,
+                                             const ConstraintEngineId constraintEngine,
+                                             const std::vector<ConstrainedVariableId>& variables,
+                                             const LabelStr& otherName,
+                                             int firstIndex, int secondIndex)
+    : Constraint(name, propagatorName, constraintEngine, variables), m_otherConstraint()
   {
     check_error(static_cast<unsigned>(abs(firstIndex)) < m_variables.size());
     check_error(static_cast<unsigned>(abs(secondIndex)) < m_variables.size());

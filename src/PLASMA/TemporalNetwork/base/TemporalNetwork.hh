@@ -490,7 +490,10 @@ namespace EUROPA {
      * @ingroup TemporalNetwork
     */
 
-  class Tnode : public Dnode {
+class Tnode : public Dnode {
+private:
+  Tnode(const Tnode&);
+  Tnode& operator=(const Tnode&);
     friend class TemporalNetwork;
     friend Void keepEdge (DispatchNode* x, DispatchNode* y, Time d);
     // PHM Support for reftime calculations
@@ -544,6 +547,9 @@ namespace EUROPA {
      * @ingroup TemporalNetwork
     */
   class Tspec : public Entity {
+private:
+    Tspec(const Tspec&);
+    Tspec& operator=(const Tspec&);
     friend class TemporalNetwork;
     Time lowerBound;
     Time upperBound;
@@ -565,8 +571,9 @@ namespace EUROPA {
      * @param edgeCount edge count
      */
     Tspec(TemporalNetwork* t, TimepointId src,TimepointId targ,Time lb,Time ub, unsigned short edgeCount)
-      :owner(t), m_id(this), m_edgeCount(edgeCount)
-    { head=src; foot=targ; lowerBound=lb; upperBound=ub;}
+        : lowerBound(lb), upperBound(ub), head(src), foot(targ), owner(t), m_id(this),
+          m_edgeCount(edgeCount)
+    {}
 
     virtual ~Tspec();
 

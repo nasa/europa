@@ -112,7 +112,8 @@ internals_accessor internals() {
 }
 
 
-Entity::Entity(): m_key(0), m_refCount(1), m_discarded(false){
+Entity::Entity(): m_externalEntity(), m_key(0), m_refCount(1), m_discarded(false), 
+                  m_dependents() {
   internals_accessor i(internals());
   m_key = i.second.get().allocateKey(this);
   check_error(!i.second.get().isPurging());

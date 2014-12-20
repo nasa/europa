@@ -200,6 +200,24 @@ namespace EUROPA {
 
   class edouble;
 
+#define handle_inf_constructor(type, v) {				\
+    if(m_v > std::numeric_limits<e ## type>::infinity()) {			\
+      assert(m_v <= std::numeric_limits<e ## type>::infinity());		\
+      m_v = cast_ ## type(std::numeric_limits<e ## type>::infinity());		\
+    }									\
+    else if(m_v < std::numeric_limits<e ## type>::minus_infinity()) {	\
+      assert(m_v >= std::numeric_limits<e ## type>::minus_infinity());	\
+      m_v = cast_ ## type(std::numeric_limits<e ## type>::minus_infinity());	\
+    }									\
+  }
+
+#define handle_inf_unary_self(type, v) {                             \
+    if(v >= std::numeric_limits<type>::infinity())		     \
+      return *this;						     \
+    else if(v <= std::numeric_limits<type>::minus_infinity())	     \
+      return *this;						     \
+  }
+
 #define handle_inf_unary(type, v) {                             \
   if(v >= std::numeric_limits<type>::infinity())                \
     return std::numeric_limits<type>::infinity();               \
@@ -305,7 +323,7 @@ namespace EUROPA {
    */
 #ifndef NO_OVERFLOW_CHECKING
 #define op(type, a, x, b) {                                             \
-  double temp = static_cast<double>(a) x (b);                                    \
+  double temp = static_cast<double>(a) x static_cast<double>(b);                                    \
   if(temp > std::numeric_limits<type>::infinity()) {                    \
     throw std::overflow_error("greater-than-infinity error"); \
   }                                                                     \
@@ -375,46 +393,16 @@ namespace EUROPA {
     typedef long basis_type;
 
     eint(const int v) : m_v(v) {
-      if(m_v > std::numeric_limits<eint>::infinity()) {
-        assert(m_v <= std::numeric_limits<eint>::infinity());
-        m_v = cast_int(std::numeric_limits<eint>::infinity());
-      }
-      else if(m_v < std::numeric_limits<eint>::minus_infinity()) {
-        assert(m_v >= std::numeric_limits<eint>::minus_infinity());
-        m_v = cast_int(std::numeric_limits<eint>::minus_infinity());
-      }
+      handle_inf_constructor(int, m_v);
     }
     eint(const long v) : m_v(v) { //this should maybe warn of loss of precision on 64-bit platforms?
-      if(m_v > std::numeric_limits<eint>::infinity()) {
-        assert(m_v <= std::numeric_limits<eint>::infinity());
-        m_v = cast_int(std::numeric_limits<eint>::infinity());
-      }
-      else if(m_v < std::numeric_limits<eint>::minus_infinity()) {
-        assert(m_v >= std::numeric_limits<eint>::minus_infinity());
-        m_v = cast_int(std::numeric_limits<eint>::minus_infinity());
-      }
-
+      handle_inf_constructor(int, m_v);
     } 
     eint(const unsigned int v) : m_v(static_cast<long>(v)) {
-      if(m_v > std::numeric_limits<eint>::infinity()) {
-        assert(m_v <= std::numeric_limits<eint>::infinity());
-        m_v = cast_int(std::numeric_limits<eint>::infinity());
-      }
-      else if(m_v < std::numeric_limits<eint>::minus_infinity()) {
-        assert(m_v >= std::numeric_limits<eint>::minus_infinity());
-        m_v = cast_int(std::numeric_limits<eint>::minus_infinity());
-      }
+      handle_inf_constructor(int, m_v);
     }
     eint(const unsigned long v) : m_v(static_cast<long>(v)) {
-      if(m_v > std::numeric_limits<eint>::infinity()) {
-        assert(m_v <= std::numeric_limits<eint>::infinity());
-        assert(m_v >= std::numeric_limits<eint>::minus_infinity());
-        m_v = cast_int(std::numeric_limits<eint>::infinity());
-      }
-      else if(m_v < std::numeric_limits<eint>::minus_infinity()) {
-        assert(m_v >= std::numeric_limits<eint>::minus_infinity());
-        m_v = cast_int(std::numeric_limits<eint>::minus_infinity());
-      }
+      handle_inf_constructor(int, m_v);
     }
 
 #ifdef _MSC_VER
@@ -448,9 +436,9 @@ namespace EUROPA {
     inline eint operator+() const {return eint(+m_v, true);}
     inline eint operator-() const {return eint(-m_v, true);}
     inline bool operator!() const {return !m_v;}
-    inline eint operator++() {handle_inf_unary(eint, m_v); return eint(++m_v, true);}
+    inline eint& operator++() {handle_inf_unary_self(eint, m_v); ++m_v; return *this;}
     inline eint operator++(int) {handle_inf_unary(eint, m_v); return eint(m_v++, true);}
-    inline eint operator--() {handle_inf_unary(eint, m_v); return eint(--m_v, true);}
+    inline eint& operator--() {handle_inf_unary_self(eint, m_v); --m_v; return *this;}
     inline eint operator--(int) {handle_inf_unary(eint, m_v); return eint(m_v--, true);}
     inline eint operator+(const int o) const {handle_inf_add(eint, m_v, o); op(eint, m_v, +, o);}
     inline eint operator+(const unsigned long o) const {handle_inf_add(eint, m_v, o); op(eint, m_v, +, o);}
@@ -588,24 +576,29 @@ namespace EUROPA {
   public:
     typedef double basis_type;
 
-    edouble(const eint v) : m_v(v.m_v) {} //don't have to check infinities with eints
+    edouble(const int v) : m_v(v) {
+      handle_inf_constructor(double, m_v);
+    }
+    edouble(const long v) : m_v(static_cast<double>(v)) {
+      handle_inf_constructor(double, m_v);
+    }
+    edouble(const eint v) : m_v(cast_double(v)) {} //don't have to check infinities with eints
     edouble(const double v) : m_v(v) {
-      if(m_v > std::numeric_limits<edouble>::infinity()) {
-        assert(m_v <= std::numeric_limits<edouble>::infinity());
-        m_v = cast_double(std::numeric_limits<edouble>::infinity());
-      }
-      else if(m_v < std::numeric_limits<edouble>::minus_infinity()) {
-        assert(m_v >= std::numeric_limits<edouble>::minus_infinity());
-        m_v = cast_double(std::numeric_limits<edouble>::minus_infinity());
-      }
+      handle_inf_constructor(double, m_v);
+    }
+    edouble(const unsigned int v) : m_v(v) {
+      handle_inf_constructor(double, m_v);
+    }
+    edouble(const unsigned long v) : m_v(static_cast<double>(v)) {
+      handle_inf_constructor(double, m_v);
     }
     edouble() : m_v(0.0) {}
     inline edouble operator+() const {return edouble(+m_v, true);}
     inline edouble operator-() const {return edouble(-m_v, true);}
     inline bool operator!() const {return m_v == 0.0;}
-    inline edouble operator++() {handle_inf_unary(edouble, m_v); return edouble(++m_v, true);}
+    inline edouble& operator++() {handle_inf_unary_self(edouble, m_v); ++m_v; return *this;}
     inline edouble operator++(int) {handle_inf_unary(edouble, m_v); return edouble(m_v++, true);}
-    inline edouble operator--() {handle_inf_unary(edouble, m_v); return edouble(--m_v, true);}
+    inline edouble& operator--() {handle_inf_unary_self(edouble, m_v); --m_v; return *this;}
     inline edouble operator--(int) {handle_inf_unary(edouble, m_v); return edouble(m_v--, true);}
     inline edouble operator+(const edouble o) const {handle_inf_add(edouble, m_v, o.m_v); op(edouble, m_v, +, o.m_v);}
     inline edouble operator-(const edouble o) const {handle_inf_sub(edouble, m_v, o.m_v); op(edouble, m_v, -, o.m_v);}
@@ -796,6 +789,15 @@ inline EUROPA::edouble pow(const EUROPA::edouble d, const EUROPA::eint i) {retur
   inline EUROPA::edouble max(const EUROPA::edouble a, const EUROPA::edouble b) {return EUROPA::edouble(std::max(a.m_v, b.m_v), true);}
   inline EUROPA::edouble min(const EUROPA::edouble a, const EUROPA::edouble b) {return EUROPA::edouble(std::min(a.m_v, b.m_v), true);}
 
+
+#undef GEN_FRIEND_COMPARISONS
+#undef DECL_FRIEND_COMPARISONS
+#undef GEN_COMPARISONS
+#undef handle_inf_mod
+#undef handle_inf_div
+#undef handle_inf_mul
+#undef handle_inf_sub
+#undef handle_inf_add
 #undef handle_inf_unary
 #undef op
 

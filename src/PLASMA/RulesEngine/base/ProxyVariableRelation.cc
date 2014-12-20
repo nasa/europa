@@ -10,7 +10,9 @@ namespace EUROPA {
       m_objectDomain(static_cast<ObjectDomain&>(getCurrentDomain(objectVar))),
       m_proxyDomain(static_cast<EnumeratedDomain&>(getCurrentDomain(proxyVar))),
       m_path(path),
-      m_sourceConstraintKey(0){
+      m_autoSpecified(false),
+      m_sourceConstraintKey(0),
+      m_sourceConstraint() {
     checkError(getScope().size() == ARG_COUNT, toString());
   }
 

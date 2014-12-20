@@ -3,10 +3,7 @@
 
 namespace EUROPA
 {
-  CESchema::CESchema()
-    : m_id(this)
-  {
-  }
+CESchema::CESchema() : m_id(this), m_dataTypes(), m_constraintTypes(), m_cfunctions() {}
 
   CESchema::~CESchema()
   {

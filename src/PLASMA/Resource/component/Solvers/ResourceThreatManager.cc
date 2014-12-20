@@ -33,7 +33,8 @@ namespace EUROPA {
 namespace {
 class ThreatIterator : public FlawIterator {
  public:
-  ThreatIterator(ResourceThreatManager& manager) : FlawIterator(manager) {
+  ThreatIterator(ResourceThreatManager& manager) 
+      : FlawIterator(manager), m_flawedInstants(), m_it(m_flawedInstants.end()) {
     const ObjectSet& objs = manager.getPlanDatabase()->getObjects();
     for(ObjectSet::const_iterator it = objs.begin(); it != objs.end(); ++it) {
       ObjectId obj(*it);
@@ -88,11 +89,11 @@ class ThreatIterator : public FlawIterator {
       m_cmps.clear();
     }
 
-    DecisionOrder::DecisionOrder(const DecisionOrder& other) {
-      for(std::list<InstantComparator*>::const_iterator it = other.m_cmps.begin(); it != other.m_cmps.end(); ++it) {
-        m_cmps.push_back((*it)->copy());
-      }
-    }
+DecisionOrder::DecisionOrder(const DecisionOrder& other) : m_cmps() {
+  for(std::list<InstantComparator*>::const_iterator it = other.m_cmps.begin(); it != other.m_cmps.end(); ++it) {
+    m_cmps.push_back((*it)->copy());
+  }
+}
 
     //returns true if a is better than b
     bool DecisionOrder::operator()(const InstantId a, const InstantId b, LabelStr& explanation) const {
@@ -253,8 +254,10 @@ class ThreatIterator : public FlawIterator {
     };
 
     //at some point, this should take data about ordering choices by earliest/latest, most/least flawed, and most/least transactions
-    ResourceThreatManager::ResourceThreatManager(const TiXmlElement& configData) : FlawManager(configData), m_preferUpper(false), m_preferLower(false) {
-      std::string order = (configData.Attribute("order") == NULL ? "lower,most,earliest" : configData.Attribute("order"));
+ResourceThreatManager::ResourceThreatManager(const TiXmlElement& configData) 
+    : FlawManager(configData), m_preferUpper(false), m_preferLower(false), m_order() {
+  std::string order = (configData.Attribute("order") == NULL ? 
+                       "lower,most,earliest" : configData.Attribute("order"));
       std::string::size_type curPos = 0;
       InstantComparator::FlawDirection dir = InstantComparator::ABSOLUTE;
       while(curPos != std::string::npos) {

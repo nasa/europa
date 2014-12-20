@@ -9,7 +9,7 @@ namespace EUROPA {
 
     class DecisionOrder {
     public:
-      DecisionOrder() {}
+      DecisionOrder() : m_cmps() {}
       DecisionOrder(const DecisionOrder& other);
       ~DecisionOrder();
       bool operator()(const InstantId a, const InstantId b, LabelStr& explanation) const;

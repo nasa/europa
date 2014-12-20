@@ -49,6 +49,7 @@ namespace EUROPA {
     : m_dataType(dt)
     , m_enumerated(enumerated)
     , m_closed(closed)
+    , m_listener()
   {
   }
 
@@ -56,6 +57,7 @@ namespace EUROPA {
     : m_dataType(org.m_dataType)
     , m_enumerated(org.m_enumerated)
     , m_closed(org.m_closed)
+    , m_listener()
   {
   }
 

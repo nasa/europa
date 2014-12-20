@@ -69,7 +69,7 @@ namespace EUROPA
 	  }
       }
 
-      void operator++()
+      EdgeOutIterator& operator++()
       {
 	++m_Iterator;
 
@@ -78,6 +78,7 @@ namespace EUROPA
 	    while( m_Iterator != m_End && ( !(*m_Iterator)->isEnabled() || !(*m_Iterator)->getTarget()->isEnabled() ) )
 	      ++m_Iterator;
 	  }
+        return *this;
       }
 
     };
@@ -101,7 +102,7 @@ namespace EUROPA
 	  }
       }
 
-      void operator++()
+      EdgeInIterator& operator++()
       {
 	++m_Iterator;
 
@@ -110,6 +111,7 @@ namespace EUROPA
 	    while( m_Iterator != m_End && ( !(*m_Iterator)->isEnabled() || !(*m_Iterator)->getSource()->isEnabled() ) )
 	      ++m_Iterator;
 	  }
+        return *this;
       }
 
     };

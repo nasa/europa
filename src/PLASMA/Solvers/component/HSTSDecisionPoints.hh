@@ -34,50 +34,56 @@ namespace EUROPA {
       class TokenComparator;
       class TokenComparatorWrapper;
 
-      class OpenConditionDecisionPoint : public SOLVERS::OpenConditionDecisionPoint {
-      public:
-        OpenConditionDecisionPoint(const DbClientId client, const TokenId flawedToken, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
-        void handleInitialize();
-        ~OpenConditionDecisionPoint();
-        const std::vector<LabelStr>& getStateChoices(){return m_choices;}
-        const std::vector<TokenId>& getCompatibleTokens(){return m_compatibleTokens;}
-      private:
-        enum Actions {
-          activateFirst = 0,
-          mergeFirst,
-          activateOnly,
-          mergeOnly
-        };
+    class OpenConditionDecisionPoint : public SOLVERS::OpenConditionDecisionPoint {
+     public:
+      OpenConditionDecisionPoint(const DbClientId client, const TokenId flawedToken, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
+      void handleInitialize();
+      ~OpenConditionDecisionPoint();
+      const std::vector<LabelStr>& getStateChoices(){return m_choices;}
+      const std::vector<TokenId>& getCompatibleTokens(){return m_compatibleTokens;}
+     private:
+      OpenConditionDecisionPoint(const OpenConditionDecisionPoint&);
+      OpenConditionDecisionPoint& operator=(const OpenConditionDecisionPoint&);
+
+      enum Actions {
+        activateFirst = 0,
+        mergeFirst,
+        activateOnly,
+        mergeOnly
+      };
       
-        Actions m_action;
-        TokenComparatorWrapper* m_comparator;
+      Actions m_action;
+      TokenComparatorWrapper* m_comparator;
+    };
+
+    class ThreatDecisionPoint : public SOLVERS::ThreatDecisionPoint {
+     public:
+      ThreatDecisionPoint(const DbClientId client, const TokenId tokenToOrder, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
+      void handleInitialize();
+      ~ThreatDecisionPoint();
+      const std::vector<std::pair<ObjectId, std::pair<TokenId, TokenId> > >& getOrderingChoices(){return m_choices;}
+     private:
+      ThreatDecisionPoint(const ThreatDecisionPoint&);
+      ThreatDecisionPoint& operator=(const ThreatDecisionPoint&);
+      std::string choicesToString();
+      class ThreatComparator {
+       public:
+        ThreatComparator(TokenComparator* comparator, const TokenId tok);
+        ThreatComparator(const ThreatComparator& other);
+        ~ThreatComparator();
+        bool operator() (const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
+                         const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2);
+       private:
+        ThreatComparator& operator=(const ThreatComparator&);
+        TokenComparator* m_comparator;
       };
 
-      class ThreatDecisionPoint : public SOLVERS::ThreatDecisionPoint {
-      public:
-        ThreatDecisionPoint(const DbClientId client, const TokenId tokenToOrder, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
-        void handleInitialize();
-        ~ThreatDecisionPoint();
-        const std::vector<std::pair<ObjectId, std::pair<TokenId, TokenId> > >& getOrderingChoices(){return m_choices;}
-      private:
-        std::string choicesToString();
-        class ThreatComparator {
-        public:
-          ThreatComparator(TokenComparator* comparator, const TokenId tok);
-          ThreatComparator(const ThreatComparator& other);
-          ~ThreatComparator();
-          bool operator() (const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
-			   const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2);
-        private:
-          TokenComparator* m_comparator;
-        };
-
-        ThreatComparator* m_comparator;
-      };
+      ThreatComparator* m_comparator;
+    };
 
       class TokenComparator : public Component {
       public:
-        TokenComparator(const TiXmlElement& configData) : Component(configData) {}
+        TokenComparator(const TiXmlElement& configData) : Component(configData), m_flawedTok() {}
         TokenComparator(TokenId tok) : m_flawedTok(tok) {}
         virtual bool compare(const TokenId x, const TokenId y) = 0;
         virtual bool compare(const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
@@ -90,15 +96,16 @@ namespace EUROPA {
       };
 
       //have to stick this in because STL wants to copy the comparator object.
-      class TokenComparatorWrapper {
-      public:
-        TokenComparatorWrapper(TokenComparator* cmp, TokenId flawedToken);
-        TokenComparatorWrapper(const TokenComparatorWrapper& other);
-        ~TokenComparatorWrapper();
-        bool operator() (TokenId x, TokenId y) {return m_comparator->compare(x, y);}
-      private:
-        TokenComparator* m_comparator;
-      };
+    class TokenComparatorWrapper {
+     public:
+      TokenComparatorWrapper(TokenComparator* cmp, TokenId flawedToken);
+      TokenComparatorWrapper(const TokenComparatorWrapper& other);
+      TokenComparatorWrapper& operator=(const TokenComparatorWrapper& other);
+      ~TokenComparatorWrapper();
+      bool operator() (TokenId x, TokenId y) {return m_comparator->compare(x, y);}
+     private:
+      TokenComparator* m_comparator;
+    };
 
       class EarlyTokenComparator : public TokenComparator {
       public:

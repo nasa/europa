@@ -28,6 +28,9 @@ namespace EUROPA
 {
 class MaximumFlowAlgorithm
 {
+private:
+  MaximumFlowAlgorithm(const MaximumFlowAlgorithm&);
+  MaximumFlowAlgorithm& operator=(const MaximumFlowAlgorithm&);
  public:
   MaximumFlowAlgorithm( Graph* g, Node* source, Node* sink  );
   Graph* getGraph() const { return m_Graph; }

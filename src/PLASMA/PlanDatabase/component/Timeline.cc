@@ -25,11 +25,15 @@ namespace EUROPA {
 
   /** TIMELINE IMPLEMENTATION **/
 
-  Timeline::Timeline(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open)
-    : Object(planDatabase, type, name, true) {commonInit(open);}
+Timeline::Timeline(const PlanDatabaseId planDatabase, const LabelStr& type, 
+                   const LabelStr& name, bool open)
+    : Object(planDatabase, type, name, true), m_tokenSequence(), m_tokenIndex() 
+{commonInit(open);}
 
-  Timeline::Timeline(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open)
-    : Object(parent, type, localName, true) {commonInit(open);}
+  Timeline::Timeline(const ObjectId parent, const LabelStr& type, 
+                     const LabelStr& localName, bool open)
+      : Object(parent, type, localName, true), m_tokenSequence(), m_tokenIndex() 
+{commonInit(open);}
 
   Timeline::~Timeline(){
     discard(false);

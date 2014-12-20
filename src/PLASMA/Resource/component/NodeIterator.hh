@@ -28,7 +28,7 @@ namespace EUROPA
 	  }
       }
       inline bool ok() const;
-      inline void operator++();
+      inline NodeIterator& operator++();
       inline Node* operator*() const;
     private:
       NodeIdentity2Node::const_iterator m_Iterator;
@@ -41,16 +41,16 @@ namespace EUROPA
       return m_Iterator != m_End;
     }
 
-    void NodeIterator::operator++()
-    {
-      ++m_Iterator;
+NodeIterator& NodeIterator::operator++() {
+  ++m_Iterator;
 
-      if( m_Enabled )
-	{
-	  while( m_Iterator != m_End && !(*m_Iterator).second->isEnabled() )
-	    ++m_Iterator;
-	}
-    }
+  if( m_Enabled )
+  {
+    while( m_Iterator != m_End && !(*m_Iterator).second->isEnabled() )
+      ++m_Iterator;
+  }
+  return *this;
+}
 
     Node* NodeIterator::operator*() const
     {

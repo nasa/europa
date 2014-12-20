@@ -19,9 +19,18 @@
  */
 namespace EUROPA {
 
-  Object::Object(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open)
-    : m_id(this), m_type(type), m_name(name), m_planDatabase(planDatabase),
-      m_state(INCOMPLETE), m_lastOrderingChoiceCount(0),
+Object::Object(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open)
+    : m_id(this), m_parent(), m_type(type), m_name(name),
+      m_planDatabase(planDatabase),
+      m_state(INCOMPLETE),
+      m_components(),
+      m_tokens(),
+      m_variables(),
+      m_explicitConstraints(),
+      m_lastOrderingChoiceCount(0),
+      m_constraintsByTokenKey(),
+      m_constraintsByKeyPair(),
+      m_keyPairsByConstraintKey(),
       m_thisVar((new Variable< ObjectDomain>(m_planDatabase->getConstraintEngine(),
                                              ObjectDomain(m_planDatabase->getSchema()->getCESchema()->getDataType(type.c_str()),
                                                           m_id)))->getId()) {
@@ -36,6 +45,14 @@ namespace EUROPA {
       m_name(std::string(parent->getName().toString() + "." + localName.toString())),
       m_planDatabase(parent->getPlanDatabase()),
       m_state(INCOMPLETE),
+      m_components(),
+      m_tokens(),
+      m_variables(),
+      m_explicitConstraints(),
+      m_lastOrderingChoiceCount(0),
+      m_constraintsByTokenKey(),
+      m_constraintsByKeyPair(),
+      m_keyPairsByConstraintKey(),
       m_thisVar((new Variable< ObjectDomain>(m_planDatabase->getConstraintEngine(),
               ObjectDomain(m_planDatabase->getSchema()->getCESchema()->getDataType(type.c_str()),m_id)))->getId()) {
     check_error(m_parent.isValid());

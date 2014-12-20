@@ -47,6 +47,12 @@ namespace EUROPA{
     : m_id(this)
     , m_schema(schema)
     , m_planDb(planDatabase)
+    , m_planDbListener()
+    , m_callback()
+    , m_ruleInstancesByToken()
+    , m_listeners()
+    , m_ruleInstancesToExecute()
+    , m_ruleInstancesToUndo()
     , m_deleted(false)
     , m_executing(false)
   {

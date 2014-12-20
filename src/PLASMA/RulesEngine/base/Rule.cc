@@ -8,10 +8,8 @@
 
 namespace EUROPA {
 
-    RuleSchema::RuleSchema()
-        : m_id(this)
-    {
-    }
+RuleSchema::RuleSchema()
+    : m_id(this), m_rulesByName() {}
 
     RuleSchema::~RuleSchema()
     {

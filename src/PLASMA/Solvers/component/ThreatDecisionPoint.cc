@@ -23,7 +23,7 @@ namespace EUROPA {
                                            const TiXmlElement&,
                                            const LabelStr& explanation)
       : DecisionPoint(client, tokenToOrder->getKey(), explanation),
-        m_tokenToOrder(tokenToOrder), m_choiceCount(0), m_index(0) {
+        m_tokenToOrder(tokenToOrder), m_choices(), m_choiceCount(0), m_index(0) {
       // Here is where we would look for custom processing for configuration of the decision point
     }
 

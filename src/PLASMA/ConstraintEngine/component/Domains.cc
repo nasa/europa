@@ -31,42 +31,42 @@ namespace EUROPA {
 //     return(true);
 //   }
 
-  EnumeratedDomain::EnumeratedDomain(const DataTypeId dt)
-  : Domain(dt,true,false)
-  {
-  }
+EnumeratedDomain::EnumeratedDomain(const DataTypeId dt)
+    : Domain(dt,true,false), m_values()
+{
+}
 
-  EnumeratedDomain::EnumeratedDomain(const DataTypeId dt, const std::list<edouble>& values)
-  : Domain(dt,true,false)
-  {
-	  for (std::list<edouble>::const_iterator it = values.begin(); it != values.end(); ++it)
-		  insert(*it);
+EnumeratedDomain::EnumeratedDomain(const DataTypeId dt, const std::list<edouble>& values)
+    : Domain(dt,true,false), m_values()
+{
+  for (std::list<edouble>::const_iterator it = values.begin(); it != values.end(); ++it)
+    insert(*it);
 
-	  close();
-  }
+  close();
+}
 
-  EnumeratedDomain::EnumeratedDomain(const DataTypeId dt, edouble value)
-  : Domain(dt,true,false)
-  {
-	  insert(value);
-	  close();
-  }
+EnumeratedDomain::EnumeratedDomain(const DataTypeId dt, edouble value)
+    : Domain(dt,true,false), m_values()
+{
+  insert(value);
+  close();
+}
 
-  EnumeratedDomain::EnumeratedDomain(const DataTypeId dt, double value)
-  : Domain(dt,true,false)
-  {
-	  insert(value);
-	  close();
-  }
+EnumeratedDomain::EnumeratedDomain(const DataTypeId dt, double value)
+    : Domain(dt,true,false), m_values()
+{
+  insert(value);
+  close();
+}
 
-  EnumeratedDomain::EnumeratedDomain(const Domain& org)
-  : Domain(org)
-  {
-	  check_error(org.isEnumerated(),
-			  "Invalid source domain " + org.getTypeName().toString() + " for enumeration");
-	  const EnumeratedDomain& enumOrg = static_cast<const EnumeratedDomain&>(org);
-	  m_values = enumOrg.m_values;
-  }
+EnumeratedDomain::EnumeratedDomain(const Domain& org)
+    : Domain(org), m_values()
+{
+  check_error(org.isEnumerated(),
+              "Invalid source domain " + org.getTypeName().toString() + " for enumeration");
+  const EnumeratedDomain& enumOrg = static_cast<const EnumeratedDomain&>(org);
+  m_values = enumOrg.m_values;
+}
 
   bool EnumeratedDomain::isFinite() const {
 	  return(true); // Always finite, even if bounds are infinite, since there are always a finite number of values to select.
@@ -481,13 +481,13 @@ namespace EUROPA {
 	  return(value_removed);
   }
 
-  Domain& EnumeratedDomain::operator=(const Domain& dom) {
-	  safeComparison(*this, dom);
-	  check_error(m_listener.isNoId(), "Can only do direct assigment if not registered with a listener");
-	  const EnumeratedDomain& e_dom = static_cast<const EnumeratedDomain&>(dom);
-	  m_values = e_dom.m_values;
-	  return(*this);
-  }
+Domain& EnumeratedDomain::operator=(const Domain& dom) {
+  safeComparison(*this, dom);
+  check_error(m_listener.isNoId(), "Can only do direct assigment if not registered with a listener");
+  const EnumeratedDomain& e_dom = dynamic_cast<const EnumeratedDomain&>(dom);
+  m_values = e_dom.m_values;
+  return *this;
+}
 
   bool EnumeratedDomain::isSubsetOf(const Domain& dom) const {
 	  safeComparison(*this, dom);
@@ -1070,8 +1070,13 @@ StringDomain::StringDomain(const std::list<LabelStr>& values, const DataTypeId d
   IntervalIntDomain::IntervalIntDomain(const DataTypeId dt) : IntervalDomain(dt)  {}
   IntervalIntDomain::IntervalIntDomain(eint lb, eint ub, const DataTypeId dt) : IntervalDomain(lb,ub,dt) {}
   IntervalIntDomain::IntervalIntDomain(eint value, const DataTypeId dt) : IntervalDomain(value,dt) {}
-  IntervalIntDomain::IntervalIntDomain(eint::basis_type lb, eint::basis_type ub, const DataTypeId dt) : IntervalDomain(lb,ub,dt) {}
-  IntervalIntDomain::IntervalIntDomain(eint::basis_type value, const DataTypeId dt) : IntervalDomain(value,dt) {}
+IntervalIntDomain::IntervalIntDomain(eint::basis_type lb, eint::basis_type ub,
+                                     const DataTypeId dt) 
+    : IntervalDomain(static_cast<edouble::basis_type>(lb),
+                     static_cast<edouble::basis_type>(ub),dt) {}
+IntervalIntDomain::IntervalIntDomain(eint::basis_type value,
+                                     const DataTypeId dt) 
+    : IntervalDomain(static_cast<edouble::basis_type>(value),dt) {}
   IntervalIntDomain::IntervalIntDomain(const Domain& org) : IntervalDomain(org) {}
 
   IntervalIntDomain::~IntervalIntDomain()
@@ -1096,9 +1101,9 @@ StringDomain::StringDomain(const std::list<LabelStr>& values, const DataTypeId d
 #endif
   }
 
-  edouble IntervalIntDomain::convert(const edouble& value) const {
-    return(cast_int(value));
-  }
+edouble IntervalIntDomain::convert(const edouble& value) const {
+  return(static_cast<eint>(value));
+}
 
   void IntervalIntDomain::insert(edouble value) {
     check_error(check_value(value));

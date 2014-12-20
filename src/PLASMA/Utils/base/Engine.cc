@@ -28,9 +28,7 @@ namespace EUROPA
         return m_engine;
     }
 
-    EngineConfig::EngineConfig()
-    {
-    }
+  EngineConfig::EngineConfig() : m_properties() {}
 
     EngineConfig::~EngineConfig()
     {
@@ -182,9 +180,8 @@ void EngineConfig::parseXML(TiXmlNode * pParent){
 		return;
 	}
 
-    EngineBase::EngineBase()
-    {
-    	m_started = false;
+  EngineBase::EngineBase() : m_config(NULL), m_modules(), m_languageInterpreters(),
+			     m_components(), m_started(false) {
     	// TODO: make this data-driven so XML/database configs can be instanciated.
     	m_config = new EngineConfig();
     }

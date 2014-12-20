@@ -10,6 +10,8 @@ namespace EUROPA {
     ProfilePropagator::ProfilePropagator(const LabelStr& name,
 					 const ConstraintEngineId constraintEngine)
     : DefaultPropagator(name, constraintEngine)
+    , m_profiles()
+    , m_newConstraints()
     , m_updateRequired(false)
     , m_inBatchMode(false)
     , m_batchListener(NULL)
@@ -112,35 +114,37 @@ void ProfilePropagator::execute(const ConstraintId constraint) {
       return DefaultPropagator::updateRequired() || m_updateRequired;
     }
 
-	class BatchModeListener : public ConstraintEngineListener
-	{
-	public:
-		BatchModeListener(const ConstraintEngineId constraintEngine, ProfilePropagator* propagator)
-		: ConstraintEngineListener(constraintEngine)
-		, m_propagator(propagator)
-		{
-		}
+class BatchModeListener : public ConstraintEngineListener {
+private:
+  BatchModeListener(const BatchModeListener&);
+  BatchModeListener& operator=(const BatchModeListener&);
+ public:
+  BatchModeListener(const ConstraintEngineId constraintEngine, ProfilePropagator* propagator)
+      : ConstraintEngineListener(constraintEngine)
+      , m_propagator(propagator)
+  {
+  }
 
-		virtual ~BatchModeListener()
-		{
-			debugMsg("ProfilePropagator:BatchModeListener", "BatchModeListener destroyed");
-		}
+  virtual ~BatchModeListener()
+  {
+    debugMsg("ProfilePropagator:BatchModeListener", "BatchModeListener destroyed");
+  }
 
-		virtual void notifyAdded(const ConstraintId constraint)
-		{
-			if (m_propagator->inBatchMode() &&
-				(constraint->getName()==ResourceTokenRelation::CONSTRAINT_NAME())) {
-				debugMsg("ProfilePropagator:BatchModeListener", "Disabling " << constraint->getName().toString() << "(" << constraint->getKey() << ")");
-				//ResourceTokenRelation* c = (ResourceTokenRelation*)constraint;
-				//c->disable();
-				// TODO JRB: should be disable() but cast above refuses to work.
-				constraint->deactivate();
-			}
-		}
+  virtual void notifyAdded(const ConstraintId constraint)
+  {
+    if (m_propagator->inBatchMode() &&
+        (constraint->getName()==ResourceTokenRelation::CONSTRAINT_NAME())) {
+      debugMsg("ProfilePropagator:BatchModeListener", "Disabling " << constraint->getName().toString() << "(" << constraint->getKey() << ")");
+      //ResourceTokenRelation* c = (ResourceTokenRelation*)constraint;
+      //c->disable();
+      // TODO JRB: should be disable() but cast above refuses to work.
+      constraint->deactivate();
+    }
+  }
 
-	protected:
-		ProfilePropagator* m_propagator;
-	};
+ protected:
+  ProfilePropagator* m_propagator;
+};
 
 void ProfilePropagator::enterBatchMode() {
   if (m_inBatchMode)

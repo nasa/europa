@@ -11,7 +11,10 @@ namespace EUROPA {
     : m_id(this)
     , m_objType(ot)
     , m_signature(signature)
+    , m_predicateName()
     , m_attributes(0)
+    , m_args()
+    , m_subgoalsByAttr()
   {
     m_predicateName = signature.getElement(1,".");
   }

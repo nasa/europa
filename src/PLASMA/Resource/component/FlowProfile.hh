@@ -64,122 +64,123 @@ class Node;
      * See 'N Muscettola. Computing the Envelope for Stepwise-Constant
      * Resource Allocations. CP 2002, LNCS 2470, pp 139-154, 2002'
      */
-    class FlowProfile:
-      public Profile
-    {
-    public:
-      /**
-       * @brief Constructor
-       */
-      FlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector);
-      /**
-       * @brief Destructor
-       */
-      virtual ~FlowProfile();
-      /**
-       * @brief Retrieves the first (earliest) instant the transaction starts contributing to
-       * lower level. Will return true in case a instant has been associated with a transaction
-       * and will in that case store the instant in parameter. Returns false if no instant
-       * has been associated with transaction t.
-       */
-      bool getEarliestLowerLevelInstant( const TransactionId t, InstantId& i );
-      /**
-       * @brief Retrieves the first (earliest) instant the transaction starts contributing to
-       * upper level. Will return true in case a instant has been associated with a transaction
-       * and will in that case store the instant in parameter. Returns false if no instant
-       * has been associated with transaction t.
-       */
-      bool getEarliestUpperLevelInstant( const TransactionId t, InstantId& i );
-      /**
-       * @brief Deletes pre-existing FlowProfileGraphs for the lower and upper level and allocates new ones.
-       */
-      template<typename FlowGraphType>
-      void initializeGraphs() {
-        if(m_lowerLevelGraph != NULL)
-          delete m_lowerLevelGraph;
-        m_lowerLevelGraph = new FlowGraphType(m_dummySourceTransaction,
-                                              m_dummySinkTransaction, true);
+class FlowProfile: public Profile {
+private:
+  FlowProfile(const FlowProfile&);
+  FlowProfile& operator=(const FlowProfile&);
+ public:
+  /**
+   * @brief Constructor
+   */
+  FlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector);
+  /**
+   * @brief Destructor
+   */
+  virtual ~FlowProfile();
+  /**
+   * @brief Retrieves the first (earliest) instant the transaction starts contributing to
+   * lower level. Will return true in case a instant has been associated with a transaction
+   * and will in that case store the instant in parameter. Returns false if no instant
+   * has been associated with transaction t.
+   */
+  bool getEarliestLowerLevelInstant( const TransactionId t, InstantId& i );
+  /**
+   * @brief Retrieves the first (earliest) instant the transaction starts contributing to
+   * upper level. Will return true in case a instant has been associated with a transaction
+   * and will in that case store the instant in parameter. Returns false if no instant
+   * has been associated with transaction t.
+   */
+  bool getEarliestUpperLevelInstant( const TransactionId t, InstantId& i );
+  /**
+   * @brief Deletes pre-existing FlowProfileGraphs for the lower and upper level and allocates new ones.
+   */
+  template<typename FlowGraphType>
+  void initializeGraphs() {
+    if(m_lowerLevelGraph != NULL)
+      delete m_lowerLevelGraph;
+    m_lowerLevelGraph = new FlowGraphType(m_dummySourceTransaction,
+                                          m_dummySinkTransaction, true);
 
-        if(m_upperLevelGraph != NULL)
-          delete m_upperLevelGraph;
-        m_upperLevelGraph = new FlowGraphType(m_dummySourceTransaction,
-                                              m_dummySinkTransaction, false);
-      }
+    if(m_upperLevelGraph != NULL)
+      delete m_upperLevelGraph;
+    m_upperLevelGraph = new FlowGraphType(m_dummySourceTransaction,
+                                          m_dummySinkTransaction, false);
+  }
 
 
-    protected:
-      virtual void postHandleRecompute(const eint& endTime, const std::pair<edouble,edouble>& endDiff);
-      /**
-       * @brief Enables a transaction t. A transaction is enabled a time T to calculate the
-       * envelopes for instant at time T if the lower bound of the time equals T (this is assuming
-       * envelopes are calculated from earliest to latest instant). Another way of formulating this
-       * is that a transaction is enabled at the time it moves from the open set to the pending set
-       * or straight to the closed set if the time is a singleton.
-       */
-      void enableTransaction( const TransactionId t, const InstantId i );
-      /**
-       * @brief Helper method for subclasses to respond to a temporal constraint being added between two transactions.
-       */
-      void handleTemporalConstraintAdded(const TransactionId predecessor,
-                                         const unsigned int preArgIndex,
-					 const TransactionId successor,
-                                         const unsigned int sucArgIndex);
+ protected:
+  virtual void postHandleRecompute(const eint& endTime, const std::pair<edouble,edouble>& endDiff);
+  /**
+   * @brief Enables a transaction t. A transaction is enabled a time T to calculate the
+   * envelopes for instant at time T if the lower bound of the time equals T (this is assuming
+   * envelopes are calculated from earliest to latest instant). Another way of formulating this
+   * is that a transaction is enabled at the time it moves from the open set to the pending set
+   * or straight to the closed set if the time is a singleton.
+   */
+  void enableTransaction( const TransactionId t, const InstantId i );
+  /**
+   * @brief Helper method for subclasses to respond to a temporal constraint being added between two transactions.
+   */
+  void handleTemporalConstraintAdded(const TransactionId predecessor,
+                                     const unsigned int preArgIndex,
+                                     const TransactionId successor,
+                                     const unsigned int sucArgIndex);
 
-      /**
-       * @brief Helper method for subclasses to respond to a temporal constraint being removed between two transactions.
-       */
-      void handleTemporalConstraintRemoved(const TransactionId predecessor,
-                                           const unsigned int preArgIndex,
-					   const TransactionId successor,
-                                           const unsigned int sucArgIndex);
-      /**
-       * @brief Updates the maximum flow graphs in case transactions t1 and t2 are now strictly ordered.
-       */
-      void handleOrderedAt( const TransactionId t1, const TransactionId t2 );
-      /**
-       * @brief Updates the maximum flow graphs in case transactions t1 and t2 are now weakly ordered.
-       */
-      void handleOrderedAtOrBefore( const TransactionId t1, const TransactionId t2 );
+  /**
+   * @brief Helper method for subclasses to respond to a temporal constraint being removed between two transactions.
+   */
+  void handleTemporalConstraintRemoved(const TransactionId predecessor,
+                                       const unsigned int preArgIndex,
+                                       const TransactionId successor,
+                                       const unsigned int sucArgIndex);
+  /**
+   * @brief Updates the maximum flow graphs in case transactions t1 and t2 are now strictly ordered.
+   */
+  void handleOrderedAt( const TransactionId t1, const TransactionId t2 );
+  /**
+   * @brief Updates the maximum flow graphs in case transactions t1 and t2 are now weakly ordered.
+   */
+  void handleOrderedAtOrBefore( const TransactionId t1, const TransactionId t2 );
 
-      void handleTransactionAdded( const TransactionId t);
-      void handleTransactionRemoved( const TransactionId t);
-      void handleTransactionTimeChanged( const TransactionId t,
+  void handleTransactionAdded( const TransactionId t);
+  void handleTransactionRemoved( const TransactionId t);
+  void handleTransactionTimeChanged( const TransactionId t,
+                                     const DomainListener::ChangeType& type );
+  void handleTransactionQuantityChanged( const TransactionId t,
                                          const DomainListener::ChangeType& type );
-      void handleTransactionQuantityChanged( const TransactionId t,
-                                             const DomainListener::ChangeType& type );
-      void initRecompute(InstantId inst);
-      void initRecompute();
-      Order getOrdering( const TransactionId t1, const TransactionId t2 );
-      void recomputeLevels(InstantId prev, InstantId inst);
+  void initRecompute(InstantId inst);
+  void initRecompute();
+  Order getOrdering( const TransactionId t1, const TransactionId t2 );
+  void recomputeLevels(InstantId prev, InstantId inst);
 
-      typedef std::pair< eint, eint > IntIntPair;
+  typedef std::pair< eint, eint > IntIntPair;
 #ifdef _MSC_VER
-      typedef std::map< TransactionId, IntIntPair > TransactionId2IntIntPair;
+  typedef std::map< TransactionId, IntIntPair > TransactionId2IntIntPair;
 #else
-      typedef boost::unordered_map< TransactionId, IntIntPair, TransactionIdHash > TransactionId2IntIntPair;
+  typedef boost::unordered_map< TransactionId, IntIntPair, TransactionIdHash > TransactionId2IntIntPair;
 #endif //_MSC_VER
 
-      TransactionId2IntIntPair m_previousTimeBounds;
+  TransactionId2IntIntPair m_previousTimeBounds;
 
-      TransactionId m_dummySourceTransaction;
-      TransactionId m_dummySinkTransaction;
+  TransactionId m_dummySourceTransaction;
+  TransactionId m_dummySinkTransaction;
 
-      FlowProfileGraph* m_lowerLevelGraph;
-      FlowProfileGraph* m_upperLevelGraph;
+  FlowProfileGraph* m_lowerLevelGraph;
+  FlowProfileGraph* m_upperLevelGraph;
 
-      edouble m_lowerClosedLevel;
-      edouble m_upperClosedLevel;
+  edouble m_lowerClosedLevel;
+  edouble m_upperClosedLevel;
 
-      bool m_recalculateLowerLevel;
-      bool m_recalculateUpperLevel;
+  bool m_recalculateLowerLevel;
+  bool m_recalculateUpperLevel;
 
 
-      TransactionIdTransactionIdPair2Order m_orderings;
-      TransactionIdTransactionIdPair2Order m_orderedAt;
+  TransactionIdTransactionIdPair2Order m_orderings;
+  TransactionIdTransactionIdPair2Order m_orderedAt;
 
-      TransactionId2InstantId m_lowerLevelContribution;
-      TransactionId2InstantId m_upperLevelContribution;
-    };
+  TransactionId2InstantId m_lowerLevelContribution;
+  TransactionId2InstantId m_upperLevelContribution;
+};
 }
 
 #endif //FLOW_PROFILE_HEADER__

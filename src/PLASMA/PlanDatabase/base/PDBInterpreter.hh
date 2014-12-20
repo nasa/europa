@@ -45,6 +45,9 @@ class EvalContext {
   EvalContext* m_parent;
   std::map<std::string,ConstrainedVariableId> m_variables;
   std::map<std::string,TokenId> m_tokens;
+ private:
+  EvalContext(const EvalContext&);
+  EvalContext& operator=(const EvalContext&);
 };
 
   class Expr

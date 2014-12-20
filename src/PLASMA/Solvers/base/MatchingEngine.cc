@@ -9,45 +9,55 @@
 #include "SolverUtils.hh"
 
 namespace EUROPA {
-  namespace SOLVERS {
+namespace SOLVERS {
 
+MatchingEngine::MatchingEngine(EngineId engine,
+                               const TiXmlElement& configData,
+                               const char* ruleTag)
+    : m_id(this)
+    , m_engine(engine)
+    , m_rulesByObjectType()
+    , m_rulesByPredicate()
+    , m_rulesByVariable()
+    , m_rulesByMasterObjectType()
+    , m_rulesByMasterPredicate()
+    , m_rulesByMasterRelation()
+    , m_rulesByTokenName()
+    , m_cycleCount(1),
+      m_rules(),
+      m_rulesByExpression(),
+      m_unfilteredRules() {
+  // Now load all the flaw managers
+  std::string ruleTagStr(ruleTag);
 
-    MatchingEngine::MatchingEngine(EngineId engine,const TiXmlElement& configData, const char* ruleTag)
-      : m_id(this)
-      , m_engine(engine)
-      , m_cycleCount(1)
-    {
-      // Now load all the flaw managers
-      std::string ruleTagStr(ruleTag);
+  for (TiXmlElement * child = configData.FirstChildElement();
+       child != NULL;
+       child = child->NextSiblingElement()) {
+    const char* component = child->Attribute("component");
 
-      for (TiXmlElement * child = configData.FirstChildElement();
-           child != NULL;
-           child = child->NextSiblingElement()) {
-        const char* component = child->Attribute("component");
+    if(ruleTagStr.find(child->Value(), 0) != std::string::npos){
+      // If no component name is provided, register it with the tag name of configuration element
+      // thus obtaining the default.
+      if(component == NULL)
+        child->SetAttribute("component", child->Value());
 
-        if(ruleTagStr.find(child->Value(), 0) != std::string::npos){
-          // If no component name is provided, register it with the tag name of configuration element
-          // thus obtaining the default.
-          if(component == NULL)
-            child->SetAttribute("component", child->Value());
-
-          // Now allocate the particular flaw manager using an abstract factory pattern.
-          ComponentFactoryMgr* cfm =
-              reinterpret_cast<ComponentFactoryMgr*>(engine->getComponent("ComponentFactoryMgr"));
-          ComponentId componentInstance = cfm->createComponentInstance(*child);
-          checkError(componentInstance.isValid(), componentInstance << ":" << child->Value());
-          checkError(MatchingRuleId::convertable(componentInstance), "Bad component for " << child->Value());
-          MatchingRuleId rule = componentInstance;
-          rule->initialize(getId());
-          debugMsg("MatchingEngine:MatchingEngine", "Adding " << rule->toString());
-        }
-      }
+      // Now allocate the particular flaw manager using an abstract factory pattern.
+      ComponentFactoryMgr* cfm =
+          reinterpret_cast<ComponentFactoryMgr*>(engine->getComponent("ComponentFactoryMgr"));
+      ComponentId componentInstance = cfm->createComponentInstance(*child);
+      checkError(componentInstance.isValid(), componentInstance << ":" << child->Value());
+      checkError(MatchingRuleId::convertable(componentInstance), "Bad component for " << child->Value());
+      MatchingRuleId rule = componentInstance;
+      rule->initialize(getId());
+      debugMsg("MatchingEngine:MatchingEngine", "Adding " << rule->toString());
     }
+  }
+}
 
-    MatchingEngine::~MatchingEngine(){
-      cleanup(m_rules);
-      m_id.remove();
-    }
+MatchingEngine::~MatchingEngine() {
+  cleanup(m_rules);
+  m_id.remove();
+}
 
     MatchingEngineId MatchingEngine::getId() { return m_id; }
 
@@ -274,14 +284,11 @@ namespace EUROPA {
     return mfm->getEntityMatchers(); 
   }    
     
-    MatchFinderMgr::MatchFinderMgr()
-    {
-    }
+MatchFinderMgr::MatchFinderMgr() : m_entityMatchers() {}
 
-    MatchFinderMgr::~MatchFinderMgr()
-    {
-        purgeAll();
-    }
+MatchFinderMgr::~MatchFinderMgr() {
+  purgeAll();
+}
 
     void MatchFinderMgr::addMatchFinder(const LabelStr& type, const MatchFinderId finder) {
         // Remove first in case one already exists

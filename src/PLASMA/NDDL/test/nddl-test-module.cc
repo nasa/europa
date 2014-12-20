@@ -63,6 +63,7 @@ NddlTest::NddlTest(const std::string& testName,
     , m_nddlFile(nddlFile)
     , m_result(result)
     , m_setBaseline(setBaseline)
+    , m_engine(NULL)
 {
 }
 
@@ -161,6 +162,7 @@ ErrorCheckingTests::ErrorCheckingTests(const std::string& testFilename,bool setB
     : CppUnit::TestSuite()
     , m_testFilename(testFilename)
     , m_setBaseline(setBaseline)
+    , m_tests()
 {
     readTests();
 

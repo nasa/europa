@@ -6,18 +6,19 @@
 
 namespace EUROPA {
 
-    GenericFVDetector::GenericFVDetector(const ResourceId res) : FVDetector(res) {
-      m_maxInstConsumption = res->getMaxInstConsumption();
-      m_maxInstProduction = res->getMaxInstProduction();
-      m_maxCumulativeConsumption = res->getMaxConsumption();
-      m_maxCumulativeProduction = res->getMaxProduction();
-      debugMsg("GenericFVDetector:GenericFVDetector", "Created FVDetector for " << res->toString());
-      debugMsg("GenericFVDetector:GenericFVDetector", "Got values: "
-    		  << " max instantaneous consumption(" << m_maxInstConsumption << ")"
-    		  << " max instantaneous production(" << m_maxInstProduction << ")"
-    		  << " max consumption(" << m_maxCumulativeConsumption << ")"
-    		  << " max production(" << m_maxCumulativeProduction << ")");
-    }
+GenericFVDetector::GenericFVDetector(const ResourceId res) 
+    : FVDetector(res),
+      m_maxInstConsumption(res->getMaxInstConsumption()),
+      m_maxInstProduction(res->getMaxInstProduction()),
+      m_maxCumulativeConsumption(res->getMaxConsumption()),
+      m_maxCumulativeProduction(res->getMaxProduction()) {
+  debugMsg("GenericFVDetector:GenericFVDetector", "Created FVDetector for " << res->toString());
+  debugMsg("GenericFVDetector:GenericFVDetector", "Got values: "
+           << " max instantaneous consumption(" << m_maxInstConsumption << ")"
+           << " max instantaneous production(" << m_maxInstProduction << ")"
+           << " max consumption(" << m_maxCumulativeConsumption << ")"
+           << " max production(" << m_maxCumulativeProduction << ")");
+}
 
     Resource::ProblemType GenericFVDetector::getResourceViolation(const InstantId inst) const
     {
@@ -230,6 +231,8 @@ namespace EUROPA {
     	: m_detector(fvd)
     	, m_profile(profile)
     	, m_isFDProfile(isFDProfile)
+        , m_times()
+        , m_bounds()
     {
     	update();
     }

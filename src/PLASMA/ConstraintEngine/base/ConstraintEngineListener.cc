@@ -10,9 +10,9 @@ namespace EUROPA {
     m_constraintEngine->add(m_id);
   }
 
-  ConstraintEngineListener::ConstraintEngineListener()
-    :m_id(this) {
-  }
+ConstraintEngineListener::ConstraintEngineListener()
+    : m_id(this), m_constraintEngine() {
+}
 
   ConstraintEngineListener::~ConstraintEngineListener(){
     check_error(m_id.isValid());

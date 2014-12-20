@@ -10,18 +10,25 @@
 #include "TokenVariable.hh"
 
 namespace EUROPA {
-  Reservoir::Reservoir(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, const LabelStr& detectorName,
-                       const LabelStr& profileName, edouble initCapacityLb, edouble initCapacityUb, edouble lowerLimit,
-                       edouble upperLimit, edouble maxInstProduction, edouble maxInstConsumption, edouble maxProduction,
-                       edouble maxConsumption) :
-    Resource(planDatabase, type, name, detectorName, profileName, initCapacityLb, initCapacityUb, lowerLimit, upperLimit,
-             maxInstProduction, maxInstConsumption, maxProduction, maxConsumption) {}
+Reservoir::Reservoir(const PlanDatabaseId planDatabase, const LabelStr& type,
+                     const LabelStr& name, const LabelStr& detectorName,
+                     const LabelStr& profileName, 
+                     edouble initCapacityLb, edouble initCapacityUb,
+                     edouble lowerLimit, edouble upperLimit,
+                     edouble maxInstProduction, edouble maxInstConsumption,
+                     edouble maxProduction, edouble maxConsumption) :
+    Resource(planDatabase, type, name, detectorName, profileName, initCapacityLb, 
+             initCapacityUb, lowerLimit, upperLimit,
+             maxInstProduction, maxInstConsumption, maxProduction, maxConsumption),
+  m_tokensToTransactions() {}
 
-  Reservoir::Reservoir(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open) :
-    Resource(planDatabase, type, name, open) {}
+Reservoir::Reservoir(const PlanDatabaseId planDatabase, const LabelStr& type,
+                     const LabelStr& name, bool open) :
+    Resource(planDatabase, type, name, open), m_tokensToTransactions() {}
 
-  Reservoir::Reservoir(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open) :
-    Resource(parent, type, localName, open) {}
+Reservoir::Reservoir(const ObjectId parent, const LabelStr& type, 
+                     const LabelStr& localName, bool open) :
+    Resource(parent, type, localName, open), m_tokensToTransactions() {}
 
   void Reservoir::createTransactions(const TokenId tok) {
     if(m_tokensToTransactions.find(tok) != m_tokensToTransactions.end()) {

@@ -4,13 +4,14 @@
 #include "ConstrainedVariable.hh"
 
 namespace EUROPA {
-    Instant::Instant(const eint time, const ProfileId prof)
-      : Entity(), m_id(this), m_time(time), m_profile(prof), m_lowerLevel(0), m_lowerLevelMax(0), m_upperLevelMin(0), m_upperLevel(0),
-        m_maxInstProduction(0), m_maxInstConsumption(0), m_minInstProduction(0), m_minInstConsumption(0),
-        m_maxCumulativeProduction(0), m_maxCumulativeConsumption(0), m_minCumulativeProduction(0), m_minCumulativeConsumption(0),
-        m_maxPrevProduction(0), m_maxPrevConsumption(0), m_minPrevProduction(0), m_minPrevConsumption(0),
-        m_upperFlawMagnitude(0), m_lowerFlawMagnitude(0),
-        m_violated(false), m_flawed(false), m_upperFlaw(false), m_lowerFlaw(false) {}
+Instant::Instant(const eint time, const ProfileId prof)
+    : Entity(), m_id(this), m_time(time), m_profile(prof), m_lowerLevel(0), m_lowerLevelMax(0), m_upperLevelMin(0), m_upperLevel(0),
+      m_maxInstProduction(0), m_maxInstConsumption(0), m_minInstProduction(0), m_minInstConsumption(0),
+      m_maxCumulativeProduction(0), m_maxCumulativeConsumption(0), m_minCumulativeProduction(0), m_minCumulativeConsumption(0),
+      m_maxPrevProduction(0), m_maxPrevConsumption(0), m_minPrevProduction(0), m_minPrevConsumption(0),
+  m_upperFlawMagnitude(0), m_lowerFlawMagnitude(0),
+  m_violated(false), m_flawed(false), m_upperFlaw(false), m_lowerFlaw(false),
+  m_transactions(), m_endingTransactions(), m_startingTransactions() {}
 
     Instant::~Instant() {
       m_id.remove();

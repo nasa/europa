@@ -12,9 +12,7 @@ namespace EUROPA
  */
 
 TokenTypeMgr::TokenTypeMgr()
-: m_id(this)
-{
-}
+    : m_id(this), m_typesByPredicate(), m_types() {}
 
 TokenTypeMgr::~TokenTypeMgr()
 {

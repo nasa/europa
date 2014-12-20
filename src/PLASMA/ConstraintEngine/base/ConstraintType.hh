@@ -78,7 +78,7 @@ class ConcreteConstraintType : public ConstraintType {
   ConcreteConstraintType(const LabelStr& name,
                          const LabelStr& propagatorName,
                          bool systemDefined = false)
-      : ConstraintType(name, propagatorName, systemDefined) {}
+      : ConstraintType(name, propagatorName, systemDefined), m_argTypes() {}
 
   ConcreteConstraintType(const LabelStr& name,
                          const LabelStr& propagatorName,

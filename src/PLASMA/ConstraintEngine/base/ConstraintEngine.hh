@@ -368,6 +368,8 @@ namespace EUROPA {
     const ViolationMgr& getViolationMgr() const { return *m_violationMgr; }
 
   private:
+    ConstraintEngine(const ConstraintEngine& other);
+    ConstraintEngine operator=(const ConstraintEngine& other);
     friend class Constraint;
     friend class VariableChangeListener;
     friend class Propagator;
@@ -584,7 +586,7 @@ namespace EUROPA {
      * @brief Constructor that does nothing.
      * 
      */
-    PostPropagationCallback() : m_id(this) {}
+    PostPropagationCallback() : m_id(this), m_ce() {}
     /** 
      * @brief Constructor with initial constraint engine.
      * 

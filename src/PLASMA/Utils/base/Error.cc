@@ -37,7 +37,7 @@ namespace {
 pthread_mutex_t outputMutex = PTHREAD_MUTEX_INITIALIZER;
 }
 Error::Error(const std::string& condition, const std::string& file, const int& line)
-  : m_condition(condition), m_file(file), m_line(line), m_type("Error") {
+    : m_condition(condition), m_msg(), m_file(file), m_line(line), m_type("Error") {
   if (s_os == 0)
     s_os = &(std::cerr);
 }

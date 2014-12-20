@@ -157,19 +157,19 @@ namespace EUROPA {
     }
 
 
-    HorizonFilter::HorizonFilter(const TiXmlElement& configData)
-      : FlawFilter(configData, true) {
-      static const LabelStr sl_defaultPolicy("PartiallyContained");
-      const char* argData = NULL;
-      argData = configData.Attribute("policy");
-      if(argData != NULL){
-        checkError(policies().contains(argData), argData << " is not a valid policy. Choose one of " << policies().toString());
-        m_policy = LabelStr(argData);
-      }
-      else
-        m_policy = sl_defaultPolicy;
-      setExpression(toString() + ":horizonFilter:" + m_policy.toString());
+  HorizonFilter::HorizonFilter(const TiXmlElement& configData)
+      : FlawFilter(configData, true), m_policy() {
+    static const LabelStr sl_defaultPolicy("PartiallyContained");
+    const char* argData = NULL;
+    argData = configData.Attribute("policy");
+    if(argData != NULL){
+      checkError(policies().contains(argData), argData << " is not a valid policy. Choose one of " << policies().toString());
+      m_policy = LabelStr(argData);
     }
+    else
+      m_policy = sl_defaultPolicy;
+    setExpression(toString() + ":horizonFilter:" + m_policy.toString());
+  }
 
     bool HorizonFilter::test(const EntityId entity) {
       static const LabelStr sl_possiblyContained("PossiblyContained");

@@ -34,7 +34,8 @@ namespace EUROPA{
 //   }
 
   MergeMemento::MergeMemento(const TokenId inactiveToken, const TokenId activeToken)
-    :m_inactiveToken(inactiveToken), m_activeToken(activeToken), m_undoing(false){
+    :m_inactiveToken(inactiveToken), m_activeToken(activeToken),
+     m_deactivatedConstraints(), m_newConstraints(), m_undoing(false){
 
     checkError(inactiveToken.isValid(), inactiveToken);
     checkError(activeToken.isValid(), activeToken);

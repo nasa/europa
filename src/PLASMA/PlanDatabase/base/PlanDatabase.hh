@@ -457,6 +457,9 @@ namespace EUROPA {
     typedef ObjVarsByObjType::iterator ObjVarsByObjType_I;
     typedef ObjVarsByObjType::const_iterator ObjVarsByObjType_CI;
     ObjVarsByObjType m_objectVariablesByObjectType;
+private:
+    PlanDatabase(const PlanDatabase&);
+    PlanDatabase& operator=(const PlanDatabase&);
   };
 
 

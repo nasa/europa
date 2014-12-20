@@ -8,24 +8,25 @@
 
 namespace EUROPA {
 
-  RuleVariableListener::RuleVariableListener(const LabelStr& name,
-					     const LabelStr& propagatorName,
-					     const ConstraintEngineId constraintEngine,
-					     const std::vector<ConstrainedVariableId>& scope)
-    : Constraint(name, propagatorName, constraintEngine, scope){}
+RuleVariableListener::RuleVariableListener(const LabelStr& name,
+                                           const LabelStr& propagatorName,
+                                           const ConstraintEngineId constraintEngine,
+                                           const std::vector<ConstrainedVariableId>& scope)
+    : Constraint(name, propagatorName, constraintEngine, scope), m_ruleInstance(), 
+      m_sourceConstraint() {}
 
 
-  RuleVariableListener::RuleVariableListener(const ConstraintEngineId constraintEngine,
-					     const RuleInstanceId ruleInstance,
-					     const std::vector<ConstrainedVariableId>& scope)
+RuleVariableListener::RuleVariableListener(const ConstraintEngineId constraintEngine,
+                                           const RuleInstanceId ruleInstance,
+                                           const std::vector<ConstrainedVariableId>& scope)
     : Constraint(CONSTRAINT_NAME(), PROPAGATOR_NAME(), constraintEngine, scope),
-      m_ruleInstance(ruleInstance){
-    check_error(! m_ruleInstance->isExecuted(),
-		"A Rule Instance should never be already executed when we construct the constraint!");
+      m_ruleInstance(ruleInstance), m_sourceConstraint() {
+  check_error(! m_ruleInstance->isExecuted(),
+              "A Rule Instance should never be already executed when we construct the constraint!");
 
-    // Add rule variable listener as a dependent of the rule instance to receive discard notifications
-    m_ruleInstance->addDependent(this);
-  }
+  // Add rule variable listener as a dependent of the rule instance to receive discard notifications
+  m_ruleInstance->addDependent(this);
+}
 
   /**
    * @see Mergemento::merge

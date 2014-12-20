@@ -54,14 +54,12 @@ class TiXmlParsingData
 
   private:
         // Only used by the document!
-        TiXmlParsingData( const char* start, int _tabsize, int row, int col )
-        {
-                assert( start );
-                stamp = start;
-                tabsize = _tabsize;
-                cursor.row = row;
-                cursor.col = col;
-        }
+  TiXmlParsingData( const char* start, int _tabsize, int row, int col )
+    : cursor(), stamp(start), tabsize(_tabsize) {
+    assert( start );
+    cursor.row = row;
+    cursor.col = col;
+  }
 
         TiXmlCursor             cursor;
         const char*             stamp;
@@ -225,57 +223,63 @@ const char* TiXmlBase::ReadName( const char* p, TIXML_STRING * name )
         return 0;
 }
 
-const char* TiXmlBase::GetEntity( const char* p, char* value )
-{
-        // Presume an entity, and pull it out.
+  const char* TiXmlBase::GetEntity( const char* p, char* value ) {
+    // Presume an entity, and pull it out.
     TIXML_STRING ent;
-        int i;
+    int i;
 
-        // Handle the &#x entities.
-        if (    strncmp( "&#x", p, 3 ) == 0 
-             && *(p+3) 
-                 && *(p+4) 
-                 && ( *(p+4) == ';' || *(p+5) == ';' )
-           )
-        {
-                *value = 0;
+    // Handle the &#x entities.
+    if (    strncmp( "&#x", p, 3 ) == 0 
+	    && *(p+3) 
+	    && *(p+4) 
+	    && ( *(p+4) == ';' || *(p+5) == ';' )
+	    )
+      {
+	*value = 0;
 
-                if ( *(p+4) == ';' )
-                {
-                        // Short, one value entity.
-                        if ( isalpha( *(p+3) ) ) *value += ( tolower( *(p+3) ) - 'a' + 10 );
-                        else                                 *value += ( *(p+3) - '0' );
+	if ( *(p+4) == ';' )
+	  {
+	    // Short, one value entity.
+	    if ( isalpha( *(p+3) ) ) 
+	      *value = static_cast<char>(*value + (tolower( *(p+3) ) - 'a' + 10));
+	    else
+	      *value = static_cast<char>(*value + (*(p+3) - '0' ));
 
-                        return p+5;
-                }
-                else
-                {
-                        // two value entity
-                        if ( isalpha( *(p+3) ) ) *value += ( tolower( *(p+3) ) - 'a' + 10 ) * 16;
-                        else                                 *value += ( *(p+3) - '0' ) * 16;
+	    return p+5;
+	  }
+	else
+	  {
+	    // two value entity
+	    if ( isalpha( *(p+3) ) ) 
+	      *value =
+		static_cast<char>(*value + (( tolower( *(p+3) ) - 'a' + 10 ) * 16));
+	    else
+	      *value = static_cast<char>(*value + (( *(p+3) - '0' ) * 16));
 
-                        if ( isalpha( *(p+4) ) ) *value += ( tolower( *(p+4) ) - 'a' + 10 );
-                        else                                 *value += ( *(p+4) - '0' );
+	    if ( isalpha( *(p+4) ) )
+	      *value = static_cast<char>(*value + (tolower( *(p+4) ) - 'a' + 10 ));
+	    else
+	      *value = static_cast<char>(*value + (*(p+4) - '0' ));
 
-                        return p+6;
-                }
-        }
+	    return p+6;
+	  }
+      }
 
-        // Now try to match it.
-        for( i=0; i<NUM_ENTITY; ++i )
-        {
-                if ( strncmp( entity[i].str, p, entity[i].strLength ) == 0 )
-                {
-                        assert( strlen( entity[i].str ) == entity[i].strLength );
-                        *value = entity[i].chr;
-                        return ( p + entity[i].strLength );
-                }
-        }
+    // Now try to match it.
+    for( i=0; i<NUM_ENTITY; ++i )
+      {
+	if ( strncmp( entity[i].str, p, entity[i].strLength ) == 0 )
+	  {
+	    assert( strlen( entity[i].str ) == entity[i].strLength );
+	    *value = entity[i].chr;
+	    return ( p + entity[i].strLength );
+	  }
+      }
 
-        // So it wasn't an entity, its unrecognized, or something like that.
-        *value = *p;    // Don't put back the last one, since we return it!
-        return p+1;
-}
+    // So it wasn't an entity, its unrecognized, or something like that.
+    *value = *p;    // Don't put back the last one, since we return it!
+    return p+1;
+  }
 
 
 bool TiXmlBase::StringEqual( const char* p,
@@ -984,9 +988,6 @@ const char* TiXmlAttribute::Parse( const char* p, TiXmlParsingData* data )
         p = SkipWhiteSpace( p );
         if ( !p || !*p ) return 0;
 
-        int tabsize = 4;
-        if ( document )
-                tabsize = document->TabSize();
 
 //      TiXmlParsingData data( p, prevData );
         if ( data )

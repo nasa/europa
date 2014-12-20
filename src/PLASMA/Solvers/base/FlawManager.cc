@@ -23,13 +23,22 @@ using HASH_NS::hash_map;
 #endif //0
 
 namespace EUROPA {
-  namespace SOLVERS {
+namespace SOLVERS {
 
-    FlawManager::FlawManager(const TiXmlElement& configData)
-      : Component(configData) 
-      , m_timestamp(0)
-    {
-    }
+FlawManager::FlawManager(const TiXmlElement& configData)
+    : Component(configData) 
+    , m_db()
+    , m_parent()
+    , m_flawFilters()
+    , m_flawHandlers()
+    , m_staticFiltersByKey()
+    , m_dynamicFiltersByKey()
+    , m_flawHandlerGuards()
+    , m_activeFlawHandlersByKey()
+    , m_timestamp(0)
+    , m_context()
+{
+}
 
     FlawManager::~FlawManager()
     {
@@ -657,14 +666,15 @@ namespace EUROPA {
 
     /** FLAW ITERATOR IMPLEMENTION **/
 
-    FlawIterator::FlawIterator(FlawManager& manager)
-      : m_visited(0), 
-        m_done(false),
-        m_manager(manager){
+FlawIterator::FlawIterator(FlawManager& manager)
+    : m_visited(0), 
+      m_done(false),
+      m_manager(manager),
+      m_flaw() {
 
-      // Force the manager to synch up with the cycle count of the constraint engine
-      manager.synchronize();
-    }
+  // Force the manager to synch up with the cycle count of the constraint engine
+  manager.synchronize();
+}
 
     void FlawIterator::advance(){
       EntityId candidate = nextCandidate();

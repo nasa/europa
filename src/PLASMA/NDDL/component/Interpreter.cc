@@ -152,48 +152,50 @@ std::string getAutoName(const char* prefix) {
 
   std::string ExprConstant::getConstantValue() const
   {
-      std::ostringstream os;
-      std::string typeName(m_type.c_str());
+    std::ostringstream os;
+    std::string typeName(m_type.c_str());
 
-      // TODO: this is a hack, where is this being used?
-      if (m_domain->isSingleton()) {
-    	  if (typeName == IntDT::NAME())
-            os << eint(cast_int((m_domain->getSingletonValue())));
-    	  else if (typeName == FloatDT::NAME())
-    	      os << m_domain->getSingletonValue();
-    	  else if (typeName == StringDT::NAME())
-			  os << LabelStr(m_domain->getSingletonValue()).toString();
-          else
-        	  os << "CONST_" << typeName << " " << m_domain->toString();
-      }
+    // TODO: this is a hack, where is this being used?
+    if (m_domain->isSingleton()) {
+      if (typeName == IntDT::NAME())
+        os << eint(cast_int((m_domain->getSingletonValue())));
+      else if (typeName == FloatDT::NAME())
+        os << m_domain->getSingletonValue();
+      else if (typeName == StringDT::NAME())
+        os << LabelStr(m_domain->getSingletonValue()).toString();
       else
-    	  os << "CONST_" << typeName << " " << m_domain->toString();
+        os << "CONST_" << typeName << " " << m_domain->toString();
+    }
+    else
+      os << "CONST_" << typeName << " " << m_domain->toString();
 
-      return os.str();
+    return os.str();
   }
 
 
 
-  /*
-   * ExprVarRef
-   */
-  ExprVarRef::ExprVarRef(const char* varName, const DataTypeId type)
+/*
+ * ExprVarRef
+ */
+ExprVarRef::ExprVarRef(const char* varName, const DataTypeId type)
     : m_varName(varName)
     , m_varType(type)
-  {
-    tokenize(m_varName,m_vars,".");
+    , m_parentName()
+    , m_vars()
+{
+  tokenize(m_varName,m_vars,".");
 
-    if (m_vars.size() > 1) {
-      m_parentName = m_vars[0];
-      m_varName = m_varName.substr(m_parentName.length()+1);
-      m_vars.erase(m_vars.begin());
-      debugMsg("Interpreter:ExprVarRef","Split " << varName << " into " << m_parentName << " and " << m_varName);
-    }
-    else {
-      m_parentName = "";
-      debugMsg("Interpreter:ExprVarRef","Didn't split " << varName);
-    }
+  if (m_vars.size() > 1) {
+    m_parentName = m_vars[0];
+    m_varName = m_varName.substr(m_parentName.length()+1);
+    m_vars.erase(m_vars.begin());
+    debugMsg("Interpreter:ExprVarRef","Split " << varName << " into " << m_parentName << " and " << m_varName);
   }
+  else {
+    m_parentName = "";
+    debugMsg("Interpreter:ExprVarRef","Didn't split " << varName);
+  }
+}
 
   ExprVarRef::~ExprVarRef()
   {
@@ -792,10 +794,14 @@ LabelStr predicateInstanceToType(
 }
 }
 
-  PredicateInstanceRef::PredicateInstanceRef(const TokenTypeId tokenType, const char* predInstance, const char* predName, const char* annotation)
-      : m_tokenType(tokenType)
-  	  , m_predicateInstance(predInstance != NULL ? predInstance : "")
-      , m_predicateName(predName != NULL ? predName : "")
+PredicateInstanceRef::PredicateInstanceRef(const TokenTypeId tokenType,
+                                           const char* predInstance, 
+                                           const char* predName, 
+                                           const char* annotation)
+    : m_tokenType(tokenType)
+    , m_predicateInstance(predInstance != NULL ? predInstance : "")
+    , m_predicateName(predName != NULL ? predName : "")
+    , m_attributes(0)
   {
 	  m_attributes=0;
 	  if (annotation != NULL) {
@@ -1206,45 +1212,49 @@ void createRelation(EvalContext& context,
     /*
      * InterpretedToken
      */
-    InterpretedToken::InterpretedToken(
-                     const PlanDatabaseId planDatabase,
-                     const LabelStr& predicateName,
-                     const std::vector<Expr*>& body,
-                     const bool& rejectable,
-                     const bool& isFact,
-                     const bool& close)
-      : IntervalToken(planDatabase,
-                        predicateName,
-                        rejectable,
-                        isFact,
-                        IntervalIntDomain(),                  // start
-                        IntervalIntDomain(),                  // end
-                        IntervalIntDomain(1, PLUS_INFINITY),  // duration
-                        Token::noObject(),                    // Object Name
-                        false)
-    {
-    	commonInit(body, close);
-    	debugMsg("Interpreter:InterpretedToken","Created token(" << getKey() << ") of type:" << predicateName.toString() << " objectVar=" << getVariable("object")->toString());
-    }
+InterpretedToken::InterpretedToken(
+    const PlanDatabaseId planDatabase,
+    const LabelStr& predicateName,
+    const std::vector<Expr*>& body,
+    const bool& rejectable,
+    const bool& _isFact,
+    const bool& _close)
+    : IntervalToken(planDatabase,
+                    predicateName,
+                    rejectable,
+                    _isFact,
+                    IntervalIntDomain(),                  // start
+                    IntervalIntDomain(),                  // end
+                    IntervalIntDomain(1, PLUS_INFINITY),  // duration
+                    Token::noObject(),                    // Object Name
+                    false)
+{
+  commonInit(body, _close);
+  debugMsg("Interpreter:InterpretedToken",
+           "Created token(" << getKey() << ") of type:" << predicateName.toString() <<
+           " objectVar=" << getVariable("object")->toString());
+}
 
-  InterpretedToken::InterpretedToken(
-                     const TokenId master,
-				     const LabelStr& predicateName,
-				     const LabelStr& relation,
-                     const std::vector<Expr*>& body,
-				     const bool& close)
-    : IntervalToken(master,
+InterpretedToken::InterpretedToken(
+    const TokenId _master,
+    const LabelStr& predicateName,
+    const LabelStr& relation,
+    const std::vector<Expr*>& body,
+    const bool& _close)
+    : IntervalToken(_master,
 		    relation,
 		    predicateName,
 		    IntervalIntDomain(),                 // start
 		    IntervalIntDomain(),                 // end
 		    IntervalIntDomain(1, PLUS_INFINITY), // duration
 		    Token::noObject(),                   // Object Name
-		    false)
-  {
-    commonInit(body, close);
-    debugMsg("Interpreter:InterpretedToken","Created slave token(" << getKey() << ") of type:" << predicateName.toString() << " objectVar=" << getVariable("object")->toString());
-  }
+		    false) {
+  commonInit(body, _close);
+  debugMsg("Interpreter:InterpretedToken",
+           "Created slave token(" << getKey() << ") of type:" << 
+           predicateName.toString() << " objectVar=" << 
+           getVariable("object")->toString());
+}
 
   InterpretedToken::~InterpretedToken()
   {
@@ -1267,23 +1277,22 @@ void createRelation(EvalContext& context,
   /*
    * InterpretedTokenType
    */
-    InterpretedTokenType::InterpretedTokenType(
-            const ObjectTypeId ot,
-            const LabelStr& predicateName,
-            const std::string& kind)
-        : TokenType(ot,predicateName)
-    {
-    	// TODO: offer conversion methods in TokenType
-    	int attributes=0;
-    	if (kind=="action")
-    		attributes |= PSTokenType::ACTION;
-    	else if (kind=="predicate")
-    		attributes |= PSTokenType::PREDICATE;
-    	else
-    		std::cerr << "TokenType "<< predicateName.toString() << " unknown kind:" << kind << std::endl;
+InterpretedTokenType::InterpretedTokenType(
+    const ObjectTypeId ot,
+    const LabelStr& predicateName,
+    const std::string& kind)
+    : TokenType(ot,predicateName), m_body(), m_rules() {
+  // TODO: offer conversion methods in TokenType
+  int attributes=0;
+  if (kind=="action")
+    attributes |= PSTokenType::ACTION;
+  else if (kind=="predicate")
+    attributes |= PSTokenType::PREDICATE;
+  else
+    std::cerr << "TokenType "<< predicateName.toString() << " unknown kind:" << kind << std::endl;
 
-    	addAttributes(attributes);
-    }
+  addAttributes(attributes);
+}
 
     void InterpretedTokenType::addBodyExpr(Expr* e)
     {

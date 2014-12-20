@@ -89,8 +89,11 @@ namespace EUROPA {
     edouble MaxValue::getNext(){return m_choices->getValue(--m_choiceIndex);}
 
     /** RANDOM VALUE **/
-    RandomValue::RandomValue(const DbClientId client, const ConstrainedVariableId flawedVariable, const TiXmlElement& configData, const LabelStr& explanation)
-      : UnboundVariableDecisionPoint(client, flawedVariable, configData, explanation), m_distribution(NORMAL){
+  RandomValue::RandomValue(const DbClientId client, 
+                           const ConstrainedVariableId flawedVariable, 
+                           const TiXmlElement& configData, const LabelStr& explanation)
+      : UnboundVariableDecisionPoint(client, flawedVariable, configData, explanation),
+        m_usedIndices(), m_distribution(NORMAL) {
       static bool sl_seeded(false);
 
       if(!sl_seeded){
@@ -127,19 +130,19 @@ namespace EUROPA {
       }
     }
 
-    bool RandomValue::hasNext() const{ return m_choices->getCount() > m_usedIndeces.size(); }
+    bool RandomValue::hasNext() const{ return m_choices->getCount() > m_usedIndices.size(); }
 
     edouble RandomValue::getNext(){
       unsigned int tryCount = 1; /*!< Number of attempts to get a new selection */
       unsigned long index = static_cast<unsigned long>(rand()) % m_choices->getCount();
 
-      while(m_usedIndeces.find(index) != m_usedIndeces.end()){
+      while(m_usedIndices.find(index) != m_usedIndices.end()){
 	index = static_cast<unsigned long>(rand()) % m_choices->getCount();
 	tryCount++;
       }
 
       // Insert selected index so we do not repeat it
-      m_usedIndeces.insert(index);
+      m_usedIndices.insert(index);
 
       // Now we should have a selection that indexes into the vector of choices.
       edouble value = m_choices->getValue(index);

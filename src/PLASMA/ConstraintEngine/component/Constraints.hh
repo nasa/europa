@@ -14,7 +14,7 @@ namespace EUROPA {
     basename(const LabelStr& name,					\
 	     const LabelStr& propagatorName,				\
 	     bool systemDefined = false)				\
-      : ConstraintType(name,propagatorName,systemDefined) { m_name = name.c_str(); } \
+        : ConstraintType(name,propagatorName,systemDefined), m_name(name.c_str()) {} \
     									\
     virtual ~basename() {}						\
     									\
@@ -42,10 +42,10 @@ namespace EUROPA {
 #define CREATE_CONSTRAINT_TYPE(base, name, constraint) \
   class name : public base {			       \
   public:					       \
-  name(const LabelStr& name,			       \
-       const LabelStr& propagatorName,		       \
-       bool systemDefined = false)					\
-    : base(name,propagatorName,systemDefined) {}			\
+  name(const LabelStr& _name,			       \
+       const LabelStr& _propagatorName,		       \
+       bool _systemDefined = false)					\
+    : base(_name,_propagatorName,_systemDefined) {}			\
   ~name() {}							\
   virtual ConstraintId createConstraint(const ConstraintEngineId constraintEngine, \
 					const std::vector<ConstrainedVariableId>& scope,\
@@ -344,7 +344,8 @@ class LessThanEqualConstraint : public Constraint {
     static const unsigned int Y = 1;
     static const unsigned int ARG_COUNT = 2;
   };
-  CREATE_CONSTRAINT_TYPE(TwoSameNumericArgumentsCT, LessThanEqualCT, LessThanEqualConstraint);
+CREATE_CONSTRAINT_TYPE(TwoSameNumericArgumentsCT, LessThanEqualCT, 
+                       LessThanEqualConstraint);
 
 
   /**
@@ -915,40 +916,41 @@ class NotEqualConstraint : public Constraint {
    * "pushing" all of the other variables to the right.
    * @note Negative and zero values for rotateCount are supported.
    */
-  class RotateScopeRightConstraint : public Constraint {
-  public:
-    RotateScopeRightConstraint(const LabelStr& name,
-                               const LabelStr& propagatorName,
-                               const ConstraintEngineId constraintEngine,
-                               const std::vector<ConstrainedVariableId>& variables) __attribute__((noreturn))
-      : Constraint(name, propagatorName, constraintEngine, variables) {
-      // Called via REGISTER_NARY() macro's factory rather than via the
-      //   REGISTER_ROTATED_NARY() macro's factory: not enough information
-      //   to create the constraint.
-      assertTrue(false);
-    }
+class RotateScopeRightConstraint : public Constraint {
+ public:
+  RotateScopeRightConstraint(const LabelStr& name,
+                             const LabelStr& propagatorName,
+                             const ConstraintEngineId constraintEngine,
+                             const std::vector<ConstrainedVariableId>& variables) __attribute__((noreturn))
+  : Constraint(name, propagatorName, constraintEngine, variables), 
+    m_otherConstraint() {
+    // Called via REGISTER_NARY() macro's factory rather than via the
+    //   REGISTER_ROTATED_NARY() macro's factory: not enough information
+    //   to create the constraint.
+    assertTrue(false);
+  }
 
-    RotateScopeRightConstraint(const LabelStr& name,
-                               const LabelStr& propagatorName,
-                               const ConstraintEngineId constraintEngine,
-                               const std::vector<ConstrainedVariableId>& variables,
-                               const LabelStr& otherName,
-                               const int& rotateCount);
+  RotateScopeRightConstraint(const LabelStr& name,
+                             const LabelStr& propagatorName,
+                             const ConstraintEngineId constraintEngine,
+                             const std::vector<ConstrainedVariableId>& variables,
+                             const LabelStr& otherName,
+                             const int& rotateCount);
 
-    ~RotateScopeRightConstraint() {
-      discard(false);
-    }
+  ~RotateScopeRightConstraint() {
+    discard(false);
+  }
 
-  private:
-    void handleExecute() { }
+ private:
+  void handleExecute() { }
 
-    void handleDiscard(){
-      Constraint::handleDiscard();
-      m_otherConstraint->discard();
-    }
+  void handleDiscard(){
+    Constraint::handleDiscard();
+    m_otherConstraint->discard();
+  }
 
-    ConstraintId m_otherConstraint;
-  };
+  ConstraintId m_otherConstraint;
+};
 
   /**
    * @class SwapTwoVarsConstraint
@@ -1028,7 +1030,7 @@ class SwapTwoVarsConstraint : public Constraint {
                         const LabelStr& propagatorName,
                         const ConstraintEngineId constraintEngine,
                         const std::vector<ConstrainedVariableId>& variables) __attribute__((noreturn))
-      : Constraint(name, propagatorName, constraintEngine, variables) {
+  : Constraint(name, propagatorName, constraintEngine, variables), m_otherConstraint() {
     // Called via REGISTER_NARY() macro's factory rather than via the
     //   REGISTER_SWAP_TWO_VARS_NARY() macro's factory: not enough information
     //   to create the constraint.
@@ -1215,7 +1217,8 @@ class UnaryConstraint : public Constraint {
     ~UnaryConstraint();
 
   private:
-
+  UnaryConstraint(const UnaryConstraint&);
+  UnaryConstraint& operator=(const UnaryConstraint&);
     void handleExecute();
 
     void handleDiscard();

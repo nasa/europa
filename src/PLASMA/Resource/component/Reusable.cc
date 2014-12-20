@@ -11,30 +11,36 @@
 
 namespace EUROPA {
 
-	Reusable::Reusable(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, const LabelStr& detectorName, const LabelStr& profileName,
-			edouble initCapacityLb, edouble initCapacityUb, edouble lowerLimit, edouble maxInstConsumption,
-			edouble maxConsumption)
-		:Resource(planDatabase,
-				type,
-				name,
-				detectorName,
-				profileName,
-				initCapacityLb, initCapacityUb,
-				lowerLimit, initCapacityUb,
-				maxInstConsumption, maxInstConsumption,
-				maxConsumption, maxConsumption)
-	{
-	}
+Reusable::Reusable(const PlanDatabaseId planDatabase, const LabelStr& type,
+                   const LabelStr& name, const LabelStr& detectorName, 
+                   const LabelStr& profileName,
+                   edouble initCapacityLb, edouble initCapacityUb, edouble lowerLimit,
+                   edouble maxInstConsumption,
+                   edouble maxConsumption)
+    : Resource(planDatabase,
+               type,
+               name,
+               detectorName,
+               profileName,
+              initCapacityLb, initCapacityUb,
+               lowerLimit, initCapacityUb,
+               maxInstConsumption, maxInstConsumption,
+               maxConsumption, maxConsumption),
+  m_tokensToTransactions()
+{
+}
 
-	Reusable::Reusable(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open)
-    	: Resource(planDatabase, type, name, open)
-	{
-	}
+Reusable::Reusable(const PlanDatabaseId planDatabase, const LabelStr& type,
+                   const LabelStr& name, bool open)
+    : Resource(planDatabase, type, name, open), m_tokensToTransactions()
+{
+}
 
-	Reusable::Reusable(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open)
-    	: Resource(parent, type, localName, open)
-	{
-	}
+Reusable::Reusable(const ObjectId parent, const LabelStr& type, 
+                   const LabelStr& localName, bool open)
+    : Resource(parent, type, localName, open), m_tokensToTransactions()
+{
+}
 
 	Reusable::~Reusable()
 	{
@@ -128,41 +134,44 @@ void Reusable::getOrderingChoices(const TokenId token,
   {
   }
 
-    CBReusable::CBReusable(const PlanDatabaseId planDatabase,
-    		const LabelStr& type,
-    		const LabelStr& name,
-    		const LabelStr& detectorName,
-    		const LabelStr& profileName,
-    		edouble initCapacityLb,
-    		edouble initCapacityUb,
-    		edouble lowerLimit,
-    		edouble maxInstConsumption,
-    		edouble maxConsumption)
-    	: Resource(planDatabase,
-    		type,
-    		name,
-    		detectorName,
-    		profileName,
-    		initCapacityLb,
-    		initCapacityUb,
-    		lowerLimit,
-    		initCapacityUb,
-    		maxInstConsumption,
-    		maxInstConsumption,
-    		maxConsumption,
-    		maxConsumption)
-    {
-    }
+CBReusable::CBReusable(const PlanDatabaseId planDatabase,
+                       const LabelStr& type,
+                       const LabelStr& name,
+                       const LabelStr& detectorName,
+                       const LabelStr& profileName,
+                       edouble initCapacityLb,
+                       edouble initCapacityUb,
+                       edouble lowerLimit,
+                       edouble maxInstConsumption,
+                       edouble maxConsumption)
+    : Resource(planDatabase,
+               type,
+               name,
+               detectorName,
+               profileName,
+               initCapacityLb,
+               initCapacityUb,
+               lowerLimit,
+               initCapacityUb,
+               maxInstConsumption,
+               maxInstConsumption,
+               maxConsumption,
+               maxConsumption),
+                           m_constraintsToTransactions()
+{
+}
 
-    CBReusable::CBReusable(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open)
-    	: Resource(planDatabase, type, name, open)
-    {
-    }
+CBReusable::CBReusable(const PlanDatabaseId planDatabase, const LabelStr& type,
+                       const LabelStr& name, bool open)
+    : Resource(planDatabase, type, name, open), m_constraintsToTransactions()
+{
+}
 
-    CBReusable::CBReusable(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open)
-    	: Resource(parent, type, localName, open)
-    {
-    }
+CBReusable::CBReusable(const ObjectId parent, const LabelStr& type,
+                       const LabelStr& localName, bool open)
+    : Resource(parent, type, localName, open), m_constraintsToTransactions()
+{
+}
 
     CBReusable::~CBReusable()
     {
@@ -331,24 +340,24 @@ edouble getUb(ConstrainedVariableId v) {
     }
   }
 
-  Uses::Uses(const LabelStr& name,
-             const LabelStr& propagatorName,
-             const ConstraintEngineId ce,
-             const std::vector<ConstrainedVariableId>& scope)
-    : Constraint(name, propagatorName, ce, scope)
-  {
-    checkError(scope.size() == 4, "Uses constraint requires resource,qty,start,end");
+Uses::Uses(const LabelStr& name,
+           const LabelStr& propagatorName,
+           const ConstraintEngineId ce,
+           const std::vector<ConstrainedVariableId>& scope)
+    : Constraint(name, propagatorName, ce, scope), m_resource(), m_txns(), 
+      m_violationProblems() {
+  checkError(scope.size() == 4, "Uses constraint requires resource,qty,start,end");
 
-    m_txns.push_back((new Transaction(scope[Uses::START_VAR], scope[Uses::QTY_VAR], true, getId()))->getId());
-    m_txns.push_back((new Transaction(scope[Uses::END_VAR],   scope[Uses::QTY_VAR], false, getId()))->getId());
+  m_txns.push_back((new Transaction(scope[Uses::START_VAR], scope[Uses::QTY_VAR], true, getId()))->getId());
+  m_txns.push_back((new Transaction(scope[Uses::END_VAR],   scope[Uses::QTY_VAR], false, getId()))->getId());
 
-    if(scope[RESOURCE_VAR]->lastDomain().isSingleton()) {
-      m_resource = Entity::getTypedEntity<CBReusable>(scope[RESOURCE_VAR]->lastDomain().getSingletonValue());
-      check_error(m_resource.isValid());
-      debugMsg("Uses:Uses", "Adding constraint " << toString() << " to resource-profile of resource " << m_resource->toString() );
-      m_resource->addToProfile(getId());
-    }
+  if(scope[RESOURCE_VAR]->lastDomain().isSingleton()) {
+    m_resource = Entity::getTypedEntity<CBReusable>(scope[RESOURCE_VAR]->lastDomain().getSingletonValue());
+    check_error(m_resource.isValid());
+    debugMsg("Uses:Uses", "Adding constraint " << toString() << " to resource-profile of resource " << m_resource->toString() );
+    m_resource->addToProfile(getId());
   }
+}
 
   const TransactionId Uses::getTransaction(int var) const
   {
@@ -380,7 +389,7 @@ edouble getUb(ConstrainedVariableId v) {
   }
 
 bool Uses::canIgnore(const ConstrainedVariableId variable,
-                     unsigned int argIndex,
+                     unsigned int,
                      const DomainListener::ChangeType& changeType) {
   ConstrainedVariableId res = m_variables[RESOURCE_VAR];
 
