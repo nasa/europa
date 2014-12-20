@@ -19,7 +19,9 @@ namespace EUROPA
     Node::Node( const NodeIdentity& identity ):
       m_Enabled( true ),
       m_Visit( -1 ),
-      m_Identity( identity )
+      m_Identity( identity ),
+      m_InEdges(),
+      m_OutEdges()
     {
     }
 

@@ -191,11 +191,12 @@ edouble SymbolDT::createValue(const std::string& value) const
   return LabelStr(value);
 }
 
-RestrictedDT::RestrictedDT(const char* name, const DataTypeId baseType, const Domain& baseDomain)
+RestrictedDT::RestrictedDT(const char* name, const DataTypeId baseType,
+                           const Domain& _baseDomain)
     : DataType(name)
     , m_baseType(baseType)
 {
-    m_baseDomain = baseDomain.copy();
+    m_baseDomain = _baseDomain.copy();
     m_baseDomain->setDataType(getId());
     setIsRestricted(true);
 }

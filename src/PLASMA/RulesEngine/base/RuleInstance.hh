@@ -249,6 +249,8 @@ namespace EUROPA{
     RuleInstanceId m_parent;
 
   private:
+    RuleInstance(const RuleInstance&);
+    RuleInstance& operator=(const RuleInstance&);
     /**
      * @brief Invoked by derived classes to set the guard variable where the test criteria will be that
      * the specified domain of the guard is a singleton. Private since should onle be called from constructor.

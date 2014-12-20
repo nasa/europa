@@ -12,6 +12,7 @@ template<class T>
 class PSList
 {
  public:
+  PSList() : m_elements() {}
   long size() const { return static_cast<long>(m_elements.size()); }
   T& get(long idx) { return m_elements[static_cast<unsigned>(idx)]; }
   const T& get(long idx) const { return m_elements[static_cast<unsigned>(idx)]; }
@@ -36,6 +37,7 @@ class PSList
 template <typename T>
 class PSList<T*> {
  public:
+  PSList() : m_elements() {}
   long size() const { return static_cast<long>(m_elements.size()); }
   T* get(long idx) { return m_elements[static_cast<unsigned>(idx)]; }
   const T* get(long idx) const { return m_elements[static_cast<unsigned>(idx)]; }

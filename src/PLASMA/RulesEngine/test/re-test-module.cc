@@ -48,7 +48,7 @@ private:
   class RootInstance: public RuleInstance{
   public:
     RootInstance(const RuleId rule, const TokenId token, const PlanDatabaseId planDb)
-      : RuleInstance(rule, token, planDb) {}
+        : RuleInstance(rule, token, planDb), m_onlySlave() {}
 
     void handleExecute(){
       m_onlySlave = addSlave(new IntervalToken(m_token, "met_by", LabelStr("AllObjects.Predicate")));
@@ -116,7 +116,7 @@ RuleInstanceId NestedGuards_0::createInstance(const TokenId token, const PlanDat
 
 NestedGuards_0_Root::NestedGuards_0_Root(const RuleId rule, const TokenId token,
                                          const PlanDatabaseId planDb)
-  : RuleInstance(rule, token, planDb, makeScope(token->getObject())) {}
+    : RuleInstance(rule, token, planDb, makeScope(token->getObject())), m_onlySlave() {}
 
 void NestedGuards_0_Root::handleExecute(){
   m_onlySlave = addSlave(new IntervalToken(m_token, "met_by", LabelStr("AllObjects.Predicate")));
@@ -126,7 +126,7 @@ void NestedGuards_0_Root::handleExecute(){
 }
 
 NestedGuards_0_0::NestedGuards_0_0(const RuleInstanceId parentInstance, const ConstrainedVariableId guard, const Domain& domain)
-  : RuleInstance(parentInstance, guard, domain){}
+    : RuleInstance(parentInstance, guard, domain), m_onlySlave() {}
 
 void NestedGuards_0_0::handleExecute(){
   m_onlySlave = addSlave(new IntervalToken(m_token, "met_by", LabelStr("AllObjects.Predicate")));
@@ -134,7 +134,7 @@ void NestedGuards_0_0::handleExecute(){
 }
 
 NestedGuards_0_1::NestedGuards_0_1(const RuleInstanceId parentInstance, const std::vector<ConstrainedVariableId>& guards)
-  : RuleInstance(parentInstance, guards){}
+    : RuleInstance(parentInstance, guards), m_onlySlave() {}
 
 void NestedGuards_0_1::handleExecute(){
   m_onlySlave = addSlave(new IntervalToken(m_token, "met_by",  LabelStr("AllObjects.Predicate")));

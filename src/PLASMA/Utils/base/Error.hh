@@ -302,14 +302,15 @@ public:
      @see Error::setCause()
   */
   inline Error(const std::string& msg)
-    : m_msg(msg), m_type("Error") {
+    : m_condition(), m_msg(msg), m_file(), m_line(0), m_type("Error") {
   }
 
   /**
      @brief Copy constructor.
   */
   inline Error(const Error& err)
-    : m_condition(err.m_condition), m_msg(err.m_msg), m_file(err.m_file), m_line(err.m_line) {
+    : m_condition(err.m_condition), m_msg(err.m_msg), m_file(err.m_file), 
+      m_line(err.m_line), m_type("Error") {
   }
 
   /**

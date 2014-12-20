@@ -62,27 +62,29 @@ namespace EUROPA
   typedef std::list< Edge* > EdgeList;
   typedef std::list< Node* > NodeList;
 
-  class NodeHash: 
-    public std::unary_function<Node*, size_t>
+class NodeHash
 #ifdef _MSC_VER
-    , public hash_compare< Node * >
+    : public hash_compare< Node * >
 #endif //_MSC_VER
+{
+ public:
+  typedef Node* argument_type;
+  typedef size_t result_type;
+  size_t operator()(Node* n) const
   {
-  public:
-    size_t operator()(Node* n) const
-    {
-      boost::hash<long> H;
-      return H( reinterpret_cast<long>(n));
-    }
-  };
+    boost::hash<long> H;
+    return H( reinterpret_cast<long>(n));
+  }
+};
 
-  class EdgeHash:
-    public std::unary_function<Edge*, size_t>
+  class EdgeHash
 #ifdef _MSC_VER
-    , public hash_compare< Edge * >
+      : public hash_compare< Edge * >
 #endif //_MSC_VER
   {
-  public:
+   public:
+    typedef Edge* argument_type;
+    typedef size_t result_type;
     size_t operator()(Edge* n) const
     {
       boost::hash<long> H;
@@ -91,13 +93,14 @@ namespace EUROPA
     
   };
 
-  class TransactionIdHash:
-    public std::unary_function< TransactionId, size_t>
+  class TransactionIdHash
 #ifdef _MSC_VER
-    , public hash_compare< TransactionId >
+      : public hash_compare< TransactionId >
 #endif //_MSC_VER
   {
-  public:
+   public:
+    typedef TransactionId argument_type;
+    typedef size_t result_type;
     size_t operator()(TransactionId n) const
     {
       boost::hash<long> H;

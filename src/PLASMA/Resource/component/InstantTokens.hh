@@ -46,69 +46,74 @@ namespace EUROPA {
       bool m_activate;
     };
 
-    class ConsumerToken : public ReservoirToken {
-    public:
-      ConsumerToken(const PlanDatabaseId planDatabase,
-		    const LabelStr& predicateName,
-		    const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
-		    const IntervalDomain quantityBaseDomain = IntervalDomain(0, PLUS_INFINITY),
-		    bool closed = true,
-		    bool activate = true)
-	: ReservoirToken(planDatabase, predicateName, timeBaseDomain, quantityBaseDomain, true, closed, activate) {
-      }
-      ConsumerToken(const PlanDatabaseId planDatabase,
-		    const LabelStr& predicateName,
-		    bool rejectable,
-		    bool isFact,
-		    const IntervalIntDomain& timeBaseDomain,
-		    const LabelStr& objectName,
-		    bool closed,
-		    bool activate = true)
-	: ReservoirToken(planDatabase, predicateName, rejectable, isFact, timeBaseDomain, objectName, true, closed, activate) {
-      }
+class ConsumerToken : public ReservoirToken {
+ public:
+  ConsumerToken(const PlanDatabaseId planDatabase,
+                const LabelStr& predicateName,
+                const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
+                const IntervalDomain quantityBaseDomain = IntervalDomain(0, PLUS_INFINITY),
+                bool closed = true,
+                bool _activate = true)
+      : ReservoirToken(planDatabase, predicateName, timeBaseDomain,
+                       quantityBaseDomain, true, closed, _activate) {
+  }
+  ConsumerToken(const PlanDatabaseId planDatabase,
+                const LabelStr& predicateName,
+                bool rejectable,
+                bool _isFact,
+                const IntervalIntDomain& timeBaseDomain,
+                const LabelStr& objectName,
+                bool closed,
+                bool _activate = true)
+      : ReservoirToken(planDatabase, predicateName, rejectable, _isFact,
+                       timeBaseDomain, objectName, true, closed, _activate) {
+  }
 
-      ConsumerToken(const TokenId parent,
-		    const LabelStr& relation,
-		    const LabelStr& predicateName,
-		    const IntervalIntDomain& timeBaseDomain,
-		    const LabelStr& objectName,
-		    bool closed,
-		    bool activate = true)
-	: ReservoirToken(parent, relation, predicateName, timeBaseDomain, objectName, true, closed, activate) {
-      }
-    };
+  ConsumerToken(const TokenId parent,
+                const LabelStr& relation,
+                const LabelStr& predicateName,
+                const IntervalIntDomain& timeBaseDomain,
+                const LabelStr& objectName,
+                bool closed,
+                bool _activate = true)
+      : ReservoirToken(parent, relation, predicateName, timeBaseDomain, objectName, true, closed, _activate) {
+  }
+};
 
-    class ProducerToken : public ReservoirToken {
-    public:
-      ProducerToken(const PlanDatabaseId planDatabase,
-		    const LabelStr& predicateName,
-		    const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
-		    const IntervalDomain quantityBaseDomain = IntervalDomain(0, PLUS_INFINITY),
-		    bool closed = true,
-		    bool activate = true)
-	: ReservoirToken(planDatabase, predicateName, timeBaseDomain, quantityBaseDomain, false, closed, activate) {
-      }
-      ProducerToken(const PlanDatabaseId planDatabase,
-		    const LabelStr& predicateName,
-		    bool rejectable,
-		    bool isFact,
-		    const IntervalIntDomain& timeBaseDomain,
-		    const LabelStr& objectName,
-		    bool closed,
-		    bool activate = true)
-	: ReservoirToken(planDatabase, predicateName, rejectable, isFact, timeBaseDomain, objectName, false, closed, activate) {
-      }
+class ProducerToken : public ReservoirToken {
+ public:
+  ProducerToken(const PlanDatabaseId planDatabase,
+                const LabelStr& predicateName,
+                const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
+                const IntervalDomain quantityBaseDomain = IntervalDomain(0, PLUS_INFINITY),
+                bool closed = true,
+                bool _activate = true)
+      : ReservoirToken(planDatabase, predicateName, timeBaseDomain, quantityBaseDomain,
+                       false, closed, _activate) {
+  }
+  ProducerToken(const PlanDatabaseId planDatabase,
+                const LabelStr& predicateName,
+                bool rejectable,
+                bool _isFact,
+                const IntervalIntDomain& timeBaseDomain,
+                const LabelStr& objectName,
+                bool closed,
+                bool _activate = true)
+      : ReservoirToken(planDatabase, predicateName, rejectable, _isFact,
+                       timeBaseDomain, objectName, false, closed, _activate) {
+  }
 
-      ProducerToken(const TokenId parent,
-		    const LabelStr& relation,
-		    const LabelStr& predicateName,
-		    const IntervalIntDomain& timeBaseDomain,
-		    const LabelStr& objectName,
-		    bool closed,
-		    bool activate = true)
-	: ReservoirToken(parent, relation, predicateName, timeBaseDomain, objectName, false, closed, activate) {
-      }
-    };
+  ProducerToken(const TokenId parent,
+                const LabelStr& relation,
+                const LabelStr& predicateName,
+                const IntervalIntDomain& timeBaseDomain,
+                const LabelStr& objectName,
+                bool closed,
+                bool _activate = true)
+      : ReservoirToken(parent, relation, predicateName, timeBaseDomain, objectName,
+                       false, closed, _activate) {
+  }
+};
 
 }
 

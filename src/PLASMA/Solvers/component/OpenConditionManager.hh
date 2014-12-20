@@ -12,7 +12,7 @@
  * @date March, 2005
  */
 namespace EUROPA {
-  namespace SOLVERS {
+namespace SOLVERS {
 
     class OpenConditionManager: public FlawManager {
     public:

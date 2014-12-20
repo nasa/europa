@@ -30,10 +30,10 @@ namespace EUROPA {
     return(sl_stringFromKeys);
   }
 
-  LabelStr::LabelStr() {
-    std::string empty("");
-    m_key = getKey(empty);
-  }
+LabelStr::LabelStr() : m_key(0) {
+  std::string empty("");
+  m_key = getKey(empty);
+}
 
 namespace {
 pthread_mutex_t& LabelStrMutex() {
@@ -48,21 +48,19 @@ pthread_mutex_t& LabelStrMutex() {
    * calculations in the domain and must maintain the ordering defined
    * by the strings.
    */
-  LabelStr::LabelStr(const std::string& label) {
-    m_key = getKey(label);
+LabelStr::LabelStr(const std::string& label) : m_key(0) {
+  m_key = getKey(label);
+}
 
-  }
+LabelStr::LabelStr(const char* label) : m_key(0) {
+  std::string str(label);
+  m_key = getKey(label);
+}
 
-  LabelStr::LabelStr(const char* label) {
-    std::string str(label);
-    m_key = getKey(label);
-
-  }
-
-  LabelStr::LabelStr(edouble key)
+LabelStr::LabelStr(edouble key)
     : m_key(key) {
-    check_error(isString(m_key), "Invalid key provided.");
-
+  check_error(isString(m_key), "Invalid key provided.");
+  
   }
 
   const std::string& LabelStr::toString() const {

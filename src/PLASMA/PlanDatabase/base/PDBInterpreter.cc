@@ -41,7 +41,7 @@ namespace EUROPA {
    * EvalContext
    */
   EvalContext::EvalContext(EvalContext* parent)
-    : m_parent(parent)
+      : m_parent(parent), m_variables(), m_tokens()
   {
   }
 
@@ -125,9 +125,7 @@ void* EvalContext::getElement(const char*) const {return NULL;}
 	  return "Expr";
   }
 
-  ExprList::ExprList()
-  {
-  }
+ExprList::ExprList() : m_children() {}
 
   ExprList::~ExprList()
   {

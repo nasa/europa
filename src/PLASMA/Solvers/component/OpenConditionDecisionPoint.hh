@@ -96,34 +96,36 @@ namespace EUROPA {
 
     class ActionSupportHeuristic;
 
-    class SupportedOCDecisionPoint : public DecisionPoint
-    {
-    public:
-        SupportedOCDecisionPoint(
-        	const DbClientId client,
-        	const TokenId flawedToken,
-        	const TiXmlElement& configData,
-        	const LabelStr& explanation = "unknown");
+  class SupportedOCDecisionPoint : public DecisionPoint {
+   public:
+    SupportedOCDecisionPoint(
+        const DbClientId client,
+        const TokenId flawedToken,
+        const TiXmlElement& configData,
+        const LabelStr& explanation = "unknown");
 
-        virtual ~SupportedOCDecisionPoint();
+    virtual ~SupportedOCDecisionPoint();
 
-        virtual std::string toString() const;
-        virtual std::string toShortString() const;
+    virtual std::string toString() const;
+    virtual std::string toShortString() const;
 
-    protected:
-        virtual void handleInitialize();
-        virtual void handleExecute();
-        virtual void handleUndo();
-        virtual bool hasNext() const;
-        virtual bool canUndo() const;
+   protected:
+    virtual void handleInitialize();
+    virtual void handleExecute();
+    virtual void handleUndo();
+    virtual bool hasNext() const;
+    virtual bool canUndo() const;
 
-        ActionSupportHeuristic* getSupportHeuristic();
+    ActionSupportHeuristic* getSupportHeuristic();
 
-        const TokenId m_flawedToken; /*!< The token to be resolved. */
-        std::vector<OCDecision*> m_choices;
-        unsigned int m_currentChoice;
-        ActionSupportHeuristic* m_heuristic;
-    };
+    const TokenId m_flawedToken; /*!< The token to be resolved. */
+    std::vector<OCDecision*> m_choices;
+    unsigned int m_currentChoice;
+    ActionSupportHeuristic* m_heuristic;
+private:
+    SupportedOCDecisionPoint(const SupportedOCDecisionPoint&);
+    SupportedOCDecisionPoint& operator=(const SupportedOCDecisionPoint&);
+  };
 
     class ChangeTokenState : public OCDecision
     {
@@ -177,27 +179,29 @@ namespace EUROPA {
 
     };
 
-    class SupportToken : public ChangeTokenState
-    {
-    public:
-    	SupportToken(const DbClientId dbClient, const TokenId token, ActionSupportHeuristic* heuristic);
-    	virtual ~SupportToken();
+  class SupportToken : public ChangeTokenState {
+   public:
+    SupportToken(const DbClientId dbClient, const TokenId token, ActionSupportHeuristic* heuristic);
+    virtual ~SupportToken();
 
-    	virtual void execute();
-    	virtual void undo();
-    	virtual std::string toString();
+    virtual void execute();
+    virtual void undo();
+    virtual std::string toString();
 
-    protected:
-      std::vector<std::pair<TokenTypeId,unsigned long> > m_choices;
-      unsigned long m_actionIndex;
-      unsigned long m_effectIndex;
-      TokenId m_action;
-      TokenId m_targetEffect;
-      ActionSupportHeuristic* m_heuristic;
-      bool m_initialized;
+   protected:
+    std::vector<std::pair<TokenTypeId,unsigned long> > m_choices;
+    unsigned long m_actionIndex;
+    unsigned long m_effectIndex;
+    TokenId m_action;
+    TokenId m_targetEffect;
+    ActionSupportHeuristic* m_heuristic;
+    bool m_initialized;
 
-    	void init();
-    };
+    void init();
+private:
+    SupportToken(const SupportToken&);
+    SupportToken& operator=(const SupportToken&);
+  };
 
     typedef std::vector< std::pair<std::string,double> > ParamValues;
 

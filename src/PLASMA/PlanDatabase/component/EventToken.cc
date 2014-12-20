@@ -6,32 +6,32 @@
 
 namespace EUROPA{
 
-  EventToken::EventToken(const PlanDatabaseId planDatabase,
-			 const LabelStr& predicateName,
-			 bool rejectable,
-			 bool isFact,
-			 const IntervalIntDomain& timeBaseDomain,
-			 const LabelStr& objectName,
-			 bool closed)
+EventToken::EventToken(const PlanDatabaseId planDatabase,
+                       const LabelStr& predicateName,
+                       bool rejectable,
+                       bool _isFact,
+                       const IntervalIntDomain& timeBaseDomain,
+                       const LabelStr& objectName,
+                       bool closed)
     :Token(planDatabase, predicateName,
 	   rejectable,
-	   isFact,
+	   _isFact,
 	   IntervalIntDomain(0, 0),
 	   objectName,
-	   closed){
-    commonInit(timeBaseDomain);
-  }
+	   closed), m_time() {
+  commonInit(timeBaseDomain);
+}
 
-  EventToken::EventToken(const TokenId master,
+  EventToken::EventToken(const TokenId _master,
 			 const LabelStr& relation,
 			 const LabelStr& predicateName,
 			 const IntervalIntDomain& timeBaseDomain,
 			 const LabelStr& objectName,
 			 bool closed)
-    :Token(master, relation, predicateName,
+    :Token(_master, relation, predicateName,
 	   IntervalIntDomain(0, 0),
 	   objectName,
-	   closed){
+	   closed), m_time() {
     commonInit(timeBaseDomain);
   }
 

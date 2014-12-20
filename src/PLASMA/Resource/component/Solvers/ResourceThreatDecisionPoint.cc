@@ -23,7 +23,7 @@ namespace EUROPA {
 
     class ChoiceFilters {
     public:
-      ChoiceFilters() {}
+      ChoiceFilters() : m_filters() {}
       ~ChoiceFilters() {
         for(std::list<ChoiceFilter*>::iterator it = m_filters.begin(); it != m_filters.end(); ++it)
           delete (*it);
@@ -51,49 +51,53 @@ namespace EUROPA {
       std::list<ChoiceFilter*> m_filters;
     };
 
-    class DefaultChoiceFilter : public ChoiceFilter {
-    public:
-      DefaultChoiceFilter(Profile* profile, const LabelStr& explanation, const InstantId inst)
-        : ChoiceFilter(), m_profile(profile), m_explanation(explanation), m_inst(inst) {
+class DefaultChoiceFilter : public ChoiceFilter {
+private:
+  DefaultChoiceFilter(const DefaultChoiceFilter&);
+  DefaultChoiceFilter& operator=(const DefaultChoiceFilter&);
+ public:
+  DefaultChoiceFilter(Profile* profile, const LabelStr& explanation, 
+                      const InstantId inst)
+      : ChoiceFilter(), m_profile(profile), m_explanation(explanation), m_inst(inst),
+        m_treatAsLowerFlaw(true) {
+    debugMsg("ResourceThreatDecisionPoint:filter", "Creating filter for " << inst->getTime() << " on " << inst->getProfile()->getResource()->toString());
+    //if there are flaws at both levels
+    if(m_inst->hasLowerLevelFlaw() && m_inst->hasUpperLevelFlaw()) {
+      debugMsg("ResourceThreatDecisionPoint:filter", "Instant is flawed on both levels.");
+      //  if we were chosen out of a lower level preference, behave like that
+      if(m_explanation == LabelStr("lowerLevelFlaw") || m_explanation.toString().find("Lower") != std::string::npos) {
+        debugMsg("ResourceThreatDecisionPoint:filter", "Treating as lower flaw because of " << m_explanation.toString());
         m_treatAsLowerFlaw = true;
-        debugMsg("ResourceThreatDecisionPoint:filter", "Creating filter for " << inst->getTime() << " on " << inst->getProfile()->getResource()->toString());
-        //if there are flaws at both levels
-        if(m_inst->hasLowerLevelFlaw() && m_inst->hasUpperLevelFlaw()) {
-          debugMsg("ResourceThreatDecisionPoint:filter", "Instant is flawed on both levels.");
-          //  if we were chosen out of a lower level preference, behave like that
-          if(m_explanation == LabelStr("lowerLevelFlaw") || m_explanation.toString().find("Lower") != std::string::npos) {
-            debugMsg("ResourceThreatDecisionPoint:filter", "Treating as lower flaw because of " << m_explanation.toString());
-            m_treatAsLowerFlaw = true;
-          }
-          //  if we were chosen out of an upper level preference, behave like that
-          else if(m_explanation == LabelStr("upperLevelFlaw") || m_explanation.toString().find("Upper") != std::string::npos) {
-            debugMsg("ResourceThreatDecisionPoint:filter", "Treating as upper flaw because of " << m_explanation.toString());
-            m_treatAsLowerFlaw = false;
-          }
-          //  if we were chosen out of a magnitude preference
-          //    pick level with greatest magnitude, treat as a flaw on that level
-          //    if the level magnitude is equal, arbitrarily choose lower level
-          else {
-            m_treatAsLowerFlaw = m_inst->getLowerFlawMagnitude() >= m_inst->getUpperFlawMagnitude();
-            debugMsg("ResourceThreatDecisionPoint:filter", "Treating as " << (m_treatAsLowerFlaw ? "lower" : "upper") <<
-                     " flaw because of magnitude.  Lower: " << m_inst->getLowerFlawMagnitude() << " Upper: " << m_inst->getUpperFlawMagnitude());
-          }
-        }
-        else {
-          m_treatAsLowerFlaw = m_inst->hasLowerLevelFlaw() && !m_inst->hasUpperLevelFlaw();
-          debugMsg("ResourceThreatDecisionPoint:filter", "Instant is only flawed on the " << (m_treatAsLowerFlaw ? "lower" : "upper") << " level.");
-        }
       }
-      virtual bool operator()(const std::pair<TransactionId, TransactionId>&) const {
-        return true;
+      //  if we were chosen out of an upper level preference, behave like that
+      else if(m_explanation == LabelStr("upperLevelFlaw") || m_explanation.toString().find("Upper") != std::string::npos) {
+        debugMsg("ResourceThreatDecisionPoint:filter", "Treating as upper flaw because of " << m_explanation.toString());
+        m_treatAsLowerFlaw = false;
       }
-      virtual std::string toString() const {return "DefaultFilter";}
-    protected:
-      Profile* m_profile;
-      LabelStr m_explanation;
-      InstantId m_inst;
-      bool m_treatAsLowerFlaw;
-    };
+      //  if we were chosen out of a magnitude preference
+      //    pick level with greatest magnitude, treat as a flaw on that level
+      //    if the level magnitude is equal, arbitrarily choose lower level
+      else {
+        m_treatAsLowerFlaw = m_inst->getLowerFlawMagnitude() >= m_inst->getUpperFlawMagnitude();
+        debugMsg("ResourceThreatDecisionPoint:filter", "Treating as " << (m_treatAsLowerFlaw ? "lower" : "upper") <<
+                 " flaw because of magnitude.  Lower: " << m_inst->getLowerFlawMagnitude() << " Upper: " << m_inst->getUpperFlawMagnitude());
+      }
+    }
+    else {
+      m_treatAsLowerFlaw = m_inst->hasLowerLevelFlaw() && !m_inst->hasUpperLevelFlaw();
+      debugMsg("ResourceThreatDecisionPoint:filter", "Instant is only flawed on the " << (m_treatAsLowerFlaw ? "lower" : "upper") << " level.");
+    }
+  }
+  virtual bool operator()(const std::pair<TransactionId, TransactionId>&) const {
+    return true;
+  }
+  virtual std::string toString() const {return "DefaultFilter";}
+ protected:
+  Profile* m_profile;
+  LabelStr m_explanation;
+  InstantId m_inst;
+  bool m_treatAsLowerFlaw;
+};
 
 class PredecessorNotContributingChoiceFilter : public DefaultChoiceFilter {
  public:
@@ -201,8 +205,8 @@ class SuccessorContributingChoiceFilter : public DefaultChoiceFilter {
 
     class ChoiceOrder {
     public:
-      ChoiceOrder() {}
-      ChoiceOrder(const ChoiceOrder& other) {
+      ChoiceOrder() : m_cmps() {}
+      ChoiceOrder(const ChoiceOrder& other) : m_cmps() {
         debugMsg("ResourceThreatDecisionPoint:sort", "Copying the choice order.");
         condDebugMsg(other.m_cmps.empty(), "ResourceThreatDecisionPoint:sort", "Other order has no comparators.");
         for(std::list<ChoiceComparator*>::const_iterator it = other.m_cmps.begin(); it != other.m_cmps.end(); ++it) {
@@ -257,6 +261,9 @@ class SuccessorContributingChoiceFilter : public DefaultChoiceFilter {
     };
 
     class SwitchComparator : public ChoiceComparator {
+     private:
+      SwitchComparator(const SwitchComparator&);
+      SwitchComparator& operator=(const SwitchComparator&);
     public:
       SwitchComparator(TransactionComparator* cmp, bool predecessor) : ChoiceComparator(), m_cmp(cmp), m_predecessor(predecessor) {}
       ~SwitchComparator(){delete  m_cmp;}
@@ -393,10 +400,16 @@ class SuccessorContributingChoiceFilter : public DefaultChoiceFilter {
        order="leastImpact" will order choices by last estimated temporal impact
 
      */
-    ResourceThreatDecisionPoint::ResourceThreatDecisionPoint(const DbClientId client, const InstantId flawedInstant, const TiXmlElement& configData, const LabelStr& explanation)
-      : DecisionPoint(client, flawedInstant->getKey(), explanation), m_flawedInstant(flawedInstant), m_index(0) {
-      m_instTime = m_flawedInstant->getTime();
-      m_resName = m_flawedInstant->getProfile()->getResource()->getName();
+ResourceThreatDecisionPoint::ResourceThreatDecisionPoint(const DbClientId client,
+                                                         const InstantId flawedInstant,
+                                                         const TiXmlElement& configData,
+                                                         const LabelStr& explanation)
+    : DecisionPoint(client, flawedInstant->getKey(), explanation), 
+      m_flawedInstant(flawedInstant), m_choices(), m_choiceCount(0), m_index(0),
+      m_constr(), m_instTime(flawedInstant->getTime()), 
+      m_resName(m_flawedInstant->getProfile()->getResource()->getName()),
+      m_order(), m_filter(), m_constraintOrder(), m_constraintNames(), 
+      m_constraintIt(m_constraintNames.end()) {
 
       //process the configuration data for ordering choices
       //store the filter, defaulting to "none"

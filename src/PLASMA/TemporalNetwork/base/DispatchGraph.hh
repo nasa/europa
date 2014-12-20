@@ -52,9 +52,12 @@ public:
   void createEdge(DispatchNode* from, DispatchNode* to, Time length);
   void filter( void (*keepEdge)(DispatchNode*, DispatchNode*, Time) );
   // Constructor & Destructor
-  DispatchGraph () {}
+  DispatchGraph() : sccLeaders(), reversePostorder(NULL){}
   // Destructor inherited from DistanceGraph is ok.
 private:
+  DispatchGraph(const DispatchGraph&);
+  DispatchGraph& operator=(const DispatchGraph&);
+
   void findSccs( void (*keepEdge)(DispatchNode*, DispatchNode*, Time) );
   void buildReversePostorder (std::vector<DnodeId>& nodes);
   void predGraphDfs (DispatchNode* node, int& position);
@@ -93,6 +96,7 @@ class DispatchNode : public Dnode {
   Bool isSccMember;  // Used during SCC construction.
   Time minDistance;  // Minimum over node and ancestors, excepting source.
 public:
+  DispatchNode() : Dnode(), name(), isSccMember(false), minDistance(0) {}
   Referent getRef() { return name; }
 };
 

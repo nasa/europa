@@ -19,83 +19,88 @@
 
 namespace EUROPA {
 
-  class ExprConstant : public Expr
-  {
-  	public:
-  	    ExprConstant(const char* type, const Domain* d);
-  	    virtual ~ExprConstant();
+class ExprConstant : public Expr {
+ public:
+  ExprConstant(const char* type, const Domain* d);
+  virtual ~ExprConstant();
 
-  	    virtual DataRef eval(EvalContext& context) const;
-        virtual const DataTypeId getDataType() const;
-        virtual std::string toString() const;
-        std::string getConstantValue() const;
+  virtual DataRef eval(EvalContext& context) const;
+  virtual const DataTypeId getDataType() const;
+  virtual std::string toString() const;
+  std::string getConstantValue() const;
 
-  	protected:
-  	    LabelStr m_type;
-  	    const Domain* m_domain;
-  };
+ protected:
+  LabelStr m_type;
+  const Domain* m_domain;
+private:
+  ExprConstant(const ExprConstant&);
+  ExprConstant& operator=(const ExprConstant&);
+};
 
   class TokenEvalContext;
   class RuleInstanceEvalContext;
 
-  class ExprVarDeclaration : public Expr
-  {
-  public:
-      ExprVarDeclaration(const char* name, const DataTypeId type, Expr* initValue, bool canBeSpecified);
-      virtual ~ExprVarDeclaration();
+class ExprVarDeclaration : public Expr {
+ private:
+  ExprVarDeclaration(const ExprVarDeclaration&);
+  ExprVarDeclaration& operator=(const ExprVarDeclaration&);
+ public:
+  ExprVarDeclaration(const char* name, const DataTypeId type, Expr* initValue, bool canBeSpecified);
+  virtual ~ExprVarDeclaration();
 
-      virtual DataRef eval(EvalContext& context) const;
-      virtual const DataTypeId getDataType() const;
-      virtual std::string toString() const;
+  virtual DataRef eval(EvalContext& context) const;
+  virtual const DataTypeId getDataType() const;
+  virtual std::string toString() const;
 
-      const LabelStr& getName() const;
-      const Expr* getInitValue() const;
-      void setInitValue(Expr* iv);
+  const LabelStr& getName() const;
+  const Expr* getInitValue() const;
+  void setInitValue(Expr* iv);
 
-  protected:
-      LabelStr m_name;
-      DataTypeId m_type;
-      Expr* m_initValue;
-      bool m_canBeSpecified;
+ protected:
+  LabelStr m_name;
+  DataTypeId m_type;
+  Expr* m_initValue;
+  bool m_canBeSpecified;
 
-      ConstrainedVariableId makeGlobalVar(EvalContext& context) const;
-      ConstrainedVariableId makeTokenVar(TokenEvalContext& context) const;
-      ConstrainedVariableId makeRuleVar(RuleInstanceEvalContext& context) const;
-  };
+  ConstrainedVariableId makeGlobalVar(EvalContext& context) const;
+  ConstrainedVariableId makeTokenVar(TokenEvalContext& context) const;
+  ConstrainedVariableId makeRuleVar(RuleInstanceEvalContext& context) const;
+};
 
-  class ExprVarRef : public Expr
-  {
-  	public:
-  	    ExprVarRef(const char* name, const DataTypeId type);
-  	    virtual ~ExprVarRef();
+class ExprVarRef : public Expr {
+ public:
+  ExprVarRef(const char* name, const DataTypeId type);
+  virtual ~ExprVarRef();
 
-  	    virtual DataRef eval(EvalContext& context) const;
-        virtual const DataTypeId getDataType() const;
-  	    virtual std::string toString() const;
+  virtual DataRef eval(EvalContext& context) const;
+  virtual const DataTypeId getDataType() const;
+  virtual std::string toString() const;
 
-  	protected:
-  	    std::string m_varName;
-  	    DataTypeId m_varType;
-  	    std::string m_parentName;
-  	    std::vector<std::string> m_vars;
-  };
+ protected:
+  std::string m_varName;
+  DataTypeId m_varType;
+  std::string m_parentName;
+  std::vector<std::string> m_vars;
+};
 
-  class ExprAssignment : public Expr
-  {
-  public:
-      ExprAssignment(Expr* lhs, Expr* rhs);
-      virtual ~ExprAssignment();
+class ExprAssignment : public Expr {
+ private:
+  ExprAssignment(const ExprAssignment&);
+  ExprAssignment& operator=(const ExprAssignment&);
+ public:
+  ExprAssignment(Expr* lhs, Expr* rhs);
+  virtual ~ExprAssignment();
 
-      Expr* getLhs() { return m_lhs; }
-      Expr* getRhs() { return m_rhs; }
+  Expr* getLhs() { return m_lhs; }
+  Expr* getRhs() { return m_rhs; }
 
-      virtual DataRef eval(EvalContext& context) const;
-      virtual std::string toString() const;
+  virtual DataRef eval(EvalContext& context) const;
+  virtual std::string toString() const;
 
-  protected:
-      Expr* m_lhs;
-      Expr* m_rhs;
-  };
+ protected:
+  Expr* m_lhs;
+  Expr* m_rhs;
+};
 
   class ExprConstraint : public Expr
   {
@@ -115,20 +120,22 @@ namespace EUROPA {
         std::string m_violationExpl;
   };
 
-  class ExprTypedef : public Expr
-  {
-  public:
-      ExprTypedef(const DataTypeId baseType, const char* name, Domain* baseDomain);
-      virtual ~ExprTypedef();
+class ExprTypedef : public Expr {
+private:
+  ExprTypedef(const ExprTypedef&);
+  ExprTypedef& operator=(const ExprTypedef&);
+ public:
+  ExprTypedef(const DataTypeId baseType, const char* name, Domain* baseDomain);
+  virtual ~ExprTypedef();
 
-      virtual DataRef eval(EvalContext& context) const;
-      virtual std::string toString() const;
+  virtual DataRef eval(EvalContext& context) const;
+  virtual std::string toString() const;
 
-  protected:
-      DataTypeId m_baseType;
-      LabelStr m_name;
-      Domain* m_baseDomain;
-  };
+ protected:
+  DataTypeId m_baseType;
+  LabelStr m_name;
+  Domain* m_baseDomain;
+};
 
   class ExprEnumdef : public Expr
   {
@@ -184,54 +191,60 @@ namespace EUROPA {
       const RuleId m_ruleFactory;
   };
 
-  class ExprMethodCall : public Expr
-  {
-  public:
-      ExprMethodCall(const MethodId method, Expr* varExpr, const std::vector<Expr*>& argExprs);
-      virtual ~ExprMethodCall();
+class ExprMethodCall : public Expr {
+private:
+  ExprMethodCall(const ExprMethodCall&);
+  ExprMethodCall& operator=(const ExprMethodCall&);
+ public:
+  ExprMethodCall(const MethodId method, Expr* varExpr, const std::vector<Expr*>& argExprs);
+  virtual ~ExprMethodCall();
 
-      virtual DataRef eval(EvalContext& context) const;
-      virtual std::string toString() const;
-    virtual const std::vector<Expr*>& getArgs() const {return m_argExprs;}
-  protected:
-      MethodId m_method;
-      Expr* m_varExpr;
-      std::vector<Expr*> m_argExprs;
-  };
+  virtual DataRef eval(EvalContext& context) const;
+  virtual std::string toString() const;
+  virtual const std::vector<Expr*>& getArgs() const {return m_argExprs;}
+ protected:
+  MethodId m_method;
+  Expr* m_varExpr;
+  std::vector<Expr*> m_argExprs;
+};
 
-  class ExprVariableMethod : public Expr
-  {
-  public:
-      ExprVariableMethod(const char* name, Expr* varExpr, const std::vector<Expr*>& argExprs);
-      virtual ~ExprVariableMethod();
+class ExprVariableMethod : public Expr {
+private:
+  ExprVariableMethod(const ExprVariableMethod&);
+  ExprVariableMethod& operator=(const ExprVariableMethod&);
+ public:
+  ExprVariableMethod(const char* name, Expr* varExpr, const std::vector<Expr*>& argExprs);
+  virtual ~ExprVariableMethod();
 
-      virtual DataRef eval(EvalContext& context) const;
-      virtual std::string toString() const;
+  virtual DataRef eval(EvalContext& context) const;
+  virtual std::string toString() const;
 
-  protected:
-      LabelStr m_methodName;
-      Expr* m_varExpr;
-      std::vector<Expr*> m_argExprs;
+ protected:
+  LabelStr m_methodName;
+  Expr* m_varExpr;
+  std::vector<Expr*> m_argExprs;
 
-      DataRef eval(EvalContext& context, ConstrainedVariableId var, const std::vector<ConstrainedVariableId>& args) const;
-  };
+  DataRef eval(EvalContext& context, ConstrainedVariableId var, const std::vector<ConstrainedVariableId>& args) const;
+};
 
-  class ExprObjectMethod : public Expr
-  {
-  public:
-      ExprObjectMethod(const char* name, Expr* objExpr, const std::vector<Expr*>& argExprs);
-      virtual ~ExprObjectMethod();
+class ExprObjectMethod : public Expr {
+private:
+  ExprObjectMethod(const ExprObjectMethod&);
+  ExprObjectMethod& operator=(const ExprObjectMethod&);
+ public:
+  ExprObjectMethod(const char* name, Expr* objExpr, const std::vector<Expr*>& argExprs);
+  virtual ~ExprObjectMethod();
 
-      virtual DataRef eval(EvalContext& context) const;
-      virtual std::string toString() const;
+  virtual DataRef eval(EvalContext& context) const;
+  virtual std::string toString() const;
 
-  protected:
-      LabelStr m_methodName;
-      Expr* m_objExpr;
-      std::vector<Expr*> m_argExprs;
+ protected:
+  LabelStr m_methodName;
+  Expr* m_objExpr;
+  std::vector<Expr*> m_argExprs;
 
-      DataRef eval(EvalContext& context, ObjectId var, const std::vector<ConstrainedVariableId>& args) const;
-  };
+  DataRef eval(EvalContext& context, ObjectId var, const std::vector<ConstrainedVariableId>& args) const;
+};
 
   class ExprTokenMethod : public Expr
   {
@@ -271,25 +284,26 @@ namespace EUROPA {
 
   class InterpretedRuleInstance;
 
-  class PredicateInstanceRef
-  {
-  public:
-      PredicateInstanceRef(const TokenTypeId tokenType, const char* predInstance, const char* predName, const char* annotation);
-      virtual ~PredicateInstanceRef();
+class PredicateInstanceRef {
+ public:
+  PredicateInstanceRef(const TokenTypeId tokenType, const char* predInstance,
+                       const char* predName, const char* annotation);
+  virtual ~PredicateInstanceRef();
 
-      TokenId getToken(EvalContext& ctx, const char* relationName, bool isFact=false, bool isRejectable=false);
-      int     getAttributes() const;
-      const TokenTypeId getTokenType();
+  TokenId getToken(EvalContext& ctx, const char* relationName, bool isFact=false,
+                   bool isRejectable=false);
+  int     getAttributes() const;
+  const TokenTypeId getTokenType();
 
-  protected:
-      TokenTypeId m_tokenType;
-      std::string m_predicateInstance;
-      std::string m_predicateName;
-      int m_attributes;
+ protected:
+  TokenTypeId m_tokenType;
+  std::string m_predicateInstance;
+  std::string m_predicateName;
+  int m_attributes;
 
-      TokenId createSubgoal(EvalContext& ctx, InterpretedRuleInstance* rule, const char* relationName);
-      TokenId createGlobalToken(EvalContext& context, bool isFact, bool isRejectable);
-  };
+  TokenId createSubgoal(EvalContext& ctx, InterpretedRuleInstance* rule, const char* relationName);
+  TokenId createGlobalToken(EvalContext& context, bool isFact, bool isRejectable);
+};
 
   class ExprProblemStmt : public Expr
   {
@@ -308,49 +322,54 @@ namespace EUROPA {
   };
 
   class InterpretedTokenType;
-  class ExprRelation : public Expr
-  {
-    public:
-        ExprRelation(const char* relation,
-                     PredicateInstanceRef* origin,
-                     const std::vector<PredicateInstanceRef*>& targets);
-        virtual ~ExprRelation();
+class ExprRelation : public Expr {
+private:
+  ExprRelation(const ExprRelation&);
+  ExprRelation& operator=(const ExprRelation&);
+ public:
+  ExprRelation(const char* relation,
+               PredicateInstanceRef* origin,
+               const std::vector<PredicateInstanceRef*>& targets);
+  virtual ~ExprRelation();
 
-        virtual DataRef eval(EvalContext& context) const;
+  virtual DataRef eval(EvalContext& context) const;
 
-        void populateCausality( InterpretedTokenType* container );
+  void populateCausality( InterpretedTokenType* container );
 
-    protected:
-        LabelStr m_relation;
-        PredicateInstanceRef* m_origin;
-        std::vector<PredicateInstanceRef*> m_targets;
+ protected:
+  LabelStr m_relation;
+  PredicateInstanceRef* m_origin;
+  std::vector<PredicateInstanceRef*> m_targets;
 
-  };
+};
 
   // Constraint Expressions
-  class CExpr : public Expr
-  {
-  public:
-      CExpr() : m_count(s_counter++), m_enforceContext(false), m_returnArgument(NULL) {}
-      virtual ~CExpr() {}
+class CExpr : public Expr {
+private:
+  CExpr(const CExpr&);
+  CExpr& operator=(const CExpr&);
+ public:
+  CExpr() : m_count(s_counter++), m_enforceContext(false), m_violationMsg(), 
+            m_returnArgument(NULL) {}
+  virtual ~CExpr() {}
 
-      virtual bool hasReturnValue() const = 0;
-      virtual void setEnforceContext() { m_enforceContext = true; }
-      virtual void setViolationMsg(const std::string& msg) { m_violationMsg = msg; }
-      virtual bool isSingleton() = 0;
-      virtual bool isSingletonOptimizable() = 0; // TODO: use output node method instead? (ask JRB)
-      virtual void checkType() = 0;
-      void setReturnArgument(CExpr *arg) { m_returnArgument = arg; }
+  virtual bool hasReturnValue() const = 0;
+  virtual void setEnforceContext() { m_enforceContext = true; }
+  virtual void setViolationMsg(const std::string& msg) { m_violationMsg = msg; }
+  virtual bool isSingleton() = 0;
+  virtual bool isSingletonOptimizable() = 0; // TODO: use output node method instead? (ask JRB)
+  virtual void checkType() = 0;
+  void setReturnArgument(CExpr *arg) { m_returnArgument = arg; }
 
-  protected:
-      std::string createVariableName() const;
+ protected:
+  std::string createVariableName() const;
 
-      static unsigned int s_counter;
-      unsigned int m_count;
-      bool m_enforceContext;
-      std::string m_violationMsg;
-      CExpr *m_returnArgument; // TODO: generalize this to output node (ask JRB)
-  };
+  static unsigned int s_counter;
+  unsigned int m_count;
+  bool m_enforceContext;
+  std::string m_violationMsg;
+  CExpr *m_returnArgument; // TODO: generalize this to output node (ask JRB)
+};
 
   class CExprFunction : public CExpr
   {
@@ -381,60 +400,65 @@ namespace EUROPA {
     CExprFunction() : m_func(), m_args() {}
   };
 
-  class CExprValue : public CExpr
-  {
-    public:
-        CExprValue(Expr* value);
-        virtual ~CExprValue() { /* TODO: release memory */ }
+class CExprValue : public CExpr {
+private:
+  CExprValue(const CExprValue&);
+  CExprValue& operator=(const CExprValue&);
+ public:
+  CExprValue(Expr* value);
+  virtual ~CExprValue() { /* TODO: release memory */ }
 
-        // Expr methods
-        virtual DataRef eval(EvalContext& context) const;
+  // Expr methods
+  virtual DataRef eval(EvalContext& context) const;
 
-        virtual const DataTypeId getDataType() const { return m_value->getDataType(); }
+  virtual const DataTypeId getDataType() const { return m_value->getDataType(); }
 
-        virtual std::string toString() const { return m_value->toString(); }
+  virtual std::string toString() const { return m_value->toString(); }
 
-        // CExpr methods
-        virtual bool hasReturnValue() const { return true; }
-        virtual bool isSingleton() { return true; /*TODO:not accurate?*/}
-        virtual bool isSingletonOptimizable() { return false; }
+  // CExpr methods
+  virtual bool hasReturnValue() const { return true; }
+  virtual bool isSingleton() { return true; /*TODO:not accurate?*/}
+  virtual bool isSingletonOptimizable() { return false; }
 
-        virtual void checkType();
+  virtual void checkType();
 
-    protected:
-        Expr* m_value;
-  };
+ protected:
+  Expr* m_value;
+};
 
   // TODO: this still needs to be broken down more into cleaner pieces
-  class CExprBinary : public CExpr
-  {
-    public:
-        CExprBinary(std::string op, CExpr* left, CExpr* right);
-        virtual ~CExprBinary();
+class CExprBinary : public CExpr {
+ private:
+  CExprBinary(const CExprBinary&);
+  CExprBinary& operator=(const CExprBinary&);
 
-        // Expr methods
-        virtual DataRef eval(EvalContext& context) const;
+ public:
+  CExprBinary(std::string op, CExpr* left, CExpr* right);
+  virtual ~CExprBinary();
 
-        virtual const DataTypeId getDataType() const;
+  // Expr methods
+  virtual DataRef eval(EvalContext& context) const;
 
-        virtual std::string toString() const;
+  virtual const DataTypeId getDataType() const;
 
-        // CExpr methods
-        virtual bool hasReturnValue() const;
+  virtual std::string toString() const;
 
-        virtual bool isSingleton();
+  // CExpr methods
+  virtual bool hasReturnValue() const;
 
-        virtual bool isSingletonOptimizable();
+  virtual bool isSingleton();
 
-        virtual void checkType();
+  virtual bool isSingletonOptimizable();
 
-    virtual const CExpr* getLhs() const {return m_lhs;}
-    virtual const CExpr* getRhs() const {return m_rhs;}
+  virtual void checkType();
 
-    protected:
-        std::string m_operator;
-        CExpr *m_lhs, *m_rhs;
-  };
+  virtual const CExpr* getLhs() const {return m_lhs;}
+  virtual const CExpr* getRhs() const {return m_rhs;}
+
+ protected:
+  std::string m_operator;
+  CExpr *m_lhs, *m_rhs;
+};
 
   // InterpretedToken is the interpreted version of NddlToken
   class InterpretedToken : public IntervalToken  {
@@ -465,26 +489,25 @@ namespace EUROPA {
 
   class InterpretedRuleFactory;
 
-  class InterpretedTokenType: public TokenType
-  {
-    public:
-	  InterpretedTokenType(const ObjectTypeId ot,const LabelStr& predicateName, const std::string& kind);
-	  virtual ~InterpretedTokenType();
+class InterpretedTokenType: public TokenType {
+ public:
+  InterpretedTokenType(const ObjectTypeId ot,const LabelStr& predicateName, const std::string& kind);
+  virtual ~InterpretedTokenType();
 
-	  void addBodyExpr(Expr* e);
-	  void addRule(InterpretedRuleFactory* rf);
+  void addBodyExpr(Expr* e);
+  void addRule(InterpretedRuleFactory* rf);
 
-	  virtual TokenId createInstance(const PlanDatabaseId planDb, const LabelStr& name, bool rejectable, bool isFact) const;
-	  virtual TokenId createInstance(const TokenId master, const LabelStr& name, const LabelStr& relation) const;
+  virtual TokenId createInstance(const PlanDatabaseId planDb, const LabelStr& name, bool rejectable, bool isFact) const;
+  virtual TokenId createInstance(const TokenId master, const LabelStr& name, const LabelStr& relation) const;
 
-    protected:
-      std::vector<Expr*> m_body;
-      std::vector<InterpretedRuleFactory*> m_rules;
-      TokenTypeId getParentType(const PlanDatabaseId planDb) const;
-      void processExpr(Expr* e);
+ protected:
+  std::vector<Expr*> m_body;
+  std::vector<InterpretedRuleFactory*> m_rules;
+  TokenTypeId getParentType(const PlanDatabaseId planDb) const;
+  void processExpr(Expr* e);
 
-    friend class ExprRelation;
-  };
+  friend class ExprRelation;
+};
 
 class TokenEvalContext : public EvalContext {
  public:
@@ -622,40 +645,44 @@ class RuleExpr  : public Expr {
   virtual ~RuleExpr(){}
 };
 
-  class ExprIfGuard : public Expr
-  {
-  public:
-      ExprIfGuard(const char* op, Expr* lhs,Expr* rhs);
-      virtual ~ExprIfGuard();
+class ExprIfGuard : public Expr {
+private:
+  ExprIfGuard(const ExprIfGuard&);
+  ExprIfGuard& operator=(const ExprIfGuard&);
+ public:
+  ExprIfGuard(const char* op, Expr* lhs,Expr* rhs);
+  virtual ~ExprIfGuard();
 
-      const std::string& getOperator();
-      Expr* getLhs() const;
-      Expr* getRhs() const;
+  const std::string& getOperator();
+  Expr* getLhs() const;
+  Expr* getRhs() const;
 
-      virtual DataRef eval(EvalContext& context) const;
-      virtual std::string toString() const;
+  virtual DataRef eval(EvalContext& context) const;
+  virtual std::string toString() const;
 
-  protected:
-      const std::string m_op;
-      Expr* m_lhs;
-      Expr* m_rhs;
+ protected:
+  const std::string m_op;
+  Expr* m_lhs;
+  Expr* m_rhs;
 
-  };
+};
 
-  class ExprIf : public RuleExpr
-  {
-  	public:
-  	    ExprIf(ExprIfGuard* guard,const std::vector<Expr*>& ifBody, const std::vector<Expr*>& elseBody);
-  	    virtual ~ExprIf();
+class ExprIf : public RuleExpr {
+private:
+  ExprIf(const ExprIf&);
+  ExprIf& operator=(const ExprIf&);
+ public:
+  ExprIf(ExprIfGuard* guard,const std::vector<Expr*>& ifBody, const std::vector<Expr*>& elseBody);
+  virtual ~ExprIf();
 
-  	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;
-        virtual std::string toString() const;
+  virtual DataRef doEval(RuleInstanceEvalContext& context) const;
+  virtual std::string toString() const;
 
-    protected:
-        ExprIfGuard* m_guard;
-        std::vector<Expr*> m_ifBody;
-        std::vector<Expr*> m_elseBody;
-  };
+ protected:
+  ExprIfGuard* m_guard;
+  std::vector<Expr*> m_ifBody;
+  std::vector<Expr*> m_elseBody;
+};
 
   class ExprLoop : public RuleExpr
   {

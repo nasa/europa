@@ -24,6 +24,8 @@ OpenConditionDecisionPoint::OpenConditionDecisionPoint(const DbClientId client,
                                                        const LabelStr& explanation)
     : DecisionPoint(client, flawedToken->getKey(), explanation),
       m_flawedToken(flawedToken),
+      m_choices(),
+      m_compatibleTokens(),
       m_mergeCount(0),
       m_choiceCount(0),
       m_mergeIndex(0),
@@ -204,6 +206,7 @@ SupportedOCDecisionPoint::SupportedOCDecisionPoint(
     const LabelStr& explanation)
     : DecisionPoint(client, flawedToken->getKey(), explanation)
     , m_flawedToken(flawedToken)
+    , m_choices()
     , m_currentChoice(0)
     , m_heuristic(NULL)
 {
@@ -400,16 +403,13 @@ std::string RejectToken::toString()
   return "REJECT";
 }
 
-SupportToken::SupportToken(const DbClientId dbClient, const TokenId token, ActionSupportHeuristic* heuristic)
-    : ChangeTokenState(dbClient,token)
-    , m_heuristic(heuristic)
-{
-  m_initialized = false;
-}
+SupportToken::SupportToken(const DbClientId dbClient, const TokenId token,
+                           ActionSupportHeuristic* heuristic)
+    : ChangeTokenState(dbClient,token), m_choices(), m_actionIndex(0),
+      m_effectIndex(0), m_action(), m_targetEffect(), m_heuristic(heuristic),
+      m_initialized(false) {}
 
-SupportToken::~SupportToken()
-{
-}
+SupportToken::~SupportToken() {}
 
 /*
  * TODO: some performance optimizations can be added for chronological backtracking:

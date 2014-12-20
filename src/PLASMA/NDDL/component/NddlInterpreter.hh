@@ -14,80 +14,84 @@
 
 namespace EUROPA {
 
-class NddlSymbolTable : public EvalContext
-{
-public:
-    NddlSymbolTable(const EngineId engine);
-    NddlSymbolTable(NddlSymbolTable* parent);
-    virtual ~NddlSymbolTable();
+class NddlSymbolTable : public EvalContext {
+private:
+  NddlSymbolTable(const NddlSymbolTable&);
+  NddlSymbolTable& operator=(const NddlSymbolTable&);
+ public:
+  NddlSymbolTable(const EngineId engine);
+  NddlSymbolTable(NddlSymbolTable* parent);
+  virtual ~NddlSymbolTable();
 
-    NddlSymbolTable* getParentST();
+  NddlSymbolTable* getParentST();
 
-    const PlanDatabaseId getPlanDatabase() const;
+  const PlanDatabaseId getPlanDatabase() const;
 
-    virtual void addLocalVar(const char* name,const DataTypeId type);
-    virtual void addLocalToken(const char* name,const TokenTypeId type);
+  virtual void addLocalVar(const char* name,const DataTypeId type);
+  virtual void addLocalToken(const char* name,const TokenTypeId type);
 
-    virtual DataTypeId getDataType(const char* name) const;
-    virtual ObjectTypeId getObjectType(const char* name) const;
-    virtual TokenTypeId getTokenType(const char* name) const;
+  virtual DataTypeId getDataType(const char* name) const;
+  virtual ObjectTypeId getObjectType(const char* name) const;
+  virtual TokenTypeId getTokenType(const char* name) const;
 
-    virtual DataTypeId getTypeForVar(const char* name);
-    virtual DataTypeId getTypeForVar(const char* qualifiedName,std::string& errorMsg);
+  virtual DataTypeId getTypeForVar(const char* name);
+  virtual DataTypeId getTypeForVar(const char* qualifiedName,std::string& errorMsg);
 
-    virtual TokenTypeId getTypeForToken(const char* name);
-    virtual TokenTypeId getTypeForToken(const char* qualifiedName,std::string& errorMsg);
+  virtual TokenTypeId getTypeForToken(const char* name);
+  virtual TokenTypeId getTypeForToken(const char* qualifiedName,std::string& errorMsg);
 
-    virtual MethodId getMethod(const char* methodName,Expr* target,const std::vector<Expr*>& args);
+  virtual MethodId getMethod(const char* methodName,Expr* target,const std::vector<Expr*>& args);
 
-    virtual CFunctionId getCFunction(const char* name, const std::vector<CExpr*>& args);
+  virtual CFunctionId getCFunction(const char* name, const std::vector<CExpr*>& args);
 
-    Domain* makeNumericDomainFromLiteral(const std::string& type,const std::string& value);
+  Domain* makeNumericDomainFromLiteral(const std::string& type,const std::string& value);
 
-    void checkConstraint(const char* name,const std::vector<Expr*>& args);
-    void checkObjectFactory(const char* name,const std::vector<Expr*>& args);
+  void checkConstraint(const char* name,const std::vector<Expr*>& args);
+  void checkObjectFactory(const char* name,const std::vector<Expr*>& args);
 
-    // Error reporting methods
-    void reportError(void* treeWalker, const std::string& msg);
-    void addError(const std::string& msg);
-    std::string getErrors() const;
+  // Error reporting methods
+  void reportError(void* treeWalker, const std::string& msg);
+  void addError(const std::string& msg);
+  std::string getErrors() const;
 
-    // EvalContext methods
-    virtual ConstrainedVariableId getVar(const char* name);
-    virtual TokenId getToken(const char* name);
-    virtual void* getElement(const char* name) const;
+  // EvalContext methods
+  virtual ConstrainedVariableId getVar(const char* name);
+  virtual TokenId getToken(const char* name);
+  virtual void* getElement(const char* name) const;
 
-    // Enum support methods
-    bool isEnumValue(const char* value) const;
-    const LabelStr& getEnumForValue(const char* value) const;
-    Expr* makeEnumRef(const char* value) const;
+  // Enum support methods
+  bool isEnumValue(const char* value) const;
+  const LabelStr& getEnumForValue(const char* value) const;
+  Expr* makeEnumRef(const char* value) const;
 
-protected:
-    NddlSymbolTable* m_parentST;
+ protected:
+  NddlSymbolTable* m_parentST;
 
-    EngineId m_engine;
-    std::vector<std::string> m_errors;
-    std::map<std::string,DataTypeId> m_localVars;
-    std::map<std::string,TokenTypeId> m_localTokens;
+  EngineId m_engine;
+  std::vector<std::string> m_errors;
+  std::map<std::string,DataTypeId> m_localVars;
+  std::map<std::string,TokenTypeId> m_localTokens;
 
-    const EngineId engine() const;
-    std::vector<std::string>& errors();
-    const std::vector<std::string>& errors() const;
+  const EngineId engine() const;
+  std::vector<std::string>& errors();
+  const std::vector<std::string>& errors() const;
 };
 
-class NddlClassSymbolTable : public NddlSymbolTable
-{
-public:
-    NddlClassSymbolTable(NddlSymbolTable* parent, ObjectType* ot);
-    virtual ~NddlClassSymbolTable();
+class NddlClassSymbolTable : public NddlSymbolTable {
+ private:
+  NddlClassSymbolTable(const NddlClassSymbolTable&);
+  NddlClassSymbolTable& operator=(const NddlClassSymbolTable&);
+ public:
+  NddlClassSymbolTable(NddlSymbolTable* parent, ObjectType* ot);
+  virtual ~NddlClassSymbolTable();
 
-    virtual DataTypeId getDataType(const char* name) const;
-    virtual ObjectTypeId getObjectType(const char* name) const;
+  virtual DataTypeId getDataType(const char* name) const;
+  virtual ObjectTypeId getObjectType(const char* name) const;
 
-    virtual DataTypeId getTypeForVar(const char* varName);
+  virtual DataTypeId getTypeForVar(const char* varName);
 
-protected:
-    ObjectType* m_objectType; // Object type being declared
+ protected:
+  ObjectType* m_objectType; // Object type being declared
 };
 
 class NddlTokenSymbolTable : public NddlSymbolTable

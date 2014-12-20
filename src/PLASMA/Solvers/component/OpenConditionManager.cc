@@ -12,10 +12,10 @@
  * @date March, 2005
  */
 namespace EUROPA {
-  namespace SOLVERS {
+namespace SOLVERS {
 
-    OpenConditionManager::OpenConditionManager(const TiXmlElement& configData)
-      : FlawManager(configData) {}
+OpenConditionManager::OpenConditionManager(const TiXmlElement& configData)
+    : FlawManager(configData), m_flawCandidates() {}
 
     void OpenConditionManager::handleInitialize(){
       // FILL UP TOKENS

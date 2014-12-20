@@ -13,10 +13,6 @@
 #include <string>
 #include <iterator>
 
-#ifndef INT_MAX
-static int const INT_MAX(std::numeric_limits<int>::max());
-#endif
-
 namespace EUROPA
 {
 
@@ -58,7 +54,8 @@ namespace EUROPA
   };
 
   ViolationMgrImpl::ViolationMgrImpl(unsigned int maxViolationsAllowed, ConstraintEngine& ce)
-    : m_maxViolationsAllowed(maxViolationsAllowed), m_relaxing(false), m_ce(ce)
+      : m_maxViolationsAllowed(maxViolationsAllowed), m_violatedConstraints(), 
+        m_emptyVariables(), m_relaxing(false), m_ce(ce)
   {
   }
 
@@ -299,6 +296,10 @@ DomainListenerId ConstraintEngine::allocateVariableListener(const ConstrainedVar
 
   ConstraintEngine::ConstraintEngine(const CESchemaId schema)
     : m_id(this)
+    , m_variables()
+    , m_constraints()
+    , m_propagators()
+    , m_propagatorsByName()
     , m_relaxing(false)
     , m_relaxingViolation(false)
       //, m_relaxed(false)
@@ -309,8 +310,12 @@ DomainListenerId ConstraintEngine::allocateVariableListener(const ConstrainedVar
     , m_dirty(false)
     , m_cycleCount(1)
     , m_mostRecentRepropagation(1)
+    , m_listeners()
+    , m_redundantConstraints()
+    , m_violationMgr(NULL)
     , m_autoPropagate(true)
     , m_schema(schema)
+    , m_callbacks()
   {
     m_violationMgr = new ViolationMgrImpl(0, *this);
   }

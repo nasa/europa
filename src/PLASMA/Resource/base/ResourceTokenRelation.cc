@@ -9,13 +9,15 @@
 
 namespace EUROPA {
 
-	ResourceTokenRelation::ResourceTokenRelation(const ConstraintEngineId constraintEngine,
-                                                 const std::vector<ConstrainedVariableId>& scope,
-                                                 const TokenId tok)
-	: Constraint(CONSTRAINT_NAME(), PROPAGATOR_NAME(), constraintEngine, scope)
-	, m_token(tok)
-	, m_violationProblem(Resource::NoProblem)
-	{
+ResourceTokenRelation::ResourceTokenRelation(const ConstraintEngineId constraintEngine,
+                                             const std::vector<ConstrainedVariableId>& scope,
+                                             const TokenId tok)
+    : Constraint(CONSTRAINT_NAME(), PROPAGATOR_NAME(), constraintEngine, scope)
+    , m_token(tok)
+    , m_resource()
+    , m_violationTime()
+    , m_violationProblem(Resource::NoProblem)
+{
 		checkError(scope.size() == 2, "Require both state and object variables, in that order.");
 		checkError(scope[0] == tok->getState() && scope[1] == tok->getObject(), "Require both state and object variables, in that order.");
 

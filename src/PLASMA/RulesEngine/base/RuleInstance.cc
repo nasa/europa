@@ -18,7 +18,11 @@ namespace EUROPA {
 RuleInstance::RuleInstance(const RuleId rule, const TokenId token, 
                            const PlanDatabaseId planDb)
     : m_id(this), m_rule(rule), m_token(token), m_planDb(planDb), m_rulesEngine(), 
-      m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
+      m_parent(), m_guards(),
+      m_guardDomain(0), m_guardListener(), m_isExecuted(false), m_isPositive(true),
+      m_constraints(), m_childRules(), m_variables(), m_slaves(), 
+      m_variablesByName(), m_slavesByName(),
+      m_constraintsByName() {
   check_error(rule.isValid(), "Parent must be a valid rule id.");
   check_error(isValid());
   commonInit();
@@ -28,7 +32,10 @@ RuleInstance::RuleInstance(const RuleId rule, const TokenId token,
                            const PlanDatabaseId planDb,
                            const std::vector<ConstrainedVariableId>& guards)
     : m_id(this), m_rule(rule), m_token(token), m_planDb(planDb), m_rulesEngine(),
-      m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
+      m_parent(), m_guards(),
+      m_guardDomain(0), m_guardListener(), m_isExecuted(false), m_isPositive(true),
+      m_constraints(), m_childRules(), m_variables(), m_slaves(), m_variablesByName(),
+      m_slavesByName(), m_constraintsByName() {
   check_error(isValid());
   setGuard(guards);
   commonInit();
@@ -38,7 +45,10 @@ RuleInstance::RuleInstance(const RuleId rule, const TokenId token,
                            const PlanDatabaseId planDb,
                            const ConstrainedVariableId guard, const Domain& domain)
     : m_id(this), m_rule(rule), m_token(token), m_planDb(planDb), m_rulesEngine(),
-      m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
+      m_parent(), m_guards(),
+      m_guardDomain(0), m_guardListener(), m_isExecuted(false), m_isPositive(true),
+      m_constraints(), m_childRules(), m_variables(), m_slaves(), m_variablesByName(), 
+      m_slavesByName(), m_constraintsByName() {
   check_error(isValid());
   setGuard(guard, domain);
   commonInit();
@@ -51,7 +61,9 @@ RuleInstance::RuleInstance(const RuleInstanceId parent,
                            const std::vector<ConstrainedVariableId>& guards)
     : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
       m_planDb(parent->getPlanDatabase()),m_rulesEngine() , m_parent(parent), 
-      m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
+      m_guards(), m_guardDomain(0), m_guardListener(), m_isExecuted(false),
+      m_isPositive(true), m_constraints(), m_childRules(), m_variables(), m_slaves(), 
+      m_variablesByName(), m_slavesByName(), m_constraintsByName() {
   check_error(isValid());
   setGuard(guards);
 }
@@ -63,8 +75,10 @@ RuleInstance::RuleInstance(const RuleInstanceId parent,
                            const std::vector<ConstrainedVariableId>& guards, 
                            const bool positive)
     : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
-      m_planDb(parent->getPlanDatabase()),m_rulesEngine() , m_parent(parent), 
-      m_guardDomain(0), m_isExecuted(false), m_isPositive(positive){
+      m_planDb(parent->getPlanDatabase()), m_rulesEngine(), m_parent(parent), 
+      m_guards(), m_guardDomain(0), m_guardListener(), m_isExecuted(false),
+      m_isPositive(positive), m_constraints(), m_childRules(), m_variables(),
+      m_slaves(), m_variablesByName(), m_slavesByName(), m_constraintsByName() {
   check_error(isValid());
   setGuard(guards);
 }
@@ -76,7 +90,9 @@ RuleInstance::RuleInstance(const RuleInstanceId parent,
                            const ConstrainedVariableId guard, const Domain& domain)
     : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
       m_planDb(parent->getPlanDatabase()), m_rulesEngine(), m_parent(parent),
-      m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
+      m_guards(), m_guardDomain(0), m_guardListener(), m_isExecuted(false),
+      m_isPositive(true), m_constraints(), m_childRules(), m_variables(), m_slaves(),
+      m_variablesByName(), m_slavesByName(), m_constraintsByName() {
   check_error(isValid());
   setGuard(guard, domain);
 }
@@ -89,7 +105,9 @@ RuleInstance::RuleInstance(const RuleInstanceId parent,
                            const Domain& domain, const bool positive)
     : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
       m_planDb(parent->getPlanDatabase()), m_rulesEngine(), m_parent(parent), 
-      m_guardDomain(0), m_isExecuted(false), m_isPositive(positive){
+      m_guards(), m_guardDomain(0), m_guardListener(), m_isExecuted(false),
+      m_isPositive(positive), m_constraints(), m_childRules(), m_variables(), 
+      m_slaves(), m_variablesByName(), m_slavesByName(), m_constraintsByName() {
   check_error(isValid());
   setGuard(guard, domain);
 }
@@ -100,7 +118,9 @@ RuleInstance::RuleInstance(const RuleInstanceId parent,
                            const std::vector<ConstrainedVariableId>& guardComponents)
     : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
       m_planDb(parent->getPlanDatabase()), m_rulesEngine(), m_parent(parent), 
-      m_guardDomain(0), m_isExecuted(false), m_isPositive(positive){
+      m_guards(), m_guardDomain(0), m_guardListener(), m_isExecuted(false),
+      m_isPositive(positive), m_constraints(), m_childRules(), m_variables(), 
+      m_slaves(), m_variablesByName(), m_slavesByName(), m_constraintsByName() {
   check_error(isValid());
   setGuard(guard, domain, guardComponents);
 }
@@ -260,85 +280,86 @@ RuleInstance::RuleInstance(const RuleInstanceId parent,
   /**
    * Delete any allocated elements due to firing, and reset status
    */
-  void RuleInstance::undo(){
-    check_error(isExecuted(), "Cannot undo a rule if not already executed.");
+void RuleInstance::undo() {
+  check_error(isExecuted(), "Cannot undo a rule if not already executed.");
 
-    // Clear child rules before destroying local entities. This is the reverse order of allocation
-    discardAll(m_childRules);
+  // Clear child rules before destroying local entities. This is the reverse order of allocation
+  discardAll(m_childRules);
 
-    if(!Entity::isPurging()){
-      m_rulesEngine->notifyUndone(getId());
-      // Clear slave lookups
-      m_slavesByName.clear();
+  if(!Entity::isPurging()){
+    m_rulesEngine->notifyUndone(getId());
+    // Clear slave lookups
+    m_slavesByName.clear();
 
-      // Clear variable lookups - may include token variables so we have to be careful
-      for(std::vector<ConstrainedVariableId>::const_iterator it = m_variables.begin(); it != m_variables.end(); ++it){
-	ConstrainedVariableId var = *it;
-	checkError(var.isValid(), var);
-	edouble key = var->getName().getKey();
-	m_variablesByName.erase(key);
-      }
-
-      // Copy collection to avoid iterator changing due to call back
-      std::vector<ConstraintId> constraints = m_constraints;
-      for(std::vector<ConstraintId>::const_iterator it = constraints.begin(); it != constraints.end(); ++it){
-	ConstraintId constraint = *it;
-	checkError(constraint.isValid(), constraint);
-
-	// Only discard constraints that are connected to the master since the master may persist after the rule has cleaned up
-	// but the constraints should not. If it is not connected to the master then it applies to local variables or slave variables.
-	// if a full roll-back of the rule occurs, slaves and local variables will be deleted, causing a delete of the attendant constraints.
-	// In the event that a slave persists, as cann occur when the master is removed through termination, then the constraints among
-	// remaining slaves should also be retained
-	if(connectedToToken(constraint, m_token)){
-	  debugMsg("RuleInstance:undo", "Removing connected constraint " << constraint->toLongString());
-	  constraint->discard();
-	}
-	else // If we are not removing the constraint, we must remove the dependency on it
-	  constraint->removeDependent(this);
-      }
-
-      m_constraints.clear();
-
-      // Clean up slaves if not already de-allocated. Copy collection to avoid call back changing the set of
-      // slaves
-      debugMsg("RuleInstance:undo", "Processing slaves");
-      std::vector<TokenId> slaves = m_slaves;
-      for(std::vector<TokenId>::const_iterator it = slaves.begin(); it != slaves.end(); ++it){
-	TokenId slave = *it;
-	checkError(slave.isValid(), slave);
-	TokenId master = slave->master();
-	checkError(master.isNoId() || master == m_token, master);
-
-	// Remove the dependent since the slave MAY NOT GO AWAY
-	slave->removeDependent(this);
-
-	if(master.isId())
-	  slave->removeMaster(m_token);
-      }
-
-      m_slaves.clear();
-
-      // Cleanup local variables
-      debugMsg("RuleInstance:undo", "Cleaning up local variables");
-
-      for(std::vector<ConstrainedVariableId>::const_iterator it = m_variables.begin();
-	  it != m_variables.end();
-	  ++it){
-	ConstrainedVariableId var = *it;
-	checkError(var.isValid(), var);
-	debugMsg("RuleInstance:undo", "Removing " << var->toLongString());
-	getToken()->removeLocalVariable(var);
-
-	if(var->parent() == m_id)
-	  var->discard();
-
-	checkError(var.isValid(), var << " should still be valid after a discard.");
-      }
-      m_variables.clear();
-      m_isExecuted = false;
+    // Clear variable lookups - may include token variables so we have to be careful
+    for(std::vector<ConstrainedVariableId>::const_iterator it = m_variables.begin(); it != m_variables.end(); ++it){
+      ConstrainedVariableId var = *it;
+      checkError(var.isValid(), var);
+      edouble key = var->getName().getKey();
+      m_variablesByName.erase(key);
     }
+
+    // Copy collection to avoid iterator changing due to call back
+    std::vector<ConstraintId> constraints = m_constraints;
+    for(std::vector<ConstraintId>::const_iterator it = constraints.begin(); it != constraints.end(); ++it){
+      ConstraintId constr = *it;
+      checkError(constr.isValid(), constr);
+
+      // Only discard constraints that are connected to the master since the master may persist after the rule has cleaned up
+      // but the constraints should not. If it is not connected to the master then it applies to local variables or slave variables.
+      // if a full roll-back of the rule occurs, slaves and local variables will be deleted, causing a delete of the attendant constraints.
+      // In the event that a slave persists, as cann occur when the master is removed through termination, then the constraints among
+      // remaining slaves should also be retained
+      if(connectedToToken(constr, m_token)){
+        debugMsg("RuleInstance:undo",
+                 "Removing connected constraint " << constr->toLongString());
+        constr->discard();
+      }
+      else // If we are not removing the constraint, we must remove the dependency on it
+        constr->removeDependent(this);
+    }
+
+    m_constraints.clear();
+
+    // Clean up slaves if not already de-allocated. Copy collection to avoid call back changing the set of
+    // slaves
+    debugMsg("RuleInstance:undo", "Processing slaves");
+    std::vector<TokenId> slaves = m_slaves;
+    for(std::vector<TokenId>::const_iterator it = slaves.begin(); it != slaves.end(); ++it){
+      TokenId slave = *it;
+      checkError(slave.isValid(), slave);
+      TokenId master = slave->master();
+      checkError(master.isNoId() || master == m_token, master);
+
+      // Remove the dependent since the slave MAY NOT GO AWAY
+      slave->removeDependent(this);
+
+      if(master.isId())
+        slave->removeMaster(m_token);
+    }
+
+    m_slaves.clear();
+
+    // Cleanup local variables
+    debugMsg("RuleInstance:undo", "Cleaning up local variables");
+
+    for(std::vector<ConstrainedVariableId>::const_iterator it = m_variables.begin();
+        it != m_variables.end();
+        ++it){
+      ConstrainedVariableId var = *it;
+      checkError(var.isValid(), var);
+      debugMsg("RuleInstance:undo", "Removing " << var->toLongString());
+      getToken()->removeLocalVariable(var);
+
+      if(var->parent() == m_id)
+        var->discard();
+
+      checkError(var.isValid(), var << " should still be valid after a discard.");
+    }
+    m_variables.clear();
+    m_isExecuted = false;
   }
+}
 
   void RuleInstance::setGuard(const std::vector<ConstrainedVariableId>& guards){
     check_error(m_guards.empty());
@@ -464,19 +485,21 @@ TokenId RuleInstance::addSlave(Token* slave){
     return addSlave(slave);
   }
 
-  void RuleInstance::addConstraint(const LabelStr& name, const std::vector<ConstrainedVariableId>& scope){
-    ConstraintId constraint =  getPlanDatabase()->getConstraintEngine()->createConstraint(name,
-								   scope);
-    addConstraint(constraint);
-  }
+void RuleInstance::addConstraint(const LabelStr& name, const std::vector<ConstrainedVariableId>& scope){
+  ConstraintId constr =  
+      getPlanDatabase()->getConstraintEngine()->createConstraint(name,
+                                                                 scope);
+  addConstraint(constr);
+}
 
-void RuleInstance::addConstraint(const ConstraintId constraint){
-  m_constraints.push_back(constraint);
-  const LabelStr& name = constraint->getName();
+void RuleInstance::addConstraint(const ConstraintId constr){
+  m_constraints.push_back(constr);
+  const LabelStr& name = constr->getName();
   m_constraintsByName.erase(name.getKey());
-  m_constraintsByName.insert(std::make_pair(name.getKey(), constraint));
-  constraint->addDependent(this);
-    debugMsg("RuleInstance:addConstraint", "added constraint:" << constraint->toString());
+  m_constraintsByName.insert(std::make_pair(name.getKey(), constr));
+  constr->addDependent(this);
+  debugMsg("RuleInstance:addConstraint",
+           "added constraint:" << constr->toString());
 }
 
   void RuleInstance::addChildRule(RuleInstance* instance){
@@ -686,59 +709,60 @@ ConstrainedVariableId RuleInstance::varFromObject(const ConstrainedVariableId ob
     return retVar; //
   }
 
-  void RuleInstance::notifyDiscarded(const Entity* entity){
+void RuleInstance::notifyDiscarded(const Entity* entity){
 
-    checkError(dynamic_cast<const Token*>(entity) != 0 || dynamic_cast<const Constraint*>(entity),
-	       "Must be a constraint or a token: " << entity->getKey());
+  checkError(dynamic_cast<const Token*>(entity) != 0 || dynamic_cast<const Constraint*>(entity),
+             "Must be a constraint or a token: " << entity->getKey());
 
-    // Is it a slave? If so, reference to it
-    if(dynamic_cast<const Constraint*>(entity) == 0){
-      for(std::vector<TokenId>::iterator it = m_slaves.begin(); it != m_slaves.end(); ++it){
-	TokenId token = *it;
-	checkError(token.isValid(), token);
-	if(token->getKey() == entity->getKey()){
-	  m_slaves.erase(it);
-	  return;
-	}
-      }
-
-      return;
-    }
-
-    // Is it the guard listener
-    if(m_guardListener.isId() && entity->getKey() == m_guardListener->getKey()){
-      m_guardListener = ConstraintId::noId();
-      m_guards.clear();
-      return;
-    }
-
-    // If neither of the above, it must be a regular constraint
-    for(std::vector<ConstraintId>::iterator it = m_constraints.begin(); it != m_constraints.end(); ++it){
-      ConstraintId constraint = *it;
-      checkError(constraint.isValid(), constraint);
-      if(constraint->getKey() == entity->getKey()){
-	m_constraints.erase(it);
-	return;
+  // Is it a slave? If so, reference to it
+  if(dynamic_cast<const Constraint*>(entity) == 0){
+    for(std::vector<TokenId>::iterator it = m_slaves.begin(); it != m_slaves.end(); ++it){
+      TokenId token = *it;
+      checkError(token.isValid(), token);
+      if(token->getKey() == entity->getKey()){
+        m_slaves.erase(it);
+        return;
       }
     }
+
+    return;
   }
 
-  bool RuleInstance::connectedToToken(const ConstraintId constraint, const TokenId token) const{
-    // If the constrant is actually a rule variable listener then it is part of the context of the rule instance
-    // and thus part of the context of the token
-    if(RuleVariableListenerId::convertable(constraint))
+  // Is it the guard listener
+  if(m_guardListener.isId() && entity->getKey() == m_guardListener->getKey()){
+    m_guardListener = ConstraintId::noId();
+    m_guards.clear();
+    return;
+  }
+
+  // If neither of the above, it must be a regular constraint
+  for(std::vector<ConstraintId>::iterator it = m_constraints.begin(); it != m_constraints.end(); ++it){
+    ConstraintId constr = *it;
+    checkError(constr.isValid(), constr);
+    if(constr->getKey() == entity->getKey()){
+      m_constraints.erase(it);
+      return;
+    }
+  }
+}
+
+bool RuleInstance::connectedToToken(const ConstraintId constr,
+                                    const TokenId token) const {
+  // If the constrant is actually a rule variable listener then it is part of the context of the rule instance
+  // and thus part of the context of the token
+  if(RuleVariableListenerId::convertable(constr))
+    return true;
+
+  for(std::vector<ConstrainedVariableId>::const_iterator it = constr->getScope().begin();
+      it != constr->getScope().end(); ++it){
+    ConstrainedVariableId var = *it;
+    EntityId parent = var->parent();
+    if(parent == token || parent == m_id)
       return true;
-
-    for(std::vector<ConstrainedVariableId>::const_iterator it = constraint->getScope().begin();
-	it != constraint->getScope().end(); ++it){
-      ConstrainedVariableId var = *it;
-      EntityId parent = var->parent();
-      if(parent == token || parent == m_id)
-	return true;
-    }
-
-    return false;
   }
+
+  return false;
+}
 
   std::string RuleInstance::ruleExecutionContext() const {
     static const std::string TAB_DELIMITER("    ");

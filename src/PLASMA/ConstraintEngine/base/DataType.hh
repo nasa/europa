@@ -134,6 +134,9 @@ protected:
     bool m_isRestricted;
     Domain* m_baseDomain;
     edouble m_minDelta; /**< The minimum amount by which elements of this data type may vary.  Once this is set, DO NOT CHANGE IT.*/
+ private:
+  DataType(const DataType& other);
+  DataType& operator=(const DataType& other);
 };
 
 }

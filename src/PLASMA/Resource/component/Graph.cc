@@ -19,9 +19,7 @@
 
 namespace EUROPA
 {
-    Graph::Graph()
-    {
-    }
+Graph::Graph() : m_Nodes() {}
 
     Graph::~Graph()
     {

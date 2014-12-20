@@ -10,40 +10,41 @@
 
 namespace EUROPA {
 
-  class Engine;
-  typedef Id<Engine> EngineId;
-
-  class EngineComponent;
-  typedef Id<EngineComponent> EngineComponentId;
-
-  class Module;
-  typedef Id<Module> ModuleId;
-
-  class LanguageInterpreter
-  {
-    public:
-      virtual ~LanguageInterpreter() {}
-      virtual std::string interpret(std::istream& input, const std::string& source) = 0;
-
-      void setEngine(EngineId engine);
-      EngineId getEngine();
-
-    protected:
-      EngineId m_engine;
-  };
+class Engine;
+typedef Id<Engine> EngineId;
+  
+class EngineComponent;
+typedef Id<EngineComponent> EngineComponentId;
+  
+class Module;
+typedef Id<Module> ModuleId;
+  
+class LanguageInterpreter
+{
+ public:
+  LanguageInterpreter() : m_engine() {}
+  virtual ~LanguageInterpreter() {}
+  virtual std::string interpret(std::istream& input, const std::string& source) = 0;
+  
+  void setEngine(EngineId engine);
+  EngineId getEngine();
+  
+ protected:
+  EngineId m_engine;
+};
 
   class EngineComponent
   {
-    public :
-	  virtual ~EngineComponent() {}
-
-	  void setEngine(EngineId engine);
-	  EngineId getEngine();
-
-    protected:
-  	  EngineComponent() {}
-
-  	  EngineId m_engine;
+  public :
+    virtual ~EngineComponent() {}
+    
+    void setEngine(EngineId engine);
+    EngineId getEngine();
+    
+  protected:
+    EngineComponent() : m_engine() {}
+    
+    EngineId m_engine;
   };
 
   class EngineConfig
@@ -144,7 +145,9 @@ namespace EUROPA {
         std::map<edouble, EngineComponent*> m_components;          
         
     private:
-        bool m_started;
+    EngineBase(const EngineBase& other);
+    EngineBase& operator=(const EngineBase& other);
+    bool m_started;
   };
 
 } // End namespace

@@ -29,11 +29,11 @@
 
 namespace EUROPA {
 
-  DbClient::DbClient(const PlanDatabaseId db)
-    : m_id(this), m_deleted(false), m_transactionLoggingEnabled(false) {
-    check_error(db.isValid());
-    m_planDb = db;
-  }
+DbClient::DbClient(const PlanDatabaseId db)
+    : m_id(this), m_planDb(db), m_keysOfTokensCreated(), m_listeners(), 
+      m_deleted(false), m_transactionLoggingEnabled(false) {
+  check_error(db.isValid());
+}
 
   DbClient::~DbClient(){
     m_deleted = true;
@@ -287,7 +287,6 @@ void DbClient::deleteToken(const TokenId token, const std::string& name) {
     check_error(isTransactionLoggingEnabled());
     check_error(!relativePath.empty());
     check_error(!m_keysOfTokensCreated.empty());
-    check_error(relativePath[0] >= 0); // Can never be a valid path
 
     // Quick check for the root of the path
     if(relativePath[0] >= m_keysOfTokensCreated.size()) // Cannot be a path for a token with this key set

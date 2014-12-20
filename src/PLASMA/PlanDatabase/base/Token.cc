@@ -75,39 +75,80 @@ namespace EUROPA{
   Token::Token(const PlanDatabaseId planDatabase,
 	       const LabelStr& tokenTypeName,
 	       bool rejectable,
-	       bool isFact,
+	       bool _isFact,
 	       const IntervalIntDomain& durationBaseDomain,
 	       const LabelStr& objectName,
 	       bool closed)
       :Entity(),
        m_id(this),
        m_name(tokenTypeName),
+       m_master(),
        m_relation("none"),
+       m_baseObjectType(),
        m_predicateName(tokenTypeName),
-       m_planDatabase(planDatabase) {
-    commonInit(tokenTypeName, rejectable, isFact, durationBaseDomain, objectName, closed);
+       m_state(),
+       m_object(),
+       m_duration(),
+       m_isFact(false),
+       m_attributes(0),
+          m_parameters(),
+          m_allVariables(),
+          m_slaves(),
+          m_standardConstraints(),
+          m_pseudoVariables(),          
+          m_planDatabase(planDatabase),
+          m_mergedTokens(),
+          m_activeToken(),
+          m_unifyMemento(),
+          m_committed(false),
+          m_deleted(false),
+          m_terminated(false),
+          m_localVariables(),
+          m_unqualifiedPredicateName()
+{
+    commonInit(tokenTypeName, rejectable, _isFact, durationBaseDomain, objectName, closed);
   }
 
-  // Slave tokens cannot be rejectable.
-  Token::Token(const TokenId master,
-	       const LabelStr& relation,
-	       const LabelStr& tokenTypeName,
-	       const IntervalIntDomain& durationBaseDomain,
-	       const LabelStr& objectName,
-	       bool closed)
-     :Entity(),
-      m_id(this),
-      m_name(tokenTypeName),
-      m_master(master),
-      m_relation(relation),
-      m_predicateName(tokenTypeName),
-      m_planDatabase((*master).m_planDatabase) {
+// Slave tokens cannot be rejectable.
+Token::Token(const TokenId _master,
+             const LabelStr& relation,
+             const LabelStr& tokenTypeName,
+             const IntervalIntDomain& durationBaseDomain,
+             const LabelStr& objectName,
+             bool closed)
+    :Entity(),
+     m_id(this),
+     m_name(tokenTypeName),
+     m_master(_master),
+     m_relation(relation),
+     m_baseObjectType(),
+     m_predicateName(tokenTypeName),
+     m_state(),
+     m_object(),
+     m_duration(),
+     m_isFact(false),
+     m_attributes(0),
+          m_parameters(),
+          m_allVariables(),
+          m_slaves(),
+          m_standardConstraints(),
+          m_pseudoVariables(),
+          m_planDatabase((*_master).m_planDatabase),
+          m_mergedTokens(),
+          m_activeToken(),
+          m_unifyMemento(),
+          m_committed(false),
+          m_deleted(false),
+          m_terminated(false),
+          m_localVariables(),
+          m_unqualifiedPredicateName()
+{
 
-       // Master must be active to add children
-       check_error(m_master->isActive());
-       m_master->add(m_id);
-       commonInit(tokenTypeName, false, false, durationBaseDomain, objectName, closed);
-  }
+  // Master must be active to add children
+  check_error(m_master->isActive());
+  m_master->add(m_id);
+  commonInit(tokenTypeName, false, false, durationBaseDomain, objectName, closed);
+}
 
   Token::~Token(){
     discard(false);
@@ -507,7 +548,7 @@ void Token::doMerge(const TokenId activeToken){
    */
   void Token::commonInit(const LabelStr& predicateName,
 			 bool rejectable,
-			 bool isFact,
+			 bool _isFact,
 			 const IntervalIntDomain& durationBaseDomain,
 			 const LabelStr& objectName,
 			 bool closed){
@@ -524,7 +565,7 @@ void Token::doMerge(const TokenId activeToken){
     m_terminated = false;
     m_isFact = false;
 
-    if (isFact)
+    if (_isFact)
         makeFact();
 
     debugMsg("Token:commonInit",

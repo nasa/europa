@@ -89,8 +89,14 @@ bool ValueEnum::hasNext() const {
 
 //accepted choice options: mergeFirst, activateFirst, mergeOnly, activateOnly
 //accepted order options (only for merge): early, late, near, far
-OpenConditionDecisionPoint::OpenConditionDecisionPoint(const DbClientId client, const TokenId flawedToken, const TiXmlElement& configData, const LabelStr& explanation) 
-    : SOLVERS::OpenConditionDecisionPoint(client, flawedToken, configData, explanation) {
+OpenConditionDecisionPoint::OpenConditionDecisionPoint(const DbClientId client, 
+                                                       const TokenId flawedToken,
+                                                       const TiXmlElement& configData,
+                                                       const LabelStr& explanation) 
+    : SOLVERS::OpenConditionDecisionPoint(client, flawedToken, configData,
+                                          explanation),
+      m_action(mergeFirst),
+      m_comparator(NULL) {
   std::string choice(configData.Attribute("choice") == NULL ? "mergeFirst" : configData.Attribute("choice"));
   std::string order(configData.Attribute("order") == NULL ? "early" : configData.Attribute("order"));
 
@@ -324,9 +330,16 @@ TokenComparatorWrapper::TokenComparatorWrapper(TokenComparator* cmp, TokenId fla
   m_comparator->m_flawedTok = flawedToken;
 }
 
-TokenComparatorWrapper::TokenComparatorWrapper(const TokenComparatorWrapper& other) {
+TokenComparatorWrapper::TokenComparatorWrapper(const TokenComparatorWrapper& other) 
+    : m_comparator(NULL) {
   m_comparator = other.m_comparator->copy();
   checkError(m_comparator != NULL, "Invalid comparator object.");
+}
+
+TokenComparatorWrapper& TokenComparatorWrapper::operator=(const TokenComparatorWrapper& other) {
+  m_comparator = other.m_comparator->copy();
+  checkError(m_comparator != NULL, "Invalid comparator object.");
+  return *this;
 }
 
 TokenComparatorWrapper::~TokenComparatorWrapper() {
@@ -334,7 +347,8 @@ TokenComparatorWrapper::~TokenComparatorWrapper() {
 }
 
 ThreatDecisionPoint::ThreatDecisionPoint(const DbClientId client, const TokenId tokenToOrder, const TiXmlElement& configData, const LabelStr& explanation)
-    : SOLVERS::ThreatDecisionPoint(client, tokenToOrder, configData, explanation) {
+    : SOLVERS::ThreatDecisionPoint(client, tokenToOrder, configData, explanation),
+      m_comparator(NULL) {
   std::string order((configData.Attribute("order") == NULL ? "early" : configData.Attribute("order")));
       
   debugMsg("ThreatDecisionPoint:constructor", "Constructing for " << tokenToOrder->getKey() << " with choice order " << order);
@@ -389,7 +403,7 @@ ThreatDecisionPoint::ThreatComparator::ThreatComparator(TokenComparator* compara
   m_comparator->m_flawedTok = tok;
 }
 
-ThreatDecisionPoint::ThreatComparator::ThreatComparator(const ThreatComparator& other) {
+ThreatDecisionPoint::ThreatComparator::ThreatComparator(const ThreatComparator& other) :m_comparator(NULL) {
   m_comparator = other.m_comparator->copy();
 }
 

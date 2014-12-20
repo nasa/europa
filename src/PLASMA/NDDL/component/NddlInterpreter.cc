@@ -21,10 +21,8 @@
 
 namespace EUROPA {
 
-NddlInterpreter::NddlInterpreter(EngineId engine)
-  : m_engine(engine)
-{
-}
+NddlInterpreter::NddlInterpreter(EngineId engine) 
+    : m_engine(engine), m_filesread(), m_inputstreams() {}
 
 NddlInterpreter::~NddlInterpreter()
 {
@@ -230,13 +228,20 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
 NddlSymbolTable::NddlSymbolTable(NddlSymbolTable* parent)
     : EvalContext(parent)
     , m_parentST(parent)
+    , m_engine()
+    , m_errors()
+    , m_localVars()
+    , m_localTokens()
 {
 }
 
-NddlSymbolTable::NddlSymbolTable(const EngineId engine)
+NddlSymbolTable::NddlSymbolTable(const EngineId _engine)
     : EvalContext(NULL)
     , m_parentST(NULL)
-    , m_engine(engine)
+    , m_engine(_engine)
+    , m_errors()
+    , m_localVars()
+    , m_localTokens()
 {
 }
 
@@ -739,9 +744,6 @@ NddlToASTInterpreter::~NddlToASTInterpreter()
 {
 }
 
-pANTLR3_STRING toVerboseString(pANTLR3_BASE_TREE tree);
-pANTLR3_STRING toVerboseStringTree(pANTLR3_BASE_TREE tree);
-
 std::string NddlToASTInterpreter::interpret(std::istream& ins, const std::string& source)
 {
 	std::string strInput;
@@ -905,6 +907,7 @@ pANTLR3_STRING toVerboseString(pANTLR3_BASE_TREE tree) {
 PSLanguageException::PSLanguageException(const char *fileName, unsigned int line,
                                          int offset, unsigned int length,
                                          const char *message) :
+    m_fileName(), 
   m_line(line), m_offset(offset), m_length(length), m_message(message) {
   if (fileName) m_fileName = fileName;
   else fileName = "No_File";

@@ -65,8 +65,26 @@ namespace EUROPA{
     : m_id(this)
     , m_constraintEngine(constraintEngine)
     , m_schema(schema)
+    , m_temporalAdvisor()
+    , m_client()
+    , m_psClient(NULL)
     , m_state(OPEN)
+    , m_tokens()
+    , m_objects()
+    , m_globalTokens()
+    , m_globalVariables()
     , m_deleted(false)
+    , m_listeners()
+    , m_objectsByName()
+    , m_objectsByPredicate()
+    , m_objectsByType()
+    , m_closedObjectTypes()
+    , m_globalVarsByName()
+      , m_globalTokensByName()
+      , m_tokensToOrder()
+      , m_activeTokensByPredicate()
+      , m_objectVariablesByObjectType()
+
   {
       check_error(m_constraintEngine.isValid());
       check_error(m_schema.isValid());

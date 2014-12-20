@@ -22,190 +22,193 @@ namespace EUROPA {
      * data so that it can be accessed during actual decision point allocation.
      * @see DecisionPoint
      */
-    class FlawHandler: public MatchingRule {
-    public:
-      virtual ~FlawHandler();
+  class FlawHandler: public MatchingRule {
+   public:
+    virtual ~FlawHandler();
 
-      /**
-       * @brief Main factory method
-       */
-      virtual DecisionPointId create(const DbClientId client, const EntityId flawedEntity, const LabelStr& explanation) const = 0;
+    /**
+     * @brief Main factory method
+     */
+    virtual DecisionPointId create(const DbClientId client, const EntityId flawedEntity, const LabelStr& explanation) const = 0;
 
-      /**
-       * @brief Get the prority
-       */
-      virtual Priority getPriority(const EntityId entity = EntityId::noId());
+    /**
+     * @brief Get the prority
+     */
+    virtual Priority getPriority(const EntityId entity = EntityId::noId());
 
-      /**
-       * @brief Retrieves a weight based on the number of criteria satisfied. Used to select the most specific
-       * active flaw handler.
-       */
-      double getWeight() const;
+    /**
+     * @brief Retrieves a weight based on the number of criteria satisfied. Used to select the most specific
+     * active flaw handler.
+     */
+    double getWeight() const;
 
-      /**
-       * @brief Also provide a function to refresh the weight. This permits sub class methods to be used. Call this if custom static filters
-       * are used.
-       */
-      void refreshWeight();
+    /**
+     * @brief Also provide a function to refresh the weight. This permits sub class methods to be used. Call this if custom static filters
+     * are used.
+     */
+    void refreshWeight();
 
-      /**
-       * @brief Accessor for th emax number of choices to permit.
-       */
-      unsigned int getMaxChoices() const;
+    /**
+     * @brief Accessor for th emax number of choices to permit.
+     */
+    unsigned int getMaxChoices() const;
 
-      /**
-       * @brief Tests for a match between this factory and the entity
-       */
-      virtual bool customStaticMatch(const EntityId entity) const;
+    /**
+     * @brief Tests for a match between this factory and the entity
+     */
+    virtual bool customStaticMatch(const EntityId entity) const;
 
-      /**
-       * @brief Tests how many costm static filters should be applied. Factors into comparative weights
-       */
-      virtual unsigned int customStaticFilterCount() const {return 0;}
+    /**
+     * @brief Tests how many costm static filters should be applied. Factors into comparative weights
+     */
+    virtual unsigned int customStaticFilterCount() const {return 0;}
 
-      /**
-       * @brief True if there are any guards posted on this heuristic.
-       */
-      bool hasGuards() const;
+    /**
+     * @brief True if there are any guards posted on this heuristic.
+     */
+    bool hasGuards() const;
 
-      /**
-       * @brief Evaluates dynamic matching - i.e. guards against variables
-       */
-      bool test(const std::vector<ConstrainedVariableId>& scope);
+    /**
+     * @brief Evaluates dynamic matching - i.e. guards against variables
+     */
+    bool test(const std::vector<ConstrainedVariableId>& scope);
 
-      /**
-       * @brief Helper method to make the scope from guard data
-       * @return true if successful in obtaining all the guards required.
-       */
-      bool makeConstraintScope(const EntityId entity, std::vector<ConstrainedVariableId>& scope) const;
+    /**
+     * @brief Helper method to make the scope from guard data
+     * @return true if successful in obtaining all the guards required.
+     */
+    bool makeConstraintScope(const EntityId entity, std::vector<ConstrainedVariableId>& scope) const;
 
-      /**
-       * @brief Useful utility for eye-balling what the heuristic actually is.
-       */
-      virtual std::string toString() const;
+    /**
+     * @brief Useful utility for eye-balling what the heuristic actually is.
+     */
+    virtual std::string toString() const;
  
-      /**
-       * @brief Handy default vector for no guards
-       */
-      static const std::vector< GuardEntry >& noGuards();
+    /**
+     * @brief Handy default vector for no guards
+     */
+    static const std::vector< GuardEntry >& noGuards();
 
-      /**
-       * @brief Helper method to do value conversions for object domains. This one does the work.
-       */
-      static edouble convertValueIfNecessary(const PlanDatabaseId db,
-                                             const ConstrainedVariableId guardVar,
-                                             const edouble& testValue);
+    /**
+     * @brief Helper method to do value conversions for object domains. This one does the work.
+     */
+    static edouble convertValueIfNecessary(const PlanDatabaseId db,
+                                           const ConstrainedVariableId guardVar,
+                                           const edouble& testValue);
 
-      static unsigned int WEIGHT_BASE() {return 100000;} /*!< Used to weight active instances. 
-                                                           Establishes upper limit on priority values.*/
+    static unsigned int WEIGHT_BASE() {return 100000;} /*!< Used to weight active instances. 
+                                                         Establishes upper limit on priority values.*/
 
 
-      friend class FlawManager;
+    friend class FlawManager;
       
-      // This constraint notifies the FlawManager when a Guard on a FlawHandler is satisfied
-      class VariableListener: public Constraint {
-      public:
-        /**
-         * @brief Standard constraint constructor must be provided to facilitate
-         * creation of a copy during merging.
-         */
-        VariableListener(const LabelStr& name,
-                         const LabelStr& propagatorName,
-                         const ConstraintEngineId constraintEngine, 
-                         const std::vector<ConstrainedVariableId>& variables);
+    // This constraint notifies the FlawManager when a Guard on a FlawHandler is satisfied
+    class VariableListener: public Constraint {
+     public:
+      /**
+       * @brief Standard constraint constructor must be provided to facilitate
+       * creation of a copy during merging.
+       */
+      VariableListener(const LabelStr& name,
+                       const LabelStr& propagatorName,
+                       const ConstraintEngineId constraintEngine, 
+                       const std::vector<ConstrainedVariableId>& variables);
 
-        /**
-         * @brief Specilized constructor also provided to create from the Heuristics Engine
-         */
-        VariableListener(const ConstraintEngineId ce,
-                         const EntityId target,
-                         const FlawManagerId flawManager,
-                         const FlawHandlerId flawHandler,
-                         const std::vector<ConstrainedVariableId>& scope);
+      /**
+       * @brief Specilized constructor also provided to create from the Heuristics Engine
+       */
+      VariableListener(const ConstraintEngineId ce,
+                       const EntityId target,
+                       const FlawManagerId flawManager,
+                       const FlawHandlerId flawHandler,
+                       const std::vector<ConstrainedVariableId>& scope);
 
-        /**
-         * @brief Standard constraint name
-         */
-        static const LabelStr& CONSTRAINT_NAME(){
-          static const LabelStr sl_const("FlawListener");
-          return sl_const;
-        }
+      /**
+       * @brief Standard constraint name
+       */
+      static const LabelStr& CONSTRAINT_NAME(){
+        static const LabelStr sl_const("FlawListener");
+        return sl_const;
+      }
 
-        /**
-         * @brief Standard constraint name
-         */
-        static const LabelStr& PROPAGATOR_NAME(){
-          static const LabelStr sl_const("Default");
-          return sl_const;
-        }
+      /**
+       * @brief Standard constraint name
+       */
+      static const LabelStr& PROPAGATOR_NAME(){
+        static const LabelStr sl_const("Default");
+        return sl_const;
+      }
 	
-        const FlawHandlerId getHandler() const {return m_flawHandler;}
-        const EntityId getTarget() const {return m_target;}
-      private:
-        void handleExecute();
-        bool isApplied() const;
-        void apply();
-        void undo();
+      const FlawHandlerId getHandler() const {return m_flawHandler;}
+      const EntityId getTarget() const {return m_target;}
+     private:
+      void handleExecute();
+      bool isApplied() const;
+      void apply();
+      void undo();
 
-        const EntityId m_target;
-        const FlawManagerId m_flawManager;
-        const FlawHandlerId m_flawHandler;
-        bool m_isApplied;
-      };
+      const EntityId m_target;
+      const FlawManagerId m_flawManager;
+      const FlawHandlerId m_flawHandler;
+      bool m_isApplied;
+    };
 
 
-    protected:
+   protected:
 
-      /**
-       * @brief Constructor
-       * @param configData XML element of type <variable-heuristic>. May have child elements
-       * particular to each derived class.
-       */
-      FlawHandler(const TiXmlElement& configData);
+    /**
+     * @brief Constructor
+     * @param configData XML element of type <variable-heuristic>. May have child elements
+     * particular to each derived class.
+     */
+    FlawHandler(const TiXmlElement& configData);
 
-      TiXmlElement* m_configData;
+    TiXmlElement* m_configData;
 
-      Priority m_priority; /*!< The priority for the flaw. Used in flaw ordering */
-      double m_weight; /*!< An input to determine the weight of the flaw. Used to tie-break when priorities are equal */
-      const std::vector< GuardEntry > m_guards; /*!< <index, value> tuples */
-      const std::vector< GuardEntry > m_masterGuards; /*!< <index, value> tuples */
+    Priority m_priority; /*!< The priority for the flaw. Used in flaw ordering */
+    double m_weight; /*!< An input to determine the weight of the flaw. Used to tie-break when priorities are equal */
+    const std::vector< GuardEntry > m_guards; /*!< <index, value> tuples */
+    const std::vector< GuardEntry > m_masterGuards; /*!< <index, value> tuples */
 
  
 
-    private:
-      /**
-       * @brief Helper method to read the guards from XML element
-       */
-      static const std::vector<GuardEntry>& readGuards(const TiXmlElement& configData, bool forMaster);
+   private:
+      FlawHandler(const FlawHandler&);
+      FlawHandler& operator=(const FlawHandler&);
 
-      /**
-       * @brief Helper method to get a double encoded value
-       */
-      static edouble readValue(const char* data);
+    /**
+     * @brief Helper method to read the guards from XML element
+     */
+    static const std::vector<GuardEntry>& readGuards(const TiXmlElement& configData, bool forMaster);
 
-      /**
-       * @brief Helper method to stringify a guard
-       */
-      static std::string toString(const GuardEntry& entry);
+    /**
+     * @brief Helper method to get a double encoded value
+     */
+    static edouble readValue(const char* data);
 
-      /**
-       * @brief Helper method to test a guard value
-       */
-      bool matches(const ConstrainedVariableId guardVar, const edouble& testValue);
+    /**
+     * @brief Helper method to stringify a guard
+     */
+    static std::string toString(const GuardEntry& entry);
 
-      /**
-       * @brief Helper to get a token, if possible, from an entity (token, or variable)
-       */
-      static TokenId getTokenFromEntity(const EntityId entity);
+    /**
+    * @brief Helper method to test a guard value
+    */
+    bool matches(const ConstrainedVariableId guardVar, const edouble& testValue);
 
-      static TiXmlElement* makeConfigData(const TiXmlElement& configData);
+    /**
+     * @brief Helper to get a token, if possible, from an entity (token, or variable)
+     */
+    static TokenId getTokenFromEntity(const EntityId entity);
 
-      const PlanDatabaseId getPlanDatabase(const ConstrainedVariableId tokenVar);
+    static TiXmlElement* makeConfigData(const TiXmlElement& configData);
 
-      PlanDatabaseId m_db;
+    const PlanDatabaseId getPlanDatabase(const ConstrainedVariableId tokenVar);
+
+    PlanDatabaseId m_db;
       
-      unsigned int m_maxChoices; /*!< Allows a cut operator on choices. xml attribute is 'maxChoices' */
-    }; 
+    unsigned int m_maxChoices; /*!< Allows a cut operator on choices. xml attribute is 'maxChoices' */
+  }; 
 
     /**
      * @brief Declares a Template class for concrete decision point factories

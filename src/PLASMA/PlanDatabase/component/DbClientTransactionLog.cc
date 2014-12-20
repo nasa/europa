@@ -10,11 +10,11 @@
 namespace EUROPA {
   DbClientTransactionLog::DbClientTransactionLog(const DbClientId client, bool chronologicalBacktracking)
     : DbClientListener(client)
+    , m_bufferedTransactions()
+    , m_chronologicalBacktracking(chronologicalBacktracking)
+    , m_tokensCreated(0)
     , m_client(client)
-  {
-    m_chronologicalBacktracking = chronologicalBacktracking;
-    m_tokensCreated = 0;
-  }
+  {}
 
   DbClientTransactionLog::~DbClientTransactionLog(){
     cleanup(m_bufferedTransactions);

@@ -541,8 +541,9 @@ bool IdTests::testBadIdUsage() {
   }
   catch (Error e) {
     Error::doDisplayErrors();
-    if (e.getType() == "Error")
-      CPPUNIT_ASSERT(false);
+    CPPUNIT_ASSERT_EQUAL(std::string("Error"), e.getType());
+    CPPUNIT_ASSERT_EQUAL(std::string("Invalid cast from Id<4Root> to Id<4Bing>."),
+                         e.getMsg());
   }
   catch (IdErr) {
     Error::doDisplayErrors();

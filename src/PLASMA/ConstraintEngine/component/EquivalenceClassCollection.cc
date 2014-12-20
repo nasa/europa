@@ -3,8 +3,8 @@
 
 namespace EUROPA{
 
-  ConstraintNode::ConstraintNode(const ConstrainedVariableId variable)
-    : m_variable(variable), m_graph(0), m_lastUpdated(0){}
+ConstraintNode::ConstraintNode(const ConstrainedVariableId variable)
+    : m_variable(variable), m_graph(0), m_lastUpdated(0), m_neighbours(){}
 
   bool ConstraintNode::hasBeenUpdated(int nextCycle) const {
     check_error(nextCycle >= m_lastUpdated);

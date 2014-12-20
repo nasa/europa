@@ -344,75 +344,75 @@ class Profile : public FactoryObj {
   bool checkMessageConsistency();
 };
 
-    /**
-     * @class ProfileIterator
-     * @brief Used to iterate over a calculated profile.  Each call to next() advances the iterator to the next point in time at which a
-     * level changes.  Directly constructible only inside the Profile class. (Is this a good idea?)
-     */
-    class ProfileIterator {
-    public:
+/**
+ * @class ProfileIterator
+ * @brief Used to iterate over a calculated profile.  Each call to next() advances the iterator to the next point in time at which a
+ * level changes.  Directly constructible only inside the Profile class. (Is this a good idea?)
+ */
+class ProfileIterator {
+ public:
 
-      /**
-       * @brief Constructor for an iterator over a profile.
-       * @param prof The profile to be iterated.
-       * @param startTime The time to begin iteration.  The time of the first Instant is guaranteed to be the greatest time not greater than this value.
-       * @param endTime The time to end iteration.  The time of the last Instant is guaranteed to be the greatest time not greater than this value.
-       */
-      ProfileIterator(const ProfileId prof, const eint startTime = MINUS_INFINITY, const eint endTime = PLUS_INFINITY);
+  /**
+   * @brief Constructor for an iterator over a profile.
+   * @param prof The profile to be iterated.
+   * @param startTime The time to begin iteration.  The time of the first Instant is guaranteed to be the greatest time not greater than this value.
+   * @param endTime The time to end iteration.  The time of the last Instant is guaranteed to be the greatest time not greater than this value.
+   */
+  ProfileIterator(const ProfileId prof, const eint startTime = MINUS_INFINITY, const eint endTime = PLUS_INFINITY);
       
-      ~ProfileIterator() {m_id.remove();}
+  ~ProfileIterator() {m_id.remove();}
 
-      /**
-       * @brief Determine whether or not this ProfileIterator has iterated past its end time.
-       */
-      bool done() const;
+  /**
+   * @brief Determine whether or not this ProfileIterator has iterated past its end time.
+   */
+  bool done() const;
 
-      /**
-       * @brief Gets the time of the current position of this ProfileIterator
-       * @return The time
-       */
-      eint getTime() const;
+  /**
+   * @brief Gets the time of the current position of this ProfileIterator
+   * @return The time
+   */
+  eint getTime() const;
       
-      /**
-       * @brief Gets the value of the lower bound of the profile at the current instant in time.
-       * @return The value of the profile.
-       */
-      edouble getLowerBound() const;
+  /**
+   * @brief Gets the value of the lower bound of the profile at the current instant in time.
+   * @return The value of the profile.
+   */
+  edouble getLowerBound() const;
 
-      /**
-       * @brief Gets the value of the upper bound of the profile at the current instant in time.
-       * @return The value of the profile.
-       */
-      edouble getUpperBound() const;
+  /**
+   * @brief Gets the value of the upper bound of the profile at the current instant in time.
+   * @return The value of the profile.
+   */
+  edouble getUpperBound() const;
 
-      /**
-       * @brief Gets the current instant.
-       * @return The instant.
-       */
-      InstantId getInstant() const;
-      /**
-       * @brief Steps the ProfileIterator to the next instant in time.
-       * @return true if the ProfileIterator ends on a valid Instant, false otherwise.
-       */
-      bool next();
+  /**
+   * @brief Gets the current instant.
+   * @return The instant.
+   */
+  InstantId getInstant() const;
+  /**
+   * @brief Steps the ProfileIterator to the next instant in time.
+   * @return true if the ProfileIterator ends on a valid Instant, false otherwise.
+   */
+  bool next();
 
-      ProfileIteratorId getId(){return m_id;}
+  ProfileIteratorId getId(){return m_id;}
 
-      /**
-       * @brief Determines if the interval of the iterator is still in synch with the actual profile.
-       */
-      bool isStale() const;
+  /**
+   * @brief Determines if the interval of the iterator is still in synch with the actual profile.
+   */
+  bool isStale() const;
 
-      eint getStartTime() const;
-      eint getEndTime() const;
+  eint getStartTime() const;
+  eint getEndTime() const;
 
-    protected:
-      ProfileIteratorId m_id;
-      ProfileId m_profile;
-      unsigned int m_changeCount; /**< A copy of the similar variable in Profile when this iterator was instantiated.  Used to detect staleness. */
-      eint m_startTime, m_endTime;
-      std::map<eint, InstantId>::const_iterator m_start, m_end, m_realEnd; /**< The start and end times over which this iterator goes*/
-    };
+ protected:
+  ProfileIteratorId m_id;
+  ProfileId m_profile;
+  unsigned int m_changeCount; /**< A copy of the similar variable in Profile when this iterator was instantiated.  Used to detect staleness. */
+  eint m_startTime, m_endTime;
+  std::map<eint, InstantId>::const_iterator m_start, m_end, m_realEnd; /**< The start and end times over which this iterator goes*/
+};
 
     class ProfileArgs : public FactoryArgs
     {
@@ -441,36 +441,36 @@ class Profile : public FactoryObj {
 
     #define REGISTER_PROFILE(MGR, CLASS, NAME) (MGR->registerFactory((new EUROPA::ProfileFactory<CLASS>(#NAME))->getId()));
 
-    /*
-     * A Profile keeps track of upper&lower bounds of a resource's attribute over time.
-     * An ExplicitProfile is a profile whose values are explicitly specified (instead of being computed from usage or other information)
-     * An ExplicitProfile is a piecewise constant function, we may consider supporting other types in the future.
-     * For the time being a resource's capacity will be represented using an ExplicitProfile.
-     * Limits could also be represented by an ExplicitProfile if we see the need to move beyond a single {upperBound,lowerBound} pair.
-     *
-     * TODO: Profile needs to be refactored into an interface that both the ExplicitProfile and (a new) ComputedProfile class can implement.
-     * The current Profile class represents the Level (or availability) profile for a resource and would be better characterized
-     * as a ComputedProfile
-     */
-    class ExplicitProfile {
-    public:
-    	ExplicitProfile(edouble lb, edouble ub);
-    	virtual ~ExplicitProfile();
+/*
+ * A Profile keeps track of upper&lower bounds of a resource's attribute over time.
+ * An ExplicitProfile is a profile whose values are explicitly specified (instead of being computed from usage or other information)
+ * An ExplicitProfile is a piecewise constant function, we may consider supporting other types in the future.
+ * For the time being a resource's capacity will be represented using an ExplicitProfile.
+ * Limits could also be represented by an ExplicitProfile if we see the need to move beyond a single {upperBound,lowerBound} pair.
+ *
+ * TODO: Profile needs to be refactored into an interface that both the ExplicitProfile and (a new) ComputedProfile class can implement.
+ * The current Profile class represents the Level (or availability) profile for a resource and would be better characterized
+ * as a ComputedProfile
+ */
+class ExplicitProfile {
+ public:
+ExplicitProfile(edouble lb, edouble ub);
+virtual ~ExplicitProfile();
 
-    	ExplicitProfileId getId();
+ExplicitProfileId getId();
 
-    	void setValue(eint time, edouble lb, edouble ub);
-    	void removeValue(eint time);
-    	// TODO: provide ExplicitProfileIterator instead?
-    	const std::map< eint,std::pair<edouble,edouble> >& getValues() const;
+void setValue(eint time, edouble lb, edouble ub);
+void removeValue(eint time);
+// TODO: provide ExplicitProfileIterator instead?
+const std::map< eint,std::pair<edouble,edouble> >& getValues() const;
 
-    	const std::pair<edouble,edouble>& getValue(eint time) const;
-    	const std::pair<edouble,edouble>& getEarliestValue() const;
+const std::pair<edouble,edouble>& getValue(eint time) const;
+const std::pair<edouble,edouble>& getEarliestValue() const;
 
-    protected:
-    	ExplicitProfileId m_id;
-    	std::map< eint,std::pair<edouble,edouble> > m_values;
-    };
+ protected:
+ExplicitProfileId m_id;
+std::map< eint,std::pair<edouble,edouble> > m_values;
+};
 }
 
 #endif

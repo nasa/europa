@@ -256,6 +256,9 @@ class InterpretedObjectFactory : public ObjectFactory
       std::vector<Expr*>        m_constructorBody;
       bool                      m_canMakeNewObject;
       mutable EvalContext*      m_evalContext;
+private:
+  InterpretedObjectFactory(const InterpretedObjectFactory&);
+  InterpretedObjectFactory& operator=(const InterpretedObjectFactory&);
 };
 
 class NativeObjectFactory : public InterpretedObjectFactory

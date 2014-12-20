@@ -13,12 +13,15 @@
 
 namespace EUROPA {
 
-ObjectType::ObjectType(const char* name, const ObjectTypeId parent, bool isNative)
+ObjectType::ObjectType(const char* name, const ObjectTypeId parent, bool _isNative)
     : m_id(this)
     , m_varType((new ObjectDT(name))->getId())
     , m_name(name)
     , m_parent(parent)
-    , m_isNative(isNative)
+    , m_isNative(_isNative)
+    , m_objectFactories(),
+      m_tokenTypes(),
+      m_members()
 {
 }
 
@@ -219,7 +222,7 @@ std::string ObjectType::toString() const
   static const char* TYPE_DELIMITER = ":"; /*!< Used to delimit types in the factory signature*/
 
   ObjectFactory::ObjectFactory(const LabelStr& signature)
-    : m_id(this), m_signature(signature){
+      : m_id(this), m_signature(signature), m_signatureTypes() {
 
     debugMsg("ObjectFactory:ObjectFactory", "Creating factory " << signature.toString());
 
@@ -255,7 +258,7 @@ void ObjectFactory::evalConstructorBody(ObjectId,
 
 
   ObjectTypeMgr::ObjectTypeMgr()
-      : m_id(this)
+      : m_id(this), m_objTypes(), m_factories()
   {
   }
 
@@ -492,7 +495,8 @@ void* ObjectEvalContext::getElement(const char* name) const {
     , m_constructorArgTypes(constructorArgTypes)
     , m_superCallExpr(superCallExpr)
     , m_constructorBody(constructorBody)
-    , m_canMakeNewObject(canMakeNewObject)
+    , m_canMakeNewObject(canMakeNewObject),
+  m_evalContext(NULL)
   {
       if (!m_canMakeNewObject && m_superCallExpr==NULL) {
           m_superCallExpr = new ExprConstructorSuperCall(objType->getParent()->getName(),std::vector<Expr*>());
@@ -532,6 +536,7 @@ void* ObjectEvalContext::getElement(const char* name) const {
                const std::vector<const Domain*>& args)
     : EvalContext(NULL) // TODO: should pass in eval context from outside to have access to globals
     , m_planDb(planDb)
+    , m_tmpVars()
   {
     debugMsg("ObjectFactoryEvalContext", ">> ");
 

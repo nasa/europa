@@ -87,38 +87,38 @@ edouble DataType::minDelta() const
 
 ConstrainedVariableId
 DataType::createVariable(const ConstraintEngineId constraintEngine,
-                         const Domain& baseDomain,
+                         const Domain& _baseDomain,
                          const bool internal,
                          bool canBeSpecified,
                          const char* name,
                          const EntityId parent,
                          unsigned int index) const
 {
-    // TODO: perform stronger checks here
-    check_error(Domain::canBeCompared(*m_baseDomain,baseDomain),
-            std::string("Tried to create a ") + getName().c_str()
-            + " variable with a different kind of base domain:"
-            + baseDomain.getTypeName().c_str());
+  // TODO: perform stronger checks here
+  check_error(Domain::canBeCompared(*m_baseDomain,_baseDomain),
+              std::string("Tried to create a ") + getName().c_str()
+              + " variable with a different kind of base domain:"
+              + _baseDomain.getTypeName().c_str());
 
-    Variable<Domain>* variable = new Variable<Domain>(
-            constraintEngine,
-            baseDomain,
-            internal,
-            canBeSpecified,
-            name,
-            parent,
-            index
-    );
+  Variable<Domain>* variable = new Variable<Domain>(
+      constraintEngine,
+      _baseDomain,
+      internal,
+      canBeSpecified,
+      name,
+      parent,
+      index
+                                                    );
 
-    check_error(variable != NULL,
-            std::string("Failed to create Variable of type ")+ getName().c_str() +" with name '" + std::string(name) + "'");
+  check_error(variable != NULL,
+              std::string("Failed to create Variable of type ")+ getName().c_str() +" with name '" + std::string(name) + "'");
 
-    ConstrainedVariableId id = variable->getId();
-    check_error(id.isValid());
+  ConstrainedVariableId id = variable->getId();
+  check_error(id.isValid());
 
-    debugMsg("DataType::createVariable", "Created Variable : " << id->toLongString());
+  debugMsg("DataType::createVariable", "Created Variable : " << id->toLongString());
 
-    return id;
+  return id;
 }
 
 

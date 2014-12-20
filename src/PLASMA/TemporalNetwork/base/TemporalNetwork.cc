@@ -37,12 +37,14 @@ namespace EUROPA {
     return edgeToTheOrigin.isId();
   }
 
-  TemporalNetwork::TemporalNetwork() :   m_id(this)
-  {
-    consistent=true; hasDeletions=false; nodeCounter=0;
-    addTimepoint();
-    fullPropagate();
-  }
+TemporalNetwork::TemporalNetwork() : consistent(true), 
+                                     hasDeletions(false), nodeCounter(0),
+                                     incrementalSource(), m_constraints(), m_id(this),
+                                     m_refpoint(), m_updatedTimepoints() {
+
+  addTimepoint();
+  fullPropagate();
+}
 
   TemporalNetwork::~TemporalNetwork()
   {
@@ -426,50 +428,50 @@ namespace EUROPA {
   }
 #endif
 
-  TemporalConstraintId TemporalNetwork::addTemporalConstraint(const TimepointId src,
-							      const TimepointId targ,
-							      const Time _lb,
-							      const Time _ub,
-							      bool propagate) {
-    const Time lb = mapToInternalInfinity(_lb);
-    const Time ub = mapToInternalInfinity(_ub);
-    if (!checkBoundsValidity(lb, ub))
-      return(TemporalConstraintId::noId());
+TemporalConstraintId TemporalNetwork::addTemporalConstraint(const TimepointId src,
+                                                            const TimepointId targ,
+                                                            const Time _lb,
+                                                            const Time _ub,
+                                                            bool _propagate) {
+  const Time lb = mapToInternalInfinity(_lb);
+  const Time ub = mapToInternalInfinity(_ub);
+  if (!checkBoundsValidity(lb, ub))
+    return(TemporalConstraintId::noId());
 
-    check_error(isValidId(src),
-                "addTemporalConstraint:  Invalid source timepoint",
-                TempNetErr::TempNetInvalidTimepointError());
-    check_error(isValidId(targ),
-                "addTemporalConstraint:  Invalid target timepoint",
-                TempNetErr::TempNetInvalidTimepointError());
-    check_error( (src != targ),
-                 "addTemporalConstraint:  source and target are the same",
-                 TempNetErr::TempNetEmptyConstraintError());
-    maintainTEQ (lb,ub,src,targ);
+  check_error(isValidId(src),
+              "addTemporalConstraint:  Invalid source timepoint",
+              TempNetErr::TempNetInvalidTimepointError());
+  check_error(isValidId(targ),
+              "addTemporalConstraint:  Invalid target timepoint",
+              TempNetErr::TempNetInvalidTimepointError());
+  check_error( (src != targ),
+               "addTemporalConstraint:  source and target are the same",
+               TempNetErr::TempNetEmptyConstraintError());
+  maintainTEQ (lb,ub,src,targ);
 
-    unsigned short edgeCount = 0;
+  unsigned short edgeCount = 0;
 
-    if (ub <= MAX_LENGTH){
-      addEdgeSpec(src, targ, ub);
-      edgeCount++;
-    }
-
-    if(lb >= MIN_LENGTH){
-      edgeCount++;
-      addEdgeSpec(targ, src, -lb);
-    }
-
-    Tspec* spec = new Tspec (this, src, targ, lb, ub, edgeCount);
-
-    m_constraints.insert(spec->getId());
-
-    // As long as propagation is not turned off, we can process this constraint
-    if (propagate){
-      incPropagate(src, targ);
-    }
-
-    return(spec->getId());
+  if (ub <= MAX_LENGTH){
+    addEdgeSpec(src, targ, ub);
+    edgeCount++;
   }
+
+  if(lb >= MIN_LENGTH){
+    edgeCount++;
+    addEdgeSpec(targ, src, -lb);
+  }
+
+  Tspec* spec = new Tspec (this, src, targ, lb, ub, edgeCount);
+
+  m_constraints.insert(spec->getId());
+
+  // As long as propagation is not turned off, we can process this constraint
+  if (_propagate){
+    incPropagate(src, targ);
+  }
+
+  return(spec->getId());
+}
 
   Void TemporalNetwork::narrowTemporalConstraint(const TemporalConstraintId tcId,
 						 const Time newLb, const Time newUb)
@@ -515,7 +517,7 @@ namespace EUROPA {
     spec->lowerBound = newLb;
     spec->upperBound = newUb;
 
-    checkError(spec->m_edgeCount >= 0 && spec->m_edgeCount <= 2, "Invalied edge count" <<  spec->m_edgeCount);
+    checkError(spec->m_edgeCount <= 2, "Invalied edge count" <<  spec->m_edgeCount);
 
     if(!this->hasDeletions)
       incPropagate(src, targ);
@@ -1067,11 +1069,9 @@ Void TemporalNetwork::incDijkstraForward() {
   }
 
 Tnode::Tnode(TemporalNetwork* t) :
-    Dnode(), reftime(0), prev_reftime(0), ordinal(0), m_deletionMarker(true), index(0),
-    owner(t){
-    lowerBound = NEG_INFINITY;
-    upperBound = POS_INFINITY;
-  }
+    Dnode(), lowerBound(NEG_INFINITY), upperBound(POS_INFINITY), reftime(0),
+    prev_reftime(0), ordinal(0), m_baseDomainConstraint(), m_deletionMarker(true),
+    index(0), ringLeader(), ringFollowers(), owner(t) {}
 
   Tnode::~Tnode(){
     discard(false);

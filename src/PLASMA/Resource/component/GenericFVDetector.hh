@@ -59,25 +59,27 @@ namespace EUROPA {
       friend class GenericFVProfile;
     };
 
-    class GenericFVProfile : public PSResourceProfile
-    {
-    public:
-    	GenericFVProfile(GenericFVDetector* fvd, const ProfileId profile, bool isFDProfile);
-		virtual ~GenericFVProfile() {}
+class GenericFVProfile : public PSResourceProfile {
+private:
+  GenericFVProfile(const GenericFVProfile&);
+  GenericFVProfile& operator=(const GenericFVProfile&);
+ public:
+  GenericFVProfile(GenericFVDetector* fvd, const ProfileId profile, bool isFDProfile);
+  virtual ~GenericFVProfile() {}
 
-		virtual PSList<TimePoint> getTimes();
-		virtual double getLowerBound(TimePoint time);
-		virtual double getUpperBound(TimePoint time);
+  virtual PSList<TimePoint> getTimes();
+  virtual double getLowerBound(TimePoint time);
+  virtual double getUpperBound(TimePoint time);
 
-	protected:
-		GenericFVDetector* m_detector;
-		ProfileId m_profile;
-		bool m_isFDProfile;
-		PSList<TimePoint> m_times;
-		std::map<TimePoint,std::pair<edouble,edouble> > m_bounds;
+ protected:
+  GenericFVDetector* m_detector;
+  ProfileId m_profile;
+  bool m_isFDProfile;
+  PSList<TimePoint> m_times;
+  std::map<TimePoint,std::pair<edouble,edouble> > m_bounds;
 
-		void update();
-    };
+  void update();
+};
 }
 
 #endif

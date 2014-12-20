@@ -50,7 +50,7 @@ namespace SOLVERS {
 
 Solver::Solver(const PlanDatabaseId db, const TiXmlElement& configData)
     : m_baseConflictLevel(0.0),
-      m_id(this), m_db(db),
+      m_id(this), m_name(), m_db(db), m_activeDecision(), 
       m_stepCountFloor(0), m_depthFloor(0), m_stepCount(0),
       m_noFlawsFound(false), m_exhausted(false), m_timedOut(false),
 #ifdef _MSC_VER
@@ -60,7 +60,13 @@ Solver::Solver(const PlanDatabaseId db, const TiXmlElement& configData)
       m_maxSteps(std::numeric_limits<unsigned int>::max()),
       m_maxDepth(std::numeric_limits<unsigned int>::max()),
 #endif //_MSC_VER
-      m_masterFlawFilter(configData), m_ceListener(db->getConstraintEngine(), *this),
+      m_masterFlawFilter(configData), 
+  m_context(),
+  m_flawManagers(),
+  m_decisionStack(),
+  m_lastExecutedDecision(),
+  m_listeners(),
+  m_ceListener(db->getConstraintEngine(), *this),
       m_dbListener(db, *this) {
   checkError(strcmp(configData.Value(), "Solver") == 0,
              "Configuration file error. Expected element <Solver> but found " << configData.Value());
@@ -522,8 +528,9 @@ Solver::~Solver(){
       return (new FlawIterator(m_flawManagers))->getId();
     }
 
-    Solver::FlawIterator::FlawIterator(const FlawManagers& flawManagers) {
-      for(FlawManagers::const_iterator it = flawManagers.begin(); it != flawManagers.end(); ++it)
+Solver::FlawIterator::FlawIterator(const FlawManagers& flawManagers) 
+    : Iterator(), m_visited(0), m_iterators(), m_it(m_iterators.end()) {
+  for(FlawManagers::const_iterator it = flawManagers.begin(); it != flawManagers.end(); ++it)
         m_iterators.push_back((*it)->createIterator());
       m_it = m_iterators.begin();
 

@@ -20,14 +20,14 @@
  */
 
 namespace EUROPA {
-  namespace SOLVERS {
+namespace SOLVERS {
 
-    /**
-     * @brief Constructor will evaluate the configuration information and construct assembly from there.
-     * @see ComponentFactory
-     */
-    UnboundVariableManager::UnboundVariableManager(const TiXmlElement& configData)
-      : FlawManager(configData) {}
+/**
+ * @brief Constructor will evaluate the configuration information and construct assembly from there.
+ * @see ComponentFactory
+ */
+UnboundVariableManager::UnboundVariableManager(const TiXmlElement& configData)
+    : FlawManager(configData), m_flawCandidates() {}
 
     void UnboundVariableManager::handleInitialize(){
 

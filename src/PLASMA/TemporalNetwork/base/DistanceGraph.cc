@@ -37,10 +37,10 @@ void deleteIfEqual(std::vector<ELEMENT>& elements, ELEMENT element){
 // Global value overridden only for Rax-derived system test.
 // Bool IsOkToRemoveConstraintTwice = false;
 
-DistanceGraph::DistanceGraph ()
+DistanceGraph::DistanceGraph() : edges(), dijkstraGeneration(0), nodes(), dqueue(NULL),
+                                 bqueue(NULL), edgeNogoodList()
 {
-  dijkstraGeneration=0;
-  dqueue= new Dqueue;
+  dqueue= new Dqueue();
   bqueue= new BucketQueue(100);
 }
 

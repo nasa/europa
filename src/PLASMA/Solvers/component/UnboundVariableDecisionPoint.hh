@@ -9,8 +9,7 @@
  * @author Conor McGann
  */
 namespace EUROPA {
-
-  namespace SOLVERS {
+namespace SOLVERS {
 
     class ValueSource;
 
@@ -21,60 +20,63 @@ namespace EUROPA {
      * leaves all details of how choices are stored and how they are iterated through to
      * derived classes, thus allowing for specialized storage and selection.
      */
-    class UnboundVariableDecisionPoint: public DecisionPoint {
-    public:
+class UnboundVariableDecisionPoint: public DecisionPoint {
+ public:
 
-      /**
-       * @brief Utility to obtain the next decision point from the set of candidates if it can exceed the
-       * given best priority.
-       * @param flawCandidates A set of unbound variables to choose from
-       * @param guardCache The set of guard variables, each with a reference to the number of guards posted on it.
-       * @param bestPriority A mutable current best priority. If a new decision point is created, the new
-       * bestPriority will be updated to the priority of the new decision point.
-       * @return A noId if no better decision can be found, otherwise a new decision with a better priority.
-       */
-      static DecisionPointId next(const ConstrainedVariableSet& flawCandidates,
-				  const std::map< ConstrainedVariableId, unsigned int>& guardCache,
-				  unsigned int& bestPriority);
+  /**
+   * @brief Utility to obtain the next decision point from the set of candidates if it can exceed the
+   * given best priority.
+   * @param flawCandidates A set of unbound variables to choose from
+   * @param guardCache The set of guard variables, each with a reference to the number of guards posted on it.
+   * @param bestPriority A mutable current best priority. If a new decision point is created, the new
+   * bestPriority will be updated to the priority of the new decision point.
+   * @return A noId if no better decision can be found, otherwise a new decision with a better priority.
+   */
+  static DecisionPointId next(const ConstrainedVariableSet& flawCandidates,
+                              const std::map< ConstrainedVariableId, unsigned int>& guardCache,
+                              unsigned int& bestPriority);
 
-      /**
-       * @brief Used to prune entities out which are not variables
-       */
-      static bool test(const EntityId entity);
+  /**
+   * @brief Used to prune entities out which are not variables
+   */
+  static bool test(const EntityId entity);
 
-      virtual ~UnboundVariableDecisionPoint();
+  virtual ~UnboundVariableDecisionPoint();
 
-      /**
-       * @brief Dump contents to a String.
-       */
-      virtual std::string toString() const;
-      virtual std::string toShortString() const;
+  /**
+   * @brief Dump contents to a String.
+   */
+  virtual std::string toString() const;
+  virtual std::string toShortString() const;
 
-      const ConstrainedVariableId getFlawedVariable() const;
+  const ConstrainedVariableId getFlawedVariable() const;
 
-    protected:
+ protected:
 
-      UnboundVariableDecisionPoint(const DbClientId client, const ConstrainedVariableId flawedVariable, const TiXmlElement& configData,
-                                   const LabelStr& explanation = "unknown");
+  UnboundVariableDecisionPoint(const DbClientId client, const ConstrainedVariableId flawedVariable, const TiXmlElement& configData,
+                               const LabelStr& explanation = "unknown");
 
-      const ConstrainedVariableId m_flawedVariable; /*!< The Flaw to resolve */
+  const ConstrainedVariableId m_flawedVariable; /*!< The Flaw to resolve */
 
-      ValueSource* m_choices;
+  ValueSource* m_choices;
 
-      virtual void handleInitialize();
+  virtual void handleInitialize();
 
-      virtual void handleExecute();
+  virtual void handleExecute();
 
-      virtual void handleUndo();
+  virtual void handleUndo();
 
-      virtual bool canUndo() const;
+  virtual bool canUndo() const;
 
-      /**
-       * @brief Retrieves the next choice to be executed. Implementation will depend
-       * on the representation of choices in the derived class.
-       */
-      virtual edouble getNext() = 0;
-    };
+  /**
+   * @brief Retrieves the next choice to be executed. Implementation will depend
+   * on the representation of choices in the derived class.
+   */
+  virtual edouble getNext() = 0;
+private:
+  UnboundVariableDecisionPoint(const UnboundVariableDecisionPoint&);
+  UnboundVariableDecisionPoint& operator=(const UnboundVariableDecisionPoint&);
+};
 
     /**
      * @brief Provides for access in ascending order
@@ -123,7 +125,7 @@ namespace EUROPA {
 
     private:
 
-      std::set<unsigned long> m_usedIndeces; /*!< The set of used choices so far. Each is the index of the choice
+      std::set<unsigned long> m_usedIndices; /*!< The set of used choices so far. Each is the index of the choice
 				     in m_choices. */
       Distribution m_distribution; /*!< Indicates the distribution used in random number selection. */
     };

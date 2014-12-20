@@ -30,20 +30,22 @@ ConstrainedVariableListener::~ConstrainedVariableListener() {
   m_id.remove();
 }
 
-  ConstrainedVariable::ConstrainedVariable(const ConstraintEngineId constraintEngine,
-                                           const bool internal,
-                                           bool canBeSpecified,
-                                           const LabelStr& name,
-                                           const EntityId parent,
-                                           unsigned long index)
-    : Entity(), m_id(this), m_lastRelaxed(0), m_constraintEngine(constraintEngine), m_name(name),
-      m_internal(internal), m_canBeSpecified(canBeSpecified), m_specifiedFlag(false), m_specifiedValue(0),
-      m_index(index), m_parent(parent), m_deactivationRefCount(0), m_deleted(false) {
-    check_error(m_constraintEngine.isValid());
-    check_error(m_index == NO_INDEX || parent.isValid());
-    m_constraintEngine->add(m_id);
-    m_listener = m_constraintEngine->allocateVariableListener(m_id, m_constraints);
-  }
+ConstrainedVariable::ConstrainedVariable(const ConstraintEngineId constraintEngine,
+                                         const bool internal,
+                                         bool _canBeSpecified,
+                                         const LabelStr& name,
+                                         const EntityId _parent,
+                                         unsigned long index)
+    : Entity(), m_id(this), m_listener(), m_propagatingConstraint(), m_lastRelaxed(0), 
+      m_constraintEngine(constraintEngine), m_name(name), m_internal(internal),
+  m_canBeSpecified(_canBeSpecified), m_specifiedFlag(false), m_specifiedValue(0),
+  m_index(index), m_parent(_parent), m_deactivationRefCount(0), m_deleted(false),
+  m_listeners(), m_constraints() {
+  check_error(m_constraintEngine.isValid());
+  check_error(m_index == NO_INDEX || _parent.isValid());
+  m_constraintEngine->add(m_id);
+  m_listener = m_constraintEngine->allocateVariableListener(m_id, m_constraints);
+}
 
   ConstrainedVariable::~ConstrainedVariable() {
     debugMsg("ConstrainedVariable:~ConstrainedVariable",

@@ -88,7 +88,8 @@ namespace EUROPA {
   }
 
   DbClientTransactionPlayer::DbClientTransactionPlayer(const DbClientId & client)
-    : m_client(client), m_objectCount(0), m_varCount(0) {
+      : m_client(client), m_objectCount(0), m_varCount(0), m_filters(), m_tokens(),
+        m_variables(), m_relations(){
   }
 
   DbClientTransactionPlayer::~DbClientTransactionPlayer() {
@@ -1555,6 +1556,7 @@ DbClientTransactionPlayer::xmlAsEnumeratedDomain(const TiXmlElement & element,
       check_error(ALWAYS_FAILS);
       return(0);
   }
+  check_error(ALWAYS_FAILS);
 }
 
   edouble DbClientTransactionPlayer::xmlAsValue(const TiXmlElement & value, const char * name) {

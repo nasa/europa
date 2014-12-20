@@ -11,30 +11,30 @@
 
 namespace EUROPA {
 
-  class UnifyMemento {
-  public:
-    virtual ~UnifyMemento();
-  protected:
-    friend class Token;
+class UnifyMemento {
+ public:
+  virtual ~UnifyMemento();
+ protected:
+  friend class Token;
 
-    enum UnifyMethod {
-      mergeMethod = 0,
-      stackMethod
-    };
-
-    UnifyMemento();
-    UnifyMemento(const TokenId inactiveToken, const TokenId activeToken);
-
-    void undo(bool activeTokenDeleted);
-
-    void handleAdditionOfInactiveConstraint(const ConstraintId constraint);
-    void handleRemovalOfInactiveConstraint(const ConstraintId constraint);
-
-  private:
-    UnifyMethod m_method;
-    MergeMementoId m_mm;
-    StackMementoId m_sm;
+  enum UnifyMethod {
+    mergeMethod = 0,
+    stackMethod
   };
+
+  UnifyMemento();
+  UnifyMemento(const TokenId inactiveToken, const TokenId activeToken);
+
+  void undo(bool activeTokenDeleted);
+
+  void handleAdditionOfInactiveConstraint(const ConstraintId constraint);
+  void handleRemovalOfInactiveConstraint(const ConstraintId constraint);
+
+ private:
+  UnifyMethod m_method;
+  MergeMementoId m_mm;
+  StackMementoId m_sm;
+};
 }
 
 #endif

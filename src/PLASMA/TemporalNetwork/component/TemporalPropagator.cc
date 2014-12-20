@@ -35,9 +35,12 @@ namespace EUROPA {
 
   typedef Id<TimepointWrapper> TimepointWrapperId;
 
-  TemporalPropagator::TemporalPropagator(const LabelStr& name, const ConstraintEngineId constraintEngine)
+TemporalPropagator::TemporalPropagator(const LabelStr& name, 
+                                       const ConstraintEngineId constraintEngine)
     : Propagator(name, constraintEngine), m_tnet((new TemporalNetwork())->getId()),
-      m_mostRecentRepropagation(1){}
+      m_activeVariables(), m_changedVariables(), m_changedConstraints(),
+      m_constraintsForDeletion(), m_variablesForDeletion(), m_wrappedTimepoints(),
+      m_listeners(), m_mostRecentRepropagation(1){}
 
   TemporalPropagator::~TemporalPropagator() {
     discard(false);
@@ -741,29 +744,28 @@ void TemporalPropagator::processConstraintChanges() {
     return result;
   }
 
-  bool TemporalPropagator::wasRelaxed(const ConstrainedVariableId var)
-  {
-      const TimepointId tp = getTimepoint(var);
-      check_error(tp.isValid());
-      const TemporalConstraintId tnetConstraint = tp->getBaseDomainConstraint();
-      Time lbt, ubt;
-      tnetConstraint->getBounds(lbt, ubt);
+bool TemporalPropagator::wasRelaxed(const ConstrainedVariableId var) {
+  const TimepointId tp = getTimepoint(var);
+  check_error(tp.isValid());
+  const TemporalConstraintId tnetConstraint = tp->getBaseDomainConstraint();
+  Time lbt, ubt;
+  tnetConstraint->getBounds(lbt, ubt);
 
-      const IntervalIntDomain& timeBounds = static_cast<const IntervalIntDomain&>(var->lastDomain());
-      Time lb = cast_basis(timeBounds.getLowerBound());
-      Time ub = cast_basis(timeBounds.getUpperBound());
+  const IntervalIntDomain& timeBounds = static_cast<const IntervalIntDomain&>(var->lastDomain());
+  Time lb = cast_long(timeBounds.getLowerBound());
+  Time ub = cast_long(timeBounds.getUpperBound());
 
-      //if(lb < lbt || ub > ubt) {
-      if(lb ==MINUS_INFINITY && ub==PLUS_INFINITY) {
-          debugMsg("TemporalPropagator:wasRelaxed", "Variable " << var->toLongString() << " was relaxed. "
-                    << "tnet bounds: [" << lbt << "," << ubt << "] "
-                    << "cnet bounds: [" << lb << "," << ub << "] "
-                    );
-          return true;
-      }
-      else
-          return false;
+  //if(lb < lbt || ub > ubt) {
+  if(lb ==MINUS_INFINITY && ub==PLUS_INFINITY) {
+    debugMsg("TemporalPropagator:wasRelaxed", "Variable " << var->toLongString() << " was relaxed. "
+             << "tnet bounds: [" << lbt << "," << ubt << "] "
+             << "cnet bounds: [" << lb << "," << ub << "] "
+             );
+    return true;
   }
+  else
+    return false;
+}
 
   void TemporalPropagator::updateTimepoint(const ConstrainedVariableId var)
   {

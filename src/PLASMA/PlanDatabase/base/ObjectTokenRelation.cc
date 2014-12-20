@@ -18,6 +18,7 @@ namespace EUROPA {
 					   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_token(variables[STATE_VAR]->parent()),
+      m_notifiedObjects(),
       m_currentDomain(static_cast<ObjectDomain&>(getCurrentDomain(variables[OBJECT_VAR]))){
     check_error(m_token.isValid());
     check_error(variables[OBJECT_VAR]->parent() == m_token);
@@ -131,7 +132,7 @@ namespace EUROPA {
 
     // Remove token from objects where the domain has been restricted, and was previously notifed,
     // or where the Token is now inactive
-    bool isActive = m_token->isActive();
+    bool active = m_token->isActive();
 
     unsigned int startIndex = 0;
 
@@ -145,7 +146,7 @@ namespace EUROPA {
 
       ObjectId object = *it;
 
-      if(!isActive || !m_currentDomain.isMember(object)){
+      if(!active || !m_currentDomain.isMember(object)){
         debugMsg("ObjectTokenRelation:notifyRemovals", "Removing " << m_token->toString() << " from " << object->toString());
 	object->remove(m_token);
 	m_notifiedObjects.erase(object);

@@ -28,7 +28,7 @@ const LabelStr& Factory::getName() const
 }
 
 FactoryMgr::FactoryMgr()
-    : m_id(this)
+    : m_id(this), m_factoryMap()
 {    
 }
 

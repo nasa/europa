@@ -28,37 +28,45 @@
 #include "Utils.hh"
 #include "Variable.hh"
 
-namespace EUROPA
-{
+namespace EUROPA {
     //-------------------------------
 
-    FlowProfile::FlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector):
-      Profile( db, flawDetector),
-      m_lowerLevelGraph(NULL),
-      m_upperLevelGraph(NULL),
-      m_recalculateLowerLevel( false ),
-      m_recalculateUpperLevel( false )
-    {
-      m_recomputeInterval = (new ProfileIterator(getId()))->getId();
+FlowProfile::FlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector):
+    Profile( db, flawDetector),
+    m_previousTimeBounds(),
+    m_dummySourceTransaction(),
+    m_dummySinkTransaction(),
+    m_lowerLevelGraph(NULL),
+    m_upperLevelGraph(NULL),
+    m_lowerClosedLevel(0),
+    m_upperClosedLevel(0),
+    m_recalculateLowerLevel( false ),
+    m_recalculateUpperLevel( false ),
+    m_orderings(),
+    m_orderedAt(),
+    m_lowerLevelContribution(),
+    m_upperLevelContribution()
+{
+  m_recomputeInterval = (new ProfileIterator(getId()))->getId();
 
-      // every node in the maximum flow graph is identified by the id of the associated Transaction
-      // we make a dummy transaction for the source and sink nodes of the graphs
-      Variable<IntervalIntDomain> * dummy1 =
-    	  new Variable<IntervalIntDomain>( db->getConstraintEngine(), IntervalIntDomain(0, 0));
-      Variable<IntervalIntDomain> * dummy2 =
-    	  new Variable<IntervalIntDomain>( db->getConstraintEngine(), IntervalIntDomain(0, 0));
-      Variable<IntervalIntDomain> * dummy3 =
-    	  new Variable<IntervalIntDomain>( db->getConstraintEngine(), IntervalIntDomain(0, 0));
-      Variable<IntervalIntDomain> * dummy4 =
-    	  new Variable<IntervalIntDomain>( db->getConstraintEngine(), IntervalIntDomain(0, 0));
+  // every node in the maximum flow graph is identified by the id of the associated Transaction
+  // we make a dummy transaction for the source and sink nodes of the graphs
+  Variable<IntervalIntDomain> * dummy1 =
+      new Variable<IntervalIntDomain>( db->getConstraintEngine(), IntervalIntDomain(0, 0));
+  Variable<IntervalIntDomain> * dummy2 =
+      new Variable<IntervalIntDomain>( db->getConstraintEngine(), IntervalIntDomain(0, 0));
+  Variable<IntervalIntDomain> * dummy3 =
+      new Variable<IntervalIntDomain>( db->getConstraintEngine(), IntervalIntDomain(0, 0));
+  Variable<IntervalIntDomain> * dummy4 =
+      new Variable<IntervalIntDomain>( db->getConstraintEngine(), IntervalIntDomain(0, 0));
 
-      m_dummySourceTransaction = 
-          (new Transaction(dummy1->getId(), dummy2->getId(), false, EntityId::noId()))->getId();
-      m_dummySinkTransaction = 
-          (new Transaction(dummy3->getId(), dummy4->getId(), false, EntityId::noId()))->getId();
+  m_dummySourceTransaction = 
+      (new Transaction(dummy1->getId(), dummy2->getId(), false, EntityId::noId()))->getId();
+  m_dummySinkTransaction = 
+      (new Transaction(dummy3->getId(), dummy4->getId(), false, EntityId::noId()))->getId();
 
-      initializeGraphs<FlowProfileGraphImpl>();
-    }
+  initializeGraphs<FlowProfileGraphImpl>();
+}
 
     FlowProfile::~FlowProfile()
     {

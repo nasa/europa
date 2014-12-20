@@ -7,6 +7,7 @@ namespace EUROPA
 {
   Propagator::Propagator(const LabelStr& name, const ConstraintEngineId constraintEngine, int priority)
   	  : Entity()
+          , m_constraints()
   	  , m_id(this)
   	  , m_name(name)
   	  , m_constraintEngine(constraintEngine)

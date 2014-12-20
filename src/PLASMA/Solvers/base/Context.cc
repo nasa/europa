@@ -2,8 +2,8 @@
 #include "Error.hh"
 
 namespace EUROPA {
-  namespace SOLVERS {
-    Context::Context(const LabelStr& name) : m_id(this), m_name(name) {}
+namespace SOLVERS {
+Context::Context(const LabelStr& name) : m_id(this), m_name(name), m_map() {}
     
     Context::~Context() {
       m_id.remove();

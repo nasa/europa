@@ -3,14 +3,14 @@
 
 namespace EUROPA {
 
-  PlanDatabaseListener::PlanDatabaseListener(const PlanDatabaseId planDatabase)
-    :m_id(this) {
-	  setPlanDatabase(planDatabase);
-  }
+PlanDatabaseListener::PlanDatabaseListener(const PlanDatabaseId planDatabase)
+    :m_id(this), m_planDatabase() {
+  setPlanDatabase(planDatabase);
+}
 
-  PlanDatabaseListener::PlanDatabaseListener()
-    :m_id(this) {
-  }
+PlanDatabaseListener::PlanDatabaseListener()
+    :m_id(this), m_planDatabase() {
+}
 
   PlanDatabaseListener::~PlanDatabaseListener(){
     check_error(m_id.isValid());
