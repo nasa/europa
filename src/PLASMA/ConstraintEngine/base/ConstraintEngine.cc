@@ -9,6 +9,8 @@
 #include "Utils.hh"
 #include "Debug.hh"
 #include "DomainListener.hh"
+#include "ConstraintType.hh"
+#include "CESchema.hh"
 
 #include <string>
 #include <iterator>

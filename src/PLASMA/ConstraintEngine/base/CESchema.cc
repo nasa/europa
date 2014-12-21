@@ -1,5 +1,7 @@
 #include "CESchema.hh"
 #include "Debug.hh"
+#include "ConstraintType.hh"
+#include "CFunction.hh"
 
 namespace EUROPA
 {

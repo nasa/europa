@@ -10,6 +10,7 @@
 #include <string.h>
 #include "Debug.hh"
 #include "PlanDatabase.hh"
+#include "CESchema.hh"
 
 namespace EUROPA {
 

@@ -18,6 +18,7 @@
 #include "ResourceThreatManager.hh"
 #include "Reusable.hh"
 #include "BoostFlowProfile.hh"
+#include "CESchema.hh"
 
 #include <boost/cast.hpp>
 

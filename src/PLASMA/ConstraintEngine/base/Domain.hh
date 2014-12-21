@@ -36,13 +36,10 @@
  * @see Variable, Constraint
  */
 #include "ConstraintEngineDefs.hh"
-#include "LabelStr.hh"
 #include "DomainListener.hh"
 #include "Number.hh"
 #include <list>
-#include <map>
 #include <string>
-#include <set>
 
 #ifdef EUROPA_FAST
 #define safeConversion(value) (value)
@@ -55,6 +52,8 @@
 #endif
 
 namespace EUROPA {
+class LabelStr;
+
   using std::ostream;
 
   // TODO!: drop this?

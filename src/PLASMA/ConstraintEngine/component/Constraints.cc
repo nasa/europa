@@ -5,6 +5,7 @@
 #include "Domains.hh"
 #include "Utils.hh"
 #include "Debug.hh"
+#include "CESchema.hh"
 #include <algorithm>
 #include <cmath>
 

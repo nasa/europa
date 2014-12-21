@@ -13,54 +13,62 @@
 #include <set>
 
 namespace EUROPA {
-  class DataType;
-  typedef Id<DataType> DataTypeId;
+class DataType;
+typedef Id<DataType> DataTypeId;
 
-  class Domain;
-  class IntervalDomain;
-  class IntervalIntDomain;
-  class BoolDomain;
-  class EnumeratedDomain;
+class Domain;
+class IntervalDomain;
+class IntervalIntDomain;
+class BoolDomain;
+class EnumeratedDomain;
 
-  class DomainListener;
-  typedef Id<DomainListener> DomainListenerId;
+class DomainListener;
+typedef Id<DomainListener> DomainListenerId;
 
-  class ConstrainedVariable;
-  typedef Id<ConstrainedVariable> ConstrainedVariableId;
-  typedef std::set<ConstrainedVariableId, EntityComparator<ConstrainedVariableId> > ConstrainedVariableSet;
+class ConstrainedVariable;
+typedef Id<ConstrainedVariable> ConstrainedVariableId;
+typedef std::set<ConstrainedVariableId, EntityComparator<ConstrainedVariableId> > ConstrainedVariableSet;
 
-  class ConstrainedVariableListener;
-  typedef Id<ConstrainedVariableListener> ConstrainedVariableListenerId;
-  class VariableChangeListener;
-  typedef Id<VariableChangeListener> VariableChangeListenerId;
+class ConstrainedVariableListener;
+typedef Id<ConstrainedVariableListener> ConstrainedVariableListenerId;
+class VariableChangeListener;
+typedef Id<VariableChangeListener> VariableChangeListenerId;
 
-  class Constraint;
-  typedef Id<Constraint> ConstraintId;
-  typedef std::set<ConstraintId, EntityComparator<ConstraintId> > ConstraintSet;
-  class Propagator;
-  typedef Id<Propagator> PropagatorId;
-  class ConstraintEngine;
-  typedef Id<ConstraintEngine> ConstraintEngineId;
-  class ConstraintEngineListener;
-  typedef Id<ConstraintEngineListener> ConstraintEngineListenerId;
-  typedef std::pair<ConstraintId, unsigned int> ConstraintEntry;
-  typedef std::list<ConstraintEntry> ConstraintList;
+class Constraint;
+typedef Id<Constraint> ConstraintId;
+typedef std::set<ConstraintId, EntityComparator<ConstraintId> > ConstraintSet;
+class CFunction;
+typedef Id<CFunction> CFunctionId;
+class ConstraintType;
+typedef Id<ConstraintType> ConstraintTypeId;
+class Propagator;
+typedef Id<Propagator> PropagatorId;
+class ConstraintEngine;
+typedef Id<ConstraintEngine> ConstraintEngineId;
+class ConstraintEngineListener;
+typedef Id<ConstraintEngineListener> ConstraintEngineListenerId;
+typedef std::pair<ConstraintId, unsigned int> ConstraintEntry;
+typedef std::list<ConstraintEntry> ConstraintList;
 
-  class PostPropagationCallback;
-  typedef Id<PostPropagationCallback> PostPropagationCallbackId;
+class CESchema;
+typedef Id<CESchema> CESchemaId;
 
-  /**
-   * @brief Helper method to cast singleton values
-   */
-  template<class T>
-  Id<T> id(const ConstrainedVariableId var);
+class PostPropagationCallback;
+typedef Id<PostPropagationCallback> PostPropagationCallbackId;
 
-  class StringDomain;
-  typedef StringDomain LabelSet;
+class PSVarValue;
+/**
+ * @brief Helper method to cast singleton values
+ */
+template<class T>
+Id<T> id(const ConstrainedVariableId var);
 
-  /** Constants **/
-  DECLARE_GLOBAL_CONST(char*, g_noVarName);
-  #define NO_VAR_NAME (g_noVarName())
+class StringDomain;
+typedef StringDomain LabelSet;
+
+/** Constants **/
+DECLARE_GLOBAL_CONST(char*, g_noVarName);
+#define NO_VAR_NAME (g_noVarName())
 
 } /* namespace EUROPA */
 

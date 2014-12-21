@@ -25,6 +25,7 @@
 #include "ConstrainedVariable.hh"
 #include "Debug.hh"
 #include "DataTypes.hh"
+#include "CESchema.hh"
 
 namespace EUROPA {
 

@@ -10,6 +10,7 @@
 #include "PSPlanDatabaseListener.hh"
 #include "PSConstraintEngineListener.hh"
 #include "NddlInterpreter.hh"
+  #include "PSVarValue.hh"
 %}
 
 %rename(PSException) Error;  // Our Error C++ class is wrapped instead as PSException

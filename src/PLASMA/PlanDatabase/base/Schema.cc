@@ -4,7 +4,7 @@
 #include "Utils.hh"
 #include "Object.hh"
 #include "DataTypes.hh"
-
+#include "CESchema.hh"
 
 #ifdef _MANAGED
   using namespace System;

@@ -2,10 +2,11 @@
 #define _H_PSVarValue
 
 #include "PSConstraintEngine.hh"
-#include "PSUtils.hh"
 #include "LabelStr.hh"
 
 namespace EUROPA {
+class PSEntity;
+
   class PSVarValue
   {
   public:

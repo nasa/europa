@@ -9,11 +9,9 @@
  */
 
 #include "ConstraintEngineDefs.hh"
-#include "PSVarValue.hh"
 #include "PSConstraintEngine.hh"
 #include "Entity.hh"
 #include "LabelStr.hh"
-#include "Domain.hh"
 #include "unused.hh"
 #include <set>
 
@@ -534,10 +532,10 @@ namespace EUROPA {
   /**
    * @brief Helper method to cast singleton values
    */
-  template<class T>
-  Id<T> id(const ConstrainedVariableId var){
-    return var->baseDomain().getSingletonValue();
-  }
+  // template<class T>
+  // Id<T> id(const ConstrainedVariableId var){
+  //   return var->baseDomain().getSingletonValue();
+  // }
 
 
 

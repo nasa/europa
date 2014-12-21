@@ -12,6 +12,7 @@
 #include "ConstraintType.hh"
 #include "Utils.hh"
 #include "Debug.hh"
+#include "CESchema.hh"
 #include <map>
 
 /**

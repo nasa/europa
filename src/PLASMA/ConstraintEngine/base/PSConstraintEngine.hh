@@ -3,7 +3,6 @@
 
 #include "Engine.hh"
 #include "PSUtils.hh"
-#include "LabelStr.hh"
 
 namespace EUROPA {
 

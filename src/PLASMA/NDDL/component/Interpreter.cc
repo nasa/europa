@@ -24,6 +24,7 @@
 #include "ObjectType.hh"
 #include "Schema.hh"
 #include "TokenVariable.hh"
+#include "CESchema.hh"
 
 #include "NddlRules.hh"
 #include "NddlUtils.hh"

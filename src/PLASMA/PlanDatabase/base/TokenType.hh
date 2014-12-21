@@ -14,6 +14,7 @@
  * @see DbClient
  */
 namespace EUROPA {
+class PSDataType;
 
   /** Version of TokenType for communication with other languages */
   class PSTokenType {

@@ -11,13 +11,12 @@
 
 #include "ConstraintEngineDefs.hh"
 #include "PSConstraintEngine.hh"
-#include "CESchema.hh"
 #include "DomainListener.hh"
 #include "LabelStr.hh"
 #include "ConstraintEngineListener.hh"
 #include "Entity.hh"
-#include "Engine.hh"
 #include "Propagator.hh"
+#include "ConstrainedVariable.hh"
 
 #include <set>
 #include <map>

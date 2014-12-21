@@ -5,6 +5,7 @@
 #include "Constraint.hh"
 #include "Variable.hh"
 #include "Domains.hh"
+#include "ConstraintType.hh"
 
 namespace EUROPA {
 

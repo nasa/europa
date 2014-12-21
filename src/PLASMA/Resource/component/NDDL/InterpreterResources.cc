@@ -1,6 +1,7 @@
 
 #include "InterpreterResources.hh"
 #include "NddlResource.hh"
+#include "PSVarValue.hh"
 
 namespace EUROPA {
 
