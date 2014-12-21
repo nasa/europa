@@ -1,8 +1,8 @@
 /**
-  @file debug.cc
-  @author William R. Edgington (wedgingt@ptolemy.arc.nasa.gov)
-  @brief Define and implement variables and functions related to
-  debugging and profiling.
+   @file debug.cc
+   @author William R. Edgington (wedgingt@ptolemy.arc.nasa.gov)
+   @brief Define and implement variables and functions related to
+   debugging and profiling.
 */
 
 #ifndef NO_DEBUG_MESSAGE_SUPPORT
@@ -19,6 +19,137 @@
 
 #include "DebugMsg.hh"
 #include "Mutex.hh"
+/**
+ * @class DebugPattern Debug.hh
+ * @brief Used to store the "patterns" of presently enabled debug messages.
+ * @see DebugMessage::enableMatchingMsgs
+ */
+class DebugPattern {
+ public:
+  /**
+   * @brief Zero argument constructor.
+   * @note Should not be used except implicitly (e.g., by std::list<DebugPattern>).
+   */
+  inline DebugPattern();
+
+  /**
+   * @brief Destructor.
+   */
+  inline virtual ~DebugPattern() {
+  }
+
+  /**
+   * @brief Constructor with data.
+   * @note Should be the only constructor called explicitly.
+   */
+  DebugPattern(const std::string& f, const std::string& m)
+      : m_file(f), m_pattern(m) {
+  }
+
+  DebugPattern(const DebugPattern& o) : m_file(o.m_file), m_pattern(o.m_pattern) {}
+
+  DebugPattern& operator=(const DebugPattern& o) {
+    const_cast<std::string&>(m_file) = o.m_file;
+    const_cast<std::string&>(m_pattern) = o.m_pattern;
+    return *this;
+  }
+  /**
+   * @brief The source file(s) that matches the pattern.
+   */
+  const std::string m_file;
+
+  /**
+   * @brief The markers that match the pattern.
+   * @note Markers refer to those of class DebugMessage.
+   * @see class DebugMessage
+   */
+  const std::string m_pattern;
+
+  bool operator== (const DebugPattern& other) const {return m_file == other.m_file && m_pattern == other.m_pattern;}
+};  //class DebugPattern
+
+namespace {
+
+/**
+   @class PatternMatches DebugDefs.hh
+   @brief Helper function for addMsg()'s use of STL find_if().
+*/
+template<class U>
+class PatternMatches {
+ private:
+  const DebugMessage& dm;
+
+ public:
+  typedef U argument_type;
+  typedef bool result_type;
+  explicit PatternMatches(const DebugMessage& debugMsg) : dm(debugMsg) {
+  }
+
+  bool operator() (const U& y) const {
+    return(dm.matches(y));
+  }
+};
+
+/**
+   @class MatchesPattern DebugDefs.hh
+   @brief Helper class to use markerMatches via STL find_if().
+*/
+template<class T>
+class MatchesPattern {
+ private:
+  const DebugPattern pattern;
+
+ public:
+  typedef T argument_type;
+  typedef bool result_type;
+
+  explicit MatchesPattern(const std::string& f, const std::string& p)
+      : pattern(f, p) {
+  }
+
+  explicit MatchesPattern(const DebugPattern& p)
+      : pattern(p) {
+  }
+
+  bool operator() (const T& dm) const {
+    return(dm->matches(pattern));
+  }
+};
+
+
+/**
+   @class EnableMatches DebugDefs.hh
+   @brief Helper class to enable matching messages via STL for_each().
+*/
+class EnableMatches {
+ private:
+
+  const DebugPattern& pattern;
+
+ public:
+
+  explicit EnableMatches(const DebugPattern& p)
+      : pattern(p) {
+  }
+
+  void operator() (DebugMessage* dm) {
+    if (dm->matches(pattern))
+      dm->enable();
+  }
+};
+
+
+class DisableMatches {
+ private:
+  const DebugPattern& pattern;
+ public:
+  explicit DisableMatches(const DebugPattern& p) : pattern(p) {}
+  void operator() (DebugMessage* dm) {
+    if(dm->matches(pattern))
+      dm->disable();
+  }
+};
+
 
 /**
  * @class DebugConfig
@@ -27,11 +158,11 @@
  * @see DebugMessage::addMsg
  */
 class DebugConfig {
-public:
+ public:
   static void init() {
     static DebugConfig s_instance;
   }
-private:
+ private:
   DebugConfig() {
     std::ifstream config("Debug.cfg");
     if (config.good()) {
@@ -41,12 +172,42 @@ private:
   }
 };
 
+/**
+   @class GetMatches DebugDefs.hh
+   @brief Helper class to gather matching messages via STL for_each().
+*/
+class GetMatches {
+ private:
+
+  const DebugPattern pattern;
+
+  std::list<DebugMessage*>& matches;
+
+ public:
+  explicit GetMatches(const std::string& f, const std::string& p,
+                      std::list<DebugMessage*>& m)
+      : pattern(f, p), matches(m) {
+  }
+
+  explicit GetMatches(const DebugPattern& p, std::list<DebugMessage*>& m)
+      : pattern(p), matches(m) {
+  }
+
+  void operator() (DebugMessage* dm) {
+    if (dm->matches(pattern))
+      matches.push_back(dm);
+  }
+};
+
+
+}
+
 class DebugMessage::DebugInternals {
  public:
   DebugInternals() 
     : m_allEnabled(false), m_msgs(), m_patterns() {}
   std::vector<DebugMessage*>& allMsgs() {return m_msgs;}
-  std::vector<DebugMessage::DebugPattern> enabledPatterns() {return m_patterns;}
+  std::vector<DebugPattern> enabledPatterns() {return m_patterns;}
   bool allEnabled() const {return m_allEnabled;}
   void enableAll() {
     m_allEnabled = true;
@@ -88,6 +249,7 @@ class DebugMessage::DebugInternals {
 
   }
 
+
   
   DebugMessage *addMsg(const std::string &file, const int& line,
                        const std::string &marker) {
@@ -103,10 +265,10 @@ class DebugMessage::DebugInternals {
                   DebugErr::DebugMemoryError());
       m_msgs.push_back(msg);
       if (!msg->isEnabled()) {
-        typedef std::vector<DebugMessage::DebugPattern>::iterator LDPI;
+        typedef std::vector<DebugPattern>::iterator LDPI;
         LDPI iter = std::find_if(m_patterns.begin(),
                                  m_patterns.end(),
-                                 PatternMatches<DebugMessage::DebugPattern>(*msg));
+                                 PatternMatches<DebugPattern>(*msg));
         if (iter != m_patterns.end())
           msg->enable();
       }
@@ -134,7 +296,7 @@ class DebugMessage::DebugInternals {
  private:
   bool m_allEnabled;
   std::vector<DebugMessage*> m_msgs;
-  std::vector<DebugMessage::DebugPattern> m_patterns;
+  std::vector<DebugPattern> m_patterns;
 };
 
 
@@ -211,6 +373,10 @@ void DebugMessage::enableMatchingMsgs(const std::string& file,
 void DebugMessage::disableMatchingMsgs(const std::string& file,
 				       const std::string& pattern) {
   internals().second.get().disableMatchingMsgs(file, pattern);
+}
+bool DebugMessage::matches(const DebugPattern& pattern) const {
+  return markerMatches(getFile(), pattern.m_file) &&
+      markerMatches(getMarker(), pattern.m_pattern);
 }
 
 bool DebugMessage::readConfigFile(std::istream& is) {

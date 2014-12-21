@@ -8,6 +8,7 @@
 #include "TokenVariable.hh"
 #include "ValueSource.hh"
 #include "Utils.hh"
+#include "tinyxml.h"
 
 #include <algorithm>
 #include <sstream>

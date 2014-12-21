@@ -1,4 +1,5 @@
 #include "XMLUtils.hh"
+#include "tinyxml.h"
 #include "Debug.hh"
 #include "Utils.hh"
 

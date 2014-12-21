@@ -13,6 +13,7 @@
 #include "PlanDatabase.hh"
 #include "Utils.hh"
 #include "XMLUtils.hh"
+#include "tinyxml.h"
 #include <math.h>
 
 namespace EUROPA {

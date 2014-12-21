@@ -38,6 +38,7 @@
 #include "ResourceThreatManager.hh"
 #include "ProfilePropagator.hh"
 #include "ResourceMatching.hh"
+#include "tinyxml.h"
 
 #include "Engine.hh"
 #include "ModuleConstraintEngine.hh"
@@ -52,6 +53,7 @@
 #include <string>
 #include <list>
 
+#include <boost/cast.hpp>
 #include <boost/shared_ptr.hpp>
 
 using namespace EUROPA;

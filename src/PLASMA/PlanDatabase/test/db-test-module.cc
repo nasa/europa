@@ -32,6 +32,8 @@
 #include <sstream>
 #include <iomanip>
 #include <string>
+#include <boost/cast.hpp>
+
 using namespace EUROPA;
 namespace {
 const char* DEFAULT_OBJECT_TYPE = "TestObject";

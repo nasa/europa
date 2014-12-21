@@ -32,6 +32,7 @@
 #include <iostream>
 #include <string>
 #include <list>
+#include <boost/cast.hpp>
 
 using namespace EUROPA;
 

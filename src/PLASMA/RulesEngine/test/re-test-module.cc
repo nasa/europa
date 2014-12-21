@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <string>
+#include <boost/cast.hpp>
 
 using namespace EUROPA;
 

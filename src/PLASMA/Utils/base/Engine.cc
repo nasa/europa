@@ -4,6 +4,7 @@
 #include "LabelStr.hh"
 #include "Entity.hh"
 #include "Module.hh"
+#include "tinyxml.h"
 #ifdef _MSC_VER
 #include "Pdlfcn.hh"
 #else

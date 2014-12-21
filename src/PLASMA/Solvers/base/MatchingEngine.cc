@@ -7,6 +7,7 @@
 #include "Schema.hh"
 #include "Utils.hh"
 #include "SolverUtils.hh"
+#include "tinyxml.h"
 
 namespace EUROPA {
 namespace SOLVERS {

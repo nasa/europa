@@ -226,6 +226,31 @@ void requireAllSame(std::string name, const std::vector<DataTypeId>& argTypes) {
     check_error(variables.size() ==  ARG_COUNT);
   }
 
+
+  /**
+   * Utility class that might get promoted later.
+   */
+  class Infinity {
+  public:
+    static edouble plus(edouble n1, edouble n2, edouble defaultValue) {
+      if (std::abs(n1) >= PLUS_INFINITY || std::abs(n2) >= PLUS_INFINITY)
+	return(defaultValue);
+      edouble retval = n1 + n2;
+      if(std::abs(retval) >= PLUS_INFINITY)
+	return defaultValue;
+      return retval;
+    }
+
+    static edouble minus(edouble n1, edouble n2, edouble defaultValue) {
+      if (std::abs(n1) >= PLUS_INFINITY || std::abs(n2) >= PLUS_INFINITY)
+	return(defaultValue);
+      edouble retval = n1 - n2;
+      if(std::abs(retval) >= PLUS_INFINITY)
+	return defaultValue;
+      return retval;
+    }
+  };
+
   void AddEqualConstraint::handleExecute() {
     static unsigned int sl_counter(0);
     sl_counter++;

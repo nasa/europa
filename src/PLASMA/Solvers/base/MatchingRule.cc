@@ -5,6 +5,7 @@
 #include "ConstrainedVariable.hh"
 #include "SolverUtils.hh"
 #include "Debug.hh"
+#include "tinyxml.h"
 
 /**
  * @author Conor McGann

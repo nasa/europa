@@ -1,15 +1,16 @@
 #ifndef _H_Entity
 #define _H_Entity
 
-#include "LabelStr.hh"
 #include "Id.hh"
+#include "LabelStr.hh"
+#include "PSUtils.hh"
 
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
 
-#include "PSUtils.hh"
+
 
 namespace EUROPA{
 
