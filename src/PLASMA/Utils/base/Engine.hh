@@ -1,14 +1,14 @@
 #ifndef _H_ENGINE
 #define _H_ENGINE
 
-#include <istream>
+#include <iosfwd>
 #include <map>
 #include <string>
 #include <vector>
 #include "Id.hh"
-#include "tinyxml.h"
 
 namespace EUROPA {
+class TiXmlNode;
 
 class Engine;
 typedef Id<Engine> EngineId;

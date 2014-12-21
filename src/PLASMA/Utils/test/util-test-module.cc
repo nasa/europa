@@ -32,6 +32,7 @@
 #include "XMLUtils.hh"
 #include "Number.hh"
 #include "Engine.hh"
+#include "tinyxml.h"
 
 #include <list>
 #include <sstream>

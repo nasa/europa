@@ -10,6 +10,7 @@
 #include "PlanDatabaseWriter.hh"
 #include "FlawHandler.hh"
 #include "Context.hh"
+#include "tinyxml.h"
 #include <bitset>
 
 /**

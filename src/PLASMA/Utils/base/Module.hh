@@ -1,12 +1,12 @@
 #ifndef _H_MODULE
 #define _H_MODULE
 
-#include <map>
 #include <string>
 #include "Id.hh"
-#include "Engine.hh"
 
 namespace EUROPA {
+class Engine;
+typedef Id<Engine> EngineId;
 
   class Module;
   typedef Id<Module> ModuleId;

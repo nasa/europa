@@ -3,8 +3,6 @@
 
 #include <vector>
 #include <algorithm>
-#include "Id.hh"
-#include "LabelStr.hh"
 
 namespace EUROPA {
 

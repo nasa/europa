@@ -4,6 +4,7 @@
 #include "Domain.hh"
 #include "Debug.hh"
 #include "ValueSource.hh"
+#include "tinyxml.h"
 #include <ctime>
 
 /**

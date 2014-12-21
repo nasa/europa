@@ -6,6 +6,7 @@
 #include "TokenVariable.hh"
 #include "RuleInstance.hh"
 #include "Context.hh"
+#include "tinyxml.h"
 
 #include <set>
 

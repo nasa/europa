@@ -4,6 +4,7 @@
 #include "Resource.hh"
 #include "PlanDatabase.hh"
 #include "Context.hh"
+#include "tinyxml.h"
 
 #ifdef ABSOLUTE
 #undef ABSOLUTE

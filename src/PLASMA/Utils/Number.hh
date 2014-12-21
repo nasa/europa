@@ -1,6 +1,6 @@
 #ifndef _H_Number
 #define _H_Number
-#include <iomanip>
+//#include <iomanip>
 
 #include <cassert>
 #include <cmath>

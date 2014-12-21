@@ -1,12 +1,6 @@
 #ifndef _H_CommonDefs
 #define _H_CommonDefs
 
-#include <cassert>
-
-#ifdef __BEOS__
-#include <debugger.h>
-#endif
-
 #include <sstream>
 #include <string>
 

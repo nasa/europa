@@ -3,6 +3,7 @@
 #include "Filters.hh"
 #include "Solver.hh"
 #include "Context.hh"
+#include "tinyxml.h"
 
 namespace EUROPA
 {

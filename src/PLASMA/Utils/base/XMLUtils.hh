@@ -8,11 +8,12 @@
 #ifndef TIXML_USE_STL
 #define TIXML_USE_STL
 #endif
-
-#include "tinyxml.h"
-#include "LabelStr.hh"
+#include <cstddef>
+#include <string>
 
 namespace EUROPA {
+class LabelStr;
+class TiXmlElement;
 
 #define IS_TAG(x) (strcmp (tagName, x) == 0)
 

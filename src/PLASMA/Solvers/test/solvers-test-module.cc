@@ -26,6 +26,7 @@
 #include "STNTemporalAdvisor.hh"
 #include "DbClientTransactionPlayer.hh"
 #include "TemporalPropagator.hh"
+#include "tinyxml.h"
 
 #include "ModuleConstraintEngine.hh"
 #include "ModulePlanDatabase.hh"

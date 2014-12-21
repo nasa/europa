@@ -15,7 +15,7 @@
 #define _H_IdTable
 
 #include <map>
-#include <iostream>
+#include <iosfwd>
 #include <string>
 #include "Number.hh"
 

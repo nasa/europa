@@ -9,7 +9,6 @@
  */
 
 #include "CommonDefs.hh"
-#include "Error.hh"
 #include <map>
 #include <string>
 //#include <boost/unordered_map.hpp>

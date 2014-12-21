@@ -6,6 +6,7 @@
 #include "FlowProfile.hh"
 #include "Constraint.hh"
 #include "DbClient.hh"
+#include "tinyxml.h"
 
 #include <boost/cast.hpp>
 

@@ -29,7 +29,7 @@
 #include <string>
 
 #include <fstream>
-
+#include <boost/cast.hpp>
 
 using namespace EUROPA;
 
