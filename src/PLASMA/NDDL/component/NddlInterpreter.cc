@@ -14,6 +14,8 @@
 #include "NDDL3Tree.h"
 #include "antlr3exception.h"
 
+#include "ConstraintType.hh"
+#include "CESchema.hh"
 #include "Debug.hh"
 #include "Utils.hh"
 

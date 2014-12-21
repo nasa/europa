@@ -2,7 +2,6 @@
 #define PSCONSTRAINTENGINELISTENER_H_
 
 #include "ConstraintEngineListener.hh"
-#include "PSConstraintEngine.hh"
 
 /*
  * PSConstraintEngineListener.h
@@ -15,8 +14,8 @@
  */
 
 namespace EUROPA {
-
-
+class PSConstraint;
+class PSVariable;
 
 class PSConstraintEngineListener: public ConstraintEngineListener {
 public:

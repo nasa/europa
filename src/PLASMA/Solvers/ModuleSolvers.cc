@@ -14,6 +14,7 @@
 #include "UnboundVariableManager.hh"
 #include "RulesEngine.hh"
 #include "PSSolversImpl.hh"
+#include "CESchema.hh"
 
 #include <boost/cast.hpp>
 

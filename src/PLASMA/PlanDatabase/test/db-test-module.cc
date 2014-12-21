@@ -20,6 +20,7 @@
 
 #include "Debug.hh"
 #include "PlanDatabaseWriter.hh"
+#include "CESchema.hh"
 
 #include "Constraints.hh"
 #include "Engine.hh"

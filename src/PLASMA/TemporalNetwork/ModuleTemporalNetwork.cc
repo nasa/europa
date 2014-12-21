@@ -6,6 +6,7 @@
 #include "Propagators.hh"
 #include "TemporalPropagator.hh"
 #include "STNTemporalAdvisor.hh"
+#include "CESchema.hh"
 
 #include <boost/cast.hpp>
 

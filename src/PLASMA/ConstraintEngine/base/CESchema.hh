@@ -3,12 +3,7 @@
 
 #include <map>
 #include "ConstraintEngineDefs.hh"
-#include "LabelStr.hh"
 #include "Engine.hh"
-#include "Domain.hh"
-#include "ConstraintType.hh"
-#include "DataType.hh"
-#include "CFunction.hh"
 
 /**
  * @file Class to manage all metadata for Constraint engine (variable data types, constraint types, etc).
@@ -16,7 +11,7 @@
  */
 
 namespace EUROPA {
-
+class Domain;
   class CESchema;
   typedef Id<CESchema> CESchemaId;
 

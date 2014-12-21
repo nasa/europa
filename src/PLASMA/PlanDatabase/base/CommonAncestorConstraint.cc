@@ -1,5 +1,6 @@
 #include "CommonAncestorConstraint.hh"
 #include "Object.hh"
+#include "CESchema.hh"
 
 namespace EUROPA{
 

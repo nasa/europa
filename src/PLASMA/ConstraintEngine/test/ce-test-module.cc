@@ -16,6 +16,7 @@
 #include "LabelStr.hh"
 
 #include "DataTypes.hh"
+#include "CESchema.hh"
 
 #include "ConstraintTesting.hh"
 

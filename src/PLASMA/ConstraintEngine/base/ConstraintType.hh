@@ -2,7 +2,6 @@
 #define _H_ConstraintType
 
 #include "ConstraintEngineDefs.hh"
-#include "Domain.hh"
 #include "LabelStr.hh"
 #include "Constraint.hh"
 #include "DataType.hh"

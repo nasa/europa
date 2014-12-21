@@ -12,6 +12,7 @@
 #include "DbClientTransactionPlayer.hh"
 #include "DbClientTransactionLog.hh"
 #include "Utils.hh"
+#include "CESchema.hh"
 
 #include <algorithm>
 #include <iostream>

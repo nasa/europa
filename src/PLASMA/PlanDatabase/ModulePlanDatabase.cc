@@ -10,6 +10,7 @@
 #include "Token.hh"
 #include "Methods.hh"
 #include "Propagators.hh"
+#include "CESchema.hh"
 
 #include <boost/cast.hpp>
 

@@ -4,6 +4,7 @@
 #include "ConstraintType.hh"
 #include "Propagators.hh"
 #include "CFunctions.hh"
+#include "CESchema.hh"
 
 #include <boost/cast.hpp>
 

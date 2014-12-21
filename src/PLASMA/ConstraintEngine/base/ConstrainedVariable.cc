@@ -6,6 +6,8 @@
 #include "Debug.hh"
 #include "Error.hh"
 #include "VariableChangeListener.hh"
+#include "DataType.hh"
+#include "PSVarValue.hh"
 #include <sstream>
 
 namespace EUROPA {
