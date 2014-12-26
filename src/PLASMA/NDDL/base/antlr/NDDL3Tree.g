@@ -18,6 +18,7 @@ options {
 #include "Debug.hh"
 #include "Domains.hh"
 #include "NddlInterpreter.hh"
+#include "PathDefs.hh"
 
 using namespace EUROPA;
 

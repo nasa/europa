@@ -2,7 +2,8 @@
 #define H_UTILS_MODULE_TESTS
 
 #include <string>
-#include "CommonDefs.hh"
+#include "TestUtils.hh"
+
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>

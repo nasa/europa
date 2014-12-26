@@ -1,4 +1,5 @@
 #include "CommonDefs.hh"
+#include <string>
 
 namespace EUROPA {
 

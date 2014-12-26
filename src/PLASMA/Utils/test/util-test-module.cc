@@ -33,6 +33,7 @@
 #include "Number.hh"
 #include "Engine.hh"
 #include "tinyxml.h"
+#include "CommonDefs.hh"
 
 #include <list>
 #include <sstream>
@@ -70,7 +71,10 @@ using namespace EUROPA;
 
 class TestError {
 public:
-  DECLARE_STATIC_CLASS_CONST(char*, TEST_CONST, "TestData");
+  static const char* TEST_CONST() {
+    static const char* sl_value = "TestData";
+    return sl_value;
+  }
   DECLARE_ERROR(BadThing);
 };
 

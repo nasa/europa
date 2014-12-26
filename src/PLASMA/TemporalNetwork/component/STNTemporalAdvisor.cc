@@ -61,17 +61,19 @@ namespace EUROPA {
 	eint s_lb = static_cast<eint>(second->getLastDomain().getLowerBound());
 	eint s_ub = static_cast<eint>(second->getLastDomain().getUpperBound());
 	
-	eint min_distance = -g_infiniteTime();
+	eint min_distance = MINUS_INFINITY;//-g_infiniteTime();
 
-	if( s_lb > -g_infiniteTime() && f_ub < g_infiniteTime() ) {
+	// if( s_lb > -g_infiniteTime() && f_ub < g_infiniteTime() ) {
+        if( s_lb > MINUS_INFINITY && f_ub < PLUS_INFINITY ) {
 	    min_distance = std::max( min_distance, s_lb - f_ub );
 	  }
 	  
-	eint max_distance = g_infiniteTime();
+	eint max_distance = PLUS_INFINITY;//g_infiniteTime();
 	
-	if( f_lb > -g_infiniteTime() && s_ub < g_infiniteTime() ) {
+	// if( f_lb > -g_infiniteTime() && s_ub < g_infiniteTime() ) {
+        if( f_lb > MINUS_INFINITY && s_ub < PLUS_INFINITY ) {
 	  max_distance = std::min( max_distance, s_ub - f_lb );
-	  }
+        }
 
 	return(IntervalIntDomain( min_distance, max_distance ));
       }

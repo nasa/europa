@@ -1,5 +1,6 @@
 #include "db-test-module.hh"
 
+#include "TestUtils.hh"
 #include "Utils.hh"
 #include "PlanDatabase.hh"
 #include "Schema.hh"

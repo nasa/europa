@@ -28,6 +28,7 @@
 #include "TemporalPropagator.hh"
 #include "CESchema.hh"
 #include "tinyxml.h"
+#include "TestUtils.hh"
 
 #include "ModuleConstraintEngine.hh"
 #include "ModulePlanDatabase.hh"

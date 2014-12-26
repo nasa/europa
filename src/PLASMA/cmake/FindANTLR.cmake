@@ -5,7 +5,7 @@ else (ANTLR_INCLUDE_DIR AND ANTLR_LIBRARIES)
   message(STATUS "Searching for ANTLR")
   find_path(ANTLR_INCLUDE_DIR antlr3.h)
   find_library(ANTLR_LIBRARIES NAMES antlr3 antlr3c libantlr3 libantlr3c)
-  find_file(ANTLR_JAR antlr.jar PATHS ${EUROPA_ROOT}/ext/lib)
+  find_file(ANTLR_JAR antlr-3.jar PATHS ${EUROPA_ROOT}/ext/lib)
 
   if (ANTLR_INCLUDE_DIR AND ANTLR_LIBRARIES AND ANTLR_JAR)
     set(ANTLR_FOUND TRUE)

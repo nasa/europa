@@ -32,6 +32,11 @@ ConstrainedVariableListener::~ConstrainedVariableListener() {
   m_id.remove();
 }
 
+const LabelStr& ConstrainedVariable::NO_NAME() {
+  static const LabelStr sl_noName(NO_VAR_NAME);
+  return(sl_noName);
+}
+
 ConstrainedVariable::ConstrainedVariable(const ConstraintEngineId constraintEngine,
                                          const bool internal,
                                          bool _canBeSpecified,

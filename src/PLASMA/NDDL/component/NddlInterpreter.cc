@@ -18,6 +18,7 @@
 #include "CESchema.hh"
 #include "Debug.hh"
 #include "Utils.hh"
+#include "PathDefs.hh"
 
 #include <boost/cast.hpp>
 

@@ -13,7 +13,6 @@
 #include "PSConstraintEngine.hh"
 #include "DomainListener.hh"
 #include "LabelStr.hh"
-#include "ConstraintEngineListener.hh"
 #include "Entity.hh"
 #include "Propagator.hh"
 #include "ConstrainedVariable.hh"
@@ -23,6 +22,9 @@
 #include <string>
 
 namespace EUROPA {
+
+class ConstraintEngineListener;
+typedef Id<ConstraintEngineListener> ConstraintEngineListenerId;
 
   class ViolationMgr
   {

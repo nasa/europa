@@ -78,22 +78,24 @@ const IntervalIntDomain DefaultTemporalAdvisor::getTemporalDistanceDomain(const 
     eint s_lb = cast_int(second->getDerivedDomain().getLowerBound());
     eint s_ub = cast_int(second->getDerivedDomain().getUpperBound());
 	
-    eint min_distance = -g_infiniteTime();
+    eint min_distance = MINUS_INFINITY;//-g_infiniteTime();
 
-    if( s_lb > -g_infiniteTime() && f_ub < g_infiniteTime() ) {
+    // if( s_lb > -g_infiniteTime() && f_ub < g_infiniteTime() ) {
+    if( s_lb > MINUS_INFINITY && f_ub < PLUS_INFINITY ) {
       min_distance = std::max( min_distance, s_lb - f_ub );
     }
 	  
-    eint max_distance = g_infiniteTime();
+    eint max_distance = PLUS_INFINITY;//g_infiniteTime();
 	
-    if( f_lb > -g_infiniteTime() && s_ub < g_infiniteTime() ) {
+    // if( f_lb > -g_infiniteTime() && s_ub < g_infiniteTime() ) {
+    if( f_lb > MINUS_INFINITY && s_ub < PLUS_INFINITY) {
       max_distance = std::min( max_distance, s_ub - f_lb );
     }
 
     return(IntervalIntDomain( min_distance, max_distance ));
   }
 
-  return(IntervalIntDomain(-g_infiniteTime(), g_infiniteTime()));
+  return(IntervalIntDomain(MINUS_INFINITY, PLUS_INFINITY));
 }
 
   void DefaultTemporalAdvisor::getTemporalDistanceDomains(const ConstrainedVariableId first,
