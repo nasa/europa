@@ -39,6 +39,7 @@
 #include "ProfilePropagator.hh"
 #include "ResourceMatching.hh"
 #include "tinyxml.h"
+#include "TestUtils.hh"
 
 #include "Engine.hh"
 #include "ModuleConstraintEngine.hh"

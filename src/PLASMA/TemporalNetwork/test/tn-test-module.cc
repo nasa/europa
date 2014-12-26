@@ -1,5 +1,6 @@
 #include "tn-test-module.hh"
 #include "Utils.hh"
+#include "TestUtils.hh"
 #include "TemporalNetwork.hh"
 #include "TemporalPropagator.hh"
 #include "STNTemporalAdvisor.hh"
@@ -115,8 +116,8 @@ private:
   static bool testBasicAllocation(){
     TemporalNetwork tn;
     TimepointId origin = tn.getOrigin();
-    Time delta = cast_basis(g_noTime());
-    Time epsilon = cast_basis(g_noTime());
+    Time delta(0);
+    Time epsilon(0);
     tn.getTimepointBounds(origin, delta, epsilon);
     CPPUNIT_ASSERT(delta == 0 && epsilon == 0);
 
@@ -131,8 +132,8 @@ private:
     TimepointId b_start = tn.addTimepoint();
     TimepointId b_end = tn.addTimepoint();
     TimepointId c_start = tn.addTimepoint();
-    TemporalConstraintId a_before_b = tn.addTemporalConstraint(a_end, b_start, 0, cast_basis(g_infiniteTime()));
-    TemporalConstraintId start_before_end = tn.addTemporalConstraint(b_start, b_end, 1, cast_basis(g_infiniteTime()));
+    TemporalConstraintId a_before_b = tn.addTemporalConstraint(a_end, b_start, 0, cast_basis(PLUS_INFINITY));
+    TemporalConstraintId start_before_end = tn.addTemporalConstraint(b_start, b_end, 1, cast_basis(PLUS_INFINITY));
     TemporalConstraintId a_meets_c = tn.addTemporalConstraint(a_end, c_start, 0, 0);
     bool res = tn.propagate();
     CPPUNIT_ASSERT(res);
@@ -167,7 +168,7 @@ private:
     TimepointId z = tn.addTimepoint();
 
     TemporalConstraintId fromage = tn.addTemporalConstraint(x, y, 0,
-                                                            cast_basis(g_infiniteTime()));
+                                                            cast_basis(PLUS_INFINITY));
     TemporalConstraintId tango = tn.addTemporalConstraint(y, x, 200, 200);
 
     bool res = tn.propagate();
@@ -179,10 +180,10 @@ private:
     res = tn.propagate();
     CPPUNIT_ASSERT(res); // Consistency restored
 
-    TemporalConstraintId c0 = tn.addTemporalConstraint(y, x, -200, cast_basis(g_infiniteTime()));
-    TemporalConstraintId c1 = tn.addTemporalConstraint(x, z, 0, cast_basis(g_infiniteTime()));
-    TemporalConstraintId c2 = tn.addTemporalConstraint(z, y, 0, cast_basis(g_infiniteTime()));
-    TemporalConstraintId c3 = tn.addTemporalConstraint(x, y, 200, cast_basis(g_infiniteTime()));
+    TemporalConstraintId c0 = tn.addTemporalConstraint(y, x, -200, cast_basis(PLUS_INFINITY));
+    TemporalConstraintId c1 = tn.addTemporalConstraint(x, z, 0, cast_basis(PLUS_INFINITY));
+    TemporalConstraintId c2 = tn.addTemporalConstraint(z, y, 0, cast_basis(PLUS_INFINITY));
+    TemporalConstraintId c3 = tn.addTemporalConstraint(x, y, 200, cast_basis(PLUS_INFINITY));
 
     res = tn.propagate();
     CPPUNIT_ASSERT(res);
@@ -207,8 +208,8 @@ private:
 	TimepointId y = tn.addTimepoint();
 	tn.addTemporalConstraint(origin, x, j, j+1);
 	tn.addTemporalConstraint(x, y, j, j+1);
-	Time delta = cast_basis(g_noTime());
-	Time epsilon = cast_basis(g_noTime());
+	Time delta(0);
+	Time epsilon(0);
 	tn.calcDistanceBounds(x, y, delta, epsilon);
       }
     }
@@ -618,7 +619,7 @@ private:
       CPPUNIT_ASSERT(  30 == distance.getUpperBound() );
     }
 
-    IntervalIntDomain d6 = IntervalIntDomain( -g_infiniteTime(), g_infiniteTime() );
+    IntervalIntDomain d6 = IntervalIntDomain( MINUS_INFINITY, PLUS_INFINITY );
     ConstrainedVariableId v6 = (new Variable<IntervalIntDomain> (ce.getId(), d6, false, true, "v6"))->getId();
 
     //            <-10>------------<10>
@@ -629,15 +630,15 @@ private:
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v1, v7, true );
 
-      CPPUNIT_ASSERT( -g_infiniteTime() == distance.getLowerBound() );
-      CPPUNIT_ASSERT(  g_infiniteTime() == distance.getUpperBound() );
+      CPPUNIT_ASSERT( MINUS_INFINITY == distance.getLowerBound() );
+      CPPUNIT_ASSERT(  PLUS_INFINITY == distance.getUpperBound() );
     }
 
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v7, v1, true );
 
-      CPPUNIT_ASSERT( -g_infiniteTime() == distance.getLowerBound() );
-      CPPUNIT_ASSERT(  g_infiniteTime() == distance.getUpperBound() );
+      CPPUNIT_ASSERT( MINUS_INFINITY == distance.getLowerBound() );
+      CPPUNIT_ASSERT(  PLUS_INFINITY == distance.getUpperBound() );
     }
 
     //  <-inf>--------------------------------<inf>
@@ -646,8 +647,8 @@ private:
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v6, v7, true );
 
-      CPPUNIT_ASSERT( -g_infiniteTime() == distance.getLowerBound() );
-      CPPUNIT_ASSERT(  g_infiniteTime() == distance.getUpperBound() );
+      CPPUNIT_ASSERT( MINUS_INFINITY == distance.getLowerBound() );
+      CPPUNIT_ASSERT(  PLUS_INFINITY == distance.getUpperBound() );
     }
 
     delete static_cast<ConstrainedVariable*>(v1);

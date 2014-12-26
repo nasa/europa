@@ -26,7 +26,7 @@ tokens {
 @parser::includes
 {
 #include "NddlInterpreter.hh"
-
+#include "PathDefs.hh"
 
 using namespace EUROPA;
 
@@ -62,7 +62,8 @@ static void newNDDL3ParserFree(pNDDL3Parser ctx) {
 
 @lexer::includes
 {
-#include "NddlInterpreter.hh" 
+#include "NddlInterpreter.hh"
+#include "PathDefs.hh"
 
 using namespace EUROPA;
 

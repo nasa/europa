@@ -223,7 +223,7 @@ endfunction(add_common_local_include_deps)
 macro(declare_module name root_srcs base_srcs component_srcs test_srcs module_dependencies module_components)
   set(libname "${name}${EUROPA_SUFFIX}")
   set(testname ${name}-test${EUROPA_SUFFIX})
-
+  message(STATUS ${name} ": " ${base_srcs})
   set(full_dependencies ${module_dependencies})
   foreach(mod ${module_dependencies})
     list(APPEND full_dependencies ${${mod}_FULL_DEPENDENCIES})

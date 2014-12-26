@@ -2,7 +2,8 @@
 #define _H_PSConstraintEngine
 
 #include "Engine.hh"
-#include "PSUtils.hh"
+#include "PSEntity.hh"
+#include "PSList.hh"
 
 namespace EUROPA {
 

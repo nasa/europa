@@ -28,6 +28,7 @@
 #include "STNTemporalAdvisor.hh"
 #include "Reusable.hh"
 #include "DurativeTokens.hh"
+#include "TestUtils.hh"
 
 #include <iostream>
 #include <string>

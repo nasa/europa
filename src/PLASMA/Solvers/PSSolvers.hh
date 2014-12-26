@@ -2,7 +2,7 @@
 #define _H_PSSolvers
 
 #include "Engine.hh"
-#include "PSUtils.hh"
+#include "PSList.hh"
 #include <string>
 
 namespace EUROPA 

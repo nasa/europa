@@ -8,11 +8,14 @@
 #ifndef CFUNCTION_HH_
 #define CFUNCTION_HH_
 
+#include "Id.hh"
 #include "LabelStr.hh"
-#include "DataType.hh"
+
+#include <vector>
 
 namespace EUROPA {
-
+class DataType;
+typedef Id<DataType> DataTypeId;
 class CFunction;
 typedef Id<CFunction> CFunctionId;
 

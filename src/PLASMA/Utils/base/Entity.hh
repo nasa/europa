@@ -3,7 +3,7 @@
 
 #include "Id.hh"
 #include "LabelStr.hh"
-#include "PSUtils.hh"
+#include "PSEntity.hh"
 
 #include <map>
 #include <set>

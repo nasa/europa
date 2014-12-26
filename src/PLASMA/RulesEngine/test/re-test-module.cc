@@ -16,6 +16,7 @@
 #include "ProxyVariableRelation.hh"
 #include "Constraint.hh"
 #include "CESchema.hh"
+#include "TestUtils.hh"
 
 #include "Constraints.hh"
 #include "ModuleConstraintEngine.hh"

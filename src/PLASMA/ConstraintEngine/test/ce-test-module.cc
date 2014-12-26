@@ -5,12 +5,13 @@
  * @brief Read the source for details
  */
 #include "ce-test-module.hh"
+#include "TestUtils.hh"
 #include "Utils.hh"
 #include "Variable.hh"
 #include "Constraints.hh"
 #include "ConstraintType.hh"
 #include "Propagators.hh"
-
+#include "ConstraintEngineListener.hh"
 /* Include for domain management */
 #include "Domains.hh"
 #include "LabelStr.hh"

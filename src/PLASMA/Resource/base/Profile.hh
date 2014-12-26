@@ -11,6 +11,7 @@
 
 #include "Domains.hh"
 #include "PlanDatabaseDefs.hh"
+#include "ConstraintEngineListener.hh"
 #include "ConstraintEngineDefs.hh"
 #include "Constraint.hh"
 #include "CommonDefs.hh"

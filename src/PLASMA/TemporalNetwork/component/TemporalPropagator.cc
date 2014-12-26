@@ -422,7 +422,7 @@ ConstraintId getConstraint(ConstrainedVariableId fromvar,
       ub = cast_int(distance->lastDomain().getUpperBound());
     }
     else if (constraint->getName() != sl_concurrent) {
-      ub = cast_int(g_infiniteTime());
+      ub = cast_int(PLUS_INFINITY);
       if(constraint->getName() == sl_strictlyPrecedes)
         lb = 1;
     }
