@@ -9,7 +9,6 @@
 #include "Domains.hh"
 #include "Utils.hh"
 #include "Debug.hh"
-#include "EntityIterator.hh"
 #include "CESchema.hh"
 #include "PSVarValue.hh"
 

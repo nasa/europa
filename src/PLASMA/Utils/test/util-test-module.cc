@@ -51,6 +51,7 @@
 #define non_fast_only_assert(T) //NO-OP
 #endif
 
+#undef EUROPA_runTest
 #define EUROPA_runTest(test) { \
   try { \
     std::cout << "      " << #test; \

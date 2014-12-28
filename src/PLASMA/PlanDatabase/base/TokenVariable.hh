@@ -4,8 +4,6 @@
 #include "Token.hh"
 #include "PlanDatabaseDefs.hh"
 #include "Variable.hh"
-//#include "Token.hh"
-
 
 /**
  * @file Provides implementation and interface for TokenVariables.

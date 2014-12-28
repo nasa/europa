@@ -2,7 +2,7 @@
 #define _H_TemporalAdvisor
 
 #include "PlanDatabaseDefs.hh"
-
+#include "PlanDatabaseVarDefs.hh"
 namespace EUROPA{
 
   /**

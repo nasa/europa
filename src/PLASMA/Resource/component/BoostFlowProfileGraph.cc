@@ -1,5 +1,7 @@
 #include "BoostFlowProfileGraph.hh"
 #include "Debug.hh"
+#include "ConstrainedVariable.hh"
+#include "Domain.hh"
 
 #include <algorithm>
 // #include <boost/graph/push_relabel_max_flow.hpp>

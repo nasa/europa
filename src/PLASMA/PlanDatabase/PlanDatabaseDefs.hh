@@ -3,7 +3,7 @@
 
 #include "ConstraintEngineDefs.hh"
 #include "Entity.hh"
-#include "Variable.hh"
+
 
 namespace EUROPA {
 
@@ -39,15 +39,6 @@ namespace EUROPA {
   class PlanDatabaseListener;
   typedef Id<PlanDatabaseListener> PlanDatabaseListenerId;
 
-  template<class DomainType> class TokenVariable;
-  class StateDomain;
-  typedef Id< TokenVariable<StateDomain> > StateVarId;
-
-  typedef Id< Variable<IntervalIntDomain> > TimeVarId;
-  typedef Id< TokenVariable<IntervalIntDomain> > TempVarId;
-
-  class ObjectDomain;
-  typedef Id< TokenVariable<ObjectDomain> > ObjectVarId;
 
   class Schema;
   typedef Id<Schema> SchemaId;

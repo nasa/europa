@@ -3,15 +3,15 @@
 
 #include "PSConstraintEngine.hh"
 #include "ConstraintEngineDefs.hh"
-#include "TokenType.hh"
-#include "ObjectType.hh"
 
 namespace EUROPA {
 	enum PSTokenState { INACTIVE,ACTIVE,MERGED,REJECTED };
 
-  class PSObject;
-  class PSToken;
-  class PSPlanDatabaseClient;
+class PSObject;
+class PSObjectType;
+class PSToken;
+class PSTokenType;
+class PSPlanDatabaseClient;
 
   class PSSchema : public EngineComponent
   {

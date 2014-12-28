@@ -9,6 +9,7 @@
  */
 
 #include "SolverDefs.hh"
+#include "Domain.hh"
 
 namespace EUROPA {
 namespace SOLVERS {

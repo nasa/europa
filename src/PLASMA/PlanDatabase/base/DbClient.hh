@@ -3,7 +3,6 @@
 
 #include "PlanDatabaseDefs.hh"
 #include "PSPlanDatabase.hh"
-#include "Variable.hh"
 #include <vector>
 
 /**

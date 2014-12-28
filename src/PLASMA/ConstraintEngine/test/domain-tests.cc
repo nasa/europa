@@ -2,6 +2,7 @@
 #include "LabelStr.hh"
 #include "Domains.hh"
 #include "DomainListener.hh"
+#include "TestUtils.hh"
 #include "module-tests.hh"
 #include <sstream>
 #include <cmath>

@@ -214,15 +214,4 @@ namespace EUROPA {
   }
 }
 
-#define EUROPA_runTest(test) { \
-     try { \
-       unsigned long id_count = EUROPA::IdTable::size(); \
-       bool result = test(); \
-       EUROPA::IdTable::checkResult(result,id_count); \
-     } \
-       catch ( Error err ){ \
-       err.print( std::cout ); \
-     } \
-   }
-
 #endif
