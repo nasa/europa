@@ -1,10 +1,13 @@
 #include "FlowProfileGraph.hh"
 
+#include "Debug.hh"
 #include "Edge.hh"
 #include "EdgeIterator.hh"
 #include "MaxFlow.hh"
 #include "Node.hh"
 #include "Number.hh"
+#include "ConstrainedVariable.hh"
+#include "Domain.hh"
 
 namespace EUROPA {
 FlowProfileGraph::FlowProfileGraph(const TransactionId ,

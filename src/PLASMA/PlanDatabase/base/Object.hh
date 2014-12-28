@@ -10,8 +10,8 @@
 
 
 #include "PlanDatabaseDefs.hh"
+#include "PlanDatabaseVarDefs.hh"
 #include "LabelStr.hh"
-#include "Variable.hh"
 #include "Domains.hh"
 #include "PSPlanDatabase.hh"
 

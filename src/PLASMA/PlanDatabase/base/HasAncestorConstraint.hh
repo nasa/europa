@@ -6,6 +6,7 @@
 
 namespace EUROPA
 {
+class ObjectDomain;
   /**
    * @brief Requires that both objects are singletons before it will execute
    */

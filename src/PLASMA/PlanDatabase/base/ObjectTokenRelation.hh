@@ -7,6 +7,7 @@
 
 namespace EUROPA
 {
+class ObjectDomain;
   /**
    * @brief Responsible for managing the relationship between objects and tokens through propagation of changes
    * in Token.state and Token.object.

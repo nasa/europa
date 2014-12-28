@@ -12,6 +12,7 @@
 
 namespace EUROPA
 {
+class ObjectDomain;
   /**
    * @brief Requires that the first and second objects have a common ancestor that is
    * contained in the restricted set.

@@ -1,7 +1,7 @@
 #ifndef _H_PDBInterpreter
 #define _H_PDBInterpreter
 
-#include "ConstrainedVariable.hh"
+#include "ConstraintEngineDefs.hh"
 #include "PlanDatabaseDefs.hh"
 #include <map>
 #include <vector>

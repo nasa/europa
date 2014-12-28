@@ -7,8 +7,6 @@
 
 #include "PlanDatabaseDefs.hh"
 #include "UnifyMemento.hh"
-#include "StackMemento.hh"
-#include "MergeMemento.hh"
 #include "Schema.hh"
 #include "Entity.hh"
 #include "LabelStr.hh"

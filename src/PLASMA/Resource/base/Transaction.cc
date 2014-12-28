@@ -6,6 +6,8 @@
  */
 #include "Transaction.hh"
 #include "Debug.hh"
+#include "ConstrainedVariable.hh"
+#include "Domain.hh"
 
 namespace EUROPA {
 Transaction::Transaction(ConstrainedVariableId _time, ConstrainedVariableId _quantity, 

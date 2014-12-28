@@ -1,12 +1,8 @@
 #ifndef _H_MergeMemento
 #define _H_MergeMemento
 
+#include "ConstraintEngineDefs.hh"
 #include "PlanDatabaseDefs.hh"
-#include "Token.hh"
-//#include "TokenVariable.hh"
-#include "LabelStr.hh"
-#include "Constraint.hh"
-#include "ConstrainedVariable.hh"
 #include <list>
 #include <vector>
 
