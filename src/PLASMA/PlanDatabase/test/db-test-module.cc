@@ -1916,7 +1916,7 @@ private:
     typedef Id<IntervalToken> IntervalTokenId;
 
     static const unsigned int NUMTOKS=3;
-    static const unsigned int UNIFIED=1;
+    static const unsigned int UNIFIED=2;
     static const unsigned int NUMPARAMS=1;
 
     //Create tokens with the same domains.  We will impose a constraint on

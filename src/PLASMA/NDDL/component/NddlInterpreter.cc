@@ -607,7 +607,7 @@ bool NddlSymbolTable::isEnumValue(const char* value) const
 Expr* NddlSymbolTable::makeEnumRef(const char* value) const
 {
     const LabelStr& enumType = getEnumForValue(value);
-    EnumeratedDomain* ad = dynamic_cast<EnumeratedDomain*>(
+    EnumeratedDomain* ad = boost::polymorphic_cast<EnumeratedDomain*>(
             getPlanDatabase()->getSchema()->getCESchema()->baseDomain(enumType.c_str()).copy());
     edouble v = LabelStr(value);
     ad->set(v);
