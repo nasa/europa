@@ -38,9 +38,9 @@ namespace EUROPA
     m_solver->step();
   }
 
-void PSSolverImpl::solve(int maxSteps, int maxDepth) {
-  m_solver->solve(static_cast<unsigned int>(maxSteps),
-                  static_cast<unsigned int>(maxDepth));
+bool PSSolverImpl::solve(int maxSteps, int maxDepth) {
+  return m_solver->solve(static_cast<unsigned int>(maxSteps),
+                         static_cast<unsigned int>(maxDepth));
 }
 
   bool PSSolverImpl::backjump(unsigned int stepCount) {

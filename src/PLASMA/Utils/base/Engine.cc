@@ -1,4 +1,5 @@
 
+#include "Error.hh"
 #include "Engine.hh"
 #include "Debug.hh"
 #include "LabelStr.hh"
@@ -51,48 +52,48 @@ namespace EUROPA
         m_properties[name] = value;
     }
 
-	int EngineConfig::readFromXML(const char* file_name, bool isFile){
+int EngineConfig::readFromXML(const char* file_name, bool isFile) {
+  check_runtime_error(file_name != NULL);
+  bool loadStat = false;
+  int status = 0;
+  TiXmlElement * xml = 0;
+  TiXmlDocument * m_doc = 0;
+  if(isFile)
+  {
+    m_doc = new TiXmlDocument(file_name);
+    loadStat = m_doc->LoadFile();
+    checkError(!m_doc->Error(), "Invalid or malformed XML file '" << file_name << "' " << m_doc->ErrorDesc());
+  }
+  else
+  {
+    m_doc = new TiXmlDocument();
+    m_doc->Parse(file_name);
+    if(!m_doc->NoChildren())
+      loadStat = true;
+  }
 
-		bool loadStat = false;
-		int status = 0;
-		TiXmlElement * xml = 0;
-		TiXmlDocument * m_doc = 0;
-		if(isFile)
-		{
-			m_doc = new TiXmlDocument(file_name);
-			loadStat = m_doc->LoadFile();
-			checkError(!m_doc->Error(), "Invalid or malformed XML file '" << file_name << "' " << m_doc->ErrorDesc());
-		}
-		else
-		{
-			m_doc = new TiXmlDocument();
-			m_doc->Parse(file_name);
-			if(!m_doc->NoChildren())
-				loadStat = true;
-		}
+  if(loadStat)
+  {
+    xml = m_doc->RootElement();
+    if (xml == NULL) return 0;
+    if(strcmp(static_cast<const char *>(xml->Value()),"EuropaConfig") == 0)
+    {
+      parseXML(xml);
+      status = 1;
+    }
+    else
+      debugMsg("EngineConfig",
+               "Expected <EuropaConfig>, Found: " <<
+               static_cast<const char *>(xml->Value()));
+  }
+  else
+  {
+    assertTrue(ALWAYS_FAIL, "LOAD FAIL");
+  }
+  delete m_doc;
+  return status;
 
-		if(loadStat)
-		{
-			xml = m_doc->RootElement();
-			if (xml == NULL) return 0;
-			if(strcmp(static_cast<const char *>(xml->Value()),"EuropaConfig") == 0)
-			{
-				parseXML(xml);
-				status = 1;
-			}
-			else
-                          debugMsg("EngineConfig",
-                                   "Expected <EuropaConfig>, Found: " <<
-                                   static_cast<const char *>(xml->Value()));
-		}
-		else
-		{
-                  assertTrue(ALWAYS_FAIL, "LOAD FAIL");
-		}
-		delete m_doc;
-		return status;
-
-	}
+}
 
 void EngineConfig::parseXML(TiXmlNode * pParent){
   TiXmlNode * pChild = 0;
