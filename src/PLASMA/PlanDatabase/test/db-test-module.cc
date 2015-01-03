@@ -754,14 +754,14 @@ private:
     // Add a unary constraint
     Variable<IntervalIntDomain> superset(db->getConstraintEngine(), IntervalIntDomain(10, 20));;
 
-    ConstraintId subsetConstraint = db->getConstraintEngine()->createConstraint("SubsetOf",
+    ConstraintId subsetConstraint = db->getConstraintEngine()->createConstraint("subsetOf",
 					makeScope(o1.getVariables()[0], superset.getId()));
 
     // Now add a constraint equating the variables and test propagation
     std::vector<ConstrainedVariableId> constrainedVars;
     constrainedVars.push_back(o1.getVariables()[0]);
     constrainedVars.push_back(o2.getVariables()[0]);
-    ConstraintId constraint = db->getConstraintEngine()->createConstraint("Equal",
+    ConstraintId constraint = db->getConstraintEngine()->createConstraint("eq",
 								  constrainedVars);
 
     CPPUNIT_ASSERT(db->getConstraintEngine()->propagate());
@@ -1629,7 +1629,7 @@ private:
     t1.cancel();
     Variable<IntervalIntDomain> superset(db->getConstraintEngine(), IntervalIntDomain(5, 6));
 
-    ConstraintId subsetOfConstraint = db->getConstraintEngine()->createConstraint("SubsetOf",
+    ConstraintId subsetOfConstraint = db->getConstraintEngine()->createConstraint("subsetOf",
                                                                           makeScope(t1.duration(), superset.getId()));
     t1.doMerge(t0.getId());
     CPPUNIT_ASSERT(t0.duration()->getDerivedDomain().getUpperBound() == 6);
@@ -4692,13 +4692,13 @@ public:
     std::list<ConstrainedVariableId> vars;
     vars.push_back(sg_int);
     vars.push_back(obj2vars[0]);
-    std::string transaction = buildXMLInvokeConstrainVarsStr("Equal", vars);
+    std::string transaction = buildXMLInvokeConstrainVarsStr("eq", vars);
     TEST_PLAYING_XML(transaction);
     std::set<ConstraintId> constraints;
     sg_int->constraints(constraints);
     CPPUNIT_ASSERT(constraints.size() == 1);
     ConstraintId constr = *(constraints.begin());
-    CPPUNIT_ASSERT(constr->getName() == LabelStr("Equal"));
+    CPPUNIT_ASSERT(constr->getName() == LabelStr("eq"));
     CPPUNIT_ASSERT(constr->getScope().size() == 2);
     CPPUNIT_ASSERT(constr->isVariableOf(sg_int));
     CPPUNIT_ASSERT(constr->isVariableOf(obj2vars[0]));
@@ -4712,14 +4712,14 @@ public:
     vars.clear();
     vars.push_back(sg_int);
     vars.push_back(sg_float);
-    TEST_PLAYING_XML(buildXMLInvokeConstrainVarsStr("LessThanEqual", vars));
+    TEST_PLAYING_XML(buildXMLInvokeConstrainVarsStr("leq", vars));
     constraints.clear();
     sg_int->constraints(constraints);
     CPPUNIT_ASSERT(constraints.size() == 2);
     CPPUNIT_ASSERT(constraints.find(constr) != constraints.end());
     constraints.erase(constraints.find(constr));
     constr = *(constraints.begin());
-    CPPUNIT_ASSERT(constr->getName() == LabelStr("LessThanEqual"));
+    CPPUNIT_ASSERT(constr->getName() == LabelStr("leq"));
     CPPUNIT_ASSERT(constr->getScope().size() == 2);
     CPPUNIT_ASSERT(constr->isVariableOf(sg_int));
     CPPUNIT_ASSERT(constr->isVariableOf(sg_float));
@@ -4732,12 +4732,12 @@ public:
     vars.clear();
     vars.push_back(sg_location);
     vars.push_back(obj2vars[2]);
-    TEST_PLAYING_XML(buildXMLInvokeConstrainVarsStr("NotEqual", vars));
+    TEST_PLAYING_XML(buildXMLInvokeConstrainVarsStr("neq", vars));
     constraints.clear();
     sg_location->constraints(constraints);
     CPPUNIT_ASSERT(constraints.size() == 1);
     constr = *(constraints.begin());
-    CPPUNIT_ASSERT(constr->getName() == LabelStr("NotEqual"));
+    CPPUNIT_ASSERT(constr->getName() == LabelStr("neq"));
     CPPUNIT_ASSERT(constr->getScope().size() == 2);
     CPPUNIT_ASSERT(constr->isVariableOf(sg_location));
     CPPUNIT_ASSERT(constr->isVariableOf(obj2vars[2]));
