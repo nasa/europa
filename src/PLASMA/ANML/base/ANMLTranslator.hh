@@ -542,13 +542,13 @@ class Change : public ANMLElement
 
 class PropositionComponent
 {
-  public:
-    PropositionComponent() {}
-    
-    void setProposition(Proposition* p) { m_parentProp = p; }
+ public:
+  PropositionComponent() : m_parentProp(NULL) {}
   
-  protected:
-    Proposition* m_parentProp;	
+  void setProposition(Proposition* p) { m_parentProp = p; }
+  
+ protected:
+  Proposition* m_parentProp;	
 };
 
 class TemporalQualifier : public PropositionComponent

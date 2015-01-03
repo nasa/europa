@@ -438,9 +438,10 @@ private:
     ProfileIterator prof1(profile.getId());
     CPPUNIT_ASSERT(checkTimes(times, prof1));
     ProfileIterator oCheck1(profile.getId(), 2, 2);
-    CPPUNIT_ASSERT(oCheck1.getInstant()->getTransactions().size() == 2);
-    CPPUNIT_ASSERT(oCheck1.getInstant()->getTransactions().find(trans3->getId()) != oCheck1.getInstant()->getTransactions().end());
-    CPPUNIT_ASSERT(oCheck1.getInstant()->getTransactions().find(trans4->getId()) != oCheck1.getInstant()->getTransactions().end());
+    const InstantId inst(oCheck1.getInstant());
+    CPPUNIT_ASSERT(inst->getTransactions().size() == 2);
+    CPPUNIT_ASSERT(inst->getTransactions().find(trans3->getId()) != inst->getTransactions().end());
+    CPPUNIT_ASSERT(inst->getTransactions().find(trans4->getId()) != inst->getTransactions().end());
     ProfileIterator oCheck1_1(profile.getId(), 3, 3);
     CPPUNIT_ASSERT(oCheck1_1.done());
 

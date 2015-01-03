@@ -282,7 +282,7 @@ class DebugMessage::DebugInternals {
     LDMPCI iter = std::find_if(m_msgs.begin(),
                                m_msgs.end(),
                                MatchesPattern<DebugMessage*>(file, pattern));
-    if (iter == allMsgs().end())
+    if (iter == m_msgs.end())
       return(0);
     return(*iter);
   }

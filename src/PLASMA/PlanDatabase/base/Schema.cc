@@ -6,6 +6,7 @@
 #include "DataTypes.hh"
 #include "CESchema.hh"
 
+#include <boost/cast.hpp>
 #ifdef _MANAGED
   using namespace System;
 
@@ -824,7 +825,7 @@ std::vector<TokenTypeId> Schema::getTypeSupporters( TokenTypeId type ) {
 
   for( int i = 0; i < actionTypes.size(); i++){
 
-    TokenType* tt = dynamic_cast<TokenType*>(actionTypes.get( i ));
+    TokenType* tt = boost::polymorphic_cast<TokenType*>(actionTypes.get( i ));
     PSList<PSTokenType*> effects = tt->getSubgoalsByAttr( PSTokenType::EFFECT);
 
     for (long j = 0; j < effects.size(); j++ ) {
