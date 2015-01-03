@@ -20,6 +20,7 @@ options {
 #include "NddlInterpreter.hh"
 #include "PathDefs.hh"
 
+#include <boost/cast.hpp>
 using namespace EUROPA;
 
 }
@@ -605,7 +606,7 @@ tokenParameter[InterpretedTokenType* tokenType] returns [Expr* result]
         { 
             const std::vector<Expr*>& vars=child->getChildren();
             for (unsigned int i=0;i<vars.size();i++) {
-                ExprVarDeclaration* vd = dynamic_cast<ExprVarDeclaration*>(vars[i]);
+                ExprVarDeclaration* vd = boost::polymorphic_cast<ExprVarDeclaration*>(vars[i]);
                 tokenType->addArg(vd->getDataType(),vd->getName());
             }
             result = child;            
