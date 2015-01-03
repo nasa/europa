@@ -2189,7 +2189,7 @@ private:
     std::list<ConstraintTestCase> tests;
 
     // This kind of information can also be read from a file, as below.
-    std::string constraintName("Equal");
+    std::string constraintName("eq");
     std::list<Domain*> domains;
     domains.push_back(new IntervalIntDomain(1, 10)); // first input domain
     domains.push_back(new IntervalIntDomain(2, 10)); // expected value of first output domain
@@ -2609,7 +2609,7 @@ private:
     variables.push_back(v0.getId());
     Variable<IntervalIntDomain> v1(ce, IntervalIntDomain(1, 1));
     variables.push_back(v1.getId());
-    ConstraintId c0 = ce->createConstraint(LabelStr("Equal"), variables);
+    ConstraintId c0 = ce->createConstraint(LabelStr("eq"), variables);
     ce->propagate();
     CPPUNIT_ASSERT(v0.getDerivedDomain().getSingletonValue() == 1);
     delete static_cast<Constraint*>(c0);

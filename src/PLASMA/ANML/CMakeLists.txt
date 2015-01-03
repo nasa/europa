@@ -12,7 +12,7 @@ add_custom_command(OUTPUT ${anml_parser_sources}
   DEPENDS antlr/ANML.g)
 
 #TODO: abstract the stuff it depends on in NDDL so languages aren't inter-dependent
-set(internal_dependencies NDDL RulesEngine TemporalNetwork PlanDatabase)
+set(internal_dependencies NDDL RulesEngine TemporalNetwork PlanDatabase ConstraintEngine Utils)
 set(root_sources ModuleAnml.cc)
 set(base_sources ${anml_parser_sources} ANMLTranslator.cc)
 set(component_sources AnmlInterpreter.cc AnmlTestEngine.cc)

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <ConstraintTests>
-	<Constraint name="CountZeros" test="1">
+	<Constraint name="countZeroes" test="1">
 		<Inputs>
 			<IntervalDomain lb="0" ub="0"/>
 			<IntervalDomain lb="0" ub="0"/>
@@ -12,7 +12,7 @@
 			<IntervalDomain/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountZeros" test="2">
+	<Constraint name="countZeroes" test="2">
 		<Inputs>
 			<IntervalDomain lb="0.0" ub="0.0"/>
 			<IntervalDomain lb="0.0" ub="1"/>
@@ -24,7 +24,7 @@
 			<IntervalDomain lb="0.000001" ub="1"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountZeros" test="3">
+	<Constraint name="countZeroes" test="3">
 		<Inputs>
 			<IntervalDomain lb="0" ub="0"/>
 			<BoolDomain><element value="false"/><element value="true"/></BoolDomain>
@@ -34,7 +34,7 @@
 			<BoolDomain><element value="true"/></BoolDomain>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountZeros" test="4">
+	<Constraint name="countZeroes" test="4">
 		<Inputs>
 			<IntervalDomain lb="1" ub="1"/>
 			<IntervalDomain lb="0" ub="0"/>
@@ -46,7 +46,7 @@
 			<IntervalDomain/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountZeros" test="5">
+	<Constraint name="countZeroes" test="5">
 		<Inputs>
 			<IntervalDomain lb="1" ub="1"/>
 			<IntervalDomain lb="0" ub="0"/>
@@ -58,7 +58,7 @@
 			<BoolDomain><element value="true"/></BoolDomain>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountZeros" test="6">
+	<Constraint name="countZeroes" test="6">
 		<Inputs>
 			<IntervalDomain lb="2" ub="+inf"/>
 			<IntervalDomain lb="0" ub="0"/>
@@ -70,7 +70,7 @@
 			<BoolDomain><element value="false"/></BoolDomain>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountZeros" test="7">
+	<Constraint name="countZeroes" test="7">
 		<Inputs>
 			<IntervalDomain lb="0" ub="1"/>
 			<IntervalDomain lb="0" ub="0"/>
@@ -82,7 +82,7 @@
 			<BoolDomain><element value="true"/></BoolDomain>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountZeros" test="8">
+	<Constraint name="countZeroes" test="8">
 		<Inputs>
 			<IntervalDomain lb="0" ub="+inf"/>
 			<IntervalDomain lb="0" ub="0"/>
@@ -94,7 +94,7 @@
 			<BoolDomain><element value="false"/><element value="true"/></BoolDomain>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountZeros" test="9">
+	<Constraint name="countZeroes" test="9">
 		<Inputs>
 			<IntervalDomain lb="1" ub="+inf"/>
 			<IntervalDomain lb="-inf" ub="+inf"/>
@@ -108,7 +108,7 @@
 			<IntervalDomain lb="5" ub="10"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountZeros" test="10">
+	<Constraint name="countZeroes" test="10">
 		<Inputs>
 			<IntervalDomain lb="1" ub="+inf"/>
 			<IntervalDomain lb="-inf" ub="-1"/>
@@ -122,7 +122,7 @@
 			<IntervalDomain/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountZeros" test="11">
+	<Constraint name="countZeroes" test="11">
 		<Inputs>
 			<IntervalDomain lb="2" ub="2"/>
 			<IntervalDomain lb="0" ub="0"/>
@@ -134,7 +134,7 @@
 			<IntervalDomain lb="0" ub="0"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="AddEqual" test="12">
+	<Constraint name="addEq" test="12">
 		<Inputs>
 			<IntervalDomain lb="0" ub="2"/>
 			<IntervalDomain lb="0" ub="0"/>
@@ -146,7 +146,7 @@
 			<IntervalDomain lb="2" ub="2"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountNonZeros" test="13">
+	<Constraint name="countNonZeroes" test="13">
 		<Inputs>
 			<IntervalDomain lb="0" ub="0"/>
 			<IntervalDomain lb="0" ub="0"/>
@@ -158,7 +158,7 @@
 			<IntervalDomain lb="0" ub="0"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountNonZeros" test="14">
+	<Constraint name="countNonZeroes" test="14">
 		<Inputs>
 			<IntervalDomain lb="0" ub="0"/>
 			<IntervalDomain lb="-inf" ub="+inf"/>
@@ -170,7 +170,7 @@
 			<IntervalDomain lb="0" ub="0"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountNonZeros" test="15">
+	<Constraint name="countNonZeroes" test="15">
 		<Inputs>
 			<IntervalDomain lb="0" ub="0"/>
 			<BoolDomain><element value="false"/><element value="true"/></BoolDomain>
@@ -180,7 +180,7 @@
 			<BoolDomain><element value="false"/></BoolDomain>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountNonZeros" test="16">
+	<Constraint name="countNonZeroes" test="16">
 		<Inputs>
 			<IntervalDomain lb="1" ub="1"/>
 			<IntervalDomain lb="0" ub="0"/>
@@ -192,7 +192,7 @@
 			<IntervalDomain/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountNonZeros" test="17">
+	<Constraint name="countNonZeroes" test="17">
 		<Inputs>
 			<IntervalDomain lb="1" ub="1"/>
 			<IntervalDomain lb="0" ub="0"/>
@@ -204,7 +204,7 @@
 			<BoolDomain><element value="true"/></BoolDomain>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountNonZeros" test="18">
+	<Constraint name="countNonZeroes" test="18">
 		<Inputs>
 			<IntervalDomain lb="2" ub="+inf"/>
 			<IntervalDomain lb="0" ub="0"/>
@@ -216,7 +216,7 @@
 			<BoolDomain/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountNonZeros" test="19">
+	<Constraint name="countNonZeroes" test="19">
 		<Inputs>
 			<IntervalDomain lb="0" ub="1"/>
 			<IntervalDomain lb="0" ub="0"/>
@@ -228,7 +228,7 @@
 			<BoolDomain><element value="false"/><element value="true"/></BoolDomain>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountNonZeros" test="20">
+	<Constraint name="countNonZeroes" test="20">
 		<Inputs>
 			<IntervalDomain lb="0" ub="+inf"/>
 			<IntervalDomain lb="0" ub="0"/>
@@ -240,7 +240,7 @@
 			<BoolDomain><element value="false"/><element value="true"/></BoolDomain>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountNonZeros" test="21">
+	<Constraint name="countNonZeroes" test="21">
 		<Inputs>
 			<IntervalDomain lb="1" ub="+inf"/>
 			<IntervalDomain lb="-inf" ub="+inf"/>
@@ -254,7 +254,7 @@
 			<IntervalDomain lb="5" ub="10"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountNonZeros" test="22">
+	<Constraint name="countNonZeroes" test="22">
 		<Inputs>
 			<IntervalDomain lb="1" ub="+inf"/>
 			<IntervalDomain lb="-inf" ub="-1"/>
@@ -268,7 +268,7 @@
 			<IntervalDomain lb="5" ub="10"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountNonZeros" test="23">
+	<Constraint name="countNonZeroes" test="23">
 		<Inputs>
 			<IntervalDomain lb="2" ub="2"/>
 			<IntervalDomain lb="0" ub="0"/>
@@ -280,7 +280,7 @@
 			<IntervalDomain/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountZeros" test="24">
+	<Constraint name="countZeroes" test="24">
 		<Inputs>
 			<IntervalDomain lb="-inf" ub="+inf"/>
 			<IntervalDomain lb="0" ub="0"/>
@@ -296,7 +296,7 @@
 			<IntervalDomain lb="0.000001" ub="+inf"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountNonZeros" test="25">
+	<Constraint name="countNonZeroes" test="25">
 		<Inputs>
 			<IntervalDomain lb="-inf" ub="+inf"/>
 			<IntervalDomain lb="0" ub="0"/>
@@ -312,7 +312,7 @@
 			<IntervalDomain lb="0.000001" ub="+inf"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountZeros" test="26">
+	<Constraint name="countZeroes" test="26">
 		<Inputs>
 			<IntervalDomain lb="-inf" ub="+inf"/>
 			<IntervalDomain lb="0" ub="1"/>
@@ -328,7 +328,7 @@
 			<IntervalDomain lb="0.000001" ub="+inf"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountNonZeros" test="27">
+	<Constraint name="countNonZeroes" test="27">
 		<Inputs>
 			<IntervalDomain lb="-inf" ub="+inf"/>
 			<IntervalDomain lb="0" ub="1"/>
@@ -344,7 +344,7 @@
 			<IntervalDomain lb="0.000001" ub="+inf"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountZeros" test="28">
+	<Constraint name="countZeroes" test="28">
 		<Inputs>
 			<IntervalDomain lb="-inf" ub="+inf"/>
 			<IntervalDomain lb="0" ub="0"/>
@@ -360,7 +360,7 @@
 			<IntervalDomain lb="0.0001" ub="+inf"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountNonZeros" test="29">
+	<Constraint name="countNonZeroes" test="29">
 		<Inputs>
 			<IntervalDomain lb="-inf" ub="+inf"/>
 			<IntervalDomain lb="0" ub="0"/>
@@ -376,7 +376,7 @@
 			<IntervalDomain lb="0.0001" ub="+inf"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountZeros" test="30">
+	<Constraint name="countZeroes" test="30">
 		<Inputs>
 			<IntervalDomain lb="-inf" ub="+inf"/>
 			<IntervalDomain lb="0" ub="1"/>
@@ -392,7 +392,7 @@
 			<IntervalDomain lb="0.0001" ub="+inf"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="CountNonZeros" test="31">
+	<Constraint name="countNonZeroes" test="31">
 		<Inputs>
 			<IntervalDomain lb="-inf" ub="+inf"/>
 			<IntervalDomain lb="0" ub="1"/>
@@ -408,7 +408,7 @@
 			<IntervalDomain lb="0.0001" ub="+inf"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="EqualMinimum" test="32">
+	<Constraint name="eqMinimum" test="32">
 		<Inputs>
 			<IntervalDomain lb="0" ub="6"/>
 			<IntervalDomain lb="2" ub="4"/>
@@ -420,7 +420,7 @@
 			<IntervalDomain lb="1" ub="5"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="EqualMinimum" test="33">
+	<Constraint name="eqMinimum" test="33">
 		<Inputs>
 			<IntervalDomain lb="0" ub="6"/>
 			<IntervalDomain lb="1" ub="5"/>
@@ -456,7 +456,7 @@
 			<IntervalDomain lb="1" ub="4"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="EqualMinimum" test="36">
+	<Constraint name="eqMinimum" test="36">
 		<Inputs>
 			<IntervalDomain lb="-1" ub="+inf"/>
 			<IntervalDomain lb="-inf" ub="-1"/>
@@ -480,7 +480,7 @@
 			<IntervalDomain lb="-1" ub="-1"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="EqualMinimum" test="38">
+	<Constraint name="eqMinimum" test="38">
 		<Inputs>
 			<IntervalDomain lb="-1" ub="0"/>
 			<IntervalDomain lb="-1" ub="1"/>

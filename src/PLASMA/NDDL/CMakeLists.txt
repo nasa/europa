@@ -57,7 +57,7 @@ add_custom_command(OUTPUT ${antlr_generated_tree_files}
 
 
     
-set(internal_dependencies RulesEngine PlanDatabase TemporalNetwork)
+set(internal_dependencies RulesEngine PlanDatabase TemporalNetwork ConstraintEngine Utils)
 set(root_sources ModuleNddl.cc)
 set(base_sources NddlRules.cc NddlToken.cc NddlUtils.cc)
 set(component_sources Interpreter.cc NddlInterpreter.cc NddlTestEngine.cc)
@@ -65,13 +65,14 @@ set(test_sources module-tests.cc nddl-test-module.cc)
 
 common_module_prepends("${base_sources}" "${component_sources}" "${test_sources}" base_sources component_sources test_sources)
 list(APPEND base_sources ${antlr_generated_source_files})
-message(STATUS "NDDL: " ${base_sources})
 declare_module(NDDL "${root_sources}" "${base_sources}" "${component_sources}" "${test_sources}" "${internal_dependencies}" "")
 #setup ANTLR link/headers?
 append_target_property("NDDL${EUROPA_SUFFIX}" INCLUDE_DIRECTORIES ";${ANTLR_INCLUDE_DIR}")
 append_target_property("NDDL${EUROPA_SUFFIX}" INCLUDE_DIRECTORIES ";${CMAKE_CURRENT_BINARY_DIR}")
 target_link_libraries("NDDL${EUROPA_SUFFIX}" ${ANTLR_LIBRARIES})
 target_link_libraries("NDDL-test${EUROPA_SUFFIX}" ${ANTLR_LIBRARIES})
+
+
 file(COPY test/ErrorCheckingTests.txt DESTINATION .)
 file(COPY test/nddl DESTINATION .)
 file(COPY test/parser DESTINATION .)

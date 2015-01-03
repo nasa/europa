@@ -501,12 +501,12 @@ bool isTimepoint(DataRef var) {
       std::string constraint = "", returnType = "";
       bool flipArguments = false;
       if (hasReturnValue()) {
-          if (m_operator == "==") { constraint = "testEQ"; returnType = "bool"; }
-          if (m_operator == "<=") { constraint = "testLEQ"; returnType = "bool"; }
-          if (m_operator == ">=") { constraint = "testLEQ"; returnType = "bool"; flipArguments = true; }
-          if (m_operator == "!=") { constraint = "testNEQ"; returnType = "bool"; }
-          if (m_operator == ">") { constraint = "TestLessThan"; returnType = "bool"; flipArguments = true; }
-          if (m_operator == "<") { constraint = "TestLessThan"; returnType = "bool"; }
+          if (m_operator == "==") { constraint = "testEq"; returnType = "bool"; }
+          if (m_operator == "<=") { constraint = "testLeq"; returnType = "bool"; }
+          if (m_operator == ">=") { constraint = "testLeq"; returnType = "bool"; flipArguments = true; }
+          if (m_operator == "!=") { constraint = "testNeq"; returnType = "bool"; }
+          if (m_operator == ">") { constraint = "testLessThan"; returnType = "bool"; flipArguments = true; }
+          if (m_operator == "<") { constraint = "testLessThan"; returnType = "bool"; }
           if (m_operator == "+") { constraint = "addEq"; }
           if (m_operator == "-") { constraint = "addEq"; }
           if (m_operator == "*") { constraint = "mulEq"; }

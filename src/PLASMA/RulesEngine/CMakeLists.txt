@@ -1,6 +1,6 @@
 include(EuropaModule)
-#set(internal_dependencies PlanDatabase ConstraintEngine Utils TinyXml)
-set(internal_dependencies PlanDatabase)
+set(internal_dependencies PlanDatabase ConstraintEngine Utils TinyXml)
+# set(internal_dependencies PlanDatabase)
 set(root_sources ModuleRulesEngine.cc)
 set(base_sources ProxyVariableRelation.cc Rule.cc RuleInstance.cc RuleVariableListener.cc RulesEngine.cc RulesEngineListener.cc)
 set(component_sources "")

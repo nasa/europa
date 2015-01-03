@@ -220,10 +220,10 @@ function(add_common_local_include_deps target)
   append_target_property(${target} INCLUDE_DIRECTORIES ";${CMAKE_CURRENT_SOURCE_DIR}/component")
 endfunction(add_common_local_include_deps)
 
-macro(declare_module name root_srcs base_srcs component_srcs test_srcs module_dependencies module_components)
+function(declare_module name root_srcs base_srcs component_srcs test_srcs module_dependencies module_components)
   set(libname "${name}${EUROPA_SUFFIX}")
   set(testname ${name}-test${EUROPA_SUFFIX})
-  message(STATUS ${name} ": " ${base_srcs})
+
   set(full_dependencies ${module_dependencies})
   foreach(mod ${module_dependencies})
     list(APPEND full_dependencies ${${mod}_FULL_DEPENDENCIES})
@@ -259,6 +259,8 @@ macro(declare_module name root_srcs base_srcs component_srcs test_srcs module_de
     target_link_libraries(${testname} ${CppUnit_LIBRARIES})
     add_test(NAME ${name}Test
       COMMAND ${testname})
+
+    set(${name}_TEST ${testname} PARENT_SCOPE)
   endif()
 
   #install EXPORT?
@@ -273,7 +275,7 @@ macro(declare_module name root_srcs base_srcs component_srcs test_srcs module_de
   #message(STATUS "Headers: ${headers}")
   install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION ${EUROPA_ROOT}/dist/europa
     FILES_MATCHING PATTERN "*.hh" PATTERN "*.h")
-endmacro(declare_module)
+endfunction(declare_module)
 
 function(list_jar jar contents)
   set(jar_files "")
