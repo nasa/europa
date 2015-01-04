@@ -1,0 +1,224 @@
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[100, 100]
+			world.m_maxPlannerSteps=int:CLOSED[100, 100]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Derived:d*************************
+		Tokens *************************
+				{0}
+				Derived.P(x=int:CLOSED[8, 8]i=int:CLOSED[-inf, +inf])
+				Key=26  Master=NONE
+					Merged Key=93 from Derived.P(65){10} --> {20}
+				{10}
+				{10}
+				Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+				Key=65  Master=26 g0(26){0} --> {10}
+					Merged Key=145 from Derived.P(111){20} --> {30}
+				{20}
+				{20}
+				Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+				Key=111  Master=65 Derived.P(65){10} --> {20}
+					Merged Key=197 from Derived.P(163){30} --> {40}
+				{30}
+				{30}
+				Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+				Key=163  Master=111 Derived.P(111){20} --> {30}
+					Merged Key=249 from Derived.P(215){40} --> {50}
+				{40}
+				{40}
+				Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+				Key=215  Master=163 Derived.P(163){30} --> {40}
+					Merged Key=301 from Derived.P(267){50} --> {60}
+				{50}
+				{50}
+				Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+				Key=267  Master=215 Derived.P(215){40} --> {50}
+					Merged Key=353 from Derived.P(319){60} --> {70}
+				{60}
+				{60}
+				Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+				Key=319  Master=267 Derived.P(267){50} --> {60}
+					Merged Key=405 from Derived.P(371){70} --> {80}
+				{70}
+				{70}
+				Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+				Key=371  Master=319 Derived.P(319){60} --> {70}
+					Merged Key=457 from Derived.P(423){80} --> {90}
+				{80}
+				{80}
+				Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+				Key=423  Master=371 Derived.P(371){70} --> {80}
+					Merged Key=509 from Derived.P(475){90} --> {100}
+				{90}
+				{90}
+				Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+				Key=475  Master=423 Derived.P(423){80} --> {90}
+				{100}
+		End Tokens *********************
+	End Derived:d*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	d=Derived:CLOSED{d(23)}
+Merged Tokens: *************************
+		[-inf, 9]
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=93  Master=65 Derived.P(65){10} --> {20}
+		{10}
+		[-inf, 19]
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=145  Master=111 Derived.P(111){20} --> {30}
+		{20}
+		[-inf, 29]
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=197  Master=163 Derived.P(163){30} --> {40}
+		{30}
+		[-inf, 39]
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=249  Master=215 Derived.P(215){40} --> {50}
+		{40}
+		[-inf, 49]
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=301  Master=267 Derived.P(267){50} --> {60}
+		{50}
+		[-inf, 59]
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=353  Master=319 Derived.P(319){60} --> {70}
+		{60}
+		[-inf, 69]
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=405  Master=371 Derived.P(371){70} --> {80}
+		{70}
+		[-inf, 79]
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=457  Master=423 Derived.P(423){80} --> {90}
+		{80}
+		[-inf, 89]
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=509  Master=475 Derived.P(475){90} --> {100}
+		{90}
+Inactive Tokens: *************************
+		[-inf, -1]
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=47  Master=26 g0(26){0} --> {10}
+		{0}
+		{100}
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=527  Master=475 Derived.P(475){90} --> {100}
+		[101, +inf]
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[100, 100]
+			world.m_maxPlannerSteps=int:CLOSED[100, 100]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Derived:d*************************
+		Tokens *************************
+				{0}
+				Derived.P(x=int:CLOSED[8, 8]i=int:CLOSED[-inf, +inf])
+				Key=26  Master=NONE
+					Merged Key=93 from Derived.P(65){10} --> {20}
+				{10}
+				{10}
+				Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+				Key=65  Master=26 g0(26){0} --> {10}
+					Merged Key=145 from Derived.P(111){20} --> {30}
+				{20}
+				{20}
+				Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+				Key=111  Master=65 Derived.P(65){10} --> {20}
+					Merged Key=197 from Derived.P(163){30} --> {40}
+				{30}
+				{30}
+				Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+				Key=163  Master=111 Derived.P(111){20} --> {30}
+					Merged Key=249 from Derived.P(215){40} --> {50}
+				{40}
+				{40}
+				Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+				Key=215  Master=163 Derived.P(163){30} --> {40}
+					Merged Key=301 from Derived.P(267){50} --> {60}
+				{50}
+				{50}
+				Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+				Key=267  Master=215 Derived.P(215){40} --> {50}
+					Merged Key=353 from Derived.P(319){60} --> {70}
+				{60}
+				{60}
+				Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+				Key=319  Master=267 Derived.P(267){50} --> {60}
+					Merged Key=405 from Derived.P(371){70} --> {80}
+				{70}
+				{70}
+				Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+				Key=371  Master=319 Derived.P(319){60} --> {70}
+					Merged Key=457 from Derived.P(423){80} --> {90}
+				{80}
+				{80}
+				Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+				Key=423  Master=371 Derived.P(371){70} --> {80}
+					Merged Key=509 from Derived.P(475){90} --> {100}
+				{90}
+				{90}
+				Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+				Key=475  Master=423 Derived.P(423){80} --> {90}
+				{100}
+		End Tokens *********************
+	End Derived:d*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	d=Derived:CLOSED{d(23)}
+Merged Tokens: *************************
+		[-inf, 9]
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=93  Master=65 Derived.P(65){10} --> {20}
+		{10}
+		[-inf, 19]
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=145  Master=111 Derived.P(111){20} --> {30}
+		{20}
+		[-inf, 29]
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=197  Master=163 Derived.P(163){30} --> {40}
+		{30}
+		[-inf, 39]
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=249  Master=215 Derived.P(215){40} --> {50}
+		{40}
+		[-inf, 49]
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=301  Master=267 Derived.P(267){50} --> {60}
+		{50}
+		[-inf, 59]
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=353  Master=319 Derived.P(319){60} --> {70}
+		{60}
+		[-inf, 69]
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=405  Master=371 Derived.P(371){70} --> {80}
+		{70}
+		[-inf, 79]
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=457  Master=423 Derived.P(423){80} --> {90}
+		{80}
+		[-inf, 89]
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=509  Master=475 Derived.P(475){90} --> {100}
+		{90}
+Inactive Tokens: *************************
+		[-inf, -1]
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=47  Master=26 g0(26){0} --> {10}
+		{0}
+		{100}
+		Derived.P(x=int:CLOSED[-inf, +inf]i=int:CLOSED[-inf, +inf])
+		Key=527  Master=475 Derived.P(475){90} --> {100}
+		[101, +inf]
+
+Finished

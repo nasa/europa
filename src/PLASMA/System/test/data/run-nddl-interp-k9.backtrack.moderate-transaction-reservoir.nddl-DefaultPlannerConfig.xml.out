@@ -1,0 +1,1502 @@
+Created node [id_538] initially enabled
+Created node [id_539] initially enabled
+Maximum flow instance created with source [id_538] and sink [id_539]
+Created node [id_538] initially enabled
+Created node [id_539] initially enabled
+Maximum flow instance created with source [id_538] and sink [id_539]
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[500, 500]
+			world.m_maxPlannerSteps=int:CLOSED[1000, 1000]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Rover:rover*************************
+		Variables *************************
+			rover.BATTERY_MIN=float:CLOSED[0, 0]
+			rover.BATTERY_MAX=float:CLOSED[518400, 518400]
+			rover.m_position=Position:CLOSED{rover.m_position(33)}
+			rover.m_tracker=Tracker:CLOSED{rover.m_tracker(39)}
+			rover.m_oppsci=OpportunisticScience:CLOSED{rover.m_oppsci(45)}
+			rover.m_champ=CHAMP:CLOSED{rover.m_champ(51)}
+			rover.m_energy=Energy:CLOSED{rover.m_energy(61)}
+		End Variables *********************
+	End Rover:rover*************************
+	Position:rover.m_position*************************
+		Tokens *************************
+				{0}
+				Position.At(location=Location:CLOSED{start(103)}TYPE=Types:CLOSED{FLUENT})
+				Key=517  Master=NONE
+					Merged Key=1421 from Position.navigate(766)[4, 492] --> [5, 493]
+				[4, 492]
+				[4, 492]
+				Position.navigate(from=Location:CLOSED{start(103)}to=Location:CLOSED{L4(88)}TYPE=Types:CLOSED{ACTION}m_duration_mean_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_mean_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000])
+				Key=766  Master=517 a(517){0} --> [4, 492]
+					Merged Key=1768 from Position.At(917)[5, 493] --> [12, +inf]
+				[5, 493]
+				[5, 493]
+				Position.At(location=Location:CLOSED{L4(88)}TYPE=Types:CLOSED{FLUENT})
+				Key=917  Master=541 ipg(541)[11, 499] --> [12, 500]
+					Merged Key=1400 from Position.navigate(766)[4, 492] --> [5, 493]
+					Merged Key=2072 from CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+					Merged Key=2502 from CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+					Merged Key=2783 from CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+				[12, +inf]
+		End Tokens *********************
+		Variables *************************
+			rover.m_position.m_rover=Rover:CLOSED{rover(25)}
+		End Variables *********************
+	End Position:rover.m_position*************************
+	Tracker:rover.m_tracker*************************
+		Tokens *************************
+				{0}
+				Tracker.TrackingOff(TYPE=Types:CLOSED{FLUENT})
+				Key=578  Master=NONE
+					Merged Key=1839 from Tracker.trackloadgroup(978)[1, 489] --> [2, 490]
+				[1, 489]
+				[1, 489]
+				Tracker.trackloadgroup(TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+				Key=978  Master=578 toff(578){0} --> [1, 489]
+					Merged Key=2152 from Tracker.LandmarksDefined(1820)[2, 490] --> [3, 491]
+				[2, 490]
+				[2, 490]
+				Tracker.LandmarksDefined(TYPE=Types:CLOSED{FLUENT})
+				Key=1820  Master=978 Tracker.trackloadgroup(978)[1, 489] --> [2, 490]
+					Merged Key=1912 from Target.trackstart(1319)[2, 490] --> [3, 491]
+					Merged Key=2358 from Tracker.StartTracking(2183)[3, 491] --> [4, 492]
+				[3, 491]
+				[3, 491]
+				Tracker.StartTracking(TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+				Key=2183  Master=1820 Tracker.LandmarksDefined(1820)[2, 490] --> [3, 491]
+					Merged Key=3150 from Tracker.TrackingOn(896)[4, 492] --> [12, +inf]
+				[4, 492]
+				[4, 492]
+				Tracker.TrackingOn(TYPE=Types:CLOSED{FLUENT})
+				Key=896  Master=541 ipg(541)[11, 499] --> [12, 500]
+					Merged Key=1443 from Position.navigate(766)[4, 492] --> [5, 493]
+					Merged Key=2051 from CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+					Merged Key=2377 from Tracker.StartTracking(2183)[3, 491] --> [4, 492]
+					Merged Key=2481 from CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+					Merged Key=2762 from CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+				[12, +inf]
+		End Tokens *********************
+		Variables *************************
+			rover.m_tracker.m_rover=Rover:CLOSED{rover(25)}
+		End Variables *********************
+	End Tracker:rover.m_tracker*************************
+	OpportunisticScience:rover.m_oppsci*************************
+		Tokens *************************
+				{0}
+				OpportunisticScience.OppSciIdle(TYPE=Types:CLOSED{FLUENT})
+				Key=600  Master=NONE
+					Merged Key=939 from ipg(541)[11, 499] --> [12, 500]
+					Merged Key=1464 from Position.navigate(766)[4, 492] --> [5, 493]
+					Merged Key=2094 from CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+					Merged Key=2524 from CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+					Merged Key=2805 from CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+				[12, 500]
+		End Tokens *********************
+		Variables *************************
+			rover.m_oppsci.m_rover=Rover:CLOSED{rover(25)}
+		End Variables *********************
+	End OpportunisticScience:rover.m_oppsci*************************
+	CHAMP:rover.m_champ*************************
+		Tokens *************************
+				{0}
+				CHAMP.IPIdle(TYPE=Types:CLOSED{FLUENT})
+				Key=622  Master=NONE
+					Merged Key=1485 from Position.navigate(766)[4, 492] --> [5, 493]
+					Merged Key=2691 from CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+				[5, 493]
+				[5, 493]
+				CHAMP.ipgetname(target=Target:CLOSED{L4_target(190)}at_loc=Location:CLOSED{L4(88)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+				Key=2581  Master=2408 CHAMP.IPHaveName(2408)[6, 494] --> [7, 495]
+				[6, 494]
+				[6, 494]
+				CHAMP.IPHaveName(target=Target:CLOSED{L0_target(106)}at_loc=Location:CLOSED{D14(79)}TYPE=Types:CLOSED{FLUENT})
+				Key=2408  Master=2244 CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+					Merged Key=2710 from CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+				[7, 495]
+				[7, 495]
+				CHAMP.ipsettarget(target=Target:CLOSED{L4_target(190)}at_loc=Location:CLOSED{L4(88)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+				Key=2244  Master=1978 CHAMP.IPTargetSet(1978)[8, 496] --> [9, 497]
+					Merged Key=2614 from CHAMP.IPHaveName(2408)[6, 494] --> [7, 495]
+				[8, 496]
+				[8, 496]
+				CHAMP.IPTargetSet(target=Target:CLOSED{L0_target(106)}at_loc=Location:CLOSED{D14(79)}TYPE=Types:CLOSED{FLUENT})
+				Key=1978  Master=1525 CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+					Merged Key=2429 from CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+				[9, 497]
+				[9, 497]
+				CHAMP.ipplaceinstrument(target=Target:CLOSED{L4_target(190)}at_loc=Location:CLOSED{L4(88)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+				Key=1525  Master=844 CHAMP.IPDonePlaceInstrument(844)[10, 498] --> [11, 499]
+					Merged Key=2277 from CHAMP.IPTargetSet(1978)[8, 496] --> [9, 497]
+				[10, 498]
+				[10, 498]
+				CHAMP.IPDonePlaceInstrument(target=Target:CLOSED{L0_target(106)}at_loc=Location:CLOSED{D14(79)}TYPE=Types:CLOSED{FLUENT})
+				Key=844  Master=541 ipg(541)[11, 499] --> [12, 500]
+					Merged Key=1999 from CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+				[11, 499]
+				[11, 499]
+				CHAMP.ipgetstatus(target=Target:CLOSED{L4_target(190)}at_loc=Location:CLOSED{L4(88)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+				Key=541  Master=NONE
+					Merged Key=1558 from CHAMP.IPDonePlaceInstrument(844)[10, 498] --> [11, 499]
+				[12, 500]
+		End Tokens *********************
+		Variables *************************
+			rover.m_champ.m_rover=Rover:CLOSED{rover(25)}
+		End Variables *********************
+	End CHAMP:rover.m_champ*************************
+	Energy:rover.m_energy*************************
+		Variables *************************
+			rover.m_energy.initialCapacity=float:CLOSED[1000, 1000]
+			rover.m_energy.levelLimitMin=float:CLOSED[0, 0]
+			rover.m_energy.levelLimitMax=float:CLOSED[518400, 518400]
+			rover.m_energy.productionRateMax=float:CLOSED[+inf, +inf]
+			rover.m_energy.productionMax=float:CLOSED[+inf, +inf]
+			rover.m_energy.consumptionRateMax=float:CLOSED[+inf, +inf]
+			rover.m_energy.consumptionMax=float:CLOSED[+inf, +inf]
+		End Variables *********************
+	End Energy:rover.m_energy*************************
+	Location:D14*************************
+	End Location:D14*************************
+	Location:D13*************************
+	End Location:D13*************************
+	Location:C1*************************
+	End Location:C1*************************
+	Location:L4*************************
+	End Location:L4*************************
+	Location:L3*************************
+	End Location:L3*************************
+	Location:L2*************************
+	End Location:L2*************************
+	Location:L1*************************
+	End Location:L1*************************
+	Location:L0*************************
+	End Location:L0*************************
+	Location:start*************************
+	End Location:start*************************
+	Target:L0_target*************************
+		Tokens *************************
+				{0}
+				Target.NotTracked(target=Target:CLOSED{L0_target(106)}TYPE=Types:CLOSED{FLUENT})
+				Key=644  Master=NONE
+				[1, 500]
+		End Tokens *********************
+	End Target:L0_target*************************
+	CHAMP_Accessable:ch_L0_target*************************
+		Variables *************************
+			ch_L0_target.m_from=Location:CLOSED{L0(100)}
+			ch_L0_target.m_to=Target:CLOSED{L0_target(106)}
+		End Variables *********************
+	End CHAMP_Accessable:ch_L0_target*************************
+	OppSci_Accessable:op_L0_target*************************
+		Variables *************************
+			op_L0_target.m_from=Location:CLOSED{L0(100)}
+			op_L0_target.m_to=Target:CLOSED{L0_target(106)}
+		End Variables *********************
+	End OppSci_Accessable:op_L0_target*************************
+	Target:L1_target*************************
+		Tokens *************************
+				{0}
+				Target.NotTracked(target=Target:CLOSED{L1_target(127)}TYPE=Types:CLOSED{FLUENT})
+				Key=668  Master=NONE
+				[1, 500]
+		End Tokens *********************
+	End Target:L1_target*************************
+	CHAMP_Accessable:ch_L1_target*************************
+		Variables *************************
+			ch_L1_target.m_from=Location:CLOSED{L1(97)}
+			ch_L1_target.m_to=Target:CLOSED{L1_target(127)}
+		End Variables *********************
+	End CHAMP_Accessable:ch_L1_target*************************
+	OppSci_Accessable:op_L1_target*************************
+		Variables *************************
+			op_L1_target.m_from=Location:CLOSED{L1(97)}
+			op_L1_target.m_to=Target:CLOSED{L1_target(127)}
+		End Variables *********************
+	End OppSci_Accessable:op_L1_target*************************
+	Target:L2_target*************************
+		Tokens *************************
+				{0}
+				Target.NotTracked(target=Target:CLOSED{L2_target(148)}TYPE=Types:CLOSED{FLUENT})
+				Key=692  Master=NONE
+				[1, 500]
+		End Tokens *********************
+	End Target:L2_target*************************
+	CHAMP_Accessable:ch_L2_target*************************
+		Variables *************************
+			ch_L2_target.m_from=Location:CLOSED{L2(94)}
+			ch_L2_target.m_to=Target:CLOSED{L2_target(148)}
+		End Variables *********************
+	End CHAMP_Accessable:ch_L2_target*************************
+	OppSci_Accessable:op_L2_target*************************
+		Variables *************************
+			op_L2_target.m_from=Location:CLOSED{L2(94)}
+			op_L2_target.m_to=Target:CLOSED{L2_target(148)}
+		End Variables *********************
+	End OppSci_Accessable:op_L2_target*************************
+	Target:L3_target*************************
+		Tokens *************************
+				{0}
+				Target.NotTracked(target=Target:CLOSED{L3_target(169)}TYPE=Types:CLOSED{FLUENT})
+				Key=716  Master=NONE
+				[1, 500]
+		End Tokens *********************
+	End Target:L3_target*************************
+	CHAMP_Accessable:ch_L3_target*************************
+		Variables *************************
+			ch_L3_target.m_from=Location:CLOSED{L3(91)}
+			ch_L3_target.m_to=Target:CLOSED{L3_target(169)}
+		End Variables *********************
+	End CHAMP_Accessable:ch_L3_target*************************
+	OppSci_Accessable:op_L3_target*************************
+		Variables *************************
+			op_L3_target.m_from=Location:CLOSED{L3(91)}
+			op_L3_target.m_to=Target:CLOSED{L3_target(169)}
+		End Variables *********************
+	End OppSci_Accessable:op_L3_target*************************
+	Target:L4_target*************************
+		Tokens *************************
+				{0}
+				Target.NotTracked(target=Target:CLOSED{L4_target(190)}TYPE=Types:CLOSED{FLUENT})
+				Key=740  Master=NONE
+					Merged Key=1891 from Target.trackstart(1319)[2, 490] --> [3, 491]
+				[2, 490]
+				[2, 490]
+				Target.trackstart(target=Target:CLOSED{L4_target(190)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+				Key=1319  Master=740 nt_L4_target(740){0} --> [2, 490]
+					Merged Key=1636 from Target.Tracked(865)[3, 491] --> [12, +inf]
+				[3, 491]
+				[3, 491]
+				Target.Tracked(target=Target:CLOSED{L4_target(190)}TYPE=Types:CLOSED{FLUENT})
+				Key=865  Master=541 ipg(541)[11, 499] --> [12, 500]
+					Merged Key=1870 from Target.trackstart(1319)[2, 490] --> [3, 491]
+					Merged Key=2020 from CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+					Merged Key=2450 from CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+					Merged Key=2731 from CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+				[12, +inf]
+		End Tokens *********************
+	End Target:L4_target*************************
+	CHAMP_Accessable:ch_L4_target*************************
+		Variables *************************
+			ch_L4_target.m_from=Location:CLOSED{L4(88)}
+			ch_L4_target.m_to=Target:CLOSED{L4_target(190)}
+		End Variables *********************
+	End CHAMP_Accessable:ch_L4_target*************************
+	OppSci_Accessable:op_L4_target*************************
+		Variables *************************
+			op_L4_target.m_from=Location:CLOSED{L4(88)}
+			op_L4_target.m_to=Target:CLOSED{L4_target(190)}
+		End Variables *********************
+	End OppSci_Accessable:op_L4_target*************************
+	Path:L4D14*************************
+		Variables *************************
+			L4D14.m_from=Location:CLOSED{L4(88)}
+			L4D14.m_to=Location:CLOSED{D14(79)}
+		End Variables *********************
+	End Path:L4D14*************************
+	Path:D14L4*************************
+		Variables *************************
+			D14L4.m_from=Location:CLOSED{D14(79)}
+			D14L4.m_to=Location:CLOSED{L4(88)}
+		End Variables *********************
+	End Path:D14L4*************************
+	Path:L2D13*************************
+		Variables *************************
+			L2D13.m_from=Location:CLOSED{L2(94)}
+			L2D13.m_to=Location:CLOSED{D13(82)}
+		End Variables *********************
+	End Path:L2D13*************************
+	Path:D13L2*************************
+		Variables *************************
+			D13L2.m_from=Location:CLOSED{D13(82)}
+			D13L2.m_to=Location:CLOSED{L2(94)}
+		End Variables *********************
+	End Path:D13L2*************************
+	Path:C1D14*************************
+		Variables *************************
+			C1D14.m_from=Location:CLOSED{C1(85)}
+			C1D14.m_to=Location:CLOSED{D14(79)}
+		End Variables *********************
+	End Path:C1D14*************************
+	Path:D14C1*************************
+		Variables *************************
+			D14C1.m_from=Location:CLOSED{D14(79)}
+			D14C1.m_to=Location:CLOSED{C1(85)}
+		End Variables *********************
+	End Path:D14C1*************************
+	Path:L3D14*************************
+		Variables *************************
+			L3D14.m_from=Location:CLOSED{L3(91)}
+			L3D14.m_to=Location:CLOSED{D14(79)}
+		End Variables *********************
+	End Path:L3D14*************************
+	Path:D14L3*************************
+		Variables *************************
+			D14L3.m_from=Location:CLOSED{D14(79)}
+			D14L3.m_to=Location:CLOSED{L3(91)}
+		End Variables *********************
+	End Path:D14L3*************************
+	Path:D14L1*************************
+		Variables *************************
+			D14L1.m_from=Location:CLOSED{D14(79)}
+			D14L1.m_to=Location:CLOSED{L1(97)}
+		End Variables *********************
+	End Path:D14L1*************************
+	Path:L1D14*************************
+		Variables *************************
+			L1D14.m_from=Location:CLOSED{L1(97)}
+			L1D14.m_to=Location:CLOSED{D14(79)}
+		End Variables *********************
+	End Path:L1D14*************************
+	Path:C1D13*************************
+		Variables *************************
+			C1D13.m_from=Location:CLOSED{C1(85)}
+			C1D13.m_to=Location:CLOSED{D13(82)}
+		End Variables *********************
+	End Path:C1D13*************************
+	Path:D13C1*************************
+		Variables *************************
+			D13C1.m_from=Location:CLOSED{D13(82)}
+			D13C1.m_to=Location:CLOSED{C1(85)}
+		End Variables *********************
+	End Path:D13C1*************************
+	Path:L4D13*************************
+		Variables *************************
+			L4D13.m_from=Location:CLOSED{L4(88)}
+			L4D13.m_to=Location:CLOSED{D13(82)}
+		End Variables *********************
+	End Path:L4D13*************************
+	Path:D13L4*************************
+		Variables *************************
+			D13L4.m_from=Location:CLOSED{D13(82)}
+			D13L4.m_to=Location:CLOSED{L4(88)}
+		End Variables *********************
+	End Path:D13L4*************************
+	Path:D13L0*************************
+		Variables *************************
+			D13L0.m_from=Location:CLOSED{D13(82)}
+			D13L0.m_to=Location:CLOSED{L0(100)}
+		End Variables *********************
+	End Path:D13L0*************************
+	Path:L0D13*************************
+		Variables *************************
+			L0D13.m_from=Location:CLOSED{L0(100)}
+			L0D13.m_to=Location:CLOSED{D13(82)}
+		End Variables *********************
+	End Path:L0D13*************************
+	Path:L4C1*************************
+		Variables *************************
+			L4C1.m_from=Location:CLOSED{L4(88)}
+			L4C1.m_to=Location:CLOSED{C1(85)}
+		End Variables *********************
+	End Path:L4C1*************************
+	Path:C1L3*************************
+		Variables *************************
+			C1L3.m_from=Location:CLOSED{C1(85)}
+			C1L3.m_to=Location:CLOSED{L3(91)}
+		End Variables *********************
+	End Path:C1L3*************************
+	Path:L3C1*************************
+		Variables *************************
+			L3C1.m_from=Location:CLOSED{L3(91)}
+			L3C1.m_to=Location:CLOSED{C1(85)}
+		End Variables *********************
+	End Path:L3C1*************************
+	Path:C1L4*************************
+		Variables *************************
+			C1L4.m_from=Location:CLOSED{C1(85)}
+			C1L4.m_to=Location:CLOSED{L4(88)}
+		End Variables *********************
+	End Path:C1L4*************************
+	Path:C1L2*************************
+		Variables *************************
+			C1L2.m_from=Location:CLOSED{C1(85)}
+			C1L2.m_to=Location:CLOSED{L2(94)}
+		End Variables *********************
+	End Path:C1L2*************************
+	Path:L2C1*************************
+		Variables *************************
+			L2C1.m_from=Location:CLOSED{L2(94)}
+			L2C1.m_to=Location:CLOSED{C1(85)}
+		End Variables *********************
+	End Path:L2C1*************************
+	Path:L4L1*************************
+		Variables *************************
+			L4L1.m_from=Location:CLOSED{L4(88)}
+			L4L1.m_to=Location:CLOSED{L1(97)}
+		End Variables *********************
+	End Path:L4L1*************************
+	Path:L1L4*************************
+		Variables *************************
+			L1L4.m_from=Location:CLOSED{L1(97)}
+			L1L4.m_to=Location:CLOSED{L4(88)}
+		End Variables *********************
+	End Path:L1L4*************************
+	Path:L4start*************************
+		Variables *************************
+			L4start.m_from=Location:CLOSED{L4(88)}
+			L4start.m_to=Location:CLOSED{start(103)}
+		End Variables *********************
+	End Path:L4start*************************
+	Path:startL4*************************
+		Variables *************************
+			startL4.m_from=Location:CLOSED{start(103)}
+			startL4.m_to=Location:CLOSED{L4(88)}
+		End Variables *********************
+	End Path:startL4*************************
+	Path:L3L2*************************
+		Variables *************************
+			L3L2.m_from=Location:CLOSED{L3(91)}
+			L3L2.m_to=Location:CLOSED{L2(94)}
+		End Variables *********************
+	End Path:L3L2*************************
+	Path:L2L3*************************
+		Variables *************************
+			L2L3.m_from=Location:CLOSED{L2(94)}
+			L2L3.m_to=Location:CLOSED{L3(91)}
+		End Variables *********************
+	End Path:L2L3*************************
+	Path:L2L0*************************
+		Variables *************************
+			L2L0.m_from=Location:CLOSED{L2(94)}
+			L2L0.m_to=Location:CLOSED{L0(100)}
+		End Variables *********************
+	End Path:L2L0*************************
+	Path:L0L2*************************
+		Variables *************************
+			L0L2.m_from=Location:CLOSED{L0(100)}
+			L0L2.m_to=Location:CLOSED{L2(94)}
+		End Variables *********************
+	End Path:L0L2*************************
+	Path:L1start*************************
+		Variables *************************
+			L1start.m_from=Location:CLOSED{L1(97)}
+			L1start.m_to=Location:CLOSED{start(103)}
+		End Variables *********************
+	End Path:L1start*************************
+	Path:startL1*************************
+		Variables *************************
+			startL1.m_from=Location:CLOSED{start(103)}
+			startL1.m_to=Location:CLOSED{L1(97)}
+		End Variables *********************
+	End Path:startL1*************************
+	Path:L0start*************************
+		Variables *************************
+			L0start.m_from=Location:CLOSED{L0(100)}
+			L0start.m_to=Location:CLOSED{start(103)}
+		End Variables *********************
+	End Path:L0start*************************
+	Path:startL0*************************
+		Variables *************************
+			startL0.m_from=Location:CLOSED{start(103)}
+			startL0.m_to=Location:CLOSED{L0(100)}
+		End Variables *********************
+	End Path:startL0*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	rover=Rover:CLOSED{rover(25)}
+	D14=Location:CLOSED{D14(79)}
+	D13=Location:CLOSED{D13(82)}
+	C1=Location:CLOSED{C1(85)}
+	L4=Location:CLOSED{L4(88)}
+	L3=Location:CLOSED{L3(91)}
+	L2=Location:CLOSED{L2(94)}
+	L1=Location:CLOSED{L1(97)}
+	L0=Location:CLOSED{L0(100)}
+	start=Location:CLOSED{start(103)}
+	L0_target=Target:CLOSED{L0_target(106)}
+	ch_L0_target=CHAMP_Accessable:CLOSED{ch_L0_target(111)}
+	op_L0_target=OppSci_Accessable:CLOSED{op_L0_target(120)}
+	L1_target=Target:CLOSED{L1_target(127)}
+	ch_L1_target=CHAMP_Accessable:CLOSED{ch_L1_target(132)}
+	op_L1_target=OppSci_Accessable:CLOSED{op_L1_target(141)}
+	L2_target=Target:CLOSED{L2_target(148)}
+	ch_L2_target=CHAMP_Accessable:CLOSED{ch_L2_target(153)}
+	op_L2_target=OppSci_Accessable:CLOSED{op_L2_target(162)}
+	L3_target=Target:CLOSED{L3_target(169)}
+	ch_L3_target=CHAMP_Accessable:CLOSED{ch_L3_target(174)}
+	op_L3_target=OppSci_Accessable:CLOSED{op_L3_target(183)}
+	L4_target=Target:CLOSED{L4_target(190)}
+	ch_L4_target=CHAMP_Accessable:CLOSED{ch_L4_target(195)}
+	op_L4_target=OppSci_Accessable:CLOSED{op_L4_target(204)}
+	L4D14=Path:CLOSED{L4D14(213)}
+	D14L4=Path:CLOSED{D14L4(222)}
+	L2D13=Path:CLOSED{L2D13(231)}
+	D13L2=Path:CLOSED{D13L2(240)}
+	C1D14=Path:CLOSED{C1D14(249)}
+	D14C1=Path:CLOSED{D14C1(258)}
+	L3D14=Path:CLOSED{L3D14(267)}
+	D14L3=Path:CLOSED{D14L3(276)}
+	D14L1=Path:CLOSED{D14L1(285)}
+	L1D14=Path:CLOSED{L1D14(294)}
+	C1D13=Path:CLOSED{C1D13(303)}
+	D13C1=Path:CLOSED{D13C1(312)}
+	L4D13=Path:CLOSED{L4D13(321)}
+	D13L4=Path:CLOSED{D13L4(330)}
+	D13L0=Path:CLOSED{D13L0(339)}
+	L0D13=Path:CLOSED{L0D13(348)}
+	L4C1=Path:CLOSED{L4C1(357)}
+	C1L3=Path:CLOSED{C1L3(366)}
+	L3C1=Path:CLOSED{L3C1(375)}
+	C1L4=Path:CLOSED{C1L4(384)}
+	C1L2=Path:CLOSED{C1L2(393)}
+	L2C1=Path:CLOSED{L2C1(402)}
+	L4L1=Path:CLOSED{L4L1(411)}
+	L1L4=Path:CLOSED{L1L4(420)}
+	L4start=Path:CLOSED{L4start(429)}
+	startL4=Path:CLOSED{startL4(438)}
+	L3L2=Path:CLOSED{L3L2(447)}
+	L2L3=Path:CLOSED{L2L3(456)}
+	L2L0=Path:CLOSED{L2L0(465)}
+	L0L2=Path:CLOSED{L0L2(474)}
+	L1start=Path:CLOSED{L1start(483)}
+	startL1=Path:CLOSED{startL1(492)}
+	L0start=Path:CLOSED{L0start(501)}
+	startL0=Path:CLOSED{startL0(510)}
+Merged Tokens: *************************
+		[-inf, 499]
+		OpportunisticScience.OppSciIdle(TYPE=Types:CLOSED{FLUENT})
+		Key=939  Master=541 ipg(541)[11, 499] --> [12, 500]
+		[3, +inf]
+		[2, 499]
+		Position.At(location=Location:CLOSED{L0(100),L1(97),L4(88)}TYPE=Types:CLOSED{FLUENT})
+		Key=1400  Master=766 Position.navigate(766)[4, 492] --> [5, 493]
+		[3, +inf]
+		[-inf, 497]
+		Position.At(location=Location:CLOSED{start(103)}TYPE=Types:CLOSED{FLUENT})
+		Key=1421  Master=766 Position.navigate(766)[4, 492] --> [5, 493]
+		[1, 498]
+		[-inf, 498]
+		Tracker.TrackingOn(TYPE=Types:CLOSED{FLUENT})
+		Key=1443  Master=766 Position.navigate(766)[4, 492] --> [5, 493]
+		[2, +inf]
+		[-inf, 498]
+		OpportunisticScience.OppSciIdle(TYPE=Types:CLOSED{FLUENT})
+		Key=1464  Master=766 Position.navigate(766)[4, 492] --> [5, 493]
+		[3, +inf]
+		[-inf, 498]
+		CHAMP.IPIdle(TYPE=Types:CLOSED{FLUENT})
+		Key=1485  Master=766 Position.navigate(766)[4, 492] --> [5, 493]
+		[3, +inf]
+		[5, 499]
+		CHAMP.ipgetstatus(target=Target:CLOSED{L0_target(106),L1_target(127),L2_target(148),L3_target(169),L4_target(190)}at_loc=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88),start(103)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1558  Master=844 CHAMP.IPDonePlaceInstrument(844)[10, 498] --> [11, 499]
+		[6, +inf]
+		[-inf, 498]
+		Target.trackstart(target=Target:CLOSED{L4_target(190)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1636  Master=865 Target.Tracked(865)[3, 491] --> [12, +inf]
+		[2, 499]
+		[-inf, 496]
+		Position.navigate(from=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88),start(103)}to=Location:CLOSED{L0(100),L1(97),L4(88)}TYPE=Types:CLOSED{ACTION}m_duration_mean_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_mean_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000])
+		Key=1768  Master=917 Position.At(917)[5, 493] --> [12, +inf]
+		[3, 497]
+		[-inf, 493]
+		Tracker.TrackingOff(TYPE=Types:CLOSED{FLUENT})
+		Key=1839  Master=978 Tracker.trackloadgroup(978)[1, 489] --> [2, 490]
+		[1, 494]
+		[2, 499]
+		Target.Tracked(target=Target:CLOSED{L4_target(190)}TYPE=Types:CLOSED{FLUENT})
+		Key=1870  Master=1319 Target.trackstart(1319)[2, 490] --> [3, 491]
+		[3, +inf]
+		[-inf, 497]
+		Target.NotTracked(target=Target:CLOSED{L4_target(190)}TYPE=Types:CLOSED{FLUENT})
+		Key=1891  Master=1319 Target.trackstart(1319)[2, 490] --> [3, 491]
+		[1, 498]
+		[-inf, 498]
+		Tracker.LandmarksDefined(TYPE=Types:CLOSED{FLUENT})
+		Key=1912  Master=1319 Target.trackstart(1319)[2, 490] --> [3, 491]
+		[2, +inf]
+		[6, 498]
+		CHAMP.IPDonePlaceInstrument(target=Target:CLOSED{L0_target(106),L1_target(127),L2_target(148),L3_target(169),L4_target(190)}at_loc=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88),start(103)}TYPE=Types:CLOSED{FLUENT})
+		Key=1999  Master=1525 CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+		[7, +inf]
+		[-inf, 497]
+		Target.Tracked(target=Target:CLOSED{L0_target(106),L1_target(127),L2_target(148),L3_target(169),L4_target(190)}TYPE=Types:CLOSED{FLUENT})
+		Key=2020  Master=1525 CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+		[6, +inf]
+		[-inf, 497]
+		Tracker.TrackingOn(TYPE=Types:CLOSED{FLUENT})
+		Key=2051  Master=1525 CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+		[6, +inf]
+		[-inf, 497]
+		Position.At(location=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88),start(103)}TYPE=Types:CLOSED{FLUENT})
+		Key=2072  Master=1525 CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+		[6, +inf]
+		[-inf, 497]
+		OpportunisticScience.OppSciIdle(TYPE=Types:CLOSED{FLUENT})
+		Key=2094  Master=1525 CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+		[6, +inf]
+		[-inf, 493]
+		Tracker.trackloadgroup(TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=2152  Master=1820 Tracker.LandmarksDefined(1820)[2, 490] --> [3, 491]
+		[2, 494]
+		[7, 497]
+		CHAMP.ipplaceinstrument(target=Target:CLOSED{L0_target(106),L1_target(127),L2_target(148),L3_target(169),L4_target(190)}at_loc=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88),start(103)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=2277  Master=1978 CHAMP.IPTargetSet(1978)[8, 496] --> [9, 497]
+		[8, +inf]
+		[-inf, 492]
+		Tracker.LandmarksDefined(TYPE=Types:CLOSED{FLUENT})
+		Key=2358  Master=2183 Tracker.StartTracking(2183)[3, 491] --> [4, 492]
+		[3, 493]
+		[4, 494]
+		Tracker.TrackingOn(TYPE=Types:CLOSED{FLUENT})
+		Key=2377  Master=2183 Tracker.StartTracking(2183)[3, 491] --> [4, 492]
+		[5, +inf]
+		[7, 496]
+		CHAMP.IPTargetSet(target=Target:CLOSED{L0_target(106),L1_target(127),L2_target(148),L3_target(169),L4_target(190)}at_loc=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88),start(103)}TYPE=Types:CLOSED{FLUENT})
+		Key=2429  Master=2244 CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+		[8, +inf]
+		[-inf, 495]
+		Target.Tracked(target=Target:CLOSED{L0_target(106),L1_target(127),L2_target(148),L3_target(169),L4_target(190)}TYPE=Types:CLOSED{FLUENT})
+		Key=2450  Master=2244 CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+		[7, +inf]
+		[-inf, 495]
+		Tracker.TrackingOn(TYPE=Types:CLOSED{FLUENT})
+		Key=2481  Master=2244 CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+		[7, +inf]
+		[-inf, 495]
+		Position.At(location=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88),start(103)}TYPE=Types:CLOSED{FLUENT})
+		Key=2502  Master=2244 CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+		[7, +inf]
+		[-inf, 495]
+		OpportunisticScience.OppSciIdle(TYPE=Types:CLOSED{FLUENT})
+		Key=2524  Master=2244 CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+		[7, +inf]
+		[7, 495]
+		CHAMP.ipsettarget(target=Target:CLOSED{L0_target(106),L1_target(127),L2_target(148),L3_target(169),L4_target(190)}at_loc=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88),start(103)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=2614  Master=2408 CHAMP.IPHaveName(2408)[6, 494] --> [7, 495]
+		[8, +inf]
+		[-inf, 492]
+		CHAMP.IPIdle(TYPE=Types:CLOSED{FLUENT})
+		Key=2691  Master=2581 CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+		[5, 493]
+		[6, 494]
+		CHAMP.IPHaveName(target=Target:CLOSED{L0_target(106),L1_target(127),L2_target(148),L3_target(169),L4_target(190)}at_loc=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88),start(103)}TYPE=Types:CLOSED{FLUENT})
+		Key=2710  Master=2581 CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+		[7, +inf]
+		[-inf, 493]
+		Target.Tracked(target=Target:CLOSED{L0_target(106),L1_target(127),L2_target(148),L3_target(169),L4_target(190)}TYPE=Types:CLOSED{FLUENT})
+		Key=2731  Master=2581 CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+		[6, +inf]
+		[-inf, 493]
+		Tracker.TrackingOn(TYPE=Types:CLOSED{FLUENT})
+		Key=2762  Master=2581 CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+		[6, +inf]
+		[-inf, 493]
+		Position.At(location=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88),start(103)}TYPE=Types:CLOSED{FLUENT})
+		Key=2783  Master=2581 CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+		[6, +inf]
+		[-inf, 493]
+		OpportunisticScience.OppSciIdle(TYPE=Types:CLOSED{FLUENT})
+		Key=2805  Master=2581 CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+		[6, +inf]
+		[-inf, 491]
+		Tracker.StartTracking(TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=3150  Master=896 Tracker.TrackingOn(896)[4, 492] --> [12, +inf]
+		[4, 492]
+Inactive Tokens: *************************
+		[-inf, -1]
+		Position.navigate(from=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88)}to=Location:CLOSED{start(103)}TYPE=Types:CLOSED{ACTION}m_duration_mean_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_mean_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000])
+		Key=801  Master=517 a(517){0} --> [4, 492]
+		{0}
+		[1, 500]
+		Target.trackstart(target=Target:CLOSED{L0_target(106)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1023  Master=644 nt_L0_target(644){0} --> [1, 500]
+		[2, +inf]
+		[-inf, -1]
+		Target.trackstop(target=Target:CLOSED{L0_target(106)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1056  Master=644 nt_L0_target(644){0} --> [1, 500]
+		{0}
+		[1, 500]
+		Target.trackstart(target=Target:CLOSED{L1_target(127)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1097  Master=668 nt_L1_target(668){0} --> [1, 500]
+		[2, +inf]
+		[-inf, -1]
+		Target.trackstop(target=Target:CLOSED{L1_target(127)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1130  Master=668 nt_L1_target(668){0} --> [1, 500]
+		{0}
+		[1, 500]
+		Target.trackstart(target=Target:CLOSED{L2_target(148)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1171  Master=692 nt_L2_target(692){0} --> [1, 500]
+		[2, +inf]
+		[-inf, -1]
+		Target.trackstop(target=Target:CLOSED{L2_target(148)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1204  Master=692 nt_L2_target(692){0} --> [1, 500]
+		{0}
+		[1, 500]
+		Target.trackstart(target=Target:CLOSED{L3_target(169)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1245  Master=716 nt_L3_target(716){0} --> [1, 500]
+		[2, +inf]
+		[-inf, -1]
+		Target.trackstop(target=Target:CLOSED{L3_target(169)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1278  Master=716 nt_L3_target(716){0} --> [1, 500]
+		{0}
+		[-inf, -1]
+		Target.trackstop(target=Target:CLOSED{L4_target(190)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1352  Master=740 nt_L4_target(740){0} --> [2, 490]
+		{0}
+		[12, +inf]
+		Target.trackstop(target=Target:CLOSED{L4_target(190)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1603  Master=865 Target.Tracked(865)[3, 491] --> [12, +inf]
+		[13, +inf]
+		[12, +inf]
+		Tracker.trackfreeze(TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1679  Master=896 Tracker.TrackingOn(896)[4, 492] --> [12, +inf]
+		[13, +inf]
+		[12, +inf]
+		Position.navigate(from=Location:CLOSED{L4(88)}to=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),start(103)}TYPE=Types:CLOSED{ACTION}m_duration_mean_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_mean_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000])
+		Key=1733  Master=917 Position.At(917)[5, 493] --> [12, +inf]
+		[13, +inf]
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[500, 500]
+			world.m_maxPlannerSteps=int:CLOSED[1000, 1000]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Rover:rover*************************
+		Variables *************************
+			rover.BATTERY_MIN=float:CLOSED[0, 0]
+			rover.BATTERY_MAX=float:CLOSED[518400, 518400]
+			rover.m_position=Position:CLOSED{rover.m_position(33)}
+			rover.m_tracker=Tracker:CLOSED{rover.m_tracker(39)}
+			rover.m_oppsci=OpportunisticScience:CLOSED{rover.m_oppsci(45)}
+			rover.m_champ=CHAMP:CLOSED{rover.m_champ(51)}
+			rover.m_energy=Energy:CLOSED{rover.m_energy(61)}
+		End Variables *********************
+	End Rover:rover*************************
+	Position:rover.m_position*************************
+		Tokens *************************
+				{0}
+				Position.At(location=Location:CLOSED{start(103)}TYPE=Types:CLOSED{FLUENT})
+				Key=517  Master=NONE
+					Merged Key=1421 from Position.navigate(766)[4, 492] --> [5, 493]
+				[4, 492]
+				[4, 492]
+				Position.navigate(from=Location:CLOSED{start(103)}to=Location:CLOSED{L4(88)}TYPE=Types:CLOSED{ACTION}m_duration_mean_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_mean_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000])
+				Key=766  Master=517 a(517){0} --> [4, 492]
+					Merged Key=1768 from Position.At(917)[5, 493] --> [12, +inf]
+				[5, 493]
+				[5, 493]
+				Position.At(location=Location:CLOSED{L4(88)}TYPE=Types:CLOSED{FLUENT})
+				Key=917  Master=541 ipg(541)[11, 499] --> [12, 500]
+					Merged Key=1400 from Position.navigate(766)[4, 492] --> [5, 493]
+					Merged Key=2072 from CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+					Merged Key=2502 from CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+					Merged Key=2783 from CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+				[12, +inf]
+		End Tokens *********************
+		Variables *************************
+			rover.m_position.m_rover=Rover:CLOSED{rover(25)}
+		End Variables *********************
+	End Position:rover.m_position*************************
+	Tracker:rover.m_tracker*************************
+		Tokens *************************
+				{0}
+				Tracker.TrackingOff(TYPE=Types:CLOSED{FLUENT})
+				Key=578  Master=NONE
+					Merged Key=1839 from Tracker.trackloadgroup(978)[1, 489] --> [2, 490]
+				[1, 489]
+				[1, 489]
+				Tracker.trackloadgroup(TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+				Key=978  Master=578 toff(578){0} --> [1, 489]
+					Merged Key=2152 from Tracker.LandmarksDefined(1820)[2, 490] --> [3, 491]
+				[2, 490]
+				[2, 490]
+				Tracker.LandmarksDefined(TYPE=Types:CLOSED{FLUENT})
+				Key=1820  Master=978 Tracker.trackloadgroup(978)[1, 489] --> [2, 490]
+					Merged Key=1912 from Target.trackstart(1319)[2, 490] --> [3, 491]
+					Merged Key=2358 from Tracker.StartTracking(2183)[3, 491] --> [4, 492]
+				[3, 491]
+				[3, 491]
+				Tracker.StartTracking(TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+				Key=2183  Master=1820 Tracker.LandmarksDefined(1820)[2, 490] --> [3, 491]
+					Merged Key=3150 from Tracker.TrackingOn(896)[4, 492] --> [12, +inf]
+				[4, 492]
+				[4, 492]
+				Tracker.TrackingOn(TYPE=Types:CLOSED{FLUENT})
+				Key=896  Master=541 ipg(541)[11, 499] --> [12, 500]
+					Merged Key=1443 from Position.navigate(766)[4, 492] --> [5, 493]
+					Merged Key=2051 from CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+					Merged Key=2377 from Tracker.StartTracking(2183)[3, 491] --> [4, 492]
+					Merged Key=2481 from CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+					Merged Key=2762 from CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+				[12, +inf]
+		End Tokens *********************
+		Variables *************************
+			rover.m_tracker.m_rover=Rover:CLOSED{rover(25)}
+		End Variables *********************
+	End Tracker:rover.m_tracker*************************
+	OpportunisticScience:rover.m_oppsci*************************
+		Tokens *************************
+				{0}
+				OpportunisticScience.OppSciIdle(TYPE=Types:CLOSED{FLUENT})
+				Key=600  Master=NONE
+					Merged Key=939 from ipg(541)[11, 499] --> [12, 500]
+					Merged Key=1464 from Position.navigate(766)[4, 492] --> [5, 493]
+					Merged Key=2094 from CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+					Merged Key=2524 from CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+					Merged Key=2805 from CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+				[12, 500]
+		End Tokens *********************
+		Variables *************************
+			rover.m_oppsci.m_rover=Rover:CLOSED{rover(25)}
+		End Variables *********************
+	End OpportunisticScience:rover.m_oppsci*************************
+	CHAMP:rover.m_champ*************************
+		Tokens *************************
+				{0}
+				CHAMP.IPIdle(TYPE=Types:CLOSED{FLUENT})
+				Key=622  Master=NONE
+					Merged Key=1485 from Position.navigate(766)[4, 492] --> [5, 493]
+					Merged Key=2691 from CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+				[5, 493]
+				[5, 493]
+				CHAMP.ipgetname(target=Target:CLOSED{L4_target(190)}at_loc=Location:CLOSED{L4(88)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+				Key=2581  Master=2408 CHAMP.IPHaveName(2408)[6, 494] --> [7, 495]
+				[6, 494]
+				[6, 494]
+				CHAMP.IPHaveName(target=Target:CLOSED{L0_target(106)}at_loc=Location:CLOSED{D14(79)}TYPE=Types:CLOSED{FLUENT})
+				Key=2408  Master=2244 CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+					Merged Key=2710 from CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+				[7, 495]
+				[7, 495]
+				CHAMP.ipsettarget(target=Target:CLOSED{L4_target(190)}at_loc=Location:CLOSED{L4(88)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+				Key=2244  Master=1978 CHAMP.IPTargetSet(1978)[8, 496] --> [9, 497]
+					Merged Key=2614 from CHAMP.IPHaveName(2408)[6, 494] --> [7, 495]
+				[8, 496]
+				[8, 496]
+				CHAMP.IPTargetSet(target=Target:CLOSED{L0_target(106)}at_loc=Location:CLOSED{D14(79)}TYPE=Types:CLOSED{FLUENT})
+				Key=1978  Master=1525 CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+					Merged Key=2429 from CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+				[9, 497]
+				[9, 497]
+				CHAMP.ipplaceinstrument(target=Target:CLOSED{L4_target(190)}at_loc=Location:CLOSED{L4(88)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+				Key=1525  Master=844 CHAMP.IPDonePlaceInstrument(844)[10, 498] --> [11, 499]
+					Merged Key=2277 from CHAMP.IPTargetSet(1978)[8, 496] --> [9, 497]
+				[10, 498]
+				[10, 498]
+				CHAMP.IPDonePlaceInstrument(target=Target:CLOSED{L0_target(106)}at_loc=Location:CLOSED{D14(79)}TYPE=Types:CLOSED{FLUENT})
+				Key=844  Master=541 ipg(541)[11, 499] --> [12, 500]
+					Merged Key=1999 from CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+				[11, 499]
+				[11, 499]
+				CHAMP.ipgetstatus(target=Target:CLOSED{L4_target(190)}at_loc=Location:CLOSED{L4(88)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+				Key=541  Master=NONE
+					Merged Key=1558 from CHAMP.IPDonePlaceInstrument(844)[10, 498] --> [11, 499]
+				[12, 500]
+		End Tokens *********************
+		Variables *************************
+			rover.m_champ.m_rover=Rover:CLOSED{rover(25)}
+		End Variables *********************
+	End CHAMP:rover.m_champ*************************
+	Energy:rover.m_energy*************************
+		Variables *************************
+			rover.m_energy.initialCapacity=float:CLOSED[1000, 1000]
+			rover.m_energy.levelLimitMin=float:CLOSED[0, 0]
+			rover.m_energy.levelLimitMax=float:CLOSED[518400, 518400]
+			rover.m_energy.productionRateMax=float:CLOSED[+inf, +inf]
+			rover.m_energy.productionMax=float:CLOSED[+inf, +inf]
+			rover.m_energy.consumptionRateMax=float:CLOSED[+inf, +inf]
+			rover.m_energy.consumptionMax=float:CLOSED[+inf, +inf]
+		End Variables *********************
+	End Energy:rover.m_energy*************************
+	Location:D14*************************
+	End Location:D14*************************
+	Location:D13*************************
+	End Location:D13*************************
+	Location:C1*************************
+	End Location:C1*************************
+	Location:L4*************************
+	End Location:L4*************************
+	Location:L3*************************
+	End Location:L3*************************
+	Location:L2*************************
+	End Location:L2*************************
+	Location:L1*************************
+	End Location:L1*************************
+	Location:L0*************************
+	End Location:L0*************************
+	Location:start*************************
+	End Location:start*************************
+	Target:L0_target*************************
+		Tokens *************************
+				{0}
+				Target.NotTracked(target=Target:CLOSED{L0_target(106)}TYPE=Types:CLOSED{FLUENT})
+				Key=644  Master=NONE
+				[1, 500]
+		End Tokens *********************
+	End Target:L0_target*************************
+	CHAMP_Accessable:ch_L0_target*************************
+		Variables *************************
+			ch_L0_target.m_from=Location:CLOSED{L0(100)}
+			ch_L0_target.m_to=Target:CLOSED{L0_target(106)}
+		End Variables *********************
+	End CHAMP_Accessable:ch_L0_target*************************
+	OppSci_Accessable:op_L0_target*************************
+		Variables *************************
+			op_L0_target.m_from=Location:CLOSED{L0(100)}
+			op_L0_target.m_to=Target:CLOSED{L0_target(106)}
+		End Variables *********************
+	End OppSci_Accessable:op_L0_target*************************
+	Target:L1_target*************************
+		Tokens *************************
+				{0}
+				Target.NotTracked(target=Target:CLOSED{L1_target(127)}TYPE=Types:CLOSED{FLUENT})
+				Key=668  Master=NONE
+				[1, 500]
+		End Tokens *********************
+	End Target:L1_target*************************
+	CHAMP_Accessable:ch_L1_target*************************
+		Variables *************************
+			ch_L1_target.m_from=Location:CLOSED{L1(97)}
+			ch_L1_target.m_to=Target:CLOSED{L1_target(127)}
+		End Variables *********************
+	End CHAMP_Accessable:ch_L1_target*************************
+	OppSci_Accessable:op_L1_target*************************
+		Variables *************************
+			op_L1_target.m_from=Location:CLOSED{L1(97)}
+			op_L1_target.m_to=Target:CLOSED{L1_target(127)}
+		End Variables *********************
+	End OppSci_Accessable:op_L1_target*************************
+	Target:L2_target*************************
+		Tokens *************************
+				{0}
+				Target.NotTracked(target=Target:CLOSED{L2_target(148)}TYPE=Types:CLOSED{FLUENT})
+				Key=692  Master=NONE
+				[1, 500]
+		End Tokens *********************
+	End Target:L2_target*************************
+	CHAMP_Accessable:ch_L2_target*************************
+		Variables *************************
+			ch_L2_target.m_from=Location:CLOSED{L2(94)}
+			ch_L2_target.m_to=Target:CLOSED{L2_target(148)}
+		End Variables *********************
+	End CHAMP_Accessable:ch_L2_target*************************
+	OppSci_Accessable:op_L2_target*************************
+		Variables *************************
+			op_L2_target.m_from=Location:CLOSED{L2(94)}
+			op_L2_target.m_to=Target:CLOSED{L2_target(148)}
+		End Variables *********************
+	End OppSci_Accessable:op_L2_target*************************
+	Target:L3_target*************************
+		Tokens *************************
+				{0}
+				Target.NotTracked(target=Target:CLOSED{L3_target(169)}TYPE=Types:CLOSED{FLUENT})
+				Key=716  Master=NONE
+				[1, 500]
+		End Tokens *********************
+	End Target:L3_target*************************
+	CHAMP_Accessable:ch_L3_target*************************
+		Variables *************************
+			ch_L3_target.m_from=Location:CLOSED{L3(91)}
+			ch_L3_target.m_to=Target:CLOSED{L3_target(169)}
+		End Variables *********************
+	End CHAMP_Accessable:ch_L3_target*************************
+	OppSci_Accessable:op_L3_target*************************
+		Variables *************************
+			op_L3_target.m_from=Location:CLOSED{L3(91)}
+			op_L3_target.m_to=Target:CLOSED{L3_target(169)}
+		End Variables *********************
+	End OppSci_Accessable:op_L3_target*************************
+	Target:L4_target*************************
+		Tokens *************************
+				{0}
+				Target.NotTracked(target=Target:CLOSED{L4_target(190)}TYPE=Types:CLOSED{FLUENT})
+				Key=740  Master=NONE
+					Merged Key=1891 from Target.trackstart(1319)[2, 490] --> [3, 491]
+				[2, 490]
+				[2, 490]
+				Target.trackstart(target=Target:CLOSED{L4_target(190)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+				Key=1319  Master=740 nt_L4_target(740){0} --> [2, 490]
+					Merged Key=1636 from Target.Tracked(865)[3, 491] --> [12, +inf]
+				[3, 491]
+				[3, 491]
+				Target.Tracked(target=Target:CLOSED{L4_target(190)}TYPE=Types:CLOSED{FLUENT})
+				Key=865  Master=541 ipg(541)[11, 499] --> [12, 500]
+					Merged Key=1870 from Target.trackstart(1319)[2, 490] --> [3, 491]
+					Merged Key=2020 from CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+					Merged Key=2450 from CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+					Merged Key=2731 from CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+				[12, +inf]
+		End Tokens *********************
+	End Target:L4_target*************************
+	CHAMP_Accessable:ch_L4_target*************************
+		Variables *************************
+			ch_L4_target.m_from=Location:CLOSED{L4(88)}
+			ch_L4_target.m_to=Target:CLOSED{L4_target(190)}
+		End Variables *********************
+	End CHAMP_Accessable:ch_L4_target*************************
+	OppSci_Accessable:op_L4_target*************************
+		Variables *************************
+			op_L4_target.m_from=Location:CLOSED{L4(88)}
+			op_L4_target.m_to=Target:CLOSED{L4_target(190)}
+		End Variables *********************
+	End OppSci_Accessable:op_L4_target*************************
+	Path:L4D14*************************
+		Variables *************************
+			L4D14.m_from=Location:CLOSED{L4(88)}
+			L4D14.m_to=Location:CLOSED{D14(79)}
+		End Variables *********************
+	End Path:L4D14*************************
+	Path:D14L4*************************
+		Variables *************************
+			D14L4.m_from=Location:CLOSED{D14(79)}
+			D14L4.m_to=Location:CLOSED{L4(88)}
+		End Variables *********************
+	End Path:D14L4*************************
+	Path:L2D13*************************
+		Variables *************************
+			L2D13.m_from=Location:CLOSED{L2(94)}
+			L2D13.m_to=Location:CLOSED{D13(82)}
+		End Variables *********************
+	End Path:L2D13*************************
+	Path:D13L2*************************
+		Variables *************************
+			D13L2.m_from=Location:CLOSED{D13(82)}
+			D13L2.m_to=Location:CLOSED{L2(94)}
+		End Variables *********************
+	End Path:D13L2*************************
+	Path:C1D14*************************
+		Variables *************************
+			C1D14.m_from=Location:CLOSED{C1(85)}
+			C1D14.m_to=Location:CLOSED{D14(79)}
+		End Variables *********************
+	End Path:C1D14*************************
+	Path:D14C1*************************
+		Variables *************************
+			D14C1.m_from=Location:CLOSED{D14(79)}
+			D14C1.m_to=Location:CLOSED{C1(85)}
+		End Variables *********************
+	End Path:D14C1*************************
+	Path:L3D14*************************
+		Variables *************************
+			L3D14.m_from=Location:CLOSED{L3(91)}
+			L3D14.m_to=Location:CLOSED{D14(79)}
+		End Variables *********************
+	End Path:L3D14*************************
+	Path:D14L3*************************
+		Variables *************************
+			D14L3.m_from=Location:CLOSED{D14(79)}
+			D14L3.m_to=Location:CLOSED{L3(91)}
+		End Variables *********************
+	End Path:D14L3*************************
+	Path:D14L1*************************
+		Variables *************************
+			D14L1.m_from=Location:CLOSED{D14(79)}
+			D14L1.m_to=Location:CLOSED{L1(97)}
+		End Variables *********************
+	End Path:D14L1*************************
+	Path:L1D14*************************
+		Variables *************************
+			L1D14.m_from=Location:CLOSED{L1(97)}
+			L1D14.m_to=Location:CLOSED{D14(79)}
+		End Variables *********************
+	End Path:L1D14*************************
+	Path:C1D13*************************
+		Variables *************************
+			C1D13.m_from=Location:CLOSED{C1(85)}
+			C1D13.m_to=Location:CLOSED{D13(82)}
+		End Variables *********************
+	End Path:C1D13*************************
+	Path:D13C1*************************
+		Variables *************************
+			D13C1.m_from=Location:CLOSED{D13(82)}
+			D13C1.m_to=Location:CLOSED{C1(85)}
+		End Variables *********************
+	End Path:D13C1*************************
+	Path:L4D13*************************
+		Variables *************************
+			L4D13.m_from=Location:CLOSED{L4(88)}
+			L4D13.m_to=Location:CLOSED{D13(82)}
+		End Variables *********************
+	End Path:L4D13*************************
+	Path:D13L4*************************
+		Variables *************************
+			D13L4.m_from=Location:CLOSED{D13(82)}
+			D13L4.m_to=Location:CLOSED{L4(88)}
+		End Variables *********************
+	End Path:D13L4*************************
+	Path:D13L0*************************
+		Variables *************************
+			D13L0.m_from=Location:CLOSED{D13(82)}
+			D13L0.m_to=Location:CLOSED{L0(100)}
+		End Variables *********************
+	End Path:D13L0*************************
+	Path:L0D13*************************
+		Variables *************************
+			L0D13.m_from=Location:CLOSED{L0(100)}
+			L0D13.m_to=Location:CLOSED{D13(82)}
+		End Variables *********************
+	End Path:L0D13*************************
+	Path:L4C1*************************
+		Variables *************************
+			L4C1.m_from=Location:CLOSED{L4(88)}
+			L4C1.m_to=Location:CLOSED{C1(85)}
+		End Variables *********************
+	End Path:L4C1*************************
+	Path:C1L3*************************
+		Variables *************************
+			C1L3.m_from=Location:CLOSED{C1(85)}
+			C1L3.m_to=Location:CLOSED{L3(91)}
+		End Variables *********************
+	End Path:C1L3*************************
+	Path:L3C1*************************
+		Variables *************************
+			L3C1.m_from=Location:CLOSED{L3(91)}
+			L3C1.m_to=Location:CLOSED{C1(85)}
+		End Variables *********************
+	End Path:L3C1*************************
+	Path:C1L4*************************
+		Variables *************************
+			C1L4.m_from=Location:CLOSED{C1(85)}
+			C1L4.m_to=Location:CLOSED{L4(88)}
+		End Variables *********************
+	End Path:C1L4*************************
+	Path:C1L2*************************
+		Variables *************************
+			C1L2.m_from=Location:CLOSED{C1(85)}
+			C1L2.m_to=Location:CLOSED{L2(94)}
+		End Variables *********************
+	End Path:C1L2*************************
+	Path:L2C1*************************
+		Variables *************************
+			L2C1.m_from=Location:CLOSED{L2(94)}
+			L2C1.m_to=Location:CLOSED{C1(85)}
+		End Variables *********************
+	End Path:L2C1*************************
+	Path:L4L1*************************
+		Variables *************************
+			L4L1.m_from=Location:CLOSED{L4(88)}
+			L4L1.m_to=Location:CLOSED{L1(97)}
+		End Variables *********************
+	End Path:L4L1*************************
+	Path:L1L4*************************
+		Variables *************************
+			L1L4.m_from=Location:CLOSED{L1(97)}
+			L1L4.m_to=Location:CLOSED{L4(88)}
+		End Variables *********************
+	End Path:L1L4*************************
+	Path:L4start*************************
+		Variables *************************
+			L4start.m_from=Location:CLOSED{L4(88)}
+			L4start.m_to=Location:CLOSED{start(103)}
+		End Variables *********************
+	End Path:L4start*************************
+	Path:startL4*************************
+		Variables *************************
+			startL4.m_from=Location:CLOSED{start(103)}
+			startL4.m_to=Location:CLOSED{L4(88)}
+		End Variables *********************
+	End Path:startL4*************************
+	Path:L3L2*************************
+		Variables *************************
+			L3L2.m_from=Location:CLOSED{L3(91)}
+			L3L2.m_to=Location:CLOSED{L2(94)}
+		End Variables *********************
+	End Path:L3L2*************************
+	Path:L2L3*************************
+		Variables *************************
+			L2L3.m_from=Location:CLOSED{L2(94)}
+			L2L3.m_to=Location:CLOSED{L3(91)}
+		End Variables *********************
+	End Path:L2L3*************************
+	Path:L2L0*************************
+		Variables *************************
+			L2L0.m_from=Location:CLOSED{L2(94)}
+			L2L0.m_to=Location:CLOSED{L0(100)}
+		End Variables *********************
+	End Path:L2L0*************************
+	Path:L0L2*************************
+		Variables *************************
+			L0L2.m_from=Location:CLOSED{L0(100)}
+			L0L2.m_to=Location:CLOSED{L2(94)}
+		End Variables *********************
+	End Path:L0L2*************************
+	Path:L1start*************************
+		Variables *************************
+			L1start.m_from=Location:CLOSED{L1(97)}
+			L1start.m_to=Location:CLOSED{start(103)}
+		End Variables *********************
+	End Path:L1start*************************
+	Path:startL1*************************
+		Variables *************************
+			startL1.m_from=Location:CLOSED{start(103)}
+			startL1.m_to=Location:CLOSED{L1(97)}
+		End Variables *********************
+	End Path:startL1*************************
+	Path:L0start*************************
+		Variables *************************
+			L0start.m_from=Location:CLOSED{L0(100)}
+			L0start.m_to=Location:CLOSED{start(103)}
+		End Variables *********************
+	End Path:L0start*************************
+	Path:startL0*************************
+		Variables *************************
+			startL0.m_from=Location:CLOSED{start(103)}
+			startL0.m_to=Location:CLOSED{L0(100)}
+		End Variables *********************
+	End Path:startL0*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	rover=Rover:CLOSED{rover(25)}
+	D14=Location:CLOSED{D14(79)}
+	D13=Location:CLOSED{D13(82)}
+	C1=Location:CLOSED{C1(85)}
+	L4=Location:CLOSED{L4(88)}
+	L3=Location:CLOSED{L3(91)}
+	L2=Location:CLOSED{L2(94)}
+	L1=Location:CLOSED{L1(97)}
+	L0=Location:CLOSED{L0(100)}
+	start=Location:CLOSED{start(103)}
+	L0_target=Target:CLOSED{L0_target(106)}
+	ch_L0_target=CHAMP_Accessable:CLOSED{ch_L0_target(111)}
+	op_L0_target=OppSci_Accessable:CLOSED{op_L0_target(120)}
+	L1_target=Target:CLOSED{L1_target(127)}
+	ch_L1_target=CHAMP_Accessable:CLOSED{ch_L1_target(132)}
+	op_L1_target=OppSci_Accessable:CLOSED{op_L1_target(141)}
+	L2_target=Target:CLOSED{L2_target(148)}
+	ch_L2_target=CHAMP_Accessable:CLOSED{ch_L2_target(153)}
+	op_L2_target=OppSci_Accessable:CLOSED{op_L2_target(162)}
+	L3_target=Target:CLOSED{L3_target(169)}
+	ch_L3_target=CHAMP_Accessable:CLOSED{ch_L3_target(174)}
+	op_L3_target=OppSci_Accessable:CLOSED{op_L3_target(183)}
+	L4_target=Target:CLOSED{L4_target(190)}
+	ch_L4_target=CHAMP_Accessable:CLOSED{ch_L4_target(195)}
+	op_L4_target=OppSci_Accessable:CLOSED{op_L4_target(204)}
+	L4D14=Path:CLOSED{L4D14(213)}
+	D14L4=Path:CLOSED{D14L4(222)}
+	L2D13=Path:CLOSED{L2D13(231)}
+	D13L2=Path:CLOSED{D13L2(240)}
+	C1D14=Path:CLOSED{C1D14(249)}
+	D14C1=Path:CLOSED{D14C1(258)}
+	L3D14=Path:CLOSED{L3D14(267)}
+	D14L3=Path:CLOSED{D14L3(276)}
+	D14L1=Path:CLOSED{D14L1(285)}
+	L1D14=Path:CLOSED{L1D14(294)}
+	C1D13=Path:CLOSED{C1D13(303)}
+	D13C1=Path:CLOSED{D13C1(312)}
+	L4D13=Path:CLOSED{L4D13(321)}
+	D13L4=Path:CLOSED{D13L4(330)}
+	D13L0=Path:CLOSED{D13L0(339)}
+	L0D13=Path:CLOSED{L0D13(348)}
+	L4C1=Path:CLOSED{L4C1(357)}
+	C1L3=Path:CLOSED{C1L3(366)}
+	L3C1=Path:CLOSED{L3C1(375)}
+	C1L4=Path:CLOSED{C1L4(384)}
+	C1L2=Path:CLOSED{C1L2(393)}
+	L2C1=Path:CLOSED{L2C1(402)}
+	L4L1=Path:CLOSED{L4L1(411)}
+	L1L4=Path:CLOSED{L1L4(420)}
+	L4start=Path:CLOSED{L4start(429)}
+	startL4=Path:CLOSED{startL4(438)}
+	L3L2=Path:CLOSED{L3L2(447)}
+	L2L3=Path:CLOSED{L2L3(456)}
+	L2L0=Path:CLOSED{L2L0(465)}
+	L0L2=Path:CLOSED{L0L2(474)}
+	L1start=Path:CLOSED{L1start(483)}
+	startL1=Path:CLOSED{startL1(492)}
+	L0start=Path:CLOSED{L0start(501)}
+	startL0=Path:CLOSED{startL0(510)}
+Merged Tokens: *************************
+		[-inf, 499]
+		OpportunisticScience.OppSciIdle(TYPE=Types:CLOSED{FLUENT})
+		Key=939  Master=541 ipg(541)[11, 499] --> [12, 500]
+		[3, +inf]
+		[2, 499]
+		Position.At(location=Location:CLOSED{L0(100),L1(97),L4(88)}TYPE=Types:CLOSED{FLUENT})
+		Key=1400  Master=766 Position.navigate(766)[4, 492] --> [5, 493]
+		[3, +inf]
+		[-inf, 497]
+		Position.At(location=Location:CLOSED{start(103)}TYPE=Types:CLOSED{FLUENT})
+		Key=1421  Master=766 Position.navigate(766)[4, 492] --> [5, 493]
+		[1, 498]
+		[-inf, 498]
+		Tracker.TrackingOn(TYPE=Types:CLOSED{FLUENT})
+		Key=1443  Master=766 Position.navigate(766)[4, 492] --> [5, 493]
+		[2, +inf]
+		[-inf, 498]
+		OpportunisticScience.OppSciIdle(TYPE=Types:CLOSED{FLUENT})
+		Key=1464  Master=766 Position.navigate(766)[4, 492] --> [5, 493]
+		[3, +inf]
+		[-inf, 498]
+		CHAMP.IPIdle(TYPE=Types:CLOSED{FLUENT})
+		Key=1485  Master=766 Position.navigate(766)[4, 492] --> [5, 493]
+		[3, +inf]
+		[5, 499]
+		CHAMP.ipgetstatus(target=Target:CLOSED{L0_target(106),L1_target(127),L2_target(148),L3_target(169),L4_target(190)}at_loc=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88),start(103)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1558  Master=844 CHAMP.IPDonePlaceInstrument(844)[10, 498] --> [11, 499]
+		[6, +inf]
+		[-inf, 498]
+		Target.trackstart(target=Target:CLOSED{L4_target(190)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1636  Master=865 Target.Tracked(865)[3, 491] --> [12, +inf]
+		[2, 499]
+		[-inf, 496]
+		Position.navigate(from=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88),start(103)}to=Location:CLOSED{L0(100),L1(97),L4(88)}TYPE=Types:CLOSED{ACTION}m_duration_mean_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_mean_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000])
+		Key=1768  Master=917 Position.At(917)[5, 493] --> [12, +inf]
+		[3, 497]
+		[-inf, 493]
+		Tracker.TrackingOff(TYPE=Types:CLOSED{FLUENT})
+		Key=1839  Master=978 Tracker.trackloadgroup(978)[1, 489] --> [2, 490]
+		[1, 494]
+		[2, 499]
+		Target.Tracked(target=Target:CLOSED{L4_target(190)}TYPE=Types:CLOSED{FLUENT})
+		Key=1870  Master=1319 Target.trackstart(1319)[2, 490] --> [3, 491]
+		[3, +inf]
+		[-inf, 497]
+		Target.NotTracked(target=Target:CLOSED{L4_target(190)}TYPE=Types:CLOSED{FLUENT})
+		Key=1891  Master=1319 Target.trackstart(1319)[2, 490] --> [3, 491]
+		[1, 498]
+		[-inf, 498]
+		Tracker.LandmarksDefined(TYPE=Types:CLOSED{FLUENT})
+		Key=1912  Master=1319 Target.trackstart(1319)[2, 490] --> [3, 491]
+		[2, +inf]
+		[6, 498]
+		CHAMP.IPDonePlaceInstrument(target=Target:CLOSED{L0_target(106),L1_target(127),L2_target(148),L3_target(169),L4_target(190)}at_loc=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88),start(103)}TYPE=Types:CLOSED{FLUENT})
+		Key=1999  Master=1525 CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+		[7, +inf]
+		[-inf, 497]
+		Target.Tracked(target=Target:CLOSED{L0_target(106),L1_target(127),L2_target(148),L3_target(169),L4_target(190)}TYPE=Types:CLOSED{FLUENT})
+		Key=2020  Master=1525 CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+		[6, +inf]
+		[-inf, 497]
+		Tracker.TrackingOn(TYPE=Types:CLOSED{FLUENT})
+		Key=2051  Master=1525 CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+		[6, +inf]
+		[-inf, 497]
+		Position.At(location=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88),start(103)}TYPE=Types:CLOSED{FLUENT})
+		Key=2072  Master=1525 CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+		[6, +inf]
+		[-inf, 497]
+		OpportunisticScience.OppSciIdle(TYPE=Types:CLOSED{FLUENT})
+		Key=2094  Master=1525 CHAMP.ipplaceinstrument(1525)[9, 497] --> [10, 498]
+		[6, +inf]
+		[-inf, 493]
+		Tracker.trackloadgroup(TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=2152  Master=1820 Tracker.LandmarksDefined(1820)[2, 490] --> [3, 491]
+		[2, 494]
+		[7, 497]
+		CHAMP.ipplaceinstrument(target=Target:CLOSED{L0_target(106),L1_target(127),L2_target(148),L3_target(169),L4_target(190)}at_loc=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88),start(103)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=2277  Master=1978 CHAMP.IPTargetSet(1978)[8, 496] --> [9, 497]
+		[8, +inf]
+		[-inf, 492]
+		Tracker.LandmarksDefined(TYPE=Types:CLOSED{FLUENT})
+		Key=2358  Master=2183 Tracker.StartTracking(2183)[3, 491] --> [4, 492]
+		[3, 493]
+		[4, 494]
+		Tracker.TrackingOn(TYPE=Types:CLOSED{FLUENT})
+		Key=2377  Master=2183 Tracker.StartTracking(2183)[3, 491] --> [4, 492]
+		[5, +inf]
+		[7, 496]
+		CHAMP.IPTargetSet(target=Target:CLOSED{L0_target(106),L1_target(127),L2_target(148),L3_target(169),L4_target(190)}at_loc=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88),start(103)}TYPE=Types:CLOSED{FLUENT})
+		Key=2429  Master=2244 CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+		[8, +inf]
+		[-inf, 495]
+		Target.Tracked(target=Target:CLOSED{L0_target(106),L1_target(127),L2_target(148),L3_target(169),L4_target(190)}TYPE=Types:CLOSED{FLUENT})
+		Key=2450  Master=2244 CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+		[7, +inf]
+		[-inf, 495]
+		Tracker.TrackingOn(TYPE=Types:CLOSED{FLUENT})
+		Key=2481  Master=2244 CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+		[7, +inf]
+		[-inf, 495]
+		Position.At(location=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88),start(103)}TYPE=Types:CLOSED{FLUENT})
+		Key=2502  Master=2244 CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+		[7, +inf]
+		[-inf, 495]
+		OpportunisticScience.OppSciIdle(TYPE=Types:CLOSED{FLUENT})
+		Key=2524  Master=2244 CHAMP.ipsettarget(2244)[7, 495] --> [8, 496]
+		[7, +inf]
+		[7, 495]
+		CHAMP.ipsettarget(target=Target:CLOSED{L0_target(106),L1_target(127),L2_target(148),L3_target(169),L4_target(190)}at_loc=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88),start(103)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=2614  Master=2408 CHAMP.IPHaveName(2408)[6, 494] --> [7, 495]
+		[8, +inf]
+		[-inf, 492]
+		CHAMP.IPIdle(TYPE=Types:CLOSED{FLUENT})
+		Key=2691  Master=2581 CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+		[5, 493]
+		[6, 494]
+		CHAMP.IPHaveName(target=Target:CLOSED{L0_target(106),L1_target(127),L2_target(148),L3_target(169),L4_target(190)}at_loc=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88),start(103)}TYPE=Types:CLOSED{FLUENT})
+		Key=2710  Master=2581 CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+		[7, +inf]
+		[-inf, 493]
+		Target.Tracked(target=Target:CLOSED{L0_target(106),L1_target(127),L2_target(148),L3_target(169),L4_target(190)}TYPE=Types:CLOSED{FLUENT})
+		Key=2731  Master=2581 CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+		[6, +inf]
+		[-inf, 493]
+		Tracker.TrackingOn(TYPE=Types:CLOSED{FLUENT})
+		Key=2762  Master=2581 CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+		[6, +inf]
+		[-inf, 493]
+		Position.At(location=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88),start(103)}TYPE=Types:CLOSED{FLUENT})
+		Key=2783  Master=2581 CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+		[6, +inf]
+		[-inf, 493]
+		OpportunisticScience.OppSciIdle(TYPE=Types:CLOSED{FLUENT})
+		Key=2805  Master=2581 CHAMP.ipgetname(2581)[5, 493] --> [6, 494]
+		[6, +inf]
+		[-inf, 491]
+		Tracker.StartTracking(TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=3150  Master=896 Tracker.TrackingOn(896)[4, 492] --> [12, +inf]
+		[4, 492]
+Inactive Tokens: *************************
+		[-inf, -1]
+		Position.navigate(from=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),L4(88)}to=Location:CLOSED{start(103)}TYPE=Types:CLOSED{ACTION}m_duration_mean_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_mean_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000])
+		Key=801  Master=517 a(517){0} --> [4, 492]
+		{0}
+		[1, 500]
+		Target.trackstart(target=Target:CLOSED{L0_target(106)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1023  Master=644 nt_L0_target(644){0} --> [1, 500]
+		[2, +inf]
+		[-inf, -1]
+		Target.trackstop(target=Target:CLOSED{L0_target(106)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1056  Master=644 nt_L0_target(644){0} --> [1, 500]
+		{0}
+		[1, 500]
+		Target.trackstart(target=Target:CLOSED{L1_target(127)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1097  Master=668 nt_L1_target(668){0} --> [1, 500]
+		[2, +inf]
+		[-inf, -1]
+		Target.trackstop(target=Target:CLOSED{L1_target(127)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1130  Master=668 nt_L1_target(668){0} --> [1, 500]
+		{0}
+		[1, 500]
+		Target.trackstart(target=Target:CLOSED{L2_target(148)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1171  Master=692 nt_L2_target(692){0} --> [1, 500]
+		[2, +inf]
+		[-inf, -1]
+		Target.trackstop(target=Target:CLOSED{L2_target(148)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1204  Master=692 nt_L2_target(692){0} --> [1, 500]
+		{0}
+		[1, 500]
+		Target.trackstart(target=Target:CLOSED{L3_target(169)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1245  Master=716 nt_L3_target(716){0} --> [1, 500]
+		[2, +inf]
+		[-inf, -1]
+		Target.trackstop(target=Target:CLOSED{L3_target(169)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1278  Master=716 nt_L3_target(716){0} --> [1, 500]
+		{0}
+		[-inf, -1]
+		Target.trackstop(target=Target:CLOSED{L4_target(190)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1352  Master=740 nt_L4_target(740){0} --> [2, 490]
+		{0}
+		[12, +inf]
+		Target.trackstop(target=Target:CLOSED{L4_target(190)}TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1603  Master=865 Target.Tracked(865)[3, 491] --> [12, +inf]
+		[13, +inf]
+		[12, +inf]
+		Tracker.trackfreeze(TYPE=Types:CLOSED{ACTION}m_duration_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std=float:CLOSED[0.000000000000000, 0.000000000000000]m_energy_mean=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std=float:CLOSED[0.000000000000000, 0.000000000000000])
+		Key=1679  Master=896 Tracker.TrackingOn(896)[4, 492] --> [12, +inf]
+		[13, +inf]
+		[12, +inf]
+		Position.navigate(from=Location:CLOSED{L4(88)}to=Location:CLOSED{C1(85),D13(82),D14(79),L0(100),L1(97),L2(94),L3(91),start(103)}TYPE=Types:CLOSED{ACTION}m_duration_mean_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_duration_std_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_mean_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000]m_energy_std_multiplier=float:CLOSED[1.000000000000000, 1.000000000000000])
+		Key=1733  Master=917 Position.At(917)[5, 493] --> [12, +inf]
+		[13, +inf]
+
+Finished

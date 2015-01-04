@@ -1,0 +1,130 @@
+Created node [id_371] initially enabled
+Created node [id_372] initially enabled
+Maximum flow instance created with source [id_371] and sink [id_372]
+Created node [id_371] initially enabled
+Created node [id_372] initially enabled
+Maximum flow instance created with source [id_371] and sink [id_372]
+Objects *************************
+	PlannerConfig:config*************************
+		Variables *************************
+			config.m_horizonStart=int:CLOSED[0, 0]
+			config.m_horizonEnd=int:CLOSED[100, 100]
+			config.m_maxPlannerSteps=int:CLOSED[100, 100]
+			config.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:config*************************
+	IntermediateReusable:programmerPool*************************
+		Tokens *************************
+				{0}
+				IntermediateReusable.uses()
+				Key=129  Master=46 task11(46){0} --> {10}
+				{10}
+				{10}
+				IntermediateReusable.uses()
+				Key=159  Master=66 task12(66){10} --> {100}
+				{100}
+				[10, 99]
+				IntermediateReusable.uses()
+				Key=188  Master=87 task21(87)[10, 99] --> [11, 100]
+				[11, 100]
+		End Tokens *********************
+		Variables *************************
+			programmerPool.capacity=float:CLOSED[5, 5]
+			programmerPool.levelLimitMin=float:CLOSED[0, 0]
+			programmerPool.consumptionRateMax=float:CLOSED[+inf, +inf]
+			programmerPool.consumptionMax=float:CLOSED[+inf, +inf]
+		End Variables *********************
+	End IntermediateReusable:programmerPool*************************
+	Project:proj1*************************
+		Tokens *************************
+				{0}
+				Project.task(numProgrammers=float:CLOSED[3.000000000000000, 3.000000000000000])
+				Key=46  Master=NONE
+				{10}
+				{10}
+				Project.task(numProgrammers=float:CLOSED[2.000000000000000, 2.000000000000000])
+				Key=66  Master=NONE
+				{100}
+		End Tokens *********************
+	End Project:proj1*************************
+	Project:proj2*************************
+		Tokens *************************
+				[10, 99]
+				Project.task(numProgrammers=float:CLOSED[3.000000000000000, 3.000000000000000])
+				Key=87  Master=NONE
+				[11, 100]
+		End Tokens *********************
+	End Project:proj2*************************
+Global Variables*************************
+	config=PlannerConfig:CLOSED{config(12)}
+	programmerPool=IntermediateReusable:CLOSED{programmerPool(27)}
+	proj1=Project:CLOSED{proj1(40)}
+	proj2=Project:CLOSED{proj2(43)}
+Rejected Tokens: *************************
+		[0, 99]
+		Project.task(numProgrammers=float:CLOSED[9.000000000000000, 9.000000000000000])
+		Key=107  Master=NONE
+		{100}
+Objects *************************
+	PlannerConfig:config*************************
+		Variables *************************
+			config.m_horizonStart=int:CLOSED[0, 0]
+			config.m_horizonEnd=int:CLOSED[100, 100]
+			config.m_maxPlannerSteps=int:CLOSED[100, 100]
+			config.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:config*************************
+	IntermediateReusable:programmerPool*************************
+		Tokens *************************
+				{0}
+				IntermediateReusable.uses()
+				Key=129  Master=46 task11(46){0} --> {10}
+				{10}
+				{10}
+				IntermediateReusable.uses()
+				Key=159  Master=66 task12(66){10} --> {100}
+				{100}
+				[10, 99]
+				IntermediateReusable.uses()
+				Key=188  Master=87 task21(87)[10, 99] --> [11, 100]
+				[11, 100]
+		End Tokens *********************
+		Variables *************************
+			programmerPool.capacity=float:CLOSED[5, 5]
+			programmerPool.levelLimitMin=float:CLOSED[0, 0]
+			programmerPool.consumptionRateMax=float:CLOSED[+inf, +inf]
+			programmerPool.consumptionMax=float:CLOSED[+inf, +inf]
+		End Variables *********************
+	End IntermediateReusable:programmerPool*************************
+	Project:proj1*************************
+		Tokens *************************
+				{0}
+				Project.task(numProgrammers=float:CLOSED[3.000000000000000, 3.000000000000000])
+				Key=46  Master=NONE
+				{10}
+				{10}
+				Project.task(numProgrammers=float:CLOSED[2.000000000000000, 2.000000000000000])
+				Key=66  Master=NONE
+				{100}
+		End Tokens *********************
+	End Project:proj1*************************
+	Project:proj2*************************
+		Tokens *************************
+				[10, 99]
+				Project.task(numProgrammers=float:CLOSED[3.000000000000000, 3.000000000000000])
+				Key=87  Master=NONE
+				[11, 100]
+		End Tokens *********************
+	End Project:proj2*************************
+Global Variables*************************
+	config=PlannerConfig:CLOSED{config(12)}
+	programmerPool=IntermediateReusable:CLOSED{programmerPool(27)}
+	proj1=Project:CLOSED{proj1(40)}
+	proj2=Project:CLOSED{proj2(43)}
+Rejected Tokens: *************************
+		[0, 99]
+		Project.task(numProgrammers=float:CLOSED[9.000000000000000, 9.000000000000000])
+		Key=107  Master=NONE
+		{100}
+
+Finished

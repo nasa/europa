@@ -1,0 +1,158 @@
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[100, 100]
+			world.m_maxPlannerSteps=int:CLOSED[200, 200]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Location:rock*************************
+		Variables *************************
+			rock.name=string:CLOSED{ROCK}
+		End Variables *********************
+	End Location:rock*************************
+	Location:hill*************************
+		Variables *************************
+			hill.name=string:CLOSED{HILL}
+		End Variables *********************
+	End Location:hill*************************
+	Location:lander*************************
+		Variables *************************
+			lander.name=string:CLOSED{LANDER}
+		End Variables *********************
+	End Location:lander*************************
+	Location:martianCity*************************
+		Variables *************************
+			martianCity.name=string:CLOSED{MARTIAN_CITY}
+		End Variables *********************
+	End Location:martianCity*************************
+	Location:crater*************************
+		Variables *************************
+			crater.name=string:CLOSED{CRATER}
+		End Variables *********************
+	End Location:crater*************************
+	Path:p1*************************
+		Variables *************************
+			p1.from=Location:CLOSED{rock(19)}
+			p1.to=Location:CLOSED{hill(26)}
+		End Variables *********************
+	End Path:p1*************************
+	Path:p2*************************
+		Variables *************************
+			p2.from=Location:CLOSED{lander(33)}
+			p2.to=Location:CLOSED{hill(26)}
+		End Variables *********************
+	End Path:p2*************************
+	Path:p3*************************
+		Variables *************************
+			p3.from=Location:CLOSED{martianCity(40)}
+			p3.to=Location:CLOSED{hill(26)}
+		End Variables *********************
+	End Path:p3*************************
+	Path:p4*************************
+		Variables *************************
+			p4.from=Location:CLOSED{hill(26)}
+			p4.to=Location:CLOSED{lander(33)}
+		End Variables *********************
+	End Path:p4*************************
+	Rover:rover*************************
+		Tokens *************************
+				{0}
+				Rover.Going(from=Location:CLOSED{hill(26)}to=Location:CLOSED{lander(33)})
+				Key=91  Master=NONE
+				{100}
+		End Tokens *********************
+	End Rover:rover*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(6)}
+	rock=Location:CLOSED{rock(19)}
+	hill=Location:CLOSED{hill(26)}
+	lander=Location:CLOSED{lander(33)}
+	martianCity=Location:CLOSED{martianCity(40)}
+	crater=Location:CLOSED{crater(47)}
+	p1=Path:CLOSED{p1(54)}
+	p2=Path:CLOSED{p2(63)}
+	p3=Path:CLOSED{p3(72)}
+	p4=Path:CLOSED{p4(81)}
+	rover=Rover:CLOSED{rover(88)}
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[100, 100]
+			world.m_maxPlannerSteps=int:CLOSED[200, 200]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Location:rock*************************
+		Variables *************************
+			rock.name=string:CLOSED{ROCK}
+		End Variables *********************
+	End Location:rock*************************
+	Location:hill*************************
+		Variables *************************
+			hill.name=string:CLOSED{HILL}
+		End Variables *********************
+	End Location:hill*************************
+	Location:lander*************************
+		Variables *************************
+			lander.name=string:CLOSED{LANDER}
+		End Variables *********************
+	End Location:lander*************************
+	Location:martianCity*************************
+		Variables *************************
+			martianCity.name=string:CLOSED{MARTIAN_CITY}
+		End Variables *********************
+	End Location:martianCity*************************
+	Location:crater*************************
+		Variables *************************
+			crater.name=string:CLOSED{CRATER}
+		End Variables *********************
+	End Location:crater*************************
+	Path:p1*************************
+		Variables *************************
+			p1.from=Location:CLOSED{rock(19)}
+			p1.to=Location:CLOSED{hill(26)}
+		End Variables *********************
+	End Path:p1*************************
+	Path:p2*************************
+		Variables *************************
+			p2.from=Location:CLOSED{lander(33)}
+			p2.to=Location:CLOSED{hill(26)}
+		End Variables *********************
+	End Path:p2*************************
+	Path:p3*************************
+		Variables *************************
+			p3.from=Location:CLOSED{martianCity(40)}
+			p3.to=Location:CLOSED{hill(26)}
+		End Variables *********************
+	End Path:p3*************************
+	Path:p4*************************
+		Variables *************************
+			p4.from=Location:CLOSED{hill(26)}
+			p4.to=Location:CLOSED{lander(33)}
+		End Variables *********************
+	End Path:p4*************************
+	Rover:rover*************************
+		Tokens *************************
+				{0}
+				Rover.Going(from=Location:CLOSED{hill(26)}to=Location:CLOSED{lander(33)})
+				Key=91  Master=NONE
+				{100}
+		End Tokens *********************
+	End Rover:rover*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(6)}
+	rock=Location:CLOSED{rock(19)}
+	hill=Location:CLOSED{hill(26)}
+	lander=Location:CLOSED{lander(33)}
+	martianCity=Location:CLOSED{martianCity(40)}
+	crater=Location:CLOSED{crater(47)}
+	p1=Path:CLOSED{p1(54)}
+	p2=Path:CLOSED{p2(63)}
+	p3=Path:CLOSED{p3(72)}
+	p4=Path:CLOSED{p4(81)}
+	rover=Rover:CLOSED{rover(88)}
+
+Finished

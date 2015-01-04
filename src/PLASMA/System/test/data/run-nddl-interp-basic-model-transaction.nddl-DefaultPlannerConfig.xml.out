@@ -1,0 +1,1692 @@
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[10, 10]
+			world.m_horizonEnd=int:CLOSED[101, 101]
+			world.m_maxPlannerSteps=int:CLOSED[1000, 1000]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Rover:rover*************************
+		Tokens *************************
+				{10}
+				Rover.At(m_location=Locations:CLOSED{Lander})
+				Key=26  Master=NONE
+					Merged Key=174 from Rover.Going(68){11} --> {12}
+				{11}
+				{11}
+				Rover.Going(m_from=Locations:CLOSED{Lander}m_to=Locations:CLOSED{Hill})
+				Key=68  Master=26 a(26){10} --> {11}
+					Merged Key=305 from Rover.At(194){12} --> {13}
+				{12}
+				{12}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=194  Master=68 Rover.Going(68){11} --> {12}
+					Merged Key=400 from Rover.Going(283){13} --> {14}
+				{13}
+				{13}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=283  Master=194 Rover.At(194){12} --> {13}
+					Merged Key=541 from Rover.At(420){14} --> {15}
+				{14}
+				{14}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=420  Master=283 Rover.Going(283){13} --> {14}
+					Merged Key=636 from Rover.Going(519){15} --> {16}
+				{15}
+				{15}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=519  Master=420 Rover.At(420){14} --> {15}
+					Merged Key=777 from Rover.At(656){16} --> {17}
+				{16}
+				{16}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=656  Master=519 Rover.Going(519){15} --> {16}
+					Merged Key=872 from Rover.Going(755){17} --> {18}
+				{17}
+				{17}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=755  Master=656 Rover.At(656){16} --> {17}
+					Merged Key=1013 from Rover.At(892){18} --> {19}
+				{18}
+				{18}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=892  Master=755 Rover.Going(755){17} --> {18}
+					Merged Key=1108 from Rover.Going(991){19} --> {20}
+				{19}
+				{19}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=991  Master=892 Rover.At(892){18} --> {19}
+					Merged Key=1249 from Rover.At(1128){20} --> {21}
+				{20}
+				{20}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=1128  Master=991 Rover.Going(991){19} --> {20}
+					Merged Key=1344 from Rover.Going(1227){21} --> {22}
+				{21}
+				{21}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=1227  Master=1128 Rover.At(1128){20} --> {21}
+					Merged Key=1485 from Rover.At(1364){22} --> {23}
+				{22}
+				{22}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=1364  Master=1227 Rover.Going(1227){21} --> {22}
+					Merged Key=1580 from Rover.Going(1463){23} --> {24}
+				{23}
+				{23}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=1463  Master=1364 Rover.At(1364){22} --> {23}
+					Merged Key=1721 from Rover.At(1600){24} --> {25}
+				{24}
+				{24}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=1600  Master=1463 Rover.Going(1463){23} --> {24}
+					Merged Key=1816 from Rover.Going(1699){25} --> {26}
+				{25}
+				{25}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=1699  Master=1600 Rover.At(1600){24} --> {25}
+					Merged Key=1957 from Rover.At(1836){26} --> {27}
+				{26}
+				{26}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=1836  Master=1699 Rover.Going(1699){25} --> {26}
+					Merged Key=2052 from Rover.Going(1935){27} --> {28}
+				{27}
+				{27}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=1935  Master=1836 Rover.At(1836){26} --> {27}
+					Merged Key=2193 from Rover.At(2072){28} --> {29}
+				{28}
+				{28}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=2072  Master=1935 Rover.Going(1935){27} --> {28}
+					Merged Key=2288 from Rover.Going(2171){29} --> {30}
+				{29}
+				{29}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=2171  Master=2072 Rover.At(2072){28} --> {29}
+					Merged Key=2429 from Rover.At(2308){30} --> {31}
+				{30}
+				{30}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=2308  Master=2171 Rover.Going(2171){29} --> {30}
+					Merged Key=2524 from Rover.Going(2407){31} --> {32}
+				{31}
+				{31}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=2407  Master=2308 Rover.At(2308){30} --> {31}
+					Merged Key=2665 from Rover.At(2544){32} --> {33}
+				{32}
+				{32}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=2544  Master=2407 Rover.Going(2407){31} --> {32}
+					Merged Key=2760 from Rover.Going(2643){33} --> {34}
+				{33}
+				{33}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=2643  Master=2544 Rover.At(2544){32} --> {33}
+					Merged Key=2901 from Rover.At(2780){34} --> {35}
+				{34}
+				{34}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=2780  Master=2643 Rover.Going(2643){33} --> {34}
+					Merged Key=2996 from Rover.Going(2879){35} --> {36}
+				{35}
+				{35}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=2879  Master=2780 Rover.At(2780){34} --> {35}
+					Merged Key=3137 from Rover.At(3016){36} --> {37}
+				{36}
+				{36}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=3016  Master=2879 Rover.Going(2879){35} --> {36}
+					Merged Key=3232 from Rover.Going(3115){37} --> {38}
+				{37}
+				{37}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=3115  Master=3016 Rover.At(3016){36} --> {37}
+					Merged Key=3373 from Rover.At(3252){38} --> {39}
+				{38}
+				{38}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=3252  Master=3115 Rover.Going(3115){37} --> {38}
+					Merged Key=3468 from Rover.Going(3351){39} --> {40}
+				{39}
+				{39}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=3351  Master=3252 Rover.At(3252){38} --> {39}
+					Merged Key=3609 from Rover.At(3488){40} --> {41}
+				{40}
+				{40}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=3488  Master=3351 Rover.Going(3351){39} --> {40}
+					Merged Key=3704 from Rover.Going(3587){41} --> {42}
+				{41}
+				{41}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=3587  Master=3488 Rover.At(3488){40} --> {41}
+					Merged Key=3845 from Rover.At(3724){42} --> {43}
+				{42}
+				{42}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=3724  Master=3587 Rover.Going(3587){41} --> {42}
+					Merged Key=3940 from Rover.Going(3823){43} --> {44}
+				{43}
+				{43}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=3823  Master=3724 Rover.At(3724){42} --> {43}
+					Merged Key=4081 from Rover.At(3960){44} --> {45}
+				{44}
+				{44}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=3960  Master=3823 Rover.Going(3823){43} --> {44}
+					Merged Key=4176 from Rover.Going(4059){45} --> {46}
+				{45}
+				{45}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=4059  Master=3960 Rover.At(3960){44} --> {45}
+					Merged Key=4317 from Rover.At(4196){46} --> {47}
+				{46}
+				{46}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=4196  Master=4059 Rover.Going(4059){45} --> {46}
+					Merged Key=4412 from Rover.Going(4295){47} --> {48}
+				{47}
+				{47}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=4295  Master=4196 Rover.At(4196){46} --> {47}
+					Merged Key=4553 from Rover.At(4432){48} --> {49}
+				{48}
+				{48}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=4432  Master=4295 Rover.Going(4295){47} --> {48}
+					Merged Key=4648 from Rover.Going(4531){49} --> {50}
+				{49}
+				{49}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=4531  Master=4432 Rover.At(4432){48} --> {49}
+					Merged Key=4789 from Rover.At(4668){50} --> {51}
+				{50}
+				{50}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=4668  Master=4531 Rover.Going(4531){49} --> {50}
+					Merged Key=4884 from Rover.Going(4767){51} --> {52}
+				{51}
+				{51}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=4767  Master=4668 Rover.At(4668){50} --> {51}
+					Merged Key=5025 from Rover.At(4904){52} --> {53}
+				{52}
+				{52}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=4904  Master=4767 Rover.Going(4767){51} --> {52}
+					Merged Key=5120 from Rover.Going(5003){53} --> {54}
+				{53}
+				{53}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=5003  Master=4904 Rover.At(4904){52} --> {53}
+					Merged Key=5261 from Rover.At(5140){54} --> {55}
+				{54}
+				{54}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=5140  Master=5003 Rover.Going(5003){53} --> {54}
+					Merged Key=5356 from Rover.Going(5239){55} --> {56}
+				{55}
+				{55}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Lander})
+				Key=5239  Master=5140 Rover.At(5140){54} --> {55}
+					Merged Key=5317 from Rover.At(5182){56} --> {57}
+				{56}
+				{56}
+				Rover.At(m_location=Locations:CLOSED{Lander})
+				Key=5182  Master=5081 Rover.Going(5081){57} --> {58}
+					Merged Key=5376 from Rover.Going(5239){55} --> {56}
+				{57}
+				{57}
+				Rover.Going(m_from=Locations:CLOSED{Lander}m_to=Locations:CLOSED{Hill})
+				Key=5081  Master=4946 Rover.At(4946){58} --> {59}
+					Merged Key=5295 from Rover.At(5182){56} --> {57}
+				{58}
+				{58}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=4946  Master=4845 Rover.Going(4845){59} --> {60}
+					Merged Key=5202 from Rover.Going(5081){57} --> {58}
+				{59}
+				{59}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=4845  Master=4710 Rover.At(4710){60} --> {61}
+					Merged Key=5059 from Rover.At(4946){58} --> {59}
+				{60}
+				{60}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=4710  Master=4609 Rover.Going(4609){61} --> {62}
+					Merged Key=4966 from Rover.Going(4845){59} --> {60}
+				{61}
+				{61}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=4609  Master=4474 Rover.At(4474){62} --> {63}
+					Merged Key=4823 from Rover.At(4710){60} --> {61}
+				{62}
+				{62}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=4474  Master=4373 Rover.Going(4373){63} --> {64}
+					Merged Key=4730 from Rover.Going(4609){61} --> {62}
+				{63}
+				{63}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=4373  Master=4238 Rover.At(4238){64} --> {65}
+					Merged Key=4587 from Rover.At(4474){62} --> {63}
+				{64}
+				{64}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=4238  Master=4137 Rover.Going(4137){65} --> {66}
+					Merged Key=4494 from Rover.Going(4373){63} --> {64}
+				{65}
+				{65}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=4137  Master=4002 Rover.At(4002){66} --> {67}
+					Merged Key=4351 from Rover.At(4238){64} --> {65}
+				{66}
+				{66}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=4002  Master=3901 Rover.Going(3901){67} --> {68}
+					Merged Key=4258 from Rover.Going(4137){65} --> {66}
+				{67}
+				{67}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=3901  Master=3766 Rover.At(3766){68} --> {69}
+					Merged Key=4115 from Rover.At(4002){66} --> {67}
+				{68}
+				{68}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=3766  Master=3665 Rover.Going(3665){69} --> {70}
+					Merged Key=4022 from Rover.Going(3901){67} --> {68}
+				{69}
+				{69}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=3665  Master=3530 Rover.At(3530){70} --> {71}
+					Merged Key=3879 from Rover.At(3766){68} --> {69}
+				{70}
+				{70}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=3530  Master=3429 Rover.Going(3429){71} --> {72}
+					Merged Key=3786 from Rover.Going(3665){69} --> {70}
+				{71}
+				{71}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=3429  Master=3294 Rover.At(3294){72} --> {73}
+					Merged Key=3643 from Rover.At(3530){70} --> {71}
+				{72}
+				{72}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=3294  Master=3193 Rover.Going(3193){73} --> {74}
+					Merged Key=3550 from Rover.Going(3429){71} --> {72}
+				{73}
+				{73}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=3193  Master=3058 Rover.At(3058){74} --> {75}
+					Merged Key=3407 from Rover.At(3294){72} --> {73}
+				{74}
+				{74}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=3058  Master=2957 Rover.Going(2957){75} --> {76}
+					Merged Key=3314 from Rover.Going(3193){73} --> {74}
+				{75}
+				{75}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=2957  Master=2822 Rover.At(2822){76} --> {77}
+					Merged Key=3171 from Rover.At(3058){74} --> {75}
+				{76}
+				{76}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=2822  Master=2721 Rover.Going(2721){77} --> {78}
+					Merged Key=3078 from Rover.Going(2957){75} --> {76}
+				{77}
+				{77}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=2721  Master=2586 Rover.At(2586){78} --> {79}
+					Merged Key=2935 from Rover.At(2822){76} --> {77}
+				{78}
+				{78}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=2586  Master=2485 Rover.Going(2485){79} --> {80}
+					Merged Key=2842 from Rover.Going(2721){77} --> {78}
+				{79}
+				{79}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=2485  Master=2350 Rover.At(2350){80} --> {81}
+					Merged Key=2699 from Rover.At(2586){78} --> {79}
+				{80}
+				{80}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=2350  Master=2249 Rover.Going(2249){81} --> {82}
+					Merged Key=2606 from Rover.Going(2485){79} --> {80}
+				{81}
+				{81}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=2249  Master=2114 Rover.At(2114){82} --> {83}
+					Merged Key=2463 from Rover.At(2350){80} --> {81}
+				{82}
+				{82}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=2114  Master=2013 Rover.Going(2013){83} --> {84}
+					Merged Key=2370 from Rover.Going(2249){81} --> {82}
+				{83}
+				{83}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=2013  Master=1878 Rover.At(1878){84} --> {85}
+					Merged Key=2227 from Rover.At(2114){82} --> {83}
+				{84}
+				{84}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=1878  Master=1777 Rover.Going(1777){85} --> {86}
+					Merged Key=2134 from Rover.Going(2013){83} --> {84}
+				{85}
+				{85}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=1777  Master=1642 Rover.At(1642){86} --> {87}
+					Merged Key=1991 from Rover.At(1878){84} --> {85}
+				{86}
+				{86}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=1642  Master=1541 Rover.Going(1541){87} --> {88}
+					Merged Key=1898 from Rover.Going(1777){85} --> {86}
+				{87}
+				{87}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=1541  Master=1406 Rover.At(1406){88} --> {89}
+					Merged Key=1755 from Rover.At(1642){86} --> {87}
+				{88}
+				{88}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=1406  Master=1305 Rover.Going(1305){89} --> {90}
+					Merged Key=1662 from Rover.Going(1541){87} --> {88}
+				{89}
+				{89}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=1305  Master=1170 Rover.At(1170){90} --> {91}
+					Merged Key=1519 from Rover.At(1406){88} --> {89}
+				{90}
+				{90}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=1170  Master=1069 Rover.Going(1069){91} --> {92}
+					Merged Key=1426 from Rover.Going(1305){89} --> {90}
+				{91}
+				{91}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=1069  Master=934 Rover.At(934){92} --> {93}
+					Merged Key=1283 from Rover.At(1170){90} --> {91}
+				{92}
+				{92}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=934  Master=833 Rover.Going(833){93} --> {94}
+					Merged Key=1190 from Rover.Going(1069){91} --> {92}
+				{93}
+				{93}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=833  Master=698 Rover.At(698){94} --> {95}
+					Merged Key=1047 from Rover.At(934){92} --> {93}
+				{94}
+				{94}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=698  Master=597 Rover.Going(597){95} --> {96}
+					Merged Key=954 from Rover.Going(833){93} --> {94}
+				{95}
+				{95}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=597  Master=462 Rover.At(462){96} --> {97}
+					Merged Key=811 from Rover.At(698){94} --> {95}
+				{96}
+				{96}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=462  Master=361 Rover.Going(361){97} --> {98}
+					Merged Key=718 from Rover.Going(597){95} --> {96}
+				{97}
+				{97}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=361  Master=226 Rover.At(226){98} --> {99}
+					Merged Key=575 from Rover.At(462){96} --> {97}
+				{98}
+				{98}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=226  Master=142 Rover.Going(142){99} --> {100}
+					Merged Key=482 from Rover.Going(361){97} --> {98}
+				{99}
+				{99}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=142  Master=46 b(46){100} --> {101}
+					Merged Key=339 from Rover.At(226){98} --> {99}
+				{100}
+				{100}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=46  Master=NONE
+					Merged Key=246 from Rover.Going(142){99} --> {100}
+				{101}
+		End Tokens *********************
+	End Rover:rover*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	rover=Rover:CLOSED{rover(23)}
+Merged Tokens: *************************
+		{10}
+		Rover.At(m_location=Locations:CLOSED{Lander})
+		Key=174  Master=68 Rover.Going(68){11} --> {12}
+		{11}
+		{100}
+		Rover.At(m_location=Locations:CLOSED{Rock})
+		Key=246  Master=142 Rover.Going(142){99} --> {100}
+		{101}
+		{11}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Rock})
+		Key=305  Master=194 Rover.At(194){12} --> {13}
+		{12}
+		{99}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=339  Master=226 Rover.At(226){98} --> {99}
+		{100}
+		{12}
+		Rover.At(m_location=Locations:CLOSED{Hill,Rock})
+		Key=400  Master=283 Rover.Going(283){13} --> {14}
+		{13}
+		{98}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander})
+		Key=482  Master=361 Rover.Going(361){97} --> {98}
+		{99}
+		{13}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=541  Master=420 Rover.At(420){14} --> {15}
+		{14}
+		{97}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=575  Master=462 Rover.At(462){96} --> {97}
+		{98}
+		{14}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=636  Master=519 Rover.Going(519){15} --> {16}
+		{15}
+		{96}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=718  Master=597 Rover.Going(597){95} --> {96}
+		{97}
+		{15}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=777  Master=656 Rover.At(656){16} --> {17}
+		{16}
+		{95}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=811  Master=698 Rover.At(698){94} --> {95}
+		{96}
+		{16}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=872  Master=755 Rover.Going(755){17} --> {18}
+		{17}
+		{94}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=954  Master=833 Rover.Going(833){93} --> {94}
+		{95}
+		{17}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1013  Master=892 Rover.At(892){18} --> {19}
+		{18}
+		{93}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1047  Master=934 Rover.At(934){92} --> {93}
+		{94}
+		{18}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1108  Master=991 Rover.Going(991){19} --> {20}
+		{19}
+		{92}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1190  Master=1069 Rover.Going(1069){91} --> {92}
+		{93}
+		{19}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1249  Master=1128 Rover.At(1128){20} --> {21}
+		{20}
+		{91}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1283  Master=1170 Rover.At(1170){90} --> {91}
+		{92}
+		{20}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1344  Master=1227 Rover.Going(1227){21} --> {22}
+		{21}
+		{90}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1426  Master=1305 Rover.Going(1305){89} --> {90}
+		{91}
+		{21}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1485  Master=1364 Rover.At(1364){22} --> {23}
+		{22}
+		{89}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1519  Master=1406 Rover.At(1406){88} --> {89}
+		{90}
+		{22}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1580  Master=1463 Rover.Going(1463){23} --> {24}
+		{23}
+		{88}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1662  Master=1541 Rover.Going(1541){87} --> {88}
+		{89}
+		{23}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1721  Master=1600 Rover.At(1600){24} --> {25}
+		{24}
+		{87}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1755  Master=1642 Rover.At(1642){86} --> {87}
+		{88}
+		{24}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1816  Master=1699 Rover.Going(1699){25} --> {26}
+		{25}
+		{86}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1898  Master=1777 Rover.Going(1777){85} --> {86}
+		{87}
+		{25}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1957  Master=1836 Rover.At(1836){26} --> {27}
+		{26}
+		{85}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1991  Master=1878 Rover.At(1878){84} --> {85}
+		{86}
+		{26}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2052  Master=1935 Rover.Going(1935){27} --> {28}
+		{27}
+		{84}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2134  Master=2013 Rover.Going(2013){83} --> {84}
+		{85}
+		{27}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2193  Master=2072 Rover.At(2072){28} --> {29}
+		{28}
+		{83}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2227  Master=2114 Rover.At(2114){82} --> {83}
+		{84}
+		{28}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2288  Master=2171 Rover.Going(2171){29} --> {30}
+		{29}
+		{82}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2370  Master=2249 Rover.Going(2249){81} --> {82}
+		{83}
+		{29}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2429  Master=2308 Rover.At(2308){30} --> {31}
+		{30}
+		{81}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2463  Master=2350 Rover.At(2350){80} --> {81}
+		{82}
+		{30}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2524  Master=2407 Rover.Going(2407){31} --> {32}
+		{31}
+		{80}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2606  Master=2485 Rover.Going(2485){79} --> {80}
+		{81}
+		{31}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2665  Master=2544 Rover.At(2544){32} --> {33}
+		{32}
+		{79}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2699  Master=2586 Rover.At(2586){78} --> {79}
+		{80}
+		{32}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2760  Master=2643 Rover.Going(2643){33} --> {34}
+		{33}
+		{78}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2842  Master=2721 Rover.Going(2721){77} --> {78}
+		{79}
+		{33}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2901  Master=2780 Rover.At(2780){34} --> {35}
+		{34}
+		{77}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2935  Master=2822 Rover.At(2822){76} --> {77}
+		{78}
+		{34}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2996  Master=2879 Rover.Going(2879){35} --> {36}
+		{35}
+		{76}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3078  Master=2957 Rover.Going(2957){75} --> {76}
+		{77}
+		{35}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3137  Master=3016 Rover.At(3016){36} --> {37}
+		{36}
+		{75}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3171  Master=3058 Rover.At(3058){74} --> {75}
+		{76}
+		{36}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3232  Master=3115 Rover.Going(3115){37} --> {38}
+		{37}
+		{74}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3314  Master=3193 Rover.Going(3193){73} --> {74}
+		{75}
+		{37}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3373  Master=3252 Rover.At(3252){38} --> {39}
+		{38}
+		{73}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3407  Master=3294 Rover.At(3294){72} --> {73}
+		{74}
+		{38}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3468  Master=3351 Rover.Going(3351){39} --> {40}
+		{39}
+		{72}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3550  Master=3429 Rover.Going(3429){71} --> {72}
+		{73}
+		{39}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3609  Master=3488 Rover.At(3488){40} --> {41}
+		{40}
+		{71}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3643  Master=3530 Rover.At(3530){70} --> {71}
+		{72}
+		{40}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3704  Master=3587 Rover.Going(3587){41} --> {42}
+		{41}
+		{70}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3786  Master=3665 Rover.Going(3665){69} --> {70}
+		{71}
+		{41}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3845  Master=3724 Rover.At(3724){42} --> {43}
+		{42}
+		{69}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3879  Master=3766 Rover.At(3766){68} --> {69}
+		{70}
+		{42}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3940  Master=3823 Rover.Going(3823){43} --> {44}
+		{43}
+		{68}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4022  Master=3901 Rover.Going(3901){67} --> {68}
+		{69}
+		{43}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4081  Master=3960 Rover.At(3960){44} --> {45}
+		{44}
+		{67}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4115  Master=4002 Rover.At(4002){66} --> {67}
+		{68}
+		{44}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4176  Master=4059 Rover.Going(4059){45} --> {46}
+		{45}
+		{66}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4258  Master=4137 Rover.Going(4137){65} --> {66}
+		{67}
+		{45}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4317  Master=4196 Rover.At(4196){46} --> {47}
+		{46}
+		{65}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4351  Master=4238 Rover.At(4238){64} --> {65}
+		{66}
+		{46}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4412  Master=4295 Rover.Going(4295){47} --> {48}
+		{47}
+		{64}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4494  Master=4373 Rover.Going(4373){63} --> {64}
+		{65}
+		{47}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4553  Master=4432 Rover.At(4432){48} --> {49}
+		{48}
+		{63}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4587  Master=4474 Rover.At(4474){62} --> {63}
+		{64}
+		{48}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4648  Master=4531 Rover.Going(4531){49} --> {50}
+		{49}
+		{62}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4730  Master=4609 Rover.Going(4609){61} --> {62}
+		{63}
+		{49}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4789  Master=4668 Rover.At(4668){50} --> {51}
+		{50}
+		{61}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4823  Master=4710 Rover.At(4710){60} --> {61}
+		{62}
+		{50}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4884  Master=4767 Rover.Going(4767){51} --> {52}
+		{51}
+		{60}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4966  Master=4845 Rover.Going(4845){59} --> {60}
+		{61}
+		{51}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=5025  Master=4904 Rover.At(4904){52} --> {53}
+		{52}
+		{59}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=5059  Master=4946 Rover.At(4946){58} --> {59}
+		{60}
+		{52}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=5120  Master=5003 Rover.Going(5003){53} --> {54}
+		{53}
+		{58}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=5202  Master=5081 Rover.Going(5081){57} --> {58}
+		{59}
+		{53}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=5261  Master=5140 Rover.At(5140){54} --> {55}
+		{54}
+		{57}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=5295  Master=5182 Rover.At(5182){56} --> {57}
+		{58}
+		{55}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=5317  Master=5182 Rover.At(5182){56} --> {57}
+		{56}
+		{54}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=5356  Master=5239 Rover.Going(5239){55} --> {56}
+		{55}
+		{56}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=5376  Master=5239 Rover.Going(5239){55} --> {56}
+		{57}
+Inactive Tokens: *************************
+		{9}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Rock}m_to=Locations:CLOSED{Lander})
+		Key=90  Master=26 a(26){10} --> {11}
+		{10}
+		{101}
+		Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill,Lander})
+		Key=120  Master=46 b(46){100} --> {101}
+		{102}
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[10, 10]
+			world.m_horizonEnd=int:CLOSED[101, 101]
+			world.m_maxPlannerSteps=int:CLOSED[1000, 1000]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Rover:rover*************************
+		Tokens *************************
+				{10}
+				Rover.At(m_location=Locations:CLOSED{Lander})
+				Key=26  Master=NONE
+					Merged Key=174 from Rover.Going(68){11} --> {12}
+				{11}
+				{11}
+				Rover.Going(m_from=Locations:CLOSED{Lander}m_to=Locations:CLOSED{Hill})
+				Key=68  Master=26 a(26){10} --> {11}
+					Merged Key=305 from Rover.At(194){12} --> {13}
+				{12}
+				{12}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=194  Master=68 Rover.Going(68){11} --> {12}
+					Merged Key=400 from Rover.Going(283){13} --> {14}
+				{13}
+				{13}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=283  Master=194 Rover.At(194){12} --> {13}
+					Merged Key=541 from Rover.At(420){14} --> {15}
+				{14}
+				{14}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=420  Master=283 Rover.Going(283){13} --> {14}
+					Merged Key=636 from Rover.Going(519){15} --> {16}
+				{15}
+				{15}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=519  Master=420 Rover.At(420){14} --> {15}
+					Merged Key=777 from Rover.At(656){16} --> {17}
+				{16}
+				{16}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=656  Master=519 Rover.Going(519){15} --> {16}
+					Merged Key=872 from Rover.Going(755){17} --> {18}
+				{17}
+				{17}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=755  Master=656 Rover.At(656){16} --> {17}
+					Merged Key=1013 from Rover.At(892){18} --> {19}
+				{18}
+				{18}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=892  Master=755 Rover.Going(755){17} --> {18}
+					Merged Key=1108 from Rover.Going(991){19} --> {20}
+				{19}
+				{19}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=991  Master=892 Rover.At(892){18} --> {19}
+					Merged Key=1249 from Rover.At(1128){20} --> {21}
+				{20}
+				{20}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=1128  Master=991 Rover.Going(991){19} --> {20}
+					Merged Key=1344 from Rover.Going(1227){21} --> {22}
+				{21}
+				{21}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=1227  Master=1128 Rover.At(1128){20} --> {21}
+					Merged Key=1485 from Rover.At(1364){22} --> {23}
+				{22}
+				{22}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=1364  Master=1227 Rover.Going(1227){21} --> {22}
+					Merged Key=1580 from Rover.Going(1463){23} --> {24}
+				{23}
+				{23}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=1463  Master=1364 Rover.At(1364){22} --> {23}
+					Merged Key=1721 from Rover.At(1600){24} --> {25}
+				{24}
+				{24}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=1600  Master=1463 Rover.Going(1463){23} --> {24}
+					Merged Key=1816 from Rover.Going(1699){25} --> {26}
+				{25}
+				{25}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=1699  Master=1600 Rover.At(1600){24} --> {25}
+					Merged Key=1957 from Rover.At(1836){26} --> {27}
+				{26}
+				{26}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=1836  Master=1699 Rover.Going(1699){25} --> {26}
+					Merged Key=2052 from Rover.Going(1935){27} --> {28}
+				{27}
+				{27}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=1935  Master=1836 Rover.At(1836){26} --> {27}
+					Merged Key=2193 from Rover.At(2072){28} --> {29}
+				{28}
+				{28}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=2072  Master=1935 Rover.Going(1935){27} --> {28}
+					Merged Key=2288 from Rover.Going(2171){29} --> {30}
+				{29}
+				{29}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=2171  Master=2072 Rover.At(2072){28} --> {29}
+					Merged Key=2429 from Rover.At(2308){30} --> {31}
+				{30}
+				{30}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=2308  Master=2171 Rover.Going(2171){29} --> {30}
+					Merged Key=2524 from Rover.Going(2407){31} --> {32}
+				{31}
+				{31}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=2407  Master=2308 Rover.At(2308){30} --> {31}
+					Merged Key=2665 from Rover.At(2544){32} --> {33}
+				{32}
+				{32}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=2544  Master=2407 Rover.Going(2407){31} --> {32}
+					Merged Key=2760 from Rover.Going(2643){33} --> {34}
+				{33}
+				{33}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=2643  Master=2544 Rover.At(2544){32} --> {33}
+					Merged Key=2901 from Rover.At(2780){34} --> {35}
+				{34}
+				{34}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=2780  Master=2643 Rover.Going(2643){33} --> {34}
+					Merged Key=2996 from Rover.Going(2879){35} --> {36}
+				{35}
+				{35}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=2879  Master=2780 Rover.At(2780){34} --> {35}
+					Merged Key=3137 from Rover.At(3016){36} --> {37}
+				{36}
+				{36}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=3016  Master=2879 Rover.Going(2879){35} --> {36}
+					Merged Key=3232 from Rover.Going(3115){37} --> {38}
+				{37}
+				{37}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=3115  Master=3016 Rover.At(3016){36} --> {37}
+					Merged Key=3373 from Rover.At(3252){38} --> {39}
+				{38}
+				{38}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=3252  Master=3115 Rover.Going(3115){37} --> {38}
+					Merged Key=3468 from Rover.Going(3351){39} --> {40}
+				{39}
+				{39}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=3351  Master=3252 Rover.At(3252){38} --> {39}
+					Merged Key=3609 from Rover.At(3488){40} --> {41}
+				{40}
+				{40}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=3488  Master=3351 Rover.Going(3351){39} --> {40}
+					Merged Key=3704 from Rover.Going(3587){41} --> {42}
+				{41}
+				{41}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=3587  Master=3488 Rover.At(3488){40} --> {41}
+					Merged Key=3845 from Rover.At(3724){42} --> {43}
+				{42}
+				{42}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=3724  Master=3587 Rover.Going(3587){41} --> {42}
+					Merged Key=3940 from Rover.Going(3823){43} --> {44}
+				{43}
+				{43}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=3823  Master=3724 Rover.At(3724){42} --> {43}
+					Merged Key=4081 from Rover.At(3960){44} --> {45}
+				{44}
+				{44}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=3960  Master=3823 Rover.Going(3823){43} --> {44}
+					Merged Key=4176 from Rover.Going(4059){45} --> {46}
+				{45}
+				{45}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=4059  Master=3960 Rover.At(3960){44} --> {45}
+					Merged Key=4317 from Rover.At(4196){46} --> {47}
+				{46}
+				{46}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=4196  Master=4059 Rover.Going(4059){45} --> {46}
+					Merged Key=4412 from Rover.Going(4295){47} --> {48}
+				{47}
+				{47}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=4295  Master=4196 Rover.At(4196){46} --> {47}
+					Merged Key=4553 from Rover.At(4432){48} --> {49}
+				{48}
+				{48}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=4432  Master=4295 Rover.Going(4295){47} --> {48}
+					Merged Key=4648 from Rover.Going(4531){49} --> {50}
+				{49}
+				{49}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=4531  Master=4432 Rover.At(4432){48} --> {49}
+					Merged Key=4789 from Rover.At(4668){50} --> {51}
+				{50}
+				{50}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=4668  Master=4531 Rover.Going(4531){49} --> {50}
+					Merged Key=4884 from Rover.Going(4767){51} --> {52}
+				{51}
+				{51}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=4767  Master=4668 Rover.At(4668){50} --> {51}
+					Merged Key=5025 from Rover.At(4904){52} --> {53}
+				{52}
+				{52}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=4904  Master=4767 Rover.Going(4767){51} --> {52}
+					Merged Key=5120 from Rover.Going(5003){53} --> {54}
+				{53}
+				{53}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=5003  Master=4904 Rover.At(4904){52} --> {53}
+					Merged Key=5261 from Rover.At(5140){54} --> {55}
+				{54}
+				{54}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=5140  Master=5003 Rover.Going(5003){53} --> {54}
+					Merged Key=5356 from Rover.Going(5239){55} --> {56}
+				{55}
+				{55}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Lander})
+				Key=5239  Master=5140 Rover.At(5140){54} --> {55}
+					Merged Key=5317 from Rover.At(5182){56} --> {57}
+				{56}
+				{56}
+				Rover.At(m_location=Locations:CLOSED{Lander})
+				Key=5182  Master=5081 Rover.Going(5081){57} --> {58}
+					Merged Key=5376 from Rover.Going(5239){55} --> {56}
+				{57}
+				{57}
+				Rover.Going(m_from=Locations:CLOSED{Lander}m_to=Locations:CLOSED{Hill})
+				Key=5081  Master=4946 Rover.At(4946){58} --> {59}
+					Merged Key=5295 from Rover.At(5182){56} --> {57}
+				{58}
+				{58}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=4946  Master=4845 Rover.Going(4845){59} --> {60}
+					Merged Key=5202 from Rover.Going(5081){57} --> {58}
+				{59}
+				{59}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=4845  Master=4710 Rover.At(4710){60} --> {61}
+					Merged Key=5059 from Rover.At(4946){58} --> {59}
+				{60}
+				{60}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=4710  Master=4609 Rover.Going(4609){61} --> {62}
+					Merged Key=4966 from Rover.Going(4845){59} --> {60}
+				{61}
+				{61}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=4609  Master=4474 Rover.At(4474){62} --> {63}
+					Merged Key=4823 from Rover.At(4710){60} --> {61}
+				{62}
+				{62}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=4474  Master=4373 Rover.Going(4373){63} --> {64}
+					Merged Key=4730 from Rover.Going(4609){61} --> {62}
+				{63}
+				{63}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=4373  Master=4238 Rover.At(4238){64} --> {65}
+					Merged Key=4587 from Rover.At(4474){62} --> {63}
+				{64}
+				{64}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=4238  Master=4137 Rover.Going(4137){65} --> {66}
+					Merged Key=4494 from Rover.Going(4373){63} --> {64}
+				{65}
+				{65}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=4137  Master=4002 Rover.At(4002){66} --> {67}
+					Merged Key=4351 from Rover.At(4238){64} --> {65}
+				{66}
+				{66}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=4002  Master=3901 Rover.Going(3901){67} --> {68}
+					Merged Key=4258 from Rover.Going(4137){65} --> {66}
+				{67}
+				{67}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=3901  Master=3766 Rover.At(3766){68} --> {69}
+					Merged Key=4115 from Rover.At(4002){66} --> {67}
+				{68}
+				{68}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=3766  Master=3665 Rover.Going(3665){69} --> {70}
+					Merged Key=4022 from Rover.Going(3901){67} --> {68}
+				{69}
+				{69}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=3665  Master=3530 Rover.At(3530){70} --> {71}
+					Merged Key=3879 from Rover.At(3766){68} --> {69}
+				{70}
+				{70}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=3530  Master=3429 Rover.Going(3429){71} --> {72}
+					Merged Key=3786 from Rover.Going(3665){69} --> {70}
+				{71}
+				{71}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=3429  Master=3294 Rover.At(3294){72} --> {73}
+					Merged Key=3643 from Rover.At(3530){70} --> {71}
+				{72}
+				{72}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=3294  Master=3193 Rover.Going(3193){73} --> {74}
+					Merged Key=3550 from Rover.Going(3429){71} --> {72}
+				{73}
+				{73}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=3193  Master=3058 Rover.At(3058){74} --> {75}
+					Merged Key=3407 from Rover.At(3294){72} --> {73}
+				{74}
+				{74}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=3058  Master=2957 Rover.Going(2957){75} --> {76}
+					Merged Key=3314 from Rover.Going(3193){73} --> {74}
+				{75}
+				{75}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=2957  Master=2822 Rover.At(2822){76} --> {77}
+					Merged Key=3171 from Rover.At(3058){74} --> {75}
+				{76}
+				{76}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=2822  Master=2721 Rover.Going(2721){77} --> {78}
+					Merged Key=3078 from Rover.Going(2957){75} --> {76}
+				{77}
+				{77}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=2721  Master=2586 Rover.At(2586){78} --> {79}
+					Merged Key=2935 from Rover.At(2822){76} --> {77}
+				{78}
+				{78}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=2586  Master=2485 Rover.Going(2485){79} --> {80}
+					Merged Key=2842 from Rover.Going(2721){77} --> {78}
+				{79}
+				{79}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=2485  Master=2350 Rover.At(2350){80} --> {81}
+					Merged Key=2699 from Rover.At(2586){78} --> {79}
+				{80}
+				{80}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=2350  Master=2249 Rover.Going(2249){81} --> {82}
+					Merged Key=2606 from Rover.Going(2485){79} --> {80}
+				{81}
+				{81}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=2249  Master=2114 Rover.At(2114){82} --> {83}
+					Merged Key=2463 from Rover.At(2350){80} --> {81}
+				{82}
+				{82}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=2114  Master=2013 Rover.Going(2013){83} --> {84}
+					Merged Key=2370 from Rover.Going(2249){81} --> {82}
+				{83}
+				{83}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=2013  Master=1878 Rover.At(1878){84} --> {85}
+					Merged Key=2227 from Rover.At(2114){82} --> {83}
+				{84}
+				{84}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=1878  Master=1777 Rover.Going(1777){85} --> {86}
+					Merged Key=2134 from Rover.Going(2013){83} --> {84}
+				{85}
+				{85}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=1777  Master=1642 Rover.At(1642){86} --> {87}
+					Merged Key=1991 from Rover.At(1878){84} --> {85}
+				{86}
+				{86}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=1642  Master=1541 Rover.Going(1541){87} --> {88}
+					Merged Key=1898 from Rover.Going(1777){85} --> {86}
+				{87}
+				{87}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=1541  Master=1406 Rover.At(1406){88} --> {89}
+					Merged Key=1755 from Rover.At(1642){86} --> {87}
+				{88}
+				{88}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=1406  Master=1305 Rover.Going(1305){89} --> {90}
+					Merged Key=1662 from Rover.Going(1541){87} --> {88}
+				{89}
+				{89}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=1305  Master=1170 Rover.At(1170){90} --> {91}
+					Merged Key=1519 from Rover.At(1406){88} --> {89}
+				{90}
+				{90}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=1170  Master=1069 Rover.Going(1069){91} --> {92}
+					Merged Key=1426 from Rover.Going(1305){89} --> {90}
+				{91}
+				{91}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=1069  Master=934 Rover.At(934){92} --> {93}
+					Merged Key=1283 from Rover.At(1170){90} --> {91}
+				{92}
+				{92}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=934  Master=833 Rover.Going(833){93} --> {94}
+					Merged Key=1190 from Rover.Going(1069){91} --> {92}
+				{93}
+				{93}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=833  Master=698 Rover.At(698){94} --> {95}
+					Merged Key=1047 from Rover.At(934){92} --> {93}
+				{94}
+				{94}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=698  Master=597 Rover.Going(597){95} --> {96}
+					Merged Key=954 from Rover.Going(833){93} --> {94}
+				{95}
+				{95}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=597  Master=462 Rover.At(462){96} --> {97}
+					Merged Key=811 from Rover.At(698){94} --> {95}
+				{96}
+				{96}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=462  Master=361 Rover.Going(361){97} --> {98}
+					Merged Key=718 from Rover.Going(597){95} --> {96}
+				{97}
+				{97}
+				Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill})
+				Key=361  Master=226 Rover.At(226){98} --> {99}
+					Merged Key=575 from Rover.At(462){96} --> {97}
+				{98}
+				{98}
+				Rover.At(m_location=Locations:CLOSED{Hill})
+				Key=226  Master=142 Rover.Going(142){99} --> {100}
+					Merged Key=482 from Rover.Going(361){97} --> {98}
+				{99}
+				{99}
+				Rover.Going(m_from=Locations:CLOSED{Hill}m_to=Locations:CLOSED{Rock})
+				Key=142  Master=46 b(46){100} --> {101}
+					Merged Key=339 from Rover.At(226){98} --> {99}
+				{100}
+				{100}
+				Rover.At(m_location=Locations:CLOSED{Rock})
+				Key=46  Master=NONE
+					Merged Key=246 from Rover.Going(142){99} --> {100}
+				{101}
+		End Tokens *********************
+	End Rover:rover*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	rover=Rover:CLOSED{rover(23)}
+Merged Tokens: *************************
+		{10}
+		Rover.At(m_location=Locations:CLOSED{Lander})
+		Key=174  Master=68 Rover.Going(68){11} --> {12}
+		{11}
+		{100}
+		Rover.At(m_location=Locations:CLOSED{Rock})
+		Key=246  Master=142 Rover.Going(142){99} --> {100}
+		{101}
+		{11}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Rock})
+		Key=305  Master=194 Rover.At(194){12} --> {13}
+		{12}
+		{99}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=339  Master=226 Rover.At(226){98} --> {99}
+		{100}
+		{12}
+		Rover.At(m_location=Locations:CLOSED{Hill,Rock})
+		Key=400  Master=283 Rover.Going(283){13} --> {14}
+		{13}
+		{98}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander})
+		Key=482  Master=361 Rover.Going(361){97} --> {98}
+		{99}
+		{13}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=541  Master=420 Rover.At(420){14} --> {15}
+		{14}
+		{97}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=575  Master=462 Rover.At(462){96} --> {97}
+		{98}
+		{14}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=636  Master=519 Rover.Going(519){15} --> {16}
+		{15}
+		{96}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=718  Master=597 Rover.Going(597){95} --> {96}
+		{97}
+		{15}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=777  Master=656 Rover.At(656){16} --> {17}
+		{16}
+		{95}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=811  Master=698 Rover.At(698){94} --> {95}
+		{96}
+		{16}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=872  Master=755 Rover.Going(755){17} --> {18}
+		{17}
+		{94}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=954  Master=833 Rover.Going(833){93} --> {94}
+		{95}
+		{17}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1013  Master=892 Rover.At(892){18} --> {19}
+		{18}
+		{93}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1047  Master=934 Rover.At(934){92} --> {93}
+		{94}
+		{18}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1108  Master=991 Rover.Going(991){19} --> {20}
+		{19}
+		{92}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1190  Master=1069 Rover.Going(1069){91} --> {92}
+		{93}
+		{19}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1249  Master=1128 Rover.At(1128){20} --> {21}
+		{20}
+		{91}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1283  Master=1170 Rover.At(1170){90} --> {91}
+		{92}
+		{20}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1344  Master=1227 Rover.Going(1227){21} --> {22}
+		{21}
+		{90}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1426  Master=1305 Rover.Going(1305){89} --> {90}
+		{91}
+		{21}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1485  Master=1364 Rover.At(1364){22} --> {23}
+		{22}
+		{89}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1519  Master=1406 Rover.At(1406){88} --> {89}
+		{90}
+		{22}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1580  Master=1463 Rover.Going(1463){23} --> {24}
+		{23}
+		{88}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1662  Master=1541 Rover.Going(1541){87} --> {88}
+		{89}
+		{23}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1721  Master=1600 Rover.At(1600){24} --> {25}
+		{24}
+		{87}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1755  Master=1642 Rover.At(1642){86} --> {87}
+		{88}
+		{24}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1816  Master=1699 Rover.Going(1699){25} --> {26}
+		{25}
+		{86}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1898  Master=1777 Rover.Going(1777){85} --> {86}
+		{87}
+		{25}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1957  Master=1836 Rover.At(1836){26} --> {27}
+		{26}
+		{85}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=1991  Master=1878 Rover.At(1878){84} --> {85}
+		{86}
+		{26}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2052  Master=1935 Rover.Going(1935){27} --> {28}
+		{27}
+		{84}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2134  Master=2013 Rover.Going(2013){83} --> {84}
+		{85}
+		{27}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2193  Master=2072 Rover.At(2072){28} --> {29}
+		{28}
+		{83}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2227  Master=2114 Rover.At(2114){82} --> {83}
+		{84}
+		{28}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2288  Master=2171 Rover.Going(2171){29} --> {30}
+		{29}
+		{82}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2370  Master=2249 Rover.Going(2249){81} --> {82}
+		{83}
+		{29}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2429  Master=2308 Rover.At(2308){30} --> {31}
+		{30}
+		{81}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2463  Master=2350 Rover.At(2350){80} --> {81}
+		{82}
+		{30}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2524  Master=2407 Rover.Going(2407){31} --> {32}
+		{31}
+		{80}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2606  Master=2485 Rover.Going(2485){79} --> {80}
+		{81}
+		{31}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2665  Master=2544 Rover.At(2544){32} --> {33}
+		{32}
+		{79}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2699  Master=2586 Rover.At(2586){78} --> {79}
+		{80}
+		{32}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2760  Master=2643 Rover.Going(2643){33} --> {34}
+		{33}
+		{78}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2842  Master=2721 Rover.Going(2721){77} --> {78}
+		{79}
+		{33}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2901  Master=2780 Rover.At(2780){34} --> {35}
+		{34}
+		{77}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2935  Master=2822 Rover.At(2822){76} --> {77}
+		{78}
+		{34}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=2996  Master=2879 Rover.Going(2879){35} --> {36}
+		{35}
+		{76}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3078  Master=2957 Rover.Going(2957){75} --> {76}
+		{77}
+		{35}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3137  Master=3016 Rover.At(3016){36} --> {37}
+		{36}
+		{75}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3171  Master=3058 Rover.At(3058){74} --> {75}
+		{76}
+		{36}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3232  Master=3115 Rover.Going(3115){37} --> {38}
+		{37}
+		{74}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3314  Master=3193 Rover.Going(3193){73} --> {74}
+		{75}
+		{37}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3373  Master=3252 Rover.At(3252){38} --> {39}
+		{38}
+		{73}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3407  Master=3294 Rover.At(3294){72} --> {73}
+		{74}
+		{38}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3468  Master=3351 Rover.Going(3351){39} --> {40}
+		{39}
+		{72}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3550  Master=3429 Rover.Going(3429){71} --> {72}
+		{73}
+		{39}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3609  Master=3488 Rover.At(3488){40} --> {41}
+		{40}
+		{71}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3643  Master=3530 Rover.At(3530){70} --> {71}
+		{72}
+		{40}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3704  Master=3587 Rover.Going(3587){41} --> {42}
+		{41}
+		{70}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3786  Master=3665 Rover.Going(3665){69} --> {70}
+		{71}
+		{41}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3845  Master=3724 Rover.At(3724){42} --> {43}
+		{42}
+		{69}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3879  Master=3766 Rover.At(3766){68} --> {69}
+		{70}
+		{42}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=3940  Master=3823 Rover.Going(3823){43} --> {44}
+		{43}
+		{68}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4022  Master=3901 Rover.Going(3901){67} --> {68}
+		{69}
+		{43}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4081  Master=3960 Rover.At(3960){44} --> {45}
+		{44}
+		{67}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4115  Master=4002 Rover.At(4002){66} --> {67}
+		{68}
+		{44}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4176  Master=4059 Rover.Going(4059){45} --> {46}
+		{45}
+		{66}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4258  Master=4137 Rover.Going(4137){65} --> {66}
+		{67}
+		{45}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4317  Master=4196 Rover.At(4196){46} --> {47}
+		{46}
+		{65}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4351  Master=4238 Rover.At(4238){64} --> {65}
+		{66}
+		{46}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4412  Master=4295 Rover.Going(4295){47} --> {48}
+		{47}
+		{64}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4494  Master=4373 Rover.Going(4373){63} --> {64}
+		{65}
+		{47}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4553  Master=4432 Rover.At(4432){48} --> {49}
+		{48}
+		{63}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4587  Master=4474 Rover.At(4474){62} --> {63}
+		{64}
+		{48}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4648  Master=4531 Rover.Going(4531){49} --> {50}
+		{49}
+		{62}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4730  Master=4609 Rover.Going(4609){61} --> {62}
+		{63}
+		{49}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4789  Master=4668 Rover.At(4668){50} --> {51}
+		{50}
+		{61}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4823  Master=4710 Rover.At(4710){60} --> {61}
+		{62}
+		{50}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4884  Master=4767 Rover.Going(4767){51} --> {52}
+		{51}
+		{60}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=4966  Master=4845 Rover.Going(4845){59} --> {60}
+		{61}
+		{51}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=5025  Master=4904 Rover.At(4904){52} --> {53}
+		{52}
+		{59}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=5059  Master=4946 Rover.At(4946){58} --> {59}
+		{60}
+		{52}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=5120  Master=5003 Rover.Going(5003){53} --> {54}
+		{53}
+		{58}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=5202  Master=5081 Rover.Going(5081){57} --> {58}
+		{59}
+		{53}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=5261  Master=5140 Rover.At(5140){54} --> {55}
+		{54}
+		{57}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=5295  Master=5182 Rover.At(5182){56} --> {57}
+		{58}
+		{55}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Lander,Rock}m_to=Locations:CLOSED{Hill,Lander,Rock})
+		Key=5317  Master=5182 Rover.At(5182){56} --> {57}
+		{56}
+		{54}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=5356  Master=5239 Rover.Going(5239){55} --> {56}
+		{55}
+		{56}
+		Rover.At(m_location=Locations:CLOSED{Hill,Lander,Rock})
+		Key=5376  Master=5239 Rover.Going(5239){55} --> {56}
+		{57}
+Inactive Tokens: *************************
+		{9}
+		Rover.Going(m_from=Locations:CLOSED{Hill,Rock}m_to=Locations:CLOSED{Lander})
+		Key=90  Master=26 a(26){10} --> {11}
+		{10}
+		{101}
+		Rover.Going(m_from=Locations:CLOSED{Rock}m_to=Locations:CLOSED{Hill,Lander})
+		Key=120  Master=46 b(46){100} --> {101}
+		{102}
+
+Finished

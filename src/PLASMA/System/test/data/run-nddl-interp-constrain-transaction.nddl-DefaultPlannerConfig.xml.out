@@ -1,0 +1,56 @@
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[5, 5]
+			world.m_maxPlannerSteps=int:CLOSED[10, 10]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Foo:f1*************************
+	End Foo:f1*************************
+	Foo:f2*************************
+		Tokens *************************
+				[-inf, +inf]
+				Foo.baz()
+				Key=44  Master=NONE
+				[-inf, +inf]
+				[-inf, +inf]
+				Foo.bar()
+				Key=29  Master=NONE
+				[-inf, +inf]
+		End Tokens *********************
+	End Foo:f2*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	f1=Foo:CLOSED{f1(23)}
+	f2=Foo:CLOSED{f2(26)}
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[5, 5]
+			world.m_maxPlannerSteps=int:CLOSED[10, 10]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Foo:f1*************************
+	End Foo:f1*************************
+	Foo:f2*************************
+		Tokens *************************
+				[-inf, +inf]
+				Foo.baz()
+				Key=44  Master=NONE
+				[-inf, +inf]
+				[-inf, +inf]
+				Foo.bar()
+				Key=29  Master=NONE
+				[-inf, +inf]
+		End Tokens *********************
+	End Foo:f2*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	f1=Foo:CLOSED{f1(23)}
+	f2=Foo:CLOSED{f2(26)}
+
+Finished

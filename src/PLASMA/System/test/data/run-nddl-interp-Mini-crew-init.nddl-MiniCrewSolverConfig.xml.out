@@ -1,0 +1,60 @@
+Objects *************************
+	PlannerConfig:plannerConfiguration*************************
+		Variables *************************
+			plannerConfiguration.m_horizonStart=int:CLOSED[0, 0]
+			plannerConfiguration.m_horizonEnd=int:CLOSED[100, 100]
+			plannerConfiguration.m_maxPlannerSteps=int:CLOSED[100000, 100000]
+			plannerConfiguration.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:plannerConfiguration*************************
+	CrewMember:crew*************************
+		Tokens *************************
+				[0, 98]
+				CrewMember.Activity(solved=bool:CLOSED[0, 0])
+				Key=29  Master=NONE
+				[1, 99]
+				[1, 99]
+				CrewMember.Activity(solved=bool:CLOSED[0, 0])
+				Key=45  Master=NONE
+				[2, 100]
+		End Tokens *********************
+		Variables *************************
+			crew.m_claim=CrewMember_Claim:CLOSED{crew.m_claim(25)}
+		End Variables *********************
+	End CrewMember:crew*************************
+	CrewMember_Claim:crew.m_claim*************************
+	End CrewMember_Claim:crew.m_claim*************************
+Global Variables*************************
+	plannerConfiguration=PlannerConfig:CLOSED{plannerConfiguration(12)}
+	crew=CrewMember:CLOSED{crew(23)}
+Objects *************************
+	PlannerConfig:plannerConfiguration*************************
+		Variables *************************
+			plannerConfiguration.m_horizonStart=int:CLOSED[0, 0]
+			plannerConfiguration.m_horizonEnd=int:CLOSED[100, 100]
+			plannerConfiguration.m_maxPlannerSteps=int:CLOSED[100000, 100000]
+			plannerConfiguration.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:plannerConfiguration*************************
+	CrewMember:crew*************************
+		Tokens *************************
+				[0, 98]
+				CrewMember.Activity(solved=bool:CLOSED[0, 0])
+				Key=29  Master=NONE
+				[1, 99]
+				[1, 99]
+				CrewMember.Activity(solved=bool:CLOSED[0, 0])
+				Key=45  Master=NONE
+				[2, 100]
+		End Tokens *********************
+		Variables *************************
+			crew.m_claim=CrewMember_Claim:CLOSED{crew.m_claim(25)}
+		End Variables *********************
+	End CrewMember:crew*************************
+	CrewMember_Claim:crew.m_claim*************************
+	End CrewMember_Claim:crew.m_claim*************************
+Global Variables*************************
+	plannerConfiguration=PlannerConfig:CLOSED{plannerConfiguration(12)}
+	crew=CrewMember:CLOSED{crew(23)}
+
+Finished

@@ -1,0 +1,252 @@
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[100, 100]
+			world.m_maxPlannerSteps=int:CLOSED[500, 500]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Location:Hill*************************
+		Variables *************************
+			Hill.description=string:CLOSED{Hill}
+		End Variables *********************
+	End Location:Hill*************************
+	Location:Rock*************************
+		Variables *************************
+			Rock.description=string:CLOSED{Rock}
+		End Variables *********************
+	End Location:Rock*************************
+	Location:Lander*************************
+		Variables *************************
+			Lander.description=string:CLOSED{Lander}
+		End Variables *********************
+	End Location:Lander*************************
+	Path:p1*************************
+		Variables *************************
+			p1.from=Location:CLOSED{Rock(32)}
+			p1.to=Location:CLOSED{Hill(25)}
+		End Variables *********************
+	End Path:p1*************************
+	Path:p2*************************
+		Variables *************************
+			p2.from=Location:CLOSED{Lander(39)}
+			p2.to=Location:CLOSED{Hill(25)}
+		End Variables *********************
+	End Path:p2*************************
+	Path:p3*************************
+		Variables *************************
+			p3.from=Location:CLOSED{Hill(25)}
+			p3.to=Location:CLOSED{Lander(39)}
+		End Variables *********************
+	End Path:p3*************************
+	Target:t1*************************
+	End Target:t1*************************
+	Target:t2*************************
+	End Target:t2*************************
+	Target:t3*************************
+	End Target:t3*************************
+	Target:t4*************************
+	End Target:t4*************************
+	Target:t5*************************
+	End Target:t5*************************
+	Target:t6*************************
+	End Target:t6*************************
+	Trackable:tr1*************************
+		Variables *************************
+			tr1.path=Path:CLOSED{p1(46)}
+			tr1.target=Target:CLOSED{t1(71)}
+		End Variables *********************
+	End Trackable:tr1*************************
+	Trackable:tr2*************************
+		Variables *************************
+			tr2.path=Path:CLOSED{p1(46)}
+			tr2.target=Target:CLOSED{t2(74)}
+		End Variables *********************
+	End Trackable:tr2*************************
+	Trackable:tr3*************************
+		Variables *************************
+			tr3.path=Path:CLOSED{p2(55)}
+			tr3.target=Target:CLOSED{t3(77)}
+		End Variables *********************
+	End Trackable:tr3*************************
+	Trackable:tr4*************************
+		Variables *************************
+			tr4.path=Path:CLOSED{p2(55)}
+			tr4.target=Target:CLOSED{t4(80)}
+		End Variables *********************
+	End Trackable:tr4*************************
+	Trackable:tr5*************************
+		Variables *************************
+			tr5.path=Path:CLOSED{p3(64)}
+			tr5.target=Target:CLOSED{t5(83)}
+		End Variables *********************
+	End Trackable:tr5*************************
+	Trackable:tr6*************************
+		Variables *************************
+			tr6.path=Path:CLOSED{p3(64)}
+			tr6.target=Target:CLOSED{t6(86)}
+		End Variables *********************
+	End Trackable:tr6*************************
+	NotTrackable:nt1*************************
+		Variables *************************
+			nt1.path=Path:CLOSED{p3(64)}
+			nt1.target=Target:CLOSED{t6(86)}
+		End Variables *********************
+	End NotTrackable:nt1*************************
+	Rover:rover*************************
+	End Rover:rover*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	Hill=Location:CLOSED{Hill(25)}
+	Rock=Location:CLOSED{Rock(32)}
+	Lander=Location:CLOSED{Lander(39)}
+	p1=Path:CLOSED{p1(46)}
+	p2=Path:CLOSED{p2(55)}
+	p3=Path:CLOSED{p3(64)}
+	t1=Target:CLOSED{t1(71)}
+	t2=Target:CLOSED{t2(74)}
+	t3=Target:CLOSED{t3(77)}
+	t4=Target:CLOSED{t4(80)}
+	t5=Target:CLOSED{t5(83)}
+	t6=Target:CLOSED{t6(86)}
+	tr1=Trackable:CLOSED{tr1(91)}
+	tr2=Trackable:CLOSED{tr2(100)}
+	tr3=Trackable:CLOSED{tr3(109)}
+	tr4=Trackable:CLOSED{tr4(118)}
+	tr5=Trackable:CLOSED{tr5(127)}
+	tr6=Trackable:CLOSED{tr6(136)}
+	nt1=NotTrackable:CLOSED{nt1(147)}
+	rover=Rover:CLOSED{rover(156)}
+Rejected Tokens: *************************
+		{0}
+		Rover.Navigate(path=Path:CLOSED{p1(46),p2(55),p3(64)}from=Location:CLOSED{Lander(39)}to=Location:CLOSED{Hill(25)})
+		Key=159  Master=NONE
+		{100}
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[100, 100]
+			world.m_maxPlannerSteps=int:CLOSED[500, 500]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Location:Hill*************************
+		Variables *************************
+			Hill.description=string:CLOSED{Hill}
+		End Variables *********************
+	End Location:Hill*************************
+	Location:Rock*************************
+		Variables *************************
+			Rock.description=string:CLOSED{Rock}
+		End Variables *********************
+	End Location:Rock*************************
+	Location:Lander*************************
+		Variables *************************
+			Lander.description=string:CLOSED{Lander}
+		End Variables *********************
+	End Location:Lander*************************
+	Path:p1*************************
+		Variables *************************
+			p1.from=Location:CLOSED{Rock(32)}
+			p1.to=Location:CLOSED{Hill(25)}
+		End Variables *********************
+	End Path:p1*************************
+	Path:p2*************************
+		Variables *************************
+			p2.from=Location:CLOSED{Lander(39)}
+			p2.to=Location:CLOSED{Hill(25)}
+		End Variables *********************
+	End Path:p2*************************
+	Path:p3*************************
+		Variables *************************
+			p3.from=Location:CLOSED{Hill(25)}
+			p3.to=Location:CLOSED{Lander(39)}
+		End Variables *********************
+	End Path:p3*************************
+	Target:t1*************************
+	End Target:t1*************************
+	Target:t2*************************
+	End Target:t2*************************
+	Target:t3*************************
+	End Target:t3*************************
+	Target:t4*************************
+	End Target:t4*************************
+	Target:t5*************************
+	End Target:t5*************************
+	Target:t6*************************
+	End Target:t6*************************
+	Trackable:tr1*************************
+		Variables *************************
+			tr1.path=Path:CLOSED{p1(46)}
+			tr1.target=Target:CLOSED{t1(71)}
+		End Variables *********************
+	End Trackable:tr1*************************
+	Trackable:tr2*************************
+		Variables *************************
+			tr2.path=Path:CLOSED{p1(46)}
+			tr2.target=Target:CLOSED{t2(74)}
+		End Variables *********************
+	End Trackable:tr2*************************
+	Trackable:tr3*************************
+		Variables *************************
+			tr3.path=Path:CLOSED{p2(55)}
+			tr3.target=Target:CLOSED{t3(77)}
+		End Variables *********************
+	End Trackable:tr3*************************
+	Trackable:tr4*************************
+		Variables *************************
+			tr4.path=Path:CLOSED{p2(55)}
+			tr4.target=Target:CLOSED{t4(80)}
+		End Variables *********************
+	End Trackable:tr4*************************
+	Trackable:tr5*************************
+		Variables *************************
+			tr5.path=Path:CLOSED{p3(64)}
+			tr5.target=Target:CLOSED{t5(83)}
+		End Variables *********************
+	End Trackable:tr5*************************
+	Trackable:tr6*************************
+		Variables *************************
+			tr6.path=Path:CLOSED{p3(64)}
+			tr6.target=Target:CLOSED{t6(86)}
+		End Variables *********************
+	End Trackable:tr6*************************
+	NotTrackable:nt1*************************
+		Variables *************************
+			nt1.path=Path:CLOSED{p3(64)}
+			nt1.target=Target:CLOSED{t6(86)}
+		End Variables *********************
+	End NotTrackable:nt1*************************
+	Rover:rover*************************
+	End Rover:rover*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	Hill=Location:CLOSED{Hill(25)}
+	Rock=Location:CLOSED{Rock(32)}
+	Lander=Location:CLOSED{Lander(39)}
+	p1=Path:CLOSED{p1(46)}
+	p2=Path:CLOSED{p2(55)}
+	p3=Path:CLOSED{p3(64)}
+	t1=Target:CLOSED{t1(71)}
+	t2=Target:CLOSED{t2(74)}
+	t3=Target:CLOSED{t3(77)}
+	t4=Target:CLOSED{t4(80)}
+	t5=Target:CLOSED{t5(83)}
+	t6=Target:CLOSED{t6(86)}
+	tr1=Trackable:CLOSED{tr1(91)}
+	tr2=Trackable:CLOSED{tr2(100)}
+	tr3=Trackable:CLOSED{tr3(109)}
+	tr4=Trackable:CLOSED{tr4(118)}
+	tr5=Trackable:CLOSED{tr5(127)}
+	tr6=Trackable:CLOSED{tr6(136)}
+	nt1=NotTrackable:CLOSED{nt1(147)}
+	rover=Rover:CLOSED{rover(156)}
+Rejected Tokens: *************************
+		{0}
+		Rover.Navigate(path=Path:CLOSED{p1(46),p2(55),p3(64)}from=Location:CLOSED{Lander(39)}to=Location:CLOSED{Hill(25)})
+		Key=159  Master=NONE
+		{100}
+
+Finished

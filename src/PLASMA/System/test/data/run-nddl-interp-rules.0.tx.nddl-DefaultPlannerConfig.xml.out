@@ -1,0 +1,104 @@
+Objects *************************
+	Location:Hill*************************
+		Variables *************************
+			Hill.name=string:CLOSED{Hill}
+		End Variables *********************
+	End Location:Hill*************************
+	Location:Rock*************************
+		Variables *************************
+			Rock.name=string:CLOSED{Rock}
+		End Variables *********************
+	End Location:Rock*************************
+	Location:Lander*************************
+		Variables *************************
+			Lander.name=string:CLOSED{Lander}
+		End Variables *********************
+	End Location:Lander*************************
+	Navigator:nav1*************************
+		Tokens *************************
+				{0}
+				Navigator.At(location=Location:CLOSED{Lander(22)})
+				Key=41  Master=NONE
+				[1, 100]
+		End Tokens *********************
+	End Navigator:nav1*************************
+	PlannerConfig:config*************************
+		Variables *************************
+			config.m_horizonStart=int:CLOSED[0, 0]
+			config.m_horizonEnd=int:CLOSED[100, 100]
+			config.m_maxPlannerSteps=int:CLOSED[200, 200]
+			config.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:config*************************
+Global Variables*************************
+	Hill=Location:CLOSED{Hill(8)}
+	Rock=Location:CLOSED{Rock(15)}
+	Lander=Location:CLOSED{Lander(22)}
+	nav1=Navigator:CLOSED{nav1(27)}
+	config=PlannerConfig:CLOSED{config(30)}
+Inactive Tokens: *************************
+		[1, 100]
+		Navigator.At(location=Location:CLOSED{Rock(15)})
+		Key=57  Master=NONE
+		[2, +inf]
+		[1, 100]
+		Navigator.Going(from=Location:CLOSED{Lander(22)}to=Location:CLOSED{Hill(8),Rock(15)})
+		Key=82  Master=41 initialPosition(41){0} --> [1, 100]
+		[2, +inf]
+		[-inf, -1]
+		Navigator.Going(from=Location:CLOSED{Hill(8),Rock(15)}to=Location:CLOSED{Lander(22)})
+		Key=102  Master=41 initialPosition(41){0} --> [1, 100]
+		{0}
+Objects *************************
+	Location:Hill*************************
+		Variables *************************
+			Hill.name=string:CLOSED{Hill}
+		End Variables *********************
+	End Location:Hill*************************
+	Location:Rock*************************
+		Variables *************************
+			Rock.name=string:CLOSED{Rock}
+		End Variables *********************
+	End Location:Rock*************************
+	Location:Lander*************************
+		Variables *************************
+			Lander.name=string:CLOSED{Lander}
+		End Variables *********************
+	End Location:Lander*************************
+	Navigator:nav1*************************
+		Tokens *************************
+				{0}
+				Navigator.At(location=Location:CLOSED{Lander(22)})
+				Key=41  Master=NONE
+				[1, 100]
+		End Tokens *********************
+	End Navigator:nav1*************************
+	PlannerConfig:config*************************
+		Variables *************************
+			config.m_horizonStart=int:CLOSED[0, 0]
+			config.m_horizonEnd=int:CLOSED[100, 100]
+			config.m_maxPlannerSteps=int:CLOSED[200, 200]
+			config.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:config*************************
+Global Variables*************************
+	Hill=Location:CLOSED{Hill(8)}
+	Rock=Location:CLOSED{Rock(15)}
+	Lander=Location:CLOSED{Lander(22)}
+	nav1=Navigator:CLOSED{nav1(27)}
+	config=PlannerConfig:CLOSED{config(30)}
+Inactive Tokens: *************************
+		[1, 100]
+		Navigator.At(location=Location:CLOSED{Rock(15)})
+		Key=57  Master=NONE
+		[2, +inf]
+		[1, 100]
+		Navigator.Going(from=Location:CLOSED{Lander(22)}to=Location:CLOSED{Hill(8),Rock(15)})
+		Key=82  Master=41 initialPosition(41){0} --> [1, 100]
+		[2, +inf]
+		[-inf, -1]
+		Navigator.Going(from=Location:CLOSED{Hill(8),Rock(15)}to=Location:CLOSED{Lander(22)})
+		Key=102  Master=41 initialPosition(41){0} --> [1, 100]
+		{0}
+
+Finished
