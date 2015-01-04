@@ -39,7 +39,17 @@ function(run_planner_problem model configFile dep)
 
   set(test_target run-nddl-interp-${model}-${configFile})
   add_test(NAME ${test_target}
-    COMMAND ${exec_plan} ${model} ${configFile} nddl)
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND}
+    -Dexec_plan=${CMAKE_CURRENT_BINARY_DIR}/${exec_plan}
+    -Dmodel=${model}
+    -DconfigFile=${configFile}
+    -Dlanguage=nddl
+    -Doutput_file=${CMAKE_CURRENT_BINARY_DIR}/${test_target}.out
+    -Dplan_compare=diff
+    -Dgold_file=${CMAKE_CURRENT_SOURCE_DIR}/data/${test_target}.out
+    -Ddiff_file=${CMAKE_CURRENT_BINARY_DIR}/${test_target}.diff
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/plan-and-compare.cmake)
   #add_dependencies(${dep} ${test_target})
 endfunction(run_planner_problem)
 

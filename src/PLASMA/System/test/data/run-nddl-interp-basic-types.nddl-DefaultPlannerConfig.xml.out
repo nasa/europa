@@ -1,0 +1,128 @@
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[10, 10]
+			world.m_maxPlannerSteps=int:CLOSED[100, 100]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	A:a1*************************
+		Variables *************************
+			a1.m_f=Fruit:CLOSED{apple}
+		End Variables *********************
+	End A:a1*************************
+	A:a2*************************
+		Variables *************************
+			a2.m_f=Fruit:CLOSED{apple}
+		End Variables *********************
+	End A:a2*************************
+	B:b3*************************
+		Variables *************************
+			b3.m_c=Color:CLOSED{purple}
+		End Variables *********************
+	End B:b3*************************
+	B:b4*************************
+		Variables *************************
+			b4.m_c=Color:CLOSED{purple}
+		End Variables *********************
+	End B:b4*************************
+Global Variables*************************
+	w=bool:CLOSED[0, 0]
+	w1=bool:CLOSED[1, 1]
+	w2=bool:CLOSED[0, 0]
+	x=int:CLOSED[-inf, +inf]
+	x1=int:CLOSED[3, 3]
+	x2=int:CLOSED[3, 3]
+	x3=int:CLOSED[-inf, 5]
+	x4=int:CLOSED[3, +inf]
+	y=float:CLOSED[-inf, +inf]
+	y1=float:CLOSED[3.5, 3.5]
+	y2=float:CLOSED[3.5, 4.5]
+	y3=float:CLOSED[3.5, 4]
+	y4=float:CLOSED[3, 4.5]
+	y5=float:CLOSED[3, 4]
+	y6=float:CLOSED[3, +inf]
+	y7=float:CLOSED[-inf, 3]
+	z=string:OPEN{}
+	z1=string:CLOSED{hi}
+	f=Fruit:CLOSED{apple}
+	f0=Fruit:CLOSED{apple}
+	f1=Fruit:CLOSED{apple}
+	f2=Fruit:CLOSED{orange}
+	f3=Fruit:CLOSED{orange}
+	f4=Fruit:CLOSED{orange}
+	c=Color:CLOSED{red}
+	c2=Color:CLOSED{purple}
+	c3=Color:CLOSED{purple}
+	c5=Color:CLOSED{red}
+	world=PlannerConfig:CLOSED{world(68)}
+	a1=A:CLOSED{a1(81)}
+	a2=A:CLOSED{a2(88)}
+	b3=B:CLOSED{b3(95)}
+	b4=B:CLOSED{b4(102)}
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[10, 10]
+			world.m_maxPlannerSteps=int:CLOSED[100, 100]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	A:a1*************************
+		Variables *************************
+			a1.m_f=Fruit:CLOSED{apple}
+		End Variables *********************
+	End A:a1*************************
+	A:a2*************************
+		Variables *************************
+			a2.m_f=Fruit:CLOSED{apple}
+		End Variables *********************
+	End A:a2*************************
+	B:b3*************************
+		Variables *************************
+			b3.m_c=Color:CLOSED{purple}
+		End Variables *********************
+	End B:b3*************************
+	B:b4*************************
+		Variables *************************
+			b4.m_c=Color:CLOSED{purple}
+		End Variables *********************
+	End B:b4*************************
+Global Variables*************************
+	w=bool:CLOSED[0, 0]
+	w1=bool:CLOSED[1, 1]
+	w2=bool:CLOSED[0, 0]
+	x=int:CLOSED[-inf, +inf]
+	x1=int:CLOSED[3, 3]
+	x2=int:CLOSED[3, 3]
+	x3=int:CLOSED[-inf, 5]
+	x4=int:CLOSED[3, +inf]
+	y=float:CLOSED[-inf, +inf]
+	y1=float:CLOSED[3.5, 3.5]
+	y2=float:CLOSED[3.5, 4.5]
+	y3=float:CLOSED[3.5, 4]
+	y4=float:CLOSED[3, 4.5]
+	y5=float:CLOSED[3, 4]
+	y6=float:CLOSED[3, +inf]
+	y7=float:CLOSED[-inf, 3]
+	z=string:OPEN{}
+	z1=string:CLOSED{hi}
+	f=Fruit:CLOSED{apple}
+	f0=Fruit:CLOSED{apple}
+	f1=Fruit:CLOSED{apple}
+	f2=Fruit:CLOSED{orange}
+	f3=Fruit:CLOSED{orange}
+	f4=Fruit:CLOSED{orange}
+	c=Color:CLOSED{red}
+	c2=Color:CLOSED{purple}
+	c3=Color:CLOSED{purple}
+	c5=Color:CLOSED{red}
+	world=PlannerConfig:CLOSED{world(68)}
+	a1=A:CLOSED{a1(81)}
+	a2=A:CLOSED{a2(88)}
+	b3=B:CLOSED{b3(95)}
+	b4=B:CLOSED{b4(102)}
+
+Finished

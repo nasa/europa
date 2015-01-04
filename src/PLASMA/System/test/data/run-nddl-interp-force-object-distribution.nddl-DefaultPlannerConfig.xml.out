@@ -1,0 +1,134 @@
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[100, 100]
+			world.m_maxPlannerSteps=int:CLOSED[350, 350]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Rover:rover*************************
+		Tokens *************************
+				{0}
+				Rover.Drive()
+				Key=38  Master=NONE
+				{10}
+				{10}
+				Rover.Drive()
+				Key=56  Master=NONE
+				{20}
+				{20}
+				Rover.Drive()
+				Key=74  Master=NONE
+				{30}
+				{30}
+				Rover.Drive()
+				Key=92  Master=NONE
+				{40}
+		End Tokens *********************
+	End Rover:rover*************************
+	Battery:b1*************************
+		Tokens *************************
+				{0}
+				Battery.uses()
+				Key=112  Master=38 d1(38){0} --> {10}
+				{30}
+				{30}
+				Battery.uses()
+				Key=182  Master=92 d4(92){30} --> {40}
+				{60}
+		End Tokens *********************
+	End Battery:b1*************************
+	Battery:b2*************************
+		Tokens *************************
+				{10}
+				Battery.uses()
+				Key=134  Master=56 d2(56){10} --> {20}
+				{40}
+		End Tokens *********************
+	End Battery:b2*************************
+	Battery:b3*************************
+		Tokens *************************
+				{20}
+				Battery.uses()
+				Key=158  Master=74 d3(74){20} --> {30}
+				{50}
+		End Tokens *********************
+	End Battery:b3*************************
+	Battery:b4*************************
+	End Battery:b4*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	rover=Rover:CLOSED{rover(23)}
+	b1=Battery:CLOSED{b1(26)}
+	b2=Battery:CLOSED{b2(29)}
+	b3=Battery:CLOSED{b3(32)}
+	b4=Battery:CLOSED{b4(35)}
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[100, 100]
+			world.m_maxPlannerSteps=int:CLOSED[350, 350]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Rover:rover*************************
+		Tokens *************************
+				{0}
+				Rover.Drive()
+				Key=38  Master=NONE
+				{10}
+				{10}
+				Rover.Drive()
+				Key=56  Master=NONE
+				{20}
+				{20}
+				Rover.Drive()
+				Key=74  Master=NONE
+				{30}
+				{30}
+				Rover.Drive()
+				Key=92  Master=NONE
+				{40}
+		End Tokens *********************
+	End Rover:rover*************************
+	Battery:b1*************************
+		Tokens *************************
+				{0}
+				Battery.uses()
+				Key=112  Master=38 d1(38){0} --> {10}
+				{30}
+				{30}
+				Battery.uses()
+				Key=182  Master=92 d4(92){30} --> {40}
+				{60}
+		End Tokens *********************
+	End Battery:b1*************************
+	Battery:b2*************************
+		Tokens *************************
+				{10}
+				Battery.uses()
+				Key=134  Master=56 d2(56){10} --> {20}
+				{40}
+		End Tokens *********************
+	End Battery:b2*************************
+	Battery:b3*************************
+		Tokens *************************
+				{20}
+				Battery.uses()
+				Key=158  Master=74 d3(74){20} --> {30}
+				{50}
+		End Tokens *********************
+	End Battery:b3*************************
+	Battery:b4*************************
+	End Battery:b4*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	rover=Rover:CLOSED{rover(23)}
+	b1=Battery:CLOSED{b1(26)}
+	b2=Battery:CLOSED{b2(29)}
+	b3=Battery:CLOSED{b3(32)}
+	b4=Battery:CLOSED{b4(35)}
+
+Finished

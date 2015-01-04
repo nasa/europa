@@ -1,0 +1,292 @@
+Created node [id_434] initially enabled
+Created node [id_435] initially enabled
+Maximum flow instance created with source [id_434] and sink [id_435]
+Created node [id_434] initially enabled
+Created node [id_435] initially enabled
+Maximum flow instance created with source [id_434] and sink [id_435]
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[10, 10]
+			world.m_horizonEnd=int:CLOSED[101, 101]
+			world.m_maxPlannerSteps=int:CLOSED[350, 350]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Rover:rover*************************
+		Tokens *************************
+				{10}
+				Rover.Standby(m_x=int:CLOSED[0, 0]m_y=int:CLOSED[0, 0])
+				Key=71  Master=NONE
+				[11, 87]
+				[11, 87]
+				Rover.Drive(m_from_x=int:CLOSED[0, 0]m_from_y=int:CLOSED[0, 0]m_to_x=int:CLOSED[3, 3]m_to_y=int:CLOSED[0, 0])
+				Key=489  Master=71 roverInit(71){10} --> [11, 87]
+				[14, 90]
+				[14, 90]
+				Rover.Sample(m_x=int:CLOSED[3, 3]m_y=int:CLOSED[0, 0])
+				Key=315  Master=169 goal1(169)[10, 90] --> [17, 97]
+					Merged Key=748 from Rover.Drive(489)[11, 87] --> [14, 90]
+				[17, 93]
+				[17, 93]
+				Rover.Drive(m_from_x=int:CLOSED[3, 3]m_from_y=int:CLOSED[0, 0]m_to_x=int:CLOSED[3, 3]m_to_y=int:CLOSED[4, 4])
+				Key=579  Master=315 Rover.Sample(315)[14, 90] --> [17, 93]
+				[21, 97]
+				[21, 97]
+				Rover.Sample(m_x=int:CLOSED[3, 3]m_y=int:CLOSED[4, 4])
+				Key=345  Master=190 goal2(190)[17, 97] --> [24, 100]
+					Merged Key=789 from Rover.Drive(579)[17, 93] --> [21, 97]
+				[24, 100]
+				[24, 100]
+				Rover.Drive(m_from_x=int:CLOSED[3, 3]m_from_y=int:CLOSED[4, 4]m_to_x=int:CLOSED[-inf, +inf]m_to_y=int:CLOSED[-inf, +inf])
+				Key=666  Master=345 Rover.Sample(345)[21, 97] --> [24, 100]
+				[25, 125]
+		End Tokens *********************
+		Variables *************************
+			rover.m_battery=Battery:CLOSED{rover.m_battery(45)}
+		End Variables *********************
+	End Rover:rover*************************
+	Battery:rover.m_battery*************************
+		Tokens *************************
+				{20}
+				Battery.produce()
+				Key=233  Master=93 w1(93){10} --> {20}
+				{20}
+				{30}
+				Battery.produce()
+				Key=252  Master=112 w2(112){20} --> {30}
+				{30}
+				{40}
+				Battery.produce()
+				Key=273  Master=131 w3(131){30} --> {40}
+				{40}
+				{50}
+				Battery.produce()
+				Key=294  Master=150 w4(150){40} --> {50}
+				{50}
+				[15, 92]
+				Battery.consume()
+				Key=392  Master=315 Rover.Sample(315)[14, 90] --> [17, 93]
+				[15, 92]
+				[22, 99]
+				Battery.consume()
+				Key=441  Master=345 Rover.Sample(345)[21, 97] --> [24, 100]
+				[22, 99]
+				[11, 87]
+				Battery.consume()
+				Key=515  Master=489 Rover.Drive(489)[11, 87] --> [14, 90]
+				[11, 87]
+				[17, 93]
+				Battery.consume()
+				Key=605  Master=579 Rover.Drive(579)[17, 93] --> [21, 97]
+				[17, 93]
+				[24, 100]
+				Battery.consume()
+				Key=692  Master=666 Rover.Drive(666)[24, 100] --> [25, 125]
+				[24, 100]
+		End Tokens *********************
+		Variables *************************
+			rover.m_battery.initialCapacity=float:CLOSED[0, 0]
+			rover.m_battery.levelLimitMin=float:CLOSED[0, 0]
+			rover.m_battery.levelLimitMax=float:CLOSED[100, 100]
+			rover.m_battery.productionRateMax=float:CLOSED[70, 70]
+			rover.m_battery.productionMax=float:CLOSED[70, 70]
+			rover.m_battery.consumptionRateMax=float:CLOSED[+inf, +inf]
+			rover.m_battery.consumptionMax=float:CLOSED[70, 70]
+		End Variables *********************
+	End Battery:rover.m_battery*************************
+	Wind:wind*************************
+		Tokens *************************
+				{10}
+				Wind.Velocity(m_velocity=float:CLOSED[0.000000000000000, 0.000000000000000])
+				Key=93  Master=NONE
+				{20}
+				{20}
+				Wind.Velocity(m_velocity=float:CLOSED[10.000000000000000, 10.000000000000000])
+				Key=112  Master=NONE
+				{30}
+				{30}
+				Wind.Velocity(m_velocity=float:CLOSED[20.000000000000000, 20.000000000000000])
+				Key=131  Master=NONE
+				{40}
+				{40}
+				Wind.Velocity(m_velocity=float:CLOSED[40.000000000000000, 40.000000000000000])
+				Key=150  Master=NONE
+				{50}
+		End Tokens *********************
+	End Wind:wind*************************
+	Mission:mission*************************
+		Tokens *************************
+				[10, 90]
+				Mission.SampleCycle(m_x=int:CLOSED[3, 3]m_y=int:CLOSED[0, 0])
+				Key=169  Master=NONE
+				[17, 97]
+				[17, 97]
+				Mission.SampleCycle(m_x=int:CLOSED[3, 3]m_y=int:CLOSED[4, 4])
+				Key=190  Master=NONE
+				[24, 100]
+		End Tokens *********************
+	End Mission:mission*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	rover=Rover:CLOSED{rover(33)}
+	wind=Wind:CLOSED{wind(65)}
+	mission=Mission:CLOSED{mission(68)}
+Merged Tokens: *************************
+		[12, 93]
+		Rover.Sample(m_x=int:CLOSED[-inf, +inf]m_y=int:CLOSED[-inf, +inf])
+		Key=748  Master=489 Rover.Drive(489)[11, 87] --> [14, 90]
+		[13, +inf]
+		[18, 97]
+		Rover.Sample(m_x=int:CLOSED[-inf, +inf]m_y=int:CLOSED[-inf, +inf])
+		Key=789  Master=579 Rover.Drive(579)[17, 93] --> [21, 97]
+		[19, +inf]
+Inactive Tokens: *************************
+		[25, 125]
+		Rover.Sample(m_x=int:CLOSED[-inf, +inf]m_y=int:CLOSED[-inf, +inf])
+		Key=832  Master=666 Rover.Drive(666)[24, 100] --> [25, 125]
+		[26, +inf]
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[10, 10]
+			world.m_horizonEnd=int:CLOSED[101, 101]
+			world.m_maxPlannerSteps=int:CLOSED[350, 350]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Rover:rover*************************
+		Tokens *************************
+				{10}
+				Rover.Standby(m_x=int:CLOSED[0, 0]m_y=int:CLOSED[0, 0])
+				Key=71  Master=NONE
+				[11, 87]
+				[11, 87]
+				Rover.Drive(m_from_x=int:CLOSED[0, 0]m_from_y=int:CLOSED[0, 0]m_to_x=int:CLOSED[3, 3]m_to_y=int:CLOSED[0, 0])
+				Key=489  Master=71 roverInit(71){10} --> [11, 87]
+				[14, 90]
+				[14, 90]
+				Rover.Sample(m_x=int:CLOSED[3, 3]m_y=int:CLOSED[0, 0])
+				Key=315  Master=169 goal1(169)[10, 90] --> [17, 97]
+					Merged Key=748 from Rover.Drive(489)[11, 87] --> [14, 90]
+				[17, 93]
+				[17, 93]
+				Rover.Drive(m_from_x=int:CLOSED[3, 3]m_from_y=int:CLOSED[0, 0]m_to_x=int:CLOSED[3, 3]m_to_y=int:CLOSED[4, 4])
+				Key=579  Master=315 Rover.Sample(315)[14, 90] --> [17, 93]
+				[21, 97]
+				[21, 97]
+				Rover.Sample(m_x=int:CLOSED[3, 3]m_y=int:CLOSED[4, 4])
+				Key=345  Master=190 goal2(190)[17, 97] --> [24, 100]
+					Merged Key=789 from Rover.Drive(579)[17, 93] --> [21, 97]
+				[24, 100]
+				[24, 100]
+				Rover.Drive(m_from_x=int:CLOSED[3, 3]m_from_y=int:CLOSED[4, 4]m_to_x=int:CLOSED[-inf, +inf]m_to_y=int:CLOSED[-inf, +inf])
+				Key=666  Master=345 Rover.Sample(345)[21, 97] --> [24, 100]
+				[25, 125]
+		End Tokens *********************
+		Variables *************************
+			rover.m_battery=Battery:CLOSED{rover.m_battery(45)}
+		End Variables *********************
+	End Rover:rover*************************
+	Battery:rover.m_battery*************************
+		Tokens *************************
+				{20}
+				Battery.produce()
+				Key=233  Master=93 w1(93){10} --> {20}
+				{20}
+				{30}
+				Battery.produce()
+				Key=252  Master=112 w2(112){20} --> {30}
+				{30}
+				{40}
+				Battery.produce()
+				Key=273  Master=131 w3(131){30} --> {40}
+				{40}
+				{50}
+				Battery.produce()
+				Key=294  Master=150 w4(150){40} --> {50}
+				{50}
+				[15, 92]
+				Battery.consume()
+				Key=392  Master=315 Rover.Sample(315)[14, 90] --> [17, 93]
+				[15, 92]
+				[22, 99]
+				Battery.consume()
+				Key=441  Master=345 Rover.Sample(345)[21, 97] --> [24, 100]
+				[22, 99]
+				[11, 87]
+				Battery.consume()
+				Key=515  Master=489 Rover.Drive(489)[11, 87] --> [14, 90]
+				[11, 87]
+				[17, 93]
+				Battery.consume()
+				Key=605  Master=579 Rover.Drive(579)[17, 93] --> [21, 97]
+				[17, 93]
+				[24, 100]
+				Battery.consume()
+				Key=692  Master=666 Rover.Drive(666)[24, 100] --> [25, 125]
+				[24, 100]
+		End Tokens *********************
+		Variables *************************
+			rover.m_battery.initialCapacity=float:CLOSED[0, 0]
+			rover.m_battery.levelLimitMin=float:CLOSED[0, 0]
+			rover.m_battery.levelLimitMax=float:CLOSED[100, 100]
+			rover.m_battery.productionRateMax=float:CLOSED[70, 70]
+			rover.m_battery.productionMax=float:CLOSED[70, 70]
+			rover.m_battery.consumptionRateMax=float:CLOSED[+inf, +inf]
+			rover.m_battery.consumptionMax=float:CLOSED[70, 70]
+		End Variables *********************
+	End Battery:rover.m_battery*************************
+	Wind:wind*************************
+		Tokens *************************
+				{10}
+				Wind.Velocity(m_velocity=float:CLOSED[0.000000000000000, 0.000000000000000])
+				Key=93  Master=NONE
+				{20}
+				{20}
+				Wind.Velocity(m_velocity=float:CLOSED[10.000000000000000, 10.000000000000000])
+				Key=112  Master=NONE
+				{30}
+				{30}
+				Wind.Velocity(m_velocity=float:CLOSED[20.000000000000000, 20.000000000000000])
+				Key=131  Master=NONE
+				{40}
+				{40}
+				Wind.Velocity(m_velocity=float:CLOSED[40.000000000000000, 40.000000000000000])
+				Key=150  Master=NONE
+				{50}
+		End Tokens *********************
+	End Wind:wind*************************
+	Mission:mission*************************
+		Tokens *************************
+				[10, 90]
+				Mission.SampleCycle(m_x=int:CLOSED[3, 3]m_y=int:CLOSED[0, 0])
+				Key=169  Master=NONE
+				[17, 97]
+				[17, 97]
+				Mission.SampleCycle(m_x=int:CLOSED[3, 3]m_y=int:CLOSED[4, 4])
+				Key=190  Master=NONE
+				[24, 100]
+		End Tokens *********************
+	End Mission:mission*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	rover=Rover:CLOSED{rover(33)}
+	wind=Wind:CLOSED{wind(65)}
+	mission=Mission:CLOSED{mission(68)}
+Merged Tokens: *************************
+		[12, 93]
+		Rover.Sample(m_x=int:CLOSED[-inf, +inf]m_y=int:CLOSED[-inf, +inf])
+		Key=748  Master=489 Rover.Drive(489)[11, 87] --> [14, 90]
+		[13, +inf]
+		[18, 97]
+		Rover.Sample(m_x=int:CLOSED[-inf, +inf]m_y=int:CLOSED[-inf, +inf])
+		Key=789  Master=579 Rover.Drive(579)[17, 93] --> [21, 97]
+		[19, +inf]
+Inactive Tokens: *************************
+		[25, 125]
+		Rover.Sample(m_x=int:CLOSED[-inf, +inf]m_y=int:CLOSED[-inf, +inf])
+		Key=832  Master=666 Rover.Drive(666)[24, 100] --> [25, 125]
+		[26, +inf]
+
+Finished

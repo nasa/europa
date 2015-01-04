@@ -1,0 +1,230 @@
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[100, 100]
+			world.m_maxPlannerSteps=int:CLOSED[500, 500]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Rover:rover*************************
+		Variables *************************
+			rover.m_position=Position:CLOSED{rover.m_position(25)}
+			rover.m_tracker=Tracker:CLOSED{rover.m_tracker(28)}
+			rover.m_oppsci=OpportunisticScience:CLOSED{rover.m_oppsci(31)}
+			rover.m_champ=CHAMP:CLOSED{rover.m_champ(34)}
+		End Variables *********************
+	End Rover:rover*************************
+	Position:rover.m_position*************************
+	End Position:rover.m_position*************************
+	Tracker:rover.m_tracker*************************
+	End Tracker:rover.m_tracker*************************
+	OpportunisticScience:rover.m_oppsci*************************
+	End OpportunisticScience:rover.m_oppsci*************************
+	CHAMP:rover.m_champ*************************
+	End CHAMP:rover.m_champ*************************
+	Location:l1*************************
+	End Location:l1*************************
+	Location:l2*************************
+	End Location:l2*************************
+	Location:l3*************************
+	End Location:l3*************************
+	Location:l4*************************
+	End Location:l4*************************
+	Location:l5*************************
+	End Location:l5*************************
+	Location:l6*************************
+	End Location:l6*************************
+	Path:p1*************************
+		Variables *************************
+			p1.m_from=Location:CLOSED{l1(38)}
+			p1.m_to=Location:CLOSED{l2(41)}
+		End Variables *********************
+	End Path:p1*************************
+	Path:p2*************************
+		Variables *************************
+			p2.m_from=Location:CLOSED{l1(38)}
+			p2.m_to=Location:CLOSED{l3(44)}
+		End Variables *********************
+	End Path:p2*************************
+	Path:p3*************************
+		Variables *************************
+			p3.m_from=Location:CLOSED{l2(41)}
+			p3.m_to=Location:CLOSED{l5(50)}
+		End Variables *********************
+	End Path:p3*************************
+	Path:p4*************************
+		Variables *************************
+			p4.m_from=Location:CLOSED{l5(50)}
+			p4.m_to=Location:CLOSED{l6(53)}
+		End Variables *********************
+	End Path:p4*************************
+	Path:p5*************************
+		Variables *************************
+			p5.m_from=Location:CLOSED{l3(44)}
+			p5.m_to=Location:CLOSED{l6(53)}
+		End Variables *********************
+	End Path:p5*************************
+	Path:p6*************************
+		Variables *************************
+			p6.m_from=Location:CLOSED{l2(41)}
+			p6.m_to=Location:CLOSED{l3(44)}
+		End Variables *********************
+	End Path:p6*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	rover=Rover:CLOSED{rover(23)}
+	l1=Location:CLOSED{l1(38)}
+	l2=Location:CLOSED{l2(41)}
+	l3=Location:CLOSED{l3(44)}
+	l4=Location:CLOSED{l4(47)}
+	l5=Location:CLOSED{l5(50)}
+	l6=Location:CLOSED{l6(53)}
+	p1=Path:CLOSED{p1(58)}
+	p2=Path:CLOSED{p2(67)}
+	p3=Path:CLOSED{p3(76)}
+	p4=Path:CLOSED{p4(85)}
+	p5=Path:CLOSED{p5(94)}
+	p6=Path:CLOSED{p6(103)}
+Active Tokens: *************************
+		[0, +inf]
+		Position.At(location=Location:CLOSED{l1(38)})
+		Key=110  Master=NONE
+		[100, +inf]
+		[100, +inf]
+		Position.At(location=Location:CLOSED{l5(50)})
+		Key=175  Master=NONE
+		[101, +inf]
+Inactive Tokens: *************************
+		[100, +inf]
+		Position.navigate(from=Location:CLOSED{l1(38)}to=Location:CLOSED{l2(41),l3(44),l4(47),l5(50),l6(53)})
+		Key=127  Master=110 a(110)[0, +inf] --> [100, +inf]
+		[101, +inf]
+		[-1, +inf]
+		Position.navigate(from=Location:CLOSED{l2(41),l3(44),l4(47),l5(50),l6(53)}to=Location:CLOSED{l1(38)})
+		Key=151  Master=110 a(110)[0, +inf] --> [100, +inf]
+		[0, +inf]
+		[101, +inf]
+		Position.navigate(from=Location:CLOSED{l5(50)}to=Location:CLOSED{l1(38),l2(41),l3(44),l4(47),l6(53)})
+		Key=192  Master=175 b(175)[100, +inf] --> [101, +inf]
+		[102, +inf]
+		[99, +inf]
+		Position.navigate(from=Location:CLOSED{l1(38),l2(41),l3(44),l4(47),l6(53)}to=Location:CLOSED{l5(50)})
+		Key=216  Master=175 b(175)[100, +inf] --> [101, +inf]
+		[100, +inf]
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[100, 100]
+			world.m_maxPlannerSteps=int:CLOSED[500, 500]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Rover:rover*************************
+		Variables *************************
+			rover.m_position=Position:CLOSED{rover.m_position(25)}
+			rover.m_tracker=Tracker:CLOSED{rover.m_tracker(28)}
+			rover.m_oppsci=OpportunisticScience:CLOSED{rover.m_oppsci(31)}
+			rover.m_champ=CHAMP:CLOSED{rover.m_champ(34)}
+		End Variables *********************
+	End Rover:rover*************************
+	Position:rover.m_position*************************
+	End Position:rover.m_position*************************
+	Tracker:rover.m_tracker*************************
+	End Tracker:rover.m_tracker*************************
+	OpportunisticScience:rover.m_oppsci*************************
+	End OpportunisticScience:rover.m_oppsci*************************
+	CHAMP:rover.m_champ*************************
+	End CHAMP:rover.m_champ*************************
+	Location:l1*************************
+	End Location:l1*************************
+	Location:l2*************************
+	End Location:l2*************************
+	Location:l3*************************
+	End Location:l3*************************
+	Location:l4*************************
+	End Location:l4*************************
+	Location:l5*************************
+	End Location:l5*************************
+	Location:l6*************************
+	End Location:l6*************************
+	Path:p1*************************
+		Variables *************************
+			p1.m_from=Location:CLOSED{l1(38)}
+			p1.m_to=Location:CLOSED{l2(41)}
+		End Variables *********************
+	End Path:p1*************************
+	Path:p2*************************
+		Variables *************************
+			p2.m_from=Location:CLOSED{l1(38)}
+			p2.m_to=Location:CLOSED{l3(44)}
+		End Variables *********************
+	End Path:p2*************************
+	Path:p3*************************
+		Variables *************************
+			p3.m_from=Location:CLOSED{l2(41)}
+			p3.m_to=Location:CLOSED{l5(50)}
+		End Variables *********************
+	End Path:p3*************************
+	Path:p4*************************
+		Variables *************************
+			p4.m_from=Location:CLOSED{l5(50)}
+			p4.m_to=Location:CLOSED{l6(53)}
+		End Variables *********************
+	End Path:p4*************************
+	Path:p5*************************
+		Variables *************************
+			p5.m_from=Location:CLOSED{l3(44)}
+			p5.m_to=Location:CLOSED{l6(53)}
+		End Variables *********************
+	End Path:p5*************************
+	Path:p6*************************
+		Variables *************************
+			p6.m_from=Location:CLOSED{l2(41)}
+			p6.m_to=Location:CLOSED{l3(44)}
+		End Variables *********************
+	End Path:p6*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	rover=Rover:CLOSED{rover(23)}
+	l1=Location:CLOSED{l1(38)}
+	l2=Location:CLOSED{l2(41)}
+	l3=Location:CLOSED{l3(44)}
+	l4=Location:CLOSED{l4(47)}
+	l5=Location:CLOSED{l5(50)}
+	l6=Location:CLOSED{l6(53)}
+	p1=Path:CLOSED{p1(58)}
+	p2=Path:CLOSED{p2(67)}
+	p3=Path:CLOSED{p3(76)}
+	p4=Path:CLOSED{p4(85)}
+	p5=Path:CLOSED{p5(94)}
+	p6=Path:CLOSED{p6(103)}
+Active Tokens: *************************
+		[0, +inf]
+		Position.At(location=Location:CLOSED{l1(38)})
+		Key=110  Master=NONE
+		[100, +inf]
+		[100, +inf]
+		Position.At(location=Location:CLOSED{l5(50)})
+		Key=175  Master=NONE
+		[101, +inf]
+Inactive Tokens: *************************
+		[100, +inf]
+		Position.navigate(from=Location:CLOSED{l1(38)}to=Location:CLOSED{l2(41),l3(44),l4(47),l5(50),l6(53)})
+		Key=127  Master=110 a(110)[0, +inf] --> [100, +inf]
+		[101, +inf]
+		[-1, +inf]
+		Position.navigate(from=Location:CLOSED{l2(41),l3(44),l4(47),l5(50),l6(53)}to=Location:CLOSED{l1(38)})
+		Key=151  Master=110 a(110)[0, +inf] --> [100, +inf]
+		[0, +inf]
+		[101, +inf]
+		Position.navigate(from=Location:CLOSED{l5(50)}to=Location:CLOSED{l1(38),l2(41),l3(44),l4(47),l6(53)})
+		Key=192  Master=175 b(175)[100, +inf] --> [101, +inf]
+		[102, +inf]
+		[99, +inf]
+		Position.navigate(from=Location:CLOSED{l1(38),l2(41),l3(44),l4(47),l6(53)}to=Location:CLOSED{l5(50)})
+		Key=216  Master=175 b(175)[100, +inf] --> [101, +inf]
+		[100, +inf]
+
+Finished

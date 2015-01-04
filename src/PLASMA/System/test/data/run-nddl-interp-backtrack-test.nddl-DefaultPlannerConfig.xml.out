@@ -1,0 +1,42 @@
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[100, 100]
+			world.m_maxPlannerSteps=int:CLOSED[500, 500]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Test:test*************************
+		Tokens *************************
+				{5}
+				Test.Predicate()
+				Key=26  Master=NONE
+				{10}
+		End Tokens *********************
+	End Test:test*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	test=Test:CLOSED{test(23)}
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[100, 100]
+			world.m_maxPlannerSteps=int:CLOSED[500, 500]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Test:test*************************
+		Tokens *************************
+				{5}
+				Test.Predicate()
+				Key=26  Master=NONE
+				{10}
+		End Tokens *********************
+	End Test:test*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	test=Test:CLOSED{test(23)}
+
+Finished

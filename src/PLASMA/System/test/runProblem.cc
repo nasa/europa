@@ -76,19 +76,17 @@ bool runPlanner(const char* modelFile,
 
   try {
     assert(engine.plan(modelFile,plannerConfig,language));
-
     debugMsg("Main:runPlanner", "Found a plan at depth "
              << engine.getDepthReached() << " after " << engine.getTotalNodesSearched());
-
+    engine.write(std::cout);
     if(replayRequired) {
-      engine.write(std::cout);
       std::string s1 = PlanDatabaseWriter::toString(engine.getPlanDatabase(), false);
       std::ofstream out(TestEngine::TX_LOG());
       txLog->flush(out);
       out.close();
       replay(s1, txLog,language);
-      std::cout << engine.getPlanDatabase()->toString();///
     }
+    std::cout << engine.getPlanDatabase()->toString() << std::endl;///
 
     debugMsg("IdTypeCounts", dumpIdTable("after"));
   }

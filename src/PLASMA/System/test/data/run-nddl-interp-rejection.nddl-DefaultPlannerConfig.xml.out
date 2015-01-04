@@ -1,0 +1,40 @@
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[10, 10]
+			world.m_maxPlannerSteps=int:CLOSED[100, 100]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	rejection:r*************************
+	End rejection:r*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	r=rejection:CLOSED{r(23)}
+Rejected Tokens: *************************
+		{2}
+		rejection.unsatisfiable()
+		Key=26  Master=NONE
+		[3, +inf]
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[10, 10]
+			world.m_maxPlannerSteps=int:CLOSED[100, 100]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	rejection:r*************************
+	End rejection:r*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	r=rejection:CLOSED{r(23)}
+Rejected Tokens: *************************
+		{2}
+		rejection.unsatisfiable()
+		Key=26  Master=NONE
+		[3, +inf]
+
+Finished

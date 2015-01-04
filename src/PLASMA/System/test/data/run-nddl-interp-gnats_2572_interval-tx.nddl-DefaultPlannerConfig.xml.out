@@ -1,0 +1,302 @@
+Objects *************************
+	PlannerConfig:plannerConfiguration*************************
+		Variables *************************
+			plannerConfiguration.m_horizonStart=int:CLOSED[0, 0]
+			plannerConfiguration.m_horizonEnd=int:CLOSED[1000, 1000]
+			plannerConfiguration.m_maxPlannerSteps=int:CLOSED[500, 500]
+			plannerConfiguration.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:plannerConfiguration*************************
+	Location:lander*************************
+		Variables *************************
+			lander.x=int:CLOSED[0, 0]
+			lander.y=int:CLOSED[0, 0]
+			lander.label=string:CLOSED{lander}
+		End Variables *********************
+	End Location:lander*************************
+	Location:rock1*************************
+		Variables *************************
+			rock1.x=int:CLOSED[9, 9]
+			rock1.y=int:CLOSED[9, 9]
+			rock1.label=string:CLOSED{rock1}
+		End Variables *********************
+	End Location:rock1*************************
+	Location:rock2*************************
+		Variables *************************
+			rock2.x=int:CLOSED[1, 1]
+			rock2.y=int:CLOSED[6, 6]
+			rock2.label=string:CLOSED{rock2}
+		End Variables *********************
+	End Location:rock2*************************
+	Location:rock3*************************
+		Variables *************************
+			rock3.x=int:CLOSED[4, 4]
+			rock3.y=int:CLOSED[8, 8]
+			rock3.label=string:CLOSED{rock3}
+		End Variables *********************
+	End Location:rock3*************************
+	Location:rock4*************************
+		Variables *************************
+			rock4.x=int:CLOSED[3, 3]
+			rock4.y=int:CLOSED[9, 9]
+			rock4.label=string:CLOSED{rock4}
+		End Variables *********************
+	End Location:rock4*************************
+	Rover:spirit*************************
+		Variables *************************
+			spirit.antenna=Instrument:CLOSED{spirit.antenna(100)}
+			spirit.rat=Stowable_Instrument:CLOSED{spirit.rat(107)}
+		End Variables *********************
+	End Rover:spirit*************************
+	Instrument:spirit.antenna*************************
+	End Instrument:spirit.antenna*************************
+	Stowable_Instrument:spirit.rat*************************
+		Tokens *************************
+				{0}
+				Stowable_Instrument.Stowed()
+				Key=132  Master=NONE
+					Merged Key=332 from Stowable_Instrument.StandBy(213)[1, 81] --> [2, 82]
+				[1, 81]
+				[1, 81]
+				Stowable_Instrument.StandBy()
+				Key=213  Master=132 stowed(132){0} --> [1, 81]
+					Merged Key=497 from Stowable_Instrument.Unstow(348)[2, 82] --> [17, 97]
+				[2, 82]
+				[2, 82]
+				Stowable_Instrument.Unstow()
+				Key=348  Master=213 Stowable_Instrument.StandBy(213)[1, 81] --> [2, 82]
+					Merged Key=381 from Stowable_Instrument.Unstowed(258)[17, 97] --> [18, 98]
+				[17, 97]
+				[17, 97]
+				Stowable_Instrument.Unstowed()
+				Key=258  Master=152 Stowable_Instrument.Position(152)[18, 98] --> [19, 99]
+					Merged Key=481 from Stowable_Instrument.Unstow(348)[2, 82] --> [17, 97]
+				[18, 98]
+				[18, 98]
+				Stowable_Instrument.Position(destination=Location:CLOSED{rock4(89)}position_speed=int:CLOSED[1, 1])
+				Key=152  Master=115 experiment(115)[19, 99] --> [99, 100]
+					Merged Key=397 from Stowable_Instrument.Unstowed(258)[17, 97] --> [18, 98]
+				[19, 99]
+				[19, 99]
+				Stowable_Instrument.Positioned(destination=Location:CLOSED{rock4(89)})
+				Key=115  Master=NONE
+					Merged Key=239 from Stowable_Instrument.Position(152)[18, 98] --> [19, 99]
+					Merged Key=305 from Stowable_Instrument.Stow(173)[99, 100] --> [109, 110]
+				[99, 100]
+				[99, 100]
+				Stowable_Instrument.Stow()
+				Key=173  Master=115 experiment(115)[19, 99] --> [99, 100]
+					Merged Key=428 from Stowable_Instrument.Stowed(289)[109, 110] --> [110, +inf]
+				[109, 110]
+				[109, 110]
+				Stowable_Instrument.Stowed()
+				Key=289  Master=173 Stowable_Instrument.Stow(173)[99, 100] --> [109, 110]
+				[110, +inf]
+		End Tokens *********************
+		Variables *************************
+			spirit.rat.stow_speed=int:CLOSED[10, 10]
+			spirit.rat.unstow_speed=int:CLOSED[15, 15]
+		End Variables *********************
+	End Stowable_Instrument:spirit.rat*************************
+Global Variables*************************
+	plannerConfiguration=PlannerConfig:CLOSED{plannerConfiguration(12)}
+	lander=Location:CLOSED{lander(29)}
+	rock1=Location:CLOSED{rock1(44)}
+	rock2=Location:CLOSED{rock2(59)}
+	rock3=Location:CLOSED{rock3(74)}
+	rock4=Location:CLOSED{rock4(89)}
+	spirit=Rover:CLOSED{spirit(98)}
+Merged Tokens: *************************
+		[3, 99]
+		Stowable_Instrument.Positioned(destination=Location:CLOSED{rock4(89)})
+		Key=239  Master=152 Stowable_Instrument.Position(152)[18, 98] --> [19, 99]
+		[4, +inf]
+		[-inf, 99]
+		Instrument.Positioned(destination=Location:CLOSED{lander(29),rock1(44),rock2(59),rock3(74),rock4(89)})
+		Key=305  Master=173 Stowable_Instrument.Stow(173)[99, 100] --> [109, 110]
+		[99, 100]
+		[-inf, 95]
+		Stowable_Instrument.Stowed()
+		Key=332  Master=213 Stowable_Instrument.StandBy(213)[1, 81] --> [2, 82]
+		[1, 96]
+		[-inf, 96]
+		Stowable_Instrument.Unstow()
+		Key=381  Master=258 Stowable_Instrument.Unstowed(258)[17, 97] --> [18, 98]
+		[17, 97]
+		[18, 98]
+		Instrument.Position(destination=Location:CLOSED{lander(29),rock1(44),rock2(59),rock3(74),rock4(89)}position_speed=int:CLOSED[1, +inf])
+		Key=397  Master=258 Stowable_Instrument.Unstowed(258)[17, 97] --> [18, 98]
+		[19, +inf]
+		[-inf, 109]
+		Stowable_Instrument.Stow()
+		Key=428  Master=289 Stowable_Instrument.Stowed(289)[109, 110] --> [110, +inf]
+		[109, 110]
+		[17, 97]
+		Stowable_Instrument.Unstowed()
+		Key=481  Master=348 Stowable_Instrument.Unstow(348)[2, 82] --> [17, 97]
+		[18, +inf]
+		[-inf, 81]
+		Stowable_Instrument.StandBy()
+		Key=497  Master=348 Stowable_Instrument.Unstow(348)[2, 82] --> [17, 97]
+		[2, 82]
+Inactive Tokens: *************************
+		[-inf, -1]
+		Stowable_Instrument.Stow()
+		Key=197  Master=132 stowed(132){0} --> [1, 81]
+		{0}
+		[110, +inf]
+		Stowable_Instrument.StandBy()
+		Key=444  Master=289 Stowable_Instrument.Stowed(289)[109, 110] --> [110, +inf]
+		[111, +inf]
+Objects *************************
+	PlannerConfig:plannerConfiguration*************************
+		Variables *************************
+			plannerConfiguration.m_horizonStart=int:CLOSED[0, 0]
+			plannerConfiguration.m_horizonEnd=int:CLOSED[1000, 1000]
+			plannerConfiguration.m_maxPlannerSteps=int:CLOSED[500, 500]
+			plannerConfiguration.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:plannerConfiguration*************************
+	Location:lander*************************
+		Variables *************************
+			lander.x=int:CLOSED[0, 0]
+			lander.y=int:CLOSED[0, 0]
+			lander.label=string:CLOSED{lander}
+		End Variables *********************
+	End Location:lander*************************
+	Location:rock1*************************
+		Variables *************************
+			rock1.x=int:CLOSED[9, 9]
+			rock1.y=int:CLOSED[9, 9]
+			rock1.label=string:CLOSED{rock1}
+		End Variables *********************
+	End Location:rock1*************************
+	Location:rock2*************************
+		Variables *************************
+			rock2.x=int:CLOSED[1, 1]
+			rock2.y=int:CLOSED[6, 6]
+			rock2.label=string:CLOSED{rock2}
+		End Variables *********************
+	End Location:rock2*************************
+	Location:rock3*************************
+		Variables *************************
+			rock3.x=int:CLOSED[4, 4]
+			rock3.y=int:CLOSED[8, 8]
+			rock3.label=string:CLOSED{rock3}
+		End Variables *********************
+	End Location:rock3*************************
+	Location:rock4*************************
+		Variables *************************
+			rock4.x=int:CLOSED[3, 3]
+			rock4.y=int:CLOSED[9, 9]
+			rock4.label=string:CLOSED{rock4}
+		End Variables *********************
+	End Location:rock4*************************
+	Rover:spirit*************************
+		Variables *************************
+			spirit.antenna=Instrument:CLOSED{spirit.antenna(100)}
+			spirit.rat=Stowable_Instrument:CLOSED{spirit.rat(107)}
+		End Variables *********************
+	End Rover:spirit*************************
+	Instrument:spirit.antenna*************************
+	End Instrument:spirit.antenna*************************
+	Stowable_Instrument:spirit.rat*************************
+		Tokens *************************
+				{0}
+				Stowable_Instrument.Stowed()
+				Key=132  Master=NONE
+					Merged Key=332 from Stowable_Instrument.StandBy(213)[1, 81] --> [2, 82]
+				[1, 81]
+				[1, 81]
+				Stowable_Instrument.StandBy()
+				Key=213  Master=132 stowed(132){0} --> [1, 81]
+					Merged Key=497 from Stowable_Instrument.Unstow(348)[2, 82] --> [17, 97]
+				[2, 82]
+				[2, 82]
+				Stowable_Instrument.Unstow()
+				Key=348  Master=213 Stowable_Instrument.StandBy(213)[1, 81] --> [2, 82]
+					Merged Key=381 from Stowable_Instrument.Unstowed(258)[17, 97] --> [18, 98]
+				[17, 97]
+				[17, 97]
+				Stowable_Instrument.Unstowed()
+				Key=258  Master=152 Stowable_Instrument.Position(152)[18, 98] --> [19, 99]
+					Merged Key=481 from Stowable_Instrument.Unstow(348)[2, 82] --> [17, 97]
+				[18, 98]
+				[18, 98]
+				Stowable_Instrument.Position(destination=Location:CLOSED{rock4(89)}position_speed=int:CLOSED[1, 1])
+				Key=152  Master=115 experiment(115)[19, 99] --> [99, 100]
+					Merged Key=397 from Stowable_Instrument.Unstowed(258)[17, 97] --> [18, 98]
+				[19, 99]
+				[19, 99]
+				Stowable_Instrument.Positioned(destination=Location:CLOSED{rock4(89)})
+				Key=115  Master=NONE
+					Merged Key=239 from Stowable_Instrument.Position(152)[18, 98] --> [19, 99]
+					Merged Key=305 from Stowable_Instrument.Stow(173)[99, 100] --> [109, 110]
+				[99, 100]
+				[99, 100]
+				Stowable_Instrument.Stow()
+				Key=173  Master=115 experiment(115)[19, 99] --> [99, 100]
+					Merged Key=428 from Stowable_Instrument.Stowed(289)[109, 110] --> [110, +inf]
+				[109, 110]
+				[109, 110]
+				Stowable_Instrument.Stowed()
+				Key=289  Master=173 Stowable_Instrument.Stow(173)[99, 100] --> [109, 110]
+				[110, +inf]
+		End Tokens *********************
+		Variables *************************
+			spirit.rat.stow_speed=int:CLOSED[10, 10]
+			spirit.rat.unstow_speed=int:CLOSED[15, 15]
+		End Variables *********************
+	End Stowable_Instrument:spirit.rat*************************
+Global Variables*************************
+	plannerConfiguration=PlannerConfig:CLOSED{plannerConfiguration(12)}
+	lander=Location:CLOSED{lander(29)}
+	rock1=Location:CLOSED{rock1(44)}
+	rock2=Location:CLOSED{rock2(59)}
+	rock3=Location:CLOSED{rock3(74)}
+	rock4=Location:CLOSED{rock4(89)}
+	spirit=Rover:CLOSED{spirit(98)}
+Merged Tokens: *************************
+		[3, 99]
+		Stowable_Instrument.Positioned(destination=Location:CLOSED{rock4(89)})
+		Key=239  Master=152 Stowable_Instrument.Position(152)[18, 98] --> [19, 99]
+		[4, +inf]
+		[-inf, 99]
+		Instrument.Positioned(destination=Location:CLOSED{lander(29),rock1(44),rock2(59),rock3(74),rock4(89)})
+		Key=305  Master=173 Stowable_Instrument.Stow(173)[99, 100] --> [109, 110]
+		[99, 100]
+		[-inf, 95]
+		Stowable_Instrument.Stowed()
+		Key=332  Master=213 Stowable_Instrument.StandBy(213)[1, 81] --> [2, 82]
+		[1, 96]
+		[-inf, 96]
+		Stowable_Instrument.Unstow()
+		Key=381  Master=258 Stowable_Instrument.Unstowed(258)[17, 97] --> [18, 98]
+		[17, 97]
+		[18, 98]
+		Instrument.Position(destination=Location:CLOSED{lander(29),rock1(44),rock2(59),rock3(74),rock4(89)}position_speed=int:CLOSED[1, +inf])
+		Key=397  Master=258 Stowable_Instrument.Unstowed(258)[17, 97] --> [18, 98]
+		[19, +inf]
+		[-inf, 109]
+		Stowable_Instrument.Stow()
+		Key=428  Master=289 Stowable_Instrument.Stowed(289)[109, 110] --> [110, +inf]
+		[109, 110]
+		[17, 97]
+		Stowable_Instrument.Unstowed()
+		Key=481  Master=348 Stowable_Instrument.Unstow(348)[2, 82] --> [17, 97]
+		[18, +inf]
+		[-inf, 81]
+		Stowable_Instrument.StandBy()
+		Key=497  Master=348 Stowable_Instrument.Unstow(348)[2, 82] --> [17, 97]
+		[2, 82]
+Inactive Tokens: *************************
+		[-inf, -1]
+		Stowable_Instrument.Stow()
+		Key=197  Master=132 stowed(132){0} --> [1, 81]
+		{0}
+		[110, +inf]
+		Stowable_Instrument.StandBy()
+		Key=444  Master=289 Stowable_Instrument.Stowed(289)[109, 110] --> [110, +inf]
+		[111, +inf]
+
+Finished

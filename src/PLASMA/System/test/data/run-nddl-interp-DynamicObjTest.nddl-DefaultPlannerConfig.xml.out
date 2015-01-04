@@ -1,0 +1,84 @@
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[20, 20]
+			world.m_maxPlannerSteps=int:CLOSED[200, 200]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	TestObject:test1*************************
+		Tokens *************************
+				{0}
+				TestObject.TestPred(foo=Foo:CLOSED{f1(26)})
+				Key=32  Master=NONE
+				{10}
+				{10}
+				TestObject.TestPred(foo=Foo:OPEN{f1(26),f2(29)})
+				Key=71  Master=NONE
+					Merged Key=87 ROOT
+				{20}
+		End Tokens *********************
+	End TestObject:test1*************************
+	Foo:f1*************************
+	End Foo:f1*************************
+	Foo:f2*************************
+	End Foo:f2*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	test1=TestObject:CLOSED{test1(23)}
+	f1=Foo:CLOSED{f1(26)}
+	f2=Foo:CLOSED{f2(29)}
+Merged Tokens: *************************
+		[10, 19]
+		TestObject.TestPred(foo=Foo:OPEN{f1(26),f2(29)})
+		Key=87  Master=NONE
+		[11, 20]
+Rejected Tokens: *************************
+		[0, 9]
+		TestObject.TestPred(foo=Foo:CLOSED{f2(29)})
+		Key=48  Master=NONE
+		[1, 10]
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[20, 20]
+			world.m_maxPlannerSteps=int:CLOSED[200, 200]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	TestObject:test1*************************
+		Tokens *************************
+				{0}
+				TestObject.TestPred(foo=Foo:CLOSED{f1(26)})
+				Key=32  Master=NONE
+				{10}
+				{10}
+				TestObject.TestPred(foo=Foo:OPEN{f1(26),f2(29)})
+				Key=71  Master=NONE
+					Merged Key=87 ROOT
+				{20}
+		End Tokens *********************
+	End TestObject:test1*************************
+	Foo:f1*************************
+	End Foo:f1*************************
+	Foo:f2*************************
+	End Foo:f2*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	test1=TestObject:CLOSED{test1(23)}
+	f1=Foo:CLOSED{f1(26)}
+	f2=Foo:CLOSED{f2(29)}
+Merged Tokens: *************************
+		[10, 19]
+		TestObject.TestPred(foo=Foo:OPEN{f1(26),f2(29)})
+		Key=87  Master=NONE
+		[11, 20]
+Rejected Tokens: *************************
+		[0, 9]
+		TestObject.TestPred(foo=Foo:CLOSED{f2(29)})
+		Key=48  Master=NONE
+		[1, 10]
+
+Finished

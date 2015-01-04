@@ -1,0 +1,286 @@
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[200, 200]
+			world.m_maxPlannerSteps=int:CLOSED[500, 500]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Monkey_Class:Monkey1*************************
+		Variables *************************
+			Monkey1.Location_SV=Monkey_Class___Location_SV:CLOSED{Monkey1.Location_SV(26)}
+			Monkey1.Altitude_SV=Monkey_Class___Altitude_SV:CLOSED{Monkey1.Altitude_SV(32)}
+			Monkey1.Banana_SV=Monkey_Class___Banana_SV:CLOSED{Monkey1.Banana_SV(38)}
+		End Variables *********************
+	End Monkey_Class:Monkey1*************************
+	Monkey_Class___Location_SV:Monkey1.Location_SV*************************
+		Tokens *************************
+				{0}
+				Monkey_Class___Location_SV.At(Loc_Label=Location_Label:CLOSED{Rock})
+				Key=44  Master=NONE
+					Merged Key=2680 from Monkey_Class___Location_SV.Going(2185)[1, 177] --> [6, 182]
+				[1, 177]
+				[1, 177]
+				Monkey_Class___Location_SV.Going(From_Loc=Location_Label:CLOSED{Rock}To_Loc=Location_Label:CLOSED{Tree})
+				Key=2185  Master=1530 Monkey_Class___Location_SV.At(1530)[6, 182] --> [18, 194]
+				[6, 182]
+				[6, 182]
+				Monkey_Class___Location_SV.At(Loc_Label=Location_Label:CLOSED{Tree})
+				Key=1530  Master=693 Monkey_Class___Location_SV.Going(693)[18, 194] --> [23, 199]
+					Merged Key=1625 from Monkey_Class___Banana_SV.GRABBING_BANANA(1505)[16, 192] --> [17, 193]
+					Merged Key=2915 from Monkey_Class___Altitude_SV.CLIMBING(2634)[6, 182] --> [16, 192]
+				[18, 194]
+				[18, 194]
+				Monkey_Class___Location_SV.Going(From_Loc=Location_Label:CLOSED{Tree}To_Loc=Location_Label:CLOSED{Rock})
+				Key=693  Master=65 finalLocation(65)[23, 199] --> {200}
+				[23, 199]
+				[23, 199]
+				Monkey_Class___Location_SV.At(Loc_Label=Location_Label:CLOSED{Rock})
+				Key=65  Master=NONE
+				{200}
+		End Tokens *********************
+		Variables *************************
+			Monkey1.Location_SV.__DDL__object=Monkey_Class:CLOSED{Monkey1(23)}
+		End Variables *********************
+	End Monkey_Class___Location_SV:Monkey1.Location_SV*************************
+	Monkey_Class___Altitude_SV:Monkey1.Altitude_SV*************************
+		Tokens *************************
+				{0}
+				Monkey_Class___Altitude_SV.LOW()
+				Key=86  Master=NONE
+					Merged Key=2699 from Monkey_Class___Location_SV.Going(2185)[1, 177] --> [6, 182]
+					Merged Key=2731 from Monkey_Class___Altitude_SV.CLIMBING(2634)[6, 182] --> [16, 192]
+				[6, 182]
+				[6, 182]
+				Monkey_Class___Altitude_SV.CLIMBING(_0_anon_OR_tag_1=int:CLOSED[2, 2])
+				Key=2634  Master=1581 Monkey_Class___Altitude_SV.HIGH(1581)[16, 192] --> [17, 193]
+				[16, 192]
+				[16, 192]
+				Monkey_Class___Altitude_SV.HIGH()
+				Key=1581  Master=1476 Monkey_Class___Altitude_SV.CLIMBING_DOWN(1476)[17, 193] --> [18, 194]
+					Merged Key=1647 from Monkey_Class___Banana_SV.GRABBING_BANANA(1505)[16, 192] --> [17, 193]
+				[17, 193]
+				[17, 193]
+				Monkey_Class___Altitude_SV.CLIMBING_DOWN()
+				Key=1476  Master=104 finalHeight(104)[18, 194] --> {200}
+				[18, 194]
+				[18, 194]
+				Monkey_Class___Altitude_SV.LOW()
+				Key=104  Master=NONE
+					Merged Key=1549 from Monkey_Class___Location_SV.Going(693)[18, 194] --> [23, 199]
+				{200}
+		End Tokens *********************
+		Variables *************************
+			Monkey1.Altitude_SV.__DDL__object=Monkey_Class:CLOSED{Monkey1(23)}
+		End Variables *********************
+	End Monkey_Class___Altitude_SV:Monkey1.Altitude_SV*************************
+	Monkey_Class___Banana_SV:Monkey1.Banana_SV*************************
+		Tokens *************************
+				{0}
+				Monkey_Class___Banana_SV.NOT_HAVE_BANANA()
+				Key=122  Master=NONE
+					Merged Key=1608 from Monkey_Class___Banana_SV.GRABBING_BANANA(1505)[16, 192] --> [17, 193]
+				[16, 192]
+				[16, 192]
+				Monkey_Class___Banana_SV.GRABBING_BANANA()
+				Key=1505  Master=140 hasBanana(140)[17, 193] --> {200}
+				[17, 193]
+				[17, 193]
+				Monkey_Class___Banana_SV.HAVE_BANANA(Who=Monkey_Class:CLOSED{Monkey1(23)})
+				Key=140  Master=NONE
+				{200}
+		End Tokens *********************
+		Variables *************************
+			Monkey1.Banana_SV.__DDL__object=Monkey_Class:CLOSED{Monkey1(23)}
+		End Variables *********************
+	End Monkey_Class___Banana_SV:Monkey1.Banana_SV*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	Monkey1=Monkey_Class:CLOSED{Monkey1(23)}
+Merged Tokens: *************************
+		[-inf, 194]
+		Monkey_Class___Altitude_SV.LOW()
+		Key=1549  Master=693 Monkey_Class___Location_SV.Going(693)[18, 194] --> [23, 199]
+		[7, +inf]
+		[-inf, 197]
+		Monkey_Class___Banana_SV.NOT_HAVE_BANANA()
+		Key=1608  Master=1505 Monkey_Class___Banana_SV.GRABBING_BANANA(1505)[16, 192] --> [17, 193]
+		[1, 198]
+		[-inf, 198]
+		Monkey_Class___Location_SV.At(Loc_Label=Location_Label:CLOSED{Tree})
+		Key=1625  Master=1505 Monkey_Class___Banana_SV.GRABBING_BANANA(1505)[16, 192] --> [17, 193]
+		[2, +inf]
+		[-inf, 193]
+		Monkey_Class___Altitude_SV.HIGH()
+		Key=1647  Master=1505 Monkey_Class___Banana_SV.GRABBING_BANANA(1505)[16, 192] --> [17, 193]
+		[2, +inf]
+		[-inf, 186]
+		Monkey_Class___Location_SV.At(Loc_Label=Location_Label:CLOSED{Rock,Tree})
+		Key=2680  Master=2185 Monkey_Class___Location_SV.Going(2185)[1, 177] --> [6, 182]
+		[1, 187]
+		[-inf, 187]
+		Monkey_Class___Altitude_SV.LOW()
+		Key=2699  Master=2185 Monkey_Class___Location_SV.Going(2185)[1, 177] --> [6, 182]
+		[6, +inf]
+		[-inf, 181]
+		Monkey_Class___Altitude_SV.LOW()
+		Key=2731  Master=2634 Monkey_Class___Altitude_SV.CLIMBING(2634)[6, 182] --> [16, 192]
+		[6, 182]
+		[-inf, 182]
+		Monkey_Class___Location_SV.At(Loc_Label=Location_Label:CLOSED{Tree})
+		Key=2915  Master=2634 Monkey_Class___Altitude_SV.CLIMBING(2634)[6, 182] --> [16, 192]
+		[16, +inf]
+Inactive Tokens: *************************
+		[-inf, -5]
+		Monkey_Class___Location_SV.Going(From_Loc=Location_Label:CLOSED{Rock,Tree}To_Loc=Location_Label:CLOSED{Rock})
+		Key=161  Master=44 initialLocation(44){0} --> [1, 177]
+		{0}
+		[-inf, -1]
+		Monkey_Class___Altitude_SV.CLIMBING_DOWN()
+		Key=721  Master=86 initialHeight(86){0} --> [6, 182]
+		{0}
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[200, 200]
+			world.m_maxPlannerSteps=int:CLOSED[500, 500]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Monkey_Class:Monkey1*************************
+		Variables *************************
+			Monkey1.Location_SV=Monkey_Class___Location_SV:CLOSED{Monkey1.Location_SV(26)}
+			Monkey1.Altitude_SV=Monkey_Class___Altitude_SV:CLOSED{Monkey1.Altitude_SV(32)}
+			Monkey1.Banana_SV=Monkey_Class___Banana_SV:CLOSED{Monkey1.Banana_SV(38)}
+		End Variables *********************
+	End Monkey_Class:Monkey1*************************
+	Monkey_Class___Location_SV:Monkey1.Location_SV*************************
+		Tokens *************************
+				{0}
+				Monkey_Class___Location_SV.At(Loc_Label=Location_Label:CLOSED{Rock})
+				Key=44  Master=NONE
+					Merged Key=2680 from Monkey_Class___Location_SV.Going(2185)[1, 177] --> [6, 182]
+				[1, 177]
+				[1, 177]
+				Monkey_Class___Location_SV.Going(From_Loc=Location_Label:CLOSED{Rock}To_Loc=Location_Label:CLOSED{Tree})
+				Key=2185  Master=1530 Monkey_Class___Location_SV.At(1530)[6, 182] --> [18, 194]
+				[6, 182]
+				[6, 182]
+				Monkey_Class___Location_SV.At(Loc_Label=Location_Label:CLOSED{Tree})
+				Key=1530  Master=693 Monkey_Class___Location_SV.Going(693)[18, 194] --> [23, 199]
+					Merged Key=1625 from Monkey_Class___Banana_SV.GRABBING_BANANA(1505)[16, 192] --> [17, 193]
+					Merged Key=2915 from Monkey_Class___Altitude_SV.CLIMBING(2634)[6, 182] --> [16, 192]
+				[18, 194]
+				[18, 194]
+				Monkey_Class___Location_SV.Going(From_Loc=Location_Label:CLOSED{Tree}To_Loc=Location_Label:CLOSED{Rock})
+				Key=693  Master=65 finalLocation(65)[23, 199] --> {200}
+				[23, 199]
+				[23, 199]
+				Monkey_Class___Location_SV.At(Loc_Label=Location_Label:CLOSED{Rock})
+				Key=65  Master=NONE
+				{200}
+		End Tokens *********************
+		Variables *************************
+			Monkey1.Location_SV.__DDL__object=Monkey_Class:CLOSED{Monkey1(23)}
+		End Variables *********************
+	End Monkey_Class___Location_SV:Monkey1.Location_SV*************************
+	Monkey_Class___Altitude_SV:Monkey1.Altitude_SV*************************
+		Tokens *************************
+				{0}
+				Monkey_Class___Altitude_SV.LOW()
+				Key=86  Master=NONE
+					Merged Key=2699 from Monkey_Class___Location_SV.Going(2185)[1, 177] --> [6, 182]
+					Merged Key=2731 from Monkey_Class___Altitude_SV.CLIMBING(2634)[6, 182] --> [16, 192]
+				[6, 182]
+				[6, 182]
+				Monkey_Class___Altitude_SV.CLIMBING(_0_anon_OR_tag_1=int:CLOSED[2, 2])
+				Key=2634  Master=1581 Monkey_Class___Altitude_SV.HIGH(1581)[16, 192] --> [17, 193]
+				[16, 192]
+				[16, 192]
+				Monkey_Class___Altitude_SV.HIGH()
+				Key=1581  Master=1476 Monkey_Class___Altitude_SV.CLIMBING_DOWN(1476)[17, 193] --> [18, 194]
+					Merged Key=1647 from Monkey_Class___Banana_SV.GRABBING_BANANA(1505)[16, 192] --> [17, 193]
+				[17, 193]
+				[17, 193]
+				Monkey_Class___Altitude_SV.CLIMBING_DOWN()
+				Key=1476  Master=104 finalHeight(104)[18, 194] --> {200}
+				[18, 194]
+				[18, 194]
+				Monkey_Class___Altitude_SV.LOW()
+				Key=104  Master=NONE
+					Merged Key=1549 from Monkey_Class___Location_SV.Going(693)[18, 194] --> [23, 199]
+				{200}
+		End Tokens *********************
+		Variables *************************
+			Monkey1.Altitude_SV.__DDL__object=Monkey_Class:CLOSED{Monkey1(23)}
+		End Variables *********************
+	End Monkey_Class___Altitude_SV:Monkey1.Altitude_SV*************************
+	Monkey_Class___Banana_SV:Monkey1.Banana_SV*************************
+		Tokens *************************
+				{0}
+				Monkey_Class___Banana_SV.NOT_HAVE_BANANA()
+				Key=122  Master=NONE
+					Merged Key=1608 from Monkey_Class___Banana_SV.GRABBING_BANANA(1505)[16, 192] --> [17, 193]
+				[16, 192]
+				[16, 192]
+				Monkey_Class___Banana_SV.GRABBING_BANANA()
+				Key=1505  Master=140 hasBanana(140)[17, 193] --> {200}
+				[17, 193]
+				[17, 193]
+				Monkey_Class___Banana_SV.HAVE_BANANA(Who=Monkey_Class:CLOSED{Monkey1(23)})
+				Key=140  Master=NONE
+				{200}
+		End Tokens *********************
+		Variables *************************
+			Monkey1.Banana_SV.__DDL__object=Monkey_Class:CLOSED{Monkey1(23)}
+		End Variables *********************
+	End Monkey_Class___Banana_SV:Monkey1.Banana_SV*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	Monkey1=Monkey_Class:CLOSED{Monkey1(23)}
+Merged Tokens: *************************
+		[-inf, 194]
+		Monkey_Class___Altitude_SV.LOW()
+		Key=1549  Master=693 Monkey_Class___Location_SV.Going(693)[18, 194] --> [23, 199]
+		[7, +inf]
+		[-inf, 197]
+		Monkey_Class___Banana_SV.NOT_HAVE_BANANA()
+		Key=1608  Master=1505 Monkey_Class___Banana_SV.GRABBING_BANANA(1505)[16, 192] --> [17, 193]
+		[1, 198]
+		[-inf, 198]
+		Monkey_Class___Location_SV.At(Loc_Label=Location_Label:CLOSED{Tree})
+		Key=1625  Master=1505 Monkey_Class___Banana_SV.GRABBING_BANANA(1505)[16, 192] --> [17, 193]
+		[2, +inf]
+		[-inf, 193]
+		Monkey_Class___Altitude_SV.HIGH()
+		Key=1647  Master=1505 Monkey_Class___Banana_SV.GRABBING_BANANA(1505)[16, 192] --> [17, 193]
+		[2, +inf]
+		[-inf, 186]
+		Monkey_Class___Location_SV.At(Loc_Label=Location_Label:CLOSED{Rock,Tree})
+		Key=2680  Master=2185 Monkey_Class___Location_SV.Going(2185)[1, 177] --> [6, 182]
+		[1, 187]
+		[-inf, 187]
+		Monkey_Class___Altitude_SV.LOW()
+		Key=2699  Master=2185 Monkey_Class___Location_SV.Going(2185)[1, 177] --> [6, 182]
+		[6, +inf]
+		[-inf, 181]
+		Monkey_Class___Altitude_SV.LOW()
+		Key=2731  Master=2634 Monkey_Class___Altitude_SV.CLIMBING(2634)[6, 182] --> [16, 192]
+		[6, 182]
+		[-inf, 182]
+		Monkey_Class___Location_SV.At(Loc_Label=Location_Label:CLOSED{Tree})
+		Key=2915  Master=2634 Monkey_Class___Altitude_SV.CLIMBING(2634)[6, 182] --> [16, 192]
+		[16, +inf]
+Inactive Tokens: *************************
+		[-inf, -5]
+		Monkey_Class___Location_SV.Going(From_Loc=Location_Label:CLOSED{Rock,Tree}To_Loc=Location_Label:CLOSED{Rock})
+		Key=161  Master=44 initialLocation(44){0} --> [1, 177]
+		{0}
+		[-inf, -1]
+		Monkey_Class___Altitude_SV.CLIMBING_DOWN()
+		Key=721  Master=86 initialHeight(86){0} --> [6, 182]
+		{0}
+
+Finished

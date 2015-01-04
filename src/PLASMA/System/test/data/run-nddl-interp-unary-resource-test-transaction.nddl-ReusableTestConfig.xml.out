@@ -1,0 +1,114 @@
+Created node [id_354] initially enabled
+Created node [id_355] initially enabled
+Maximum flow instance created with source [id_354] and sink [id_355]
+Created node [id_354] initially enabled
+Created node [id_355] initially enabled
+Maximum flow instance created with source [id_354] and sink [id_355]
+Objects *************************
+	PlannerConfig:config*************************
+		Variables *************************
+			config.m_horizonStart=int:CLOSED[0, 0]
+			config.m_horizonEnd=int:CLOSED[100, 100]
+			config.m_maxPlannerSteps=int:CLOSED[100, 100]
+			config.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:config*************************
+	IntermediateUnary:unary*************************
+		Tokens *************************
+				{0}
+				IntermediateUnary.use()
+				Key=89  Master=37 bar11(37){0} --> {10}
+				{10}
+				{10}
+				IntermediateUnary.use()
+				Key=118  Master=54 bar12(54){10} --> {50}
+				{50}
+				[50, 99]
+				IntermediateUnary.use()
+				Key=153  Master=70 bar21(70)[50, 99] --> [51, 100]
+				[51, 100]
+		End Tokens *********************
+		Variables *************************
+			unary.consumptionMax=float:CLOSED[+inf, +inf]
+		End Variables *********************
+	End IntermediateUnary:unary*************************
+	Foo:proj1*************************
+		Tokens *************************
+				{0}
+				Foo.bar()
+				Key=37  Master=NONE
+				{10}
+				{10}
+				Foo.bar()
+				Key=54  Master=NONE
+				{50}
+		End Tokens *********************
+	End Foo:proj1*************************
+	Foo:proj2*************************
+		Tokens *************************
+				[50, 99]
+				Foo.bar()
+				Key=70  Master=NONE
+				[51, 100]
+		End Tokens *********************
+	End Foo:proj2*************************
+Global Variables*************************
+	config=PlannerConfig:CLOSED{config(12)}
+	unary=IntermediateUnary:CLOSED{unary(23)}
+	proj1=Foo:CLOSED{proj1(31)}
+	proj2=Foo:CLOSED{proj2(34)}
+Objects *************************
+	PlannerConfig:config*************************
+		Variables *************************
+			config.m_horizonStart=int:CLOSED[0, 0]
+			config.m_horizonEnd=int:CLOSED[100, 100]
+			config.m_maxPlannerSteps=int:CLOSED[100, 100]
+			config.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:config*************************
+	IntermediateUnary:unary*************************
+		Tokens *************************
+				{0}
+				IntermediateUnary.use()
+				Key=89  Master=37 bar11(37){0} --> {10}
+				{10}
+				{10}
+				IntermediateUnary.use()
+				Key=118  Master=54 bar12(54){10} --> {50}
+				{50}
+				[50, 99]
+				IntermediateUnary.use()
+				Key=153  Master=70 bar21(70)[50, 99] --> [51, 100]
+				[51, 100]
+		End Tokens *********************
+		Variables *************************
+			unary.consumptionMax=float:CLOSED[+inf, +inf]
+		End Variables *********************
+	End IntermediateUnary:unary*************************
+	Foo:proj1*************************
+		Tokens *************************
+				{0}
+				Foo.bar()
+				Key=37  Master=NONE
+				{10}
+				{10}
+				Foo.bar()
+				Key=54  Master=NONE
+				{50}
+		End Tokens *********************
+	End Foo:proj1*************************
+	Foo:proj2*************************
+		Tokens *************************
+				[50, 99]
+				Foo.bar()
+				Key=70  Master=NONE
+				[51, 100]
+		End Tokens *********************
+	End Foo:proj2*************************
+Global Variables*************************
+	config=PlannerConfig:CLOSED{config(12)}
+	unary=IntermediateUnary:CLOSED{unary(23)}
+	proj1=Foo:CLOSED{proj1(31)}
+	proj2=Foo:CLOSED{proj2(34)}
+
+Finished

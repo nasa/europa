@@ -1,0 +1,52 @@
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[100, 100]
+			world.m_maxPlannerSteps=int:CLOSED[500, 500]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Test:test*************************
+		Tokens *************************
+				{0}
+				Test.Predicate(parameter=string:CLOSED{foo}first=bool:CLOSED[0, 0]qforce_backtrack=int:CLOSED[2, 2])
+				Key=26  Master=NONE
+				{50}
+		End Tokens *********************
+	End Test:test*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	test=Test:CLOSED{test(23)}
+Inactive Tokens: *************************
+		[-inf, -1]
+		Test.Predicate(parameter=string:CLOSED{foo}first=bool:CLOSED[0, 1]qforce_backtrack=int:CLOSED[3, 3])
+		Key=60  Master=26 p(26){0} --> {50}
+		[-inf, 0]
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[100, 100]
+			world.m_maxPlannerSteps=int:CLOSED[500, 500]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Test:test*************************
+		Tokens *************************
+				{0}
+				Test.Predicate(parameter=string:CLOSED{foo}first=bool:CLOSED[0, 0]qforce_backtrack=int:CLOSED[2, 2])
+				Key=26  Master=NONE
+				{50}
+		End Tokens *********************
+	End Test:test*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	test=Test:CLOSED{test(23)}
+Inactive Tokens: *************************
+		[-inf, -1]
+		Test.Predicate(parameter=string:CLOSED{foo}first=bool:CLOSED[0, 1]qforce_backtrack=int:CLOSED[3, 3])
+		Key=60  Master=26 p(26){0} --> {50}
+		[-inf, 0]
+
+Finished

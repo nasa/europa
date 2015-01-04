@@ -1,0 +1,40 @@
+Objects *************************
+	PlannerTestConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[10, 10]
+			world.m_maxPlannerSteps=int:CLOSED[6, 6]
+			world.m_maxPlannerDepth=int:CLOSED[4, 4]
+		End Variables *********************
+	End PlannerTestConfig:world*************************
+	A:a*************************
+	End A:a*************************
+Global Variables*************************
+	world=PlannerTestConfig:CLOSED{world(18)}
+	a=A:CLOSED{a(33)}
+Rejected Tokens: *************************
+		{0}
+		A.pred(location=Location:CLOSED{Lander,Rock})
+		Key=36  Master=NONE
+		{5}
+Objects *************************
+	PlannerTestConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[10, 10]
+			world.m_maxPlannerSteps=int:CLOSED[6, 6]
+			world.m_maxPlannerDepth=int:CLOSED[4, 4]
+		End Variables *********************
+	End PlannerTestConfig:world*************************
+	A:a*************************
+	End A:a*************************
+Global Variables*************************
+	world=PlannerTestConfig:CLOSED{world(18)}
+	a=A:CLOSED{a(33)}
+Rejected Tokens: *************************
+		{0}
+		A.pred(location=Location:CLOSED{Lander,Rock})
+		Key=36  Master=NONE
+		{5}
+
+Finished

@@ -1,0 +1,138 @@
+Created node [id_411] initially enabled
+Created node [id_412] initially enabled
+Maximum flow instance created with source [id_411] and sink [id_412]
+Created node [id_411] initially enabled
+Created node [id_412] initially enabled
+Maximum flow instance created with source [id_411] and sink [id_412]
+Created node [id_460] initially enabled
+Created node [id_461] initially enabled
+Maximum flow instance created with source [id_460] and sink [id_461]
+Created node [id_460] initially enabled
+Created node [id_461] initially enabled
+Maximum flow instance created with source [id_460] and sink [id_461]
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[100, 100]
+			world.m_maxPlannerSteps=int:CLOSED[350, 350]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Battery:mainBattery*************************
+		Tokens *************************
+				{0}
+				Battery.consume()
+				Key=175  Master=154 DriveSubsystem.Stroll(154){0} --> {100}
+				{0}
+		End Tokens *********************
+		Variables *************************
+			mainBattery.initialCapacity=float:CLOSED[30, 30]
+			mainBattery.levelLimitMin=float:CLOSED[0, 0]
+			mainBattery.levelLimitMax=float:CLOSED[50, 50]
+			mainBattery.productionRateMax=float:CLOSED[0, 0]
+			mainBattery.productionMax=float:CLOSED[0, 0]
+			mainBattery.consumptionRateMax=float:CLOSED[+inf, +inf]
+			mainBattery.consumptionMax=float:CLOSED[+inf, +inf]
+		End Variables *********************
+	End Battery:mainBattery*************************
+	Rover:rover*************************
+		Tokens *************************
+				{0}
+				Rover.Move()
+				Key=77  Master=NONE
+				{100}
+		End Tokens *********************
+		Variables *************************
+			rover.dss=DriveSubsystem:CLOSED{rover.dss(58)}
+			rover.battery=Battery:CLOSED{mainBattery(33)}
+			rover.disk=Disk:CLOSED{rover.disk(62)}
+		End Variables *********************
+	End Rover:rover*************************
+	DriveSubsystem:rover.dss*************************
+		Tokens *************************
+				{0}
+				DriveSubsystem.Stroll()
+				Key=154  Master=77 goal1(77){0} --> {100}
+				{100}
+		End Tokens *********************
+	End DriveSubsystem:rover.dss*************************
+	Disk:rover.disk*************************
+		Variables *************************
+			rover.disk.initialCapacity=float:CLOSED[0, 0]
+			rover.disk.levelLimitMin=float:CLOSED[-inf, -inf]
+			rover.disk.levelLimitMax=float:CLOSED[+inf, +inf]
+			rover.disk.productionRateMax=float:CLOSED[+inf, +inf]
+			rover.disk.productionMax=float:CLOSED[+inf, +inf]
+			rover.disk.consumptionRateMax=float:CLOSED[+inf, +inf]
+			rover.disk.consumptionMax=float:CLOSED[+inf, +inf]
+		End Variables *********************
+	End Disk:rover.disk*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	mainBattery=Battery:CLOSED{mainBattery(33)}
+	rover=Rover:CLOSED{rover(55)}
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[100, 100]
+			world.m_maxPlannerSteps=int:CLOSED[350, 350]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Battery:mainBattery*************************
+		Tokens *************************
+				{0}
+				Battery.consume()
+				Key=175  Master=154 DriveSubsystem.Stroll(154){0} --> {100}
+				{0}
+		End Tokens *********************
+		Variables *************************
+			mainBattery.initialCapacity=float:CLOSED[30, 30]
+			mainBattery.levelLimitMin=float:CLOSED[0, 0]
+			mainBattery.levelLimitMax=float:CLOSED[50, 50]
+			mainBattery.productionRateMax=float:CLOSED[0, 0]
+			mainBattery.productionMax=float:CLOSED[0, 0]
+			mainBattery.consumptionRateMax=float:CLOSED[+inf, +inf]
+			mainBattery.consumptionMax=float:CLOSED[+inf, +inf]
+		End Variables *********************
+	End Battery:mainBattery*************************
+	Rover:rover*************************
+		Tokens *************************
+				{0}
+				Rover.Move()
+				Key=77  Master=NONE
+				{100}
+		End Tokens *********************
+		Variables *************************
+			rover.dss=DriveSubsystem:CLOSED{rover.dss(58)}
+			rover.battery=Battery:CLOSED{mainBattery(33)}
+			rover.disk=Disk:CLOSED{rover.disk(62)}
+		End Variables *********************
+	End Rover:rover*************************
+	DriveSubsystem:rover.dss*************************
+		Tokens *************************
+				{0}
+				DriveSubsystem.Stroll()
+				Key=154  Master=77 goal1(77){0} --> {100}
+				{100}
+		End Tokens *********************
+	End DriveSubsystem:rover.dss*************************
+	Disk:rover.disk*************************
+		Variables *************************
+			rover.disk.initialCapacity=float:CLOSED[0, 0]
+			rover.disk.levelLimitMin=float:CLOSED[-inf, -inf]
+			rover.disk.levelLimitMax=float:CLOSED[+inf, +inf]
+			rover.disk.productionRateMax=float:CLOSED[+inf, +inf]
+			rover.disk.productionMax=float:CLOSED[+inf, +inf]
+			rover.disk.consumptionRateMax=float:CLOSED[+inf, +inf]
+			rover.disk.consumptionMax=float:CLOSED[+inf, +inf]
+		End Variables *********************
+	End Disk:rover.disk*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(12)}
+	mainBattery=Battery:CLOSED{mainBattery(33)}
+	rover=Rover:CLOSED{rover(55)}
+
+Finished

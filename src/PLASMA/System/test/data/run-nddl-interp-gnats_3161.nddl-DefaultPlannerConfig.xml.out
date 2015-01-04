@@ -1,0 +1,82 @@
+Objects *************************
+	Foo:x*************************
+		Variables *************************
+			x.b=bool:CLOSED[1, 1]
+		End Variables *********************
+	End Foo:x*************************
+	Foo:y*************************
+		Variables *************************
+			y.b=bool:CLOSED[0, 0]
+		End Variables *********************
+	End Foo:y*************************
+	Bar:b*************************
+		Tokens *************************
+				{0}
+				Bar.somePred(arg=bool:CLOSED[1, 1])
+				Key=25  Master=NONE
+				{1}
+		End Tokens *********************
+		Variables *************************
+			b.b=bool:CLOSED[1, 1]
+		End Variables *********************
+	End Bar:b*************************
+	PlannerTestConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[10, 10]
+			world.m_maxPlannerSteps=int:CLOSED[4, 4]
+			world.m_maxPlannerDepth=int:CLOSED[2, 2]
+		End Variables *********************
+	End PlannerTestConfig:world*************************
+Global Variables*************************
+	x=Foo:CLOSED{x(8)}
+	y=Foo:CLOSED{y(15)}
+	b=Bar:CLOSED{b(20)}
+	world=PlannerTestConfig:CLOSED{world(84)}
+Rejected Tokens: *************************
+		{0}
+		Bar.otherPred()
+		Key=55  Master=NONE
+		{1}
+Objects *************************
+	Foo:x*************************
+		Variables *************************
+			x.b=bool:CLOSED[1, 1]
+		End Variables *********************
+	End Foo:x*************************
+	Foo:y*************************
+		Variables *************************
+			y.b=bool:CLOSED[0, 0]
+		End Variables *********************
+	End Foo:y*************************
+	Bar:b*************************
+		Tokens *************************
+				{0}
+				Bar.somePred(arg=bool:CLOSED[1, 1])
+				Key=25  Master=NONE
+				{1}
+		End Tokens *********************
+		Variables *************************
+			b.b=bool:CLOSED[1, 1]
+		End Variables *********************
+	End Bar:b*************************
+	PlannerTestConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[10, 10]
+			world.m_maxPlannerSteps=int:CLOSED[4, 4]
+			world.m_maxPlannerDepth=int:CLOSED[2, 2]
+		End Variables *********************
+	End PlannerTestConfig:world*************************
+Global Variables*************************
+	x=Foo:CLOSED{x(8)}
+	y=Foo:CLOSED{y(15)}
+	b=Bar:CLOSED{b(20)}
+	world=PlannerTestConfig:CLOSED{world(84)}
+Rejected Tokens: *************************
+		{0}
+		Bar.otherPred()
+		Key=55  Master=NONE
+		{1}
+
+Finished
