@@ -23,6 +23,8 @@ if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
 endif(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
 option(SIXTYFOUR "Build for 64-bit" ${SIXTYFOUR})
 # * modules?
+# * coverage
+option(COVERAGE "Build with coverage info" FALSE)
 
 set(EUROPA_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 set(CppUnit_FIND_QUIETLY TRUE)
