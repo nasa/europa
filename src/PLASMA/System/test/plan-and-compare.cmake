@@ -6,7 +6,7 @@ if(NOT ${result} EQUAL 0)
   message(FATAL_ERROR ${result})
 endif(NOT ${result} EQUAL 0)
 
-if(plan_compare)
+if(plan_compare AND (${compare} STREQUAL "true"))
   execute_process(COMMAND ${plan_compare} ${gold_file} ${output_file}
     OUTPUT_FILE ${diff_file}
     RESULT_VARIABLE diff_result)
