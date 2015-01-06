@@ -30,7 +30,7 @@ set(system_tests backtrack-test
   subtype-extension.tx)
 
   
-function(run_planner_problem model configFile dep)
+function(run_planner_problem model configFile compare dep)
   set(is_nddl FALSE)
   string(REGEX MATCH ".nddl^" is_nddl ${model})
   if(NOT is_nddl)
@@ -46,30 +46,32 @@ function(run_planner_problem model configFile dep)
     -DconfigFile=${configFile}
     -Dlanguage=nddl
     -Doutput_file=${CMAKE_CURRENT_BINARY_DIR}/${test_target}.out
-    -Dplan_compare=diff
+    # -Dplan_compare=diff
+    -Dplan_compare=${CMAKE_CURRENT_SOURCE_DIR}/plan-diff.pl
     -Dgold_file=${CMAKE_CURRENT_SOURCE_DIR}/data/${test_target}.out
     -Ddiff_file=${CMAKE_CURRENT_BINARY_DIR}/${test_target}.diff
+    -Dcompare=${compare}
     -P ${CMAKE_CURRENT_SOURCE_DIR}/plan-and-compare.cmake)
   #add_dependencies(${dep} ${test_target})
 endfunction(run_planner_problem)
 
 foreach(test ${checkin_tests})
-  run_planner_problem(${test} ${DEFAULT_PCONFIG} common-tests)
+  run_planner_problem(${test} ${DEFAULT_PCONFIG} true common-tests)
 endforeach(test)
 foreach(test ${resource_tests})
-  run_planner_problem(${test} ${DEFAULT_PCONFIG} common-tests)
+  run_planner_problem(${test} ${DEFAULT_PCONFIG} true common-tests)
 endforeach(test)
 foreach(test ${system_tests})
-  run_planner_problem(${test} ${DEFAULT_PCONFIG} common-tests)
+  run_planner_problem(${test} ${DEFAULT_PCONFIG} true common-tests)
 endforeach(test)
-run_planner_problem(HTX.1 HTX.1.solverConfig.xml nddl)
+run_planner_problem(HTX.1 HTX.1.solverConfig.xml true other-tests)
 #TODO: find out why this doesn't get run in the Jamfile
 #run_planner_problem(HTX.2 HTX.2.solverConfig.xml nddl) 
-run_planner_problem(HTX.3 HTX.3.solverConfig.xml nddl)
-run_planner_problem(reusable-test-transaction ReusableTestConfig.xml nddl)
-run_planner_problem(unary-resource-test-transaction ReusableTestConfig.xml nddl)
-run_planner_problem(Mini-crew-init MiniCrewSolverConfig.xml nddl)
-run_planner_problem(basic-model-transaction RandomPlannerConfig.xml nddl)
+run_planner_problem(HTX.3 HTX.3.solverConfig.xml true other-tests)
+run_planner_problem(reusable-test-transaction ReusableTestConfig.xml true other-tests)
+run_planner_problem(unary-resource-test-transaction ReusableTestConfig.xml true other-tests)
+run_planner_problem(Mini-crew-init MiniCrewSolverConfig.xml true other-tests)
+run_planner_problem(basic-model-transaction RandomPlannerConfig.xml false other-tests)
 
 file(GLOB models *.nddl)
 file(COPY ${models} DESTINATION .)
