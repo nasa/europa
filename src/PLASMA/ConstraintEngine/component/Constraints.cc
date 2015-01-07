@@ -12,9 +12,11 @@
 namespace EUROPA {
 
 namespace {
-void requireArgCount(std::string name, const std::vector<DataTypeId>& argTypes, const unsigned int count) {
+void requireArgCount(std::string name, const std::vector<DataTypeId>& argTypes,
+                     const unsigned int count) {
   if (argTypes.size() != count) {
-    std::ostringstream msg; msg << "Constraint " << name << " takes 2 args, not " << argTypes.size();
+    std::ostringstream msg;
+    msg << "Constraint " << name << " takes " << count << " args, not " << argTypes.size();
     throw msg.str();
   }
 }
