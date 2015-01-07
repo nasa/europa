@@ -4,6 +4,7 @@
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/3615/badge.svg"/>
 </a>
+[![Coverage Status](https://coveralls.io/repos/nasa/europa/badge.png)](https://coveralls.io/r/nasa/europa)
 
 **EUROPA is available under [NASA's Open Source Agreement (NOSA) ](http://opensource.arc.nasa.gov/page/nosa-software-agreement)**
 
