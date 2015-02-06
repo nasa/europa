@@ -6,56 +6,9 @@
 #include "Variable.hh"
 #include "Domains.hh"
 #include "ConstraintType.hh"
+#include "ConstraintTypeChecking.hh"
 
 namespace EUROPA {
-
-#define CREATE_CONSTRAINT_BASE(basename)				\
-  class basename : public ConstraintType {				\
-  public:								\
-    basename(const LabelStr& name,					\
-	     const LabelStr& propagatorName,				\
-	     bool systemDefined = false)				\
-        : ConstraintType(name,propagatorName,systemDefined), m_name(name.c_str()) {} \
-    									\
-    virtual ~basename() {}						\
-    									\
-    virtual ConstraintId createConstraint( \
-                      const ConstraintEngineId constraintEngine, \
-					  const std::vector<ConstrainedVariableId>& scope, \
-					  const char* violationExpl) = 0; \
-    									\
-    virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes) const; \
-  protected:								\
-    std::string m_name;							\
-  };
-
-  CREATE_CONSTRAINT_BASE(TwoSameArgumentsCT);
-  CREATE_CONSTRAINT_BASE(TwoSameNumericArgumentsCT);
-  CREATE_CONSTRAINT_BASE(TestTwoSameArgumentsCT);
-  CREATE_CONSTRAINT_BASE(TestTwoSameNumericArgumentsCT);
-  CREATE_CONSTRAINT_BASE(TwoBooleanArgumentsCT);
-  CREATE_CONSTRAINT_BASE(ThreeBooleanArgumentsCT);
-  CREATE_CONSTRAINT_BASE(AllSameArgumentsCT);
-  CREATE_CONSTRAINT_BASE(AllSameNumericArgumentsCT);
-  CREATE_CONSTRAINT_BASE(TestOneArgumentCT);
-
-
-#define CREATE_CONSTRAINT_TYPE(base, name, constraint) \
-  class name : public base {			       \
-  public:					       \
-  name(const LabelStr& _name,			       \
-       const LabelStr& _propagatorName,		       \
-       bool _systemDefined = false)					\
-    : base(_name,_propagatorName,_systemDefined) {}			\
-  ~name() {}							\
-  virtual ConstraintId createConstraint(const ConstraintEngineId constraintEngine, \
-					const std::vector<ConstrainedVariableId>& scope,\
-					const char* violationMsg) \
-    {									\
-      return makeConstraintInstance<constraint>(m_name, m_propagatorName, constraintEngine, scope, violationMsg); \
-    } \
-  };
-
 
 #define CREATE_FUNCTION_CONSTRAINT(cname)				\
   class cname##Constraint : public Constraint {				\
@@ -100,225 +53,213 @@ namespace EUROPA {
 
 
 
-  CREATE_FUNCTION_CONSTRAINT(Max);
-  CREATE_FUNCTION_CONSTRAINT(Min);
-  CREATE_FUNCTION_CONSTRAINT(Abs);
-  CREATE_FUNCTION_CONSTRAINT(Pow);
-  CREATE_FUNCTION_CONSTRAINT(Sqrt);
-  CREATE_FUNCTION_CONSTRAINT(Mod);
-  CREATE_FUNCTION_CONSTRAINT(Floor);
-  CREATE_FUNCTION_CONSTRAINT(Ceil);
+CREATE_FUNCTION_CONSTRAINT(Max);
+typedef And<NArgs<3>, All<Numeric> > TwoArgNumericFun;
+typedef DataTypeCheck<MaxConstraint, TwoArgNumericFun> MaxCT;
+CREATE_FUNCTION_CONSTRAINT(Min);
+typedef DataTypeCheck<MinConstraint, TwoArgNumericFun> MinCT;
+CREATE_FUNCTION_CONSTRAINT(Abs);
+typedef And<NArgs<2>, All<Numeric> > OneArgNumericFun;
+typedef DataTypeCheck<AbsConstraint, OneArgNumericFun> AbsCT;
+CREATE_FUNCTION_CONSTRAINT(Pow);
+typedef DataTypeCheck<PowConstraint, TwoArgNumericFun> PowCT;
+CREATE_FUNCTION_CONSTRAINT(Sqrt);
+typedef DataTypeCheck<SqrtConstraint, OneArgNumericFun> SqrtCT;
+CREATE_FUNCTION_CONSTRAINT(Mod);
+typedef DataTypeCheck<ModConstraint, TwoArgNumericFun> ModCT;
+CREATE_FUNCTION_CONSTRAINT(Floor);
+typedef DataTypeCheck<FloorConstraint, OneArgNumericFun> FloorCT;
+CREATE_FUNCTION_CONSTRAINT(Ceil);
+typedef DataTypeCheck<CeilConstraint, OneArgNumericFun> CeilCT;
 
 
 
-  /**
-   * @brief AbsoluteValue(x, y) maintains the relation:
-   * @li x.lb >= 0
-   * @li x.ub = max(abs(y.lb), abs(y.ub))
-   * @li y.lb >= -x.lb
-   * @li y.ub <= x.ub
-   */
-  class AbsoluteValue : public Constraint {
-  public:
-    AbsoluteValue(const LabelStr& name,
-          const LabelStr& propagatorName,
-          const ConstraintEngineId constraintEngine,
+/**
+ * @brief AbsoluteValue(x, y) maintains the relation:
+ * @li x.lb >= 0
+ * @li x.ub = max(abs(y.lb), abs(y.ub))
+ * @li y.lb >= -x.lb
+ * @li y.ub <= x.ub
+ */
+class AbsoluteValue : public Constraint {
+ public:
+  AbsoluteValue(const LabelStr& name,
+                const LabelStr& propagatorName,
+                const ConstraintEngineId constraintEngine,
           const std::vector<ConstrainedVariableId>& variables);
-    void handleExecute();
-  private:
-    IntervalDomain& m_x;
-    IntervalDomain& m_y;
-    static const unsigned int ARG_COUNT = 2;
-  };
+  void handleExecute();
+ private:
+  IntervalDomain& m_x;
+  IntervalDomain& m_y;
+  static const unsigned int ARG_COUNT = 2;
+};
+typedef And<NArgs<2>, And<Mutually<Assignable<> >, All<Numeric> > > TwoAssignableNumeric;
+typedef DataTypeCheck<AbsoluteValue, TwoAssignableNumeric>  AbsoluteValueCT;
 
-  class AbsoluteValueCT : public ConstraintType {
-  public:
-      AbsoluteValueCT(const LabelStr& name,
-              const LabelStr& propagatorName,
-              bool systemDefined = false)
-      : ConstraintType(name,propagatorName,systemDefined) {}
+class AddEqualConstraint : public Constraint {
+ public:
+  AddEqualConstraint(const LabelStr& name,
+                     const LabelStr& propagatorName,
+                     const ConstraintEngineId constraintEngine,
+                     const std::vector<ConstrainedVariableId>& variables);
 
-      virtual ~AbsoluteValueCT() {}
+  void handleExecute();
 
-      virtual ConstraintId createConstraint(
-              const ConstraintEngineId constraintEngine,
-              const std::vector<ConstrainedVariableId>& scope,
-              const char* violationExpl)
-      {
-          return makeConstraintInstance<AbsoluteValue>(m_name, m_propagatorName, constraintEngine, scope, violationExpl);
-      }
+ private:
+  // X + Y = Z
+  Domain& m_x;
+  Domain& m_y;
+  Domain& m_z;
 
-      virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes) const;
-  };
+  static const unsigned int X = 0;
+  static const unsigned int Y = 1;
+  static const unsigned int Z = 2;
+  static const unsigned int ARG_COUNT = 3;
+};
 
+//TODO: fix this
+// typedef And<NArgs<3>, And<All<Numeric>, All<Assignable<Last<> > > > > ThreeNumericEq;
+typedef And<NArgs<3>, And<All<Numeric>, All<Comparable<Last<> > > > > ThreeNumericEq;
+typedef DataTypeCheck<AddEqualConstraint, ThreeNumericEq> AddEqualCT;
 
-  class AddEqualConstraint : public Constraint {
-  public:
-    AddEqualConstraint(const LabelStr& name,
-           const LabelStr& propagatorName,
-           const ConstraintEngineId constraintEngine,
-           const std::vector<ConstrainedVariableId>& variables);
-
-    void handleExecute();
-
-  private:
-    // X + Y = Z
-    Domain& m_x;
-    Domain& m_y;
-    Domain& m_z;
-
-    static const unsigned int X = 0;
-    static const unsigned int Y = 1;
-    static const unsigned int Z = 2;
-    static const unsigned int ARG_COUNT = 3;
-  };
-
-  class AddEqualCT : public ConstraintType {
-  public:
-      AddEqualCT(const LabelStr& name,
-              const LabelStr& propagatorName,
-              bool systemDefined = false)
-      : ConstraintType(name,propagatorName,systemDefined) {}
-
-      virtual ~AddEqualCT() {}
-
-      virtual ConstraintId createConstraint(const ConstraintEngineId constraintEngine,
-              const std::vector<ConstrainedVariableId>& scope,
-              const char* violationExpl)
-      {
-          return makeConstraintInstance<AddEqualConstraint>(m_name, m_propagatorName, constraintEngine, scope, violationExpl);
-      }
-
-      virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes) const;
-  };
-
-
-
-  class MultEqualConstraint : public Constraint {
-  public:
-    MultEqualConstraint(const LabelStr& name,
-			const LabelStr& propagatorName,
-			const ConstraintEngineId constraintEngine,
-			const std::vector<ConstrainedVariableId>& variables);
-
-    void handleExecute();
-
-  private:
-    static const unsigned int X = 0;
-    static const unsigned int Y = 1;
-    static const unsigned int Z = 2;
-    static const unsigned int ARG_COUNT = 3;
-  };
-
-
-  class DivEqualConstraint : public Constraint {
-  public:
-    DivEqualConstraint(const LabelStr& name,
-      const LabelStr& propagatorName,
-      const ConstraintEngineId constraintEngine,
-      const std::vector<ConstrainedVariableId>& variables);
-
-    void handleExecute();
-
-  private:
-    static const unsigned int X = 0;
-    static const unsigned int Y = 1;
-    static const unsigned int Z = 2;
-    static const unsigned int ARG_COUNT = 3;
-  };
-
-
-  // A + (B * C) = D
-  class AddMultEqualConstraint : public Constraint {
-    public:
-      AddMultEqualConstraint(const LabelStr& name,
-                 const LabelStr& propagatorName,
-                 const ConstraintEngineId constraintEngine,
-                 const std::vector<ConstrainedVariableId>& variables);
-
-      ~AddMultEqualConstraint();
-    private:
-      // All the work is done by the member constraints
-      inline void handleExecute() { }
-      void handleDiscard();
-
-      static const unsigned int A = 0;
-      static const unsigned int B = 1;
-      static const unsigned int C = 2;
-      static const unsigned int D = 3;
-      static const unsigned int ARG_COUNT = 4;
-
-      Variable<IntervalDomain> m_interimVariable;
-      MultEqualConstraint m_multEqualConstraint;
-      AddEqualConstraint m_addEqualConstraint;
-  };
-
-    /**
-   * @class AllDiff
-   * @brief A != B && A != C && B != C && A != D && B != D && ...
-   */
-
-  class AllDiffConstraint : public Constraint {
-  public:
-    AllDiffConstraint(const LabelStr& name,
+class MultEqualConstraint : public Constraint {
+ public:
+  MultEqualConstraint(const LabelStr& name,
                       const LabelStr& propagatorName,
                       const ConstraintEngineId constraintEngine,
                       const std::vector<ConstrainedVariableId>& variables);
+  
+  void handleExecute();
+  
+ private:
+  static const unsigned int X = 0;
+  static const unsigned int Y = 1;
+  static const unsigned int Z = 2;
+  static const unsigned int ARG_COUNT = 3;
+};
 
-    ~AllDiffConstraint() {
-			discard(false);
-    }
+typedef DataTypeCheck<MultEqualConstraint, ThreeNumericEq> MultEqualCT;
 
-  private:
-    void handleExecute() { }
 
-    void handleDiscard(){
-      Constraint::handleDiscard();
-      m_condVar.discard();
-      m_condAllDiffConstraint->discard();
-    }
+class DivEqualConstraint : public Constraint {
+ public:
+  DivEqualConstraint(const LabelStr& name,
+                     const LabelStr& propagatorName,
+                     const ConstraintEngineId constraintEngine,
+                     const std::vector<ConstrainedVariableId>& variables);
 
-    Variable<BoolDomain> m_condVar;
-    ConstraintId m_condAllDiffConstraint;
-  };
+  void handleExecute();
+
+ private:
+  static const unsigned int X = 0;
+  static const unsigned int Y = 1;
+  static const unsigned int Z = 2;
+  static const unsigned int ARG_COUNT = 3;
+};
+typedef DataTypeCheck<DivEqualConstraint, ThreeNumericEq> DivEqualCT;
+
+
+// A + (B * C) = D
+class AddMultEqualConstraint : public Constraint {
+ public:
+  AddMultEqualConstraint(const LabelStr& name,
+                         const LabelStr& propagatorName,
+                         const ConstraintEngineId constraintEngine,
+                         const std::vector<ConstrainedVariableId>& variables);
+  
+  ~AddMultEqualConstraint();
+ private:
+  // All the work is done by the member constraints
+  inline void handleExecute() { }
+  void handleDiscard();
+
+  static const unsigned int A = 0;
+  static const unsigned int B = 1;
+  static const unsigned int C = 2;
+  static const unsigned int D = 3;
+  static const unsigned int ARG_COUNT = 4;
+  
+  Variable<IntervalDomain> m_interimVariable;
+  MultEqualConstraint m_multEqualConstraint;
+  AddEqualConstraint m_addEqualConstraint;
+};
+//TODO: other, similar constraints check that the last be assignable from the rest rather than
+//requiring the same type all the way through.  should this do the same?
+typedef DataTypeCheck<AddMultEqualConstraint, And<NArgs<4>, All<And<Same, Numeric> > > > AddMultEqualCT;
+
+/**
+ * @class AllDiff
+ * @brief A != B && A != C && B != C && A != D && B != D && ...
+ */
+
+class AllDiffConstraint : public Constraint {
+ public:
+  AllDiffConstraint(const LabelStr& name,
+                    const LabelStr& propagatorName,
+                    const ConstraintEngineId constraintEngine,
+                    const std::vector<ConstrainedVariableId>& variables);
+  
+  ~AllDiffConstraint() {
+    discard(false);
+  }
+
+ private:
+  void handleExecute() { }
+
+  void handleDiscard(){
+    Constraint::handleDiscard();
+    m_condVar.discard();
+    m_condAllDiffConstraint->discard();
+  }
+
+  Variable<BoolDomain> m_condVar;
+  ConstraintId m_condAllDiffConstraint;
+};
+typedef DataTypeCheck<AllDiffConstraint, And<AtLeastNArgs<2>, Mutually<Assignable<> > > >
+AllDiffCT;
 
   /**
    * @brief Calculate the euclidean distance in 2-d space between between 2 points
    */
 class CalcDistanceConstraint : public Constraint {
-  public:
-    CalcDistanceConstraint(const LabelStr& name,
-			   const LabelStr& propagatorName,
-			   const ConstraintEngineId constraintEngine,
-			   const std::vector<ConstrainedVariableId>& variables);
+ public:
+  CalcDistanceConstraint(const LabelStr& name,
+                         const LabelStr& propagatorName,
+                         const ConstraintEngineId constraintEngine,
+                         const std::vector<ConstrainedVariableId>& variables);
 
-    void handleExecute();
+  void handleExecute();
 
-    /**
-     * Calculates the actual distance
-     */
-    static edouble compute(edouble x1, edouble y1, edouble x2, edouble y2);
+  /**
+   * Calculates the actual distance
+   */
+  static edouble compute(edouble x1, edouble y1, edouble x2, edouble y2);
 
-    /**
-     * Calculates the hypotenuse w. pythagaras
-     */
-    static edouble compute(edouble a, edouble b);
+  /**
+   * Calculates the hypotenuse w. pythagaras
+   */
+  static edouble compute(edouble a, edouble b);
 
-  private:
+ private:
 
-    static const unsigned int ARG_COUNT = 5;
-    static const unsigned int DISTANCE = 0;
-    static const unsigned int X1 = 1;
-    static const unsigned int Y1 = 2;
-    static const unsigned int X2 = 3;
-    static const unsigned int Y2 = 4;
+  static const unsigned int ARG_COUNT = 5;
+  static const unsigned int DISTANCE = 0;
+  static const unsigned int X1 = 1;
+  static const unsigned int Y1 = 2;
+  static const unsigned int X2 = 3;
+  static const unsigned int Y2 = 4;
 
-    Domain& m_distance;
-    Domain& m_x1;
-    Domain& m_y1;
-    Domain& m_x2;
-    Domain& m_y2;
-  };
+  Domain& m_distance;
+  Domain& m_x1;
+  Domain& m_y1;
+  Domain& m_x2;
+  Domain& m_y2;
+};
+
+typedef DataTypeCheck<CalcDistanceConstraint,
+                      And<NArgs<5>, And<All<Numeric>,
+                                        All<Assignable<First<> >, Second<>, Last<> > > > >
+CalcDistanceCT;
 
 
 class LessThanEqualConstraint : public Constraint {
@@ -345,65 +286,80 @@ class LessThanEqualConstraint : public Constraint {
     static const unsigned int Y = 1;
     static const unsigned int ARG_COUNT = 2;
   };
-CREATE_CONSTRAINT_TYPE(TwoSameNumericArgumentsCT, LessThanEqualCT, 
-                       LessThanEqualConstraint);
+typedef DataTypeCheck<LessThanEqualConstraint,
+                      And<NArgs<2>, And<All<Numeric>, Mutually<Assignable<> > > > >
+LessThanEqualCT;
 
 
-  /**
-   * @class CardinalityConstraint
-   * @brief First variable must be greater than or equal the count of the
-   * other variables that are true.
-   * @note Supports numeric domains for the other variables with the
-   * usual C/C++ convention of false being zero and true being
-   * any non-zero value.
-   */
+/**
+ * @class CardinalityConstraint
+ * @brief First variable must be greater than or equal the count of the
+ * other variables that are true.
+ * @note Supports numeric domains for the other variables with the
+ * usual C/C++ convention of false being zero and true being
+ * any non-zero value.
+ */
 
 class CardinalityConstraint : public Constraint {
-  public:
-    CardinalityConstraint(const LabelStr& name,
-                          const LabelStr& propagatorName,
-                          const ConstraintEngineId constraintEngine,
-                          const std::vector<ConstrainedVariableId>& variables);
-
-    ~CardinalityConstraint() {
-      discard(false);
-    }
-
-  private:
-    // All the work is done by the member constraints.
-    inline void handleExecute() { }
-
-    void handleDiscard(){
-      Constraint::handleDiscard();
-      m_nonZeros.discard();
+ public:
+  CardinalityConstraint(const LabelStr& name,
+                        const LabelStr& propagatorName,
+                        const ConstraintEngineId constraintEngine,
+                        const std::vector<ConstrainedVariableId>& variables);
+  
+  ~CardinalityConstraint() {
+    discard(false);
+  }
+  
+ private:
+  // All the work is done by the member constraints.
+  inline void handleExecute() { }
+  
+  void handleDiscard(){
+    Constraint::handleDiscard();
+      m_nonZeroes.discard();
       m_lessThanEqualConstraint.discard();
-      m_countNonZerosConstraint->discard();
-    }
-
-    Variable<IntervalIntDomain> m_nonZeros;
-    LessThanEqualConstraint m_lessThanEqualConstraint;
-    ConstraintId m_countNonZerosConstraint;
-  };
-
+      m_countNonZeroesConstraint->discard();
+  }
+  
+  Variable<IntervalIntDomain> m_nonZeroes;
+  LessThanEqualConstraint m_lessThanEqualConstraint;
+  ConstraintId m_countNonZeroesConstraint;
+};
+typedef DataTypeCheck<CardinalityConstraint,
+                      And<AtLeastNArgs<2>, All<Numeric> > > CardinalityCT;
     /**
    * @class CondAllDiff
    * @brief If A, then B != C && B != D && C != D && ... ; if not A, then !(B != C && B != D && C != D && ...).
    */
 
 class CondAllDiffConstraint : public Constraint {
-  public:
-    CondAllDiffConstraint(const LabelStr& name,
-                          const LabelStr& propagatorName,
-                          const ConstraintEngineId constraintEngine,
-                          const std::vector<ConstrainedVariableId>& variables);
-
+ public:
+  CondAllDiffConstraint(const LabelStr& name,
+                        const LabelStr& propagatorName,
+                        const ConstraintEngineId constraintEngine,
+                        const std::vector<ConstrainedVariableId>& variables);
+  
     ~CondAllDiffConstraint() { }
-
-    void handleExecute();
-
-  private:
-    const unsigned long ARG_COUNT;
-  };
+  
+  void handleExecute();
+  
+ private:
+  const unsigned long ARG_COUNT;
+};
+template<typename Start = First<>, typename End = End>
+struct AllAssignable : Mutually<Assignable<>, Start, End> {
+  AllAssignable() : Mutually<Assignable<>, Start, End>() {}
+  AllAssignable(type_iterator start, type_iterator end)
+      : Mutually<Assignable<>, Start, End>(start, end){}
+};
+struct CondCondition : And<AtLeastNArgs<3>, First<Type<BoolDT> > > {
+  CondCondition() : And<AtLeastNArgs<3>, First<Type<BoolDT> > >() {}
+  CondCondition(type_iterator start, type_iterator end)
+      : And<AtLeastNArgs<3>, First<Type<BoolDT> > >(start, end) {}
+};
+typedef And<CondCondition, AllAssignable<Second<>, End> > CondAllAssignableCondition;
+typedef DataTypeCheck<CondAllDiffConstraint, CondAllAssignableCondition> CondAllDiffCT;
 
     /**
    * @class CondAllSame
@@ -411,19 +367,20 @@ class CondAllDiffConstraint : public Constraint {
    */
 
 class CondAllSameConstraint : public Constraint {
-  public:
-    CondAllSameConstraint(const LabelStr& name,
-                          const LabelStr& propagatorName,
-                          const ConstraintEngineId constraintEngine,
-                          const std::vector<ConstrainedVariableId>& variables);
+ public:
+  CondAllSameConstraint(const LabelStr& name,
+                        const LabelStr& propagatorName,
+                        const ConstraintEngineId constraintEngine,
+                        const std::vector<ConstrainedVariableId>& variables);
 
-    ~CondAllSameConstraint() { }
+  ~CondAllSameConstraint() { }
 
-    void handleExecute();
+  void handleExecute();
 
-  private:
-    const unsigned long ARG_COUNT;
-  };
+ private:
+  const unsigned long ARG_COUNT;
+};
+typedef DataTypeCheck<CondAllSameConstraint, CondAllAssignableCondition> CondAllSameCT;
 
     /**
    * @class CondEqualSumConstraint
@@ -456,116 +413,136 @@ class CondEqualSumConstraint : public Constraint {
     Variable<IntervalDomain> m_sumVar;
     CondAllSameConstraint m_condAllSameConstraint;
     ConstraintId m_eqSumConstraint;
-  };
-
-class CountNonZerosConstraint : public Constraint {
-  public:
-    CountNonZerosConstraint(const LabelStr& name,
-                            const LabelStr& propagatorName,
-                            const ConstraintEngineId constraintEngine,
-                            const std::vector<ConstrainedVariableId>& variables);
-
-    ~CountNonZerosConstraint() {
-      discard(false);
-    }
-
-    // All the work is done by the member constraints.
-    inline void handleExecute() { }
-
-    void handleDiscard(){
-      Constraint::handleDiscard();
-      m_zeros.discard();
-      m_otherVars.discard();
-      m_superset.discard();
-      m_addEqualConstraint.discard();
-      m_countZerosConstraint->discard();
-      m_subsetConstraint->discard();
-    }
-
-  private:
-    Variable<IntervalDomain> m_zeros, m_otherVars,  m_superset;
-    AddEqualConstraint m_addEqualConstraint;
-    ConstraintId m_subsetConstraint;
-    ConstraintId m_countZerosConstraint;
-  };
-
-  /**
-   * @class CountZerosConstraint
-   * @brief First variable is the count of the rest that can be zero.
-   * @note Supports boolean domains with the usual C/C++ convention of false
-   * being zero and true being non-zero.
-   */
-class CountZerosConstraint : public Constraint {
-  public:
-    CountZerosConstraint(const LabelStr& name,
-                         const LabelStr& propagatorName,
-                         const ConstraintEngineId constraintEngine,
-                         const std::vector<ConstrainedVariableId>& variables);
-
-    ~CountZerosConstraint() { }
-
-    void handleExecute();
-  };
+};
+template<typename Start = First<>, typename End = End>
+struct EqThreeNumeric : public And<AtLeastNArgs<3>, And<All<Numeric>, All<Assignable<Start>, Start, End > > > {
+  EqThreeNumeric() : And<AtLeastNArgs<3>, And<All<Numeric>, All<Assignable<Start>, Start, End > > >() {}
+  EqThreeNumeric(type_iterator start, type_iterator end)
+      : And<AtLeastNArgs<3>, And<All<Numeric>, All<Assignable<Start>, Start, End > > >(start, end) {}
+};
+typedef DataTypeCheck<CondEqualSumConstraint,
+                      And<AtLeastNArgs<4>, And<CondCondition, EqThreeNumeric<> > > >
+CondEqualSumCT;
 
 
-    /**
-   * @brief DistanceFromSquaresConstraint(x, y, a) maintains the relation
-   * @li a = sqrt(x + y)
-   * if x and y are singleton
-   */
-
-    class DistanceFromSquaresConstraint : public Constraint {
-  public:
-    DistanceFromSquaresConstraint(const LabelStr& name,
-		       const LabelStr& propagatorName,
-		       const ConstraintEngineId constraintEngine,
-		       const std::vector<ConstrainedVariableId>& variables);
-
-    void handleExecute();
-
-  private:
-    static const unsigned int V1 = 0;
-    static const unsigned int V2 = 1;
-    static const unsigned int RES = 2;
-    static const unsigned int ARG_COUNT = 3;
-  };
-
-  class EqualConstraint : public Constraint {
-  public:
-    EqualConstraint(const LabelStr& name,
-		    const LabelStr& propagatorName,
-		    const ConstraintEngineId constraintEngine,
-		    const std::vector<ConstrainedVariableId>& variables);
-
-    void handleExecute();
-
-    /**
-     * @brief Accessor required for EqualityConstraintPropagator.
-     */
-    static Domain& getCurrentDomain(const ConstrainedVariableId var);
-
-  private:
-    bool equate(const ConstrainedVariableId v1, const ConstrainedVariableId v2, bool& isEmpty);
-    const unsigned long m_argCount;
-  };
-  CREATE_CONSTRAINT_TYPE(AllSameArgumentsCT, EqualCT, EqualConstraint);
-
-    /**
-   * @class EqualMaximumConstraint
-   * @brief First variable is the maximum value of the others.
-   */
-
-      class EqualMaximumConstraint : public Constraint {
-  public:
-    EqualMaximumConstraint(const LabelStr& name,
+class CountNonZeroesConstraint : public Constraint {
+ public:
+  CountNonZeroesConstraint(const LabelStr& name,
                            const LabelStr& propagatorName,
                            const ConstraintEngineId constraintEngine,
                            const std::vector<ConstrainedVariableId>& variables);
 
-    ~EqualMaximumConstraint() { }
+  ~CountNonZeroesConstraint() {
+    discard(false);
+  }
 
-    void handleExecute();
-  };
+  // All the work is done by the member constraints.
+  inline void handleExecute() { }
+
+  void handleDiscard(){
+    Constraint::handleDiscard();
+    m_zeroes.discard();
+    m_otherVars.discard();
+    m_superset.discard();
+    m_addEqualConstraint.discard();
+    m_countZeroesConstraint->discard();
+    m_subsetConstraint->discard();
+  }
+
+ private:
+  Variable<IntervalDomain> m_zeroes, m_otherVars,  m_superset;
+  AddEqualConstraint m_addEqualConstraint;
+  ConstraintId m_subsetConstraint;
+  ConstraintId m_countZeroesConstraint;
+};
+typedef And<And<AtLeastNArgs<2>, All<Numeric> >, First<Assignable<IntDT> > > AtLeastTwoNumericFirstAssignable; 
+typedef DataTypeCheck<CountNonZeroesConstraint,
+                      AtLeastTwoNumericFirstAssignable>
+CountNonZeroesCT;
+
+  /**
+   * @class CountZeroesConstraint
+   * @brief First variable is the count of the rest that can be zero.
+   * @note Supports boolean domains with the usual C/C++ convention of false
+   * being zero and true being non-zero.
+   */
+class CountZeroesConstraint : public Constraint {
+ public:
+  CountZeroesConstraint(const LabelStr& name,
+                        const LabelStr& propagatorName,
+                        const ConstraintEngineId constraintEngine,
+                        const std::vector<ConstrainedVariableId>& variables);
+
+  ~CountZeroesConstraint() { }
+
+  void handleExecute();
+};
+typedef DataTypeCheck<CountZeroesConstraint, AtLeastTwoNumericFirstAssignable> CountZeroesCT;
+
+
+/**
+ * @brief DistanceFromSquaresConstraint(x, y, a) maintains the relation
+ * @li a = sqrt(x + y)
+ * if x and y are singleton
+ */
+
+class DistanceFromSquaresConstraint : public Constraint {
+ public:
+  DistanceFromSquaresConstraint(const LabelStr& name,
+                                const LabelStr& propagatorName,
+                                const ConstraintEngineId constraintEngine,
+                                const std::vector<ConstrainedVariableId>& variables);
+
+  void handleExecute();
+
+ private:
+  static const unsigned int V1 = 0;
+  static const unsigned int V2 = 1;
+  static const unsigned int RES = 2;
+  static const unsigned int ARG_COUNT = 3;
+};
+typedef DataTypeCheck<DistanceFromSquaresConstraint,
+                      And<And<NArgs<3>, All<Numeric> >, Last<Assignable<FloatDT> > > >
+DistanceFromSquaresCT;
+
+class EqualConstraint : public Constraint {
+ public:
+  EqualConstraint(const LabelStr& name,
+                  const LabelStr& propagatorName,
+                  const ConstraintEngineId constraintEngine,
+                  const std::vector<ConstrainedVariableId>& variables);
+  
+  void handleExecute();
+  
+  /**
+   * @brief Accessor required for EqualityConstraintPropagator.
+   */
+  static Domain& getCurrentDomain(const ConstrainedVariableId var);
+  
+ private:
+  bool equate(const ConstrainedVariableId v1, const ConstrainedVariableId v2, bool& isEmpty);
+  const unsigned long m_argCount;
+};
+typedef And<AtLeastNArgs<2>, Mutually<Assignable<> > > EqualCondition;
+typedef DataTypeCheck<EqualConstraint,  EqualCondition> EqualCT;
+
+/**
+ * @class EqualMaximumConstraint
+ * @brief First variable is the maximum value of the others.
+ */
+
+class EqualMaximumConstraint : public Constraint {
+ public:
+  EqualMaximumConstraint(const LabelStr& name,
+                         const LabelStr& propagatorName,
+                         const ConstraintEngineId constraintEngine,
+                         const std::vector<ConstrainedVariableId>& variables);
+
+  ~EqualMaximumConstraint() { }
+  
+  void handleExecute();
+};
+typedef DataTypeCheck<EqualMaximumConstraint, EqThreeNumeric<> > EqualMaximumCT;
 
   /**
    * @class EqualMinimumConstraint
@@ -574,15 +551,16 @@ class CountZerosConstraint : public Constraint {
 
 class EqualMinimumConstraint : public Constraint {
   public:
-    EqualMinimumConstraint(const LabelStr& name,
-                           const LabelStr& propagatorName,
-                           const ConstraintEngineId constraintEngine,
-                           const std::vector<ConstrainedVariableId>& variables);
-
-    ~EqualMinimumConstraint() { }
-
-    void handleExecute();
-  };
+  EqualMinimumConstraint(const LabelStr& name,
+                         const LabelStr& propagatorName,
+                         const ConstraintEngineId constraintEngine,
+                         const std::vector<ConstrainedVariableId>& variables);
+  
+  ~EqualMinimumConstraint() { }
+  
+  void handleExecute();
+};
+typedef DataTypeCheck<EqualMinimumConstraint, EqThreeNumeric<> > EqualMinimumCT;
 
     /**
    * @class EqualProductConstraint
@@ -591,26 +569,27 @@ class EqualMinimumConstraint : public Constraint {
    */
 
 class EqualProductConstraint : public Constraint {
-  public:
-    EqualProductConstraint(const LabelStr& name,
-                           const LabelStr& propagatorName,
-                           const ConstraintEngineId constraintEngine,
-                           const std::vector<ConstrainedVariableId>& variables);
+ public:
+  EqualProductConstraint(const LabelStr& name,
+                         const LabelStr& propagatorName,
+                         const ConstraintEngineId constraintEngine,
+                         const std::vector<ConstrainedVariableId>& variables);
 
-    ~EqualProductConstraint();
+  ~EqualProductConstraint();
 
-  private:
+ private:
 
-    // All the work is done by the member constraints
-    inline void handleExecute() { }
+  // All the work is done by the member constraints
+  inline void handleExecute() { }
 
-    void handleDiscard();
+  void handleDiscard();
 
-    const unsigned long ARG_COUNT;
+  const unsigned long ARG_COUNT;
 
-    ConstraintId m_eqProductC1, m_eqProductC2, m_eqProductC3, m_eqProductC4, m_eqProductC5;
-    Variable<IntervalDomain> m_product1, m_product2, m_product3, m_product4;
-  };
+  ConstraintId m_eqProductC1, m_eqProductC2, m_eqProductC3, m_eqProductC4, m_eqProductC5;
+  Variable<IntervalDomain> m_product1, m_product2, m_product3, m_product4;
+};
+typedef DataTypeCheck<EqualProductConstraint, EqThreeNumeric<> > EqualProductCT;
 
 /**
  * @class EqualSumConstraint
@@ -618,26 +597,27 @@ class EqualProductConstraint : public Constraint {
  * Converted into an AddEqualConstraint and/or two EqSumConstraints with fewer variables.
  */
 class EqualSumConstraint : public Constraint {
-  public:
-    EqualSumConstraint(const LabelStr& name,
-                       const LabelStr& propagatorName,
-                       const ConstraintEngineId constraintEngine,
-                       const std::vector<ConstrainedVariableId>& variables);
+ public:
+  EqualSumConstraint(const LabelStr& name,
+                     const LabelStr& propagatorName,
+                     const ConstraintEngineId constraintEngine,
+                     const std::vector<ConstrainedVariableId>& variables);
 
-    ~EqualSumConstraint();
+  ~EqualSumConstraint();
 
-  private:
+ private:
 
-    // All the work is done by the member constraints
-    inline void handleExecute() { }
+  // All the work is done by the member constraints
+  inline void handleExecute() { }
 
-    void handleDiscard();
+  void handleDiscard();
 
-    const unsigned long ARG_COUNT;
+  const unsigned long ARG_COUNT;
 
-    ConstraintId m_eqSumC1, m_eqSumC2, m_eqSumC3, m_eqSumC4, m_eqSumC5;
-    Variable<IntervalDomain> m_sum1, m_sum2, m_sum3, m_sum4;
-  };
+  ConstraintId m_eqSumC1, m_eqSumC2, m_eqSumC3, m_eqSumC4, m_eqSumC5;
+  Variable<IntervalDomain> m_sum1, m_sum2, m_sum3, m_sum4;
+};
+typedef DataTypeCheck<EqualSumConstraint, EqThreeNumeric<> > EqualSumCT;
 
     /**
    * @class GreaterOrEqThanSumConstraint
@@ -646,60 +626,61 @@ class EqualSumConstraint : public Constraint {
    */
 
 class GreaterOrEqThanSumConstraint : public Constraint {
-  public:
-    GreaterOrEqThanSumConstraint(const LabelStr& name,
-                                 const LabelStr& propagatorName,
-                                 const ConstraintEngineId constraintEngine,
-                                 const std::vector<ConstrainedVariableId>& variables);
+ public:
+  GreaterOrEqThanSumConstraint(const LabelStr& name,
+                               const LabelStr& propagatorName,
+                               const ConstraintEngineId constraintEngine,
+                               const std::vector<ConstrainedVariableId>& variables);
 
-    ~GreaterOrEqThanSumConstraint() {
-      discard(false);
-    }
+  ~GreaterOrEqThanSumConstraint() {
+    discard(false);
+  }
 
-  private:
-    // All the work is done by the member constraints
-    inline void handleExecute() { }
+ private:
+  // All the work is done by the member constraints
+  inline void handleExecute() { }
 
-    void handleDiscard(){
-      Constraint::handleDiscard();
-      m_interimVariable.discard();
-      m_lessOrEqualConstraint.discard();
-      m_eqSumConstraint->discard();
-    }
+  void handleDiscard(){
+    Constraint::handleDiscard();
+    m_interimVariable.discard();
+    m_lessOrEqualConstraint.discard();
+    m_eqSumConstraint->discard();
+  }
 
-    Variable<IntervalDomain> m_interimVariable;
-    LessThanEqualConstraint m_lessOrEqualConstraint;
-    ConstraintId m_eqSumConstraint;
-  };
+  Variable<IntervalDomain> m_interimVariable;
+  LessThanEqualConstraint m_lessOrEqualConstraint;
+  ConstraintId m_eqSumConstraint;
+};
+typedef DataTypeCheck<GreaterOrEqThanSumConstraint, EqThreeNumeric<> > GreaterOrEqSumCT;
 
 class LessThanConstraint : public Constraint {
-  public:
-    LessThanConstraint(const LabelStr& name,
-                       const LabelStr& propagatorName,
-                       const ConstraintEngineId constraintEngine,
-                       const std::vector<ConstrainedVariableId>& variables);
+ public:
+  LessThanConstraint(const LabelStr& name,
+                     const LabelStr& propagatorName,
+                     const ConstraintEngineId constraintEngine,
+                     const std::vector<ConstrainedVariableId>& variables);
 
 
-    void handleExecute();
+  void handleExecute();
 
-    bool canIgnore(const ConstrainedVariableId variable,
-		   unsigned int argIndex,
-		   const DomainListener::ChangeType& changeType);
+  bool canIgnore(const ConstrainedVariableId variable,
+                 unsigned int argIndex,
+                 const DomainListener::ChangeType& changeType);
 
-    static void propagate(IntervalDomain& domx, IntervalDomain& domy);
+  static void propagate(IntervalDomain& domx, IntervalDomain& domy);
 
-  private:
-    static const unsigned int X = 0;
-    static const unsigned int Y = 1;
-    static const unsigned int ARG_COUNT = 2;
-  };
-  CREATE_CONSTRAINT_TYPE(TwoSameNumericArgumentsCT, LessThanCT, LessThanConstraint);
+ private:
+  static const unsigned int X = 0;
+  static const unsigned int Y = 1;
+  static const unsigned int ARG_COUNT = 2;
+};
+typedef DataTypeCheck<LessThanConstraint, And<NArgs<2>, Mutually<Assignable<> > > > LessThanCT;
 
-    /**
-   * @class GreaterThanSumConstraint
-   * @brief A > B + C + ...
-   * Converted into two constraints: A < temp and temp equal to the sum of the rest.
-   */
+/**
+ * @class GreaterThanSumConstraint
+ * @brief A > B + C + ...
+ * Converted into two constraints: A < temp and temp equal to the sum of the rest.
+ */
 
 class GreaterThanSumConstraint : public Constraint {
   public:
@@ -727,117 +708,123 @@ class GreaterThanSumConstraint : public Constraint {
     LessThanConstraint m_lessThanConstraint;
     ConstraintId m_eqSumConstraint;
   };
+typedef DataTypeCheck<GreaterThanSumConstraint, EqThreeNumeric<> > GreaterThanSumCT;
 
-    /**
-   * @class LessOrEqThanSumConstraint
-   * @brief A <= B + C + ...
-   * Converted into two constraints: A <= temp and temp equal to the sum of the rest.
-   */
+/**
+ * @class LessOrEqThanSumConstraint
+ * @brief A <= B + C + ...
+ * Converted into two constraints: A <= temp and temp equal to the sum of the rest.
+ */
 
 class LessOrEqThanSumConstraint : public Constraint {
-  public:
-    LessOrEqThanSumConstraint(const LabelStr& name,
-                              const LabelStr& propagatorName,
-                              const ConstraintEngineId constraintEngine,
-                              const std::vector<ConstrainedVariableId>& variables);
+ public:
+  LessOrEqThanSumConstraint(const LabelStr& name,
+                            const LabelStr& propagatorName,
+                            const ConstraintEngineId constraintEngine,
+                            const std::vector<ConstrainedVariableId>& variables);
 
-    ~LessOrEqThanSumConstraint();
+  ~LessOrEqThanSumConstraint();
 
-  private:
-    void handleExecute();
-    void handleDiscard();
-    Variable<IntervalDomain> m_interimVariable;
-    LessThanEqualConstraint m_lessOrEqualConstraint;
-    ConstraintId m_eqSumConstraint;
-  };
+ private:
+  void handleExecute();
+  void handleDiscard();
+  Variable<IntervalDomain> m_interimVariable;
+  LessThanEqualConstraint m_lessOrEqualConstraint;
+  ConstraintId m_eqSumConstraint;
+};
+typedef DataTypeCheck<LessOrEqThanSumConstraint, EqThreeNumeric<> > LessOrEqThanSumCT;
 
-    /**
-   * @class LessThanSumConstraint
-   * @brief A < B + C + ...
-   * Converted into two constraints: A < temp and temp equal to the sum of the rest.
-   */
+/**
+ * @class LessThanSumConstraint
+ * @brief A < B + C + ...
+ * Converted into two constraints: A < temp and temp equal to the sum of the rest.
+ */
 
-  class LessThanSumConstraint : public Constraint {
-  public:
-    LessThanSumConstraint(const LabelStr& name,
-                          const LabelStr& propagatorName,
-                          const ConstraintEngineId constraintEngine,
-                          const std::vector<ConstrainedVariableId>& variables);
+class LessThanSumConstraint : public Constraint {
+ public:
+  LessThanSumConstraint(const LabelStr& name,
+                        const LabelStr& propagatorName,
+                        const ConstraintEngineId constraintEngine,
+                        const std::vector<ConstrainedVariableId>& variables);
 
-    ~LessThanSumConstraint() {
-      discard(false);
-    }
+  ~LessThanSumConstraint() {
+    discard(false);
+  }
 
-  private:
+ private:
 
-    // All the work is done by the member constraints
-    inline void handleExecute() { }
+  // All the work is done by the member constraints
+  inline void handleExecute() { }
 
-    void handleDiscard(){
-      Constraint::handleDiscard();
-      m_interimVariable.discard();
-      m_lessThanConstraint.discard();
-      m_eqSumConstraint->discard();
-    }
+  void handleDiscard(){
+    Constraint::handleDiscard();
+    m_interimVariable.discard();
+    m_lessThanConstraint.discard();
+    m_eqSumConstraint->discard();
+  }
 
-    Variable<IntervalDomain> m_interimVariable;
-    LessThanConstraint m_lessThanConstraint;
-    ConstraintId m_eqSumConstraint;
-  };
+  Variable<IntervalDomain> m_interimVariable;
+  LessThanConstraint m_lessThanConstraint;
+  ConstraintId m_eqSumConstraint;
+};
+typedef DataTypeCheck<LessThanSumConstraint, EqThreeNumeric<> > LessThanSumCT;
 
 class LockConstraint : public Constraint {
-  public:
-    LockConstraint(const LabelStr& name,
-		   const LabelStr& propagatorName,
-		   const ConstraintEngineId constraintEngine,
-		   const std::vector<ConstrainedVariableId>& variables);
+ public:
+  LockConstraint(const LabelStr& name,
+                 const LabelStr& propagatorName,
+                 const ConstraintEngineId constraintEngine,
+                 const std::vector<ConstrainedVariableId>& variables);
 
-    ~LockConstraint();
+  ~LockConstraint();
 
-    void handleExecute();
+  void handleExecute();
 
-    const Domain& getDomain() const;
+  const Domain& getDomain() const;
 
-  private:
-    Domain& m_currentDomain;
-    Domain& m_lockDomain;
-  };
+ private:
+  Domain& m_currentDomain;
+  Domain& m_lockDomain;
+};
+typedef DataTypeCheck<LockConstraint, And<NArgs<2>, All<Assignable<First<> > > > > LockCT;
 
 class NegateConstraint : public Constraint {
-  public:
-    NegateConstraint(const LabelStr& name,
-		    const LabelStr& propagatorName,
-		    const ConstraintEngineId constraintEngine,
-		    const std::vector<ConstrainedVariableId>& variables);
-
-    void handleExecute();
-  private:
-    static const unsigned int X=0;
-    static const unsigned int Y=1;
-  };
+ public:
+  NegateConstraint(const LabelStr& name,
+                   const LabelStr& propagatorName,
+                   const ConstraintEngineId constraintEngine,
+                   const std::vector<ConstrainedVariableId>& variables);
+  
+  void handleExecute();
+ private:
+  static const unsigned int X=0;
+  static const unsigned int Y=1;
+};
+typedef DataTypeCheck<NegateConstraint, TwoAssignableNumeric> NegateCT;
 
 class NotEqualConstraint : public Constraint {
-  public:
-    NotEqualConstraint(const LabelStr& name,
-		       const LabelStr& propagatorName,
-		       const ConstraintEngineId constraintEngine,
-		       const std::vector<ConstrainedVariableId>& variables);
+ public:
+  NotEqualConstraint(const LabelStr& name,
+                     const LabelStr& propagatorName,
+                     const ConstraintEngineId constraintEngine,
+                     const std::vector<ConstrainedVariableId>& variables);
 
-    void handleExecute();
+  void handleExecute();
 
-    bool canIgnore(const ConstrainedVariableId variable,
-		   unsigned int argIndex,
-		   const DomainListener::ChangeType& changeType);
-    /**
-     * @brief Helper method to do domain comparisons, and process removals if necessary
-     */
-    static bool checkAndRemove(const Domain& domx, Domain& domy);
+  bool canIgnore(const ConstrainedVariableId variable,
+                 unsigned int argIndex,
+                 const DomainListener::ChangeType& changeType);
+  /**
+   * @brief Helper method to do domain comparisons, and process removals if necessary
+   */
+  static bool checkAndRemove(const Domain& domx, Domain& domy);
 
-  private:
-    static const unsigned int X = 0;
-    static const unsigned int Y = 1;
-    static const unsigned int ARG_COUNT = 2;
-  };
+ private:
+  static const unsigned int X = 0;
+  static const unsigned int Y = 1;
+  static const unsigned int ARG_COUNT = 2;
+};
+typedef DataTypeCheck<NotEqualConstraint, EqualCondition> NotEqualCT;
 
   /**
    * Enforces the relation x < y
@@ -847,20 +834,26 @@ class NotEqualConstraint : public Constraint {
    * @class MemberImplyConstraint
    * @brief If A is subset of B, then require that C is subset of D.
    */
-  class MemberImplyConstraint : public Constraint {
-  public:
-    MemberImplyConstraint(const LabelStr& name,
-                          const LabelStr& propagatorName,
-                          const ConstraintEngineId constraintEngine,
-                          const std::vector<ConstrainedVariableId>& variables);
+class MemberImplyConstraint : public Constraint {
+ public:
+  MemberImplyConstraint(const LabelStr& name,
+                        const LabelStr& propagatorName,
+                        const ConstraintEngineId constraintEngine,
+                        const std::vector<ConstrainedVariableId>& variables);
+  
+  ~MemberImplyConstraint() { }
+  
+  void handleExecute();
+  
+ private:
+  const unsigned long ARG_COUNT;
+};
+//TODO: come up with better syntax for this
+typedef DataTypeCheck<MemberImplyConstraint,
+                      And<NArgs<4>, And<All<Assignable<First<> >, Second<>, Third<> >,
+                                        All<Assignable<Third<> >, Fourth<>, Last<> > > > >
+MemberImplyCT;
 
-    ~MemberImplyConstraint() { }
-
-    void handleExecute();
-
-  private:
-    const unsigned long ARG_COUNT;
-  };
 
     /**
    * @class OrConstraint
@@ -869,45 +862,48 @@ class NotEqualConstraint : public Constraint {
    * usual C/C++ convention of false being zero and true being
    * any non-zero value.
    */
-  class OrConstraint : public Constraint {
-  public:
-    OrConstraint(const LabelStr& name,
+class OrConstraint : public Constraint {
+ public:
+  OrConstraint(const LabelStr& name,
+               const LabelStr& propagatorName,
+               const ConstraintEngineId constraintEngine,
+               const std::vector<ConstrainedVariableId>& variables);
+
+  ~OrConstraint() {
+    discard(false);
+  }
+
+ private:
+  // All the work is done by the member constraints.
+  inline void handleExecute() { }
+
+  void handleDiscard(){
+    Constraint::handleDiscard();
+    m_nonZeroes.discard();
+    m_superset.discard();
+    m_subsetConstraint->discard();
+    m_countNonZeroesConstraint->discard();
+  }
+
+  Variable<IntervalIntDomain> m_nonZeroes;
+  Variable<IntervalIntDomain> m_superset;
+  ConstraintId m_subsetConstraint;
+  ConstraintId m_countNonZeroesConstraint;
+};
+typedef DataTypeCheck<OrConstraint, And<AtLeastNArgs<1>, All<Numeric> > > OrCT;
+
+
+class RandConstraint : public Constraint {
+ public:
+  RandConstraint(const LabelStr& name,
                  const LabelStr& propagatorName,
                  const ConstraintEngineId constraintEngine,
                  const std::vector<ConstrainedVariableId>& variables);
-
-    ~OrConstraint() {
-      discard(false);
-    }
-
-  private:
-    // All the work is done by the member constraints.
-    inline void handleExecute() { }
-
-    void handleDiscard(){
-      Constraint::handleDiscard();
-      m_nonZeros.discard();
-      m_superset.discard();
-      m_subsetConstraint->discard();
-      m_countNonZerosConstraint->discard();
-    }
-
-    Variable<IntervalIntDomain> m_nonZeros;
-    Variable<IntervalIntDomain> m_superset;
-    ConstraintId m_subsetConstraint;
-    ConstraintId m_countNonZerosConstraint;
-  };
-
-  class RandConstraint : public Constraint {
-  public:
-    RandConstraint(const LabelStr& name,
-          const LabelStr& propagatorName,
-          const ConstraintEngineId constraintEngine,
-          const std::vector<ConstrainedVariableId>& variables);
-    void handleExecute();
-  private:
-    unsigned int m_rvalue;
-  };
+  void handleExecute();
+ private:
+  unsigned int m_rvalue;
+};
+typedef DataTypeCheck<RandConstraint, And<NArgs<1>, All<Numeric> > > RandCT;
 
     /**
    * @class RotateScopeRightConstraint
@@ -959,71 +955,84 @@ class RotateScopeRightConstraint : public Constraint {
    * constraint.
    */
 
-    /**
-   * @brief Computes the sine of a given variable. Varable is in degrees. The constraint is a function
-   * rather than a relation. The range of the source variable must be in [0 90].
-   */
-  class SineFunction : public Constraint {
-  public:
-    SineFunction(const LabelStr& name,
-		 const LabelStr& propagatorName,
-		 const ConstraintEngineId constraintEngine,
-		 const std::vector<ConstrainedVariableId>& variables);
+/**
+ * @brief Computes the sine of a given variable. Varable is in degrees. The constraint is a function
+ * rather than a relation. The range of the source variable must be in [0 90].
+ */
+class SineFunction : public Constraint {
+ public:
+  SineFunction(const LabelStr& name,
+               const LabelStr& propagatorName,
+               const ConstraintEngineId constraintEngine,
+               const std::vector<ConstrainedVariableId>& variables);
 
-    void handleExecute();
+  void handleExecute();
 
-  private:
-    static const unsigned int ARG_COUNT = 2;
-    Domain& m_target;
-    Domain& m_source;
-  };
+ private:
+  static const unsigned int ARG_COUNT = 2;
+  Domain& m_target;
+  Domain& m_source;
+};
+//TODO: Fix this syntax, too
+typedef DataTypeCheck<SineFunction, And<NArgs<2>, And<First<Assignable<FloatDT> >,
+                                                      Second<Assignable<FloatDT> > > > >
+SineCT;
 
-    /**
-   * @brief SquareOfDifference(x, y, a) maintains the relation:
-   * @li a = (x - y)^2
-   * if x and y are singleton.
-   */
+/**
+ * @brief SquareOfDifference(x, y, a) maintains the relation:
+ * @li a = (x - y)^2
+ * if x and y are singleton.
+ */
 
 class SquareOfDifferenceConstraint : public Constraint {
-  public:
-    SquareOfDifferenceConstraint(const LabelStr& name,
-		       const LabelStr& propagatorName,
-		       const ConstraintEngineId constraintEngine,
-		       const std::vector<ConstrainedVariableId>& variables);
+ public:
+  SquareOfDifferenceConstraint(const LabelStr& name,
+                               const LabelStr& propagatorName,
+                               const ConstraintEngineId constraintEngine,
+                               const std::vector<ConstrainedVariableId>& variables);
+  
+  void handleExecute();
+  
+ private:
+  static const unsigned int V1 = 0;
+  static const unsigned int V2 = 1;
+  static const unsigned int RES = 2;
+  static const unsigned int ARG_COUNT = 3;
+};
+typedef DataTypeCheck<SquareOfDifferenceConstraint,
+                      And<NArgs<3>, And<All<Assignable<Last<> >, First<>, End>,
+                                        First<CanBePositive> > > >
+SquareOfDifferenceCT;
 
-    void handleExecute();
-
-  private:
-    static const unsigned int V1 = 0;
-    static const unsigned int V2 = 1;
-    static const unsigned int RES = 2;
-    static const unsigned int ARG_COUNT = 3;
-  };
-
-    /**
-   * @brief Maintains a unary relation from a constant to a variable such that the variable
-   * is a subset of the given constant.
-   */
+/**
+ * @brief Maintains a unary relation from a constant to a variable such that the variable
+ * is a subset of the given constant.
+ */
 
 class SubsetOfConstraint : public Constraint {
-  public:
-    SubsetOfConstraint(const LabelStr& name,
-		       const LabelStr& propagatorName,
-		       const ConstraintEngineId constraintEngine,
-		       const std::vector<ConstrainedVariableId>& variables);
+ public:
+  SubsetOfConstraint(const LabelStr& name,
+                     const LabelStr& propagatorName,
+                     const ConstraintEngineId constraintEngine,
+                     const std::vector<ConstrainedVariableId>& variables);
 
-    ~SubsetOfConstraint();
+  ~SubsetOfConstraint();
 
-    void handleExecute();
+  void handleExecute();
 
-    bool canIgnore(const ConstrainedVariableId variable,
-		   unsigned int argIndex,
-		   const DomainListener::ChangeType& changeType);
+  bool canIgnore(const ConstrainedVariableId variable,
+                 unsigned int argIndex,
+                 const DomainListener::ChangeType& changeType);
 
-  private:
-    Domain& m_currentDomain;
-    Domain& m_superSetDomain;
-  };
+ private:
+  Domain& m_currentDomain;
+  Domain& m_superSetDomain;
+};
+//TODO: fix this syntax
+typedef DataTypeCheck<SubsetOfConstraint, And<NArgs<2>,
+                                              All<Comparable<Second<> >, First<>, Last<> > > >
+SubsetOfCT;
+                      
 
 class SwapTwoVarsConstraint : public Constraint {
  public:
@@ -1061,178 +1070,185 @@ class SwapTwoVarsConstraint : public Constraint {
   };
 
   // Enforce X+Y=0. X >=0. Y <=0.
-    class TestAnd : public Constraint {
-  public:
-    TestAnd(const LabelStr& name,
-	    const LabelStr& propagatorName,
-	    const ConstraintEngineId constraintEngine,
-	    const std::vector<ConstrainedVariableId>& variables);
+class TestAnd : public Constraint {
+ public:
+  TestAnd(const LabelStr& name,
+          const LabelStr& propagatorName,
+          const ConstraintEngineId constraintEngine,
+          const std::vector<ConstrainedVariableId>& variables);
 
-    void handleExecute();
+  void handleExecute();
 
-  private:
-    Domain& m_test;
-    Domain& m_arg1;
-    Domain& m_arg2;
-    static const unsigned int ARG_COUNT = 3;
-  };
-  CREATE_CONSTRAINT_TYPE(ThreeBooleanArgumentsCT, TestAndCT, TestAnd);
+ private:
+  Domain& m_test;
+  Domain& m_arg1;
+  Domain& m_arg2;
+  static const unsigned int ARG_COUNT = 3;
+};
+struct TestCondition : And<NArgs<3>, First<Type<BoolDT> > > {
+  TestCondition() : And<NArgs<3>, First<Type<BoolDT> > >() {}
+  TestCondition(type_iterator start, type_iterator end)
+      : And<NArgs<3>, First<Type<BoolDT> > >(start, end) {}
+};
 
-  class TestEQ : public Constraint {
-  public:
-    TestEQ(const LabelStr& name,
-	   const LabelStr& propagatorName,
-	   const ConstraintEngineId constraintEngine,
-	   const std::vector<ConstrainedVariableId>& variables);
+typedef And<NArgs<3>, All<Type<BoolDT> > > ThreeBooleanArgs;
+typedef DataTypeCheck<TestAnd, And<TestCondition, ThreeBooleanArgs> > TestAndCT;
 
-    void handleExecute();
+class TestEQ : public Constraint {
+ public:
+  TestEQ(const LabelStr& name,
+         const LabelStr& propagatorName,
+         const ConstraintEngineId constraintEngine,
+         const std::vector<ConstrainedVariableId>& variables);
 
-  private:
-    Domain& m_test;
-    Domain& m_arg1;
-    Domain& m_arg2;
-    static const unsigned int ARG_COUNT = 3;
-  };
-  CREATE_CONSTRAINT_TYPE(TestTwoSameArgumentsCT, TestEQCT, TestEQ);
+  void handleExecute();
 
-  class TestLessThan : public Constraint {
-  public:
-    TestLessThan(const LabelStr& name,
-		 const LabelStr& propagatorName,
-		 const ConstraintEngineId constraintEngine,
-		 const std::vector<ConstrainedVariableId>& variables);
-
-    void handleExecute();
-
-  private:
-    Domain& m_test;
-    Domain& m_arg1;
-    Domain& m_arg2;
-    static const unsigned int ARG_COUNT = 3;
-  };
-  CREATE_CONSTRAINT_TYPE(TestTwoSameNumericArgumentsCT, TestLessThanCT, TestLessThan);
-
-  class TestLEQ : public Constraint {
-  public:
-    TestLEQ(const LabelStr& name,
-	    const LabelStr& propagatorName,
-	    const ConstraintEngineId constraintEngine,
-	    const std::vector<ConstrainedVariableId>& variables);
-
-    void handleExecute();
-
-  private:
-    Domain& m_test;
-    Domain& m_arg1;
-    Domain& m_arg2;
-    static const unsigned int ARG_COUNT = 3;
-  };
-  CREATE_CONSTRAINT_TYPE(TestTwoSameNumericArgumentsCT, TestLEQCT, TestLEQ);
+ private:
+  Domain& m_test;
+  Domain& m_arg1;
+  Domain& m_arg2;
+  static const unsigned int ARG_COUNT = 3;
+};
+typedef And<TestCondition, Mutually<Comparable<>, Second<>, End> > TestCompareCondition;
+typedef DataTypeCheck<TestEQ, TestCompareCondition> TestEQCT;
 
 
-  class TestNEQ : public Constraint {
-  public:
-    TestNEQ(const LabelStr& name,
-	    const LabelStr& propagatorName,
-	    const ConstraintEngineId constraintEngine,
-	    const std::vector<ConstrainedVariableId>& variables);
+class TestLessThan : public Constraint {
+ public:
+  TestLessThan(const LabelStr& name,
+               const LabelStr& propagatorName,
+               const ConstraintEngineId constraintEngine,
+               const std::vector<ConstrainedVariableId>& variables);
 
-    void handleExecute();
+  void handleExecute();
 
-  private:
-    Domain& m_test;
-    Domain& m_arg1;
-    Domain& m_arg2;
-    static const unsigned int ARG_COUNT = 3;
-  };
-  CREATE_CONSTRAINT_TYPE(TestTwoSameArgumentsCT, TestNEQCT, TestNEQ);
+ private:
+  Domain& m_test;
+  Domain& m_arg1;
+  Domain& m_arg2;
+  static const unsigned int ARG_COUNT = 3;
+};
+typedef DataTypeCheck<TestLessThan, TestCompareCondition> TestLessThanCT;
+
+class TestLEQ : public Constraint {
+ public:
+  TestLEQ(const LabelStr& name,
+          const LabelStr& propagatorName,
+          const ConstraintEngineId constraintEngine,
+          const std::vector<ConstrainedVariableId>& variables);
+
+  void handleExecute();
+
+ private:
+  Domain& m_test;
+  Domain& m_arg1;
+  Domain& m_arg2;
+  static const unsigned int ARG_COUNT = 3;
+};
+typedef DataTypeCheck<TestLEQ, TestCompareCondition> TestLEQCT;
+
+class TestNEQ : public Constraint {
+ public:
+  TestNEQ(const LabelStr& name,
+          const LabelStr& propagatorName,
+          const ConstraintEngineId constraintEngine,
+          const std::vector<ConstrainedVariableId>& variables);
+
+  void handleExecute();
+
+ private:
+  Domain& m_test;
+  Domain& m_arg1;
+  Domain& m_arg2;
+  static const unsigned int ARG_COUNT = 3;
+};
+typedef DataTypeCheck<TestNEQ, TestCompareCondition> TestNEQCT;
 
 class TestOr : public Constraint {
-  public:
-    TestOr(const LabelStr& name,
-	   const LabelStr& propagatorName,
-	   const ConstraintEngineId constraintEngine,
-	   const std::vector<ConstrainedVariableId>& variables);
+ public:
+  TestOr(const LabelStr& name,
+         const LabelStr& propagatorName,
+         const ConstraintEngineId constraintEngine,
+         const std::vector<ConstrainedVariableId>& variables);
 
-    void handleExecute();
+  void handleExecute();
 
-  private:
-    Domain& m_test;
-    Domain& m_arg1;
-    Domain& m_arg2;
-    static const unsigned int ARG_COUNT = 3;
-  };
-  CREATE_CONSTRAINT_TYPE(ThreeBooleanArgumentsCT, TestOrCT, TestOr);
-
+ private:
+  Domain& m_test;
+  Domain& m_arg1;
+  Domain& m_arg2;
+  static const unsigned int ARG_COUNT = 3;
+};
+typedef DataTypeCheck<TestOr, ThreeBooleanArgs> TestOrCT;
 
 class TestSingleton : public Constraint {
-  public:
-    TestSingleton(const LabelStr& name,
-	   const LabelStr& propagatorName,
-	   const ConstraintEngineId constraintEngine,
-	   const std::vector<ConstrainedVariableId>& variables);
+ public:
+  TestSingleton(const LabelStr& name,
+                const LabelStr& propagatorName,
+                const ConstraintEngineId constraintEngine,
+                const std::vector<ConstrainedVariableId>& variables);
 
-    void handleExecute();
+  void handleExecute();
   const std::vector<ConstrainedVariableId>& getModifiedVariables() const;
 
-private:
-    Domain& m_test;
-    Domain& m_arg1;
+ private:
+  Domain& m_test;
+  Domain& m_arg1;
   std::vector<ConstrainedVariableId> m_modifiedVariables;
-    static const unsigned int ARG_COUNT = 2;
-  };
-
-  CREATE_CONSTRAINT_TYPE(TestOneArgumentCT, TestSingletonCT, TestSingleton);
+  static const unsigned int ARG_COUNT = 2;
+};
+typedef DataTypeCheck<TestSingleton, And<NArgs<2>, First<Type<BoolDT> > > > TestSingletonCT;
 
 class TestSpecified : public Constraint {
-  public:
-    TestSpecified(const LabelStr& name,
-	   const LabelStr& propagatorName,
-	   const ConstraintEngineId constraintEngine,
-	   const std::vector<ConstrainedVariableId>& variables);
+ public:
+  TestSpecified(const LabelStr& name,
+                const LabelStr& propagatorName,
+                const ConstraintEngineId constraintEngine,
+                const std::vector<ConstrainedVariableId>& variables);
 
-    void handleExecute();
+  void handleExecute();
 
-  private:
-    Domain& m_test;
-    Domain& m_arg1;
-    static const unsigned int ARG_COUNT = 2;
-  };
-  CREATE_CONSTRAINT_TYPE(TestOneArgumentCT, TestSpecifiedCT, TestSpecified);
+ private:
+  Domain& m_test;
+  Domain& m_arg1;
+  static const unsigned int ARG_COUNT = 2;
+};
+typedef DataTypeCheck<TestSpecified, And<NArgs<2>, First<Type<BoolDT> > > > TestSpecifiedCT;
 
 class UnaryConstraint : public Constraint {
-  public:
-    /**
-     * @brief Specialized constructor
-     */
-    UnaryConstraint(const Domain& dom, const ConstrainedVariableId var);
+ public:
+  /**
+   * @brief Specialized constructor
+   */
+  UnaryConstraint(const Domain& dom, const ConstrainedVariableId var);
 
-    /**
-     * @brief Standard constructor
-     */
-    UnaryConstraint(const LabelStr& name,
-            const LabelStr& propagatorName,
-            const ConstraintEngineId constraintEngine,
-            const std::vector<ConstrainedVariableId>& variables);
+  /**
+   * @brief Standard constructor
+   */
+  UnaryConstraint(const LabelStr& name,
+                  const LabelStr& propagatorName,
+                  const ConstraintEngineId constraintEngine,
+                  const std::vector<ConstrainedVariableId>& variables);
 
-    ~UnaryConstraint();
+  ~UnaryConstraint();
 
-  private:
+ private:
   UnaryConstraint(const UnaryConstraint&);
   UnaryConstraint& operator=(const UnaryConstraint&);
-    void handleExecute();
+  void handleExecute();
 
-    void handleDiscard();
+  void handleDiscard();
 
-    bool canIgnore(const ConstrainedVariableId variable,
-                   unsigned int argIndex,
-           const DomainListener::ChangeType& changeType);
+  bool canIgnore(const ConstrainedVariableId variable,
+                 unsigned int argIndex,
+                 const DomainListener::ChangeType& changeType);
 
-    void setSource(const ConstraintId sourceConstraint);
+  void setSource(const ConstraintId sourceConstraint);
 
-    Domain* m_x;
-    Domain* m_y;
-  };
+  Domain* m_x;
+  Domain* m_y;
+};
+typedef DataTypeCheck<UnaryConstraint, NArgs<1> > UnaryCT;
 
   /**
    * @brief WithinBounds(x, y, z) maintains the relations:
@@ -1240,23 +1256,25 @@ class UnaryConstraint : public Constraint {
    * @li x.ub <= z.ub
    * @li y <= z
    */
-  class WithinBounds : public Constraint {
-  public:
-    WithinBounds(const LabelStr& name,
-         const LabelStr& propagatorName,
-         const ConstraintEngineId constraintEngine,
-         const std::vector<ConstrainedVariableId>& variables);
+class WithinBounds : public Constraint {
+ public:
+  WithinBounds(const LabelStr& name,
+               const LabelStr& propagatorName,
+               const ConstraintEngineId constraintEngine,
+               const std::vector<ConstrainedVariableId>& variables);
 
-    void handleExecute();
+  void handleExecute();
 
-  private:
-    IntervalDomain& m_x;
-    IntervalDomain& m_y;
-    IntervalDomain& m_z;
-    LessThanEqualConstraint m_leq;
-    static const unsigned int ARG_COUNT = 3;
-  };
-
+ private:
+  IntervalDomain& m_x;
+  IntervalDomain& m_y;
+  IntervalDomain& m_z;
+  LessThanEqualConstraint m_leq;
+  static const unsigned int ARG_COUNT = 3;
+};
+typedef DataTypeCheck<WithinBounds, And<NArgs<3>, And<All<Numeric>,
+                                                      Mutually<Comparable<> > > > >
+WithinBoundsCT;
 
 }
 #endif

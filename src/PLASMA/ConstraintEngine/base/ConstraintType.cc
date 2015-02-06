@@ -21,6 +21,8 @@ ConstraintType::ConstraintType(const LabelStr& name,
 
 ConstraintType::~ConstraintType()
 {
+  if(m_id.isValid())
+    m_id.remove();
 }
 
 const ConstraintTypeId ConstraintType::getId() const {return m_id;}

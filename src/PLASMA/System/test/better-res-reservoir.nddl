@@ -83,7 +83,7 @@ Rover::Sample{
   float qty;
   //sampleBattery(qty, m_x, m_y);
   eq(qty, -10.0);
-  addEq(bc.quantity, qty, 0);
+  addEq(bc.quantity, qty, 0.0);
 
   //sampleDuration( duration, m_x, m_y );
   eq(duration, [3 10]);
@@ -126,7 +126,7 @@ Rover::Drive{
   float intermediateQuantity;
   mulEq(dist, 4, intermediateQuantity);
   neg(intermediateQuantity, qty);
-  addEq(bc.quantity, qty, 0);
+  addEq(bc.quantity, qty, 0.0);
 
   //driveDuration( duration, dist );
   mulEq(dist, [1 2], duration);

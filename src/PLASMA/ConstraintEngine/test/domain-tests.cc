@@ -9,6 +9,7 @@
 
 namespace EUROPA {
 
+namespace {
 class DummyDT : public DataType {
  public:
   DummyDT();
@@ -27,6 +28,7 @@ class DummyDT : public DataType {
   static const DataTypeId instance();
   
 };
+}
 
 class DummyDomain : public Domain {
  public:
