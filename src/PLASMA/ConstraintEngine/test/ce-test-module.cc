@@ -2795,6 +2795,119 @@ private:
   }
 };
 
+#include "ConstraintTypeChecking.hh"
+
+namespace {
+class DummyConstraint : public Constraint {
+ public:
+  DummyConstraint(const LabelStr& name, const LabelStr& propagatorName,
+                  const ConstraintEngineId constraintEngine,
+                  const std::vector<ConstrainedVariableId>& scope)
+      : Constraint(name, propagatorName, constraintEngine, scope) {}
+  void handleExecute() {}
+};
+
+class DummyDT : public DataType {
+ public:
+  DummyDT() : DataType(DummyDT::NAME().c_str()) {
+    m_minDelta = 0.5;
+    m_baseDomain = NULL;//new DummyDomain(getId());
+  }
+  virtual ~DummyDT() {}
+  
+  bool isNumeric() const {return true;}
+  bool isBool() const {return false;}
+  bool isString() const {return false;}
+
+  edouble createValue(const std::string& ) const {return 1.0;}
+  
+  static const std::string& NAME() {
+    static std::string sl_name("DummyDT"); 
+    return sl_name;
+  }
+  
+  static const DataTypeId instance() { 
+
+    return sl_instance.getId();
+  }
+  static DummyDT sl_instance; 
+};
+DummyDT DummyDT::sl_instance;
+}
+class TypeCheckingTests {
+ public:
+  static bool test() {
+    testNArgs();
+    testAtLeastNArgs();
+    testAllNumeric();
+    testTwoNumericArgs();
+    return true;
+  }
+ private:
+  static bool testNArgs() {
+    typedef DataTypeCheck<DummyConstraint, NArgs<2> > TwoArgs;
+    TwoArgs checker("TwoArgs", "Default");
+    std::vector<DataTypeId> argTypes;
+    for(int i = 0; i < 4; ++i) {
+      if(i == 2) {
+        CPPUNIT_ASSERT_NO_THROW(checker.checkArgTypes(argTypes));
+      }
+      else {
+        CPPUNIT_ASSERT_THROW(checker.checkArgTypes(argTypes), std::string);
+      }
+      argTypes.push_back(DummyDT::instance());
+    }
+    return true;
+  }
+  static bool testAtLeastNArgs() {
+    typedef DataTypeCheck<DummyConstraint, AtLeastNArgs<2> > TwoArgs;
+    TwoArgs checker("TwoArgs", "Default");
+    std::vector<DataTypeId> argTypes;
+    for(int i = 0; i < 4; ++i) {
+      if(i >= 2) {
+        CPPUNIT_ASSERT_NO_THROW(checker.checkArgTypes(argTypes));
+      }
+      else {
+        CPPUNIT_ASSERT_THROW(checker.checkArgTypes(argTypes), std::string);
+      }
+      argTypes.push_back(DummyDT::instance());
+    }
+    return true;
+  }
+  static bool testAllNumeric() {
+    typedef DataTypeCheck<DummyConstraint, All<Numeric> > AllNumeric;
+    AllNumeric checker("AllNumeric", "Default");
+    std::vector<DataTypeId> argTypes;
+    CPPUNIT_ASSERT_NO_THROW(checker.checkArgTypes(argTypes));
+    argTypes.push_back(FloatDT::instance());
+    CPPUNIT_ASSERT_NO_THROW(checker.checkArgTypes(argTypes));
+    argTypes.push_back(IntDT::instance());
+    CPPUNIT_ASSERT_NO_THROW(checker.checkArgTypes(argTypes));
+    argTypes.push_back(BoolDT::instance()); //Is this right? ~MJI
+    CPPUNIT_ASSERT_NO_THROW(checker.checkArgTypes(argTypes));
+    argTypes.push_back(StringDT::instance());
+    CPPUNIT_ASSERT_THROW(checker.checkArgTypes(argTypes), std::string);
+    return true;
+  }
+  static bool testTwoNumericArgs() {
+    typedef DataTypeCheck<DummyConstraint, And<NArgs<2>, All<Numeric> > > AllNumeric;
+    AllNumeric checker("AllNumeric", "Default");
+    std::vector<DataTypeId> argTypes;
+    CPPUNIT_ASSERT_THROW(checker.checkArgTypes(argTypes), std::string);
+    argTypes.push_back(FloatDT::instance());
+    CPPUNIT_ASSERT_THROW(checker.checkArgTypes(argTypes), std::string);
+    argTypes.push_back(IntDT::instance());
+    CPPUNIT_ASSERT_NO_THROW(checker.checkArgTypes(argTypes));
+    argTypes.push_back(IntDT::instance()); //Is this right? ~MJI
+    CPPUNIT_ASSERT_THROW(checker.checkArgTypes(argTypes), std::string);
+    argTypes.pop_back();
+    argTypes.pop_back();
+    argTypes.push_back(StringDT::instance());
+    CPPUNIT_ASSERT_THROW(checker.checkArgTypes(argTypes), std::string);
+    return true;
+  }
+};
+
 void ConstraintEngineModuleTests::cppSetup(void)
 {
     setTestLoadLibraryPath(".");
@@ -2838,5 +2951,9 @@ void ConstraintEngineModuleTests::constraintFactoryTests(void)
 void ConstraintEngineModuleTests::equivalenceClassTests(void)
 {
     EquivalenceClassTest::test();
+}
+
+void ConstraintEngineModuleTests::typeCheckingTests(void) {
+  TypeCheckingTests::test();
 }
 

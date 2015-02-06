@@ -11,129 +11,6 @@
 
 namespace EUROPA {
 
-namespace {
-void requireArgCount(std::string name, const std::vector<DataTypeId>& argTypes,
-                     const unsigned int count) {
-  if (argTypes.size() != count) {
-    std::ostringstream msg;
-    msg << "Constraint " << name << " takes " << count << " args, not " << argTypes.size();
-    throw msg.str();
-  }
-}
-
-void mutuallyAssignable(std::string name, DataTypeId a, DataTypeId b) {
-  if (b->isNumeric() && b->isNumeric()) {
-    //This is a hopefully temporary hack that makes the constraints work so the tests can pass. Waiting for agreement on the
-    //mailling list before deciding what to do in this case. Tony T. Pratkanis: 9/11/09.
-    return;
-  }
-  if (!b->isAssignableFrom(a) || !a->isAssignableFrom(b)) {
-    std::ostringstream msg; msg << "Constraint " << name << " args must be assignable. In this case, "
-                                << a->getName().c_str() << " and " << b->getName().c_str()
-                                << " are not assignable.";
-    throw msg.str();
-  }
-}
-
-void requireNumeric(std::string name, DataTypeId a) {
-  if (!a->isNumeric()) {
-    std::ostringstream msg; msg << "Constraint " << name << " args must be numeric. " << a->getName().c_str() << " is not.";
-    throw msg.str();
-  }
-}
-
-void requireBoolean(std::string name, DataTypeId a) {
-  if (!a->isBool()) {
-    std::ostringstream msg; msg << "Constraint " << name << " args must be numeric. " << a->getName().c_str() << " is not.";
-    throw msg.str();
-  }
-}
-
-void requireAllSame(std::string name, const std::vector<DataTypeId>& argTypes) {
-  for (unsigned int i = 0; i < argTypes.size(); i++) {
-    for (unsigned int u = i + 1; u < argTypes.size(); u++) {
-      mutuallyAssignable(name, argTypes[i], argTypes[u]);
-    }
-  }
-}
-}
-
-  void TwoSameArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
-  {
-      requireArgCount(m_name, argTypes, 2);
-      mutuallyAssignable(m_name, argTypes[0], argTypes[1]);
-  }
-
-  void TwoSameNumericArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
-  {
-      requireArgCount(m_name, argTypes, 2);
-      mutuallyAssignable(m_name, argTypes[0], argTypes[1]);
-      requireNumeric(m_name, argTypes[0]);
-      requireNumeric(m_name, argTypes[1]);
-  }
-
-  void TestOneArgumentCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
-  {
-      requireArgCount(m_name, argTypes, 2);
-      requireBoolean(m_name, argTypes[0]);
-  }
-
-  void TestTwoSameArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
-  {
-      requireArgCount(m_name, argTypes, 3);
-      mutuallyAssignable(m_name, argTypes[1], argTypes[2]);
-      requireBoolean(m_name, argTypes[0]);
-  }
-
-  void TestTwoSameNumericArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
-  {
-      requireArgCount(m_name, argTypes, 3);
-      mutuallyAssignable(m_name, argTypes[1], argTypes[2]);
-      requireBoolean(m_name, argTypes[0]);
-      requireNumeric(m_name, argTypes[1]);
-      requireNumeric(m_name, argTypes[2]);
-  }
-
-  void TwoBooleanArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
-  {
-      requireArgCount(m_name, argTypes, 2);
-      mutuallyAssignable(m_name, argTypes[0], argTypes[1]);
-      requireBoolean(m_name, argTypes[0]);
-      requireBoolean(m_name, argTypes[1]);
-  }
-
-  void ThreeBooleanArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
-  {
-      requireArgCount(m_name, argTypes, 3);
-      mutuallyAssignable(m_name, argTypes[0], argTypes[1]);
-      mutuallyAssignable(m_name, argTypes[1], argTypes[2]);
-      mutuallyAssignable(m_name, argTypes[0], argTypes[2]);
-      requireBoolean(m_name, argTypes[0]);
-      requireBoolean(m_name, argTypes[1]);
-      requireBoolean(m_name, argTypes[2]);
-  }
-
-  void AllSameArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
-  {
-      requireAllSame(m_name, argTypes);
-  }
-
-  void AllSameNumericArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
-  {
-      requireAllSame(m_name, argTypes);
-      for (unsigned int i = 0; i < argTypes.size(); i++) {
-	requireNumeric(m_name, argTypes[i]);
-      }
-  }
-
-
-
-
-
-
-
-
-
   UnaryConstraint::UnaryConstraint(const Domain& dom,
 				   const ConstrainedVariableId var)
     : Constraint("UNARY", "Default", var->getConstraintEngine(), makeScope(var)),
@@ -186,34 +63,6 @@ void requireAllSame(std::string name, const std::vector<DataTypeId>& argTypes) {
     checkError(m_x == 0, "Already set domain for " << toString() << " and not using " << sourceConstraint->toString());
     UnaryConstraint* source = id_cast<UnaryConstraint>(sourceConstraint);
     m_x = source->m_x->copy();
-  }
-
-  /*************** AddEqualConstraint **********************/
-
-  void AddEqualCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
-  {
-      if (argTypes.size() != 3) {
-          std::ostringstream msg; msg << "Constraint AddEqual takes 3 args, not " << argTypes.size();
-          throw msg.str();
-      }
-
-      for (unsigned int i=0; i< argTypes.size(); i++) {
-          if (!argTypes[i]->isNumeric()) {
-              std::ostringstream msg;
-              msg << "Parameter " << i << " for Constraint AddEqual is not numeric : "
-                  << argTypes[i]->getName().toString();
-              throw msg.str();
-          }
-      }
-
-      if (!argTypes[0]->isAssignableFrom(argTypes[1]) ||
-          !argTypes[0]->isAssignableFrom(argTypes[2])) {
-          std::ostringstream msg;
-          msg << argTypes[0]->getName().toString() << " can't hold the result of : "
-              << argTypes[1]->getName().toString() << "+"
-              << argTypes[2]->getName().toString();
-          throw msg.str();
-      }
   }
 
 
@@ -1701,7 +1550,7 @@ AllDiffConstraint::AllDiffConstraint(const LabelStr& name,
       (void) domA.intersect(domD);
   }
 
-  CountZerosConstraint::CountZerosConstraint(const LabelStr& name,
+  CountZeroesConstraint::CountZeroesConstraint(const LabelStr& name,
                                              const LabelStr& propagatorName,
                                              const ConstraintEngineId constraintEngine,
                                              const std::vector<ConstrainedVariableId>& variables)
@@ -1710,29 +1559,29 @@ AllDiffConstraint::AllDiffConstraint(const LabelStr& name,
       check_error(getCurrentDomain(m_variables[i]).isNumeric() || getCurrentDomain(m_variables[i]).isBool());
   }
 
-  void CountZerosConstraint::handleExecute() {
+  void CountZeroesConstraint::handleExecute() {
     unsigned int i = 1;
 
     // Count the other vars that must be zero ...
-    unsigned int minZeros = 0;
+    unsigned int minZeroes = 0;
     // ... and that could be zero.
-    unsigned int maxZeros = 0;
+    unsigned int maxZeroes = 0;
     for ( ; i < m_variables.size(); i++) {
       Domain& other = getCurrentDomain(m_variables[i]);
       if (other.isMember(0.0)) {
-        ++maxZeros;
+        ++maxZeroes;
         if (other.isSingleton())
-          ++minZeros;
+          ++minZeroes;
       }
     }
 
-    // The count of zeros is the first variable.
+    // The count of zeroes is the first variable.
     Domain& countDom = getCurrentDomain(m_variables[0]);
 
     // If all that could be zero must be zero to get the count high
     // enough, set all that could be zero to zero.
-    if (minZeros < countDom.getLowerBound() &&
-        maxZeros == countDom.getLowerBound()) {
+    if (minZeroes < countDom.getLowerBound() &&
+        maxZeroes == countDom.getLowerBound()) {
       // Find those that could be zero but might not be
       // and restrict them to 0.
       for (i = 1; i < m_variables.size(); i++) {
@@ -1749,8 +1598,8 @@ AllDiffConstraint::AllDiffConstraint(const LabelStr& name,
     // If all that might be zero are needed to be non-zero to get the
     // count low enough, restrict all that might be zero to not be
     // zero.
-    if (maxZeros > countDom.getUpperBound() &&
-        minZeros == countDom.getUpperBound()) {
+    if (maxZeroes > countDom.getUpperBound() &&
+        minZeroes == countDom.getUpperBound()) {
       // Find those that could be zero but might not be and restrict
       // them to not be 0.
       for (i = 1; i < m_variables.size(); i++) {
@@ -1773,28 +1622,28 @@ AllDiffConstraint::AllDiffConstraint(const LabelStr& name,
     }
 
     // If the counts seen restrict the count variable, do so.
-    if (minZeros > countDom.getLowerBound() ||
-        countDom.getUpperBound() > maxZeros)
-      countDom.intersect(make_int_int(minZeros, maxZeros));
+    if (minZeroes > countDom.getLowerBound() ||
+        countDom.getUpperBound() > maxZeroes)
+      countDom.intersect(make_int_int(minZeroes, maxZeroes));
   }
 
-CountNonZerosConstraint::CountNonZerosConstraint(const LabelStr& name,
+CountNonZeroesConstraint::CountNonZeroesConstraint(const LabelStr& name,
                                                  const LabelStr& propagatorName,
                                                  const ConstraintEngineId constraintEngine,
                                                  const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_zeros(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalCountNonZerosVar"), getId()),
-      m_otherVars(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalCountNonZerosOtherVars"), getId()),
-    m_superset(constraintEngine, IntervalDomain(edouble(variables.size() - 1)), true, false, LabelStr("InternalCountNonZerosSuperset"), getId()),
+      m_zeroes(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalCountNonZeroesVar"), getId()),
+      m_otherVars(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalCountNonZeroesOtherVars"), getId()),
+    m_superset(constraintEngine, IntervalDomain(edouble(variables.size() - 1)), true, false, LabelStr("InternalCountNonZeroesSuperset"), getId()),
     m_addEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine,
-                         makeScope(m_zeros.getId(), m_variables[0], m_otherVars.getId())),
-    m_subsetConstraint(), m_countZerosConstraint() {
+                         makeScope(m_zeroes.getId(), m_variables[0], m_otherVars.getId())),
+    m_subsetConstraint(), m_countZeroesConstraint() {
   m_subsetConstraint = (new SubsetOfConstraint(LabelStr("SubsetOf"), propagatorName, constraintEngine,
                                                makeScope(m_otherVars.getId(), m_superset.getId())))->getId();
   std::vector<ConstrainedVariableId> cZCScope = m_variables;
-  cZCScope[0] = m_zeros.getId();
+  cZCScope[0] = m_zeroes.getId();
   check_error(m_variables.size() == cZCScope.size());
-  m_countZerosConstraint = (new CountZerosConstraint(LabelStr("CountZeros"),
+  m_countZeroesConstraint = (new CountZeroesConstraint(LabelStr("CountZeroes"),
                                                      propagatorName, constraintEngine, cZCScope))->getId();
 }
 
@@ -1803,15 +1652,16 @@ CardinalityConstraint::CardinalityConstraint(const LabelStr& name,
                                              const ConstraintEngineId constraintEngine,
                                              const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_nonZeros(constraintEngine, IntervalIntDomain(0, PLUS_INFINITY), true, false, LabelStr("InternalCardinalityVar"), getId()),
+      m_nonZeroes(constraintEngine, IntervalIntDomain(0, PLUS_INFINITY), true, false,
+                  LabelStr("InternalCardinalityVar"), getId()),
       m_lessThanEqualConstraint(LabelStr("LessThanEqual"), propagatorName,
-                                constraintEngine, makeScope(m_nonZeros.getId(), m_variables[0])),
-                     m_countNonZerosConstraint()
+                                constraintEngine, makeScope(m_nonZeroes.getId(), m_variables[0])),
+                     m_countNonZeroesConstraint()
   {
     std::vector<ConstrainedVariableId> cCScope = m_variables;
-    cCScope[0] = m_nonZeros.getId();
+    cCScope[0] = m_nonZeroes.getId();
     check_error(m_variables.size() == cCScope.size());
-    m_countNonZerosConstraint = (new CountNonZerosConstraint(LabelStr("CountNonZeros"),
+    m_countNonZeroesConstraint = (new CountNonZeroesConstraint(LabelStr("CountNonZeroes"),
                                                              propagatorName, constraintEngine, cCScope))->getId();
   }
 
@@ -1820,18 +1670,18 @@ CardinalityConstraint::CardinalityConstraint(const LabelStr& name,
                              const ConstraintEngineId constraintEngine,
                              const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_nonZeros(constraintEngine, IntervalIntDomain(1, PLUS_INFINITY), true, false, LabelStr("InternalVar:Or:nonZeros"), getId()),
+      m_nonZeroes(constraintEngine, IntervalIntDomain(1, PLUS_INFINITY), true, false, LabelStr("InternalVar:Or:nonZeroes"), getId()),
       m_superset(constraintEngine, IntervalIntDomain(1, eint(variables.size())), true, false, LabelStr("InternalVar:Or:superset"), getId()),
-                     m_subsetConstraint(), m_countNonZerosConstraint()
+                     m_subsetConstraint(), m_countNonZeroesConstraint()
   {
     m_subsetConstraint = (new SubsetOfConstraint(LabelStr("SubsetOf"), propagatorName, constraintEngine,
-                                                 makeScope(m_nonZeros.getId(), m_superset.getId())))->getId();
+                                                 makeScope(m_nonZeroes.getId(), m_superset.getId())))->getId();
     std::vector<ConstrainedVariableId> cNZCScope;
     cNZCScope.reserve(m_variables.size() + 1);
-    cNZCScope.push_back(m_nonZeros.getId());
+    cNZCScope.push_back(m_nonZeroes.getId());
     cNZCScope.insert(cNZCScope.end(), m_variables.begin(), m_variables.end());
     check_error(m_variables.size() + 1 == cNZCScope.size());
-    m_countNonZerosConstraint = (new CountNonZerosConstraint(LabelStr("CountNonZeros"), propagatorName,
+    m_countNonZeroesConstraint = (new CountNonZeroesConstraint(LabelStr("CountNonZeroes"), propagatorName,
                                                              constraintEngine, cNZCScope))->getId();
   }
 
@@ -2448,29 +2298,29 @@ SwapTwoVarsConstraint::SwapTwoVarsConstraint(const LabelStr& name,
     m_x.intersect(m_y.getLowerBound(), m_z.getUpperBound());
   }
 
-  void AbsoluteValueCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
-  {
-      if (argTypes.size() != 2) {
-          std::ostringstream msg; msg << "Constraint AbsoluteValue takes 2 args, not " << argTypes.size();
-          throw msg.str();
-      }
+  // void AbsoluteValueCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  // {
+  //     if (argTypes.size() != 2) {
+  //         std::ostringstream msg; msg << "Constraint AbsoluteValue takes 2 args, not " << argTypes.size();
+  //         throw msg.str();
+  //     }
 
-      for (unsigned int i=0; i< argTypes.size(); i++) {
-          if (!argTypes[i]->isNumeric()) {
-              std::ostringstream msg;
-              msg << "Parameter " << i << " for Constraint AbsoluteValue is not numeric : "
-                  << argTypes[i]->getName().toString();
-              throw msg.str();
-          }
-      }
+  //     for (unsigned int i=0; i< argTypes.size(); i++) {
+  //         if (!argTypes[i]->isNumeric()) {
+  //             std::ostringstream msg;
+  //             msg << "Parameter " << i << " for Constraint AbsoluteValue is not numeric : "
+  //                 << argTypes[i]->getName().toString();
+  //             throw msg.str();
+  //         }
+  //     }
 
-      if (!argTypes[0]->isAssignableFrom(argTypes[1])) {
-          std::ostringstream msg;
-          msg << argTypes[0]->getName().toString() << " can't hold AbsoluteValue for : "
-              << argTypes[1]->getName().toString();
-          throw msg.str();
-      }
-  }
+  //     if (!argTypes[0]->isAssignableFrom(argTypes[1])) {
+  //         std::ostringstream msg;
+  //         msg << argTypes[0]->getName().toString() << " can't hold AbsoluteValue for : "
+  //             << argTypes[1]->getName().toString();
+  //         throw msg.str();
+  //     }
+  // }
 
   AbsoluteValue::AbsoluteValue(const LabelStr& name,
 			       const LabelStr& propagatorName,

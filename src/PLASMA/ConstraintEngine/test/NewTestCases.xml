@@ -504,7 +504,7 @@
 			<IntervalDomain lb="-1" ub="0"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="Cardinality" test="40">
+	<Constraint name="cardinality" test="40">
 		<Inputs>
 			<IntervalDomain lb="-inf" ub="+inf"/>
 			<IntervalDomain lb="1" ub="1"/>
@@ -520,7 +520,7 @@
 			<IntervalDomain lb="-inf" ub="+inf"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="EqualProduct" test="41">
+	<Constraint name="eqProduct" test="41">
 		<Inputs>
 			<IntervalDomain lb="-inf" ub="0"/>
 			<IntervalDomain lb="-inf" ub="0"/>
@@ -532,7 +532,7 @@
 			<IntervalDomain lb="-inf" ub="0"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="Equal" test="42">
+	<Constraint name="eq" test="42">
 		<Inputs>
 			<IntervalDomain lb="-inf" ub="10"/>
 			<IntervalDomain lb="-10" ub="+inf"/>
@@ -544,7 +544,7 @@
 			<IntervalDomain lb="-10" ub="5"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="Equal" test="43">
+	<Constraint name="eq" test="43">
 		<Inputs>
 			<IntervalDomain lb="-inf" ub="10"/>
 			<IntervalDomain lb="-10" ub="+inf"/>

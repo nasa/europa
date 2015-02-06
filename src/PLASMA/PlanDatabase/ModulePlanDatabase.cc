@@ -59,8 +59,8 @@ void ModulePlanDatabase::initialize(EngineId engine) {
   new DefaultPropagator("PlanDatabaseSystemPropagator", ce->getId(), SYSTEM_PRIORITY);
   REGISTER_SYSTEM_CONSTRAINT(ceSchema,ObjectTokenRelation, "ObjectTokenRelation", "PlanDatabaseSystemPropagator");
   
-  REGISTER_CONSTRAINT(ceSchema,CommonAncestorConstraint, "commonAncestor", "Default");
-  REGISTER_CONSTRAINT(ceSchema,HasAncestorConstraint, "hasAncestor", "Default");
+  REGISTER_CONSTRAINT_TYPE(ceSchema,CommonAncestorCT, "commonAncestor", "Default");
+  REGISTER_CONSTRAINT_TYPE(ceSchema,HasAncestorCT, "hasAncestor", "Default");
   
   Schema* schema = new Schema("EngineSchema",ceSchema->getId()); // TODO: use engine name
   schema->registerEnum("TokenStates",StateDomain());
