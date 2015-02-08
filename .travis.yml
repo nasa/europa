@@ -12,6 +12,6 @@ matrix:
       env: OPTIMIZE=0 COVERAGE=1
 before_install: sudo pip install cpp-coveralls
 install: sudo add-apt-repository --yes ppa:kalakris/cmake && sudo apt-get update -qq && sudo apt-get install cmake libboost-dev libcppunit-dev libantlr3c-dev antlr swig
-script: mkdir build && cd build && cmake -DOPTIMIZE=$OPTIMIZE -DCOVERAGE=$COVERAGE .. && make -j2 && ctest -VV
+script: mkdir build && cd build && cmake -DOPTIMIZE=$OPTIMIZE -DCOVERAGE=$COVERAGE .. && make -j2 && ctest
 after_success:
   - coveralls --gcov-options '\-lp'
