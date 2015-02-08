@@ -20,10 +20,10 @@ EUROPA was developed at NASA's Ames Research Center and is available under NASA'
 
 |**Getting Started**|**Documentation**|**Development**|
 |-------------------|-----------------|---------------|
-|[Download](Europa-Download)|[Background/Overview](Europa-Background)|[Building EUROPA](Building-Europa)|
-|[Installation](Europa-Installation)|[User Documentation](Europa-Docs)|[Automated Builds](Nightly-Builds)|
-|[Quick Start](Quick-Start)|[Examples](Europa-Examples)|[Developer Notes](Misc-Development)|
-||[Publications](Europa-Publications)|[Product Roadmap](Europa-Roadmap)|
-|||[People](Europa-Team)|
+|[Download](https://github.com/nasa/europa/wiki/Europa-Download)|[Background/Overview](https://github.com/nasa/europa/wiki/Europa-Background)|[Building EUROPA](https://github.com/nasa/europa/wiki/Building-Europa)|
+|[Installation](https://github.com/nasa/europa/wiki/Europa-Installation)|[User Documentation](https://github.com/nasa/europa/wiki/Europa-Docs)|[Automated Builds](https://github.com/nasa/europa/wiki/Nightly-Builds)|
+|[Quick Start](https://github.com/nasa/europa/wiki/Quick-Start)|[Examples](https://github.com/nasa/europa/wiki/Europa-Examples)|[Developer Notes](https://github.com/nasa/europa/wiki/Misc-Development)|
+||[Publications](https://github.com/nasa/europa/wiki/Europa-Publications)|[Product Roadmap](https://github.com/nasa/europa/wiki/Europa-Roadmap)|
+|||[People](https://github.com/nasa/europa/wiki/Europa-Team)|
 
 For questions, please use the [europa-users](http://groups.google.com/group/europa-users) google group.
