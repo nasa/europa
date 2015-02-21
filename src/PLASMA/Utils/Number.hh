@@ -192,6 +192,7 @@ namespace std {
 
   inline EUROPA::edouble max(const EUROPA::edouble a, const EUROPA::edouble b);
   inline EUROPA::edouble min(const EUROPA::edouble a, const EUROPA::edouble b);
+  inline EUROPA::edouble fmod(const EUROPA::edouble a, const EUROPA::edouble b);
 }
 
 
@@ -648,7 +649,6 @@ namespace EUROPA {
     friend edouble operator-(const double o, const edouble e);
     friend edouble operator*(const double o, const edouble e);
     friend edouble operator/(const double o, const edouble e);
-    friend edouble operator%(const double o, const edouble e);
 
     DECL_FRIEND_COMPARISONS(int, edouble);
     DECL_FRIEND_COMPARISONS(long, edouble);
@@ -665,6 +665,7 @@ namespace EUROPA {
     friend edouble std::floor(const edouble d);
     friend edouble std::max(const edouble a, const edouble b);
     friend edouble std::min(const edouble a, const edouble b);
+    friend edouble std::fmod(const edouble a, const edouble b);
 
     friend std::ostream& operator<<(std::ostream& o, const edouble e);
     friend std::istream& operator>>(std::istream& o, edouble& e);
@@ -780,15 +781,15 @@ inline EUROPA::eint numeric_limits<EUROPA::eint>::max() throw() {return cast_bas
 #endif //_MSC_VER
 
 
-  inline EUROPA::edouble abs(const EUROPA::edouble d) { return EUROPA::edouble(abs(d.m_v), true);}
-  inline EUROPA::edouble sqrt(const EUROPA::edouble d) { handle_inf_unary(EUROPA::edouble, d); return EUROPA::edouble(sqrt(d.m_v), true);}
+inline EUROPA::edouble abs(const EUROPA::edouble d) { return EUROPA::edouble(abs(d.m_v), true);}
+inline EUROPA::edouble sqrt(const EUROPA::edouble d) { handle_inf_unary(EUROPA::edouble, d); return EUROPA::edouble(sqrt(d.m_v), true);}
 inline EUROPA::edouble pow(const EUROPA::edouble d, const EUROPA::eint i) {return EUROPA::edouble(std::pow(d.m_v, static_cast<int>(i.m_v)));}
-  inline EUROPA::edouble sin(const EUROPA::edouble d) {return EUROPA::edouble(std::sin(d.m_v), true);}
-  inline EUROPA::edouble ceil(const EUROPA::edouble d) {return EUROPA::edouble(std::ceil(d.m_v), true);}
-  inline EUROPA::edouble floor(const EUROPA::edouble d) {return EUROPA::edouble(std::floor(d.m_v), true);}
-  inline EUROPA::edouble max(const EUROPA::edouble a, const EUROPA::edouble b) {return EUROPA::edouble(std::max(a.m_v, b.m_v), true);}
-  inline EUROPA::edouble min(const EUROPA::edouble a, const EUROPA::edouble b) {return EUROPA::edouble(std::min(a.m_v, b.m_v), true);}
-
+inline EUROPA::edouble sin(const EUROPA::edouble d) {return EUROPA::edouble(std::sin(d.m_v), true);}
+inline EUROPA::edouble ceil(const EUROPA::edouble d) {return EUROPA::edouble(std::ceil(d.m_v), true);}
+inline EUROPA::edouble floor(const EUROPA::edouble d) {return EUROPA::edouble(std::floor(d.m_v), true);}
+inline EUROPA::edouble max(const EUROPA::edouble a, const EUROPA::edouble b) {return EUROPA::edouble(std::max(a.m_v, b.m_v), true);}
+inline EUROPA::edouble min(const EUROPA::edouble a, const EUROPA::edouble b) {return EUROPA::edouble(std::min(a.m_v, b.m_v), true);}
+inline EUROPA::edouble fmod(const EUROPA::edouble a, const EUROPA::edouble b) {return EUROPA::edouble(std::fmod(a.m_v, b.m_v), true);}
 
 #undef GEN_FRIEND_COMPARISONS
 #undef DECL_FRIEND_COMPARISONS
