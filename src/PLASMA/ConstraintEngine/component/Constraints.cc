@@ -2546,6 +2546,95 @@ eint mod(edouble a, edouble b) {return static_cast<eint::basis_type>(std::fmod(c
   CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Floor, std::floor, edouble);
   CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Ceil, std::ceil, edouble);
 
+EqUnionConstraint::EqUnionConstraint(const LabelStr& name,
+                                     const LabelStr& propagatorName,
+                                     const ConstraintEngineId constraintEngine,
+                                     const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables) {}
+
+void EqUnionConstraint::handleExecute() {
+  if(getCurrentDomain(m_variables[0]).isEnumerated()) {
+    handleExecuteEnumerated(dynamic_cast<EnumeratedDomain&>(getCurrentDomain(m_variables[0])),
+                            m_variables.begin() + 1, m_variables.end());
+  }
+  else {
+    handleExecuteInterval(dynamic_cast<IntervalDomain&>(getCurrentDomain(m_variables[0])),
+                          m_variables.begin() + 1, m_variables.end());
+  }
+}
+
+void EqUnionConstraint::handleExecuteInterval(IntervalDomain& dest,
+                                              std::vector<ConstrainedVariableId>::const_iterator start,
+                                              const std::vector<ConstrainedVariableId>::const_iterator end) {
+  edouble minValue = std::numeric_limits<edouble>::max(),
+      maxValue = std::numeric_limits<edouble>::min();
+  
+  for(std::vector<ConstrainedVariableId>::const_iterator it = start; it != end; ++it) {
+    minValue = std::min(minValue, getCurrentDomain(*it).getLowerBound());
+    maxValue = std::max(maxValue, getCurrentDomain(*it).getUpperBound());
+  }
+  minValue = std::max(minValue, dest.getLowerBound());
+  maxValue = std::min(maxValue, dest.getUpperBound());
+
+  dest.intersect(minValue, maxValue);
+  for(std::vector<ConstrainedVariableId>::const_iterator it = start; it != end; ++it) {
+    if(dest.isEmpty())
+      getCurrentDomain(*it).empty();
+    else
+      getCurrentDomain(*it).intersect(dest);
+  }
+}
+
+namespace {
+struct InInterval {
+  InInterval(const edouble v) : m_v(v) {}
+  bool operator()(const std::pair<edouble, edouble>& i) {
+    return i.first <= m_v && m_v <= i.second;
+  }
+ private:
+  edouble m_v;
+};
+}
+void EqUnionConstraint::handleExecuteEnumerated(EnumeratedDomain& dest,
+                                                std::vector<ConstrainedVariableId>::const_iterator start,
+                                                const std::vector<ConstrainedVariableId>::const_iterator end) {
+  std::set<edouble> enumUnion;
+  std::vector<std::pair<edouble, edouble> > intervalUnion;
+
+  //collect enumerated and interval unions separately
+  for(std::vector<ConstrainedVariableId>::const_iterator it = start; it != end; ++it) {
+    Domain& temp = getCurrentDomain(*it);
+    if(temp.isEnumerated()) {
+      EnumeratedDomain& etemp = dynamic_cast<EnumeratedDomain&>(getCurrentDomain(*it));
+      enumUnion.insert(etemp.getValues().begin(), etemp.getValues().end());
+    }
+    else {
+      intervalUnion.push_back(std::make_pair(temp.getLowerBound(), temp.getUpperBound()));
+    }
+  }
+  //NOTE: if it turns out that a lot of time is being spent in checking values against
+  //the intervalUnion, it may be worth it to combine contiguous unions
+  
+  std::list<edouble> existingValues;
+  dest.getValues(existingValues);
+  for(std::list<edouble>::const_iterator it = existingValues.begin();
+      it != existingValues.end(); ++it) {
+    if((enumUnion.find(*it) == enumUnion.end()) &&
+       (std::find_if(intervalUnion.begin(), intervalUnion.end(), InInterval(*it)) ==
+          intervalUnion.end()))
+      dest.remove(*it);
+  }
+
+
+  for(std::vector<ConstrainedVariableId>::const_iterator it = start; it != end; ++it) {
+    if(dest.isEmpty())
+      getCurrentDomain(*it).empty();
+    else
+      getCurrentDomain(*it).intersect(dest);
+  }
+}
+
+
 
 
 } // end namespace EUROPA

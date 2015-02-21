@@ -44406,5 +44406,398 @@
 			<IntervalDomain lb="6.216149" ub="6.216149"/>
 			<IntervalDomain lb="2.09133" ub="2.09133"/>
 		</Outputs>
+	</Constraint>
+	<!-- Single value -->
+	<Constraint name="eqUnion" test="4100">
+	  <Inputs>
+	    <IntervalDomain lb="0" ub="0"/>
+	    <IntervalDomain lb="0" ub="0"/>
+	  </Inputs>
+	  <Outputs>
+	    <IntervalDomain lb="0" ub="0"/>
+	    <IntervalDomain lb="0" ub="0"/>
+	  </Outputs>
+	</Constraint>
+	<!-- Single range -->
+	<Constraint name="eqUnion" test="4101">
+	  <Inputs>
+	    <IntervalDomain lb="0" ub="100"/>
+	    <IntervalDomain lb="0" ub="100"/>
+	  </Inputs>
+	  <Outputs>
+	    <IntervalDomain lb="0" ub="100"/>
+	    <IntervalDomain lb="0" ub="100"/>
+	  </Outputs>
+	</Constraint>
+	<!-- Restriction to dest -->
+	<Constraint name="eqUnion" test="4102">
+	  <Inputs>
+	    <IntervalDomain lb="0" ub="1000"/>
+	    <IntervalDomain lb="0" ub="100"/>
+	  </Inputs>
+	  <Outputs>
+	    <IntervalDomain lb="0" ub="100"/>
+	    <IntervalDomain lb="0" ub="100"/>
+	  </Outputs>
+	</Constraint>
+	<!-- Restriction to arg -->
+	<Constraint name="eqUnion" test="4103">
+	  <Inputs>
+	    <IntervalDomain lb="0" ub="100"/>
+	    <IntervalDomain lb="0" ub="1000"/>
+	  </Inputs>
+	  <Outputs>
+	    <IntervalDomain lb="0" ub="100"/>
+	    <IntervalDomain lb="0" ub="100"/>
+	  </Outputs>
+	</Constraint>
+	<!-- Check negative -->
+	<Constraint name="eqUnion" test="4104">
+	  <Inputs>
+	    <IntervalDomain lb="-100" ub="100"/>
+	    <IntervalDomain lb="0" ub="100"/>
+	  </Inputs>
+	  <Outputs>
+	    <IntervalDomain lb="0" ub="100"/>
+	    <IntervalDomain lb="0" ub="100"/>
+	  </Outputs>
+	</Constraint>
+	<!-- Check negative -->
+	<Constraint name="eqUnion" test="4105">
+	  <Inputs>
+	    <IntervalDomain lb="0" ub="100"/>
+	    <IntervalDomain lb="-100" ub="100"/>
+	  </Inputs>
+	  <Outputs>
+	    <IntervalDomain lb="0" ub="100"/>
+	    <IntervalDomain lb="0" ub="100"/>
+	  </Outputs>
+	</Constraint>
+	<!-- Single disjoint -->
+	<Constraint name="eqUnion" test="4106">
+	  <Inputs>	    
+	    <IntervalDomain lb="0" ub="100"/>
+	    <IntervalDomain lb="110" ub="200"/>
+	  </Inputs>
+	  <Outputs>
+	    <IntervalDomain/>
+	    <IntervalDomain/>
+	  </Outputs>
+	</Constraint>
+	<!-- Two value -->
+	<Constraint name="eqUnion" test="4107">
+	  <Inputs>
+	    <IntervalDomain lb="0" ub="1"/>
+	    <IntervalDomain lb="0" ub="0"/>
+	    <IntervalDomain lb="1" ub="1"/>
+	  </Inputs>
+	  <Outputs>
+	    <IntervalDomain lb="0" ub="1"/>
+	    <IntervalDomain lb="0" ub="0"/>
+	    <IntervalDomain lb="1" ub="1"/>
+	  </Outputs>
+	</Constraint>
+	<!-- Two value restriction to dest-->
+	<Constraint name="eqUnion" test="4108">
+	  <Inputs>
+	    <IntervalDomain lb="0" ub="2"/>
+	    <IntervalDomain lb="0" ub="0"/>
+	    <IntervalDomain lb="1" ub="1"/>
+	  </Inputs>
+	  <Outputs>
+	    <IntervalDomain lb="0" ub="1"/>
+	    <IntervalDomain lb="0" ub="0"/>
+	    <IntervalDomain lb="1" ub="1"/>
+	  </Outputs>
+	</Constraint>
+	<!-- Two value restriction to one arg-->
+	<Constraint name="eqUnion" test="4109">
+	  <Inputs>
+	    <IntervalDomain lb="0" ub="1"/>
+	    <IntervalDomain lb="0" ub="0"/>
+	    <IntervalDomain lb="1" ub="2"/>
+	  </Inputs>
+	  <Outputs>
+	    <IntervalDomain lb="0" ub="1"/>
+	    <IntervalDomain lb="0" ub="0"/>
+	    <IntervalDomain lb="1" ub="1"/>
+	  </Outputs>
+	</Constraint>
+	<!-- Two value restriction of both args-->
+	<Constraint name="eqUnion" test="4110">
+	  <Inputs>
+	    <IntervalDomain lb="0" ub="1"/>
+	    <IntervalDomain lb="-1" ub="0"/>
+	    <IntervalDomain lb="1" ub="2"/>
+	  </Inputs>
+	  <Outputs>
+	    <IntervalDomain lb="0"  ub="1"/>
+	    <IntervalDomain lb="0" ub="0"/>
+	    <IntervalDomain lb="1" ub="1"/>
+	  </Outputs>
+	</Constraint>
+	<!-- Two disjoint values in result-->
+	<Constraint name="eqUnion" test="4111">
+	  <Inputs>
+	    <IntervalDomain lb="0" ub="100"/>
+	    <IntervalDomain lb="20" ub="30"/>
+	    <IntervalDomain lb="80" ub="90"/>
+	  </Inputs>
+	  <Outputs>
+	    <IntervalDomain lb="20"  ub="90"/>
+	    <IntervalDomain lb="20" ub="30"/>
+	    <IntervalDomain lb="80" ub="90"/>
+	  </Outputs>
+	</Constraint>
+	<!-- enumerated domain tests -->
+	<!-- Single value -->
+	<Constraint name="eqUnion" test="4200">
+	  <Inputs>
+	    <NumericDomain><element value="0"/></NumericDomain>
+	    <NumericDomain><element value="0"/></NumericDomain>
+	  </Inputs>
+	  <Outputs>
+	    <NumericDomain><element value="0"/></NumericDomain>
+	    <NumericDomain><element value="0"/></NumericDomain>
+	  </Outputs>
+	</Constraint>
+	<!-- Two values -->
+	<Constraint name="eqUnion" test="4201">
+	  <Inputs>
+	    <NumericDomain><element value="0"/><element value="100"/></NumericDomain>
+	    <NumericDomain><element value="0"/><element value="100"/></NumericDomain>
+	  </Inputs>
+	  <Outputs>
+	    <NumericDomain><element value="0"/><element value="100"/></NumericDomain>
+	    <NumericDomain><element value="0"/><element value="100"/></NumericDomain>
+	  </Outputs>
+	</Constraint>
+	<!-- Restriction to dest -->
+	<Constraint name="eqUnion" test="4202">
+	  <Inputs>
+	    <NumericDomain><element value="0"/><element value="100"/><element value="1000"/></NumericDomain>
+	    <NumericDomain><element value="0"/><element value="100"/></NumericDomain>
+	  </Inputs>
+	  <Outputs>
+	    <NumericDomain><element value="0"/><element value="100"/></NumericDomain>
+	    <NumericDomain><element value="0"/><element value="100"/></NumericDomain>
+	  </Outputs>
+	</Constraint>
+	<!-- Restriction to arg -->
+	<Constraint name="eqUnion" test="4203">
+	  <Inputs>
+	    <NumericDomain><element value="0"/><element value="100"/></NumericDomain>
+	    <NumericDomain><element value="0"/><element value="100"/><element value="1000"/></NumericDomain>
+	  </Inputs>
+	  <Outputs>
+	    <NumericDomain><element value="0"/><element value="100"/></NumericDomain>
+	    <NumericDomain><element value="0"/><element value="100"/></NumericDomain>
+	  </Outputs>
+	</Constraint>
+	<!-- Single disjoint -->
+	<Constraint name="eqUnion" test="4206">
+	  <Inputs>	    
+	    <NumericDomain><element value="0"/><element value="100"/></NumericDomain>
+	    <NumericDomain><element value="50"/><element value="130"/></NumericDomain>
+	  </Inputs>
+	  <Outputs>
+	    <NumericDomain/>
+	    <NumericDomain/>
+	  </Outputs>
+	</Constraint>
+	<!-- Two value -->
+	<Constraint name="eqUnion" test="4207">
+	  <Inputs>
+	    <NumericDomain><element value="0"/><element value="1"/></NumericDomain>
+	    <NumericDomain><element value="0"/></NumericDomain>
+	    <NumericDomain><element value="1"/></NumericDomain>
+	  </Inputs>
+	  <Outputs>
+	    <NumericDomain><element value="0"/><element value="1"/></NumericDomain>
+	    <NumericDomain><element value="0"/></NumericDomain>
+	    <NumericDomain><element value="1"/></NumericDomain>
+	  </Outputs>
+	</Constraint>
+	<!-- Two value restriction to dest-->
+	<Constraint name="eqUnion" test="4208">
+	  <Inputs>
+	    <NumericDomain><element value="0"/><element value="1"/><element value="2"/></NumericDomain>
+	    <NumericDomain><element value="0"/></NumericDomain>
+	    <NumericDomain><element value="1"/></NumericDomain>
+	  </Inputs>
+	  <Outputs>
+	    <NumericDomain><element value="0"/><element value="1"/></NumericDomain>
+	    <NumericDomain><element value="0"/></NumericDomain>
+	    <NumericDomain><element value="1"/></NumericDomain>
+	  </Outputs>
+	</Constraint>
+	<!-- Two value restriction to one arg-->
+	<Constraint name="eqUnion" test="4209">
+	  <Inputs>
+	    <NumericDomain><element value="0"/><element value="1"/></NumericDomain>
+	    <NumericDomain><element value="0"/><element value="2"/></NumericDomain>
+	    <NumericDomain><element value="1"/></NumericDomain>
+	  </Inputs>
+	  <Outputs>
+	    <NumericDomain><element value="0"/><element value="1"/></NumericDomain>
+	    <NumericDomain><element value="0"/></NumericDomain>
+	    <NumericDomain><element value="1"/></NumericDomain>
+	  </Outputs>
+	</Constraint>
+	<!-- Two value restriction of both args-->
+	<Constraint name="eqUnion" test="4210">
+	  <Inputs>
+	    <NumericDomain><element value="0"/><element value="1"/></NumericDomain>
+	    <NumericDomain><element value="-1"/><element value="0"/></NumericDomain>
+	    <NumericDomain><element value="1"/><element value="2"/></NumericDomain>
+	  </Inputs>
+	  <Outputs>
+	    <NumericDomain><element value="0" /><element value="1"/></NumericDomain>
+	    <NumericDomain><element value="0"/></NumericDomain>
+	    <NumericDomain><element value="1"/></NumericDomain>
+	  </Outputs>
+	</Constraint>
+	<!-- mixed type tests -->
+	<!-- Single value -->
+	<Constraint name="eqUnion" test="4300">
+	  <Inputs>
+	    <NumericDomain><element value="0"/></NumericDomain>
+	    <IntervalDomain lb="0" ub="0"/>
+	  </Inputs>
+	  <Outputs>
+	    <NumericDomain><element value="0"/></NumericDomain>
+	    <IntervalDomain lb="0" ub="0"/>
+	  </Outputs>
+	</Constraint>
+	<!-- Single range -->
+	<Constraint name="eqUnion" test="4301">
+	  <Inputs>
+	    <NumericDomain><element value="0"/><element value="100"/></NumericDomain>
+	    <IntervalDomain lb="0" ub="100"/>
+	  </Inputs>
+	  <Outputs>
+	    <NumericDomain><element value="0"/><element value="100"/></NumericDomain>
+	    <IntervalDomain lb="0" ub="100"/>
+	  </Outputs>
+	</Constraint>
+	<!-- Restriction to dest -->
+	<Constraint name="eqUnion" test="4302">
+	  <Inputs>
+	    <NumericDomain><element value="0"/><element value="1"/><element value="2"/></NumericDomain>
+	    <IntervalDomain lb="0" ub="1"/>
+	  </Inputs>
+	  <Outputs>
+	    <NumericDomain><element value="0"/><element value="1"/></NumericDomain>
+	    <IntervalDomain lb="0" ub="1"/>
+	  </Outputs>
+	</Constraint>
+	<!-- Restriction to arg -->
+	<Constraint name="eqUnion" test="4303">
+	  <Inputs>
+	    <NumericDomain><element value="0"/><element value="1"/></NumericDomain>
+	    <IntervalDomain lb="0" ub="3"/>
+	  </Inputs>
+	  <Outputs>
+	    <NumericDomain><element value="0"/><element value="1"/></NumericDomain>
+	    <IntervalDomain lb="0" ub="1"/>
+	  </Outputs>
+	</Constraint>
+	<!-- Check negative -->
+	<Constraint name="eqUnion" test="4304">
+	  <Inputs>
+	    <NumericDomain><element value="-100"/><element value="100"/></NumericDomain>
+	    <IntervalDomain lb="0" ub="100"/>
+	  </Inputs>
+	  <Outputs>
+	    <NumericDomain><element value="100"/></NumericDomain>
+	    <IntervalDomain lb="100" ub="100"/>
+	  </Outputs>
+	</Constraint>
+	<!-- Check negative -->
+	<Constraint name="eqUnion" test="4305">
+	  <Inputs>
+	    <NumericDomain><element value="0"/><element value="100"/></NumericDomain>
+	    <IntervalDomain lb="-100" ub="100"/>
+	  </Inputs>
+	  <Outputs>
+	    <NumericDomain><element value="0"/><element value="100"/></NumericDomain>
+	    <IntervalDomain lb="0" ub="100"/>
+	  </Outputs>
+	</Constraint>
+	<!-- Single disjoint -->
+	<Constraint name="eqUnion" test="4306">
+	  <Inputs>	    
+	    <NumericDomain><element value="0"/><element value="100"/></NumericDomain>
+	    <IntervalDomain lb="110" ub="200"/>
+	  </Inputs>
+	  <Outputs>
+	    <NumericDomain></NumericDomain>
+	    <IntervalDomain/>
+	  </Outputs>
+	</Constraint>
+	<!-- Two value -->
+	<Constraint name="eqUnion" test="4307">
+	  <Inputs>
+	    <NumericDomain><element value="0"/><element value="1"/></NumericDomain>
+	    <IntervalDomain lb="0" ub="0"/>
+	    <IntervalDomain lb="1" ub="1"/>
+	  </Inputs>
+	  <Outputs>
+	    <NumericDomain><element value="0"/><element value="1"/></NumericDomain>
+	    <IntervalDomain lb="0" ub="0"/>
+	    <IntervalDomain lb="1" ub="1"/>
+	  </Outputs>
+	</Constraint>
+	<!-- Two value restriction to dest-->
+	<Constraint name="eqUnion" test="4308">
+	  <Inputs>
+	    <NumericDomain><element value="0"/><element value="1"/><element value="2"/></NumericDomain>
+	    <IntervalDomain lb="0" ub="0"/>
+	    <NumericDomain><element value="1"/></NumericDomain>
+	  </Inputs>
+	  <Outputs>
+	    <NumericDomain><element value="0"/><element value="1"/></NumericDomain>
+	    <IntervalDomain lb="0" ub="0"/>
+	    <NumericDomain><element value="1"/></NumericDomain>
+	  </Outputs>
+	</Constraint>
+	<!-- Two value restriction to one arg-->
+	<Constraint name="eqUnion" test="4309">
+	  <Inputs>
+	    <NumericDomain><element value="0"/><element value="1"/></NumericDomain>
+	    <IntervalDomain lb="0" ub="0"/>
+	    <NumericDomain><element value="0"/><element value="1"/><element value="2"/></NumericDomain>
+	  </Inputs>
+	  <Outputs>
+	    <NumericDomain><element value="0"/><element value="1"/></NumericDomain>
+	    <IntervalDomain lb="0" ub="0"/>
+	    <NumericDomain><element value="0"/><element value="1"/></NumericDomain>
+	  </Outputs>
+	</Constraint>
+	<!-- Two value restriction of both args-->
+	<Constraint name="eqUnion" test="4310">
+	  <Inputs>
+	    <NumericDomain><element value="0"/><element value="1"/></NumericDomain>
+	    <IntervalDomain lb="-1" ub="0"/>
+	    <NumericDomain><element value="1"/><element value="2"/></NumericDomain>
+	  </Inputs>
+	  <Outputs>
+	    <NumericDomain><element value="0"/><element value="1"/></NumericDomain>
+	    <IntervalDomain lb="0" ub="0"/>
+	    <NumericDomain><element value="1"/></NumericDomain>
+	  </Outputs>
+	</Constraint>
+	<!-- Two disjoint values in result-->
+	<Constraint name="eqUnion" test="4311">
+	  <Inputs>
+	    <NumericDomain><element value="0"/><element value="1"/><element value="2"/><element value="3"/></NumericDomain>
+	    <IntervalDomain lb="-1" ub="1"/>
+	    <NumericDomain><element value="2"/><element value="3"/></NumericDomain>
+	  </Inputs>
+	  <Outputs>
+	    <NumericDomain><element value="0"/><element value="1"/><element value="2"/><element value="3"/></NumericDomain>
+	    <IntervalDomain lb="0" ub="1"/>
+	    <NumericDomain><element value="2"/><element value="3"/></NumericDomain>
+	  </Outputs>
 	</Constraint>	
 </ConstraintTests>
