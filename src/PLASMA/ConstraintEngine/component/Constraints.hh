@@ -1276,5 +1276,25 @@ typedef DataTypeCheck<WithinBounds, And<NArgs<3>, And<All<Numeric>,
                                                       Mutually<Comparable<> > > > >
 WithinBoundsCT;
 
+
+class EqUnionConstraint : public Constraint {
+ public:
+  EqUnionConstraint(const LabelStr& name,
+                    const LabelStr& propagatorName,
+                    const ConstraintEngineId constraintEngine,
+                    const std::vector<ConstrainedVariableId>& variables);
+
+  void handleExecute();
+  void handleExecuteInterval(IntervalDomain& dest,
+                             std::vector<ConstrainedVariableId>::const_iterator start,
+                             const std::vector<ConstrainedVariableId>::const_iterator end);
+  void handleExecuteEnumerated(EnumeratedDomain& dest,
+                               std::vector<ConstrainedVariableId>::const_iterator start,
+                               const std::vector<ConstrainedVariableId>::const_iterator end);
+
+};
+typedef DataTypeCheck<EqUnionConstraint, And<AtLeastNArgs<2>,
+                                             All<Assignable<First<> >, Second<>, End > > >
+EqUnionCT;
 }
 #endif

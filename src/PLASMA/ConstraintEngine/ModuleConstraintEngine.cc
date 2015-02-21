@@ -148,6 +148,8 @@ void ModuleConstraintEngine::uninitialize(EngineId engine) {
       REGISTER_CONSTRAINT_TYPE(ces,CeilCT, "ceil", "Default");
       REGISTER_CONSTRAINT_TYPE(ces,RandCT, "rand", "Default");
 
+      REGISTER_CONSTRAINT_TYPE(ces,EqUnionCT, "eqUnion", "Default");
+
       // Rotate scope right one (last var moves to front) to ...
       // ... change addleq constraint to GreaterOrEqThan constraint:
       REGISTER_ROTATED_CONSTRAINT(ces,"addLeq", "Default", "greaterOrEqThanSum", 1);
