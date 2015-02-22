@@ -14,7 +14,8 @@ set(resource_tests  better-res
   resource-backtrack-test
   resource-backtrack-test-reservoir
   #Rover-transaction
-  Rover-transaction-reservoir)
+  Rover-transaction-reservoir
+  constraint-to-temporal)
 
 set(system_tests backtrack-test
   merge-with-open-domain
