@@ -1,0 +1,21 @@
+#include "PlannerConfig.nddl"
+#include "Resources.nddl"
+
+class Foo extends Reservoir {
+  Foo() {
+    super(50.0, 0.0, 0.0);    
+  }
+}
+
+PlannerConfig world = new PlannerConfig();
+Foo foo = new Foo();
+close();
+
+goal(foo.consume bar1);
+goal(foo.consume bar2);
+
+int reftime1 = 0;
+int reftime2 = 100;
+
+temporalDistance(0, reftime1, bar1.time);
+eq(bar2.time, reftime2);

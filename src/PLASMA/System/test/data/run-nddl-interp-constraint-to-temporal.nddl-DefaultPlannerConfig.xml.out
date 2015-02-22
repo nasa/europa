@@ -1,0 +1,78 @@
+Created node [id_362] initially enabled
+Created node [id_363] initially enabled
+Maximum flow instance created with source [id_362] and sink [id_363]
+Created node [id_362] initially enabled
+Created node [id_363] initially enabled
+Maximum flow instance created with source [id_362] and sink [id_363]
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[100, 100]
+			world.m_maxPlannerSteps=int:CLOSED[200, 200]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Foo:foo*************************
+		Tokens *************************
+				{0}
+				Foo.consume()
+				Key=37  Master=NONE
+				{0}
+				{100}
+				Foo.consume()
+				Key=49  Master=NONE
+				{100}
+		End Tokens *********************
+		Variables *************************
+			foo.initialCapacity=float:CLOSED[50, 50]
+			foo.levelLimitMin=float:CLOSED[0, 0]
+			foo.levelLimitMax=float:CLOSED[0, 0]
+			foo.productionRateMax=float:CLOSED[+inf, +inf]
+			foo.productionMax=float:CLOSED[+inf, +inf]
+			foo.consumptionRateMax=float:CLOSED[+inf, +inf]
+			foo.consumptionMax=float:CLOSED[+inf, +inf]
+		End Variables *********************
+	End Foo:foo*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(6)}
+	foo=Foo:CLOSED{foo(20)}
+	reftime1=int:CLOSED[0, 0]
+	reftime2=int:CLOSED[100, 100]
+Objects *************************
+	PlannerConfig:world*************************
+		Variables *************************
+			world.m_horizonStart=int:CLOSED[0, 0]
+			world.m_horizonEnd=int:CLOSED[100, 100]
+			world.m_maxPlannerSteps=int:CLOSED[200, 200]
+			world.m_maxPlannerDepth=int:CLOSED[+inf, +inf]
+		End Variables *********************
+	End PlannerConfig:world*************************
+	Foo:foo*************************
+		Tokens *************************
+				{0}
+				Foo.consume()
+				Key=37  Master=NONE
+				{0}
+				{100}
+				Foo.consume()
+				Key=49  Master=NONE
+				{100}
+		End Tokens *********************
+		Variables *************************
+			foo.initialCapacity=float:CLOSED[50, 50]
+			foo.levelLimitMin=float:CLOSED[0, 0]
+			foo.levelLimitMax=float:CLOSED[0, 0]
+			foo.productionRateMax=float:CLOSED[+inf, +inf]
+			foo.productionMax=float:CLOSED[+inf, +inf]
+			foo.consumptionRateMax=float:CLOSED[+inf, +inf]
+			foo.consumptionMax=float:CLOSED[+inf, +inf]
+		End Variables *********************
+	End Foo:foo*************************
+Global Variables*************************
+	world=PlannerConfig:CLOSED{world(6)}
+	foo=Foo:CLOSED{foo(20)}
+	reftime1=int:CLOSED[0, 0]
+	reftime2=int:CLOSED[100, 100]
+
+Finished
