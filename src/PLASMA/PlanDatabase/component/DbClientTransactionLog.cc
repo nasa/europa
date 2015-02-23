@@ -45,31 +45,29 @@ namespace EUROPA {
     popTransaction();
   }
 
-  void DbClientTransactionLog::notifyVariableCreated(const ConstrainedVariableId variable) {
-    if(!variable->isInternal()) {
-      TiXmlElement * element = allocateXmlElement("var");
-      const Domain& baseDomain = variable->baseDomain();
-      std::string type = baseDomain.getTypeName().toString();
-      if (m_client->getSchema()->isObjectType(type)) {
-        ObjectId object = Entity::getTypedEntity<Object>(baseDomain.getLowerBound());
-        check_error(object.isValid());
-        type = object->getType().toString();
-      }
-      element->SetAttribute( "type", type );
-      if (LabelStr::isString(variable->getName())) {
-          element->SetAttribute( "name", variable->getName().toString() );
-      }
-      debugMsg("notifyVariableCreated"," variable name = " << variable->getName().c_str() << " typeName = " << type << " type = " << baseDomain.getTypeName().c_str());
-      
-      element->SetAttribute("index", static_cast<int>(m_client->getIndexByVariable(variable)));
-      
-      if (!baseDomain.isEmpty()) {
-        TiXmlElement * value = abstractDomainAsXml(&baseDomain);
-        element->LinkEndChild(value);
-      }
-      pushTransaction(element);
+void DbClientTransactionLog::notifyVariableCreated(const ConstrainedVariableId variable) {
+  if(!variable->isInternal()) {
+    TiXmlElement * element = allocateXmlElement("var");
+    const Domain& baseDomain = variable->baseDomain();
+    std::string type = baseDomain.getTypeName().toString();
+    if (m_client->getSchema()->isObjectType(type)) {
+      ObjectId object = Entity::getTypedEntity<Object>(baseDomain.getLowerBound());
+      check_error(object.isValid());
+      type = object->getType().toString();
     }
+    element->SetAttribute( "type", type );
+    element->SetAttribute( "name", variable->getName().toString() );
+    debugMsg("notifyVariableCreated"," variable name = " << variable->getName().c_str() << " typeName = " << type << " type = " << baseDomain.getTypeName().c_str());
+      
+    element->SetAttribute("index", static_cast<int>(m_client->getIndexByVariable(variable)));
+      
+    if (!baseDomain.isEmpty()) {
+      TiXmlElement * value = abstractDomainAsXml(&baseDomain);
+      element->LinkEndChild(value);
+    }
+    pushTransaction(element);
   }
+}
 
 void DbClientTransactionLog::notifyVariableDeleted(const ConstrainedVariableId variable) {
   if(!variable->isInternal()) {
@@ -86,18 +84,17 @@ void DbClientTransactionLog::notifyVariableDeleted(const ConstrainedVariableId v
     notifyObjectCreated(object, noArguments);
   }
 
-  void DbClientTransactionLog::notifyObjectCreated(const ObjectId object, const std::vector<const Domain*>& arguments){
-    TiXmlElement * element = allocateXmlElement("new");
-    if (LabelStr::isString(object->getName())) {
-      element->SetAttribute("name", object->getName().toString());
-    }
-    element->SetAttribute("type", object->getType().toString());
-    std::vector<const Domain*>::const_iterator iter;
-    for (iter = arguments.begin() ; iter != arguments.end() ; iter++) {
-      element->LinkEndChild(abstractDomainAsXml(*iter));
-    }
-    pushTransaction(element);
+void DbClientTransactionLog::notifyObjectCreated(const ObjectId object,
+                                                 const std::vector<const Domain*>& arguments){
+  TiXmlElement * element = allocateXmlElement("new");
+  element->SetAttribute("name", object->getName().toString());
+  element->SetAttribute("type", object->getType().toString());
+  std::vector<const Domain*>::const_iterator iter;
+  for (iter = arguments.begin() ; iter != arguments.end() ; iter++) {
+    element->LinkEndChild(abstractDomainAsXml(*iter));
   }
+  pushTransaction(element);
+}
 
   void DbClientTransactionLog::notifyObjectDeleted(const ObjectId object) {
     TiXmlElement* element = allocateXmlElement("deleteobject");
@@ -123,7 +120,6 @@ void DbClientTransactionLog::notifyVariableDeleted(const ConstrainedVariableId v
                               allocateXmlElement("goal"));
     TiXmlElement * instance = allocateXmlElement("predicateinstance");
     instance->SetAttribute("name", m_tokensCreated++);
-    check_error(LabelStr::isString(token->getPredicateName()));
     instance->SetAttribute("type", token->getPredicateName().toString());
     instance->SetAttribute("path", m_client->getPathAsString(token));
     element->LinkEndChild(instance);

@@ -985,6 +985,7 @@ std::list<edouble> convert(const std::list<LabelStr>& values) {
 }
 
   StringDomain::StringDomain(const DataTypeId dt) : EnumeratedDomain(dt) {}
+  StringDomain::StringDomain(const LabelStr& value, const DataTypeId dt) : EnumeratedDomain(dt,value) {}
   StringDomain::StringDomain(edouble value, const DataTypeId dt) : EnumeratedDomain(dt,value) {}
   StringDomain::StringDomain(double value, const DataTypeId dt) : EnumeratedDomain(dt,value) {}
   StringDomain::StringDomain(const std::string& value, const DataTypeId dt) : EnumeratedDomain(dt,LabelStr(value)) {}
@@ -1009,6 +1010,15 @@ StringDomain::StringDomain(const std::list<LabelStr>& values, const DataTypeId d
     EnumeratedDomain::set(value);
   }
 
+void StringDomain::set(const LabelStr& value) {
+  checkError(isEmpty() || isMember(value),
+             value << " is not a member of the domain :" << toString());
+
+  // Insert the value into the set as a special behavior for strings
+  m_values.insert(value);
+  EnumeratedDomain::set(value);
+}
+
   bool StringDomain::isMember(edouble value) const {
       // This is a hack so that specify() will work
       // string domain needs to be able to handle all situations that involve literal string gracefully
@@ -1030,6 +1040,10 @@ StringDomain::StringDomain(const std::list<LabelStr>& values, const DataTypeId d
     return isMember(static_cast<edouble>(lbl));
   }
 
+  bool StringDomain::isMember(const LabelStr& value) const{
+    return isMember(static_cast<edouble>(value));
+  }
+
   void StringDomain::insert(const std::string& value){
     LabelStr lbl(value);
     EnumeratedDomain::insert(static_cast<edouble>(lbl));
@@ -1038,6 +1052,10 @@ StringDomain::StringDomain(const std::list<LabelStr>& values, const DataTypeId d
   void StringDomain::insert(edouble value){
     EnumeratedDomain::insert(value);
   }
+
+void StringDomain::insert(const LabelStr& value) {
+  EnumeratedDomain::insert(value.getKey());
+}
 
   SymbolDomain::SymbolDomain(const DataTypeId dt) : EnumeratedDomain(dt) {}
   SymbolDomain::SymbolDomain(edouble value, const DataTypeId dt) : EnumeratedDomain(dt,value) {}
