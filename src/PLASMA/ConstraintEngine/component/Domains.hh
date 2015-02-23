@@ -571,6 +571,7 @@ namespace EUROPA {
     StringDomain(const DataTypeId dt = StringDT::instance());
     StringDomain(edouble value, const DataTypeId dt = StringDT::instance());
     StringDomain(double value, const DataTypeId dt = StringDT::instance());
+    StringDomain(const LabelStr& value, const DataTypeId dt = StringDT::instance());
     StringDomain(const std::string& value, const DataTypeId dt = StringDT::instance());
     StringDomain(const std::list<edouble>& values, const DataTypeId dt = StringDT::instance());
     StringDomain(const std::list<LabelStr>& values, const DataTypeId dt = StringDT::instance());
@@ -583,13 +584,17 @@ namespace EUROPA {
      * @param value The value to set. Must be a LabelStr.
      */
     void set(edouble value);
-
     bool isMember(edouble value) const;
 
     /** String specific bindings for user convenience **/
     void set(const std::string& value);
+    void set(const LabelStr& value);
     bool isMember(const std::string& value) const;
+    bool isMember(const LabelStr& value) const;
+    bool isMember(const char* value) const {return isMember(LabelStr(value));}
     void insert(const std::string& value);
+    void insert(const LabelStr& value);
+    void insert(const char* value) {insert(LabelStr(value));}
     void insert(edouble value);
     void insert(const std::list<edouble>& values) {EnumeratedDomain::insert(values);}
   };

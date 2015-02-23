@@ -68,6 +68,7 @@ namespace EUROPA {
       return(m_key);
     }
 
+
 #else
 
     /**
@@ -81,6 +82,10 @@ namespace EUROPA {
     operator edouble () const;
 
 #endif
+    inline operator std::string() const {
+      return toString();
+    }
+
 
     /**
      * @brief Lexical ordering test - less than
