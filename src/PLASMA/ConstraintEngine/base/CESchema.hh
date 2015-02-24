@@ -49,9 +49,9 @@ class CESchema : public EngineComponent
 
  protected:
   CESchemaId m_id;
-  std::map<edouble, DataTypeId> m_dataTypes;
-  std::map<edouble, ConstraintTypeId > m_constraintTypes;
-  std::map<edouble, CFunctionId> m_cfunctions;
+  std::map<std::string, DataTypeId> m_dataTypes;
+  std::map<std::string, ConstraintTypeId > m_constraintTypes;
+  std::map<std::string, CFunctionId> m_cfunctions;
 };
 
 } // namespace EUROPA

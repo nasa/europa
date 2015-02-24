@@ -134,7 +134,7 @@ FlawManager::FlawManager(const TiXmlElement& configData)
       // then we search through the map and remove any instances of it.
       if(Id<FlawHandler::VariableListener>::convertable(constraint)) {
         debugMsg("FlawManager:notifyRemoved:Constraint", getId() << "->notifyRemoved( " <<
-                 constraint->getName().toString() << "(" << constraint->getKey() << ") )");
+                 constraint->getName() << "(" << constraint->getKey() << ") )");
         Id<FlawHandler::VariableListener> listener = constraint;
         
         // As the target of a FlawHandler::VariableListener is only set by its constructor,

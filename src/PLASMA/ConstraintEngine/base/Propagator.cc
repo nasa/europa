@@ -27,7 +27,7 @@ namespace EUROPA
 
   const PropagatorId Propagator::getId() const {return m_id;}
 
-  const LabelStr& Propagator::getName() const {return m_name;}
+const std::string& Propagator::getName() const {return m_name;}
 
   const ConstraintEngineId Propagator::getConstraintEngine() const {return m_constraintEngine;}
 

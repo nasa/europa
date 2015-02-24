@@ -49,7 +49,7 @@ public:
 
     const DataTypeId getVarType() const; // Data type for a variable that holds a reference to an object
 
-    virtual const LabelStr& getName() const;
+  virtual const std::string& getName() const;
     virtual const ObjectTypeId getParent() const;
     virtual bool isNative() const;
 
@@ -58,7 +58,7 @@ public:
     virtual const DataTypeId getMemberType(const char* name) const;
 
     virtual void addObjectFactory(const ObjectFactoryId factory);
-    virtual const std::map<edouble,ObjectFactoryId>& getObjectFactories() const;
+  virtual const std::map<std::string,ObjectFactoryId>& getObjectFactories() const;
 
     virtual void addTokenType(const TokenTypeId factory);
     virtual const std::map<edouble,TokenTypeId>& getTokenTypes() const;
@@ -81,10 +81,10 @@ public:
 protected:
     ObjectTypeId m_id;
     DataTypeId m_varType;
-    LabelStr m_name;
+  std::string m_name;
     ObjectTypeId m_parent;
     bool m_isNative;
-    std::map<edouble,ObjectFactoryId> m_objectFactories;
+  std::map<std::string,ObjectFactoryId> m_objectFactories;
     std::map<edouble,TokenTypeId> m_tokenTypes;
     std::map<std::string,DataTypeId> m_members;
 };
@@ -131,8 +131,8 @@ public:
 
 protected:
 	ObjectTypeMgrId m_id;
-    std::map<edouble, ObjectTypeId> m_objTypes;
-	std::map<edouble, ObjectFactoryId> m_factories; // TODO: should delegate to object types instead
+  std::map<std::string, ObjectTypeId> m_objTypes;
+  std::map<std::string, ObjectFactoryId> m_factories; // TODO: should delegate to object types instead
 };
 
 /**
@@ -152,9 +152,10 @@ public:
   const LabelStr& getSignature() const;
 
   /**
-   * @brief Retreive the type signature as a vector of types
+   * @brief Retreive the type signature as a vector of type names.
+   * TODO: re-write this so it actually returns DataTypes.
    */
-  const std::vector<LabelStr>& getSignatureTypes() const;
+  const std::vector<std::string>& getSignatureTypes() const;
 
   /**
    * @brief Create a root object instance
@@ -190,7 +191,7 @@ public:
 private:
   ObjectFactoryId m_id;
   LabelStr m_signature;
-  std::vector<LabelStr> m_signatureTypes;
+  std::vector<std::string> m_signatureTypes;
 };
 
 // Call to super inside a constructor

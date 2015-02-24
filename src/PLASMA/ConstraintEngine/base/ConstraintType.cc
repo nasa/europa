@@ -27,7 +27,7 @@ ConstraintType::~ConstraintType()
 
 const ConstraintTypeId ConstraintType::getId() const {return m_id;}
 
-const LabelStr& ConstraintType::getName() const { return m_name; }
+const std::string& ConstraintType::getName() const { return m_name; }
 
 bool ConstraintType::isSystemDefined() const { return m_systemDefined;  }
 

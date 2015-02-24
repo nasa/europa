@@ -405,7 +405,7 @@ DataTypeId NddlSymbolTable::getTypeForVar(const char* qualifiedName,std::string&
             curVarName = vars[idx];
             idx++;
         }
-        curVarType = dt->getName().toString();
+        curVarType = dt->getName();
 
         for (;idx<vars.size();idx++) {
             ObjectTypeId ot = getObjectType(curVarType.c_str());
@@ -421,7 +421,7 @@ DataTypeId NddlSymbolTable::getTypeForVar(const char* qualifiedName,std::string&
             }
 
             curVarName = vars[idx];
-            curVarType = dt->getName().toString();
+            curVarType = dt->getName();
         }
     }
 
@@ -506,7 +506,7 @@ TokenTypeId NddlSymbolTable::getTypeForToken(const char* qualifiedName,
     }
 
     std::string curVarName=parentName;
-    std::string curVarType = dt->getName().toString();
+    std::string curVarType = dt->getName();
     unsigned int idx = 0;
     for (;idx<vars.size();idx++) {
       dt = ot->getMemberType(vars[idx].c_str());
@@ -522,10 +522,10 @@ TokenTypeId NddlSymbolTable::getTypeForToken(const char* qualifiedName,
       }
 
       curVarName = vars[idx];
-      curVarType = dt->getName().toString();
+      curVarType = dt->getName();
     }
 
-    tokenType = ot->getName().toString()+"."+tokenType;
+    tokenType = ot->getName()+"."+tokenType;
     debugMsg("NddlSymbolTable:getTypeForToken","looking for tokenType " << tokenType);
     return getTokenType(tokenType.c_str());
   }
@@ -666,7 +666,7 @@ NddlClassSymbolTable::~NddlClassSymbolTable()
 
 DataTypeId NddlClassSymbolTable::getDataType(const char* name) const
 {
-    if (m_objectType->getName().toString()==name)
+    if (m_objectType->getName()==name)
         return m_objectType->getVarType();
 
     return NddlSymbolTable::getDataType(name);
@@ -674,7 +674,7 @@ DataTypeId NddlClassSymbolTable::getDataType(const char* name) const
 
 ObjectTypeId NddlClassSymbolTable::getObjectType(const char* name) const
 {
-    if (m_objectType->getName().toString()==name)
+    if (m_objectType->getName()==name)
         return m_objectType->getId();
 
     return NddlSymbolTable::getObjectType(name);
@@ -721,7 +721,7 @@ TokenTypeId NddlTokenSymbolTable::getTokenType(const char* name) const
 
     if (tt.isNoId()) {
         // Try implicit qualification
-        std::string qualifiedName = m_objectType->getName().toString()+"."+name;
+        std::string qualifiedName = m_objectType->getName()+"."+name;
         tt= NddlSymbolTable::getTokenType(qualifiedName.c_str());
     }
 

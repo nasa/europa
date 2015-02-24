@@ -55,7 +55,7 @@ namespace EUROPA{
 
     
     virtual const std::string& getEntityName() const;
-    virtual const LabelStr& getName() const;
+    virtual const std::string& getName() const;
 
     virtual const std::string& getEntityType() const;
 

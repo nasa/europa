@@ -75,7 +75,7 @@ namespace EUROPA {
     /**
      * @brief Accessor
      */
-    const LabelStr& getName() const;
+    const std::string& getName() const;
 
     /**
      * @brief Accessor

@@ -1554,7 +1554,7 @@ class IntrinsicsTest {
 
       copyPtr = customDom.copy();
       CPPUNIT_ASSERT(copyPtr->isBool());
-      CPPUNIT_ASSERT(copyPtr->getTypeName().toString() == BoolDT::NAME());
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == BoolDT::NAME());
       CPPUNIT_ASSERT((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
       CPPUNIT_ASSERT(!(dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
       delete copyPtr;
@@ -1581,7 +1581,7 @@ class IntrinsicsTest {
       NumericDomain oneDom(2.7); // Singletn
 
       copyPtr = emptyOpen.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("float"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == "float");
       CPPUNIT_ASSERT(copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isNumeric());
       CPPUNIT_ASSERT(copyPtr->isEnumerated());
@@ -1593,7 +1593,7 @@ class IntrinsicsTest {
       delete copyPtr;
 
       copyPtr = fourDom.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("float"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == "float");
       CPPUNIT_ASSERT(copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isEnumerated());
       copyPtr->close();
@@ -1602,7 +1602,7 @@ class IntrinsicsTest {
       delete copyPtr;
 
       copyPtr = fiveDom.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("float"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == "float");
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isEnumerated());
       CPPUNIT_ASSERT(copyPtr->getSize() == 5);
@@ -1610,7 +1610,7 @@ class IntrinsicsTest {
       delete copyPtr;
 
       copyPtr = oneDom.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("float"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == "float");
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isEnumerated());
       CPPUNIT_ASSERT(copyPtr->isSingleton());
@@ -1635,7 +1635,7 @@ class IntrinsicsTest {
       // Domains containing infinities should also be tested.
 
       copyPtr = empty.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("float"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == "float");
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isNumeric());
       CPPUNIT_ASSERT(!copyPtr->isEnumerated());
@@ -1656,7 +1656,7 @@ class IntrinsicsTest {
       delete copyPtr;
 
       copyPtr = one2ten.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("float"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == "float");
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isNumeric());
       CPPUNIT_ASSERT(!copyPtr->isEnumerated());
@@ -1675,7 +1675,7 @@ class IntrinsicsTest {
       delete copyPtr;
 
       copyPtr = four.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName().toString() == IntDT::NAME());
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == IntDT::NAME());
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isNumeric());
       CPPUNIT_ASSERT(!copyPtr->isEnumerated());
@@ -1709,7 +1709,7 @@ class IntrinsicsTest {
       // domains containing infinities should also be tested
 
       copyPtr = empty.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("int"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == "int");
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isNumeric());
       CPPUNIT_ASSERT(!copyPtr->isEnumerated());
@@ -1730,7 +1730,7 @@ class IntrinsicsTest {
       delete copyPtr;
 
       copyPtr = one2ten.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("int"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == "int");
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isNumeric());
       CPPUNIT_ASSERT(!copyPtr->isEnumerated());
@@ -1751,7 +1751,7 @@ class IntrinsicsTest {
       delete copyPtr;
 
       copyPtr = four.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName().toString() == IntDT::NAME());
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == IntDT::NAME());
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isNumeric());
       CPPUNIT_ASSERT(!copyPtr->isEnumerated());

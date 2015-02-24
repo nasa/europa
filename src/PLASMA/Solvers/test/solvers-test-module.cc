@@ -268,25 +268,25 @@ private:
     for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
       if((*it)->getName() == std::string("b")) {
         CPPUNIT_ASSERT_MESSAGE(std::string("Should be a guard: ") + \
-                               (*it)->getName().toString(),
+                               (*it)->getName(),
                                f.test(*it));
         CPPUNIT_ASSERT_MESSAGE(std::string("Should be a guard: ") + \
-                               (*it)->getName().toString(),
+                               (*it)->getName(),
                                !g.test(*it));
         guardFound = true;
       }
-      else if(starts_with((*it)->getName().toString(), "implicit") || 
-              starts_with((*it)->getName().toString(), "ExprConstant_PSEUDO_VARIABLE")) {
+      else if(starts_with((*it)->getName(), "implicit") || 
+              starts_with((*it)->getName(), "ExprConstant_PSEUDO_VARIABLE")) {
         //these *might* be guards, but might not.  can't tell a priori, so skipping the
         //test
       }
       else {
         //everything else should be a guard
         CPPUNIT_ASSERT_MESSAGE(std::string("Should not be a guard: ") + \
-                               (*it)->getName().toString(),
+                               (*it)->getName(),
                                !f.test(*it));
         CPPUNIT_ASSERT_MESSAGE(std::string("Should not be a guard: ") + \
-                               (*it)->getName().toString(),
+                               (*it)->getName(),
                                g.test(*it));
       }
     }
@@ -484,7 +484,7 @@ private:
       // Confirm temporal variables have been excluded
       static const LabelStr excludedVariables(":start:end:duration:arg1:arg3:arg4:arg6:arg7:arg8:filterVar:");
       static const LabelStr includedVariables(":arg2:arg5:keepVar:");
-      std::string s = ":" + var->getName().toString() + ":";
+      std::string s = ":" + var->getName() + ":";
       if(excludedVariables.contains(s))
         CPPUNIT_ASSERT_MESSAGE(var->toString(), !fm.inScope(var));
       else if(includedVariables.contains(s))
@@ -1901,7 +1901,7 @@ private:
     TiXmlElement* root = initXml(xml);
     Solver solver(testEngine.getPlanDatabase(), *root);
     ContextId ctx = solver.getContext();
-    CPPUNIT_ASSERT(ctx->getName() == LabelStr(solver.getName().toString() + "Context"));
+    CPPUNIT_ASSERT(ctx->getName() == LabelStr(solver.getName() + "Context"));
     ctx->put("foo", 1);
     CPPUNIT_ASSERT(ctx->get("foo") == 1);
     CPPUNIT_ASSERT(solver.getContext()->get("foo") == 1);

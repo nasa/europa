@@ -21,8 +21,8 @@ namespace EUROPA {
 			    const std::vector<ConstrainedVariableId>& scope,
 			    const TokenId tok);
       ~ResourceTokenRelation();
-      static const LabelStr& CONSTRAINT_NAME() {
-	static const LabelStr sl_const("ResourceObjectRelation");
+      static const std::string& CONSTRAINT_NAME() {
+	static const std::string sl_const("ResourceObjectRelation");
 	return sl_const;
       }
       static const LabelStr& PROPAGATOR_NAME() {

@@ -113,7 +113,7 @@ void Resource::init(const edouble initCapacityLb, const edouble initCapacityUb,
       profileName,
       ProfileArgs(getPlanDatabase(),m_detector));
 
-  debugMsg("Resource:init", "Initialized Resource " << getName().toString() << "{"
+  debugMsg("Resource:init", "Initialized Resource " << getName() << "{"
            << "initCapacity=[" << initCapacityLb << "," << initCapacityUb << "],"
            << "usageLimits=[" << lowerLimit << "," << upperLimit << "],"
            << "productionLimits=[max=" << m_maxProduction << ",maxInst=" << m_maxInstProduction << "],"

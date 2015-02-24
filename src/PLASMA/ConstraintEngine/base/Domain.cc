@@ -128,7 +128,7 @@ namespace EUROPA {
   }
 
   void Domain::operator>>(ostream& os) const {
-    os << getTypeName().toString() << (m_closed ? ":CLOSED" : ":OPEN");
+    os << getTypeName() << (m_closed ? ":CLOSED" : ":OPEN");
   }
 
   edouble Domain::translateNumber(edouble number, bool) const {
@@ -146,7 +146,7 @@ namespace EUROPA {
   bool Domain::canBeCompared(const Domain& domx, const Domain& domy) {
     debugMsg("Domain:canBeCompared", "domx.isBool " << domx.isBool() << " domx.isNumeric " << domx.isNumeric() << " domx.isString " << domx.isString() << " domx.isSymbolic " << domx.isSymbolic());
     debugMsg("Domain:canBeCompared", "domy.isBool " << domy.isBool() << " domy.isNumeric " << domy.isNumeric() << " domy.isString " << domy.isString() << " domy.isSymbolic " << domy.isSymbolic());
-    debugMsg("Domain:canBeCompared", "type of domx " << domx.getTypeName().toString() << " type of domy " << domy.getTypeName().toString());
+    debugMsg("Domain:canBeCompared", "type of domx " << domx.getTypeName() << " type of domy " << domy.getTypeName());
     debugMsg("Domain:canBeCompared", domx.toString());
     debugMsg("Domain:canBeCompared", domy.toString());
     bool result = domx.getDataType()->canBeCompared(domy.getDataType());
@@ -174,7 +174,7 @@ namespace EUROPA {
 
   void Domain::assertSafeComparison(const Domain& domA, const Domain& domB){
     check_error(canBeCompared(domA, domB),
-		domA.getTypeName().toString() + " cannot be compared with " + domB.getTypeName().toString());
+		domA.getTypeName() + " cannot be compared with " + domB.getTypeName());
 
   }
 
@@ -189,7 +189,7 @@ namespace EUROPA {
   void Domain::setDataType(const DataTypeId dt) { m_dataType=dt; }
 
   // TODO: all these just delegate to the data type, should be dropped eventually, preserved for now for backwards compatibility
-  const LabelStr& Domain::getTypeName() const { return getDataType()->getName(); }
+const std::string& Domain::getTypeName() const { return getDataType()->getName(); }
   bool Domain::isSymbolic() const { return getDataType()->isSymbolic(); }
   bool Domain::isEntity() const { return getDataType()->isEntity(); }
   bool Domain::isNumeric() const { return getDataType()->isNumeric(); }

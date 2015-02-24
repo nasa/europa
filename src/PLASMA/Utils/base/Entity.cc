@@ -176,15 +176,14 @@ const std::string& Entity::getEntityType() const {
 	  return toString();
   }
 
-  const std::string& Entity::getEntityName() const
-  {
-	  return getName().toString();
-  }
+const std::string& Entity::getEntityName() const {
+  return getName();
+}
 
-  const LabelStr& Entity::getName() const {
-	  static const LabelStr NO_NAME("NO_NAME_Entity");
-	  return NO_NAME;
-  }
+const std::string& Entity::getName() const {
+  static const std::string NO_NAME("NO_NAME_Entity");
+  return NO_NAME;
+}
 
   bool Entity::canBeCompared(const EntityId) const{ return true;}
 

@@ -161,19 +161,19 @@ namespace EUROPA{
     check_error(object.isValid());
 
     check_error(!isClosed(object->getType()),
-                "Cannot add object " + object->getName().toString() +
+                "Cannot add object " + object->getName() +
                 " if type " + object->getType().toString() + " is already closed.");
 
     check_error(m_objects.find(object) == m_objects.end(),
-                "Object with the name " + object->getName().toString() + " already added.");
+                "Object with the name " + object->getName() + " already added.");
 
-    check_error(m_objectsByName.find(object->getName().getKey()) == m_objectsByName.end(),
-                "Object with the name " + object->getName().toString() + " already added.");
+    check_error(m_objectsByName.find(object->getName()) == m_objectsByName.end(),
+                "Object with the name " + object->getName() + " already added.");
 
     m_objects.insert(object);
 
     // Cache by name
-    m_objectsByName.insert(std::make_pair(object->getName().getKey(), object));
+    m_objectsByName.insert(std::make_pair(object->getName(), object));
 
     // Now cache by type
     LabelStr type = object->getType();
@@ -196,18 +196,18 @@ namespace EUROPA{
     publish(notifyAdded(object));
 
     debugMsg("PlanDatabase:notifyAdded:Object",
-             object->getType().toString() << CLASS_DELIMITER << object->getName().toString() << " (" << object->getKey() << ")");
+             object->getType().toString() << CLASS_DELIMITER << object->getName() << " (" << object->getKey() << ")");
   }
 
   void PlanDatabase::notifyRemoved(const ObjectId object){
     check_error(!Entity::isPurging());
     check_error(object.isValid());
     check_error(m_objects.find(object) != m_objects.end());
-    check_error(m_objectsByName.find(object->getName().getKey()) != m_objectsByName.end());
+    check_error(m_objectsByName.find(object->getName()) != m_objectsByName.end());
 
     // Clean up cached values
     m_objects.erase(object);
-    m_objectsByName.erase(object->getName().getKey());
+    m_objectsByName.erase(object->getName());
     for(std::multimap<edouble, ObjectId>::iterator it = m_objectsByPredicate.begin(); it != m_objectsByPredicate.end();){
       if(it->second == object)
         m_objectsByPredicate.erase(it++);
@@ -234,7 +234,7 @@ namespace EUROPA{
     publish(notifyRemoved(object));
 
     debugMsg("PlanDatabase:notifyRemoved:Object",
-             object->getType().toString() << CLASS_DELIMITER << object->getName().toString() << " (" << object->getKey() << ")");
+             object->getType().toString() << CLASS_DELIMITER << object->getName() << " (" << object->getKey() << ")");
   }
 
   void PlanDatabase::notifyAdded(const TokenId token){
@@ -469,14 +469,14 @@ namespace EUROPA{
 	if(!isCompatible) {
 	  debugMsg("PlanDatabase:getCompatibleTokens",
 		   "EXCLUDING (" << candidate->getKey() << ")" <<
-		   "VAR=" << candidateTokenVariables[i]->getName().toString() <<
+		   "VAR=" << candidateTokenVariables[i]->getName() <<
 		   "(" << candidateTokenVariables[i]->getKey() << ") " <<
 		   "Cannot intersect " << domA.toString() << " with " << domB.toString());
 	  break;
 	}
 
 	debugMsg("PlanDatabase:getCompatibleTokens",
-		 "VAR=" << candidateTokenVariables[i]->getName().toString() <<
+		 "VAR=" << candidateTokenVariables[i]->getName() <<
 		 "(" << candidateTokenVariables[i]->getKey() << ") " <<
 		 "Can intersect " << domA.toString() << " with " << domB.toString());
       }
@@ -625,9 +625,9 @@ unsigned long PlanDatabase::countCompatibleTokens(const TokenId inactiveToken,
   }
 
   const ObjectId PlanDatabase::getObject(const LabelStr& name) const{
-    if (m_objectsByName.find(name.getKey()) == m_objectsByName.end())
+    if (m_objectsByName.find(name) == m_objectsByName.end())
       return ObjectId::noId();
-    return m_objectsByName.find(name.getKey())->second;
+    return m_objectsByName.find(name)->second;
   }
 
   const TokenSet& PlanDatabase::getTokens() const {
@@ -785,7 +785,7 @@ unsigned long PlanDatabase::countCompatibleTokens(const TokenId inactiveToken,
 
     debugMsg("PlanDatabase:notifyConstrained",
              "(" << predecessor->getKey() << ") On Object " <<
-             object->getType().toString() << CLASS_DELIMITER << object->getName().toString() << " ("
+             object->getType().toString() << CLASS_DELIMITER << object->getName() << " ("
              << object->getKey() << ") Constrained Before Token (" << successor->getKey() << ")");
   }
 
@@ -795,13 +795,13 @@ unsigned long PlanDatabase::countCompatibleTokens(const TokenId inactiveToken,
 
     debugMsg("PlanDatabase:notifyFreed",
              "(" << predecessor->getKey() << ") On Object " <<
-             object->getType().toString() << CLASS_DELIMITER << object->getName().toString() << " ("
+             object->getType().toString() << CLASS_DELIMITER << object->getName() << " ("
              << object->getKey() << ") Freed from Before Token (" << successor->getKey() << ")");
   }
 
   void PlanDatabase::notifyOrderingRequired(const ObjectId object, const TokenId token){
     debugMsg("PlanDatabase:notifyOrderingRequired",
-	     object->getName().toString() << "(" << object->getKey() << ") from " << token->toString());
+	     object->getName() << "(" << object->getKey() << ") from " << token->toString());
 
     checkError(token->isActive(), "Token must be active to induce an ordering:" << token->toString());
 
@@ -823,7 +823,7 @@ unsigned long PlanDatabase::countCompatibleTokens(const TokenId inactiveToken,
 
   void PlanDatabase::notifyOrderingNoLongerRequired(const ObjectId object, const TokenId token){
     debugMsg("PlanDatabase:notifyOrderingNoLongerRequired",
-	     object->getName().toString() << "(" << object->getKey() << ") from " << token->toString());
+	     object->getName() << "(" << object->getKey() << ") from " << token->toString());
     std::map<eint, std::pair<TokenId, ObjectSet> >::iterator it = m_tokensToOrder.find(token->getKey());
 
     checkError(it != m_tokensToOrder.end(),
@@ -862,7 +862,7 @@ unsigned long PlanDatabase::countCompatibleTokens(const TokenId inactiveToken,
       check_error(object.isValid());
       objectVar->insert(object->getKey());
       debugMsg("PlanDatabase:makeObjectVariable",
-               "Inserting object " << object->getName().toString() << " of type "
+               "Inserting object " << object->getName() << " of type "
                << object->getType().toString() << " for base type " << objectType.toString());
     }
 

@@ -86,7 +86,7 @@ namespace EUROPA {
   }
 
   void Constraint::handleDiscard(){
-    debugMsg("Constraint:handleDiscard", getName().toString() << "(" << getKey() << ") " << m_id);
+    debugMsg("Constraint:handleDiscard", getName() << "(" << getKey() << ") " << m_id);
 
     if(!Entity::isPurging()){
       check_error(isValid());
@@ -115,11 +115,11 @@ namespace EUROPA {
 
       std::ostringstream os;
 
-      os << getName().toString() << "(";
+      os << getName() << "(";
       for(unsigned int i=0;i<m_variables.size();i++) {
           if (i > 0)
               os << ",";
-          std::string name = m_variables[i]->getName().toString();
+          std::string name = m_variables[i]->getName();
           if (name.substr(0,4) != "$VAR")
               os << name << "(" << m_variables[i]->getKey() << ")";
           else
@@ -149,7 +149,7 @@ PSList<PSVariable*> Constraint::getVariables() const {
     return m_id;
   }
 
-  const LabelStr& Constraint::getName() const {return m_name;}
+const std::string& Constraint::getName() const {return m_name.toString();}
 
   const PropagatorId Constraint::getPropagator() const {return m_propagator;}
 

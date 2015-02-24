@@ -120,8 +120,8 @@ DBFoo::DBFoo(const ObjectId parent, const LabelStr& type, const LabelStr& name)
       DBFooId foo = (new DBFoo(planDb, objectType, objectName))->getId();
       // Type check the arguments
       CPPUNIT_ASSERT(arguments.size() == 2);
-      CPPUNIT_ASSERT(arguments[0]->getTypeName().toString() == IntDT::NAME());
-      CPPUNIT_ASSERT(arguments[1]->getTypeName().toString() == StringDT::NAME());
+      CPPUNIT_ASSERT(arguments[0]->getTypeName() == IntDT::NAME());
+      CPPUNIT_ASSERT(arguments[1]->getTypeName() == StringDT::NAME());
 
       eint arg0(arguments[0]->getSingletonValue());
       LabelStr arg1(arguments[1]->getSingletonValue());
@@ -679,7 +679,7 @@ private:
     new Object(id1, LabelStr(DEFAULT_OBJECT_TYPE), "id2");
     ObjectId id3((new Object(id1, LabelStr(DEFAULT_OBJECT_TYPE), "id3"))->getId());
     CPPUNIT_ASSERT(db->getObjects().size() == 6);
-    CPPUNIT_ASSERT(id3->getName().toString() == "id1.id3");
+    CPPUNIT_ASSERT(id3->getName() == "id1.id3");
 
     // Test ancestor call
     ObjectId id4((new Object(id3, LabelStr(DEFAULT_OBJECT_TYPE), "id4"))->getId());
@@ -2119,7 +2119,7 @@ private:
     std::string str;
     for(std::vector<TokenId>::const_iterator it = tokens.begin(); it != tokens.end(); ++it){
       TokenId token = *it;
-      str = str + token->getName().toString() + ":";
+      str = str + token->getName() + ":";
     }
     return str;
   }
@@ -4270,10 +4270,10 @@ public:
       if (arguments.size() == 4) {
         //!!I'm not sure why this first one is passed in; it appears to be the object's type info.
         //!!--wedgingt@email.arc.nasa.gov 2004 Nov 1
-        CPPUNIT_ASSERT(arguments[0]->getTypeName() == LabelStr(StringDT::NAME()));
-        CPPUNIT_ASSERT(arguments[1]->getTypeName() == LabelStr(IntDT::NAME()));
-        CPPUNIT_ASSERT(arguments[2]->getTypeName() == LabelStr(FloatDT::NAME()));
-        CPPUNIT_ASSERT(arguments[3]->getTypeName() == LabelStr("Locations"));
+        CPPUNIT_ASSERT(arguments[0]->getTypeName() == StringDT::NAME());
+        CPPUNIT_ASSERT(arguments[1]->getTypeName() == IntDT::NAME());
+        CPPUNIT_ASSERT(arguments[2]->getTypeName() == FloatDT::NAME());
+        CPPUNIT_ASSERT(arguments[3]->getTypeName() == "Locations");
       }
       TestClass2Id instance = (new TestClass2(planDb, objectType, objectName))->getId();
       instance->handleDefaults();
@@ -4284,7 +4284,7 @@ public:
 	else
 	  vars[i - 1]->restrictBaseDomain(*(arguments[i]));
       }
-      debugMsg("TestClass2:createInstance", "TestClass2 objectId " << instance->getId() << ' ' << instance->getName().toString()
+      debugMsg("TestClass2:createInstance", "TestClass2 objectId " << instance->getId() << ' ' << instance->getName()
                 << " has varIds " << vars[0] << ' ' << vars[1] << ' ' << vars[2] << '\n');
       return(instance);
     }
@@ -4333,21 +4333,21 @@ public:
     ConstrainedVariableSet::iterator varIter = allVars.begin();
     ConstrainedVariableId g_int2, g_float2, g_location2;
     for ( ; varIter != allVars.end(); varIter++) {
-      if ((*varIter)->getName() == LabelStr("g_int")) {
+      if ((*varIter)->getName() == LabelStr("g_int").toString()) {
         if (sg_int.isNoId())
           sg_int = *varIter;
         else
           g_int2 = *varIter;
       }
       else {
-        if ((*varIter)->getName() == LabelStr("g_float")) {
+        if ((*varIter)->getName() == LabelStr("g_float").toString()) {
           if (sg_float.isNoId())
             sg_float = *varIter;
           else
             g_float2 = *varIter;
         }
         else {
-          if ((*varIter)->getName() == LabelStr("g_location")) {
+          if ((*varIter)->getName() == LabelStr("g_location").toString()) {
             if (sg_location.isNoId())
               sg_location = *varIter;
             else
@@ -4376,7 +4376,7 @@ public:
     CPPUNIT_ASSERT(!s_db->getClient()->isGlobalVariable("g_int"));
     ConstrainedVariableSet allVars = s_ce->getVariables();
     for(ConstrainedVariableSet::iterator it = allVars.begin(); it != allVars.end(); ++it) {
-      CPPUNIT_ASSERT((*it)->getName() != LabelStr("g_int"));
+      CPPUNIT_ASSERT((*it)->getName() != LabelStr("g_int").toString());
     }
     //have to re-create the variable because future tests depend on it
     TEST_PLAYING_XML(buildXMLNameTypeStr("var", "g_int",
@@ -4387,7 +4387,7 @@ public:
     allVars = s_ce->getVariables();
     for(ConstrainedVariableSet::iterator it = allVars.begin(); it != allVars.end() && !found;
 	++it) {
-      if((found = ((*it)->getName() == LabelStr("g_int")))) {
+      if((found = ((*it)->getName() == LabelStr("g_int").toString()))) {
 	sg_int = (*it);
       }
     }
@@ -4400,7 +4400,7 @@ public:
     ConstrainedVariableSet allVars = s_ce->getVariables();
     for(ConstrainedVariableSet::iterator it = allVars.begin(); it != allVars.end() && !found;
 	++it)
-      found = ((*it)->getName() == LabelStr("g_int"));
+      found = ((*it)->getName() == LabelStr("g_int").toString());
     CPPUNIT_ASSERT(found);
 
     std::stringstream transactions;
@@ -4411,7 +4411,7 @@ public:
     CPPUNIT_ASSERT(!s_db->getClient()->isGlobalVariable("g_int"));
     allVars = s_ce->getVariables();
     for(ConstrainedVariableSet::iterator it = allVars.begin(); it != allVars.end(); ++it) {
-      CPPUNIT_ASSERT((*it)->getName() != LabelStr("g_int"));
+      CPPUNIT_ASSERT((*it)->getName() != LabelStr("g_int").toString());
     }
 
     std::stringstream otherTransactions;
@@ -4427,7 +4427,7 @@ public:
     allVars = s_ce->getVariables();
     for(ConstrainedVariableSet::iterator it = allVars.begin(); it != allVars.end() && !found;
 	++it) {
-      if((found = ((*it)->getName() == LabelStr("g_int")))) {
+      if((found = ((*it)->getName() == LabelStr("g_int").toString()))) {
 	sg_int = (*it);
       }
     }
@@ -4474,7 +4474,7 @@ public:
     ObjectId obj2a = s_db->getObject("testObj2a");
     CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
     CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
+    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a").toString());
     std::vector<ConstrainedVariableId> obj2vars = obj2a->getVariables();
     CPPUNIT_ASSERT(obj2vars.size() == 3);
     for (unsigned int i = 0; i < 3; i++) {
@@ -4517,7 +4517,7 @@ public:
     ObjectId obj2b = s_db->getObject("testObj2b");
     CPPUNIT_ASSERT(!obj2b.isNoId() && obj2b.isValid());
     CPPUNIT_ASSERT(obj2b->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b"));
+    CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b").toString());
     obj2vars = obj2b->getVariables();
     CPPUNIT_ASSERT(obj2vars.size() == 3);
     for (unsigned int i = 0; i < 3; i++) {
@@ -4548,7 +4548,7 @@ public:
     //!!std::cout << "\n  PlanDB objects are:";
     //!!std::set<ObjectId, EntityComparator<ObjectId> >::const_iterator it = objects.begin();
     //!!for ( ; it != objects.end(); it++)
-    //!!  std::cout << "\n    id " << *it << " name " << (*it)->getName().toString();
+    //!!  std::cout << "\n    id " << *it << " name " << (*it)->getName();
     //!!std::cout << std::endl;
     //!!Mix of singleton and non-singleton member vars in testObj2c?
     //!!Find each in PlanDB just after each is built
@@ -4558,7 +4558,7 @@ public:
     ObjectId obj2a = s_db->getObject("testObj2a");
     CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
     CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
+    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a").toString());
 
     std::vector<const Domain*> domains;
     domains.push_back(new IntervalIntDomain(1));
@@ -4579,7 +4579,7 @@ public:
     obj2a = s_db->getObject("testObj2a");
     CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
     CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
+    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a").toString());
 
   }
 
@@ -4587,7 +4587,7 @@ public:
     ObjectId obj2a = s_db->getObject("testObj2a");
     CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
     CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
+    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a").toString());
 
     std::vector<const Domain*> domains;
     domains.push_back(new IntervalIntDomain(1));
@@ -4617,7 +4617,7 @@ public:
     obj2a = s_db->getObject("testObj2a");
     CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
     CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
+    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a").toString());
 
   }
 
@@ -4647,7 +4647,7 @@ public:
     ObjectId obj2b = s_db->getObject("testObj2b");
     CPPUNIT_ASSERT(!obj2b.isNoId() && obj2b.isValid());
     CPPUNIT_ASSERT(obj2b->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b"));
+    CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b").toString());
     std::vector<ConstrainedVariableId> obj2vars = obj2b->getVariables();
     CPPUNIT_ASSERT(obj2vars.size() == 3);
     TEST_PLAYING_XML(buildXMLResetVariableStr(obj2vars[0]));
@@ -4684,7 +4684,7 @@ public:
     ObjectId obj2b = s_db->getObject("testObj2b");
     CPPUNIT_ASSERT(!obj2b.isNoId() && obj2b.isValid());
     CPPUNIT_ASSERT(obj2b->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b"));
+    CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b").toString());
     std::vector<ConstrainedVariableId> obj2vars = obj2b->getVariables();
     CPPUNIT_ASSERT(obj2vars.size() == 3);
 
@@ -4698,7 +4698,7 @@ public:
     sg_int->constraints(constraints);
     CPPUNIT_ASSERT(constraints.size() == 1);
     ConstraintId constr = *(constraints.begin());
-    CPPUNIT_ASSERT(constr->getName() == LabelStr("eq"));
+    CPPUNIT_ASSERT(constr->getName() == LabelStr("eq").toString());
     CPPUNIT_ASSERT(constr->getScope().size() == 2);
     CPPUNIT_ASSERT(constr->isVariableOf(sg_int));
     CPPUNIT_ASSERT(constr->isVariableOf(obj2vars[0]));
@@ -4719,7 +4719,7 @@ public:
     CPPUNIT_ASSERT(constraints.find(constr) != constraints.end());
     constraints.erase(constraints.find(constr));
     constr = *(constraints.begin());
-    CPPUNIT_ASSERT(constr->getName() == LabelStr("leq"));
+    CPPUNIT_ASSERT(constr->getName() == LabelStr("leq").toString());
     CPPUNIT_ASSERT(constr->getScope().size() == 2);
     CPPUNIT_ASSERT(constr->isVariableOf(sg_int));
     CPPUNIT_ASSERT(constr->isVariableOf(sg_float));
@@ -4737,7 +4737,7 @@ public:
     sg_location->constraints(constraints);
     CPPUNIT_ASSERT(constraints.size() == 1);
     constr = *(constraints.begin());
-    CPPUNIT_ASSERT(constr->getName() == LabelStr("neq"));
+    CPPUNIT_ASSERT(constr->getName() == LabelStr("neq").toString());
     CPPUNIT_ASSERT(constr->getScope().size() == 2);
     CPPUNIT_ASSERT(constr->isVariableOf(sg_location));
     CPPUNIT_ASSERT(constr->isVariableOf(obj2vars[2]));
@@ -4834,7 +4834,7 @@ public:
                          const TokenId, const StateDomain& stateDom) {
     if (token.isNoId() || !token.isValid())
       return(false);
-    if ((name.toString() != "_auto_") && (token->getName() != name))
+    if ((name.toString() != "_auto_") && (token->getName() != name.toString()))
       return(false);
     if (token->getPredicateName() != predName)
       return(false);
@@ -4945,7 +4945,7 @@ public:
     ObjectId obj2b = s_db->getObject("testObj2b");
     CPPUNIT_ASSERT(!obj2b.isNoId() && obj2b.isValid());
     CPPUNIT_ASSERT(obj2b->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b"));
+    CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b").toString());
     const unsigned long initialObjectTokenCount_B = obj2b->tokens().size();
 
     TokenId constrainedToken = createToken("constrainedSample", true);
@@ -4987,7 +4987,7 @@ public:
     ObjectId obj2a = s_db->getObject("testObj2a");
     CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
     CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
+    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a").toString());
     ObjectDomain objDom2a(GET_DATA_TYPE(s_db,"TestClass2"),obj2a);
     const unsigned long initialObjectTokenCount_A = obj2a->tokens().size();
 
@@ -5046,14 +5046,14 @@ public:
     ObjectId obj2a = s_db->getObject("testObj2a");
     CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
     CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
+    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a").toString());
     ObjectDomain objDom2a(GET_DATA_TYPE(s_db,"TestClass2"),obj2a);
     const unsigned long initialObjectTokenCount_A = obj2a->tokens().size();
 
     ObjectId obj2b = s_db->getObject("testObj2b");
     CPPUNIT_ASSERT(!obj2b.isNoId() && obj2b.isValid());
     CPPUNIT_ASSERT(obj2b->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b"));
+    CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b").toString());
     ObjectDomain objDom2b(GET_DATA_TYPE(s_db,"TestClass2"),obj2b);
     TokenSet tokens = obj2b->tokens();
     debugMsg("testFree", __FILE__ << ':' << __LINE__ << ": there are " << tokens.size() << " tokens on testObj2b; should be 2.");
@@ -5688,7 +5688,7 @@ std::string DbTransPlayerTest::buildXMLInvokeSpecifyVariableStr(const Constraine
   std::string str("<invoke name=\"specify\" identifier=\"");
   //!!Would like to re-use buildXMLVariableStr() here, but this wants a different syntax(!)
   if (var->parent().isNoId())
-    str += var->getName().toString();
+    str += var->getName();
   else {
     if (TokenId::convertable(var->parent())) {
       //!!For token variables, the player's name for the token is needed: identifier="tokenName.varName"
@@ -5698,9 +5698,9 @@ std::string DbTransPlayerTest::buildXMLInvokeSpecifyVariableStr(const Constraine
     CPPUNIT_ASSERT_MESSAGE("var's parent is neither token nor object", ObjectId::convertable(var->parent()));
     //!!I don't understand the details in DbClientTransactionPlayer.cc:parseVariable() well enough to figure this out yet
     //!!But here's a guess:
-    str += var->parent()->getName().toString();
+    str += var->parent()->getName();
     str += ".";
-    str += var->getName().toString();
+    str += var->getName();
   }
   str += "\"> ";
   str += buildXMLDomainStr(dom);
@@ -5785,13 +5785,13 @@ std::string DbTransPlayerTest::buildXMLVariableStr(const ConstrainedVariableId v
   std::string str(" <");
   if (var->parent().isNoId()) {
     str += "id name =\"";
-    str += var->getName().toString();
+    str += var->getName();
   } else {
     str += "variable index=\"";
     std::ostringstream oss;
     oss << var->getIndex() << "\" ";
     if (ObjectId::convertable(var->parent()))
-      oss << "object=\"" << var->parent()->getName().toString();
+      oss << "object=\"" << var->parent()->getName();
     else {
       CPPUNIT_ASSERT_MESSAGE("unknown or unsupported (C++) type of parent of variable",
           TokenId::convertable(var->parent()));
@@ -5817,7 +5817,7 @@ std::string DbTransPlayerTest::buildXMLDomainStr(const Domain& dom) {
   if (dom.isSingleton() && dom.isNumeric()) {
     str += "value";
     str += " type=\"";
-    str += dom.getTypeName().toString();
+    str += dom.getTypeName();
     str += "\"";
     str += " name=\"";
     std::ostringstream oss;
@@ -5828,7 +5828,7 @@ std::string DbTransPlayerTest::buildXMLDomainStr(const Domain& dom) {
   }
   if (dom.isInterval()) {
     str += "interval type=\"";
-    str += dom.getTypeName().toString();
+    str += dom.getTypeName();
     str += "\" min=\"";
     std::ostringstream oss2;
     std::fixed(oss2);
@@ -5857,7 +5857,7 @@ std::string DbTransPlayerTest::buildXMLDomainStr(const Domain& dom) {
       str += oss4.str();
     }
     str += "\" type=\"";
-    str += dom.getTypeName().toString();
+    str += dom.getTypeName();
     str += "\"/> ";
   }
   str += "</set>";

@@ -100,7 +100,7 @@ class Solver {
   /**
    * @brief Name accessor
    */
-  const LabelStr& getName() const;
+  const std::string& getName() const;
 
   /**
    * @brief The size of the search stack
@@ -253,7 +253,7 @@ class Solver {
 
   /* Data Members */
   SolverId m_id;
-  LabelStr m_name;
+  std::string m_name;
   const PlanDatabaseId m_db;
   DecisionPointId m_activeDecision; /*!< Stores the decision point we are currently working on.
                                       It should not be in the decision stack. */

@@ -63,7 +63,7 @@ EnumeratedDomain::EnumeratedDomain(const Domain& org)
     : Domain(org), m_values()
 {
   check_error(org.isEnumerated(),
-              "Invalid source domain " + org.getTypeName().toString() + " for enumeration");
+              "Invalid source domain " + org.getTypeName() + " for enumeration");
   const EnumeratedDomain& enumOrg = static_cast<const EnumeratedDomain&>(org);
   m_values = enumOrg.m_values;
 }
@@ -610,7 +610,7 @@ void EnumeratedDomain::testPrecision(const edouble&) const {}
     , m_ub(org.getUpperBound())
     , m_lb(org.getLowerBound())
   {
-    check_error(org.isInterval(),"Attempted to create an Interval domain from " + org.getTypeName().toString());
+    check_error(org.isInterval(),"Attempted to create an Interval domain from " + org.getTypeName());
     commonInit();
   }
 

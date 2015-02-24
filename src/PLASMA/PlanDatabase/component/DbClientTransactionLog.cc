@@ -49,14 +49,14 @@ void DbClientTransactionLog::notifyVariableCreated(const ConstrainedVariableId v
   if(!variable->isInternal()) {
     TiXmlElement * element = allocateXmlElement("var");
     const Domain& baseDomain = variable->baseDomain();
-    std::string type = baseDomain.getTypeName().toString();
+    std::string type = baseDomain.getTypeName();
     if (m_client->getSchema()->isObjectType(type)) {
       ObjectId object = Entity::getTypedEntity<Object>(baseDomain.getLowerBound());
       check_error(object.isValid());
       type = object->getType().toString();
     }
     element->SetAttribute( "type", type );
-    element->SetAttribute( "name", variable->getName().toString() );
+    element->SetAttribute( "name", variable->getName() );
     debugMsg("notifyVariableCreated"," variable name = " << variable->getName().c_str() << " typeName = " << type << " type = " << baseDomain.getTypeName().c_str());
       
     element->SetAttribute("index", static_cast<int>(m_client->getIndexByVariable(variable)));
@@ -73,8 +73,8 @@ void DbClientTransactionLog::notifyVariableDeleted(const ConstrainedVariableId v
   if(!variable->isInternal()) {
     TiXmlElement* element = allocateXmlElement("deletevar");
     element->SetAttribute("index", static_cast<int>(m_client->getIndexByVariable(variable)));
-    element->SetAttribute("name", variable->getName().toString() );
-    element->SetAttribute("type", variable->baseDomain().getTypeName().toString() );
+    element->SetAttribute("name", variable->getName() );
+    element->SetAttribute("type", variable->baseDomain().getTypeName() );
     pushTransaction(element);
   }
 }
@@ -87,7 +87,7 @@ void DbClientTransactionLog::notifyVariableDeleted(const ConstrainedVariableId v
 void DbClientTransactionLog::notifyObjectCreated(const ObjectId object,
                                                  const std::vector<const Domain*>& arguments){
   TiXmlElement * element = allocateXmlElement("new");
-  element->SetAttribute("name", object->getName().toString());
+  element->SetAttribute("name", object->getName());
   element->SetAttribute("type", object->getType().toString());
   std::vector<const Domain*>::const_iterator iter;
   for (iter = arguments.begin() ; iter != arguments.end() ; iter++) {
@@ -98,7 +98,7 @@ void DbClientTransactionLog::notifyObjectCreated(const ObjectId object,
 
   void DbClientTransactionLog::notifyObjectDeleted(const ObjectId object) {
     TiXmlElement* element = allocateXmlElement("deleteobject");
-    element->SetAttribute("name", object->getName().toString());
+    element->SetAttribute("name", object->getName());
     pushTransaction(element);
   }
 
@@ -139,7 +139,7 @@ void DbClientTransactionLog::notifyObjectCreated(const ObjectId object,
   void DbClientTransactionLog::notifyConstrained(const ObjectId object, const TokenId predecessor, const TokenId successor){
     TiXmlElement * element = allocateXmlElement("constrain");
     TiXmlElement * object_el = allocateXmlElement("object");
-    object_el->SetAttribute("name", object->getName().toString());
+    object_el->SetAttribute("name", object->getName());
     element->LinkEndChild(object_el);
     element->LinkEndChild(tokenAsXml(predecessor));
     element->LinkEndChild(tokenAsXml(successor));
@@ -156,7 +156,7 @@ void DbClientTransactionLog::notifyObjectCreated(const ObjectId object,
     }
     TiXmlElement * element = allocateXmlElement("free");
     TiXmlElement * object_el = allocateXmlElement("object");
-    object_el->SetAttribute("name", object->getName().toString());
+    object_el->SetAttribute("name", object->getName());
     element->LinkEndChild(object_el);
     element->LinkEndChild(tokenAsXml(predecessor));
     element->LinkEndChild(tokenAsXml(successor));
@@ -204,7 +204,7 @@ void DbClientTransactionLog::notifyObjectCreated(const ObjectId object,
 
 void DbClientTransactionLog::notifyConstraintCreated(const ConstraintId constraint){
   TiXmlElement * element = allocateXmlElement("invoke");
-  element->SetAttribute("name", constraint->getName().toString());
+  element->SetAttribute("name", constraint->getName());
   element->SetAttribute("index", static_cast<int>(m_client->getIndexByConstraint(constraint)));
   const std::vector<ConstrainedVariableId>& variables = constraint->getScope();
   std::vector<ConstrainedVariableId>::const_iterator iter;
@@ -217,7 +217,7 @@ void DbClientTransactionLog::notifyConstraintCreated(const ConstraintId constrai
 
 void DbClientTransactionLog::notifyConstraintDeleted(const ConstraintId constraint) {
   TiXmlElement* element = allocateXmlElement("deleteconstraint");
-  element->SetAttribute("name", constraint->getName().toString());
+  element->SetAttribute("name", constraint->getName());
   element->SetAttribute("index", static_cast<int>(m_client->getIndexByConstraint(constraint)));
   const std::vector<ConstrainedVariableId>& variables = constraint->getScope();
   std::vector<ConstrainedVariableId>::const_iterator iter;
@@ -272,14 +272,14 @@ void DbClientTransactionLog::notifyConstraintDeleted(const ConstraintId constrai
   std::string
   DbClientTransactionLog::domainValueAsString(const Domain * domain, edouble value)
   {
-    if (isBool(domain->getTypeName().toString())) {
+    if (isBool(domain->getTypeName())) {
       return (value == 1 ? "true" : "false");
     }
     else
       if (domain->isNumeric()) {
         // CMG: Do not use snprintf. Not supported on DEC
         std::stringstream ss;
-        if (isInt(domain->getTypeName().toString())) {
+        if (isInt(domain->getTypeName())) {
           ss << cast_int(value);
         } else {
           ss << value;
@@ -291,7 +291,7 @@ void DbClientTransactionLog::notifyConstraintDeleted(const ConstraintId constrai
       } else {
         ObjectId object = Entity::getTypedEntity<Object>(value);
         check_error(object.isValid());
-        return object->getName().toString();
+        return object->getName();
       }
   }
 
@@ -307,7 +307,7 @@ void DbClientTransactionLog::notifyConstraintDeleted(const ConstraintId constrai
 
     debugMsg("domainValueAsXml"," domain type = " << domain->getTypeName().c_str()  << " domain name = " << typeName.c_str());
 
-    if (isBool(domain->getTypeName().toString())) {
+    if (isBool(domain->getTypeName())) {
       TiXmlElement * element = allocateXmlElement("value");
       element->SetAttribute("type", "bool");
       element->SetAttribute("name", domainValueAsString(domain, value));
@@ -338,7 +338,7 @@ void DbClientTransactionLog::notifyConstraintDeleted(const ConstraintId constrai
       return domainValueAsXml(domain, domain->getSingletonValue());
     } else if (domain->isEnumerated()) {
       TiXmlElement * element = allocateXmlElement("set");
-      element->SetAttribute("type", domain->getTypeName().toString());
+      element->SetAttribute("type", domain->getTypeName());
       std::list<edouble> values;
       domain->getValues(values);
       std::list<edouble>::const_iterator iter;
@@ -348,7 +348,7 @@ void DbClientTransactionLog::notifyConstraintDeleted(const ConstraintId constrai
       return element;
     } else if (domain->isInterval()) {
       TiXmlElement * element = allocateXmlElement("interval");
-      std::string typeName = domain->getTypeName().toString();
+      std::string typeName = domain->getTypeName();
       element->SetAttribute("type",typeName);
       element->SetAttribute("min", domainValueAsString(domain, domain->getLowerBound()));
       element->SetAttribute("max", domainValueAsString(domain, domain->getUpperBound()));
@@ -379,7 +379,7 @@ DbClientTransactionLog::variableAsXml(const ConstrainedVariableId variable) cons
     else if (ObjectId::convertable(parent)) {
       ObjectId object = parent;
       check_error(object.isValid());
-      var_el->SetAttribute("object", object->getName().toString());
+      var_el->SetAttribute("object", object->getName());
     }
     else {
       var_el->SetAttribute("index", static_cast<int>(m_client->getIndexByVariable(variable)));

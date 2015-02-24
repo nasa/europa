@@ -75,7 +75,7 @@ Solver::Solver(const PlanDatabaseId db, const TiXmlElement& configData)
   // Extract the name of the Solver
   m_name = extractData(configData, "name");
 
-  m_context = ((new Context(m_name.toString() + "Context"))->getId());
+  m_context = ((new Context(m_name + "Context"))->getId());
   // Initialize the common filter
   m_masterFlawFilter.initialize(configData, m_db, m_context);
 
@@ -147,7 +147,7 @@ Solver::~Solver(){
 
     const SolverId Solver::getId() const{ return m_id;}
 
-    const LabelStr& Solver::getName() const { return m_name;}
+const std::string& Solver::getName() const { return m_name;}
 
     unsigned long Solver::getDepth() const {return m_decisionStack.size();}
 

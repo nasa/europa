@@ -376,7 +376,7 @@ class LabelStr;
     const DataTypeId getDataType() const;
 
     // TODO: all these just delegate to the data type, should be dropped eventually, preserved for now for backwards compatibility
-    const LabelStr& getTypeName() const;
+    const std::string& getTypeName() const;
     bool isSymbolic() const;
     bool isEntity() const;
     bool isNumeric() const;

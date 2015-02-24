@@ -432,7 +432,7 @@ bool Uses::canIgnore(const ConstrainedVariableId variable,
     std::map<InstantId,Resource::ProblemType>::const_iterator it = m_violationProblems.begin();
     for(;it != m_violationProblems.end();++it) {
       os << Resource::getProblemString(it->second)
-         << " for resource " << m_resource->getName().toString()
+         << " for resource " << m_resource->getName()
          << " at instant " << (it->first->getTime());
     }
 

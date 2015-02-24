@@ -43,7 +43,7 @@ Object::Object(const PlanDatabaseId planDatabase, const LabelStr& type, const La
   Object::Object(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open)
     : m_id(this), m_parent(parent),
       m_type(type),
-      m_name(std::string(parent->getName().toString() + "." + localName.toString())),
+      m_name(std::string(parent->getName() + "." + localName.toString())),
       m_planDatabase(parent->getPlanDatabase()),
       m_state(INCOMPLETE),
       m_components(),
@@ -58,7 +58,7 @@ Object::Object(const PlanDatabaseId planDatabase, const LabelStr& type, const La
               ObjectDomain(m_planDatabase->getSchema()->getCESchema()->getDataType(type.c_str()),m_id)))->getId()) {
     check_error(m_parent.isValid());
     check_error(m_planDatabase->getSchema()->canContain(parent->getType(), type, localName),
-		"Object " + parent->getName().toString() +
+		"Object " + parent->getName() +
 		" cannot contain " + localName.toString() + " of type " + type.toString());
 
     parent->add(m_id);
@@ -145,9 +145,9 @@ void Object::constructor(const std::vector<const Domain*>&) {}
 
 
 
-  const LabelStr& Object::getName() const {
-    return(m_name);
-  }
+const std::string& Object::getName() const {
+  return(m_name);
+}
 
   const PlanDatabaseId Object::getPlanDatabase() const {
     return(m_planDatabase);
@@ -395,7 +395,7 @@ void Object::constrain(const TokenId predecessor, const TokenId successor, bool 
          it != m_variables.end(); ++it) {
       const ConstrainedVariableId var = *it;
       check_error(var.isValid());
-      if (var->getName() == name)
+      if (var->getName() == name.toString())
         return(var);
     }
     return(ConstrainedVariableId::noId());
@@ -405,7 +405,7 @@ void Object::constrain(const TokenId predecessor, const TokenId successor, bool 
     unsigned int index = path[0];
 
     checkError(index < m_variables.size(),
-	       "index of " << index << " out of bounds for " << getName().toString());
+	       "index of " << index << " out of bounds for " << getName());
 
     ConstrainedVariableId var = m_variables[index];
     if(path.size() > 1){
@@ -560,7 +560,7 @@ void Object::constrain(const TokenId predecessor, const TokenId successor, bool 
     check_error(token.isValid());
     check_error(token->isActive());
     check_error(token->getObject()->lastDomain().isMember(getKey()),
-      "Cannot assign token " + token->getPredicateName().toString() + " to  object " + getName().toString() + ", it is not part of derived domain.");
+      "Cannot assign token " + token->getPredicateName().toString() + " to  object " + getName() + ", it is not part of derived domain.");
 
     // Place this token on the object. We use a constraint since token assignment is done by specifying
     // the object variable. This only needs to be done once, so test first if it has already been constrained
@@ -639,11 +639,11 @@ ConstrainedVariableId Object::addVariable(const Domain& baseDomain, const char* 
 
   check_error(!isComplete(),
               "Cannot add variable " + std::string(name) +
-              " after completing object construction for " + m_name.toString());
+              " after completing object construction for " + m_name);
 
   check_error(m_planDatabase->getSchema()->canContain(m_type, varTypeName.c_str(), name),
               "Cannot add a variable " + std::string(name) + " of type " +
-              baseDomain.getTypeName().toString() +
+              baseDomain.getTypeName() +
               " to objects of type " + m_type.toString());
 
 
@@ -652,7 +652,7 @@ ConstrainedVariableId Object::addVariable(const Domain& baseDomain, const char* 
   }
 
 
-  std::string fullVariableName(m_name.toString() + "." + name);
+  std::string fullVariableName(m_name + "." + name);
 
   ConstrainedVariableId id =
       m_planDatabase->getConstraintEngine()->createVariable(
@@ -710,7 +710,7 @@ ConstrainedVariableId Object::addVariable(const Domain& baseDomain, const char* 
   // The old toString method
   std::string Object::toLongString() const {
     std::stringstream sstr;
-    sstr << getType().toString() << ":" << getName().toString();
+    sstr << getType().toString() << ":" << getName();
     return sstr.str();
   }
 
@@ -775,7 +775,7 @@ PSVariable* Object::getMemberVariable(const std::string& name) {
   for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
       ++it) {
     ConstrainedVariableId id = *it;
-    if(id->getName() == realName) {
+    if(id->getName() == realName.toString()) {
       retval = id_cast<PSVariable>(id);
       break;
     }
@@ -882,7 +882,7 @@ PSList<PSToken*> Object::getTokens() const {
     : EnumeratedDomain(org){
     check_error(org.isEmpty() || Entity::getTypedEntity<Object>(org.getLowerBound()).isValid(),
         "Attempted to construct an object domain with values of non-object type " +
-        org.getTypeName().toString());
+        org.getTypeName());
   }
 
   bool ObjectDomain::convertToMemberValue(const std::string& strValue, edouble& dblValue) const{

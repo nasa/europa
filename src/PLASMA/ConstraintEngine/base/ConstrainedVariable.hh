@@ -197,7 +197,7 @@ namespace EUROPA {
     /**
      * @brief Accessor for variable name.
      */
-    const LabelStr& getName() const;
+    const std::string& getName() const;
 
     /**
      * @brief Convenience method to get at parents of variables.  In some cases,
@@ -509,7 +509,7 @@ namespace EUROPA {
     const ConstraintEngineId m_constraintEngine; /**< Reference to the ConstraintEngine to which this variable belongs.
 						    The  construction model of this class ensures
 						    that it is always set to a valid ConstraintEngineId. */
-    LabelStr m_name;
+    std::string m_name;
     const bool m_internal;
     const bool m_canBeSpecified;
     bool m_specifiedFlag; /**< True of internalSpecify is called.

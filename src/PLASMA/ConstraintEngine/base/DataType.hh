@@ -34,10 +34,10 @@ public:
     /**
      * @brief Get the data type's name.
      */
-    virtual const LabelStr& getName() const;
+  virtual const std::string& getName() const;
 
     // From PSDataType
-    const std::string& getNameString() const { return getName().toString(); }
+    const std::string& getNameString() const { return getName(); }
 
     /**
      * @brief Set the data ype's name.
@@ -130,7 +130,7 @@ public:
 
 protected:
     DataTypeId m_id;
-    LabelStr m_name;
+  std::string m_name;
     bool m_isRestricted;
     Domain* m_baseDomain;
     edouble m_minDelta; /**< The minimum amount by which elements of this data type may vary.  Once this is set, DO NOT CHANGE IT.*/

@@ -65,12 +65,12 @@ namespace EUROPA {
       return toString();
     }
     
-    std::string UnboundVariableDecisionPoint::toString() const{
-      std::stringstream strStream;
-      strStream << "VAR=" <<m_flawedVariable->getName().toString() << "(" << m_flawedVariable->getKey() << ")->"
-		<< m_flawedVariable->lastDomain().toString();
-      return strStream.str();
-    }
+  std::string UnboundVariableDecisionPoint::toString() const {
+    std::stringstream strStream;
+    strStream << "VAR=" <<m_flawedVariable->getName() << "(" << m_flawedVariable->getKey() << ")->"
+              << m_flawedVariable->lastDomain().toString();
+    return strStream.str();
+  }
 
 
     MinValue::MinValue(const DbClientId client, const ConstrainedVariableId flawedVariable, const TiXmlElement& configData, const LabelStr& explanation)

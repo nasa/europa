@@ -42,7 +42,7 @@ namespace EUROPA {
     /**
      * @brief Name of propagator. Used for configuration
      */
-    const LabelStr& getName() const;
+    const std::string& getName() const;
 
     /**
      * @brief Obtain the list of all constraints managed by this Propagator
@@ -184,7 +184,7 @@ namespace EUROPA {
 
     std::set<ConstraintId> m_constraints; /**< The list of all constraints (should be a set) managed by this Propagator. */
     PropagatorId m_id; /**< Self reference. */
-    const LabelStr m_name;
+    const std::string m_name;
     const ConstraintEngineId m_constraintEngine; /**< The ConstraintEngine to which this Propagator belongs. Must be valid. */
     bool m_enabled; /**< Indicates if the propagator is enabled or not */
     int m_priority;

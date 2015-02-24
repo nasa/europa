@@ -149,7 +149,7 @@ void ResourceTokenRelation::notifyViolated(Resource::ProblemType problem,
 		std::ostringstream os;
 
 		os << Resource::getProblemString(m_violationProblem)
-		<< " for resource " << m_resource->getName().toString()
+		<< " for resource " << m_resource->getName()
 		<< " at instant " << m_violationTime;
 
 		return os.str();

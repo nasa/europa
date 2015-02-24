@@ -49,13 +49,12 @@ const ObjectTypeId ObjectType::getId() const
     return m_id;
 }
 
-const LabelStr& ObjectType::getName() const
-{
-    return m_name;
+const std::string& ObjectType::getName() const {
+  return m_name;
 }
 
 const std::string& ObjectType::getNameString() const {
-	return m_name.toString();
+  return m_name;
 }
 
 const ObjectTypeId ObjectType::getParent() const
@@ -83,9 +82,8 @@ PSList<std::string> ObjectType::getMemberNames() const {
 	  return retval;
 }
 
-const std::map<edouble,ObjectFactoryId>& ObjectType::getObjectFactories() const
-{
-    return m_objectFactories;
+const std::map<std::string,ObjectFactoryId>& ObjectType::getObjectFactories() const {
+  return m_objectFactories;
 }
 
 const std::map<edouble,TokenTypeId>& ObjectType::getTokenTypes() const
@@ -125,7 +123,7 @@ PSDataType* ObjectType::getMemberTypeRef(const std::string& name) const {
 
 void ObjectType::addObjectFactory(const ObjectFactoryId factory) {
   // TODO: allow redefinition of old one
-  m_objectFactories[static_cast<edouble>(factory->getSignature())] = factory;
+  m_objectFactories[factory->getSignature()] = factory;
 }
 
 void ObjectType::addTokenType(const TokenTypeId factory) {
@@ -143,7 +141,7 @@ const TokenTypeId ObjectType::getTokenType(const LabelStr& signature) const {
     return it->second;
   
   if (m_parent.isId()) {
-    std::string parentSignature = m_parent->getName().toString()+"."+signature.getElement(1,".").toString();
+    std::string parentSignature = m_parent->getName()+"."+signature.getElement(1,".").toString();
     return m_parent->getTokenType(parentSignature);
   }
 
@@ -170,54 +168,53 @@ PSList<PSTokenType*> ObjectType::getPSTokenTypesByAttr( int attrMask ) const {
 const TokenTypeId ObjectType::getParentType(const TokenTypeId type) const
 {
     if (m_parent.isId()) {
-        std::string parentSignature = m_parent->getName().toString()+"."+type->getPredicateName().toString();
+        std::string parentSignature = m_parent->getName()+"."+type->getPredicateName().toString();
         return m_parent->getTokenType(parentSignature);
     }
 
     return TokenTypeId::noId();
 }
 
-std::string ObjectType::toString() const
-{
-    std::ostringstream os;
-    std::string extends = (m_parent.isId() ? std::string("extends ")+m_parent->getName().c_str() : "");
+std::string ObjectType::toString() const {
+  std::ostringstream os;
+  std::string extends = (m_parent.isId() ? std::string("extends ")+m_parent->getName().c_str() : "");
 
-    os << "class " << m_name.c_str() << " extends " << extends << " {" << std::endl;
+  os << "class " << m_name.c_str() << " extends " << extends << " {" << std::endl;
 
-    {
-        std::map<std::string,DataTypeId>::const_iterator it = m_members.begin();
-        for(;it != m_members.end(); ++it)
-            os << "    "
-               << it->second->getName().toString() /*type*/ << " "
-               <<  it->first/*name*/
-               << std::endl;
+  {
+    std::map<std::string,DataTypeId>::const_iterator it = m_members.begin();
+    for(;it != m_members.end(); ++it)
+      os << "    "
+         << it->second->getName() /*type*/ << " "
+         <<  it->first/*name*/
+         << std::endl;
+  }
+
+  os << std::endl;
+
+  {
+    std::map<std::string,ObjectFactoryId>::const_iterator it = m_objectFactories.begin();
+    for(;it != m_objectFactories.end(); ++it)
+      os << "    " << it->second->getSignature().c_str() << std::endl;
+  }
+
+  os << std::endl;
+
+  {
+    std::map<edouble,TokenTypeId>::const_iterator it = m_tokenTypes.begin();
+    for(;it != m_tokenTypes.end(); ++it) {
+      TokenTypeId tokenType = it->second;
+      os << "    " << tokenType->getSignature().c_str();
+      std::map<LabelStr,DataTypeId>::const_iterator paramIt = tokenType->getArgs().begin();
+      for(;paramIt != tokenType->getArgs().end();++paramIt)
+        os<< " " << paramIt->second->getName().c_str() /*type*/ << "->" << paramIt->first.c_str()/*name*/;
+      os << std::endl;
     }
+  }
 
-    os << std::endl;
+  os << "}" << std::endl;
 
-    {
-        std::map<edouble,ObjectFactoryId>::const_iterator it = m_objectFactories.begin();
-        for(;it != m_objectFactories.end(); ++it)
-            os << "    " << it->second->getSignature().c_str() << std::endl;
-    }
-
-    os << std::endl;
-
-    {
-        std::map<edouble,TokenTypeId>::const_iterator it = m_tokenTypes.begin();
-        for(;it != m_tokenTypes.end(); ++it) {
-            TokenTypeId tokenType = it->second;
-            os << "    " << tokenType->getSignature().c_str();
-            std::map<LabelStr,DataTypeId>::const_iterator paramIt = tokenType->getArgs().begin();
-            for(;paramIt != tokenType->getArgs().end();++paramIt)
-                os<< " " << paramIt->second->getName().c_str() /*type*/ << "->" << paramIt->first.c_str()/*name*/;
-            os << std::endl;
-        }
-    }
-
-    os << "}" << std::endl;
-
-    return os.str();
+  return os.str();
 }
 
   static const char* TYPE_DELIMITER = ":"; /*!< Used to delimit types in the factory signature*/
@@ -244,7 +241,7 @@ std::string ObjectType::toString() const
 
   const LabelStr& ObjectFactory::getSignature() const {return m_signature;}
 
-  const std::vector<LabelStr>& ObjectFactory::getSignatureTypes() const {return m_signatureTypes;}
+const std::vector<std::string>& ObjectFactory::getSignatureTypes() const {return m_signatureTypes;}
 
 ObjectId ObjectFactory::makeNewObject(const PlanDatabaseId,
                                       const LabelStr&,
@@ -279,7 +276,7 @@ void ObjectTypeMgr::purgeAll(){
   
   // TODO: this should be done by the object types
   std::set<ObjectFactory*> alreadyDeleted;
-  for(std::map<edouble, ObjectFactoryId>::const_iterator it = m_factories.begin(); it != m_factories.end(); ++it) {
+  for(std::map<std::string, ObjectFactoryId>::const_iterator it = m_factories.begin(); it != m_factories.end(); ++it) {
     if(alreadyDeleted.find(it->second) == alreadyDeleted.end()) {
       alreadyDeleted.insert(static_cast<ObjectFactory*>(it->second));
       delete static_cast<ObjectFactory*>(it->second);
@@ -291,36 +288,36 @@ void ObjectTypeMgr::purgeAll(){
 }
 
 
-  void ObjectTypeMgr::registerObjectType(const ObjectTypeId objType)
+void ObjectTypeMgr::registerObjectType(const ObjectTypeId objType) {
+  // TODO: instead of keeping separate map, we should probably just delegate to the ObjectType
   {
-	  // TODO: instead of keeping separate map, we should probably just delegate to the ObjectType
-      {
-          std::map<edouble,ObjectFactoryId>::const_iterator it = objType->getObjectFactories().begin();
-          for(;it != objType->getObjectFactories().end(); ++it)
-              registerFactory(it->second);
-      }
-
-      m_objTypes[objType->getName().getKey()] = objType;
-
-      debugMsg("Schema:registerObjectType","Registered object type:" << std::endl << objType->toString());
+    std::map<std::string,ObjectFactoryId>::const_iterator it = objType->getObjectFactories().begin();
+    for(;it != objType->getObjectFactories().end(); ++it)
+      registerFactory(it->second);
   }
 
+  m_objTypes[objType->getName()] = objType;
+
+  debugMsg("Schema:registerObjectType",
+           "Registered object type:" << std::endl << objType->toString());
+}
+
 const ObjectTypeId ObjectTypeMgr::getObjectType(const LabelStr& objType) const {
-  std::map<edouble,ObjectTypeId>::const_iterator it =
-      m_objTypes.find(static_cast<edouble>(objType));
+  std::map<std::string,ObjectTypeId>::const_iterator it =
+      m_objTypes.find(objType);
 
   return (it == m_objTypes.end() ? ObjectTypeId::noId() : it->second);
 }
 
-  std::vector<ObjectTypeId> ObjectTypeMgr::getAllObjectTypes() const
-  {
-	  std::vector<ObjectTypeId> retval;
-	  for(std::map<edouble, ObjectTypeId>::const_iterator it = m_objTypes.begin(); it != m_objTypes.end(); ++it) {
-		  retval.push_back(it->second);
-	  }
-
-	  return retval;
+std::vector<ObjectTypeId> ObjectTypeMgr::getAllObjectTypes() const {
+  std::vector<ObjectTypeId> retval;
+  for(std::map<std::string, ObjectTypeId>::const_iterator it = m_objTypes.begin();
+      it != m_objTypes.end(); ++it) {
+    retval.push_back(it->second);
   }
+
+  return retval;
+}
 
   LabelStr ObjectTypeMgr::makeFactoryName(const LabelStr& objectType, const std::vector<const Domain*>& arguments){
     std::string signature = objectType.toString();
@@ -328,102 +325,101 @@ const ObjectTypeId ObjectTypeMgr::getObjectType(const LabelStr& objType) const {
     debugMsg("ObjectFactory:makeFactoryName", "Making factory name " << signature);
     // Iterate over the argument types and compose full signature
     for(std::vector<const Domain*>::const_iterator it = arguments.begin(); it != arguments.end(); ++it){
-      signature = signature + TYPE_DELIMITER + (*it)->getTypeName().toString();
+      signature = signature + TYPE_DELIMITER + (*it)->getTypeName();
     }
 
     return signature;
   }
 
-  /**
-   * We must consider the possibility that the precise signature will not be registered, but a more abstracted signature may
-   * work. For example. Suppose we have the following: Foo:int:float:Bar:Bing as a signature for a Foo factory. We are presented with
-   * Foo:int:int:Bar:Bong where Bong extends Bing. We should permit a match under such circumstances.
-   *
-   * Matching rules for argument types:
-   * matches(int, float)
-   * matches(descendant, ancestor)
-   * matches(x, x)
-   */
-  ObjectFactoryId ObjectTypeMgr::getFactory(const SchemaId schema,
-                                            const LabelStr& objectType,
-                                            const std::vector<const Domain*>& arguments,
-					    const bool doCheckError)
-  {
-    // Build the full signature for the factory
-    LabelStr factoryName = makeFactoryName(objectType,arguments);
+/**
+ * We must consider the possibility that the precise signature will not be registered, but a more abstracted signature may
+ * work. For example. Suppose we have the following: Foo:int:float:Bar:Bing as a signature for a Foo factory. We are presented with
+ * Foo:int:int:Bar:Bong where Bong extends Bing. We should permit a match under such circumstances.
+ *
+ * Matching rules for argument types:
+ * matches(int, float)
+ * matches(descendant, ancestor)
+ * matches(x, x)
+ */
+ObjectFactoryId ObjectTypeMgr::getFactory(const SchemaId schema,
+                                          const LabelStr& objectType,
+                                          const std::vector<const Domain*>& arguments,
+                                          const bool doCheckError) {
+  // Build the full signature for the factory
+  LabelStr factoryName = makeFactoryName(objectType,arguments);
 
-    debugMsg("ObjectFactory:getFactory", "looking for factory " << factoryName.toString());
-
+  debugMsg("ObjectFactory:getFactory", "looking for factory " << factoryName.toString());
 
 
-    // Try to find a hit straight off
-    std::map<edouble, ObjectFactoryId>::const_iterator it = m_factories.find(factoryName.getKey());
 
-    // If we have a hit, return it
-    if(it != m_factories.end())
-      return it->second;
+  // Try to find a hit straight off
+  std::map<std::string, ObjectFactoryId>::const_iterator it = m_factories.find(factoryName);
 
-    // Otherwise, loop over all factories, and test for a match
-    for(it = m_factories.begin(); it != m_factories.end(); ++it){
-      ObjectFactoryId factory = it->second;
-      const std::vector<LabelStr>& signatureTypes = factory->getSignatureTypes();
+  // If we have a hit, return it
+  if(it != m_factories.end())
+    return it->second;
 
-      // if there is no hit for the object type, move on immediately
-      if(!schema->isA(objectType, signatureTypes[0]))
-	continue;
+  // Otherwise, loop over all factories, and test for a match
+  for(it = m_factories.begin(); it != m_factories.end(); ++it){
+    ObjectFactoryId factory = it->second;
+    const std::vector<std::string>& signatureTypes = factory->getSignatureTypes();
 
-      if (signatureTypes[0].c_str() != objectType.c_str())
-	continue;
+    // if there is no hit for the object type, move on immediately
+    if(!schema->isA(objectType, signatureTypes[0]))
+      continue;
 
-      // If the argument length does not match the signature, which includes the extra for the class
-      if(signatureTypes.size() - arguments.size() != 1)
-	continue;
+    if (signatureTypes[0].c_str() != objectType.c_str())
+      continue;
 
-      // Now do a type by type comparison
-      bool found = true;
-      for (unsigned int j=1;j<signatureTypes.size();j++){
-	if(schema->isType(arguments[j-1]->getTypeName()) &&
-	   schema->isType(signatureTypes[j])){
-	  if(!schema->isA(arguments[j-1]->getTypeName(), signatureTypes[j])){
-	    found = false;
-	    break;
-	  }
-	}
-	else if(arguments[j-1]->getTypeName() != signatureTypes[j]){
-	  found = false;
-	  break;
-	}
+    // If the argument length does not match the signature, which includes the extra for the class
+    if(signatureTypes.size() - arguments.size() != 1)
+      continue;
+
+    // Now do a type by type comparison
+    bool found = true;
+    for (unsigned int j=1;j<signatureTypes.size();j++){
+      if(schema->isType(arguments[j-1]->getTypeName()) &&
+         schema->isType(signatureTypes[j])){
+        if(!schema->isA(arguments[j-1]->getTypeName(), signatureTypes[j])){
+          found = false;
+          break;
+        }
       }
-
-      if(found){
-	// Cache for next time and return
-	m_factories.insert(std::pair<edouble, ObjectFactoryId>(factoryName, factory));
-	return factory;
+      else if(arguments[j-1]->getTypeName() != signatureTypes[j]){
+        found = false;
+        break;
       }
     }
 
-    // At this point, we should have a hit
-    if (doCheckError)
-	check_error(ALWAYS_FAILS, "Factory '" + factoryName.toString() + "' is not registered.");
-    return ObjectFactoryId::noId();
-  }
-
-  void ObjectTypeMgr::registerFactory(const ObjectFactoryId factory){
-    check_error(factory.isValid());
-
-    debugMsg("ObjectFactory:registerFactory", "Registering factory with signature " << factory->getSignature().toString());
-
-    if(m_factories.find(factory->getSignature().getKey()) != m_factories.end()){
-      ObjectFactoryId oldFactory = m_factories.find(factory->getSignature().getKey())->second;
-      m_factories.erase(factory->getSignature().getKey());
-      delete static_cast<ObjectFactory*>(oldFactory);
-      debugMsg("ObjectFactory:registerFactory", "Over-riding registeration for factory with signature " << factory->getSignature().toString());
+    if(found){
+      // Cache for next time and return
+      m_factories.insert(std::make_pair(factoryName, factory));
+      return factory;
     }
-
-    // Ensure it is not present already
-    check_error(m_factories.find(factory->getSignature().getKey()) == m_factories.end());
-    m_factories.insert(std::make_pair(factory->getSignature().getKey(), factory));
   }
+
+  // At this point, we should have a hit
+  if (doCheckError)
+    check_error(ALWAYS_FAILS, "Factory '" + factoryName.toString() + "' is not registered.");
+  return ObjectFactoryId::noId();
+}
+
+void ObjectTypeMgr::registerFactory(const ObjectFactoryId factory) {
+  check_error(factory.isValid());
+
+  debugMsg("ObjectFactory:registerFactory",
+           "Registering factory with signature " << factory->getSignature().toString());
+  if(m_factories.find(factory->getSignature()) != m_factories.end()){
+    ObjectFactoryId oldFactory = m_factories.find(factory->getSignature())->second;
+    m_factories.erase(factory->getSignature());
+    delete static_cast<ObjectFactory*>(oldFactory);
+    debugMsg("ObjectFactory:registerFactory", "Over-riding registeration for factory with signature " << factory->getSignature().toString());
+  }
+
+  // Ensure it is not present already
+  check_error(m_factories.find(factory->getSignature()) == m_factories.end());
+  m_factories.insert(std::make_pair(factory->getSignature(), factory));
+}
 
 
   /*
@@ -463,7 +459,7 @@ const ObjectTypeId ObjectTypeMgr::getObjectType(const LabelStr& objType) const {
     if (strcmp(name,"this") == 0)
         return m_obj->getThis();
 
-    ConstrainedVariableId var = m_obj->getVariable(m_obj->getName().toString()+"."+name);
+    ConstrainedVariableId var = m_obj->getVariable(m_obj->getName()+"."+name);
 
     if (!var.isNoId()) {
       debugMsg("Interpreter:EvalContext:Object","Found var in object instance:" << name);
@@ -665,7 +661,7 @@ void* ObjectFactoryEvalContext::getElement(const char* name) const {
         // Initialize any variables that were not explicitly initialized
         const Schema::NameValueVector& members = instance->getPlanDatabase()->getSchema()->getMembers(m_className);
         for (unsigned int i=0; i < members.size(); i++) {
-            std::string varName = instance->getName().toString() + "." + members[i].second.toString();
+            std::string varName = instance->getName() + "." + members[i].second.toString();
             if (instance->getVariable(varName) == ConstrainedVariableId::noId()) {
                 const Domain& baseDomain =
                     instance->getPlanDatabase()->getConstraintEngine()->getCESchema()->baseDomain(members[i].first.c_str());

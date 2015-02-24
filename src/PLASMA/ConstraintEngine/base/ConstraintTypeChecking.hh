@@ -258,7 +258,7 @@ struct All {
     for(; begin != finish; ++begin) {
       if(!c(name, *begin, os)) {
         os << "Constraint " << name << " takes a " << c.description() << " argument at "
-            << std::distance(begin, finish) << ", not a " << (*begin)->getName().toString() <<
+            << std::distance(begin, finish) << ", not a " << (*begin)->getName() <<
             std::endl;
         retval = false;
       }
@@ -285,12 +285,12 @@ struct And {
     A m_a;
     B m_b;
     if(!m_a(name, dt, os)) {
-      os << "Constraint " << name << " requires that " << dt->getName().toString() <<
+      os << "Constraint " << name << " requires that " << dt->getName() <<
           " be " << m_a.description() << std::endl;
       retval = false;
     }
     if(!m_b(name, dt, os)) {
-      os << "Constraint " << name << " requires that " << dt->getName().toString() <<
+      os << "Constraint " << name << " requires that " << dt->getName() <<
           " be " << m_b.description() << std::endl;
       retval = false;
     }
@@ -330,7 +330,7 @@ struct Mutually {
     bool b = m_c(name, two, one, os);
     if(!a || !b) {
       os << "Constraint " << name << " requires that " <<
-          one->getName().toString() << " and " << two->getName().toString() <<
+          one->getName() << " and " << two->getName() <<
           " be mutually " << m_c.description() << std::endl;
       return false;
     }
@@ -445,7 +445,7 @@ struct Type {
   bool operator()(const std::string&, DataTypeId dt, std::ostream&) const {
     return T::instance() == dt;
   }
-  std::string description() const {return T::instance()->getName().toString();}
+  std::string description() const {return T::instance()->getName();}
 };
 
 /**
@@ -468,7 +468,7 @@ class DataTypeCheckBase : public ConstraintType {
 
   void checkArgTypes(const std::vector<DataTypeId>& argTypes) const {
     std::ostringstream str;
-    if(!m_check(this->m_name.toString(), argTypes.begin(), argTypes.end(), str))
+    if(!m_check(this->m_name, argTypes.begin(), argTypes.end(), str))
       throw str.str();
   }
  private:

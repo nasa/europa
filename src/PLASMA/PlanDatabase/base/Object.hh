@@ -77,7 +77,7 @@ namespace EUROPA {
      * @brief Access the instance name of this object.
      * Instance names include the full path, delimited by ':' in the composition hierarchy.
      */
-    virtual const LabelStr& getName() const;
+    virtual const std::string& getName() const;
 
 
 
@@ -327,7 +327,7 @@ namespace EUROPA {
     ObjectId m_id;
     ObjectId m_parent;
     LabelStr m_type;
-    LabelStr m_name;
+    std::string m_name;
     const PlanDatabaseId m_planDatabase;
     State m_state;
     ObjectSet m_components;

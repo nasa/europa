@@ -26,10 +26,10 @@ namespace EUROPA {
     return sl_delimiter;
   }
 
-  const LabelStr& Schema::rootObject(){
-    static const LabelStr sl_rootObject("Object");
-    return sl_rootObject;
-  }
+const std::string& Schema::rootObject() {
+  static const std::string sl_rootObject("Object");
+  return sl_rootObject;
+}
 
   const std::set<LabelStr>& Schema::getBuiltInVariableNames(){
     static std::set<LabelStr> sl_instance;
@@ -737,7 +737,7 @@ const Id<ObjectFactory> createDefaultObjectFactory(
       {
           std::map<std::string,DataTypeId>::const_iterator it = objType->getMembers().begin();
           for(;it != objType->getMembers().end(); ++it)
-              addMember(className, it->second->getName().toString() /*type*/, it->first/*name*/);
+              addMember(className, it->second->getName() /*type*/, it->first/*name*/);
       }
 
       {

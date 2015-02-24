@@ -61,7 +61,7 @@ namespace EUROPA {
     /**
      * @brief Get the name
      */
-    const LabelStr& getName() const;
+    const std::string& getName() const;
 
     /**
      * @brief Set the name
@@ -496,7 +496,7 @@ namespace EUROPA {
     bool removeMergedToken(const TokenId token);
 
     TokenId m_id;
-    LabelStr m_name;
+    std::string m_name;
     TokenId m_master;
     LabelStr m_relation;
     LabelStr m_baseObjectType;

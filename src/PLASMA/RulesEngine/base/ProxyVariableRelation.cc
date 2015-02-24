@@ -110,11 +110,12 @@ namespace EUROPA {
     return false;
   }
 
-  void ProxyVariableRelation::setSource(const ConstraintId sourceConstraint){
-    checkError(sourceConstraint->getName() == LabelStr("proxyRelation"), sourceConstraint->toString());
-    checkError(m_path.empty(), "Should be empty when setting up the source from " << sourceConstraint->toString());
-    m_sourceConstraint = sourceConstraint;
-  }
+void ProxyVariableRelation::setSource(const ConstraintId sourceConstraint) {
+  checkError(sourceConstraint->getName() == LabelStr("proxyRelation").toString(),
+             sourceConstraint->toString());
+  checkError(m_path.empty(), "Should be empty when setting up the source from " << sourceConstraint->toString());
+  m_sourceConstraint = sourceConstraint;
+}
 
   /**
    * In the lifetime of a constraint, this should only be called at most once. It is used to lazily copy a source path under conditions

@@ -207,65 +207,64 @@ ExprVarRef::ExprVarRef(const char* varName, const DataTypeId type)
       return m_varType;
   }
 
-  DataRef ExprVarRef::eval(EvalContext& context) const
-  {
-    ConstrainedVariableId var;
+DataRef ExprVarRef::eval(EvalContext& context) const {
+  ConstrainedVariableId var;
 
-    if (m_parentName == "") {
-        var = context.getVar(m_varName.c_str());
-        if (var.isNoId()) {
-            // If var evaluates to a token, return state var.
-            TokenId tok = context.getToken(m_varName.c_str());
-            if (tok.isNoId()) {
-                check_runtime_error(!var.isNoId(),std::string("Couldn't find variable or token '" )+m_varName+"' in Evaluation Context");
-                return DataRef::null;
-            }
-            var = tok->getState();
-        }
+  if (m_parentName == "") {
+    var = context.getVar(m_varName.c_str());
+    if (var.isNoId()) {
+      // If var evaluates to a token, return state var.
+      TokenId tok = context.getToken(m_varName.c_str());
+      if (tok.isNoId()) {
+        check_runtime_error(!var.isNoId(),std::string("Couldn't find variable or token '" )+m_varName+"' in Evaluation Context");
+        return DataRef::null;
+      }
+      var = tok->getState();
+    }
+  }
+  else {
+    TokenId tok = context.getToken(m_parentName.c_str());
+    if (tok.isNoId()) {
+      var = context.getVar(m_parentName.c_str());
+      if (var.isNoId()) {
+        check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable or token '")+m_parentName+"' in Evaluation Context");
+        return DataRef::null;
+      }
+    }
+
+    // TODO: this isn't pretty, have the different EvalContexts perform the lookup
+    // TODO: is this really still necessary?, code in "else" block should work in ruleInstance context as well
+    RuleInstanceEvalContext *riec = dynamic_cast<RuleInstanceEvalContext*>(&context);
+    if (riec != NULL) {
+      if (tok.isId())
+        var = riec->getRuleInstance()->varfromtok(tok,m_varName);
+      else
+        var = riec->getRuleInstance()->varFromObject(m_parentName,m_varName,false);
     }
     else {
-        TokenId tok = context.getToken(m_parentName.c_str());
-        if (tok.isNoId()) {
-            var = context.getVar(m_parentName.c_str());
-            if (var.isNoId()) {
-                check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable or token '")+m_parentName+"' in Evaluation Context");
-                return DataRef::null;
-            }
-        }
+      std::string varName=m_vars[0];
+      unsigned int idx = 0;
 
-        // TODO: this isn't pretty, have the different EvalContexts perform the lookup
-        // TODO: is this really still necessary?, code in "else" block should work in ruleInstance context as well
-        RuleInstanceEvalContext *riec = dynamic_cast<RuleInstanceEvalContext*>(&context);
-        if (riec != NULL) {
-            if (tok.isId())
-                var = riec->getRuleInstance()->varfromtok(tok,m_varName);
-            else
-                var = riec->getRuleInstance()->varFromObject(m_parentName,m_varName,false);
-        }
-        else {
-            std::string varName=m_vars[0];
-            unsigned int idx = 0;
+      if (tok.isId()) {
+        var = tok->getVariable(varName,false);
+        idx++;
+      }
 
-            if (tok.isId()) {
-                var = tok->getVariable(varName,false);
-                idx++;
-            }
+      for (;idx<m_vars.size();idx++) {
+        check_runtime_error(var->derivedDomain().isSingleton(),varName+" must be singleton to be able to get to "+m_vars[idx]);
+        ObjectId object = Entity::getTypedEntity<Object>(var->derivedDomain().getSingletonValue());
+        var = object->getVariable(object->getName()+"."+m_vars[idx]);
+        varName += "." + m_vars[idx];
 
-            for (;idx<m_vars.size();idx++) {
-              check_runtime_error(var->derivedDomain().isSingleton(),varName+" must be singleton to be able to get to "+m_vars[idx]);
-              ObjectId object = Entity::getTypedEntity<Object>(var->derivedDomain().getSingletonValue());
-              var = object->getVariable(object->getName().toString()+"."+m_vars[idx]);
-              varName += "." + m_vars[idx];
-
-              if (var.isNoId())
-                  check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+m_vars[idx]+
-                        " in object \""+object->getName().toString()+"\" of type "+object->getType().toString());
-            }
-        }
+        if (var.isNoId())
+          check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+m_vars[idx]+
+                              " in object \""+object->getName()+"\" of type "+object->getType().toString());
+      }
     }
-
-    return DataRef(var);
   }
+
+  return DataRef(var);
+}
 
   std::string ExprVarRef::toString() const
   {
@@ -307,7 +306,7 @@ ExprVarRef::ExprVarRef(const char* varName, const DataTypeId type)
     ConstrainedVariableId thisVar = context.getVar("this");
     ObjectId thisObject =
       (thisVar.isId() ? Entity::getTypedEntity<Object>(thisVar->derivedDomain().getSingletonValue()) : ObjectId::noId());
-    std::string prefix = (thisObject.isId() ? thisObject->getName().toString() + "." : "");
+    std::string prefix = (thisObject.isId() ? thisObject->getName() + "." : "");
 
     LabelStr name(prefix+m_objectName.toString());
     DbClientId pdb = getPDB(context);
@@ -422,7 +421,7 @@ ExprVarRef::ExprVarRef(const char* varName, const DataTypeId type)
         args += m_args[i]->toString() + std::string("_");
       }
 
-      return m_func->getName().toString() + "__" + args + "_";
+      return m_func->getName() + "__" + args + "_";
   }
 
   CExprBinary::CExprBinary(std::string op, CExpr* lhs, CExpr* rhs)
@@ -484,7 +483,7 @@ namespace {
 bool isTimepoint(DataRef var) {
   ConstrainedVariable *cvar = var.getValue();
   return dynamic_cast< TokenVariable<IntervalIntDomain>* >(cvar) != NULL
-      && (cvar->getName().toString() == "end" || cvar->getName().toString() == "start");
+      && (cvar->getName() == "end" || cvar->getName() == "start");
 }
 }
 
@@ -1460,7 +1459,7 @@ InterpretedTokenType::InterpretedTokenType(
     const std::vector<ConstrainedVariableId>& vars = m_ruleInstance->getToken()->getVariables();
     for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end(); ++it){
       ConstrainedVariableId var = *it;
-      os << var->getName().toString() << "," ;
+      os << var->getName() << "," ;
     }
     os << "}" << std::endl;
 
@@ -1568,7 +1567,7 @@ InterpretedRuleInstance::InterpretedRuleInstance(const RuleInstanceId parent,
     RuleInstanceEvalContext evalContext(NULL,getId());
 
     debugMsg("Interpreter:InterpretedRule",
-	     "Executing interpreted rule: " << getRule()->getName().toString() << ":" <<  getRule()->getSource().toString() <<
+	     "Executing interpreted rule: " << getRule()->getName() << ":" <<  getRule()->getSource().toString() <<
 	     "token: " << m_token->toString());
 
     for(std::vector<Expr*>::const_iterator it = m_body.begin(); it != m_body.end(); ++it) {
@@ -1581,7 +1580,7 @@ InterpretedRuleInstance::InterpretedRuleInstance(const RuleInstanceId parent,
     }
 
     debugMsg("Interpreter:InterpretedRule",
-	     "Executed interpreted rule: " << getRule()->getName().toString() << ":" <<  getRule()->getSource().toString() <<
+	     "Executed interpreted rule: " << getRule()->getName() << ":" <<  getRule()->getSource().toString() <<
 	     "token: " << m_token->toString());
   }
 
@@ -1804,7 +1803,7 @@ InterpretedRuleInstance::InterpretedRuleInstance(const RuleInstanceId parent,
   {
       std::ostringstream os;
 
-      os << "TYPEDEF:" << m_baseType->getName().toString() << " -> " << m_name.toString();
+      os << "TYPEDEF:" << m_baseType->getName() << " -> " << m_name.toString();
 
       return os.str();
   }
@@ -2043,7 +2042,7 @@ InterpretedRuleInstance::InterpretedRuleInstance(const RuleInstanceId parent,
           const Domain& domain = rhsValue->derivedDomain();
           ConstrainedVariableId v = object->addVariable(domain,varName);
           lhs = DataRef(v);
-          debugMsg("Interpreter:InterpretedObject","Initialized variable:" << object->getName().toString() << "." << varName << " to " << rhsValue->derivedDomain().toString() << " in constructor");
+          debugMsg("Interpreter:InterpretedObject","Initialized variable:" << object->getName() << "." << varName << " to " << rhsValue->derivedDomain().toString() << " in constructor");
       }
       else {
           lhs = m_lhs->eval(context);
