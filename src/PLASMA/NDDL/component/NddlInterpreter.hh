@@ -61,7 +61,7 @@ private:
 
   // Enum support methods
   bool isEnumValue(const char* value) const;
-  const LabelStr& getEnumForValue(const char* value) const;
+  const std::string& getEnumForValue(const char* value) const;
   Expr* makeEnumRef(const char* value) const;
 
  protected:

@@ -365,11 +365,11 @@ private:
     CPPUNIT_ASSERT(schema->isEnumValue(LabelStr("BarEnum"), 5));
     CPPUNIT_ASSERT(!schema->isEnumValue(LabelStr("BarEnum"), 6));
 
-    std::list<LabelStr> allenums;
+    std::list<std::string> allenums;
     schema->getEnumerations(allenums);
     CPPUNIT_ASSERT(allenums.size() == 2);
-    CPPUNIT_ASSERT(allenums.back() == LabelStr("BarEnum"));
-    CPPUNIT_ASSERT(allenums.front() == LabelStr("FooEnum"));
+    CPPUNIT_ASSERT(std::find(allenums.begin(), allenums.end(), "BarEnum") != allenums.end());
+    CPPUNIT_ASSERT(std::find(allenums.begin(), allenums.end(), "FooEnum") != allenums.end());
 
     // test getEnumValues.
     LabelStr enumDomainName = "TestEnum";

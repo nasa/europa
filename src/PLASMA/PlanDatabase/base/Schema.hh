@@ -20,8 +20,6 @@
 
 namespace EUROPA {
 
-  typedef std::set<edouble> LabelStrSet;
-
   /**
    * @class Schema
    * @brief Defines an interface for type checking information for the PlanDatabase.
@@ -39,10 +37,6 @@ namespace EUROPA {
     typedef std::pair<std::string, std::string> NameValuePair;
     typedef std::vector<NameValuePair> NameValueVector;
     typedef std::set<edouble> ValueSet;
-    typedef std::map<edouble, LabelStr> LabelStr_LabelStr_Map;
-    typedef std::map<edouble, LabelStrSet > LabelStr_LabelStrSet_Map;
-    typedef std::map<edouble, ValueSet > LabelStr_ValueSet_Map;
-    typedef std::map<edouble,LabelStr_LabelStr_Map> LabelStr_LabelStrLabelStrMap_Map;
 
     Schema(const LabelStr& name, const CESchemaId cesch);
     ~Schema();
@@ -188,7 +182,7 @@ namespace EUROPA {
      * @brief Obtains all the Object Types in the Schema.
      * @return a const ref to a set of LabelStr (each of which is the name of an  ObjectType)
      */
-    const LabelStrSet& getAllObjectTypes() const;
+    const std::set<std::string>& getAllObjectTypes() const;
 
     /**
      * @brief Obtains the set of all ObjectTypes that can be matched with the given object type.
@@ -210,7 +204,7 @@ namespace EUROPA {
      * @brief Obtains the enum name for an enum value
      * @param value enum value to be looked up
      */
-    const LabelStr& getEnumForValue(edouble value) const;
+    const std::string& getEnumForValue(edouble value) const;
 
     /**
      * @brief Obtain the set of predicates for a given object type.  Errors if objectType
@@ -333,7 +327,7 @@ namespace EUROPA {
      * @param enumName The name of the enumeration
      * @param enumValue The member to be added
      */
-    void addValue(const LabelStr& enumName, edouble enumValue);
+    void addValue(const std::string& enumName, edouble enumValue);
 
     void registerEnum(const char* enumName, const EnumeratedDomain& domain);
 
@@ -341,7 +335,7 @@ namespace EUROPA {
      * @brief Obtain a list of names of enumerations
      * @param results a list of enumeration names
      */
-    void getEnumerations(std::list<LabelStr>& results) const;
+    void getEnumerations(std::list<std::string>& results) const;
 
     /**
      * @brief Output contents to the given stream
@@ -380,22 +374,22 @@ namespace EUROPA {
     const CESchemaId m_ceSchema;
     const ObjectTypeMgrId m_objectTypeMgr;
     const TokenTypeMgrId m_tokenTypeMgr;
-    std::map<edouble, MethodId> m_methods; // TODO: define methodMgr instead of keeping a map here
+    std::map<std::string, MethodId> m_methods; // TODO: define methodMgr instead of keeping a map here
 
     // TODO: Drop these. Enums have been deprecated
-    LabelStr_ValueSet_Map enumValues;
-    std::map<edouble, LabelStr> enumValuesToEnums;
+    std::map<std::string, std::set<edouble> > enumValues;
+    std::map<edouble, std::string> enumValuesToEnums;
 
     // TODO: get rid of all data members from this point on. There are object-oriented abstractions in place now
     // that hold the same information
-    LabelStrSet objectTypes;
-    LabelStrSet predicates;
-    LabelStrSet primitives;
+    std::set<std::string> objectTypes;
+    std::set<std::string> predicates;
+    std::set<std::string> primitives;
 
     std::map<std::string, NameValueVector> membershipRelation; /*! All type compositions */
     std::map<edouble, LabelStr> childOfRelation; /*! Required to answer the getParent query */
-    LabelStr_LabelStrSet_Map objectPredicates; /*! All predicates by object type */
-    LabelStrSet typesWithNoPredicates; /*! Cache for lookup efficiently */
+    std::map<std::string, std::set<std::string> > objectPredicates; /*! All predicates by object type */
+    std::set<std::string> typesWithNoPredicates; /*! Cache for lookup efficiently */
     std::map<std::string, std::vector<std::string> > allObjectTypes; /*! Cache to retrieve allObjectTypes by sub-class */
 
     mutable std::set<edouble> m_predTrueCache, m_predFalseCache; /**< Caches from isPredicate, now useful and not static . */

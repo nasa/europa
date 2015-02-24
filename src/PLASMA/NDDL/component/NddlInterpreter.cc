@@ -202,12 +202,14 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
         // TODO: report treeParser antlr errors the same way we do it for tree builder lexer and parser
     }
     catch (const std::string&) {
-        debugMsg("NddlInterpreter:error","nddl parser halted on error:" << symbolTable.getErrors());
+        debugMsg("NddlInterpreter:error",
+                 "nddl parser halted on error:" << symbolTable.getErrors());
         return symbolTable.getErrors();
     }
     catch (const Error& internalError) {
         symbolTable.reportError(treeParser,internalError.getMsg());
-        debugMsg("NddlInterpreter:error","nddl parser halted on error:" << symbolTable.getErrors());
+        debugMsg("NddlInterpreter:error",
+                 "nddl parser halted on error:" << symbolTable.getErrors());
         return symbolTable.getErrors();
     }
 
@@ -588,7 +590,7 @@ TokenId NddlSymbolTable::getToken(const char* name)
         return EvalContext::getToken(name);
 }
 
-const LabelStr& NddlSymbolTable::getEnumForValue(const char* value) const
+const std::string& NddlSymbolTable::getEnumForValue(const char* value) const
 {
     if (m_parentST == NULL)
         return getPlanDatabase()->getSchema()->getEnumForValue(LabelStr(value));
