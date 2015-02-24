@@ -712,51 +712,50 @@ const Id<ObjectFactory> createDefaultObjectFactory(
 }
 }
 
-  void Schema::registerObjectType(const ObjectTypeId objType)
-  {
-      const char* className = objType->getName().c_str();
+void Schema::registerObjectType(const ObjectTypeId objType) {
+  const char* className = objType->getName().c_str();
 
-      if (objType->getName() == Schema::rootObject())
-          addObjectType(className);
-      else
-          addObjectType(className,objType->getParent()->getName().c_str());
+  if (objType->getName() == Schema::rootObject())
+    addObjectType(className);
+  else
+    addObjectType(className,objType->getParent()->getName().c_str());
 
-      if (objType->getObjectFactories().size() == 0) {
-          bool canCreateObjects = objType->isNative();
-          objType->addObjectFactory(createDefaultObjectFactory(objType,canCreateObjects));
-          debugMsg("Schema:registerObjectType","Generated default factory for object type:" << objType->getName().c_str());
-      }
-
-      m_objectTypeMgr->registerObjectType(objType);
-
-      // Add type for constrained variables to be able to hold references to objects of the new type
-      if (!getCESchema()->isDataType(className))
-          getCESchema()->registerDataType((new ObjectDT(className))->getId());
-
-      // TODO: all these need to go eventually (except for the registerTokenType call)
-      {
-          std::map<std::string,DataTypeId>::const_iterator it = objType->getMembers().begin();
-          for(;it != objType->getMembers().end(); ++it)
-              addMember(className, it->second->getName() /*type*/, it->first/*name*/);
-      }
-
-      {
-          std::map<edouble,TokenTypeId>::const_iterator it = objType->getTokenTypes().begin();
-          for(;it != objType->getTokenTypes().end(); ++it) {
-              const TokenTypeId tokenType = it->second;
-              LabelStr predName = tokenType->getSignature();
-
-              addPredicate(predName.c_str());
-              std::map<LabelStr,DataTypeId>::const_iterator paramIt = tokenType->getArgs().begin();
-              for(;paramIt != tokenType->getArgs().end();++paramIt)
-                  addMember(predName.c_str(), paramIt->second->getName() /*type*/, paramIt->first/*name*/);
-
-              registerTokenType(it->second);
-          }
-      }
-
-      debugMsg("Schema:registerObjectType","Registered object type:" << std::endl << objType->toString());
+  if (objType->getObjectFactories().size() == 0) {
+    bool canCreateObjects = objType->isNative();
+    objType->addObjectFactory(createDefaultObjectFactory(objType,canCreateObjects));
+    debugMsg("Schema:registerObjectType","Generated default factory for object type:" << objType->getName().c_str());
   }
+
+  m_objectTypeMgr->registerObjectType(objType);
+
+  // Add type for constrained variables to be able to hold references to objects of the new type
+  if (!getCESchema()->isDataType(className))
+    getCESchema()->registerDataType((new ObjectDT(className))->getId());
+
+  // TODO: all these need to go eventually (except for the registerTokenType call)
+  {
+    std::map<std::string,DataTypeId>::const_iterator it = objType->getMembers().begin();
+    for(;it != objType->getMembers().end(); ++it)
+      addMember(className, it->second->getName() /*type*/, it->first/*name*/);
+  }
+
+  {
+    std::map<std::string,TokenTypeId>::const_iterator it = objType->getTokenTypes().begin();
+    for(;it != objType->getTokenTypes().end(); ++it) {
+      const TokenTypeId tokenType = it->second;
+      LabelStr predName = tokenType->getSignature();
+
+      addPredicate(predName.c_str());
+      std::map<LabelStr,DataTypeId>::const_iterator paramIt = tokenType->getArgs().begin();
+      for(;paramIt != tokenType->getArgs().end();++paramIt)
+        addMember(predName.c_str(), paramIt->second->getName() /*type*/, paramIt->first/*name*/);
+
+      registerTokenType(it->second);
+    }
+  }
+
+  debugMsg("Schema:registerObjectType","Registered object type:" << std::endl << objType->toString());
+}
 
   const ObjectTypeId Schema::getObjectType(const LabelStr& objType)
   {

@@ -86,7 +86,7 @@ const std::map<std::string,ObjectFactoryId>& ObjectType::getObjectFactories() co
   return m_objectFactories;
 }
 
-const std::map<edouble,TokenTypeId>& ObjectType::getTokenTypes() const
+const std::map<std::string,TokenTypeId>& ObjectType::getTokenTypes() const
 {
     return m_tokenTypes;
 }
@@ -128,15 +128,15 @@ void ObjectType::addObjectFactory(const ObjectFactoryId factory) {
 
 void ObjectType::addTokenType(const TokenTypeId factory) {
   // TODO: allow redefinition of old one
-  m_tokenTypes[static_cast<edouble>(factory->getSignature())] = factory;
+  m_tokenTypes[factory->getSignature()] = factory;
 }
 
 const TokenTypeId ObjectType::getTokenType(const LabelStr& signature) const {
   check_error(signature.getElement(0,".")==getName(),
               "Can't look for a token factory I don't own");
 
-  std::map<edouble,TokenTypeId>::const_iterator it =
-      m_tokenTypes.find(static_cast<edouble>(signature));
+  std::map<std::string,TokenTypeId>::const_iterator it =
+      m_tokenTypes.find(signature);
   if (it != m_tokenTypes.end())
     return it->second;
   
@@ -149,20 +149,22 @@ const TokenTypeId ObjectType::getTokenType(const LabelStr& signature) const {
 }
 
 PSList<PSTokenType*> ObjectType::getPredicates() const {
-	  PSList<PSTokenType*> retval;
-	  for (std::map<edouble,TokenTypeId>::const_iterator it = m_tokenTypes.begin(); it != m_tokenTypes.end(); ++it) {
-		  retval.push_back(it->second);
-	  }
-	  return retval;
+  PSList<PSTokenType*> retval;
+  for (std::map<std::string,TokenTypeId>::const_iterator it = m_tokenTypes.begin();
+       it != m_tokenTypes.end(); ++it) {
+    retval.push_back(it->second);
+  }
+  return retval;
 }
 
 PSList<PSTokenType*> ObjectType::getPSTokenTypesByAttr( int attrMask ) const {
-	  PSList<PSTokenType*> retval;
-	  for (std::map<edouble,TokenTypeId>::const_iterator it = m_tokenTypes.begin(); it != m_tokenTypes.end(); ++it) {
-	    if( it->second->hasAttributes( attrMask ) )
-		  retval.push_back(it->second);
-	  }
-	  return retval;
+  PSList<PSTokenType*> retval;
+  for (std::map<std::string,TokenTypeId>::const_iterator it = m_tokenTypes.begin();
+       it != m_tokenTypes.end(); ++it) {
+    if( it->second->hasAttributes( attrMask ) )
+      retval.push_back(it->second);
+  }
+  return retval;
 }
 
 const TokenTypeId ObjectType::getParentType(const TokenTypeId type) const
@@ -201,7 +203,7 @@ std::string ObjectType::toString() const {
   os << std::endl;
 
   {
-    std::map<edouble,TokenTypeId>::const_iterator it = m_tokenTypes.begin();
+    std::map<std::string,TokenTypeId>::const_iterator it = m_tokenTypes.begin();
     for(;it != m_tokenTypes.end(); ++it) {
       TokenTypeId tokenType = it->second;
       os << "    " << tokenType->getSignature().c_str();
