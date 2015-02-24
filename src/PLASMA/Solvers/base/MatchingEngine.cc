@@ -127,26 +127,26 @@ MatchingEngine::~MatchingEngine() {
       it->second->getMatches(getId(), entity, results);
     }
 
-    template<>
-    void MatchingEngine::getMatches(const ConstrainedVariableId var,
-				    std::vector<MatchingRuleId>& results) {
-      m_cycleCount++;
-      results = m_unfilteredRules;
+template<>
+void MatchingEngine::getMatches(const ConstrainedVariableId var,
+                                std::vector<MatchingRuleId>& results) {
+  m_cycleCount++;
+  results = m_unfilteredRules;
 
-      // If it has a parent, then process that too
-      if(var->parent().isId()){
-        if(TokenId::convertable(var->parent()))
-          getMatchesInternal(TokenId(var->parent()), results);
-        else if(RuleInstanceId::convertable(var->parent()))
-          getMatchesInternal(RuleInstanceId(var->parent())->getToken(), results);
-        else if(ObjectId::convertable(var->parent())){
-          ObjectId object = var->parent();
-          trigger(object->getPlanDatabase()->getSchema()->getAllObjectTypes(object->getType()), m_rulesByObjectType, results);
-        }
-      }
-
-      trigger(var->getName(), m_rulesByVariable, results);
+  // If it has a parent, then process that too
+  if(var->parent().isId()){
+    if(TokenId::convertable(var->parent()))
+      getMatchesInternal(TokenId(var->parent()), results);
+    else if(RuleInstanceId::convertable(var->parent()))
+      getMatchesInternal(RuleInstanceId(var->parent())->getToken(), results);
+    else if(ObjectId::convertable(var->parent())){
+      ObjectId object = var->parent();
+      trigger(object->getPlanDatabase()->getSchema()->getAllObjectTypes(object->getType()), m_rulesByObjectType, results);
     }
+  }
+
+  trigger(var->getName(), m_rulesByVariable, results);
+}
 
     template<>
     void MatchingEngine::getMatches(const TokenId token, std::vector<MatchingRuleId>& results) {
@@ -270,14 +270,14 @@ MatchingEngine::~MatchingEngine() {
                "Found " << results.size() << " matches for " << lbl.toString() << " so far.  Added " << addedCount);
     }
 
-    void MatchingEngine::trigger(const std::vector<LabelStr>& labels, 
-                                 const std::multimap<edouble, MatchingRuleId>& rules,
-                                 std::vector<MatchingRuleId>& results){
-      for(std::vector<LabelStr>::const_iterator it = labels.begin(); it != labels.end(); ++it){
-        const LabelStr& label = *it;
-        trigger(label, rules, results);
-      }
-    }
+void MatchingEngine::trigger(const std::vector<std::string>& labels, 
+                             const std::multimap<edouble, MatchingRuleId>& rules,
+                             std::vector<MatchingRuleId>& results) {
+  for(std::vector<std::string>::const_iterator it = labels.begin(); it != labels.end(); ++it){
+    const LabelStr& label = *it;
+    trigger(label, rules, results);
+  }
+}
 
   std::map<edouble, MatchFinderId>& MatchingEngine::getEntityMatchers() { 
     MatchFinderMgr* mfm =

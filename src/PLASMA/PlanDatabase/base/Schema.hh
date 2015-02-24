@@ -196,7 +196,7 @@ namespace EUROPA {
      * @return results All matchable classes in the schema. Includes objectType and all super classes.
      * @see hasParent, getParent
      */
-    const std::vector<LabelStr>&  getAllObjectTypes(const LabelStr& objectType);
+    const std::vector<std::string>&  getAllObjectTypes(const std::string& objectType);
 
      /**
      * @brief Obtains the set of values for an enumeration.  Calling this function with a
@@ -396,7 +396,7 @@ namespace EUROPA {
     std::map<edouble, LabelStr> childOfRelation; /*! Required to answer the getParent query */
     LabelStr_LabelStrSet_Map objectPredicates; /*! All predicates by object type */
     LabelStrSet typesWithNoPredicates; /*! Cache for lookup efficiently */
-    std::map<edouble, std::vector<LabelStr> > allObjectTypes; /*! Cache to retrieve allObjectTypes by sub-class */
+    std::map<std::string, std::vector<std::string> > allObjectTypes; /*! Cache to retrieve allObjectTypes by sub-class */
 
     mutable std::set<edouble> m_predTrueCache, m_predFalseCache; /**< Caches from isPredicate, now useful and not static . */
     mutable std::set<edouble> m_hasParentCache; /**< Cache from hasParent, now useful and not static */

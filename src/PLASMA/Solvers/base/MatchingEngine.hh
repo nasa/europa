@@ -100,7 +100,7 @@ class MatchingEngine {
   /**
    * @brief Utility method to trigger rules along a given index for each element in the vector
    */
-  void trigger(const std::vector<LabelStr>& labels, 
+  void trigger(const std::vector<std::string>& labels, 
                const std::multimap<edouble, MatchingRuleId>& rules,
                std::vector<MatchingRuleId>& results);
 
