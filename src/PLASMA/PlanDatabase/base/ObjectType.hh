@@ -61,7 +61,7 @@ public:
   virtual const std::map<std::string,ObjectFactoryId>& getObjectFactories() const;
 
     virtual void addTokenType(const TokenTypeId factory);
-    virtual const std::map<edouble,TokenTypeId>& getTokenTypes() const;
+  virtual const std::map<std::string,TokenTypeId>& getTokenTypes() const;
     virtual const TokenTypeId getTokenType(const LabelStr& signature) const;
     virtual const TokenTypeId getParentType(const TokenTypeId factory) const;
 
@@ -85,8 +85,8 @@ protected:
     ObjectTypeId m_parent;
     bool m_isNative;
   std::map<std::string,ObjectFactoryId> m_objectFactories;
-    std::map<edouble,TokenTypeId> m_tokenTypes;
-    std::map<std::string,DataTypeId> m_members;
+  std::map<std::string,TokenTypeId> m_tokenTypes;
+  std::map<std::string,DataTypeId> m_members;
 };
 
 
