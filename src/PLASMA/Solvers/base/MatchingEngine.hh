@@ -28,10 +28,10 @@ class MatchFinderMgr : public EngineComponent {
   void removeMatchFinder(const LabelStr& type);
   void purgeAll();
         
-  std::map<edouble, MatchFinderId>& getEntityMatchers();
+  std::map<std::string, MatchFinderId>& getEntityMatchers();
         
  protected:
-  std::map<edouble, MatchFinderId> m_entityMatchers;        
+  std::map<std::string, MatchFinderId> m_entityMatchers;        
 };
     
 class MatchingEngine {
@@ -83,7 +83,7 @@ class MatchingEngine {
    * @brief Utility method to add a rule to an index if it is required.
    */
   void addFilter(const LabelStr& label, const MatchingRuleId rule, 
-                 std::multimap<edouble,MatchingRuleId>& index);
+                 std::multimap<std::string,MatchingRuleId>& index);
 
   template<typename T>
   void getMatchesInternal(const T, std::vector<MatchingRuleId>&) {
@@ -94,14 +94,14 @@ class MatchingEngine {
    * @brief Utility method to trigger rules along a given index.
    */
   void trigger(const LabelStr& lbl, 
-               const std::multimap<edouble, MatchingRuleId>& rules,
+               const std::multimap<std::string, MatchingRuleId>& rules,
                std::vector<MatchingRuleId>& results);
 
   /**
    * @brief Utility method to trigger rules along a given index for each element in the vector
    */
   void trigger(const std::vector<std::string>& labels, 
-               const std::multimap<edouble, MatchingRuleId>& rules,
+               const std::multimap<std::string, MatchingRuleId>& rules,
                std::vector<MatchingRuleId>& results);
 
   /**
@@ -113,20 +113,20 @@ class MatchingEngine {
   /**
    * Declarations basically support indexing by each criteria.
    */
-  std::multimap<edouble, MatchingRuleId> m_rulesByObjectType;
-  std::multimap<edouble, MatchingRuleId> m_rulesByPredicate;
-  std::multimap<edouble, MatchingRuleId> m_rulesByVariable;
-  std::multimap<edouble, MatchingRuleId> m_rulesByMasterObjectType;
-  std::multimap<edouble, MatchingRuleId> m_rulesByMasterPredicate;
-  std::multimap<edouble, MatchingRuleId> m_rulesByMasterRelation;
-  std::multimap<edouble, MatchingRuleId> m_rulesByTokenName;
+  std::multimap<std::string, MatchingRuleId> m_rulesByObjectType;
+  std::multimap<std::string, MatchingRuleId> m_rulesByPredicate;
+  std::multimap<std::string, MatchingRuleId> m_rulesByVariable;
+  std::multimap<std::string, MatchingRuleId> m_rulesByMasterObjectType;
+  std::multimap<std::string, MatchingRuleId> m_rulesByMasterPredicate;
+  std::multimap<std::string, MatchingRuleId> m_rulesByMasterRelation;
+  std::multimap<std::string, MatchingRuleId> m_rulesByTokenName;
 
   unsigned int m_cycleCount; /*!< Used to reset all rule firing data. Updated on each call to match. */
   std::set<MatchingRuleId> m_rules; /*!< The set of all rules. */
-  std::multimap<edouble, MatchingRuleId> m_rulesByExpression; /*!< All rules by expression */
+  std::multimap<std::string, MatchingRuleId> m_rulesByExpression; /*!< All rules by expression */
   std::vector<MatchingRuleId> m_unfilteredRules; /*!< All rules without filters */
 
-  std::map<edouble, MatchFinderId>& getEntityMatchers();
+  std::map<std::string, MatchFinderId>& getEntityMatchers();
 };
     
 
