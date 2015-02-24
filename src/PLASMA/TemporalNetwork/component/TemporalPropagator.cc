@@ -168,10 +168,10 @@ TemporalPropagator::TemporalPropagator(const LabelStr& name,
                                               const DomainListener::ChangeType& ){
 
     debugMsg("TemporalPropagator:handleNotification",
-             variable->toLongString() << " change through " << constraint->getKey() << "-" << constraint->getName().toString());
+             variable->toLongString() << " change through " << constraint->getKey() << "-" << constraint->getName());
 
     checkError(constraint->isActive(),
-               "Received a change notification for inactive constraint " << constraint->getName().toString() <<
+               "Received a change notification for inactive constraint " << constraint->getName() <<
                ". Must be a bug in the ConstraintEngine.");
 
     m_changedConstraints.insert(constraint);
@@ -389,18 +389,18 @@ ConstraintId getConstraint(ConstrainedVariableId fromvar,
   }
 
   void TemporalPropagator::addTemporalConstraint(const ConstraintId constraint) {
-    static const LabelStr sl_temporaldistance("temporaldistance");
-    static const LabelStr sl_temporalDistance("temporalDistance");
-    static const LabelStr sl_concurrent("concurrent");
-    static const LabelStr sl_precedes("precedes");
-    static const LabelStr sl_strictlyPrecedes("strictlyPrecedes");
-    static const LabelStr sl_before("before");
+    static const std::string sl_temporaldistance("temporaldistance");
+    static const std::string sl_temporalDistance("temporalDistance");
+    static const std::string sl_concurrent("concurrent");
+    static const std::string sl_precedes("precedes");
+    static const std::string sl_strictlyPrecedes("strictlyPrecedes");
+    static const std::string sl_before("before");
 
     checkError(constraint->isActive(), constraint->toString());
 
     checkError(constraint->getScope().size() == 2 || constraint->getScope().size() == 3,
                "Invalid argument count of " << constraint->getScope().size() <<
-               " for constraint " << constraint->getName().toString());
+               " for constraint " << constraint->getName());
 
     checkError(constraint->getName() == sl_temporaldistance ||
                constraint->getName() == sl_temporalDistance ||
@@ -408,7 +408,7 @@ ConstraintId getConstraint(ConstrainedVariableId fromvar,
                constraint->getName() == sl_precedes ||
                constraint->getName() == sl_strictlyPrecedes ||
                constraint->getName() == sl_before,
-               "Invalid constraint name " << constraint->getName().toString() << " for temporal propagation.");
+               "Invalid constraint name " << constraint->getName() << " for temporal propagation.");
 
     ConstrainedVariableId start = constraint->getScope()[0];
     ConstrainedVariableId end = constraint->getScope()[1];
@@ -444,7 +444,7 @@ ConstraintId getConstraint(ConstrainedVariableId fromvar,
     publish(notifyConstraintAdded(constraint, c, lb,ub));
 
     debugMsg("TemporalPropagator:addTemporalConstraint",
-             "ADDED-Constraint " << constraint->getName().toString() << "(" <<  constraint->getKey() << ") - [" << c << "] "
+             "ADDED-Constraint " << constraint->getName() << "(" <<  constraint->getKey() << ") - [" << c << "] "
              << " --[" << lb << "," << ub << "]--> ");
   }
 

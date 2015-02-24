@@ -723,7 +723,7 @@ void DbClientTransactionPlayer::playTokenCreated(const TiXmlElement & element) {
 	       svar->toString());
     LabelStr relName(name);
     for(TemporalRelations::iterator it = range.first; it != range.second; ++it) {
-      if(it->second->getName() == relName)
+      if(it->second->getName() == relName.toString())
 	return it;
     }
     return m_relations.end();

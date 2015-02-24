@@ -26,7 +26,7 @@ public:
   
   const CFunctionId getId() const;
   
-  const LabelStr& getName();
+  const std::string& getName();
   
   // TODO: this API probably needs to be re-evaluated
   // TODO: CFunction should know how to evaluate itself
@@ -38,7 +38,7 @@ public:
   
  protected:
   CFunctionId m_id;
-  LabelStr m_name;
+  std::string m_name;
 };
 
 }

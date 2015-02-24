@@ -30,7 +30,7 @@ namespace EUROPA {
       for (ObjectSet::const_iterator oit = objs.begin(); oit != objs.end() ; ++oit) {
 	ObjectId object = *oit;
 	os << indentation() << object->getType().toString() << ":"
-	   << object->getName().toString() << "*************************" << std::endl;
+	   << object->getName() << "*************************" << std::endl;
 
 
 	std::list<TokenId> toks;
@@ -73,7 +73,7 @@ namespace EUROPA {
 	  indent()--;
 	}
 
-	os << indentation() << "End " << object->getType().toString() << ":" << object->getName().toString()
+	os << indentation() << "End " << object->getType().toString() << ":" << object->getName()
 	   << "*************************" << std::endl;
       }
       indent()--;
@@ -195,7 +195,7 @@ namespace EUROPA {
 	else
 	  os.unsetf(std::ios::fixed);
 
-	os << v->getName().toString() << "=" << dom;
+	os << v->getName() << "=" << dom;
 	os.unsetf(std::ios::fixed);
       }
       os << ")" <<std::endl;
@@ -227,7 +227,7 @@ namespace EUROPA {
     void PlanDatabaseWriter::writeVariable(const ConstrainedVariableId var, std::ostream& os) {
       check_error(var.isValid());
       indent()++;
-      os << indentation() << var->getName().toString() << "=" << var->lastDomain() << std::endl;
+      os << indentation() << var->getName() << "=" << var->lastDomain() << std::endl;
       indent()--;
     }
 

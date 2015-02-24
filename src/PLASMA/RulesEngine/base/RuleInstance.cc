@@ -13,6 +13,7 @@
 #include "Domains.hh"
 #include <sstream>
 
+#include <boost/algorithm/string.hpp>
 namespace EUROPA {
 
 RuleInstance::RuleInstance(const RuleId rule, const TokenId token, 
@@ -295,8 +296,7 @@ void RuleInstance::undo() {
     for(std::vector<ConstrainedVariableId>::const_iterator it = m_variables.begin(); it != m_variables.end(); ++it){
       ConstrainedVariableId var = *it;
       checkError(var.isValid(), var);
-      edouble key = var->getName().getKey();
-      m_variablesByName.erase(key);
+      m_variablesByName.erase(var->getName());
     }
 
     // Copy collection to avoid iterator changing due to call back
@@ -374,8 +374,8 @@ void RuleInstance::undo() {
     check_error(guard.isValid());
     m_guards.push_back(guard);
     check_error(Domain::canBeCompared(guard->baseDomain(), domain),
-					      "Failed attempt to compare " + guard->baseDomain().getTypeName().toString() +
-					      " with " + domain.getTypeName().toString());
+					      "Failed attempt to compare " + guard->baseDomain().getTypeName() +
+					      " with " + domain.getTypeName());
     m_guardDomain = domain.copy();
     m_guardListener = (new RuleVariableListener(m_planDb->getConstraintEngine(), m_id, m_guards))->getId();
     m_guardListener->addDependent(this);
@@ -390,8 +390,8 @@ void RuleInstance::setGuard(const ConstrainedVariableId guard, const Domain& dom
   m_guards.insert(m_guards.end(), guardComponents.begin(), guardComponents.end());
   checkError(Domain::canBeCompared(guard->baseDomain(), domain),
              "Failed attempt to compare " << 
-             guard->baseDomain().getTypeName().toString()  << " with " <<
-             domain.getTypeName().toString());
+             guard->baseDomain().getTypeName()  << " with " <<
+             domain.getTypeName());
   m_guardDomain = domain.copy();
   m_guardListener = (new RuleVariableListener(m_planDb->getConstraintEngine(), m_id, 
                                               m_guards))->getId();
@@ -405,43 +405,42 @@ TokenId RuleInstance::addSlave(Token* slave){
   return slave->getId();
 }
 
-  ConstrainedVariableId RuleInstance::addVariable( const Domain& baseDomain,
-				       bool canBeSpecified,
-				       const LabelStr& name){
-    // If there is already a name-value pair for retrieving a variable by name,
-    // we erase it. Though we do not erase the actual variable stored in the list since it still
-    // has to be cleaned up when the rule instance is undone. This is done reluctantly, since it
-    // is based on assumptions that there will be no child rules. This is all required to support the
-    // looping construct used to implement the 'foreach' semantics. Therefore, we overwrite the old
-    // value with the new value.
-    if(!getVariable(name).isNoId()) {
-      m_variablesByName.erase(name.getKey());
+ConstrainedVariableId RuleInstance::addVariable( const Domain& baseDomain,
+                                                 bool canBeSpecified,
+                                                 const LabelStr& name){
+  // If there is already a name-value pair for retrieving a variable by name,
+  // we erase it. Though we do not erase the actual variable stored in the list since it still
+  // has to be cleaned up when the rule instance is undone. This is done reluctantly, since it
+  // is based on assumptions that there will be no child rules. This is all required to support the
+  // looping construct used to implement the 'foreach' semantics. Therefore, we overwrite the old
+  // value with the new value.
+  if(!getVariable(name).isNoId()) {
+    m_variablesByName.erase(name);
 
-      // Also erase all variables that may be derived from the variable we're removing
-      std::string prefix = name.toString()+".";
-      std::map<edouble,ConstrainedVariableId>::iterator it = m_variablesByName.begin();
-      while (it != m_variablesByName.end()) {
-    	  edouble varLabel = it->first;
-    	  std::string varName = LabelStr(varLabel).toString();
-    	  ++it;
-    	  if (varName.find(prefix)==0)
-    		  m_variablesByName.erase(varLabel);
-      }
+    // Also erase all variables that may be derived from the variable we're removing
+    std::string prefix = name.toString() + ".";
+    std::map<std::string,ConstrainedVariableId>::iterator it = m_variablesByName.begin();
+    while (it != m_variablesByName.end()) {
+      std::string varName = it->first;
+      ++it;
+      if (varName.find(prefix)==0)
+        m_variablesByName.erase(varName);
     }
-
-    ConstrainedVariableId localVariable = (new Variable<Domain>(m_planDb->getConstraintEngine(),
-                                                                    baseDomain,
-                                                                    false, // TODO: Maybe true?
-                                                                    canBeSpecified,
-                                                                    name,
-                                                                    m_id))->getId();
-    // Only allowed add a variable for an executed rule instance
-    check_error(isExecuted());
-
-    m_variables.push_back(localVariable);
-    addVariable(localVariable, name);
-    return localVariable;
   }
+
+  ConstrainedVariableId localVariable = (new Variable<Domain>(m_planDb->getConstraintEngine(),
+                                                              baseDomain,
+                                                              false, // TODO: Maybe true?
+                                                              canBeSpecified,
+                                                              name,
+                                                              m_id))->getId();
+  // Only allowed add a variable for an executed rule instance
+  check_error(isExecuted());
+
+  m_variables.push_back(localVariable);
+  addVariable(localVariable, name);
+  return localVariable;
+}
 
   void RuleInstance::addVariable(const ConstrainedVariableId var, const LabelStr& name){
     check_error(var.isValid(), "Tried to add invalid variable " + name.toString());
@@ -453,18 +452,22 @@ TokenId RuleInstance::addSlave(Token* slave){
    * This is going to be slow as we iterate over a load of variables and do string manipulate in them. Could optimize
    * if this seems a problem.
    */
-  void RuleInstance::clearLoopVar(const LabelStr& loopVarName){
-    std::map<edouble, ConstrainedVariableId>::iterator it = m_variablesByName.begin();
-    while (it != m_variablesByName.end()){
-      const LabelStr& name = it->first;
-      const ConstrainedVariableId var = it->second;
-      // If we get a match straight away, remove the entry.
-      if(var->parent() == getId() && (name == loopVarName ||	(name.countElements(".") > 0 && loopVarName == name.getElement(0, "."))))
-	m_variablesByName.erase(it++);
-      else
-	++it;
-    }
+void RuleInstance::clearLoopVar(const LabelStr& loopVarName){
+  std::map<std::string, ConstrainedVariableId>::iterator it = m_variablesByName.begin();
+  while (it != m_variablesByName.end()){
+    const std::string& name = it->first;
+    const ConstrainedVariableId var = it->second;
+    // If we get a match straight away, remove the entry.
+    if(var->parent() == getId() &&
+       (name == loopVarName.toString() ||
+        //(name.countElements(".") > 0 && loopVarName == name.getElement(0, "."))
+        (name.find('.') != std::string::npos && loopVarName == name.substr(0, name.find('.')))
+        ))
+      m_variablesByName.erase(it++);
+    else
+      ++it;
   }
+}
 
   std::string RuleInstance::makeImplicitVariableName(){
     std::stringstream sstr;
@@ -479,9 +482,9 @@ TokenId RuleInstance::addSlave(Token* slave){
 
     // As with adding variables, we have to handle case of re-use of name when executing the inner
     // loop of 'foreach'
-    m_slavesByName.erase(name.getKey());
+    m_slavesByName.erase(name);
 
-    m_slavesByName.insert(std::make_pair(name.getKey(), slave->getId()));
+    m_slavesByName.insert(std::make_pair(name, slave->getId()));
     return addSlave(slave);
   }
 
@@ -495,8 +498,8 @@ void RuleInstance::addConstraint(const LabelStr& name, const std::vector<Constra
 void RuleInstance::addConstraint(const ConstraintId constr){
   m_constraints.push_back(constr);
   const LabelStr& name = constr->getName();
-  m_constraintsByName.erase(name.getKey());
-  m_constraintsByName.insert(std::make_pair(name.getKey(), constr));
+  m_constraintsByName.erase(name);
+  m_constraintsByName.insert(std::make_pair(name, constr));
   constr->addDependent(this);
   debugMsg("RuleInstance:addConstraint",
            "added constraint:" << constr->toString());
@@ -518,56 +521,57 @@ void RuleInstance::addConstraint(const ConstraintId constr){
     return true;
   }
 
-  ConstrainedVariableId RuleInstance::getVariable(const LabelStr& name) const{
-    std::map<edouble, ConstrainedVariableId>::const_iterator it = m_variablesByName.find(name.getKey());
-    if(it != m_variablesByName.end())
-      return it->second;
-    else if (!m_parent.isNoId())
-      return m_parent->getVariable(name);
-    else if(getPlanDatabase()->isGlobalVariable(name))
-      return getPlanDatabase()->getGlobalVariable(name);
-    else
-      return ConstrainedVariableId::noId();
-  }
+ConstrainedVariableId RuleInstance::getVariable(const LabelStr& name) const {
+  std::map<std::string, ConstrainedVariableId>::const_iterator it =
+      m_variablesByName.find(name);
+  if(it != m_variablesByName.end())
+    return it->second;
+  else if (!m_parent.isNoId())
+    return m_parent->getVariable(name);
+  else if(getPlanDatabase()->isGlobalVariable(name))
+    return getPlanDatabase()->getGlobalVariable(name);
+  else
+    return ConstrainedVariableId::noId();
+}
 
-  TokenId RuleInstance::getSlave(const LabelStr& name) const{
-    static const LabelStr sl_this("this");
-    // Special handling for 'this'
-    if(name == sl_this)
-      return m_token;
+TokenId RuleInstance::getSlave(const LabelStr& name) const {
+  static const LabelStr sl_this("this");
+  // Special handling for 'this'
+  if(name == sl_this)
+    return m_token;
 
-    std::map<edouble, TokenId>::const_iterator it = m_slavesByName.find(name.getKey());
-    if(it != m_slavesByName.end())
-      return it->second;
-    else if (!m_parent.isNoId())
-      return m_parent->getSlave(name);
-    else
-      return TokenId::noId();
-  }
+  std::map<std::string, TokenId>::const_iterator it = m_slavesByName.find(name);
+  if(it != m_slavesByName.end())
+    return it->second;
+  else if (!m_parent.isNoId())
+    return m_parent->getSlave(name);
+  else
+    return TokenId::noId();
+}
 
 
-  ConstraintId RuleInstance::getConstraint(const LabelStr& name) const{
-    std::map<edouble, ConstraintId>::const_iterator it = m_constraintsByName.find(name.getKey());
-    if(it != m_constraintsByName.end())
-      return it->second;
-    else if (!m_parent.isNoId())
-      return m_parent->getConstraint(name);
-    else
-      return ConstraintId::noId();
-  }
+ConstraintId RuleInstance::getConstraint(const LabelStr& name) const {
+  std::map<std::string, ConstraintId>::const_iterator it = m_constraintsByName.find(name);
+  if(it != m_constraintsByName.end())
+    return it->second;
+  else if (!m_parent.isNoId())
+    return m_parent->getConstraint(name);
+  else
+    return ConstraintId::noId();
+}
 
   ConstraintId RuleInstance::constraint(const std::string& name) const{
     return getConstraint(LabelStr(name));
   }
 
 
-  void RuleInstance::commonInit(){
-    const std::vector<ConstrainedVariableId>& vars = m_token->getVariables();
-    for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end(); ++it){
-      ConstrainedVariableId var = *it;
-      m_variablesByName.insert(std::make_pair(var->getName().getKey(), var));
-    }
+void RuleInstance::commonInit() {
+  const std::vector<ConstrainedVariableId>& vars = m_token->getVariables();
+  for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end(); ++it){
+    ConstrainedVariableId var = *it;
+    m_variablesByName.insert(std::make_pair(var->getName(), var));
   }
+}
 
   std::vector<ConstrainedVariableId> RuleInstance::getVariables(const std::string& delimitedVars) const{
     std::vector<ConstrainedVariableId> scope;
@@ -623,16 +627,16 @@ ConstrainedVariableId RuleInstance::varFromObject(const ConstrainedVariableId ob
 
   // Traverse the object structure using the names in each case. Store indexes as we go to build a path
   for (; varindex < names.size()-1; ++varindex) {
-    ConstrainedVariableId iVar = iObj->getVariable(LabelStr(iObj->getName().toString() + "." + names[varindex]));
+    ConstrainedVariableId iVar = iObj->getVariable(LabelStr(iObj->getName() + "." + names[varindex]));
     path.push_back(static_cast<unsigned int>(iVar->getIndex()));
-    checkError(iVar->lastDomain().isSingleton(), iVar->toString() + ", " + iObj->getName().toString() + "." + names[varindex]);
+    checkError(iVar->lastDomain().isSingleton(), iVar->toString() + ", " + iObj->getName() + "." + names[varindex]);
     iObj = Entity::getTypedEntity<Object>(iVar->lastDomain().getSingletonValue());
   }
 
   // Finally, handle the terminal point - the field variable itself
-  std::string field_name = iObj->getName().toString() + "." + names[varindex];
+  std::string field_name = iObj->getName() + "." + names[varindex];
   ConstrainedVariableId fieldVar = iObj->getVariable(LabelStr(field_name));
-  checkError(fieldVar.isValid(), "No variable named '" << field_name << "' in " << iObj->getName().toString());
+  checkError(fieldVar.isValid(), "No variable named '" << field_name << "' in " << iObj->getName());
   path.push_back(static_cast<unsigned int>(fieldVar->getIndex()));
 
   // Get the field type for the resulting domain.
@@ -764,46 +768,46 @@ bool RuleInstance::connectedToToken(const ConstraintId constr,
   return false;
 }
 
-  std::string RuleInstance::ruleExecutionContext() const {
-    static const std::string TAB_DELIMITER("    ");
-    std::stringstream ss;
+std::string RuleInstance::ruleExecutionContext() const {
+  static const std::string TAB_DELIMITER("    ");
+  std::stringstream ss;
 
-    // What is the token
-    ss << "[" << getToken()->getKey() << "]Rule fired on master token: " <<
+  // What is the token
+  ss << "[" << getToken()->getKey() << "]Rule fired on master token: " <<
       getToken()->toString() << ". The rule instance context is given below:" << std::endl << std::endl;
 
-    // What rule
-    ss << "Rule: " << getRule()->toString() << std::endl << std::endl;
+  // What rule
+  ss << "Rule: " << getRule()->toString() << std::endl << std::endl;
 
-    // What guards are involved
-    if(m_guards.empty())
-      ss << "No Guards" << std::endl;
-    else {
-      ss << "Guards:" << std::endl;
+  // What guards are involved
+  if(m_guards.empty())
+    ss << "No Guards" << std::endl;
+  else {
+    ss << "Guards:" << std::endl;
 
-      for(std::vector<ConstrainedVariableId>::const_iterator it = m_guards.begin(); it != m_guards.end(); ++it){
-	ConstrainedVariableId guard = *it;
-	ss << TAB_DELIMITER << guard->getName().toString() << " == " << guard->lastDomain().toString() << std::endl;
-      }
+    for(std::vector<ConstrainedVariableId>::const_iterator it = m_guards.begin(); it != m_guards.end(); ++it){
+      ConstrainedVariableId guard = *it;
+      ss << TAB_DELIMITER << guard->getName() << " == " << guard->lastDomain().toString() << std::endl;
     }
-
-    ss << std::endl;
-
-    // What slaves are created
-    if(m_slaves.empty())
-      ss << "No Slaves" << std::endl;
-    else {
-      ss << "Slaves: " << std::endl;
-      for(std::map<edouble, TokenId>::const_iterator it = m_slavesByName.begin(); it != m_slavesByName.end(); ++it){
-	LabelStr name(it->first);
-	TokenId token = it->second;
-	ss << TAB_DELIMITER << name.toString() << "==" << token->toString() << std::endl;
-      }
-    }
-
-    ss << "++++++++++++++++++x+++++++";
-    return ss.str();
   }
+
+  ss << std::endl;
+
+  // What slaves are created
+  if(m_slaves.empty())
+    ss << "No Slaves" << std::endl;
+  else {
+    ss << "Slaves: " << std::endl;
+    for(std::map<std::string, TokenId>::const_iterator it = m_slavesByName.begin(); it != m_slavesByName.end(); ++it){
+      LabelStr name(it->first);
+      TokenId token = it->second;
+      ss << TAB_DELIMITER << name.toString() << "==" << token->toString() << std::endl;
+    }
+  }
+
+  ss << "++++++++++++++++++x+++++++";
+  return ss.str();
+}
 
   bool RuleInstance::hasEmptyGuard() const {
     if(m_guards.empty())

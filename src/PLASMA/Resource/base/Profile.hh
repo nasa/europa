@@ -125,8 +125,8 @@ class Profile : public FactoryObj {
                      const ProfileId profile,
                      const TransactionId trans,
                      const std::vector<ConstrainedVariableId>& scope, const bool isQuantity = false);
-    static const LabelStr& CONSTRAINT_NAME() {
-      static const LabelStr sl_const("ProfileVariableListener");
+    static const std::string& CONSTRAINT_NAME() {
+      static const std::string sl_const("ProfileVariableListener");
       return sl_const;
     }
     static const LabelStr& PROPAGATOR_NAME() {

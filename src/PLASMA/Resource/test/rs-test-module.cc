@@ -1429,7 +1429,7 @@ private:
     //get the slave that can go on Foo instances
     TokenId fooSlave = master->getSlave(1);
     CPPUNIT_ASSERT(fooSlave.isValid());
-    CPPUNIT_ASSERT(fooSlave->getName().toString() == "Foo.foo");
+    CPPUNIT_ASSERT(fooSlave->getName() == "Foo.foo");
     
     //get the slave that can go on Battery instances
     TokenId battSlave = master->getSlave(0);

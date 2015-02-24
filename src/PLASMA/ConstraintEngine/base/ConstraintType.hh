@@ -26,7 +26,7 @@ namespace EUROPA {
 
     const ConstraintTypeId getId() const;
 
-    const LabelStr& getName() const;
+    const std::string& getName() const;
 
     bool isSystemDefined() const;
 
@@ -45,7 +45,7 @@ namespace EUROPA {
 		           bool systemDefined = false);
 
     ConstraintTypeId m_id;
-    const LabelStr m_name;
+    const std::string m_name;
     const LabelStr m_propagatorName;
     const bool m_systemDefined;
   };
@@ -104,7 +104,7 @@ class ConcreteConstraintType : public ConstraintType {
 
     if (m_argTypes.size() != types.size()) {
       std::ostringstream os;
-      os << "Constraint "<< m_name.toString()
+      os << "Constraint "<< m_name
          << " can't take " << types.size() << " parameters."
          << " It expects " << m_argTypes.size() << ".";
       throw os.str();
@@ -114,10 +114,10 @@ class ConcreteConstraintType : public ConstraintType {
       // TODO: need some convention or a data type to represent "any"
       if (!m_argTypes[i]->isAssignableFrom(types[i])) {
         std::ostringstream os;
-        os << "Constraint "<< m_name.toString()
-           << " can't take a " << types[i]->getName().toString()
+        os << "Constraint "<< m_name
+           << " can't take a " << types[i]->getName()
            << " as parameter number " << i << "."
-           << " It expects " << m_argTypes[i]->getName().toString() << ".";
+           << " It expects " << m_argTypes[i]->getName() << ".";
         throw os.str();
       }
     }

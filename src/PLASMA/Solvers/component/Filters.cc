@@ -54,10 +54,10 @@ namespace EUROPA {
       std::set<ConstraintId> constraints;
       var->constraints(constraints);
       debugMsg("GuardFilter:test",
-               "Testing for " << RuleVariableListener::CONSTRAINT_NAME().toString() << " constraints.");
+               "Testing for " << RuleVariableListener::CONSTRAINT_NAME() << " constraints.");
       for(std::set<ConstraintId>::iterator it = constraints.begin(); it != constraints.end(); ++it) {
         ConstraintId constr = *it;
-        debugMsg("GuardFilter:test", "Variable has a " << constr->getName().toString() << " constraint.");
+        debugMsg("GuardFilter:test", "Variable has a " << constr->getName() << " constraint.");
         //indicate a match if this variable is a guard (will be filtered out)
         if(constr->getName() == RuleVariableListener::CONSTRAINT_NAME()) {
           debugMsg("GuardFilter:test", "Variable has a " << constr->toString() << ".");

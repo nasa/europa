@@ -56,7 +56,7 @@ ConstrainedVariable::ConstrainedVariable(const ConstraintEngineId constraintEngi
 
   ConstrainedVariable::~ConstrainedVariable() {
     debugMsg("ConstrainedVariable:~ConstrainedVariable",
-	     "NAME=" << getName().toString() << " KEY=" << getKey() << " ID=" << m_id);
+	     "NAME=" << getName() << " KEY=" << getKey() << " ID=" << m_id);
 
     discard(false);
 
@@ -277,7 +277,7 @@ void ConstrainedVariable::removeConstraint(const ConstraintId constraint,
     check_error(!Entity::isPurging());
     check_error(m_lastRelaxed < cycleCount);
     m_lastRelaxed = cycleCount;
-    debugMsg("ConstrainedVariable:updateLastRelaxed",getName().toString() << " lastRelaxed updated to " << m_lastRelaxed);
+    debugMsg("ConstrainedVariable:updateLastRelaxed",getName() << " lastRelaxed updated to " << m_lastRelaxed);
   }
 
   unsigned int ConstrainedVariable::lastRelaxed() const {
@@ -333,9 +333,9 @@ void ConstrainedVariable::handleSpecified(edouble) {}
     return(baseDomain().isClosed());
   }
 
-  const LabelStr& ConstrainedVariable::getName() const {
-    return(m_name);
-  }
+const std::string& ConstrainedVariable::getName() const {
+  return(m_name);
+}
 
   void ConstrainedVariable::specify(edouble singletonValue) {
     debugMsg("ConstrainedVariable:specify", "specifying value:" << toString());

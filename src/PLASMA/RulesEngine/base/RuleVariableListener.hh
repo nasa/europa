@@ -35,8 +35,8 @@ namespace EUROPA
     /**
      * @brief Standard constraint name
      */
-    static const LabelStr& CONSTRAINT_NAME(){
-      static const LabelStr sl_const("RuleVariableListener");
+    static const std::string& CONSTRAINT_NAME(){
+      static const std::string sl_const("RuleVariableListener");
       return sl_const;
     }
 

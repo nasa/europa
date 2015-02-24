@@ -89,7 +89,7 @@ namespace EUROPA {
     			  profile->needsRecompute()) {
             condDebugMsg(profile->getResource() != ResourceId::noId(),
                          "ProfilePropagator:execute", 
-                         "Recomputing profile " << profile->getResource()->getName().toString());
+                         "Recomputing profile " << profile->getResource()->getName());
             condDebugMsg(profile->getResource() == ResourceId::noId(),
                          "ProfilePropagator:execute", 
                          "Recomputing profile " << profile);
@@ -134,7 +134,7 @@ private:
   {
     if (m_propagator->inBatchMode() &&
         (constraint->getName()==ResourceTokenRelation::CONSTRAINT_NAME())) {
-      debugMsg("ProfilePropagator:BatchModeListener", "Disabling " << constraint->getName().toString() << "(" << constraint->getKey() << ")");
+      debugMsg("ProfilePropagator:BatchModeListener", "Disabling " << constraint->getName() << "(" << constraint->getKey() << ")");
       //ResourceTokenRelation* c = (ResourceTokenRelation*)constraint;
       //c->disable();
       // TODO JRB: should be disable() but cast above refuses to work.

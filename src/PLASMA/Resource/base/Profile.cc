@@ -740,7 +740,7 @@ bool Profile::VariableListener::canIgnore(const ConstrainedVariableId variable,
 
 void Profile::ConstraintAdditionListener::notifyConstraintAdded(const ConstraintId constr,
                                                                 unsigned int argIndex) {
-  static const LabelStr temporal("Temporal");
+  static const std::string temporal("Temporal");
   if(constr->getPropagator()->getName() == temporal) {
     debugMsg("Profile:ConstraintAdditionListener",
              getId() << " Notifying profile " << m_profile << " of addition of constraint " << constr->toString() <<
@@ -751,7 +751,7 @@ void Profile::ConstraintAdditionListener::notifyConstraintAdded(const Constraint
 
 void Profile::ConstraintAdditionListener::notifyConstraintRemoved(const ConstraintId constr,
                                                                   unsigned int argIndex) {
-  static const LabelStr temporal("Temporal");
+  static const std::string temporal("Temporal");
   if(constr->getPropagator()->getName() == temporal) {
     debugMsg("Profile:ConstraintAdditionListener",
              getId() << " Notifying profile " << m_profile << " of removal of constraint " << constr->toString() <<

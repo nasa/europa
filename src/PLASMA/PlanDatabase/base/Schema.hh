@@ -62,7 +62,7 @@ namespace EUROPA {
     /**
      * @brief Accessor for the root object
      */
-    static const LabelStr& rootObject();
+    static const std::string& rootObject();
 
 
     const SchemaId getId() const;

@@ -33,8 +33,8 @@ namespace EUROPA{
   StateDomain::StateDomain(const Domain& org)
     : EnumeratedDomain(org)
   {
-    check_error(org.getTypeName().toString() == SymbolDT::NAME(),
-		"Attempted to construct a StateDomain with invalid type " + org.getTypeName().toString());
+    check_error(org.getTypeName() == SymbolDT::NAME(),
+		"Attempted to construct a StateDomain with invalid type " + org.getTypeName());
   }
 
   void StateDomain::operator>>(ostream&os) const {
@@ -242,7 +242,7 @@ const TokenId Token::getSlave(unsigned int slavePosition) const{
 
   const LabelStr& Token::getBaseObjectType() const {return m_baseObjectType;}
 
-  const LabelStr&  Token::getName() const { return m_name; }
+const std::string&  Token::getName() const { return m_name; }
 
   void Token::setName(const LabelStr& name) { m_name = name; }
 
@@ -278,7 +278,7 @@ const TokenId Token::getSlave(unsigned int slavePosition) const{
 	it != vars.end(); ++it){
       ConstrainedVariableId var = *it;
       checkError(var.isValid(), "Invalid variable id: " << var << " found in token: " << m_id);
-      if(var->getName() == name)
+      if(var->getName() == name.toString())
         return var;
     }
 
@@ -972,7 +972,7 @@ bool Token::canBeTerminated(eint) const{
   }
 
   bool Token::isStateVariable(const ConstrainedVariableId var){
-    static const LabelStr sl_stateStr("state");
+    static const std::string sl_stateStr("state");
 
     bool result = (var->getName() == sl_stateStr);
 
@@ -1120,7 +1120,7 @@ PSVariable* Token::getParameter(const std::string& name) const {
   for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
       ++it) {
     ConstrainedVariableId id = *it;
-    if((*it)->getName() == realName) {
+    if((*it)->getName() == realName.toString()) {
       retval = id_cast<PSVariable>(id);
       break;
     }

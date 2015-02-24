@@ -45,20 +45,20 @@ RuleVariableListener::RuleVariableListener(const ConstraintEngineId constraintEn
    * so that rule execution is not subject to the vagaries of propagtion timing
    * @return true
    */
-  bool RuleVariableListener::canIgnore(const ConstrainedVariableId,
-				       unsigned int,
-				       const DomainListener::ChangeType&){
-    checkError(getRuleInstance().isValid(), getKey() << " has lost its rule instance:" << getRuleInstance());
+bool RuleVariableListener::canIgnore(const ConstrainedVariableId,
+                                     unsigned int,
+                                     const DomainListener::ChangeType&){
+  checkError(getRuleInstance().isValid(), getKey() << " has lost its rule instance:" << getRuleInstance());
 
-    if(getRuleInstance().isNoId())
-      return true;
+  if(getRuleInstance().isNoId())
+    return true;
 
-    debugMsg("RuleVariableListener:canIgnore",
-    		"Checking canIgnore for guard listener for rule " << getRuleInstance()->getRule()->getName().toString() <<
-    		" from source " << (m_sourceConstraint.isId() ? m_sourceConstraint->getName().toString() : "NULL"));
+  debugMsg("RuleVariableListener:canIgnore",
+           "Checking canIgnore for guard listener for rule " << getRuleInstance()->getRule()->getName().toString() <<
+           " from source " << (m_sourceConstraint.isId() ? m_sourceConstraint->getName() : "NULL"));
 
-    return false;
-  }
+  return false;
+}
 
   const RuleInstanceId RuleVariableListener::getRuleInstance() {
     if(m_ruleInstance.isNoId()){

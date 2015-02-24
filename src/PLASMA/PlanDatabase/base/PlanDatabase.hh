@@ -440,7 +440,7 @@ namespace EUROPA {
     std::vector<PlanDatabaseListenerId> m_listeners;
 
     /* In the data structures below, the key is a LabelStr representation of a name */
-    std::map<edouble, ObjectId> m_objectsByName; /*!< Object names are unique. Holds all objects m_objectsByName.size() == m_objects.size(). */
+    std::map<std::string, ObjectId> m_objectsByName; /*!< Object names are unique. Holds all objects m_objectsByName.size() == m_objects.size(). */
     std::multimap<edouble, ObjectId> m_objectsByPredicate; /*!< May be updated every time we add a Token, or remove an object. */
     std::multimap<edouble, ObjectId> m_objectsByType; /*!< May be updated every time we add a Token, or remove an object. */
     std::set<edouble> m_closedObjectTypes; /*!< The set of explicitly closed object types.
@@ -471,7 +471,7 @@ private:
     for (std::multimap<edouble, ObjectId>::const_iterator it = m_objectsByType.find(type.getKey());
 	 it != m_objectsByType.end() && it->first == type.getKey();
 	 ++it) {
-      debugMsg("PlanDatabase:getObjectsByType", "Adding object '" << it->second->getName().toString() << "' of type '" <<
+      debugMsg("PlanDatabase:getObjectsByType", "Adding object '" << it->second->getName() << "' of type '" <<
 	       it->second->getType().toString() << "' for type '" << type.toString() << "'");
       debugMsg("PlanDatabase:getObjectsByType", "Typeid for object: " << typeid((*(it->second))).name());
       results.push_back(ID(it->second));

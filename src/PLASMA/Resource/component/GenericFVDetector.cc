@@ -221,7 +221,7 @@ GenericFVDetector::GenericFVDetector(const ResourceId res)
     	ub = capacityBounds.second + usageUb;
 
     	debugMsg("GenericFVDetector:getDeafultLevelBounds",
-    		m_res->getName().toString() << " - time:" << inst->getTime() << " "
+    		m_res->getName() << " - time:" << inst->getTime() << " "
     		<< "Capacity[" << capacityBounds.first << "," << capacityBounds.second << "] "
     		<< "Usage[" << usageLb << "," << usageUb << "] "
     		<< "Level[" << lb << "," << ub << "]");

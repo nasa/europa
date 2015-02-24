@@ -519,7 +519,7 @@ private:
 
     Variable<IntervalIntDomain> v1(ENGINE, dom1, false, false, LabelStr("TEST VARIABLE"));
     CPPUNIT_ASSERT(!v1.canBeSpecified());
-    CPPUNIT_ASSERT(v1.getName() == LabelStr("TEST VARIABLE"));
+    CPPUNIT_ASSERT(v1.getName() == std::string("TEST VARIABLE"));
     CPPUNIT_ASSERT(v1.isValid());
     return true;
   }

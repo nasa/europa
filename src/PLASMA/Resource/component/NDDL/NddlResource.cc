@@ -33,8 +33,8 @@ bool isValidCombo(const std::string& profileName, const std::string& detectorNam
 // are valid to use together
 std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, const std::string& defaultProfile, const std::string& defaultDetector)
 {
-	std::string pFullName = res->getName().toString()+"."+PARAM_PROFILE_TYPE;
-	std::string dFullName = res->getName().toString()+"."+PARAM_DETECTOR_TYPE;
+	std::string pFullName = res->getName()+"."+PARAM_PROFILE_TYPE;
+	std::string dFullName = res->getName()+"."+PARAM_DETECTOR_TYPE;
 
 	ConstrainedVariableId pNameVar = res->getVariable(pFullName);
 	ConstrainedVariableId dNameVar = res->getVariable(dFullName);
@@ -110,7 +110,7 @@ NddlUnary::NddlUnary(const ObjectId parent,
     static const std::string PARAM_CONSUMPTION_MAX("consumptionMax");
 
     check_error(m_variables.size() >= ARG_COUNT);
-    check_error(m_variables[CMAX]->getName().toString().find(PARAM_CONSUMPTION_MAX) != std::string::npos);
+    check_error(m_variables[CMAX]->getName().find(PARAM_CONSUMPTION_MAX) != std::string::npos);
 
     check_error(m_variables[CMAX]->derivedDomain().isSingleton());
 
@@ -206,10 +206,10 @@ NddlReusable::NddlReusable(const ObjectId parent,
     static const std::string PARAM_CONSUMPTION_MAX("consumptionMax");
 
     check_error(m_variables.size() >= ARG_COUNT);
-    check_error(m_variables[C]->getName().toString().find(PARAM_CAPACITY) != std::string::npos);
-    check_error(m_variables[LLMIN]->getName().toString().find(PARAM_LEVEL_LIMIT_MIN) != std::string::npos);
-    check_error(m_variables[CRMAX]->getName().toString().find(PARAM_CONSUMPTION_RATE_MAX) != std::string::npos);
-    check_error(m_variables[CMAX]->getName().toString().find(PARAM_CONSUMPTION_MAX) != std::string::npos);
+    check_error(m_variables[C]->getName().find(PARAM_CAPACITY) != std::string::npos);
+    check_error(m_variables[LLMIN]->getName().find(PARAM_LEVEL_LIMIT_MIN) != std::string::npos);
+    check_error(m_variables[CRMAX]->getName().find(PARAM_CONSUMPTION_RATE_MAX) != std::string::npos);
+    check_error(m_variables[CMAX]->getName().find(PARAM_CONSUMPTION_MAX) != std::string::npos);
 
     check_error(m_variables[C]->derivedDomain().isSingleton());
     check_error(m_variables[LLMIN]->derivedDomain().isSingleton());
@@ -342,10 +342,10 @@ NddlCBReusable::NddlCBReusable(const ObjectId parent,
     static const std::string PARAM_CONSUMPTION_MAX("consumptionMax");
 
     check_error(m_variables.size() >= ARG_COUNT);
-    check_error(m_variables[C]->getName().toString().find(PARAM_CAPACITY) != std::string::npos);
-    check_error(m_variables[LLMIN]->getName().toString().find(PARAM_LEVEL_LIMIT_MIN) != std::string::npos);
-    check_error(m_variables[CRMAX]->getName().toString().find(PARAM_CONSUMPTION_RATE_MAX) != std::string::npos);
-    check_error(m_variables[CMAX]->getName().toString().find(PARAM_CONSUMPTION_MAX) != std::string::npos);
+    check_error(m_variables[C]->getName().find(PARAM_CAPACITY) != std::string::npos);
+    check_error(m_variables[LLMIN]->getName().find(PARAM_LEVEL_LIMIT_MIN) != std::string::npos);
+    check_error(m_variables[CRMAX]->getName().find(PARAM_CONSUMPTION_RATE_MAX) != std::string::npos);
+    check_error(m_variables[CMAX]->getName().find(PARAM_CONSUMPTION_MAX) != std::string::npos);
 
     check_error(m_variables[C]->derivedDomain().isSingleton());
     check_error(m_variables[LLMIN]->derivedDomain().isSingleton());
@@ -456,13 +456,13 @@ NddlReservoir::NddlReservoir(const ObjectId parent,
     // Ensure the binding of variable names is as expected
 
     check_error(m_variables.size() >= ARG_COUNT);
-    check_error(m_variables[IC]->getName().toString().find(PARAM_INITIAL_CAPACITY)  != std::string::npos);
-    check_error(m_variables[LLMIN]->getName().toString().find(PARAM_LEVEL_LIMIT_MIN)  != std::string::npos);
-    check_error(m_variables[LLMAX]->getName().toString().find(PARAM_LEVEL_LIMIT_MAX)  != std::string::npos);
-    check_error(m_variables[PRMAX]->getName().toString().find(PARAM_PRODUCTION_RATE_MAX)  != std::string::npos);
-    check_error(m_variables[PMAX]->getName().toString().find(PARAM_PRODUCTION_MAX)  != std::string::npos);
-    check_error(m_variables[CRMAX]->getName().toString().find(PARAM_CONSUMPTION_RATE_MAX)  != std::string::npos);
-    check_error(m_variables[CMAX]->getName().toString().find(PARAM_CONSUMPTION_MAX)  != std::string::npos);
+    check_error(m_variables[IC]->getName().find(PARAM_INITIAL_CAPACITY)  != std::string::npos);
+    check_error(m_variables[LLMIN]->getName().find(PARAM_LEVEL_LIMIT_MIN)  != std::string::npos);
+    check_error(m_variables[LLMAX]->getName().find(PARAM_LEVEL_LIMIT_MAX)  != std::string::npos);
+    check_error(m_variables[PRMAX]->getName().find(PARAM_PRODUCTION_RATE_MAX)  != std::string::npos);
+    check_error(m_variables[PMAX]->getName().find(PARAM_PRODUCTION_MAX)  != std::string::npos);
+    check_error(m_variables[CRMAX]->getName().find(PARAM_CONSUMPTION_RATE_MAX)  != std::string::npos);
+    check_error(m_variables[CMAX]->getName().find(PARAM_CONSUMPTION_MAX)  != std::string::npos);
 
 
     // Ensure all values have been set to singletons already

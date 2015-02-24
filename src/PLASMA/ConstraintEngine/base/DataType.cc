@@ -31,7 +31,7 @@ DataType::~DataType()
 
 const DataTypeId DataType::getId() const { return m_id; }
 
-const LabelStr& DataType::getName() const { return m_name; }
+const std::string& DataType::getName() const { return m_name; }
 void DataType::setName(const LabelStr& name) { m_name = name; }
 
 bool DataType::isEntity() const {return false;}

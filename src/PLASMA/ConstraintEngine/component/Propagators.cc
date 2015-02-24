@@ -24,26 +24,26 @@ DefaultPropagator::DefaultPropagator(const LabelStr& name,
       m_activeConstraint(0) { }
 
   void DefaultPropagator::handleConstraintAdded(const ConstraintId constraint){
-    debugMsg("DefaultPropagator:handleConstraintAdded", "Adding to the agenda: " << constraint->getName().toString() << "(" << constraint->getKey() << ")");
+    debugMsg("DefaultPropagator:handleConstraintAdded", "Adding to the agenda: " << constraint->getName() << "(" << constraint->getKey() << ")");
     m_agenda.insert(constraint);
   }
 
   void DefaultPropagator::handleConstraintRemoved(const ConstraintId constraint){
     // Remove from agenda
-    debugMsg("DefaultPropagator:handleConstraintRemoved", "Removing from the agenda: " << constraint->getName().toString() << "(" << constraint->getKey() << ")");
+    debugMsg("DefaultPropagator:handleConstraintRemoved", "Removing from the agenda: " << constraint->getName() << "(" << constraint->getKey() << ")");
     m_agenda.erase(constraint);
     check_error(isValid());
   }
 
   void DefaultPropagator::handleConstraintActivated(const ConstraintId constraint){
-    debugMsg("DefaultPropagator:handleConstraintActivated", "Adding to the agenda: " << constraint->getName().toString() << "(" << constraint->getKey() << ")");
+    debugMsg("DefaultPropagator:handleConstraintActivated", "Adding to the agenda: " << constraint->getName() << "(" << constraint->getKey() << ")");
     m_agenda.insert(constraint);
     check_error(isValid());
   }
 
   void DefaultPropagator::handleConstraintDeactivated(const ConstraintId constraint){
     // Remove from agenda
-    debugMsg("DefaultPropagator:handleConstraintDeactivated", "Removing from the agenda: " << constraint->getName().toString() << "(" << constraint->getKey() << ")");
+    debugMsg("DefaultPropagator:handleConstraintDeactivated", "Removing from the agenda: " << constraint->getName() << "(" << constraint->getKey() << ")");
     m_agenda.erase(constraint);
     check_error(isValid());
   }
@@ -55,7 +55,7 @@ DefaultPropagator::DefaultPropagator(const LabelStr& name,
     checkError(!constraint->isDiscarded(), constraint);
     if(constraint->getKey() != m_activeConstraint) {
       debugMsg("DefaultPropagator:handleNotification",
-          "Adding to the agenda: " << constraint->getName().toString() << "(" << constraint->getKey() << ")"
+          "Adding to the agenda: " << constraint->getName() << "(" << constraint->getKey() << ")"
           << " because of " << DomainListener::toString(changeType) << " change to " << variable->toString()
       );
       m_agenda.insert(constraint);
@@ -102,7 +102,7 @@ DefaultPropagator::DefaultPropagator(const LabelStr& name,
       ConstraintId constraint = *it;
       checkError(constraint.isValid(), constraint);
       checkError(!constraint->isDiscarded(),
-		 constraint->getName().toString() << "(" << constraint->getKey() << ") Id=" << constraint);
+		 constraint->getName() << "(" << constraint->getKey() << ") Id=" << constraint);
     }
     return true;
   }

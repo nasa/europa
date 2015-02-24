@@ -91,7 +91,7 @@ namespace EUROPA {
       ObjectId object;
       TokenId predecessor, successor;
       extractParts(m_index, object, predecessor, successor);
-      os << "THR{" << object->getName().toString() << " (" << predecessor->getKey() << ")<(" << successor->getKey() << ")}";
+      os << "THR{" << object->getName() << " (" << predecessor->getKey() << ")<(" << successor->getKey() << ")}";
       return os.str();
     }
     
@@ -120,7 +120,7 @@ namespace EUROPA {
     TokenId predecessor;
     TokenId successor;
     extractParts(index, object, predecessor, successor);
-    strStream << "{" << object->getName().toString() << " " << predecessor->toString() << " < " << successor->toString() << "}";
+    strStream << "{" << object->getName() << " " << predecessor->toString() << " < " << successor->toString() << "}";
     return strStream.str();
   }
 
