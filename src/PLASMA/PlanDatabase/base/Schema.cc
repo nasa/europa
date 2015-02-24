@@ -292,24 +292,24 @@ PSList<std::string> Schema::getObjectMembers(const std::string& objectType) cons
     return predicate.getElement(0, getDelimiter());
   }
 
-  const std::vector<LabelStr>& Schema::getAllObjectTypes(const LabelStr& objectType) {
-    std::map<edouble, std::vector<LabelStr> >::iterator it = allObjectTypes.find(objectType);
-    if(it != allObjectTypes.end())
-      return it->second;
+const std::vector<std::string>& Schema::getAllObjectTypes(const std::string& objectType) {
+  std::map<std::string, std::vector<std::string> >::iterator it = allObjectTypes.find(objectType);
+  if(it != allObjectTypes.end())
+    return it->second;
 
-    std::vector<LabelStr> results;
-    results.clear();
-    results.push_back(objectType);
-    LabelStr lbl = objectType;
-    while(hasParent(lbl)){
-      lbl = getParent(lbl);
-      results.push_back(lbl);
-    }
-
-    allObjectTypes.insert(std::pair<LabelStr, std::vector<LabelStr> >(objectType, results));
-
-    return getAllObjectTypes(objectType);
+  std::vector<std::string> results;
+  results.clear();
+  results.push_back(objectType);
+  std::string lbl = objectType;
+  while(hasParent(lbl)){
+    lbl = getParent(lbl);
+    results.push_back(lbl);
   }
+
+  allObjectTypes.insert(std::make_pair(objectType, results));
+
+  return getAllObjectTypes(objectType);
+}
 
   bool Schema::hasParent(const LabelStr& type) const {
 
