@@ -8,31 +8,6 @@
 
 namespace EUROPA{
 
-  /**
-   * @brief Helper method to lookup a replacement for a variable or use the one u r given.
-   *
-   * The need for this arises out of Token merging where we want to migrate any constraints on
-   * a Token being merged to its active token. Thus, any variables of the Token being merged which
-   * participate in a constraint shall be replaced with the equivalent variable in the active
-   * token.
-   * @param lookup A lookup table for variable in the merged token to corresponding variable in the active Token.
-   * The key is a double, which is the encoding of the variable Id.
-   * @param var The variable to be replaced, if found. It may not be in the map, indicating it is not a variable of the
-   * merged token.
-   * @return Variable Id Entry in lookup table if the given token is part of the token being merged,
-   * otherwise returns var.
-   * @todo The algorithm for splitting is very sub-optimal in the non-chronological case. Consider in the future
-   * an algorithm to migrate consequenecs rather than force additional splits. This is similar to deactivation
-   * of a token in its simple, robust, and potentially inefficient treatment of such non-chronological retractions.
-   */
-//   ConstrainedVariableId checkForReplacement(const std::map<edouble, ConstrainedVariableId>& lookup, const ConstrainedVariableId var){
-//     std::map<edouble, ConstrainedVariableId>::const_iterator it = lookup.find((edouble) var);
-//     if(it == lookup.end())
-//       return var;
-//     else
-//       return (it->second);
-//   }
-
   MergeMemento::MergeMemento(const TokenId inactiveToken, const TokenId activeToken)
     :m_inactiveToken(inactiveToken), m_activeToken(activeToken),
      m_deactivatedConstraints(), m_newConstraints(), m_undoing(false){

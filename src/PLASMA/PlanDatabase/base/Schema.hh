@@ -387,7 +387,7 @@ namespace EUROPA {
     std::set<std::string> primitives;
 
     std::map<std::string, NameValueVector> membershipRelation; /*! All type compositions */
-    std::map<edouble, LabelStr> childOfRelation; /*! Required to answer the getParent query */
+    std::map<std::string, std::string> childOfRelation; /*! Required to answer the getParent query */
     std::map<std::string, std::set<std::string> > objectPredicates; /*! All predicates by object type */
     std::set<std::string> typesWithNoPredicates; /*! Cache for lookup efficiently */
     std::map<std::string, std::vector<std::string> > allObjectTypes; /*! Cache to retrieve allObjectTypes by sub-class */
