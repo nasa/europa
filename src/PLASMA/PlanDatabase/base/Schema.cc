@@ -153,6 +153,10 @@ Schema::Schema(const LabelStr& name, const CESchemaId ces)
 
   bool Schema::isEnumValue(const LabelStr& enumName, edouble value) const {
     check_error(isEnum(enumName), enumName.toString() + " is not defined.");
+    debugMsg("Schema:isEnumValue",
+             "Checking to see if " << LabelStr(value).toString() <<
+             " is in enumeration " << enumName.toString());
+             
     const std::set<edouble>& members = enumValues.find(enumName)->second;
     return(members.find(value) != members.end());
   }
@@ -349,9 +353,9 @@ const std::vector<std::string>& Schema::getAllObjectTypes(const std::string& obj
     return predStr;
   }
 
-  const LabelStrSet& Schema::getAllObjectTypes() const {
-    return objectTypes;
-  }
+const std::set<std::string>& Schema::getAllObjectTypes() const {
+  return objectTypes;
+}
 
 
   const std::set<edouble>& Schema::getEnumValues(const LabelStr& enumName) const {
@@ -363,7 +367,7 @@ const std::vector<std::string>& Schema::getAllObjectTypes(const std::string& obj
 
   void Schema::getPredicates(const LabelStr& objectType, std::set<LabelStr>& results) const {
     check_error(isType(objectType), objectType.toString() + " is undefined");
-    for(LabelStrSet::const_iterator pred = predicates.begin(); pred != predicates.end(); ++pred) {
+    for(std::set<std::string>::const_iterator pred = predicates.begin(); pred != predicates.end(); ++pred) {
       LabelStr predLbl(*pred);
       LabelStr object((predLbl).getElement(0, getDelimiter()));
       LabelStr predicate((predLbl).getElement(1, getDelimiter()));
@@ -373,7 +377,7 @@ const std::vector<std::string>& Schema::getAllObjectTypes(const std::string& obj
   }
 
   void Schema::getPredicates(std::set<LabelStr>& results) const {
-    for(LabelStrSet::const_iterator it = predicates.begin(); it != predicates.end(); ++it)
+    for(std::set<std::string>::const_iterator it = predicates.begin(); it != predicates.end(); ++it)
       results.insert(*it);
   }
 
@@ -385,7 +389,7 @@ const std::vector<std::string>& Schema::getAllObjectTypes(const std::string& obj
       return false;
 
     // Otherwise, it is not conclusive, so we try in detail
-    for(LabelStrSet::const_iterator pred = predicates.begin(); pred != predicates.end(); ++pred) {
+    for(std::set<std::string>::const_iterator pred = predicates.begin(); pred != predicates.end(); ++pred) {
       LabelStr predLbl(*pred);
       LabelStr object((predLbl).getElement(0, getDelimiter()));
       if ((object == objectType) || isA(objectType, object))
@@ -481,7 +485,7 @@ const std::vector<std::string>& Schema::getAllObjectTypes(const std::string& obj
    * across enumerations. Look into this when we address enum scoping in a language
    */
   const LabelStr Schema::getEnumFromMember(const LabelStr& member) const {
-    for(LabelStr_ValueSet_Map::const_iterator it = enumValues.begin();
+    for(std::map<std::string, ValueSet>::const_iterator it = enumValues.begin();
         it != enumValues.end(); ++it)
       for(ValueSet::const_iterator memIt = it->second.begin(); memIt != it->second.end(); ++memIt)
         if((*memIt) == member)
@@ -631,38 +635,37 @@ const std::vector<std::string>& Schema::getAllObjectTypes(const std::string& obj
               " with base domain " << domain.toString());
   }
 
-  void Schema::addValue(const LabelStr& enumName, edouble enumValue) {
-    check_error(isEnum(enumName), enumName.toString() + " is undefined.");
-    check_error(enumValuesToEnums.find(enumValue) == enumValuesToEnums.end(),
-            LabelStr(enumValue).toString() + " is already an enum value for " + (enumValuesToEnums[enumValue]).toString());
+void Schema::addValue(const std::string& enumName, edouble enumValue) {
+  check_error(isEnum(enumName), enumName + " is undefined.");
+  check_error(enumValuesToEnums.find(enumValue) == enumValuesToEnums.end(),
+              LabelStr(enumValue).toString() + " is already an enum value for " + enumValuesToEnums[enumValue]);
 
-    debugMsg("Schema:addValue", "[" << m_name.toString() << "] " << "Added " <<
-	     (LabelStr::isString(enumValue) ? LabelStr(enumValue).toString() : toString(enumValue)) << " to " <<
-	     enumName.toString());
-    ValueSet& members = enumValues.find(enumName)->second;
-    members.insert(enumValue);
-    enumValuesToEnums[enumValue] = enumName;
-  }
+  debugMsg("Schema:addValue", "[" << m_name.toString() << "] " << "Added " <<
+           (LabelStr::isString(enumValue) ? LabelStr(enumValue).toString() : toString(enumValue)) << " to " <<
+           enumName);
+  ValueSet& members = enumValues.find(enumName)->second;
+  members.insert(enumValue);
+  enumValuesToEnums[enumValue] = enumName;
+}
 
-  const LabelStr& Schema::getEnumForValue(edouble value) const
-  {
-    check_error(enumValuesToEnums.find(value) != enumValuesToEnums.end());
-    return enumValuesToEnums.find(value)->second;
-  }
+const std::string& Schema::getEnumForValue(edouble value) const {
+  check_error(enumValuesToEnums.find(value) != enumValuesToEnums.end());
+  return enumValuesToEnums.find(value)->second;
+}
 
-  void Schema::write(ostream& os) const{
-    os << "SCHEMA RULES:\n";
-    for(LabelStr_LabelStrSet_Map::const_iterator it = objectPredicates.begin();
-	it != objectPredicates.end(); ++it){
-      LabelStr objectName = it->first;
-      os << objectName.toString() << ":{";
-      for (LabelStrSet::const_iterator pos = it->second.begin(); pos != it->second.end(); ++pos){
-	LabelStr predicate = *pos;
-	os << predicate.toString() << " ";
-      }
-      os << "}\n";
+void Schema::write(ostream& os) const {
+  os << "SCHEMA RULES:\n";
+  for(std::map<std::string, std::set<std::string> >::const_iterator it = objectPredicates.begin();
+      it != objectPredicates.end(); ++it){
+    std::string objectName = it->first;
+    os << objectName << ":{";
+    for (std::set<std::string>::const_iterator pos = it->second.begin(); pos != it->second.end(); ++pos){
+      LabelStr predicate = *pos;
+      os << predicate.toString() << " ";
     }
+    os << "}\n";
   }
+}
 
   bool Schema::makeParentPredicateString(const LabelStr& predicate, std::string& predStr) const{
     check_error(predicate.countElements(getDelimiter()) == 2,
@@ -680,11 +683,11 @@ const std::vector<std::string>& Schema::getAllObjectTypes(const std::string& obj
     return true;
   }
 
-  void Schema::getEnumerations(std::list<LabelStr>& results) const {
-    for(LabelStr_ValueSet_Map::const_iterator it = enumValues.begin();
-        it != enumValues.end(); ++it)
-      results.push_back(it->first);
-  }
+void Schema::getEnumerations(std::list<std::string>& results) const {
+  for(std::map<std::string, ValueSet>::const_iterator it = enumValues.begin();
+      it != enumValues.end(); ++it)
+    results.push_back(it->first);
+}
 
 namespace {
 const Id<ObjectFactory> createDefaultObjectFactory(
@@ -808,12 +811,12 @@ void Schema::registerObjectType(const ObjectTypeId objType) {
       m_methods[m->getName()] = m;
   }
 
-  MethodId Schema::getMethod(const LabelStr& methodName, const DataTypeId, const std::vector<DataTypeId>&)
-  {
-      // TODO: use target type and arg types to resolve
-      std::map<edouble,MethodId>::iterator it = m_methods.find(methodName);
-      return (it != m_methods.end() ? it->second : MethodId::noId());
-  }
+MethodId Schema::getMethod(const LabelStr& methodName, const DataTypeId,
+                           const std::vector<DataTypeId>&) {
+  // TODO: use target type and arg types to resolve
+  std::map<std::string,MethodId>::iterator it = m_methods.find(methodName);
+  return (it != m_methods.end() ? it->second : MethodId::noId());
+}
 
 std::vector<TokenTypeId> Schema::getTypeSupporters( TokenTypeId type ) {
   edouble key = type->getSignature().getKey();
