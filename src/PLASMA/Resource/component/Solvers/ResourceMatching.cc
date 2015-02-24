@@ -23,7 +23,7 @@ namespace EUROPA {
       const ResourceId res = inst->getProfile()->getResource();
       debugMsg("MatchingEngine:getMatchesInternal",
 	       "Triggering matches for object types (" <<
-	       res->getType().toString() << ")");
+	       res->getType() << ")");
       const SchemaId schema = res->getPlanDatabase()->getSchema();
       trigger(schema->getAllObjectTypes(res->getType()), m_rulesByObjectType, results);
     }

@@ -237,12 +237,12 @@ namespace EUROPA {
      * @param results A (initially empty) collection to be populated with all instances of that type.
      */
     template<class ID>
-    void getObjectsByType(const LabelStr& type, std::list<ID>& results);
+    void getObjectsByType(const std::string& type, std::list<ID>& results);
 
     /**
      * @brief Are there any object instances of the specified type?
      */
-    bool hasObjectInstances(const LabelStr& objectType) const;
+    bool hasObjectInstances(const std::string& objectType) const;
 
     /**
      * @brief Lookup an object by name. It is an error if the object is not present.
@@ -261,7 +261,7 @@ namespace EUROPA {
      * Note that this will cause an error if Tokens have already been created for this type. This is
      * because we have the rule - once dynamic, always dynamic.
      */
-    void close(const LabelStr& objectType);
+    void close(const std::string& objectType);
 
     /**
      * @brief True if and only if close() has been called.
@@ -413,7 +413,7 @@ namespace EUROPA {
      * @param results A collection, initially empty, which is an output parameter for results.
      * @see Schema::isPredicateDefined, Schema::canBeAssigned
      */
-    void getObjectsByPredicate(const LabelStr& predicate, std::list<ObjectId>& results);
+    void getObjectsByPredicate(const std::string& predicate, std::list<ObjectId>& results);
 
     /**
      * @brief Utility to index an active token.
@@ -441,19 +441,19 @@ namespace EUROPA {
 
     /* In the data structures below, the key is a LabelStr representation of a name */
     std::map<std::string, ObjectId> m_objectsByName; /*!< Object names are unique. Holds all objects m_objectsByName.size() == m_objects.size(). */
-    std::multimap<edouble, ObjectId> m_objectsByPredicate; /*!< May be updated every time we add a Token, or remove an object. */
-    std::multimap<edouble, ObjectId> m_objectsByType; /*!< May be updated every time we add a Token, or remove an object. */
-    std::set<edouble> m_closedObjectTypes; /*!< The set of explicitly closed object types.
+    std::multimap<std::string, ObjectId> m_objectsByPredicate; /*!< May be updated every time we add a Token, or remove an object. */
+    std::multimap<std::string, ObjectId> m_objectsByType; /*!< May be updated every time we add a Token, or remove an object. */
+    std::set<std::string> m_closedObjectTypes; /*!< The set of explicitly closed object types.
 					     If present here, it cannot be present in m_objectVariablesByType */
-    std::map<edouble, ConstrainedVariableId> m_globalVarsByName;
-    std::map<edouble, TokenId> m_globalTokensByName;
+    std::map<std::string, ConstrainedVariableId> m_globalVarsByName;
+    std::map<std::string, TokenId> m_globalTokensByName;
     std::map<eint, std::pair<TokenId, ObjectSet> > m_tokensToOrder; /*!< All tokens to order, with the object
 								     inducing the requirement stored in the set */
 
-    std::map<edouble, TokenSet > m_activeTokensByPredicate; /*!< All active tokens sorted by predicate */
+    std::map<std::string, TokenSet > m_activeTokensByPredicate; /*!< All active tokens sorted by predicate */
 
     // All this to store variables (and their listeners) for Open Object Types
-    typedef std::multimap<edouble, std::pair<ConstrainedVariableId, ConstrainedVariableListenerId> > ObjVarsByObjType;
+    typedef std::multimap<std::string, std::pair<ConstrainedVariableId, ConstrainedVariableListenerId> > ObjVarsByObjType;
     typedef ObjVarsByObjType::iterator ObjVarsByObjType_I;
     typedef ObjVarsByObjType::const_iterator ObjVarsByObjType_CI;
     ObjVarsByObjType m_objectVariablesByObjectType;
@@ -463,20 +463,21 @@ private:
   };
 
 
-  template<class ID>
-  void PlanDatabase::getObjectsByType(const LabelStr& type, std::list<ID>& results) {
-    check_error(results.empty());
-    checkError(m_schema->isObjectType(type), "Is not an object type in the plan database: " + type.toString());
-
-    for (std::multimap<edouble, ObjectId>::const_iterator it = m_objectsByType.find(type.getKey());
-	 it != m_objectsByType.end() && it->first == type.getKey();
-	 ++it) {
-      debugMsg("PlanDatabase:getObjectsByType", "Adding object '" << it->second->getName() << "' of type '" <<
-	       it->second->getType().toString() << "' for type '" << type.toString() << "'");
-      debugMsg("PlanDatabase:getObjectsByType", "Typeid for object: " << typeid((*(it->second))).name());
-      results.push_back(ID(it->second));
-    }
+template<class ID>
+void PlanDatabase::getObjectsByType(const std::string& type, std::list<ID>& results) {
+  check_error(results.empty());
+  checkError(m_schema->isObjectType(type),
+             "Is not an object type in the plan database: " + type);
+    
+  for (std::multimap<std::string, ObjectId>::const_iterator it = m_objectsByType.find(type);
+       it != m_objectsByType.end() && it->first == type; ++it) {
+    debugMsg("PlanDatabase:getObjectsByType",
+             "Adding object '" << it->second->getName() << "' of type '" <<
+             it->second->getType() << "' for type '" << type << "'");
+    debugMsg("PlanDatabase:getObjectsByType", "Typeid for object: " << typeid((*(it->second))).name());
+    results.push_back(ID(it->second));
   }
+}
 }
 
 #endif

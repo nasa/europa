@@ -35,35 +35,34 @@ namespace EUROPA {
 
   const LabelStr& TokenType::getSignature() const {return m_signature;}
 
-  const std::map<LabelStr,DataTypeId>& TokenType::getArgs() const { return m_args; }
+const std::map<std::string,DataTypeId>& TokenType::getArgs() const { return m_args; }
 
   // TODO: this should live in one place only
   static RestrictedDT StateDT("TokenStates",SymbolDT::instance(),StateDomain());
 
-  const DataTypeId TokenType::getArgType(const char* argName) const
-  {
-    std::map<LabelStr,DataTypeId>::const_iterator it = m_args.find(argName);
+const DataTypeId TokenType::getArgType(const char* argName) const {
+  std::map<std::string,DataTypeId>::const_iterator it = m_args.find(argName);
 
-    if (it != m_args.end())
-      return it->second;
+  if (it != m_args.end())
+    return it->second;
 
-    std::string name(argName);
+  std::string name(argName);
 
-    if (name == "state")
-      return StateDT.getId();
+  if (name == "state")
+    return StateDT.getId();
 
-    if (name == "object")
-      return m_objType->getVarType();
+  if (name == "object")
+    return m_objType->getVarType();
 
-    if (name=="start" || name=="end" || name=="duration")
-      return IntDT::instance();
+  if (name=="start" || name=="end" || name=="duration")
+    return IntDT::instance();
 
-    TokenTypeId parent = getParentType();
-    if (parent.isId())
-      return parent->getArgType(argName);
+  TokenTypeId parent = getParentType();
+  if (parent.isId())
+    return parent->getArgType(argName);
 
-    return DataTypeId::noId();
-  }
+  return DataTypeId::noId();
+}
 
 
   void TokenType::addArg(const DataTypeId type, const LabelStr& name)
@@ -94,61 +93,59 @@ namespace EUROPA {
     return (m_attributes & attrMask) == attrMask;
   }
 
-  std::string TokenType::toString() const
-  {
-    std::stringstream oss;
-    //oss << getId() << " - ";
-    oss << "\t" <<getName() <<" ( ";
-    for (std::map<LabelStr,DataTypeId>::const_iterator it = m_args.begin(); it != m_args.end(); ++it) {
-      oss<< it->first.toString();
-      oss<< " ";
-    }
-    oss<<")";
-
-    return oss.str();
+std::string TokenType::toString() const {
+  std::stringstream oss;
+  //oss << getId() << " - ";
+  oss << "\t" <<getName() <<" ( ";
+  for (std::map<std::string,DataTypeId>::const_iterator it = m_args.begin(); it != m_args.end(); ++it) {
+    oss<< it->first;
+    oss<< " ";
   }
+  oss<<")";
 
-  std::string TokenType::toLongString() const
-  {
-    std::stringstream oss;
-    //oss << getId() << " - ";
-    oss << "\t" <<getName() <<" ( ";
-    for (std::map<LabelStr,DataTypeId>::const_iterator it = m_args.begin(); it != m_args.end(); ++it) {
-      oss<< it->first.toString();
-      oss<< " ";
-    }
-    oss<<")";
+  return oss.str();
+}
 
-    /**
-     * TODO: condition on variable v and no effect changes v, then condition
-     * needs to be taken as an side-effect
-     */
-    if(hasAttributes(PSTokenType::ACTION)){
-      oss << ":" << std::endl;
-
-      oss << "\t\t" << "Conditions:" << std::endl;
-      PSList<PSTokenType*> conditions = getSubgoalsByAttr( PSTokenType::CONDITION);
-
-      for ( int i = 0; i < conditions.size(); i++ ){
-	TokenType* tt = boost::polymorphic_cast<TokenType*>(conditions.get(i));
-	oss << "\t\t\t";
-	oss<< tt->toLongString();
-      }
-
-      oss << "\t\t" << "Effects:" << std::endl;
-      PSList<PSTokenType*> effects = getSubgoalsByAttr( PSTokenType::EFFECT);
-
-      for ( int i = 0; i < effects.size(); i++ ){
-	TokenType* tt = boost::polymorphic_cast<TokenType*>(effects.get(i));
-	oss << "\t\t\t";
-	oss<< tt->toLongString();
-      }
-    }
-    else
-       oss << std::endl;
-
-    return oss.str();
+std::string TokenType::toLongString() const {
+  std::stringstream oss;
+  //oss << getId() << " - ";
+  oss << "\t" <<getName() <<" ( ";
+  for (std::map<std::string,DataTypeId>::const_iterator it = m_args.begin(); it != m_args.end(); ++it) {
+    oss<< it->first;
+    oss<< " ";
   }
+  oss<<")";
+
+  /**
+   * TODO: condition on variable v and no effect changes v, then condition
+   * needs to be taken as an side-effect
+   */
+  if(hasAttributes(PSTokenType::ACTION)){
+    oss << ":" << std::endl;
+
+    oss << "\t\t" << "Conditions:" << std::endl;
+    PSList<PSTokenType*> conditions = getSubgoalsByAttr( PSTokenType::CONDITION);
+
+    for ( int i = 0; i < conditions.size(); i++ ){
+      TokenType* tt = boost::polymorphic_cast<TokenType*>(conditions.get(i));
+      oss << "\t\t\t";
+      oss<< tt->toLongString();
+    }
+
+    oss << "\t\t" << "Effects:" << std::endl;
+    PSList<PSTokenType*> effects = getSubgoalsByAttr( PSTokenType::EFFECT);
+
+    for ( int i = 0; i < effects.size(); i++ ){
+      TokenType* tt = boost::polymorphic_cast<TokenType*>(effects.get(i));
+      oss << "\t\t\t";
+      oss<< tt->toLongString();
+    }
+  }
+  else
+    oss << std::endl;
+
+  return oss.str();
+}
 
   void TokenType::addSubgoalByAttr( TokenTypeId type, int attr ){
     for( int attrMask = 1; attrMask <= attr; attrMask = attrMask << 1 ){
@@ -165,20 +162,20 @@ namespace EUROPA {
     return ( cit == m_subgoalsByAttr.end() ) ?  retEmpty : cit->second ;
   }
 
-  PSList<std::string> TokenType::getParameterNames() const {
-    PSList<std::string> retval;
-    for (std::map<LabelStr,DataTypeId>::const_iterator it = m_args.begin(); it != m_args.end(); ++it) {
-      retval.push_back(it->first.toString());
-    }
-    return retval;
+PSList<std::string> TokenType::getParameterNames() const {
+  PSList<std::string> retval;
+  for (std::map<std::string,DataTypeId>::const_iterator it = m_args.begin(); it != m_args.end(); ++it) {
+    retval.push_back(it->first);
   }
+  return retval;
+}
 
-  PSDataType* TokenType::getParameterType(int index) const {
-    check_error(static_cast<unsigned int>(index) < m_args.size(), "Index out of bounds");
-    std::map<LabelStr,DataTypeId>::const_iterator it = m_args.begin();
-    while (index-- > 0) ++it;
-    return it->second;
-  }
+PSDataType* TokenType::getParameterType(int index) const {
+  check_error(static_cast<unsigned int>(index) < m_args.size(), "Index out of bounds");
+  std::map<std::string,DataTypeId>::const_iterator it = m_args.begin();
+  while (index-- > 0) ++it;
+  return it->second;
+}
 
   PSDataType* TokenType::getParameterType(const std::string& name) const {
     return getArgType(name.c_str());

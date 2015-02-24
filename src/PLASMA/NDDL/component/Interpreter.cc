@@ -258,7 +258,7 @@ DataRef ExprVarRef::eval(EvalContext& context) const {
 
         if (var.isNoId())
           check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+m_vars[idx]+
-                              " in object \""+object->getName()+"\" of type "+object->getType().toString());
+                              " in object \""+object->getName()+"\" of type "+object->getType());
       }
     }
   }

@@ -197,62 +197,61 @@ Schema::Schema(const LabelStr& name, const CESchemaId ces)
     return false;
   }
 
-  bool Schema::canContain(const LabelStr& parentType,
-			  const LabelStr& memberType,
-			  const LabelStr& memberName) const {
-    check_error(isType(parentType), parentType.toString() + " is not defined.");
+bool Schema::canContain(const std::string& parentType,
+                        const std::string& memberType,
+                        const std::string& memberName) const {
+  check_error(isType(parentType), parentType + " is not defined.");
 
-    // First see if we get a hit for the parentType
-    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it =
+  // First see if we get a hit for the parentType
+  std::map<std::string, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(parentType);
 
-    // If no hit, then try for the parent. There must be one since it is a valid
-    // type but no hit yet
-    if(membershipRelation_it == membershipRelation.end())
-      return canContain(getParent(parentType), memberType, memberName);
+  // If no hit, then try for the parent. There must be one since it is a valid
+  // type but no hit yet
+  if(membershipRelation_it == membershipRelation.end())
+    return canContain(getParent(parentType), memberType, memberName);
 
-    // Otherwise, we have a parentType with members defined, so search there
-    const NameValueVector& members = membershipRelation_it->second;
-    for(NameValueVector::const_iterator it = members.begin(); it != members.end();++it){
-      const NameValuePair& pair = *it;
-      if(pair.second == memberName && isA(memberType, pair.first))
-          return true;
-    }
-
-    // Call recursively for inheritance relationships on parent and member types
-    if(hasParent(parentType) && canContain(getParent(parentType), memberType, memberName))
+  // Otherwise, we have a parentType with members defined, so search there
+  const NameValueVector& members = membershipRelation_it->second;
+  for(NameValueVector::const_iterator it = members.begin(); it != members.end();++it){
+    const NameValuePair& pair = *it;
+    if(pair.second == memberName && isA(memberType, pair.first))
       return true;
-
-    // Allow for the possibility that it is declared as base type of the member type
-    if(isObjectType(memberType) &&
-       hasParent(memberType) &&
-       canContain(parentType,getParent(memberType), memberName))
-      return true;
-
-    return false;
   }
 
-  const Schema::NameValueVector& Schema::getMembers(const LabelStr& objectType) const
-  {
-    std::map<edouble, NameValueVector>::const_iterator it = membershipRelation.find(objectType);
+  // Call recursively for inheritance relationships on parent and member types
+  if(hasParent(parentType) && canContain(getParent(parentType), memberType, memberName))
+    return true;
 
-    check_error(it != membershipRelation.end(), "Unable to find members for object type:" + objectType.toString() );
+  // Allow for the possibility that it is declared as base type of the member type
+  if(isObjectType(memberType) &&
+     hasParent(memberType) &&
+     canContain(parentType,getParent(memberType), memberName))
+    return true;
+
+  return false;
+}
+
+const Schema::NameValueVector& Schema::getMembers(const std::string& objectType) const
+  {
+    std::map<std::string, NameValueVector>::const_iterator it = membershipRelation.find(objectType);
+
+    check_error(it != membershipRelation.end(),
+                "Unable to find members for object type:" + objectType);
     return it->second;
   }
 
   // For now just return the member names, not their types:
   // TODO:  Is it better to use an iterator in this loop?
-  PSList<std::string> Schema::getMembers(const std::string& objectType) const
-  {
-      PSList<std::string> retval;
-      const NameValueVector& members = getMembers(LabelStr(objectType));
-      for(std::vector< std::pair<LabelStr, LabelStr> >::const_iterator it = members.begin();
-          it != members.end(); ++it)
-      {
-          retval.push_back((*it).second.toString());
-      }
-      return retval;
+PSList<std::string> Schema::getObjectMembers(const std::string& objectType) const {
+  PSList<std::string> retval;
+  const NameValueVector& members = getMembers(LabelStr(objectType));
+  for(std::vector< std::pair<std::string, std::string> >::const_iterator it = members.begin();
+      it != members.end(); ++it) {
+    retval.push_back((*it).second);
   }
+  return retval;
+}
 
   bool Schema::hasMember(const std::string& parentType, const std::string& memberName) const
   {
@@ -263,7 +262,7 @@ Schema::Schema(const LabelStr& name, const CESchemaId ces)
     check_error(isType(parentType), parentType.toString() + " is undefined.");
 
     // First see if we get a hit for the parentType
-    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it =
+    std::map<std::string, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(parentType);
 
     // If no hit, then try for the parent. There must be one since it is a valid
@@ -403,7 +402,7 @@ Schema::Schema(const LabelStr& name, const CESchemaId ces)
 		memberName.toString() + " is not a member of " + parentType.toString());
 
     // First see if we get a hit for the parentType
-    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it =
+    std::map<std::string, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(parentType);
 
     // At this point we know if we do not have a hit, then try a parent
@@ -427,7 +426,7 @@ Schema::Schema(const LabelStr& name, const CESchemaId ces)
 		memberName.toString() + " is not a member of " + parentType.toString());
 
     // First see if we get a hit for the parentType
-    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it =
+    std::map<std::string, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(parentType);
 
     // At this point we know if we do not have a hit, then try a parent
@@ -451,7 +450,7 @@ Schema::Schema(const LabelStr& name, const CESchemaId ces)
 
   const LabelStr Schema::getNameFromIndex(const LabelStr& parentType, unsigned int index) const {
     // First see if we get a hit for the parentType
-    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it =
+    std::map<std::string, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(parentType);
 
     // At this point we know if we do not have a hit, then try a parent
@@ -495,7 +494,7 @@ Schema::Schema(const LabelStr& name, const CESchemaId ces)
   unsigned long Schema::getParameterCount(const LabelStr& predicate) const {
     check_error(isPredicate(predicate), predicate.toString() + " is not defined as a Predicate");
     // First see if we get a hit for the parentType
-    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it =
+    std::map<std::string, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(predicate);
 
     check_error(membershipRelation_it != membershipRelation.end(), predicate.toString() + " not found in the membership relation");
@@ -515,7 +514,7 @@ Schema::Schema(const LabelStr& name, const CESchemaId ces)
     checkError(paramIndex < getParameterCount(predicate), paramIndex << " is not a valid index");
 #endif
     // First see if we get a hit for the parentType
-    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it =
+    std::map<std::string, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(predicate);
 
     check_error(membershipRelation_it != membershipRelation.end());
@@ -746,7 +745,7 @@ void Schema::registerObjectType(const ObjectTypeId objType) {
       LabelStr predName = tokenType->getSignature();
 
       addPredicate(predName.c_str());
-      std::map<LabelStr,DataTypeId>::const_iterator paramIt = tokenType->getArgs().begin();
+      std::map<std::string,DataTypeId>::const_iterator paramIt = tokenType->getArgs().begin();
       for(;paramIt != tokenType->getArgs().end();++paramIt)
         addMember(predName.c_str(), paramIt->second->getName() /*type*/, paramIt->first/*name*/);
 

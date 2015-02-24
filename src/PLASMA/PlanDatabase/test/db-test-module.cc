@@ -4473,8 +4473,8 @@ public:
     cleanDomains(domains);
     ObjectId obj2a = s_db->getObject("testObj2a");
     CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
-    CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a").toString());
+    CPPUNIT_ASSERT(obj2a->getType() == "TestClass2");
+    CPPUNIT_ASSERT(obj2a->getName() == "testObj2a");
     std::vector<ConstrainedVariableId> obj2vars = obj2a->getVariables();
     CPPUNIT_ASSERT(obj2vars.size() == 3);
     for (unsigned int i = 0; i < 3; i++) {
@@ -4516,8 +4516,8 @@ public:
     cleanDomains(domains);
     ObjectId obj2b = s_db->getObject("testObj2b");
     CPPUNIT_ASSERT(!obj2b.isNoId() && obj2b.isValid());
-    CPPUNIT_ASSERT(obj2b->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b").toString());
+    CPPUNIT_ASSERT(obj2b->getType() == "TestClass2");
+    CPPUNIT_ASSERT(obj2b->getName() == "testObj2b");
     obj2vars = obj2b->getVariables();
     CPPUNIT_ASSERT(obj2vars.size() == 3);
     for (unsigned int i = 0; i < 3; i++) {
@@ -4557,8 +4557,8 @@ public:
   static void testDeleteObject() {
     ObjectId obj2a = s_db->getObject("testObj2a");
     CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
-    CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a").toString());
+    CPPUNIT_ASSERT(obj2a->getType() == "TestClass2");
+    CPPUNIT_ASSERT(obj2a->getName() == "testObj2a");
 
     std::vector<const Domain*> domains;
     domains.push_back(new IntervalIntDomain(1));
@@ -4578,16 +4578,16 @@ public:
     TEST_PLAYING_XML(transaction);
     obj2a = s_db->getObject("testObj2a");
     CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
-    CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a").toString());
+    CPPUNIT_ASSERT(obj2a->getType() == "TestClass2");
+    CPPUNIT_ASSERT(obj2a->getName() == "testObj2a");
 
   }
 
   static void testUndeleteObject() {
     ObjectId obj2a = s_db->getObject("testObj2a");
     CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
-    CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a").toString());
+    CPPUNIT_ASSERT(obj2a->getType() == "TestClass2");
+    CPPUNIT_ASSERT(obj2a->getName() == "testObj2a");
 
     std::vector<const Domain*> domains;
     domains.push_back(new IntervalIntDomain(1));
@@ -4616,8 +4616,8 @@ public:
 
     obj2a = s_db->getObject("testObj2a");
     CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
-    CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a").toString());
+                   CPPUNIT_ASSERT(obj2a->getType() == "TestClass2");
+                   CPPUNIT_ASSERT(obj2a->getName() == "testObj2a");
 
   }
 
@@ -4646,8 +4646,8 @@ public:
 
     ObjectId obj2b = s_db->getObject("testObj2b");
     CPPUNIT_ASSERT(!obj2b.isNoId() && obj2b.isValid());
-    CPPUNIT_ASSERT(obj2b->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b").toString());
+    CPPUNIT_ASSERT(obj2b->getType() == "TestClass2");
+    CPPUNIT_ASSERT(obj2b->getName() == "testObj2b");
     std::vector<ConstrainedVariableId> obj2vars = obj2b->getVariables();
     CPPUNIT_ASSERT(obj2vars.size() == 3);
     TEST_PLAYING_XML(buildXMLResetVariableStr(obj2vars[0]));
@@ -4683,8 +4683,8 @@ public:
     // First section: constraints between variables
     ObjectId obj2b = s_db->getObject("testObj2b");
     CPPUNIT_ASSERT(!obj2b.isNoId() && obj2b.isValid());
-    CPPUNIT_ASSERT(obj2b->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b").toString());
+    CPPUNIT_ASSERT(obj2b->getType() == "TestClass2");
+    CPPUNIT_ASSERT(obj2b->getName() == "testObj2b");
     std::vector<ConstrainedVariableId> obj2vars = obj2b->getVariables();
     CPPUNIT_ASSERT(obj2vars.size() == 3);
 
@@ -4944,8 +4944,8 @@ public:
     /* Get an existing object.  See testCreateObject(). */
     ObjectId obj2b = s_db->getObject("testObj2b");
     CPPUNIT_ASSERT(!obj2b.isNoId() && obj2b.isValid());
-    CPPUNIT_ASSERT(obj2b->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b").toString());
+    CPPUNIT_ASSERT(obj2b->getType() == "TestClass2");
+    CPPUNIT_ASSERT(obj2b->getName() == "testObj2b");
     const unsigned long initialObjectTokenCount_B = obj2b->tokens().size();
 
     TokenId constrainedToken = createToken("constrainedSample", true);
@@ -4986,8 +4986,8 @@ public:
     /* Create two rejectable tokens and do the same tests, but with testObj2a. */
     ObjectId obj2a = s_db->getObject("testObj2a");
     CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
-    CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a").toString());
+    CPPUNIT_ASSERT(obj2a->getType() == "TestClass2");
+    CPPUNIT_ASSERT(obj2a->getName() == "testObj2a");
     ObjectDomain objDom2a(GET_DATA_TYPE(s_db,"TestClass2"),obj2a);
     const unsigned long initialObjectTokenCount_A = obj2a->tokens().size();
 
@@ -5045,15 +5045,15 @@ public:
   static void testFree() {
     ObjectId obj2a = s_db->getObject("testObj2a");
     CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
-    CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a").toString());
+    CPPUNIT_ASSERT(obj2a->getType() == "TestClass2");
+    CPPUNIT_ASSERT(obj2a->getName() == "testObj2a");
     ObjectDomain objDom2a(GET_DATA_TYPE(s_db,"TestClass2"),obj2a);
     const unsigned long initialObjectTokenCount_A = obj2a->tokens().size();
 
     ObjectId obj2b = s_db->getObject("testObj2b");
     CPPUNIT_ASSERT(!obj2b.isNoId() && obj2b.isValid());
-    CPPUNIT_ASSERT(obj2b->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b").toString());
+    CPPUNIT_ASSERT(obj2b->getType() == "TestClass2");
+    CPPUNIT_ASSERT(obj2b->getName() == "testObj2b");
     ObjectDomain objDom2b(GET_DATA_TYPE(s_db,"TestClass2"),obj2b);
     TokenSet tokens = obj2b->tokens();
     debugMsg("testFree", __FILE__ << ':' << __LINE__ << ": there are " << tokens.size() << " tokens on testObj2b; should be 2.");

@@ -36,7 +36,7 @@ namespace EUROPA {
   class Schema: public DomainComparator, public PSSchema {
   public:
 
-    typedef std::pair<LabelStr, LabelStr> NameValuePair;
+    typedef std::pair<std::string, std::string> NameValuePair;
     typedef std::vector<NameValuePair> NameValueVector;
     typedef std::set<edouble> ValueSet;
     typedef std::map<edouble, LabelStr> LabelStr_LabelStr_Map;
@@ -133,9 +133,9 @@ namespace EUROPA {
      * @param memberType the type of the composed object
      * @param memberName the member name for the composed field.
      */
-    bool canContain(const LabelStr& parentType,
-		    const LabelStr& memberType,
-		    const LabelStr& memberName) const;
+    bool canContain(const std::string& parentType,
+		    const std::string& memberType,
+		    const std::string& memberName) const;
 
     /**
      *
@@ -144,7 +144,7 @@ namespace EUROPA {
      * - the first element is the member's type
      * - the second elemnt is the member's name
      */
-    const NameValueVector& getMembers(const LabelStr& objectType) const;
+    const NameValueVector& getMembers(const std::string& objectType) const;
 
     /**
      * @brief Determines if the given member is contained in the parent
@@ -368,7 +368,7 @@ namespace EUROPA {
 
     //PSSchema methods:
     PSList<std::string> getAllPredicates() const;
-    PSList<std::string> getMembers(const std::string& objectType) const;
+    PSList<std::string> getObjectMembers(const std::string& objectType) const;
     bool hasMember(const std::string& parentType, const std::string& memberName) const;
 
     PSList<PSObjectType*> getAllPSObjectTypes() const;
@@ -392,7 +392,7 @@ namespace EUROPA {
     LabelStrSet predicates;
     LabelStrSet primitives;
 
-    std::map<edouble, NameValueVector> membershipRelation; /*! All type compositions */
+    std::map<std::string, NameValueVector> membershipRelation; /*! All type compositions */
     std::map<edouble, LabelStr> childOfRelation; /*! Required to answer the getParent query */
     LabelStr_LabelStrSet_Map objectPredicates; /*! All predicates by object type */
     LabelStrSet typesWithNoPredicates; /*! Cache for lookup efficiently */

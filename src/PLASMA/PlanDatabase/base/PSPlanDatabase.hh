@@ -19,7 +19,7 @@ class PSPlanDatabaseClient;
         // TODO: flesh this interface out
       virtual ~PSSchema() {}
       virtual PSList<std::string> getAllPredicates() const = 0;
-      virtual PSList<std::string> getMembers(const std::string& objectType) const = 0;
+      virtual PSList<std::string> getObjectMembers(const std::string& objectType) const = 0;
       virtual bool hasMember(const std::string& parentType, const std::string& memberName) const = 0;
 
       virtual PSList<PSObjectType*> getAllPSObjectTypes() const = 0;
