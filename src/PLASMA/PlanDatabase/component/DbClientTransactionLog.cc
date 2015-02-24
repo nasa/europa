@@ -53,7 +53,7 @@ void DbClientTransactionLog::notifyVariableCreated(const ConstrainedVariableId v
     if (m_client->getSchema()->isObjectType(type)) {
       ObjectId object = Entity::getTypedEntity<Object>(baseDomain.getLowerBound());
       check_error(object.isValid());
-      type = object->getType().toString();
+      type = object->getType();
     }
     element->SetAttribute( "type", type );
     element->SetAttribute( "name", variable->getName() );
@@ -88,7 +88,7 @@ void DbClientTransactionLog::notifyObjectCreated(const ObjectId object,
                                                  const std::vector<const Domain*>& arguments){
   TiXmlElement * element = allocateXmlElement("new");
   element->SetAttribute("name", object->getName());
-  element->SetAttribute("type", object->getType().toString());
+  element->SetAttribute("type", object->getType());
   std::vector<const Domain*>::const_iterator iter;
   for (iter = arguments.begin() ; iter != arguments.end() ; iter++) {
     element->LinkEndChild(abstractDomainAsXml(*iter));

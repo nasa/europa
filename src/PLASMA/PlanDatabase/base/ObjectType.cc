@@ -207,7 +207,7 @@ std::string ObjectType::toString() const {
     for(;it != m_tokenTypes.end(); ++it) {
       TokenTypeId tokenType = it->second;
       os << "    " << tokenType->getSignature().c_str();
-      std::map<LabelStr,DataTypeId>::const_iterator paramIt = tokenType->getArgs().begin();
+      std::map<std::string,DataTypeId>::const_iterator paramIt = tokenType->getArgs().begin();
       for(;paramIt != tokenType->getArgs().end();++paramIt)
         os<< " " << paramIt->second->getName().c_str() /*type*/ << "->" << paramIt->first.c_str()/*name*/;
       os << std::endl;
@@ -663,7 +663,7 @@ void* ObjectFactoryEvalContext::getElement(const char* name) const {
         // Initialize any variables that were not explicitly initialized
         const Schema::NameValueVector& members = instance->getPlanDatabase()->getSchema()->getMembers(m_className);
         for (unsigned int i=0; i < members.size(); i++) {
-            std::string varName = instance->getName() + "." + members[i].second.toString();
+            std::string varName = instance->getName() + "." + members[i].second;
             if (instance->getVariable(varName) == ConstrainedVariableId::noId()) {
                 const Domain& baseDomain =
                     instance->getPlanDatabase()->getConstraintEngine()->getCESchema()->baseDomain(members[i].first.c_str());
@@ -671,7 +671,7 @@ void* ObjectFactoryEvalContext::getElement(const char* name) const {
                   baseDomain,
                   members[i].second.c_str()
                 );
-                debugMsg("Interpreter:InterpretedObject","Used default initializer for " << m_className.toString() << "." << members[i].second.toString());
+                debugMsg("Interpreter:InterpretedObject","Used default initializer for " << m_className.toString() << "." << members[i].second);
             }
         }
 

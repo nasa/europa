@@ -130,9 +130,9 @@ void Object::constructor(const std::vector<const Domain*>&) {}
     return(m_parent);
   }
 
-  const LabelStr& Object::getType() const {
-    return(m_type);
-  }
+const std::string& Object::getType() const {
+  return(m_type);
+}
 
   const LabelStr Object::getRootType() const {
     LabelStr rootType = getType();
@@ -644,7 +644,7 @@ ConstrainedVariableId Object::addVariable(const Domain& baseDomain, const char* 
   check_error(m_planDatabase->getSchema()->canContain(m_type, varTypeName.c_str(), name),
               "Cannot add a variable " + std::string(name) + " of type " +
               baseDomain.getTypeName() +
-              " to objects of type " + m_type.toString());
+              " to objects of type " + m_type);
 
 
   if (!baseDomain.isSubsetOf(typeDomain)) {
@@ -710,7 +710,7 @@ ConstrainedVariableId Object::addVariable(const Domain& baseDomain, const char* 
   // The old toString method
   std::string Object::toLongString() const {
     std::stringstream sstr;
-    sstr << getType().toString() << ":" << getName();
+    sstr << getType() << ":" << getName();
     return sstr.str();
   }
 
@@ -753,7 +753,7 @@ ConstrainedVariableId Object::addVariable(const Domain& baseDomain, const char* 
 
   std::string Object::getObjectType() const
   {
-	  return getType().toString();
+	  return getType();
   }
 
 PSList<PSVariable*> Object::getMemberVariables() {

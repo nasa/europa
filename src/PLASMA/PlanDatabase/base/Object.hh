@@ -65,8 +65,9 @@ namespace EUROPA {
 
     /**
      * @brief Access the type name for which this object is an instance
+     * TODO: have this return the type
      */
-    const LabelStr& getType() const;
+    const std::string& getType() const;
 
     /**
      * @brief Access the root type in the class hierarchy starting from this instance
@@ -326,7 +327,7 @@ namespace EUROPA {
 
     ObjectId m_id;
     ObjectId m_parent;
-    LabelStr m_type;
+    std::string m_type;
     std::string m_name;
     const PlanDatabaseId m_planDatabase;
     State m_state;

@@ -61,7 +61,7 @@ class TokenType: public PSTokenType {
 
   // From PSTokenType
   const std::string& getName() const { return getPredicateName().toString(); }
-  const std::map<LabelStr,DataTypeId>& getArgs() const;
+  const std::map<std::string,DataTypeId>& getArgs() const;
   const DataTypeId getArgType(const char* argName) const;
 
   const TokenTypeId getId() const;
@@ -111,7 +111,7 @@ class TokenType: public PSTokenType {
   LabelStr m_signature;
   LabelStr m_predicateName;
   int m_attributes;
-  std::map<LabelStr,DataTypeId> m_args;
+  std::map<std::string,DataTypeId> m_args;
 
   std::map< int, PSList<PSTokenType*> > m_subgoalsByAttr;
 

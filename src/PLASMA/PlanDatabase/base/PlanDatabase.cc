@@ -162,7 +162,7 @@ namespace EUROPA{
 
     check_error(!isClosed(object->getType()),
                 "Cannot add object " + object->getName() +
-                " if type " + object->getType().toString() + " is already closed.");
+                " if type " + object->getType() + " is already closed.");
 
     check_error(m_objects.find(object) == m_objects.end(),
                 "Object with the name " + object->getName() + " already added.");
@@ -177,10 +177,10 @@ namespace EUROPA{
 
     // Now cache by type
     LabelStr type = object->getType();
-    m_objectsByType.insert(std::make_pair(type.getKey(), object));
+    m_objectsByType.insert(std::make_pair(type, object));
     while(m_schema->hasParent(type)){
       type = m_schema->getParent(type);
-      m_objectsByType.insert(std::make_pair(type.getKey(), object));
+      m_objectsByType.insert(std::make_pair(type, object));
     }
 
     // Now we must push the insertion to any connected variables.
@@ -196,7 +196,7 @@ namespace EUROPA{
     publish(notifyAdded(object));
 
     debugMsg("PlanDatabase:notifyAdded:Object",
-             object->getType().toString() << CLASS_DELIMITER << object->getName() << " (" << object->getKey() << ")");
+             object->getType() << CLASS_DELIMITER << object->getName() << " (" << object->getKey() << ")");
   }
 
   void PlanDatabase::notifyRemoved(const ObjectId object){
@@ -208,14 +208,14 @@ namespace EUROPA{
     // Clean up cached values
     m_objects.erase(object);
     m_objectsByName.erase(object->getName());
-    for(std::multimap<edouble, ObjectId>::iterator it = m_objectsByPredicate.begin(); it != m_objectsByPredicate.end();){
+    for(std::multimap<std::string, ObjectId>::iterator it = m_objectsByPredicate.begin(); it != m_objectsByPredicate.end();){
       if(it->second == object)
         m_objectsByPredicate.erase(it++);
       else
         ++it;
     }
 
-    for(std::multimap<edouble, ObjectId>::iterator it = m_objectsByType.begin(); it != m_objectsByType.end();){
+    for(std::multimap<std::string, ObjectId>::iterator it = m_objectsByType.begin(); it != m_objectsByType.end();){
       if(it->second == object)
         m_objectsByType.erase(it++);
       else
@@ -234,7 +234,7 @@ namespace EUROPA{
     publish(notifyRemoved(object));
 
     debugMsg("PlanDatabase:notifyRemoved:Object",
-             object->getType().toString() << CLASS_DELIMITER << object->getName() << " (" << object->getKey() << ")");
+             object->getType() << CLASS_DELIMITER << object->getName() << " (" << object->getKey() << ")");
   }
 
   void PlanDatabase::notifyAdded(const TokenId token){
@@ -319,13 +319,13 @@ namespace EUROPA{
     return m_objects;
   }
 
-  bool PlanDatabase::hasObjectInstances(const LabelStr& objectType) const {
-    check_error(m_schema->isObjectType(objectType));
+bool PlanDatabase::hasObjectInstances(const std::string& objectType) const {
+  check_error(m_schema->isObjectType(objectType));
 
-    std::multimap<edouble, ObjectId>::const_iterator it = m_objectsByType.find(objectType.getKey());
+  std::multimap<std::string, ObjectId>::const_iterator it = m_objectsByType.find(objectType);
 
-    return (it != m_objectsByType.end() && it->first == objectType.getKey());
-  }
+  return (it != m_objectsByType.end() && it->first == objectType);
+}
 
   void PlanDatabase::registerGlobalVariable(const ConstrainedVariableId var){
     const LabelStr& varName = var->getName();
@@ -601,28 +601,29 @@ unsigned long PlanDatabase::countCompatibleTokens(const TokenId inactiveToken,
       return false;
   }
 
-  void PlanDatabase::getObjectsByPredicate(const LabelStr& predicate, std::list<ObjectId>& results) {
-    check_error(results.empty());
-    check_error(m_schema->isPredicate(predicate));
+void PlanDatabase::getObjectsByPredicate(const std::string& predicate,
+                                         std::list<ObjectId>& results) {
+  check_error(results.empty());
+  check_error(m_schema->isPredicate(predicate));
 
-    // First try a cache hit.
-    for(std::multimap<edouble, ObjectId>::const_iterator it = m_objectsByPredicate.find(predicate.getKey());
-        (it != m_objectsByPredicate.end() && it->first == predicate.getKey());
-        ++it){
-      results.push_back(it->second);
-    }
+  // First try a cache hit.
+  for(std::multimap<std::string, ObjectId>::const_iterator it = m_objectsByPredicate.find(predicate);
+      (it != m_objectsByPredicate.end() && it->first == predicate);
+      ++it){
+    results.push_back(it->second);
+  }
 
-    if(results.empty()){ // We do not have a hit, so we must construct the set by iterating over all objects and checking with the schema
-      for (ObjectSet::const_iterator it = m_objects.begin(); it != m_objects.end(); ++it){
-        ObjectId object = *it;
-        check_error(object.isValid());
-        if(m_schema->canBeAssigned(object->getType(), predicate)){
-          results.push_back(object);
-          m_objectsByPredicate.insert(std::make_pair(predicate.getKey(), object));
-        }
+  if(results.empty()){ // We do not have a hit, so we must construct the set by iterating over all objects and checking with the schema
+    for (ObjectSet::const_iterator it = m_objects.begin(); it != m_objects.end(); ++it){
+      ObjectId object = *it;
+      check_error(object.isValid());
+      if(m_schema->canBeAssigned(object->getType(), predicate)){
+        results.push_back(object);
+        m_objectsByPredicate.insert(std::make_pair(predicate, object));
       }
     }
   }
+}
 
   const ObjectId PlanDatabase::getObject(const LabelStr& name) const{
     if (m_objectsByName.find(name) == m_objectsByName.end())
@@ -635,14 +636,15 @@ unsigned long PlanDatabase::countCompatibleTokens(const TokenId inactiveToken,
   }
 
 
-  const TokenSet& PlanDatabase::getActiveTokens(const LabelStr& predicate) const {
-    static const TokenSet sl_noTokens;
-    std::map<edouble, TokenSet>::const_iterator it = m_activeTokensByPredicate.find(predicate);
-    if(it != m_activeTokensByPredicate.end())
-      return it->second;
-    else
-      return sl_noTokens;
-  }
+const TokenSet& PlanDatabase::getActiveTokens(const LabelStr& predicate) const {
+  static const TokenSet sl_noTokens;
+  std::map<std::string, TokenSet>::const_iterator it =
+      m_activeTokensByPredicate.find(predicate);
+  if(it != m_activeTokensByPredicate.end())
+    return it->second;
+  else
+    return sl_noTokens;
+}
 
   bool PlanDatabase::isClosed() const {
     return (m_state == CLOSED);
@@ -677,29 +679,31 @@ unsigned long PlanDatabase::countCompatibleTokens(const TokenId inactiveToken,
     m_state = CLOSED;
   }
 
-  void PlanDatabase::close(const LabelStr& objectType){
-    check_error(m_state == OPEN);
-    check_error(!isClosed(objectType));
+void PlanDatabase::close(const std::string& objectType) {
+  check_error(m_state == OPEN);
+  check_error(!isClosed(objectType));
 
-    debugMsg("PlanDatabase:close","Closing "+objectType.toString());
+  debugMsg("PlanDatabase:close","Closing "+objectType);
 
-    // Now we must close all the object variables associated with this type
-    ObjVarsByObjType_I it = m_objectVariablesByObjectType.find(objectType);
-    while (it != m_objectVariablesByObjectType.end() && it->first == objectType){
-      ConstrainedVariableId connectedObjectVariable = it->second.first;
-      check_error(connectedObjectVariable.isValid());
-      if(!connectedObjectVariable->isClosed()) {
-    	  debugMsg("PlanDatabase:close","Closing "+objectType.toString()+" closing "+connectedObjectVariable->toString());
-    	  connectedObjectVariable->close();
-    	  debugMsg("PlanDatabase:close","Closing "+objectType.toString()+" closed "+connectedObjectVariable->toString());
-      }
-      delete static_cast<ObjectVariableListener*>(it->second.second);
-      m_objectVariablesByObjectType.erase(it++);
+  // Now we must close all the object variables associated with this type
+  ObjVarsByObjType_I it = m_objectVariablesByObjectType.find(objectType);
+  while (it != m_objectVariablesByObjectType.end() && it->first == objectType){
+    ConstrainedVariableId connectedObjectVariable = it->second.first;
+    check_error(connectedObjectVariable.isValid());
+    if(!connectedObjectVariable->isClosed()) {
+      debugMsg("PlanDatabase:close",
+               "Closing " << objectType << " closing " << connectedObjectVariable->toString());
+      connectedObjectVariable->close();
+      debugMsg("PlanDatabase:close",
+               "Closing " << objectType << " closed " << connectedObjectVariable->toString());
     }
-    m_closedObjectTypes.insert(objectType);
-
-    debugMsg("PlanDatabase:close","Closed "+objectType.toString());
+    delete static_cast<ObjectVariableListener*>(it->second.second);
+    m_objectVariablesByObjectType.erase(it++);
   }
+  m_closedObjectTypes.insert(objectType);
+
+  debugMsg("PlanDatabase:close","Closed "+objectType);
+}
 
   PlanDatabase::State PlanDatabase::getState() const {
     return m_state;
@@ -785,7 +789,7 @@ unsigned long PlanDatabase::countCompatibleTokens(const TokenId inactiveToken,
 
     debugMsg("PlanDatabase:notifyConstrained",
              "(" << predecessor->getKey() << ") On Object " <<
-             object->getType().toString() << CLASS_DELIMITER << object->getName() << " ("
+             object->getType() << CLASS_DELIMITER << object->getName() << " ("
              << object->getKey() << ") Constrained Before Token (" << successor->getKey() << ")");
   }
 
@@ -795,7 +799,7 @@ unsigned long PlanDatabase::countCompatibleTokens(const TokenId inactiveToken,
 
     debugMsg("PlanDatabase:notifyFreed",
              "(" << predecessor->getKey() << ") On Object " <<
-             object->getType().toString() << CLASS_DELIMITER << object->getName() << " ("
+             object->getType() << CLASS_DELIMITER << object->getName() << " ("
              << object->getKey() << ") Freed from Before Token (" << successor->getKey() << ")");
   }
 
@@ -863,7 +867,7 @@ unsigned long PlanDatabase::countCompatibleTokens(const TokenId inactiveToken,
       objectVar->insert(object->getKey());
       debugMsg("PlanDatabase:makeObjectVariable",
                "Inserting object " << object->getName() << " of type "
-               << object->getType().toString() << " for base type " << objectType.toString());
+               << object->getType() << " for base type " << objectType.toString());
     }
 
     handleObjectVariableCreation(objectType, objectVar, leaveOpen);
@@ -945,38 +949,38 @@ unsigned long PlanDatabase::archive(eint tick){
   return initialCount-getTokens().size();
 }
 
-  void PlanDatabase::insertActiveToken(const TokenId token){
-    static const LabelStr sl_objectRoot("Object");
-    static const LabelStr sl_timelineRoot("Timeline");
-    LabelStr objectType = token->getObject()->baseDomain().getTypeName();
-    LabelStr predicate = token->getPredicateName();
-    LabelStr predicateSuffix = token->getUnqualifiedPredicateName();
+void PlanDatabase::insertActiveToken(const TokenId token){
+  static const LabelStr sl_objectRoot("Object");
+  static const LabelStr sl_timelineRoot("Timeline");
+  LabelStr objectType = token->getObject()->baseDomain().getTypeName();
+  LabelStr predicate = token->getPredicateName();
+  LabelStr predicateSuffix = token->getUnqualifiedPredicateName();
 
-    debugMsg("PlanDatabase:insertActiveToken", token->toString());
+  debugMsg("PlanDatabase:insertActiveToken", token->toString());
 
-    while(getSchema()->isPredicate(predicate)){
-      std::map<edouble, TokenSet>::iterator it = m_activeTokensByPredicate.find(predicate);
-      if(it == m_activeTokensByPredicate.end()){
-	static const TokenSet emptySet;
-	std::pair<edouble, TokenSet > entry(predicate, emptySet);
-	m_activeTokensByPredicate.insert(entry);
-	it = m_activeTokensByPredicate.find(predicate);
-      }
-
-      TokenSet& activeTokens = it->second;
-      activeTokens.insert(token);
-      debugMsg("PlanDatabase:insertActiveToken", token->toString() << " added for " << predicate.toString());
-
-      // Break if we hit a built in class
-      if(objectType == sl_timelineRoot || objectType == sl_objectRoot)
-	break;
-
-      objectType = getSchema()->getParent(objectType);
-
-      std::string predStr = objectType.toString() + "." + predicateSuffix.c_str();
-      predicate = predStr;
+  while(getSchema()->isPredicate(predicate)){
+    std::map<std::string, TokenSet>::iterator it = m_activeTokensByPredicate.find(predicate);
+    if(it == m_activeTokensByPredicate.end()){
+      static const TokenSet emptySet;
+      std::pair<std::string, TokenSet > entry(predicate, emptySet);
+      m_activeTokensByPredicate.insert(entry);
+      it = m_activeTokensByPredicate.find(predicate);
     }
+
+    TokenSet& activeTokens = it->second;
+    activeTokens.insert(token);
+    debugMsg("PlanDatabase:insertActiveToken", token->toString() << " added for " << predicate.toString());
+
+    // Break if we hit a built in class
+    if(objectType == sl_timelineRoot || objectType == sl_objectRoot)
+      break;
+
+    objectType = getSchema()->getParent(objectType);
+
+    std::string predStr = objectType.toString() + "." + predicateSuffix.c_str();
+    predicate = predStr;
   }
+}
 
   void PlanDatabase::removeActiveToken(const TokenId token){
     static const LabelStr sl_objectRoot("Object");
@@ -988,7 +992,7 @@ unsigned long PlanDatabase::archive(eint tick){
     debugMsg("PlanDatabase:removeActiveToken", token->toString());
 
     while(getSchema()->isPredicate(predicate)){
-      std::map<edouble, TokenSet>::iterator it = m_activeTokensByPredicate.find(predicate);
+      std::map<std::string, TokenSet>::iterator it = m_activeTokensByPredicate.find(predicate);
       checkError(it != m_activeTokensByPredicate.end(), token->toString() << " must be present but isn't.")
       TokenSet& activeTokens = it->second;
       activeTokens.erase(token);

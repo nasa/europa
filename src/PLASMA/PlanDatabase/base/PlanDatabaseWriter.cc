@@ -29,7 +29,7 @@ namespace EUROPA {
       indent()++;
       for (ObjectSet::const_iterator oit = objs.begin(); oit != objs.end() ; ++oit) {
 	ObjectId object = *oit;
-	os << indentation() << object->getType().toString() << ":"
+	os << indentation() << object->getType() << ":"
 	   << object->getName() << "*************************" << std::endl;
 
 
@@ -73,7 +73,7 @@ namespace EUROPA {
 	  indent()--;
 	}
 
-	os << indentation() << "End " << object->getType().toString() << ":" << object->getName()
+	os << indentation() << "End " << object->getType() << ":" << object->getName()
 	   << "*************************" << std::endl;
       }
       indent()--;
