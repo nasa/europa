@@ -355,98 +355,96 @@ void EngineBase::uninitializeByModules() {
     uninitializeByModule(m_modules[i-1]);
 }
 
-    std::string EngineBase::executeScript(const std::string& language, const std::string& script, bool isFile)
-    {
-      std::map<edouble, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
-      checkRuntimeError(it != getLanguageInterpreters().end(),
-  		      "Cannot execute script for unknown language \"" << language << "\"");
+std::string EngineBase::executeScript(const std::string& language,
+                                      const std::string& script, bool isFile) {
+  std::map<std::string, LanguageInterpreter*>::iterator it =
+      getLanguageInterpreters().find(language);
+  checkRuntimeError(it != getLanguageInterpreters().end(),
+                    "Cannot execute script for unknown language \"" << language << "\"");
 
-      std::istream *in;
-      std::string source;
-      if (isFile) {
-        in = new std::ifstream(script.c_str());
-        checkRuntimeError(in->good(), "Cannot read script from location \"" << script << "\"");
-        source = script;
-      }
-      else {
-        in = new std::istringstream(script);
-        source = "<eval>";
-      }
+  std::istream *in;
+  std::string source;
+  if (isFile) {
+    in = new std::ifstream(script.c_str());
+    checkRuntimeError(in->good(), "Cannot read script from location \"" << script << "\"");
+    source = script;
+  }
+  else {
+    in = new std::istringstream(script);
+    source = "<eval>";
+  }
 
-      std::string retval = it->second->interpret(*in, source);
-      delete in;
+  std::string retval = it->second->interpret(*in, source);
+  delete in;
 
-      return retval;
-    }
+  return retval;
+}
 
-    LanguageInterpreter *EngineBase::addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter)
-    {
-      LanguageInterpreter *old = NULL;
-      std::map<edouble, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
-      if(it == getLanguageInterpreters().end())
-        getLanguageInterpreters().insert(std::make_pair(LabelStr(language), interpreter));
-      else {
-    	old = it->second;
-        it->second = interpreter;
-      }
-      interpreter->setEngine(getId());
-      return old;
-    }
+LanguageInterpreter *EngineBase::addLanguageInterpreter(const std::string& language,
+                                                        LanguageInterpreter* interpreter) {
+  LanguageInterpreter *old = NULL;
+  std::map<std::string, LanguageInterpreter*>::iterator it =
+      getLanguageInterpreters().find(language);
+  if(it == getLanguageInterpreters().end())
+    getLanguageInterpreters().insert(std::make_pair(language, interpreter));
+  else {
+    old = it->second;
+    it->second = interpreter;
+  }
+  interpreter->setEngine(getId());
+  return old;
+}
 
-    LanguageInterpreter* EngineBase::removeLanguageInterpreter(const std::string& language)
-    {
-      LanguageInterpreter *old = NULL;
-      std::map<edouble, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
-      if(it != getLanguageInterpreters().end()) {
-    	old = it->second;
-        getLanguageInterpreters().erase(it);
-      }
-      return old;
-    }
+LanguageInterpreter* EngineBase::removeLanguageInterpreter(const std::string& language) {
+  LanguageInterpreter *old = NULL;
+  std::map<std::string, LanguageInterpreter*>::iterator it =
+      getLanguageInterpreters().find(language);
+  if(it != getLanguageInterpreters().end()) {
+    old = it->second;
+    getLanguageInterpreters().erase(it);
+  }
+  return old;
+}
 
-    LanguageInterpreter* EngineBase::getLanguageInterpreter(const std::string& language)
-    {
-        std::map<edouble, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
-        if(it != getLanguageInterpreters().end()) 
-            return it->second;
+LanguageInterpreter* EngineBase::getLanguageInterpreter(const std::string& language) {
+  std::map<std::string, LanguageInterpreter*>::iterator it =
+      getLanguageInterpreters().find(language);
+  if(it != getLanguageInterpreters().end()) 
+    return it->second;
 
-        return NULL;
-    }
+  return NULL;
+}
 
-    std::map<edouble, LanguageInterpreter*>& EngineBase::getLanguageInterpreters()
-    {
-        return m_languageInterpreters;
-    }
+std::map<std::string, LanguageInterpreter*>& EngineBase::getLanguageInterpreters() {
+  return m_languageInterpreters;
+}
 
-    void EngineBase::addComponent(const std::string& name,EngineComponent* component)
-    {
-        std::map<edouble, EngineComponent*>::iterator it = getComponents().find(LabelStr(name));
-        if(it == getComponents().end())
-          getComponents().insert(std::make_pair(LabelStr(name), component));
-        else {
-          delete it->second;
-          it->second = component;
-        }
-        component->setEngine(getId());
-    }
+void EngineBase::addComponent(const std::string& name,EngineComponent* component) {
+  std::map<std::string, EngineComponent*>::iterator it = getComponents().find(name);
+  if(it == getComponents().end())
+    getComponents().insert(std::make_pair(name, component));
+  else {
+    delete it->second;
+    it->second = component;
+  }
+  component->setEngine(getId());
+}
 
-    EngineComponent* EngineBase::getComponent(const std::string& name)
-    {
-      std::map<edouble, EngineComponent*>::iterator it = getComponents().find(LabelStr(name));
-      if(it != getComponents().end()) 
-          return it->second;
+EngineComponent* EngineBase::getComponent(const std::string& name) {
+  std::map<std::string, EngineComponent*>::iterator it = getComponents().find(name);
+  if(it != getComponents().end()) 
+    return it->second;
 
-  	  return NULL;
-    }
+  return NULL;
+}
 
-    const EngineComponent* EngineBase::getComponent(const std::string& name) const
-    {
-      std::map<edouble, EngineComponent*>::const_iterator it = m_components.find(LabelStr(name));
-      if(it != m_components.end()) 
-          return it->second;
+const EngineComponent* EngineBase::getComponent(const std::string& name) const {
+  std::map<std::string, EngineComponent*>::const_iterator it = m_components.find(name);
+  if(it != m_components.end()) 
+    return it->second;
 
-      return NULL;
-    }
+  return NULL;
+}
 
 EngineComponent* EngineBase::removeComponent(const std::string& name) {
   static EngineId s_nullEngineId;
@@ -459,10 +457,9 @@ EngineComponent* EngineBase::removeComponent(const std::string& name) {
   return c;
 }    
     
-    std::map<edouble, EngineComponent*>& EngineBase::getComponents()
-    {
-        return m_components;
-    }
+std::map<std::string, EngineComponent*>& EngineBase::getComponents() {
+  return m_components;
+}
 
     void LanguageInterpreter::setEngine(EngineId engine)
     {

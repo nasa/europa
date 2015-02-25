@@ -44,7 +44,7 @@ FactoryMgrId FactoryMgr::getId()
 }
 
 void FactoryMgr::registerFactory(FactoryId factory) {
-  std::map<edouble,FactoryId>::iterator it = m_factoryMap.find(factory->getName());
+  std::map<std::string,FactoryId>::iterator it = m_factoryMap.find(factory->getName());
   if(it != m_factoryMap.end()) {
     delete (static_cast<Factory*>(it->second));
     m_factoryMap.erase(it);
@@ -55,7 +55,7 @@ void FactoryMgr::registerFactory(FactoryId factory) {
 
 void FactoryMgr::purgeAll()
 {
-    std::map<edouble,FactoryId>::iterator factories_iter = m_factoryMap.begin();
+  std::map<std::string,FactoryId>::iterator factories_iter = m_factoryMap.begin();
     while (factories_iter != m_factoryMap.end()) {
       Factory* factory = static_cast<Factory*>((factories_iter++)->second);
       debugMsg("FactoryMgr:purgeAll","Removing factory for " << factory->getName().toString());
@@ -72,9 +72,10 @@ FactoryObjId FactoryMgr::createInstance(const LabelStr& name, const FactoryArgs&
 
 FactoryId FactoryMgr::getFactory(const LabelStr& name)
 {   
-    std::map<edouble,FactoryId>::iterator it = m_factoryMap.find(name);
-    checkError(it != m_factoryMap.end(), "No factory registered for '" << name.toString() << "'");    
-    return it->second;
+  std::map<std::string,FactoryId>::iterator it = m_factoryMap.find(name);
+  checkError(it != m_factoryMap.end(),
+             "No factory registered for '" << name.toString() << "'");    
+  return it->second;
 }
 
 }
