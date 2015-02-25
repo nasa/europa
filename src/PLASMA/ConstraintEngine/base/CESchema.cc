@@ -77,7 +77,7 @@ void CESchema::purgeDataTypes() {
 }
 
 void CESchema::registerConstraintType(const ConstraintTypeId factory) {
-  const LabelStr& name = factory->getName();
+  const std::string& name = factory->getName();
   if(isConstraintType(name)){
     debugMsg("CESchema:registerConstraintType", "Over-riding prior registration for " << name.c_str());
     ConstraintTypeId oldFactory = getConstraintType(name);
@@ -86,12 +86,12 @@ void CESchema::registerConstraintType(const ConstraintTypeId factory) {
     oldFactory.release();
   }
 
-  check_error(!isConstraintType(name), "Constraint Type '" + name.toString() + "' should not be registered, and yet it is....");
+  check_error(!isConstraintType(name), "Constraint Type '" + name + "' should not be registered, and yet it is....");
   m_constraintTypes.insert(std::make_pair(name,factory));
   debugMsg("CESchema:registerConstraintType", "Registered Constraint Type " << factory->getName());
 }
 
-const ConstraintTypeId CESchema::getConstraintType(const LabelStr& name) {
+const ConstraintTypeId CESchema::getConstraintType(const std::string& name) {
   std::map< std::string, ConstraintTypeId >::const_iterator it = m_constraintTypes.find(name);
   condDebugMsg(it ==  m_constraintTypes.end(),
                "europa:error", "Factory for constraint '" << name << "' is not registered.");
@@ -100,11 +100,11 @@ const ConstraintTypeId CESchema::getConstraintType(const LabelStr& name) {
   return(it->second);
 }
 
-bool CESchema::isConstraintType(const LabelStr& name, const bool& warn) {
+bool CESchema::isConstraintType(const std::string& name, const bool& warn) {
   std::map<std::string, ConstraintTypeId >::const_iterator it = m_constraintTypes.find(name);
   if (it == m_constraintTypes.end()) {
     if (warn)
-      std::cerr << "\nConstraint Type <" << name.toString() << "> has not been registered\n";
+      std::cerr << "\nConstraint Type <" << name << "> has not been registered\n";
     return(false);
   }
   return(true);
@@ -137,7 +137,7 @@ void CESchema::registerCFunction(const CFunctionId cf) {
   debugMsg("CESchema::registerCFunction", "Registered CFunction " << cf->getName());
 }
 
-CFunctionId CESchema::getCFunction(const LabelStr& name) {
+CFunctionId CESchema::getCFunction(const std::string& name) {
   std::map<std::string, CFunctionId>::const_iterator it =  m_cfunctions.find(name);
 
   if (it != m_cfunctions.end())

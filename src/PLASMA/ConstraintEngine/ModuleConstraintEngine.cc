@@ -52,7 +52,7 @@ namespace EUROPA {
       ces->registerCFunction((new CeilFunction())->getId());
 
       ConstraintEngine* ce = new ConstraintEngine(ces->getId());
-	  new DefaultPropagator(LabelStr("Default"), ce->getId());
+	  new DefaultPropagator(std::string("Default"), ce->getId());
       engine->addComponent("ConstraintEngine",ce);
   }
 

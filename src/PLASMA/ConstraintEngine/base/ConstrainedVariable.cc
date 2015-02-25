@@ -32,15 +32,15 @@ ConstrainedVariableListener::~ConstrainedVariableListener() {
   m_id.remove();
 }
 
-const LabelStr& ConstrainedVariable::NO_NAME() {
-  static const LabelStr sl_noName(NO_VAR_NAME);
+const std::string& ConstrainedVariable::NO_NAME() {
+  static const std::string sl_noName(NO_VAR_NAME);
   return(sl_noName);
 }
 
 ConstrainedVariable::ConstrainedVariable(const ConstraintEngineId constraintEngine,
                                          const bool internal,
                                          bool _canBeSpecified,
-                                         const LabelStr& name,
+                                         const std::string& name,
                                          const EntityId _parent,
                                          unsigned long index)
     : Entity(), m_id(this), m_listener(), m_propagatingConstraint(), m_lastRelaxed(0), 
@@ -505,30 +505,29 @@ const std::string& ConstrainedVariable::getName() const {
 
 
   // PS-Specific stuff below here:
-  PSVarType ConstrainedVariable::getType() const
-  {
-	  PSVarType answer = STRING;
-	  if(baseDomain().isString())
-		  answer =  STRING;
-	  else if(baseDomain().isSymbolic()) {
-		  if(baseDomain().isEmpty() || LabelStr::isString(baseDomain().getLowerBound()))
-			  answer =  STRING;
-		  else
-			  answer =  OBJECT; //this may not be the best assumption ~MJI
-	  }
-	  else if(baseDomain().isBool())
-		  answer =  BOOLEAN;
-	  else if(baseDomain().isNumeric()) {
-		  if(baseDomain().minDelta() < 1)
-			  answer =  DOUBLE;
-		  else
-			  answer =  INTEGER;
-	  }
-	  else {
-		  checkError(ALWAYS_FAIL, "Failed to correctly determine the type of " << toString());
-	  }
-	  return answer;
+PSVarType ConstrainedVariable::getType() const {
+  PSVarType answer = STRING;
+  if(baseDomain().isString())
+    answer =  STRING;
+  else if(baseDomain().isSymbolic()) {
+    if(baseDomain().isEmpty() || LabelStr::isString(baseDomain().getLowerBound()))
+      answer =  STRING;
+    else
+      answer =  OBJECT; //this may not be the best assumption ~MJI
   }
+  else if(baseDomain().isBool())
+    answer =  BOOLEAN;
+  else if(baseDomain().isNumeric()) {
+    if(baseDomain().minDelta() < 1)
+      answer =  DOUBLE;
+    else
+      answer =  INTEGER;
+  }
+  else {
+    checkError(ALWAYS_FAIL, "Failed to correctly determine the type of " << toString());
+  }
+  return answer;
+}
 
 
   bool ConstrainedVariable::isEnumerated() const {

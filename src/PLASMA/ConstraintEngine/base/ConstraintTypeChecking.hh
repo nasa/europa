@@ -458,7 +458,7 @@ struct Type {
 template<typename TypeCheck>
 class DataTypeCheckBase : public ConstraintType {
  public:
-  DataTypeCheckBase(const LabelStr& _name, const LabelStr& _propagatorName,
+  DataTypeCheckBase(const std::string& _name, const std::string& _propagatorName,
                 bool systemDefined = false)
       : ConstraintType(_name, _propagatorName, systemDefined), m_check() {}
   
@@ -487,7 +487,7 @@ class DataTypeCheckBase : public ConstraintType {
 template<typename Constr, typename TypeCheck>
 class DataTypeCheck : public DataTypeCheckBase<TypeCheck> {
  public:
-  DataTypeCheck(const LabelStr& _name, const LabelStr& _propagatorName,
+  DataTypeCheck(const std::string& _name, const std::string& _propagatorName,
                 bool systemDefined = false)
       : DataTypeCheckBase<TypeCheck>(_name, _propagatorName, systemDefined) {}
   

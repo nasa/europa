@@ -18,7 +18,7 @@ namespace EUROPA {
   class DefaultPropagator: public Propagator
   {
   public:
-    DefaultPropagator(const LabelStr& name, const ConstraintEngineId constraintEngine, int priority=USER_PRIORITY);
+    DefaultPropagator(const std::string& name, const ConstraintEngineId constraintEngine, int priority=USER_PRIORITY);
     virtual void execute();
     virtual bool updateRequired() const;
   protected:
@@ -55,7 +55,7 @@ namespace EUROPA {
   class EqualityConstraintPropagator: public Propagator {
   public:
 
-    EqualityConstraintPropagator(const LabelStr& name, const ConstraintEngineId constraintEngine);
+    EqualityConstraintPropagator(const std::string& name, const ConstraintEngineId constraintEngine);
 
     ~EqualityConstraintPropagator();
 

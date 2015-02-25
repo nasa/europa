@@ -33,13 +33,13 @@ class CESchema : public EngineComponent
 
   // Methods to Manage Constraint Factories
   void registerConstraintType(const ConstraintTypeId ct);
-  const ConstraintTypeId getConstraintType(const LabelStr& name);
-  bool isConstraintType(const LabelStr& name, const bool& warn = false);
+  const ConstraintTypeId getConstraintType(const std::string& name);
+  bool isConstraintType(const std::string& name, const bool& warn = false);
   void purgeConstraintTypes();
 
   // Methods to manage CFunctions
   void registerCFunction(const CFunctionId cf);
-  CFunctionId getCFunction(const LabelStr& name);
+  CFunctionId getCFunction(const std::string& name);
   void purgeCFunctions();
 
   /**

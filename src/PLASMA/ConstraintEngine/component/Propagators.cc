@@ -16,7 +16,7 @@
 
 namespace EUROPA {
 
-DefaultPropagator::DefaultPropagator(const LabelStr& name, 
+DefaultPropagator::DefaultPropagator(const std::string& name, 
                                      const ConstraintEngineId constraintEngine, 
                                      int priority)
     : Propagator(name, constraintEngine, priority),
@@ -108,7 +108,7 @@ DefaultPropagator::DefaultPropagator(const LabelStr& name,
   }
 
 
-EqualityConstraintPropagator::EqualityConstraintPropagator(const LabelStr& name,
+EqualityConstraintPropagator::EqualityConstraintPropagator(const std::string& name,
                                                            const ConstraintEngineId constraintEngine)
     : Propagator(name, constraintEngine), m_fullReprop(false), m_active(false),
       m_eqClassCollection(), m_eqClassAgenda() {}

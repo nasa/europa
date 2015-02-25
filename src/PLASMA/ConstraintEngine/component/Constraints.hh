@@ -13,8 +13,8 @@ namespace EUROPA {
 #define CREATE_FUNCTION_CONSTRAINT(cname)				\
   class cname##Constraint : public Constraint {				\
   public:								\
-  cname##Constraint(const LabelStr& name,				\
-		const LabelStr& propagatorName,				\
+  cname##Constraint(const std::string& name,				\
+		const std::string& propagatorName,				\
 		const ConstraintEngineId constraintEngine,		\
 		const std::vector<ConstrainedVariableId>& variables);	\
   void handleExecute();							\
@@ -22,8 +22,8 @@ namespace EUROPA {
   };
 
 #define CREATE_FUNCTION_CONSTRAINT_ONE_ARG(cname, function, rt)		\
-  cname##Constraint::cname##Constraint(const LabelStr& name,		\
-				       const LabelStr& propagatorName,	\
+  cname##Constraint::cname##Constraint(const std::string& name,		\
+				       const std::string& propagatorName,	\
 				       const ConstraintEngineId constraintEngine, \
 				       const std::vector<ConstrainedVariableId>& variables) \
   : Constraint(name, propagatorName, constraintEngine, variables) {}	\
@@ -36,8 +36,8 @@ namespace EUROPA {
   }
 
 #define CREATE_FUNCTION_CONSTRAINT_TWO_ARG(cname, function, rt)		\
-  cname##Constraint::cname##Constraint(const LabelStr& name,		\
-				       const LabelStr& propagatorName,	\
+  cname##Constraint::cname##Constraint(const std::string& name,		\
+				       const std::string& propagatorName,	\
 				       const ConstraintEngineId constraintEngine, \
 				       const std::vector<ConstrainedVariableId>& variables) \
   : Constraint(name, propagatorName, constraintEngine, variables) {}	\
@@ -83,8 +83,8 @@ typedef DataTypeCheck<CeilConstraint, OneArgNumericFun> CeilCT;
  */
 class AbsoluteValue : public Constraint {
  public:
-  AbsoluteValue(const LabelStr& name,
-                const LabelStr& propagatorName,
+  AbsoluteValue(const std::string& name,
+                const std::string& propagatorName,
                 const ConstraintEngineId constraintEngine,
           const std::vector<ConstrainedVariableId>& variables);
   void handleExecute();
@@ -98,8 +98,8 @@ typedef DataTypeCheck<AbsoluteValue, TwoAssignableNumeric>  AbsoluteValueCT;
 
 class AddEqualConstraint : public Constraint {
  public:
-  AddEqualConstraint(const LabelStr& name,
-                     const LabelStr& propagatorName,
+  AddEqualConstraint(const std::string& name,
+                     const std::string& propagatorName,
                      const ConstraintEngineId constraintEngine,
                      const std::vector<ConstrainedVariableId>& variables);
 
@@ -124,8 +124,8 @@ typedef DataTypeCheck<AddEqualConstraint, ThreeNumericEq> AddEqualCT;
 
 class MultEqualConstraint : public Constraint {
  public:
-  MultEqualConstraint(const LabelStr& name,
-                      const LabelStr& propagatorName,
+  MultEqualConstraint(const std::string& name,
+                      const std::string& propagatorName,
                       const ConstraintEngineId constraintEngine,
                       const std::vector<ConstrainedVariableId>& variables);
   
@@ -143,8 +143,8 @@ typedef DataTypeCheck<MultEqualConstraint, ThreeNumericEq> MultEqualCT;
 
 class DivEqualConstraint : public Constraint {
  public:
-  DivEqualConstraint(const LabelStr& name,
-                     const LabelStr& propagatorName,
+  DivEqualConstraint(const std::string& name,
+                     const std::string& propagatorName,
                      const ConstraintEngineId constraintEngine,
                      const std::vector<ConstrainedVariableId>& variables);
 
@@ -162,8 +162,8 @@ typedef DataTypeCheck<DivEqualConstraint, ThreeNumericEq> DivEqualCT;
 // A + (B * C) = D
 class AddMultEqualConstraint : public Constraint {
  public:
-  AddMultEqualConstraint(const LabelStr& name,
-                         const LabelStr& propagatorName,
+  AddMultEqualConstraint(const std::string& name,
+                         const std::string& propagatorName,
                          const ConstraintEngineId constraintEngine,
                          const std::vector<ConstrainedVariableId>& variables);
   
@@ -194,8 +194,8 @@ typedef DataTypeCheck<AddMultEqualConstraint, And<NArgs<4>, All<And<Same, Numeri
 
 class AllDiffConstraint : public Constraint {
  public:
-  AllDiffConstraint(const LabelStr& name,
-                    const LabelStr& propagatorName,
+  AllDiffConstraint(const std::string& name,
+                    const std::string& propagatorName,
                     const ConstraintEngineId constraintEngine,
                     const std::vector<ConstrainedVariableId>& variables);
   
@@ -223,8 +223,8 @@ AllDiffCT;
    */
 class CalcDistanceConstraint : public Constraint {
  public:
-  CalcDistanceConstraint(const LabelStr& name,
-                         const LabelStr& propagatorName,
+  CalcDistanceConstraint(const std::string& name,
+                         const std::string& propagatorName,
                          const ConstraintEngineId constraintEngine,
                          const std::vector<ConstrainedVariableId>& variables);
 
@@ -264,8 +264,8 @@ CalcDistanceCT;
 
 class LessThanEqualConstraint : public Constraint {
   public:
-    LessThanEqualConstraint(const LabelStr& name,
-			    const LabelStr& propagatorName,
+    LessThanEqualConstraint(const std::string& name,
+			    const std::string& propagatorName,
 			    const ConstraintEngineId constraintEngine,
 			    const std::vector<ConstrainedVariableId>& variables);
 
@@ -302,8 +302,8 @@ LessThanEqualCT;
 
 class CardinalityConstraint : public Constraint {
  public:
-  CardinalityConstraint(const LabelStr& name,
-                        const LabelStr& propagatorName,
+  CardinalityConstraint(const std::string& name,
+                        const std::string& propagatorName,
                         const ConstraintEngineId constraintEngine,
                         const std::vector<ConstrainedVariableId>& variables);
   
@@ -335,8 +335,8 @@ typedef DataTypeCheck<CardinalityConstraint,
 
 class CondAllDiffConstraint : public Constraint {
  public:
-  CondAllDiffConstraint(const LabelStr& name,
-                        const LabelStr& propagatorName,
+  CondAllDiffConstraint(const std::string& name,
+                        const std::string& propagatorName,
                         const ConstraintEngineId constraintEngine,
                         const std::vector<ConstrainedVariableId>& variables);
   
@@ -368,8 +368,8 @@ typedef DataTypeCheck<CondAllDiffConstraint, CondAllAssignableCondition> CondAll
 
 class CondAllSameConstraint : public Constraint {
  public:
-  CondAllSameConstraint(const LabelStr& name,
-                        const LabelStr& propagatorName,
+  CondAllSameConstraint(const std::string& name,
+                        const std::string& propagatorName,
                         const ConstraintEngineId constraintEngine,
                         const std::vector<ConstrainedVariableId>& variables);
 
@@ -390,8 +390,8 @@ typedef DataTypeCheck<CondAllSameConstraint, CondAllAssignableCondition> CondAll
 
 class CondEqualSumConstraint : public Constraint {
   public:
-    CondEqualSumConstraint(const LabelStr& name,
-                           const LabelStr& propagatorName,
+    CondEqualSumConstraint(const std::string& name,
+                           const std::string& propagatorName,
                            const ConstraintEngineId constraintEngine,
                            const std::vector<ConstrainedVariableId>& variables);
 
@@ -427,8 +427,8 @@ CondEqualSumCT;
 
 class CountNonZeroesConstraint : public Constraint {
  public:
-  CountNonZeroesConstraint(const LabelStr& name,
-                           const LabelStr& propagatorName,
+  CountNonZeroesConstraint(const std::string& name,
+                           const std::string& propagatorName,
                            const ConstraintEngineId constraintEngine,
                            const std::vector<ConstrainedVariableId>& variables);
 
@@ -468,8 +468,8 @@ CountNonZeroesCT;
    */
 class CountZeroesConstraint : public Constraint {
  public:
-  CountZeroesConstraint(const LabelStr& name,
-                        const LabelStr& propagatorName,
+  CountZeroesConstraint(const std::string& name,
+                        const std::string& propagatorName,
                         const ConstraintEngineId constraintEngine,
                         const std::vector<ConstrainedVariableId>& variables);
 
@@ -488,8 +488,8 @@ typedef DataTypeCheck<CountZeroesConstraint, AtLeastTwoNumericFirstAssignable> C
 
 class DistanceFromSquaresConstraint : public Constraint {
  public:
-  DistanceFromSquaresConstraint(const LabelStr& name,
-                                const LabelStr& propagatorName,
+  DistanceFromSquaresConstraint(const std::string& name,
+                                const std::string& propagatorName,
                                 const ConstraintEngineId constraintEngine,
                                 const std::vector<ConstrainedVariableId>& variables);
 
@@ -507,8 +507,8 @@ DistanceFromSquaresCT;
 
 class EqualConstraint : public Constraint {
  public:
-  EqualConstraint(const LabelStr& name,
-                  const LabelStr& propagatorName,
+  EqualConstraint(const std::string& name,
+                  const std::string& propagatorName,
                   const ConstraintEngineId constraintEngine,
                   const std::vector<ConstrainedVariableId>& variables);
   
@@ -533,8 +533,8 @@ typedef DataTypeCheck<EqualConstraint,  EqualCondition> EqualCT;
 
 class EqualMaximumConstraint : public Constraint {
  public:
-  EqualMaximumConstraint(const LabelStr& name,
-                         const LabelStr& propagatorName,
+  EqualMaximumConstraint(const std::string& name,
+                         const std::string& propagatorName,
                          const ConstraintEngineId constraintEngine,
                          const std::vector<ConstrainedVariableId>& variables);
 
@@ -551,8 +551,8 @@ typedef DataTypeCheck<EqualMaximumConstraint, EqThreeNumeric<> > EqualMaximumCT;
 
 class EqualMinimumConstraint : public Constraint {
   public:
-  EqualMinimumConstraint(const LabelStr& name,
-                         const LabelStr& propagatorName,
+  EqualMinimumConstraint(const std::string& name,
+                         const std::string& propagatorName,
                          const ConstraintEngineId constraintEngine,
                          const std::vector<ConstrainedVariableId>& variables);
   
@@ -570,8 +570,8 @@ typedef DataTypeCheck<EqualMinimumConstraint, EqThreeNumeric<> > EqualMinimumCT;
 
 class EqualProductConstraint : public Constraint {
  public:
-  EqualProductConstraint(const LabelStr& name,
-                         const LabelStr& propagatorName,
+  EqualProductConstraint(const std::string& name,
+                         const std::string& propagatorName,
                          const ConstraintEngineId constraintEngine,
                          const std::vector<ConstrainedVariableId>& variables);
 
@@ -598,8 +598,8 @@ typedef DataTypeCheck<EqualProductConstraint, EqThreeNumeric<> > EqualProductCT;
  */
 class EqualSumConstraint : public Constraint {
  public:
-  EqualSumConstraint(const LabelStr& name,
-                     const LabelStr& propagatorName,
+  EqualSumConstraint(const std::string& name,
+                     const std::string& propagatorName,
                      const ConstraintEngineId constraintEngine,
                      const std::vector<ConstrainedVariableId>& variables);
 
@@ -627,8 +627,8 @@ typedef DataTypeCheck<EqualSumConstraint, EqThreeNumeric<> > EqualSumCT;
 
 class GreaterOrEqThanSumConstraint : public Constraint {
  public:
-  GreaterOrEqThanSumConstraint(const LabelStr& name,
-                               const LabelStr& propagatorName,
+  GreaterOrEqThanSumConstraint(const std::string& name,
+                               const std::string& propagatorName,
                                const ConstraintEngineId constraintEngine,
                                const std::vector<ConstrainedVariableId>& variables);
 
@@ -655,8 +655,8 @@ typedef DataTypeCheck<GreaterOrEqThanSumConstraint, EqThreeNumeric<> > GreaterOr
 
 class LessThanConstraint : public Constraint {
  public:
-  LessThanConstraint(const LabelStr& name,
-                     const LabelStr& propagatorName,
+  LessThanConstraint(const std::string& name,
+                     const std::string& propagatorName,
                      const ConstraintEngineId constraintEngine,
                      const std::vector<ConstrainedVariableId>& variables);
 
@@ -684,8 +684,8 @@ typedef DataTypeCheck<LessThanConstraint, And<NArgs<2>, Mutually<Assignable<> > 
 
 class GreaterThanSumConstraint : public Constraint {
   public:
-    GreaterThanSumConstraint(const LabelStr& name,
-                             const LabelStr& propagatorName,
+    GreaterThanSumConstraint(const std::string& name,
+                             const std::string& propagatorName,
                              const ConstraintEngineId constraintEngine,
                              const std::vector<ConstrainedVariableId>& variables);
 
@@ -718,8 +718,8 @@ typedef DataTypeCheck<GreaterThanSumConstraint, EqThreeNumeric<> > GreaterThanSu
 
 class LessOrEqThanSumConstraint : public Constraint {
  public:
-  LessOrEqThanSumConstraint(const LabelStr& name,
-                            const LabelStr& propagatorName,
+  LessOrEqThanSumConstraint(const std::string& name,
+                            const std::string& propagatorName,
                             const ConstraintEngineId constraintEngine,
                             const std::vector<ConstrainedVariableId>& variables);
 
@@ -742,8 +742,8 @@ typedef DataTypeCheck<LessOrEqThanSumConstraint, EqThreeNumeric<> > LessOrEqThan
 
 class LessThanSumConstraint : public Constraint {
  public:
-  LessThanSumConstraint(const LabelStr& name,
-                        const LabelStr& propagatorName,
+  LessThanSumConstraint(const std::string& name,
+                        const std::string& propagatorName,
                         const ConstraintEngineId constraintEngine,
                         const std::vector<ConstrainedVariableId>& variables);
 
@@ -771,8 +771,8 @@ typedef DataTypeCheck<LessThanSumConstraint, EqThreeNumeric<> > LessThanSumCT;
 
 class LockConstraint : public Constraint {
  public:
-  LockConstraint(const LabelStr& name,
-                 const LabelStr& propagatorName,
+  LockConstraint(const std::string& name,
+                 const std::string& propagatorName,
                  const ConstraintEngineId constraintEngine,
                  const std::vector<ConstrainedVariableId>& variables);
 
@@ -790,8 +790,8 @@ typedef DataTypeCheck<LockConstraint, And<NArgs<2>, All<Assignable<First<> > > >
 
 class NegateConstraint : public Constraint {
  public:
-  NegateConstraint(const LabelStr& name,
-                   const LabelStr& propagatorName,
+  NegateConstraint(const std::string& name,
+                   const std::string& propagatorName,
                    const ConstraintEngineId constraintEngine,
                    const std::vector<ConstrainedVariableId>& variables);
   
@@ -804,8 +804,8 @@ typedef DataTypeCheck<NegateConstraint, TwoAssignableNumeric> NegateCT;
 
 class NotEqualConstraint : public Constraint {
  public:
-  NotEqualConstraint(const LabelStr& name,
-                     const LabelStr& propagatorName,
+  NotEqualConstraint(const std::string& name,
+                     const std::string& propagatorName,
                      const ConstraintEngineId constraintEngine,
                      const std::vector<ConstrainedVariableId>& variables);
 
@@ -836,8 +836,8 @@ typedef DataTypeCheck<NotEqualConstraint, EqualCondition> NotEqualCT;
    */
 class MemberImplyConstraint : public Constraint {
  public:
-  MemberImplyConstraint(const LabelStr& name,
-                        const LabelStr& propagatorName,
+  MemberImplyConstraint(const std::string& name,
+                        const std::string& propagatorName,
                         const ConstraintEngineId constraintEngine,
                         const std::vector<ConstrainedVariableId>& variables);
   
@@ -864,8 +864,8 @@ MemberImplyCT;
    */
 class OrConstraint : public Constraint {
  public:
-  OrConstraint(const LabelStr& name,
-               const LabelStr& propagatorName,
+  OrConstraint(const std::string& name,
+               const std::string& propagatorName,
                const ConstraintEngineId constraintEngine,
                const std::vector<ConstrainedVariableId>& variables);
 
@@ -895,8 +895,8 @@ typedef DataTypeCheck<OrConstraint, And<AtLeastNArgs<1>, All<Numeric> > > OrCT;
 
 class RandConstraint : public Constraint {
  public:
-  RandConstraint(const LabelStr& name,
-                 const LabelStr& propagatorName,
+  RandConstraint(const std::string& name,
+                 const std::string& propagatorName,
                  const ConstraintEngineId constraintEngine,
                  const std::vector<ConstrainedVariableId>& variables);
   void handleExecute();
@@ -915,8 +915,8 @@ typedef DataTypeCheck<RandConstraint, And<NArgs<1>, All<Numeric> > > RandCT;
    */
 class RotateScopeRightConstraint : public Constraint {
  public:
-  RotateScopeRightConstraint(const LabelStr& name,
-                             const LabelStr& propagatorName,
+  RotateScopeRightConstraint(const std::string& name,
+                             const std::string& propagatorName,
                              const ConstraintEngineId constraintEngine,
                              const std::vector<ConstrainedVariableId>& variables) __attribute__((noreturn))
   : Constraint(name, propagatorName, constraintEngine, variables), 
@@ -927,11 +927,11 @@ class RotateScopeRightConstraint : public Constraint {
     assertTrue(false);
   }
 
-  RotateScopeRightConstraint(const LabelStr& name,
-                             const LabelStr& propagatorName,
+  RotateScopeRightConstraint(const std::string& name,
+                             const std::string& propagatorName,
                              const ConstraintEngineId constraintEngine,
                              const std::vector<ConstrainedVariableId>& variables,
-                             const LabelStr& otherName,
+                             const std::string& otherName,
                              const int& rotateCount);
 
   ~RotateScopeRightConstraint() {
@@ -961,8 +961,8 @@ class RotateScopeRightConstraint : public Constraint {
  */
 class SineFunction : public Constraint {
  public:
-  SineFunction(const LabelStr& name,
-               const LabelStr& propagatorName,
+  SineFunction(const std::string& name,
+               const std::string& propagatorName,
                const ConstraintEngineId constraintEngine,
                const std::vector<ConstrainedVariableId>& variables);
 
@@ -986,8 +986,8 @@ SineCT;
 
 class SquareOfDifferenceConstraint : public Constraint {
  public:
-  SquareOfDifferenceConstraint(const LabelStr& name,
-                               const LabelStr& propagatorName,
+  SquareOfDifferenceConstraint(const std::string& name,
+                               const std::string& propagatorName,
                                const ConstraintEngineId constraintEngine,
                                const std::vector<ConstrainedVariableId>& variables);
   
@@ -1011,8 +1011,8 @@ SquareOfDifferenceCT;
 
 class SubsetOfConstraint : public Constraint {
  public:
-  SubsetOfConstraint(const LabelStr& name,
-                     const LabelStr& propagatorName,
+  SubsetOfConstraint(const std::string& name,
+                     const std::string& propagatorName,
                      const ConstraintEngineId constraintEngine,
                      const std::vector<ConstrainedVariableId>& variables);
 
@@ -1036,8 +1036,8 @@ SubsetOfCT;
 
 class SwapTwoVarsConstraint : public Constraint {
  public:
-  SwapTwoVarsConstraint(const LabelStr& name,
-                        const LabelStr& propagatorName,
+  SwapTwoVarsConstraint(const std::string& name,
+                        const std::string& propagatorName,
                         const ConstraintEngineId constraintEngine,
                         const std::vector<ConstrainedVariableId>& variables) __attribute__((noreturn))
   : Constraint(name, propagatorName, constraintEngine, variables), m_otherConstraint() {
@@ -1047,11 +1047,11 @@ class SwapTwoVarsConstraint : public Constraint {
     assertTrue(false);
   }
   
-    SwapTwoVarsConstraint(const LabelStr& name,
-                          const LabelStr& propagatorName,
+    SwapTwoVarsConstraint(const std::string& name,
+                          const std::string& propagatorName,
                           const ConstraintEngineId constraintEngine,
                           const std::vector<ConstrainedVariableId>& variables,
-                          const LabelStr& otherName,
+                          const std::string& otherName,
                           int firstIndex, int secondIndex);
 
     ~SwapTwoVarsConstraint() {
@@ -1072,8 +1072,8 @@ class SwapTwoVarsConstraint : public Constraint {
   // Enforce X+Y=0. X >=0. Y <=0.
 class TestAnd : public Constraint {
  public:
-  TestAnd(const LabelStr& name,
-          const LabelStr& propagatorName,
+  TestAnd(const std::string& name,
+          const std::string& propagatorName,
           const ConstraintEngineId constraintEngine,
           const std::vector<ConstrainedVariableId>& variables);
 
@@ -1096,8 +1096,8 @@ typedef DataTypeCheck<TestAnd, And<TestCondition, ThreeBooleanArgs> > TestAndCT;
 
 class TestEQ : public Constraint {
  public:
-  TestEQ(const LabelStr& name,
-         const LabelStr& propagatorName,
+  TestEQ(const std::string& name,
+         const std::string& propagatorName,
          const ConstraintEngineId constraintEngine,
          const std::vector<ConstrainedVariableId>& variables);
 
@@ -1115,8 +1115,8 @@ typedef DataTypeCheck<TestEQ, TestCompareCondition> TestEQCT;
 
 class TestLessThan : public Constraint {
  public:
-  TestLessThan(const LabelStr& name,
-               const LabelStr& propagatorName,
+  TestLessThan(const std::string& name,
+               const std::string& propagatorName,
                const ConstraintEngineId constraintEngine,
                const std::vector<ConstrainedVariableId>& variables);
 
@@ -1132,8 +1132,8 @@ typedef DataTypeCheck<TestLessThan, TestCompareCondition> TestLessThanCT;
 
 class TestLEQ : public Constraint {
  public:
-  TestLEQ(const LabelStr& name,
-          const LabelStr& propagatorName,
+  TestLEQ(const std::string& name,
+          const std::string& propagatorName,
           const ConstraintEngineId constraintEngine,
           const std::vector<ConstrainedVariableId>& variables);
 
@@ -1149,8 +1149,8 @@ typedef DataTypeCheck<TestLEQ, TestCompareCondition> TestLEQCT;
 
 class TestNEQ : public Constraint {
  public:
-  TestNEQ(const LabelStr& name,
-          const LabelStr& propagatorName,
+  TestNEQ(const std::string& name,
+          const std::string& propagatorName,
           const ConstraintEngineId constraintEngine,
           const std::vector<ConstrainedVariableId>& variables);
 
@@ -1166,8 +1166,8 @@ typedef DataTypeCheck<TestNEQ, TestCompareCondition> TestNEQCT;
 
 class TestOr : public Constraint {
  public:
-  TestOr(const LabelStr& name,
-         const LabelStr& propagatorName,
+  TestOr(const std::string& name,
+         const std::string& propagatorName,
          const ConstraintEngineId constraintEngine,
          const std::vector<ConstrainedVariableId>& variables);
 
@@ -1183,8 +1183,8 @@ typedef DataTypeCheck<TestOr, ThreeBooleanArgs> TestOrCT;
 
 class TestSingleton : public Constraint {
  public:
-  TestSingleton(const LabelStr& name,
-                const LabelStr& propagatorName,
+  TestSingleton(const std::string& name,
+                const std::string& propagatorName,
                 const ConstraintEngineId constraintEngine,
                 const std::vector<ConstrainedVariableId>& variables);
 
@@ -1201,8 +1201,8 @@ typedef DataTypeCheck<TestSingleton, And<NArgs<2>, First<Type<BoolDT> > > > Test
 
 class TestSpecified : public Constraint {
  public:
-  TestSpecified(const LabelStr& name,
-                const LabelStr& propagatorName,
+  TestSpecified(const std::string& name,
+                const std::string& propagatorName,
                 const ConstraintEngineId constraintEngine,
                 const std::vector<ConstrainedVariableId>& variables);
 
@@ -1225,8 +1225,8 @@ class UnaryConstraint : public Constraint {
   /**
    * @brief Standard constructor
    */
-  UnaryConstraint(const LabelStr& name,
-                  const LabelStr& propagatorName,
+  UnaryConstraint(const std::string& name,
+                  const std::string& propagatorName,
                   const ConstraintEngineId constraintEngine,
                   const std::vector<ConstrainedVariableId>& variables);
 
@@ -1258,8 +1258,8 @@ typedef DataTypeCheck<UnaryConstraint, NArgs<1> > UnaryCT;
    */
 class WithinBounds : public Constraint {
  public:
-  WithinBounds(const LabelStr& name,
-               const LabelStr& propagatorName,
+  WithinBounds(const std::string& name,
+               const std::string& propagatorName,
                const ConstraintEngineId constraintEngine,
                const std::vector<ConstrainedVariableId>& variables);
 
@@ -1279,8 +1279,8 @@ WithinBoundsCT;
 
 class EqUnionConstraint : public Constraint {
  public:
-  EqUnionConstraint(const LabelStr& name,
-                    const LabelStr& propagatorName,
+  EqUnionConstraint(const std::string& name,
+                    const std::string& propagatorName,
                     const ConstraintEngineId constraintEngine,
                     const std::vector<ConstrainedVariableId>& variables);
 

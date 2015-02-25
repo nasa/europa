@@ -13,7 +13,6 @@
 #include "ConstraintEngineDefs.hh"
 #include "PSConstraintEngine.hh"
 #include "DomainListener.hh"
-#include "LabelStr.hh"
 
 #include <vector>
 #include <set>
@@ -58,8 +57,8 @@ namespace EUROPA {
      * @param constraintEngine The constraintEngine instance to wich the constraint belongs. There is exactly one.
      * @param variables The variables that will form the scope of the constraint.
      */
-    Constraint(const LabelStr& name,
-	       const LabelStr& propagatorName,
+    Constraint(const std::string& name,
+	       const std::string& propagatorName,
 	       const ConstraintEngineId constraintEngine,
 	       const std::vector<ConstrainedVariableId>& variables);
 
@@ -85,7 +84,7 @@ namespace EUROPA {
     /**
      * @brief Accessor
      */
-    const LabelStr& getCreatedBy() const;
+    const std::string& getCreatedBy() const;
 
     /**
      * @brief Test if the given variable is constrained by this constraint.
@@ -286,10 +285,10 @@ namespace EUROPA {
      */
     virtual void handleDiscard();
 
-    const LabelStr m_name; /**< Name used on stratup to bind to the correct factory and then present as a debugging aid. */
+    const std::string m_name; /**< Name used on stratup to bind to the correct factory and then present as a debugging aid. */
     const ConstraintEngineId m_constraintEngine; /**< The owner ConstraintEngine */
     std::vector<ConstrainedVariableId> m_variables; /**< The variable scope of the Constraint. */
-    LabelStr m_violationExpl; /**< optional explanation string, typically coming from the model */
+    std::string m_violationExpl; /**< optional explanation string, typically coming from the model */
 
   private:
     /**
@@ -306,7 +305,7 @@ namespace EUROPA {
     ConstraintId m_id; /**< Self reference */
     PropagatorId m_propagator; /**< The owner Propagator. */
     bool m_isUnary; /**< True if constructed with a single variable */
-    const LabelStr m_createdBy; /**< Populated on construction. Indicates the user that created the constraint. */
+    const std::string m_createdBy; /**< Populated on construction. Indicates the user that created the constraint. */
     unsigned int m_deactivationRefCount; /*!< Tracks number of outstanding deactivation calls */
     bool m_isRedundant; /*!< True of the constraint is redundant */
   };

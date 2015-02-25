@@ -142,15 +142,15 @@ edouble BoolDT::createValue(const std::string& value) const
   return -1;
 }
 
-std::string  BoolDT::toString(edouble value) const
+std::string BoolDT::toString(edouble value) const
 {
-  static const LabelStr sl_true("true");
-  static const LabelStr sl_false("false");
+  static const std::string sl_true("true");
+  static const std::string sl_false("false");
   checkError(value == true || value == false, value << "is not a bool value" );
   if(value == true)
-    return sl_true.toString();
+    return sl_true;
   else
-    return sl_false.toString();
+    return sl_false;
 }
 
 StringDT::StringDT()

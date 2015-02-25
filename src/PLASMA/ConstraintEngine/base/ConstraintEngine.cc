@@ -463,27 +463,27 @@ DomainListenerId ConstraintEngine::allocateVariableListener(const ConstrainedVar
 	     variable->getName() << "(" << variable->getKey() <<  ")");
   }
 
-  void ConstraintEngine::add(const ConstraintId constraint, const LabelStr& propagatorName){
-    check_error(m_constraints.find(constraint) == m_constraints.end(),
-		"Attempted to add constraint " + constraint->getName() + " but it already exists.");
-    check_error(m_propagatorsByName.find(propagatorName) != m_propagatorsByName.end(),
-		"Propagator " + propagatorName.toString() + " has not been registered.");
+void ConstraintEngine::add(const ConstraintId constraint, const std::string& propagatorName){
+  check_error(m_constraints.find(constraint) == m_constraints.end(),
+              "Attempted to add constraint " + constraint->getName() + " but it already exists.");
+  check_error(m_propagatorsByName.find(propagatorName) != m_propagatorsByName.end(),
+              "Propagator " + propagatorName + " has not been registered.");
 
-    m_constraints.insert(constraint);
+  m_constraints.insert(constraint);
 
-    // If constraint initially redundant, then store it.
-    if(constraint->isRedundant())
-      m_redundantConstraints.insert(constraint);
+  // If constraint initially redundant, then store it.
+  if(constraint->isRedundant())
+    m_redundantConstraints.insert(constraint);
 
-    PropagatorId propagator = m_propagatorsByName.find(propagatorName)->second;
-    propagator->addConstraint(constraint);
-    constraint->setPropagator(propagator);
+  PropagatorId propagator = m_propagatorsByName.find(propagatorName)->second;
+  propagator->addConstraint(constraint);
+  constraint->setPropagator(propagator);
 
-    publish(notifyAdded(constraint));
-    debugMsg("ConstraintEngine:add:constraint:Propagator",
-	     constraint->toLongString() << std::endl << " added to " << propagatorName.toString());
-	     //constraint->getName().toString() << "(" << constraint->getKey() <<  ") added to " << propagatorName.toString());
-  }
+  publish(notifyAdded(constraint));
+  debugMsg("ConstraintEngine:add:constraint:Propagator",
+           constraint->toLongString() << std::endl << " added to " << propagatorName);
+  //constraint->getName().toString() << "(" << constraint->getKey() <<  ") added to " << propagatorName.toString());
+}
 
   /**
    * Process removals even if purging, since compound constraints will cause multiple
@@ -1011,12 +1011,12 @@ void ConstraintEngine::notify(const ConstrainedVariableId source,
     return static_cast<unsigned int>(std::distance(m_constraints.begin(), it));
   }
 
-  const PropagatorId ConstraintEngine::getPropagatorByName(const LabelStr& name)  const {
-    if (m_propagatorsByName.find(name) == m_propagatorsByName.end())
-      return PropagatorId::noId();
-    else
-      return(m_propagatorsByName.find(name)->second);
-  }
+const PropagatorId ConstraintEngine::getPropagatorByName(const std::string& name)  const {
+  if (m_propagatorsByName.find(name) == m_propagatorsByName.end())
+    return PropagatorId::noId();
+  else
+    return(m_propagatorsByName.find(name)->second);
+}
 
   /**
    * @brief Process redundant constraints
@@ -1166,20 +1166,19 @@ ConstraintEngine::createVariable(const char* typeName,
   return variable;
 }
 
-  ConstraintId ConstraintEngine::createConstraint(const LabelStr& name,
-                           const std::vector<ConstrainedVariableId>& scope,
-                           const char* violationExpl)
-  {
-      ConstraintTypeId factory = getCESchema()->getConstraintType(name);
-      check_error(factory.isValid());
-      ConstraintId constraint = factory->createConstraint(getId(), scope, violationExpl);
+ConstraintId ConstraintEngine::createConstraint(const std::string& name,
+                                                const std::vector<ConstrainedVariableId>& scope,
+                                                const char* violationExpl) {
+  ConstraintTypeId factory = getCESchema()->getConstraintType(name);
+  check_error(factory.isValid());
+  ConstraintId constraint = factory->createConstraint(getId(), scope, violationExpl);
 
-      if (shouldAutoPropagate())
-          propagate();
+  if (shouldAutoPropagate())
+    propagate();
 
-      debugMsg("ConstraintEngine:createConstraint","Created Constraint:" << constraint->toLongString());
-      return(constraint);
-  }
+  debugMsg("ConstraintEngine:createConstraint","Created Constraint:" << constraint->toLongString());
+  return(constraint);
+}
 
   void ConstraintEngine::deleteConstraint(const ConstraintId c)
   {
