@@ -2,7 +2,6 @@
 #define _H_ConstraintType
 
 #include "ConstraintEngineDefs.hh"
-#include "LabelStr.hh"
 #include "Constraint.hh"
 #include "DataType.hh"
 #include "unused.hh"
@@ -40,13 +39,13 @@ namespace EUROPA {
     virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes) const = 0;
 
   protected:
-    ConstraintType(const LabelStr& name,
-                   const LabelStr& propagatorName,
-		           bool systemDefined = false);
+    ConstraintType(const std::string& name,
+                   const std::string& propagatorName,
+                   bool systemDefined = false);
 
     ConstraintTypeId m_id;
     const std::string m_name;
-    const LabelStr m_propagatorName;
+    const std::string m_propagatorName;
     const bool m_systemDefined;
   };
 
@@ -54,8 +53,8 @@ namespace EUROPA {
 
 template <class ConstraintInstance>
 ConstraintId makeConstraintInstance(
-    const LabelStr& name,
-    const LabelStr& propagatorName,
+    const std::string& name,
+    const std::string& propagatorName,
     const ConstraintEngineId constraintEngine,
     const std::vector<ConstrainedVariableId>& scope,
     const char* violationExpl) {
@@ -74,13 +73,13 @@ template <class ConstraintInstance>
 class ConcreteConstraintType : public ConstraintType {
  public:
   // TODO: remove this constructor after all constraint types have been updated to check arg types
-  ConcreteConstraintType(const LabelStr& name,
-                         const LabelStr& propagatorName,
+  ConcreteConstraintType(const std::string& name,
+                         const std::string& propagatorName,
                          bool systemDefined = false)
       : ConstraintType(name, propagatorName, systemDefined), m_argTypes() {}
 
-  ConcreteConstraintType(const LabelStr& name,
-                         const LabelStr& propagatorName,
+  ConcreteConstraintType(const std::string& name,
+                         const std::string& propagatorName,
                          const std::vector<DataTypeId>& argTypes,
                          bool systemDefined = false)
       : ConstraintType(name, propagatorName, systemDefined)
@@ -130,9 +129,9 @@ class ConcreteConstraintType : public ConstraintType {
 template <class ConstraintInstance>
 class RotatedNaryConstraintType : public ConstraintType {
  public:
-  RotatedNaryConstraintType(const LabelStr& name,
-                            const LabelStr& propagatorName,
-                            const LabelStr& otherName,
+  RotatedNaryConstraintType(const std::string& name,
+                            const std::string& propagatorName,
+                            const std::string& otherName,
                             const int& rotateCount)
       : ConstraintType(name, propagatorName)
       , m_otherName(otherName)
@@ -165,15 +164,15 @@ class RotatedNaryConstraintType : public ConstraintType {
   }
 
   protected:
-    const LabelStr m_otherName;
+    const std::string m_otherName;
     const int m_rotateCount;
   };
 
   template <class ConstraintInstance>
   class SwapTwoVarsNaryConstraintType : public ConstraintType {
   public:
-    SwapTwoVarsNaryConstraintType(const LabelStr& name, const LabelStr& propagatorName,
-                                 const LabelStr& otherName, const int& first, const int& second)
+    SwapTwoVarsNaryConstraintType(const std::string& name, const std::string& propagatorName,
+                                 const std::string& otherName, const int& first, const int& second)
       : ConstraintType(name, propagatorName),
         m_otherName(otherName), m_first(first), m_second(second) {
       checkError(name != otherName);
@@ -203,7 +202,7 @@ class RotatedNaryConstraintType : public ConstraintType {
     }
 
   protected:
-    const LabelStr m_otherName;
+    const std::string m_otherName;
     const int m_first, m_second;
   };
 
@@ -216,7 +215,7 @@ class RotatedNaryConstraintType : public ConstraintType {
    * @param PropagatorName The constraint's propagator's name.
    */
 #define REGISTER_SYSTEM_CONSTRAINT(ceSchema, ConstraintInstance, ConstraintName, PropagatorName) \
-  (ceSchema->registerConstraintType((new ConcreteConstraintType<ConstraintInstance>(LabelStr(ConstraintName), LabelStr(PropagatorName), true))->getId()))
+  (ceSchema->registerConstraintType((new ConcreteConstraintType<ConstraintInstance>(ConstraintName, PropagatorName, true))->getId()))
 
   /**
    * @def REGISTER_CONSTRAINT
@@ -227,20 +226,20 @@ class RotatedNaryConstraintType : public ConstraintType {
    * @param PropagatorName The constraint's propagator's name.
    */
 #define REGISTER_CONSTRAINT(ceSchema,ConstraintInstance, ConstraintName, PropagatorName) \
-  (ceSchema->registerConstraintType((new ConcreteConstraintType<ConstraintInstance>(LabelStr(ConstraintName), LabelStr(PropagatorName)))->getId()))
+  (ceSchema->registerConstraintType((new ConcreteConstraintType<ConstraintInstance>(ConstraintName, PropagatorName))->getId()))
 
 #define REGISTER_CONSTRAINT_TYPE(ceSchema,constraintType,constraintName,propagatorName) \
-  (ceSchema->registerConstraintType((new constraintType(LabelStr(constraintName),LabelStr(propagatorName)))->getId()))
+  (ceSchema->registerConstraintType((new constraintType(constraintName,propagatorName))->getId()))
 
 #define REGISTER_CONSTRAINT_TYPE_WITH_SIGNATURE(ceSchema,ConstraintInstance, ConstraintName, PropagatorName, ArgTypes) \
 {\
     std::vector<DataTypeId> argTypes;\
-    LabelStr types(ArgTypes);\
+    std::string types(ArgTypes);                              \
     for (int i=0;i<types.countElements(":");i++) {\
         DataTypeId argType = ceSchema->getDataType(types.getElement(i,":").c_str());\
         argTypes.push_back(argType);\
     }\
-    (ceSchema->registerConstraintType((new ConcreteConstraintType<ConstraintInstance>(LabelStr(ConstraintName), LabelStr(PropagatorName), argTypes))->getId()));\
+    (ceSchema->registerConstraintType((new ConcreteConstraintType<ConstraintInstance>(ConstraintName, PropagatorName, argTypes))->getId()));\
 }
 
 
@@ -259,8 +258,8 @@ class RotatedNaryConstraintType : public ConstraintType {
    * if -1, move the first variable to the end.
    */
 #define REGISTER_ROTATED_CONSTRAINT(ceSchema,ConstraintName, PropagatorName, RotateName, RotateCount) \
-  (ceSchema->registerConstraintType((new RotatedNaryConstraintType<RotateScopeRightConstraint>(LabelStr(ConstraintName), LabelStr(PropagatorName),\
-                                                                                                   LabelStr(RotateName), (RotateCount)))->getId()))
+  (ceSchema->registerConstraintType((new RotatedNaryConstraintType<RotateScopeRightConstraint>(ConstraintName, PropagatorName,\
+                                                                                               RotateName, (RotateCount)))->getId()))
 
   /**
    * @def REGISTER_SWAP_TWO_VARS_CONSTRAINT
@@ -278,8 +277,8 @@ class RotatedNaryConstraintType : public ConstraintType {
    * before the last variable, etc.
    */
 #define REGISTER_SWAP_TWO_VARS_CONSTRAINT(ceSchema,ConstraintName, PropagatorName, RotateName, FirstVar, SecondVar) \
-  (ceSchema->registerConstraintType((new SwapTwoVarsNaryConstraintType<SwapTwoVarsConstraint>(LabelStr(ConstraintName), LabelStr(PropagatorName), \
-                                                                                                  LabelStr(RotateName), (FirstVar), (SecondVar)))->getId()))
+  (ceSchema->registerConstraintType((new SwapTwoVarsNaryConstraintType<SwapTwoVarsConstraint>((ConstraintName), (PropagatorName), \
+                                                                                                  (RotateName), (FirstVar), (SecondVar)))->getId()))
 
 }
 #endif

@@ -32,7 +32,7 @@ DataType::~DataType()
 const DataTypeId DataType::getId() const { return m_id; }
 
 const std::string& DataType::getName() const { return m_name; }
-void DataType::setName(const LabelStr& name) { m_name = name; }
+void DataType::setName(const std::string& name) { m_name = name; }
 
 bool DataType::isEntity() const {return false;}
 
@@ -122,14 +122,13 @@ DataType::createVariable(const ConstraintEngineId constraintEngine,
 }
 
 
-std::string DataType::toString(edouble value) const
-{
-    if(isNumeric())
-        return EUROPA::toString(value);
-    else {
-        checkError(LabelStr::isString(value), "expected LabelStr");
-        return LabelStr(value).toString();
-    }
+std::string DataType::toString(edouble value) const {
+  if(isNumeric())
+    return EUROPA::toString(value);
+  else {
+    checkError(LabelStr::isString(value), "expected LabelStr");
+    return LabelStr(value).toString();
+  }
 }
 
 }

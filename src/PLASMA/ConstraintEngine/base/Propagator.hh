@@ -10,7 +10,6 @@
 #include "Entity.hh"
 #include "ConstraintEngineDefs.hh"
 #include "DomainListener.hh"
-#include "LabelStr.hh"
 
 namespace EUROPA {
 
@@ -78,7 +77,8 @@ namespace EUROPA {
      * @brief Constructor guarantees the Propagator belongs to exactly one ConstraintEngine
      * @param constraintEngine The engine to place it in. Must be a valid id.
      */
-    Propagator(const LabelStr& name, const ConstraintEngineId constraintEngine, int priority=USER_PRIORITY);
+    Propagator(const std::string& name, const ConstraintEngineId constraintEngine,
+               int priority=USER_PRIORITY);
 
     /**
      * @brief Destructor - will remove the Propagator from the ConstraintEngine.

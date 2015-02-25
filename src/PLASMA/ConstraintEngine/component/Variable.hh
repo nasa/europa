@@ -36,7 +36,7 @@ namespace EUROPA {
              const Domain& baseDomain,
              const bool internal = false,
              bool canBeSpecified = true,
-             const LabelStr& name = ConstrainedVariable::NO_NAME(),
+             const std::string& name = ConstrainedVariable::NO_NAME(),
              const EntityId parent = EntityId::noId(),
              unsigned long index = ConstrainedVariable::NO_INDEX);
 
@@ -111,14 +111,14 @@ namespace EUROPA {
                                  const Domain& _baseDomain,
                                  const bool internal,
                                  bool _canBeSpecified,
-                                 const LabelStr& name,
+                                 const std::string& name,
                                  const EntityId _parent,
                                  unsigned long index)
     : ConstrainedVariable(constraintEngine, internal, _canBeSpecified, name, _parent, index),
     m_baseDomain(static_cast<DomainType*>(_baseDomain.copy())),
     m_derivedDomain(static_cast<DomainType*>(_baseDomain.copy())) {
 
-    debugMsg("Variable:Variable", "Name " << name.toString());
+    debugMsg("Variable:Variable", "Name " << name);
     debugMsg("Variable:Variable", "Base Domain = " << _baseDomain.toString());
 
     // Note that we permit the domain to be empty initially

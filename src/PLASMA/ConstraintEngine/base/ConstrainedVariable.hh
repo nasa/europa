@@ -11,7 +11,6 @@
 #include "ConstraintEngineDefs.hh"
 #include "PSConstraintEngine.hh"
 #include "Entity.hh"
-#include "LabelStr.hh"
 #include "unused.hh"
 #include <set>
 
@@ -56,7 +55,7 @@ namespace EUROPA {
   public:
     DECLARE_ENTITY_TYPE(ConstrainedVariable);
 
-    static const LabelStr& NO_NAME(); 
+    static const std::string& NO_NAME(); 
 
     /**
      * Should not be called unless all constraints have been removed.
@@ -395,7 +394,7 @@ namespace EUROPA {
     ConstrainedVariable(const ConstraintEngineId constraintEngine,
 			const bool internal,
 			bool canBeSpecified,
-			const LabelStr& name,
+			const std::string& name,
 			const EntityId parent = EntityId::noId(),
 			unsigned long index = NO_INDEX);
 

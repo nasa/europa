@@ -9,7 +9,6 @@
 #define CFUNCTION_HH_
 
 #include "Id.hh"
-#include "LabelStr.hh"
 
 #include <vector>
 

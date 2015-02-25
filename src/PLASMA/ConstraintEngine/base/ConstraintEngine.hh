@@ -12,7 +12,6 @@
 #include "ConstraintEngineDefs.hh"
 #include "PSConstraintEngine.hh"
 #include "DomainListener.hh"
-#include "LabelStr.hh"
 #include "Entity.hh"
 #include "Propagator.hh"
 #include "ConstrainedVariable.hh"
@@ -253,7 +252,7 @@ typedef Id<ConstraintEngineListener> ConstraintEngineListenerId;
     /**
      * @brief Accessor for all propagators
      */
-    const PropagatorId getPropagatorByName(const LabelStr& name)  const;
+    const PropagatorId getPropagatorByName(const std::string& name)  const;
 
     /**
      * @see If AutoPropagation is enabled, the constraint engine will automatically invoke propagate()
@@ -336,9 +335,9 @@ typedef Id<ConstraintEngineListener> ConstraintEngineListenerId;
                                          unsigned int index = ConstrainedVariable::NO_INDEX);
 
 
-    ConstraintId createConstraint(const LabelStr& name,
-                     const std::vector<ConstrainedVariableId>& scope,
-                     const char* violationExpl=NULL);
+    ConstraintId createConstraint(const std::string& name,
+                                  const std::vector<ConstrainedVariableId>& scope,
+                                  const char* violationExpl=NULL);
 
     void deleteConstraint(const ConstraintId c);
 
@@ -381,7 +380,7 @@ typedef Id<ConstraintEngineListener> ConstraintEngineListenerId;
      * @brief Constraint Constructor will call this method to establish linkage with the ConstraintEngine.
      * @param constraint The constraint to be added.
      */
-    void add(const ConstraintId constraint, const LabelStr& propagatorName);
+    void add(const ConstraintId constraint, const std::string& propagatorName);
 
     /**
      * @brief Constraint destructor will call this method to withdraw links with the ConstraintEngine.
