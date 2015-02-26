@@ -80,14 +80,15 @@ class TokenType: public PSTokenType {
    * @see DbClient::createInstance(const LabelStr& type, const LabelStr& name)
    */
   virtual TokenId createInstance(const PlanDatabaseId planDb,
-                                 const LabelStr& name,
+                                 const std::string& name,
                                  bool rejectable = false,
                                  bool isFact = false) const = 0;
 
   /**
    * @brief Create a slave token
    */
-  virtual TokenId createInstance(const TokenId master, const LabelStr& name, const LabelStr& relation) const = 0;
+  virtual TokenId createInstance(const TokenId master, const std::string& name,
+                                 const std::string& relation) const = 0;
 
   // From PSTokenType
   virtual PSList<std::string> getParameterNames() const;

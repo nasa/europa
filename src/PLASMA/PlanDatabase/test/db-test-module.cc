@@ -131,26 +131,26 @@ DBFoo::DBFoo(const ObjectId parent, const LabelStr& type, const LabelStr& name)
     }
   };
 
-  class IntervalTokenType: public TokenType {
-  public:
-    IntervalTokenType(const ObjectTypeId ot)
+class IntervalTokenType: public TokenType {
+ public:
+  IntervalTokenType(const ObjectTypeId ot)
       : TokenType(ot,LabelStr(DEFAULT_PREDICATE)) {
-        addArg(FloatDT::instance(), "IntervalParam");
-        addArg(IntDT::instance(), "IntervalIntParam");
-        addArg(BoolDT::instance(), "BoolParam");
-        addArg(StringDT::instance(), "LabelSetParam");
-        addArg(FloatDT::instance(), "EnumeratedParam");
-    }
-  private:
-    TokenId createInstance(const PlanDatabaseId planDb, const LabelStr& name, bool rejectable = false, bool isFact = false) const {
-      TokenId token = (new IntervalToken(planDb, name, rejectable, isFact))->getId();
-      return(token);
-    }
-    TokenId createInstance(const TokenId master, const LabelStr& name, const LabelStr& relation) const{
-      TokenId token = (new IntervalToken(master, relation, name))->getId();
-      return(token);
-    }
-  };
+    addArg(FloatDT::instance(), "IntervalParam");
+    addArg(IntDT::instance(), "IntervalIntParam");
+    addArg(BoolDT::instance(), "BoolParam");
+    addArg(StringDT::instance(), "LabelSetParam");
+    addArg(FloatDT::instance(), "EnumeratedParam");
+  }
+ private:
+  TokenId createInstance(const PlanDatabaseId planDb, const std::string& name, bool rejectable = false, bool isFact = false) const {
+    TokenId token = (new IntervalToken(planDb, name, rejectable, isFact))->getId();
+    return(token);
+  }
+  TokenId createInstance(const TokenId master, const std::string& name, const std::string& relation) const{
+    TokenId token = (new IntervalToken(master, relation, name))->getId();
+    return(token);
+  }
+};
 
 namespace {
 void initDbTestSchema(const SchemaId schema) {
@@ -302,11 +302,11 @@ public:
   DummyTokenType(const ObjectTypeId ot,const LabelStr& predicateName) : TokenType(ot, predicateName){}
   virtual ~DummyTokenType(){}
 
-  virtual TokenId createInstance(const PlanDatabaseId, const LabelStr&, bool, bool) const{
+  virtual TokenId createInstance(const PlanDatabaseId, const std::string&, bool, bool) const{
     TokenId token;
     return token;
   }
-  virtual TokenId createInstance(const TokenId, const LabelStr&, const LabelStr&) const{
+  virtual TokenId createInstance(const TokenId, const std::string&, const std::string&) const{
     TokenId token;
     return token;
   }
@@ -4239,11 +4239,11 @@ public:
           : TokenType(ot,LabelStr("TestClass2.Sample")) {
         }
       private:
-        TokenId createInstance(const PlanDatabaseId planDb, const LabelStr& name, bool rejectable = false, bool isFact = false) const {
+        TokenId createInstance(const PlanDatabaseId planDb, const std::string& name, bool rejectable = false, bool isFact = false) const {
           TokenId token = (new Sample(planDb, name, rejectable, isFact))->getId();
           return(token);
         }
-        TokenId createInstance(const TokenId master, const LabelStr& name, const LabelStr& relation) const {
+        TokenId createInstance(const TokenId master, const std::string& name, const std::string& relation) const {
           TokenId token = (new Sample(master, name, relation))->getId();
           return(token);
         }

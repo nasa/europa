@@ -114,34 +114,34 @@ Schema::Schema(const LabelStr& name, const CESchemaId ces)
     return (primitives.find(str) != primitives.end());
   }
 
-  bool Schema::isPredicate(const LabelStr& predicateName) const {
+bool Schema::isPredicate(const LabelStr& predicateName) const {
 
-    if(m_predTrueCache.find(predicateName) != m_predTrueCache.end())
-      return true;
+  if(m_predTrueCache.find(predicateName) != m_predTrueCache.end())
+    return true;
 
-    if(m_predFalseCache.find(predicateName) != m_predFalseCache.end())
-      return false;
+  if(m_predFalseCache.find(predicateName) != m_predFalseCache.end())
+    return false;
 
-    bool result = false;
+  bool result = false;
 
-    if(predicates.find(predicateName) != predicates.end()) // If a direct hit, then true
-      result = true;
-    else if(predicateName.countElements(getDelimiter()) != 2) // If not the correct format, return false
-      result = false;
-    else {
-      // Call recursively if we have a parent
-      std::string predStr;
-      if(makeParentPredicateString(predicateName, predStr))
-	result = isPredicate(predStr);
-    }
-
-    if(result)
-      m_predTrueCache.insert(predicateName);
-    else
-      m_predFalseCache.insert(predicateName);
-
-    return result;
+  if(predicates.find(predicateName) != predicates.end()) // If a direct hit, then true
+    result = true;
+  else if(predicateName.countElements(getDelimiter()) != 2) // If not the correct format, return false
+    result = false;
+  else {
+    // Call recursively if we have a parent
+    std::string predStr;
+    if(makeParentPredicateString(predicateName, predStr))
+      result = isPredicate(predStr);
   }
+
+  if(result)
+    m_predTrueCache.insert(predicateName);
+  else
+    m_predFalseCache.insert(predicateName);
+
+  return result;
+}
 
   bool Schema::isObjectType(const LabelStr& str) const {
     return objectTypes.find(str) != objectTypes.end();

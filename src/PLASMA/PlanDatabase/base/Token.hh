@@ -105,7 +105,7 @@ namespace EUROPA {
      * Note that since we have an inheritance mechanism, the token may actually be associated with an instance of a derived
      * class.
      */
-    const LabelStr& getBaseObjectType() const;
+    const std::string& getBaseObjectType() const;
 
     /**
      * @brief Access the predicate name for the token.
@@ -499,7 +499,7 @@ namespace EUROPA {
     std::string m_name;
     TokenId m_master;
     LabelStr m_relation;
-    LabelStr m_baseObjectType;
+    std::string m_baseObjectType;
     LabelStr m_predicateName;
     StateVarId m_state; /*!< state variable for token.*/
     ObjectVarId m_object; /*!< object variable for token. The set of objects it may be assigned to. */

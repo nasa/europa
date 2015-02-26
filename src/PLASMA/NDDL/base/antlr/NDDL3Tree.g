@@ -119,7 +119,7 @@ nddl
 
 enumDefinition returns [Expr* result]
 @init {
-    std::vector<std::string> values;
+    std::vector<LabelStr> values;
 }
     :   ^('enum' name=IDENT enumValues[values])
         {
@@ -128,7 +128,7 @@ enumDefinition returns [Expr* result]
         }
     ;
 
-enumValues[std::vector<std::string>& values]
+enumValues[std::vector<LabelStr>& values]
     :       ^('{' (v=IDENT {values.push_back(c_str($v.text->chars));})+ )
     ;
                   

@@ -233,7 +233,7 @@ void triggerTokenByName(const LabelStr& lbl,
 
       // If it has a master, trigger on the relation
       if(token->master().isId()){
-        debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for master object types (" << token->master()->getBaseObjectType().toString() << ")");
+        debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for master object types (" << token->master()->getBaseObjectType() << ")");
         trigger(schema->getAllObjectTypes(token->master()->getBaseObjectType()),
                 m_rulesByMasterObjectType, results);
         debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for master predicate " << token->master()->getUnqualifiedPredicateName().toString());

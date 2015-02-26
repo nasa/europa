@@ -9,7 +9,6 @@
 class NDDLModuleTests : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(NDDLModuleTests);
   CPPUNIT_TEST(syntaxTests);
-  CPPUNIT_TEST(utilitiesTests);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -22,7 +21,6 @@ public:
   }
 
   void syntaxTests();
-  void utilitiesTests();
 };
 
 class NddlTest : public CppUnit::TestFixture

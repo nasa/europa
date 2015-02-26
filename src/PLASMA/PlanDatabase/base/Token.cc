@@ -240,7 +240,7 @@ const TokenId Token::getSlave(unsigned int slavePosition) const{
     return -1;
   }
 
-  const LabelStr& Token::getBaseObjectType() const {return m_baseObjectType;}
+const std::string& Token::getBaseObjectType() const {return m_baseObjectType;}
 
 const std::string&  Token::getName() const { return m_name; }
 
@@ -604,7 +604,7 @@ void Token::doMerge(const TokenId activeToken){
 						LabelStr("object")))->getId();
 
     checkError(m_planDatabase->hasObjectInstances(m_baseObjectType),
-	       "Allocated a token with no object instance available of type " << m_baseObjectType.toString());
+	       "Allocated a token with no object instance available of type " << m_baseObjectType);
 
     // Call the plan database to fill it in, and maintain synchronization for dynamic objects
     m_planDatabase->makeObjectVariableFromType(m_baseObjectType, m_object);

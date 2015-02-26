@@ -33,7 +33,7 @@ namespace NDDL {
 							      domain,
 							      false,
 							      false,
-							      LabelStr(sstr.str()),
+							      sstr.str(),
 							      parent))->getId();
     vars.push_back(var);
     return var;
@@ -56,11 +56,11 @@ EUROPA::ConstrainedVariableId var(const EUROPA::TokenId entity, const std::strin
 #define DECLARE_DEFAULT_OBJECT_FACTORY(Factory, Klass)\
 class Factory: public ObjectFactory{\
 public:\
-  Factory(const LabelStr& name): ObjectFactory(name) {}\
+  Factory(const std::string& name): ObjectFactory(name) {}\
 private:\
   ObjectId createInstance(const PlanDatabaseId planDb,\
-			  const LabelStr& objectType, \
-			  const LabelStr& objectName,\
+			  const std::string& objectType, \
+			  const std::string& objectName,\
 			  const std::vector<const Domain*>& arguments) const {\
     check_error(arguments.empty());\
     Id<Klass> instance = (new Klass(planDb, objectType, objectName))->getId();\
@@ -77,13 +77,13 @@ private:\
 #define DECLARE_TOKEN_FACTORY(klass, predicateName) \
 class Factory: public TokenFactory { \
 public: \
-  Factory() : TokenFactory(LabelStr(#predicateName)) { \
+  Factory() : TokenFactory(#predicateName) { \
   } \
-  TokenId createInstance(const PlanDatabaseId planDb, const LabelStr& name, bool rejectable = false, bool isFact = false) const { \
+  TokenId createInstance(const PlanDatabaseId planDb, const std::string& name, bool rejectable = false, bool isFact = false) const { \
     TokenId token = (new klass(planDb, name, rejectable, isFact, true))->getId(); \
     return(token); \
   } \
-  TokenId createInstance(const TokenId master, const LabelStr& name, const LabelStr& relation) const { \
+  TokenId createInstance(const TokenId master, const std::string& name, const std::string& relation) const { \
     TokenId token = (new klass(master, name, relation, true))->getId(); \
     return(token); \
   } \
