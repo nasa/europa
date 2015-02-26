@@ -4,16 +4,16 @@
 
 namespace EUROPA{
 
-  CommonAncestorConstraint::CommonAncestorConstraint(const LabelStr& name,
-						     const LabelStr& propagatorName,
-						     const ConstraintEngineId constraintEngine,
-						     const std::vector<ConstrainedVariableId>& variables)
+CommonAncestorConstraint::CommonAncestorConstraint(const LabelStr& name,
+                                                   const LabelStr& propagatorName,
+                                                   const ConstraintEngineId constraintEngine,
+                                                   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_first(static_cast<ObjectDomain&>(getCurrentDomain(variables[0]))),
       m_second(static_cast<ObjectDomain&>(getCurrentDomain(variables[1]))),
       m_restrictions(static_cast<ObjectDomain&>(getCurrentDomain(variables[2]))) {
-    check_error(variables.size() == 3);
-  }
+  check_error(variables.size() == 3);
+}
 
   CommonAncestorConstraint::~CommonAncestorConstraint(){}
 

@@ -6,7 +6,7 @@ using namespace EUROPA;
 namespace NDDL {
 
 NddlToken::NddlToken(const PlanDatabaseId planDatabase, 
-                     const LabelStr& predicateName, const bool& rejectable,
+                     const std::string& predicateName, const bool& rejectable,
                      const bool& _isFact, const bool& _close)
     : EUROPA::IntervalToken(planDatabase, 
                             predicateName,
@@ -21,8 +21,8 @@ NddlToken::NddlToken(const PlanDatabaseId planDatabase,
   commonInit(_close);
 }
 
-NddlToken::NddlToken(const TokenId _master, const LabelStr& predicateName,
-                     const LabelStr& relation, const bool& _close)
+NddlToken::NddlToken(const TokenId _master, const std::string& predicateName,
+                     const std::string& relation, const bool& _close)
     : EUROPA::IntervalToken(_master, 
                             relation,
                             predicateName,
@@ -49,7 +49,7 @@ NddlToken::NddlToken(const TokenId _master, const LabelStr& predicateName,
   }
 
 //   ConstrainedVariableId NddlToken::var(const std::string& name) const {
-//     return getVariable(LabelStr(name));
+//     return getVariable(std::string(name));
 //   }
 
 } // namespace NDDL

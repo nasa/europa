@@ -19,15 +19,16 @@ namespace EUROPA {
 	                        const std::vector<const Domain*>& arguments) const;
   };
 
-  class ReusableUsesTokenType: public NativeTokenType
-  {
-    public:
-	  ReusableUsesTokenType(const ObjectTypeId ot,const LabelStr& predicateName);
+class ReusableUsesTokenType: public NativeTokenType {
+ public:
+  ReusableUsesTokenType(const ObjectTypeId ot,const std::string& predicateName);
 
-	private:
-	  virtual TokenId createInstance(const PlanDatabaseId planDb, const LabelStr& name, bool rejectable , bool isFact) const;
-	  virtual TokenId createInstance(const TokenId master, const LabelStr& name, const LabelStr& relation) const;
-  };
+ private:
+  virtual TokenId createInstance(const PlanDatabaseId planDb, const std::string& name,
+                                 bool rejectable , bool isFact) const;
+  virtual TokenId createInstance(const TokenId master, const std::string& name,
+                                 const std::string& relation) const;
+};
 
   class CBReusableObjectFactory : public NativeObjectFactory
   {
@@ -57,25 +58,27 @@ namespace EUROPA {
 	                        const std::vector<const Domain*>& arguments) const;
   };
 
-  class ReservoirProduceTokenType: public NativeTokenType
-  {
-    public:
-	  ReservoirProduceTokenType(const ObjectTypeId ot,const LabelStr& predicateName);
+class ReservoirProduceTokenType: public NativeTokenType {
+ public:
+  ReservoirProduceTokenType(const ObjectTypeId ot,const std::string& predicateName);
 
-	private:
-	  virtual TokenId createInstance(const PlanDatabaseId planDb, const LabelStr& name, bool rejectable , bool isFact) const;
-	  virtual TokenId createInstance(const TokenId master, const LabelStr& name, const LabelStr& relation) const;
-  };
+ private:
+  virtual TokenId createInstance(const PlanDatabaseId planDb, const std::string& name,
+                                 bool rejectable , bool isFact) const;
+  virtual TokenId createInstance(const TokenId master, const std::string& name,
+                                 const std::string& relation) const;
+};
 
-  class ReservoirConsumeTokenType: public NativeTokenType
-  {
-    public:
-	  ReservoirConsumeTokenType(const ObjectTypeId ot,const LabelStr& predicateName);
-
-	private:
-	  virtual TokenId createInstance(const PlanDatabaseId planDb, const LabelStr& name, bool rejectable , bool isFact) const;
-	  virtual TokenId createInstance(const TokenId master, const LabelStr& name, const LabelStr& relation) const;
-  };
+class ReservoirConsumeTokenType: public NativeTokenType {
+ public:
+  ReservoirConsumeTokenType(const ObjectTypeId ot,const std::string& predicateName);
+  
+ private:
+  virtual TokenId createInstance(const PlanDatabaseId planDb, const std::string& name,
+                                 bool rejectable , bool isFact) const;
+  virtual TokenId createInstance(const TokenId master, const std::string& name,
+                                 const std::string& relation) const;
+};
 
   class UnaryObjectFactory : public NativeObjectFactory
   {
@@ -91,15 +94,16 @@ namespace EUROPA {
                             const std::vector<const Domain*>& arguments) const;
   };
 
-  class UnaryUseTokenType: public NativeTokenType
-  {
-    public:
-        UnaryUseTokenType(const ObjectTypeId ot,const LabelStr& predicateName) : NativeTokenType(ot,predicateName) {}
+class UnaryUseTokenType: public NativeTokenType {
+ public:
+  UnaryUseTokenType(const ObjectTypeId ot,const std::string& predicateName) : NativeTokenType(ot,predicateName) {}
 
-    private:
-      virtual TokenId createInstance(const PlanDatabaseId planDb, const LabelStr& name, bool rejectable , bool isFact) const;
-      virtual TokenId createInstance(const TokenId master, const LabelStr& name, const LabelStr& relation) const;
-  };
+ private:
+  virtual TokenId createInstance(const PlanDatabaseId planDb, const std::string& name,
+                                 bool rejectable , bool isFact) const;
+  virtual TokenId createInstance(const TokenId master, const std::string& name,
+                                 const std::string& relation) const;
+};
 
   class SetCapacity : public Method
   {

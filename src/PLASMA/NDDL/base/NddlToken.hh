@@ -18,7 +18,7 @@ namespace NDDL {
      * @see PLASMA::IntervalToken
      */
     NddlToken(const EUROPA::PlanDatabaseId planDatabase,
-              const EUROPA::LabelStr& predicateName,
+              const std::string& predicateName,
               const bool& rejectable = false, const bool& isFact = false,
               const bool& close = false);
 
@@ -27,8 +27,8 @@ namespace NDDL {
      * @see PLASMA::IntervalToken
      */
     NddlToken(const EUROPA::TokenId master,
-              const EUROPA::LabelStr& predicateName,
-              const EUROPA::LabelStr& relation, const bool& close = false);
+              const std::string& predicateName,
+              const std::string& relation, const bool& close = false);
 
     EUROPA::StateVarId state; /**<Tracks token's state: active, merged, rejected, etc. */
     EUROPA::ObjectVarId object; /**<Tracks the objects the token could be associated with. */

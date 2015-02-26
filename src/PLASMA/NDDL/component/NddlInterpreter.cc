@@ -21,6 +21,8 @@
 #include "PathDefs.hh"
 
 #include <boost/cast.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 namespace EUROPA {
 
@@ -79,38 +81,34 @@ void NddlInterpreter::addInputStream(pANTLR3_INPUT_STREAM in)
     m_inputstreams.push_back(in);
 }
 
-std::vector<std::string> NddlInterpreter::getIncludePath()
-{
-    // TODO: cache this
-    std::vector<std::string> includePath;
+std::vector<std::string> NddlInterpreter::getIncludePath() {
+  // TODO: cache this
+  std::vector<std::string> includePath;
 
-    // Add overrides from config;
-    const std::string& configPathStr = getEngine()->getConfig()->getProperty("nddl.includePath");
-    if (configPathStr.size() > 0) {
-        LabelStr configPath=configPathStr;
-        unsigned long cnt = configPath.countElements(PATH_SEPARATOR_STR.c_str());
-        for (unsigned long i=0;i<cnt;i++)
-            includePath.push_back(configPath.getElement(i,PATH_SEPARATOR_STR.c_str()).c_str());
-    }
+  // Add overrides from config;
+  const std::string& configPathStr = getEngine()->getConfig()->getProperty("nddl.includePath");
+  if (configPathStr.size() > 0) {
+    boost::split(includePath, configPathStr, boost::is_any_of(PATH_SEPARATOR_STR));
+  }
 
-    // Look in current dir first
-    includePath.push_back(".");
+  // Look in current dir first
+  includePath.push_back(".");
 
-    // otherwise, look in include path, starting with $EUROPA_HOME, then $PLASMA_HOME
-    const char* europaHome = std::getenv("EUROPA_HOME");
-    if (europaHome != NULL)
-        includePath.push_back(std::string(europaHome)+ PATH_STR + "include");
-    else // TODO: this should be at least INFO, possibly WARNING
-        debugMsg("NddlInterpreter","$EUROPA_HOME is not defined, therefore not added to NddlInterpreter include path");
+  // otherwise, look in include path, starting with $EUROPA_HOME, then $PLASMA_HOME
+  const char* europaHome = std::getenv("EUROPA_HOME");
+  if (europaHome != NULL)
+    includePath.push_back(std::string(europaHome)+ PATH_STR + "include");
+  else // TODO: this should be at least INFO, possibly WARNING
+    debugMsg("NddlInterpreter","$EUROPA_HOME is not defined, therefore not added to NddlInterpreter include path");
 
-    const char* plasmaHome = std::getenv("PLASMA_HOME");
-    if (plasmaHome != NULL) {
-        includePath.push_back(std::string(plasmaHome)+ PATH_STR + "src" + PATH_STR + "PLASMA" + PATH_STR + "NDDL" + PATH_STR + "base");
-        includePath.push_back(std::string(plasmaHome)+ PATH_STR + "src" + PATH_STR + "PLASMA" + PATH_STR + "Resource" + PATH_STR + "component" + PATH_STR +"NDDL");
-    }
+  const char* plasmaHome = std::getenv("PLASMA_HOME");
+  if (plasmaHome != NULL) {
+    includePath.push_back(std::string(plasmaHome)+ PATH_STR + "src" + PATH_STR + "PLASMA" + PATH_STR + "NDDL" + PATH_STR + "base");
+    includePath.push_back(std::string(plasmaHome)+ PATH_STR + "src" + PATH_STR + "PLASMA" + PATH_STR + "Resource" + PATH_STR + "component" + PATH_STR +"NDDL");
+  }
 		
-    // TODO: dump includePath to log
-    return includePath;
+  // TODO: dump includePath to log
+  return includePath;
 }
 
 
@@ -533,17 +531,17 @@ TokenTypeId NddlSymbolTable::getTypeForToken(const char* qualifiedName,
   }
 }
 
-MethodId NddlSymbolTable::getMethod(const char* methodName,Expr* target,const std::vector<Expr*>& args)
-{
-    if (m_parentST != NULL)
-        return m_parentST->getMethod(methodName,target,args);
+MethodId NddlSymbolTable::getMethod(const char* methodName,Expr* target,
+                                    const std::vector<Expr*>& args) {
+  if (m_parentST != NULL)
+    return m_parentST->getMethod(methodName,target,args);
 
-    std::vector<DataTypeId> argTypes;
-    for (unsigned int i=0;i<args.size();i++)
-        argTypes.push_back(args[i]->getDataType());
+  std::vector<DataTypeId> argTypes;
+  for (unsigned int i=0;i<args.size();i++)
+    argTypes.push_back(args[i]->getDataType());
 
-    DataTypeId targetDataType = (target != NULL ? target->getDataType() : DataTypeId::noId());
-    return getPlanDatabase()->getSchema()->getMethod(LabelStr(methodName),targetDataType,argTypes);
+  DataTypeId targetDataType = (target != NULL ? target->getDataType() : DataTypeId::noId());
+  return getPlanDatabase()->getSchema()->getMethod(methodName,targetDataType,argTypes);
 }
 
 CFunctionId NddlSymbolTable::getCFunction(const char* name,const std::vector<CExpr*>& args)
@@ -551,7 +549,7 @@ CFunctionId NddlSymbolTable::getCFunction(const char* name,const std::vector<CEx
     if (m_parentST != NULL)
         return m_parentST->getCFunction(name,args);
 
-    CFunctionId f = getPlanDatabase()->getSchema()->getCESchema()->getCFunction(LabelStr(name));
+    CFunctionId f = getPlanDatabase()->getSchema()->getCESchema()->getCFunction(name);
 
     if (f.isId()) {
     	std::vector<DataTypeId> argTypes;
@@ -590,27 +588,24 @@ TokenId NddlSymbolTable::getToken(const char* name)
         return EvalContext::getToken(name);
 }
 
-const std::string& NddlSymbolTable::getEnumForValue(const char* value) const
-{
-    if (m_parentST == NULL)
-        return getPlanDatabase()->getSchema()->getEnumForValue(LabelStr(value));
+const std::string& NddlSymbolTable::getEnumForValue(const char* value) const {
+  if (m_parentST == NULL)
+    return getPlanDatabase()->getSchema()->getEnumForValue(LabelStr(value));
 
-    return m_parentST->getEnumForValue(value);
+  return m_parentST->getEnumForValue(value);
 }
 
-bool NddlSymbolTable::isEnumValue(const char* value) const
-{
-    if (m_parentST == NULL)
-        return getPlanDatabase()->getSchema()->isEnumValue(LabelStr(value));
+bool NddlSymbolTable::isEnumValue(const char* value) const {
+  if (m_parentST == NULL)
+    return getPlanDatabase()->getSchema()->isEnumValue(LabelStr(value));
 
-    return m_parentST->isEnumValue(value);
+  return m_parentST->isEnumValue(value);
 }
 
-Expr* NddlSymbolTable::makeEnumRef(const char* value) const
-{
-    const LabelStr& enumType = getEnumForValue(value);
-    EnumeratedDomain* ad = boost::polymorphic_cast<EnumeratedDomain*>(
-            getPlanDatabase()->getSchema()->getCESchema()->baseDomain(enumType.c_str()).copy());
+Expr* NddlSymbolTable::makeEnumRef(const char* value) const {
+  const std::string& enumType = getEnumForValue(value);
+  EnumeratedDomain* ad = boost::polymorphic_cast<EnumeratedDomain*>(
+      getPlanDatabase()->getSchema()->getCESchema()->baseDomain(enumType.c_str()).copy());
     edouble v = LabelStr(value);
     ad->set(v);
 
