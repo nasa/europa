@@ -2,24 +2,23 @@
 #define _H_Context
 
 #include "SolverDefs.hh"
-#include "LabelStr.hh"
 
 namespace EUROPA {
   namespace SOLVERS {
     
     class Context {
     public:
-      Context(const LabelStr& name);
+      Context(const std::string& name);
       ~Context();
-      double get(const LabelStr& key) const;
-      void remove(const LabelStr& key);
+      double get(const std::string& key) const;
+      void remove(const std::string& key);
       void put(const std::string& key, const double value) {m_map[key] = value;}
-      const LabelStr& getName() const {return m_name;}
+      const std::string& getName() const {return m_name;}
       ContextId getId() const {return m_id;}
     protected:
     private:
       ContextId m_id;
-      const LabelStr m_name;
+      const std::string m_name;
       std::map<std::string, double> m_map;
     };
   }

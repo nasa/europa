@@ -22,7 +22,7 @@ namespace EUROPA {
     UnboundVariableDecisionPoint::UnboundVariableDecisionPoint(const DbClientId dbClient, 
                                                                const ConstrainedVariableId flawedVariable, 
                                                                const TiXmlElement& configData,
-                                                               const LabelStr& explanation)
+                                                               const std::string& explanation)
       : DecisionPoint(dbClient, flawedVariable->getKey(), explanation),
         m_flawedVariable(flawedVariable),
         m_choices(ValueSource::getSource(dbClient->getSchema(),flawedVariable)){
@@ -73,7 +73,7 @@ namespace EUROPA {
   }
 
 
-    MinValue::MinValue(const DbClientId client, const ConstrainedVariableId flawedVariable, const TiXmlElement& configData, const LabelStr& explanation)
+    MinValue::MinValue(const DbClientId client, const ConstrainedVariableId flawedVariable, const TiXmlElement& configData, const std::string& explanation)
       : UnboundVariableDecisionPoint(client, flawedVariable, configData, explanation), m_choiceIndex(0){}
 
     bool MinValue::hasNext() const {return m_choiceIndex < m_choices->getCount();}
@@ -81,7 +81,7 @@ namespace EUROPA {
     edouble MinValue::getNext(){return m_choices->getValue(m_choiceIndex++);}
 
     /** MAX VALUE **/
-    MaxValue::MaxValue(const DbClientId client, const ConstrainedVariableId flawedVariable, const TiXmlElement& configData, const LabelStr& explanation)
+    MaxValue::MaxValue(const DbClientId client, const ConstrainedVariableId flawedVariable, const TiXmlElement& configData, const std::string& explanation)
       : UnboundVariableDecisionPoint(client, flawedVariable, configData, explanation),
         m_choiceIndex(m_choices->getCount()){}
 
@@ -92,7 +92,7 @@ namespace EUROPA {
     /** RANDOM VALUE **/
   RandomValue::RandomValue(const DbClientId client, 
                            const ConstrainedVariableId flawedVariable, 
-                           const TiXmlElement& configData, const LabelStr& explanation)
+                           const TiXmlElement& configData, const std::string& explanation)
       : UnboundVariableDecisionPoint(client, flawedVariable, configData, explanation),
         m_usedIndices(), m_distribution(NORMAL) {
       static bool sl_seeded(false);

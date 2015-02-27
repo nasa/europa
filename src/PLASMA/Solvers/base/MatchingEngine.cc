@@ -69,7 +69,7 @@ MatchingEngine::~MatchingEngine() {
       m_rules.insert(rule);
 
       std::string expression = rule->toString();
-      LabelStr expressionLabel(expression);
+      std::string expressionLabel(expression);
       m_rulesByExpression.insert(std::make_pair(expressionLabel, rule));
 
       if(rule->staticFilterCount() == 0){
@@ -85,12 +85,12 @@ MatchingEngine::~MatchingEngine() {
       addFilter(rule->tokenNameFilter(), rule, m_rulesByTokenName);
 
       if(rule->filteredByMasterRelation()){
-        static const LabelStr BEFORE("before");
-        static const LabelStr AFTER("after");
-        static const LabelStr MEETS("meets");
-        static const LabelStr MET_BY("met_by");
+        static const std::string BEFORE("before");
+        static const std::string AFTER("after");
+        static const std::string MEETS("meets");
+        static const std::string MET_BY("met_by");
 
-        const LabelStr& relation = rule->masterRelationFilter();
+        const std::string& relation = rule->masterRelationFilter();
         addFilter(relation, rule, m_rulesByMasterRelation);
 
         // Post for matchable relations too
@@ -101,16 +101,16 @@ MatchingEngine::~MatchingEngine() {
       }
     }
 
-void MatchingEngine::addFilter(const LabelStr& label, const MatchingRuleId rule, 
+void MatchingEngine::addFilter(const std::string& label, const MatchingRuleId rule, 
                                std::multimap<std::string,MatchingRuleId>& index){
   if(label != WILD_CARD()){
     debugMsg("MatchingEngine:addFilter",
-             "Adding " << rule->toString() << " for label " << label.toString());
+             "Adding " << rule->toString() << " for label " << label);
     index.insert(std::make_pair(label, rule));
   }
 }
 
-bool MatchingEngine::hasRule(const LabelStr& expression) const {
+bool MatchingEngine::hasRule(const std::string& expression) const {
   return m_rulesByExpression.find(expression) != m_rulesByExpression.end();
 }
 
@@ -186,10 +186,10 @@ bool matches(MatchingRuleId rule, const std::string& value, const std::string& k
     return value==key;
 }
   
-void triggerTokenByName(const LabelStr& lbl,
+void triggerTokenByName(const std::string& lbl,
                         const std::multimap<std::string, MatchingRuleId>& rules,
                         std::vector<MatchingRuleId>& results) {
-  debugMsg("MatchingEngine:trigger", "Searching with label " << lbl.toString());
+  debugMsg("MatchingEngine:trigger", "Searching with label " << lbl);
   debugMsg("MatchingEngine:verboseTrigger", "Searching in " << std::endl << rulesToString(rules));
   unsigned int addedCount = 0;
   std::multimap<std::string, MatchingRuleId>::const_iterator it = rules.begin();
@@ -205,7 +205,7 @@ void triggerTokenByName(const LabelStr& lbl,
   }
 
   debugMsg("MatchingEngine:trigger",
-           "Found " << results.size() << " matches for " << lbl.toString() <<
+           "Found " << results.size() << " matches for " << lbl <<
            " so far.  Added " << addedCount);
 }
 }
@@ -215,13 +215,13 @@ void triggerTokenByName(const LabelStr& lbl,
     template<>
     void MatchingEngine::getMatchesInternal(const TokenId token, std::vector<MatchingRuleId>& results){
       // Fire for predicate
-      LabelStr unqualifiedName = token->getUnqualifiedPredicateName();
-      debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for predicate " << unqualifiedName.toString());
+      std::string unqualifiedName = token->getUnqualifiedPredicateName();
+      debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for predicate " << unqualifiedName);
       trigger(unqualifiedName, m_rulesByPredicate, results);
 
       // Fire for tokenName
-      LabelStr tokenName = token->getName();
-      debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for tokenName " << tokenName.toString());
+      std::string tokenName = token->getName();
+      debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for tokenName " << tokenName);
       triggerTokenByName(tokenName, m_rulesByTokenName, results);
 
       SchemaId schema = token->getPlanDatabase()->getSchema();
@@ -242,21 +242,21 @@ void triggerTokenByName(const LabelStr& lbl,
         trigger(token->getRelation(), m_rulesByMasterRelation, results);
       }
       else { // Trigger for those registered for 'none' explicitly
-        static const LabelStr none("none");
+        static const std::string none("none");
         debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for 'none' master relation.");
         trigger(none, m_rulesByMasterRelation, results);
       }
     }
 
-void MatchingEngine::trigger(const LabelStr& lbl, 
+void MatchingEngine::trigger(const std::string& lbl, 
                              const std::multimap<std::string, MatchingRuleId>& rules,
                              std::vector<MatchingRuleId>& results){
-  debugMsg("MatchingEngine:trigger", "Searching with label " << lbl.toString());
+  debugMsg("MatchingEngine:trigger", "Searching with label " << lbl);
   debugMsg("MatchingEngine:verboseTrigger", "Searching in " << std::endl << rulesToString(rules));
   unsigned int addedCount = 0;
 
   std::multimap<std::string, MatchingRuleId>::const_iterator it = rules.find(lbl);
-  while(it != rules.end() && it->first==lbl.toString()) {
+  while(it != rules.end() && it->first==lbl) {
     MatchingRuleId rule = it->second;
     if(rule->fire()) {
       results.push_back(rule);
@@ -266,7 +266,7 @@ void MatchingEngine::trigger(const LabelStr& lbl,
   }
 
   debugMsg("MatchingEngine:trigger",
-           "Found " << results.size() << " matches for " << lbl.toString() <<
+           "Found " << results.size() << " matches for " << lbl <<
            " so far.  Added " << addedCount);
 }
 
@@ -274,7 +274,7 @@ void MatchingEngine::trigger(const std::vector<std::string>& labels,
                              const std::multimap<std::string, MatchingRuleId>& rules,
                              std::vector<MatchingRuleId>& results) {
   for(std::vector<std::string>::const_iterator it = labels.begin(); it != labels.end(); ++it){
-    const LabelStr& label = *it;
+    const std::string& label = *it;
     trigger(label, rules, results);
   }
 }
@@ -291,13 +291,13 @@ MatchFinderMgr::~MatchFinderMgr() {
   purgeAll();
 }
 
-    void MatchFinderMgr::addMatchFinder(const LabelStr& type, const MatchFinderId finder) {
+    void MatchFinderMgr::addMatchFinder(const std::string& type, const MatchFinderId finder) {
         // Remove first in case one already exists
         removeMatchFinder(type);
         getEntityMatchers().insert(std::make_pair(type, finder));
     }
 
-void MatchFinderMgr::removeMatchFinder(const LabelStr& type) {
+void MatchFinderMgr::removeMatchFinder(const std::string& type) {
   std::map<std::string, MatchFinderId>::iterator it = getEntityMatchers().find(type);
   if(it != getEntityMatchers().end()) {
     MatchFinderId oldId = it->second;

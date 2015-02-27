@@ -105,14 +105,14 @@ namespace EUROPA {
       /**
        * @brief Allowed policy strings for customization
        */
-      static const LabelStr& policies(){
-	static const LabelStr sl_policies("PossiblyContained:PartiallyContained:TotallyContained:");
+      static const std::string& policies(){
+	static const std::string sl_policies("PossiblyContained:PartiallyContained:TotallyContained:");
 	return sl_policies;
       }
 
     private:
 
-      LabelStr m_policy;
+      std::string m_policy;
     };
 
     /**

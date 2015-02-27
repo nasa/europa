@@ -34,7 +34,7 @@ class UnboundVariableManager: public FlawManager {
   void addFlaw(const ConstrainedVariableId var);
   void removeFlaw(const ConstrainedVariableId var);
   void updateFlaw(const ConstrainedVariableId var);
-  bool betterThan(const EntityId a, const EntityId b, LabelStr& explanation);
+  bool betterThan(const EntityId a, const EntityId b, std::string& explanation);
 
   /**
    * @brief Utility to test if the given variable is part of a token that is merged, rejected or inactive.

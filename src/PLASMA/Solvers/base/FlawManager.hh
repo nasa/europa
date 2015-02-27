@@ -165,14 +165,14 @@ namespace EUROPA {
       /**
        * @brief Factory method to allocate instance for selected decision point
        */
-      DecisionPointId allocateDecisionPoint(const EntityId entity, const LabelStr& explanation);      
+      DecisionPointId allocateDecisionPoint(const EntityId entity, const std::string& explanation);      
 
       /**
        * @brief Subclass to implement in order to trigger database dependent data
        */
       virtual void handleInitialize() = 0;
 
-      virtual bool betterThan(const EntityId a, const EntityId b, LabelStr& explanation);
+      virtual bool betterThan(const EntityId a, const EntityId b, std::string& explanation);
 
       PlanDatabaseId m_db;
 

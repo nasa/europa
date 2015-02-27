@@ -30,7 +30,7 @@ namespace EUROPA {
        * @brief Constructor. Test signature for DecisionPointFactory
        */
       OpenConditionDecisionPoint(const DbClientId client, const TokenId flawedToken, const TiXmlElement& configData,
-                                 const LabelStr& explanation = "unknown");
+                                 const std::string& explanation = "unknown");
 
       virtual ~OpenConditionDecisionPoint();
 
@@ -102,7 +102,7 @@ namespace EUROPA {
         const DbClientId client,
         const TokenId flawedToken,
         const TiXmlElement& configData,
-        const LabelStr& explanation = "unknown");
+        const std::string& explanation = "unknown");
 
     virtual ~SupportedOCDecisionPoint();
 

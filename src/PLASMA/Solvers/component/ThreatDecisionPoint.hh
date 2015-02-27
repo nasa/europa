@@ -21,7 +21,7 @@ class ThreatDecisionPoint: public DecisionPoint {
 
   ThreatDecisionPoint(const DbClientId client, const TokenId tokenToOrder, 
                       const TiXmlElement& configData,
-                      const LabelStr& explanation = "unknown");
+                      const std::string& explanation = "unknown");
 
   /**
    * @brief Used to prune entities out which are not active tokens

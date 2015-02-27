@@ -24,16 +24,16 @@ ComponentId Component::getId() {return m_id;}
 
 const ComponentId Component::getId() const {return m_id;}
 
-const LabelStr& Component::getName() const {
+const std::string& Component::getName() const {
   return m_name;
 }
 
-void Component::setName(const LabelStr& name){
+void Component::setName(const std::string& name){
   m_name = name;
 }
 
 ComponentId ComponentFactoryMgr::createComponentInstance(const TiXmlElement& configData) {
-  LabelStr name = extractData(configData, "component");
+  std::string name = extractData(configData, "component");
   return FactoryMgr::createInstance(name,ComponentArgs(configData));
 }
 

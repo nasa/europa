@@ -24,8 +24,8 @@ class MatchFinderMgr : public EngineComponent {
   MatchFinderMgr();
   virtual ~MatchFinderMgr();
         
-  void addMatchFinder(const LabelStr& type, const MatchFinderId finder);
-  void removeMatchFinder(const LabelStr& type);
+  void addMatchFinder(const std::string& type, const MatchFinderId finder);
+  void removeMatchFinder(const std::string& type);
   void purgeAll();
         
   std::map<std::string, MatchFinderId>& getEntityMatchers();
@@ -63,7 +63,7 @@ class MatchingEngine {
    * @param expression A string expression for the rule
    * @see MatchingRule::toString(), MatchingRule::setExpression
    */
-  bool hasRule(const LabelStr& expression) const;
+  bool hasRule(const std::string& expression) const;
 
   /**
    * @brief The last count of matches tried.
@@ -82,7 +82,7 @@ class MatchingEngine {
   /**
    * @brief Utility method to add a rule to an index if it is required.
    */
-  void addFilter(const LabelStr& label, const MatchingRuleId rule, 
+  void addFilter(const std::string& label, const MatchingRuleId rule, 
                  std::multimap<std::string,MatchingRuleId>& index);
 
   template<typename T>
@@ -93,7 +93,7 @@ class MatchingEngine {
   /**
    * @brief Utility method to trigger rules along a given index.
    */
-  void trigger(const LabelStr& lbl, 
+  void trigger(const std::string& lbl, 
                const std::multimap<std::string, MatchingRuleId>& rules,
                std::vector<MatchingRuleId>& results);
 

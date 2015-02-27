@@ -69,7 +69,7 @@ namespace EUROPA {
 
       const eint getFlawedEntityKey() {return m_entityKey;}
       //    protected:
-      DecisionPoint(const DbClientId client, eint entityKey, const LabelStr& explanation);
+      DecisionPoint(const DbClientId client, eint entityKey, const std::string& explanation);
 
       // friend class Solver; /*!< grants special access to execute and undo methods */
       // friend class ::FlawManagerTests;
@@ -140,10 +140,10 @@ namespace EUROPA {
       /**
        * @brief Get the justification behind the selection of this decision point
        */
-      const LabelStr& getExplanation() {return m_explanation;}
+      const std::string& getExplanation() {return m_explanation;}
     private:
       DecisionPointId m_id;
-      LabelStr m_explanation;
+      std::string m_explanation;
       bool m_isExecuted; /*!< True if executed has been called, and undo has not */
       bool m_initialized; /*!< True if choices have been set up. Otherwise false.*/
       ContextId m_context;

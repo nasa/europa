@@ -315,7 +315,7 @@ FlawManager::FlawManager(const TiXmlElement& configData)
       Priority bestP =  bestPriority - (2 * cast_double(EPSILON));
       IteratorId it = createIterator();
 
-      LabelStr explanation = "unknown";
+      std::string explanation = "unknown";
       // Now go through the candidates
       while(!it->done()){
 
@@ -438,7 +438,7 @@ FlawManager::FlawManager(const TiXmlElement& configData)
         debugMsg("FlawManager:staticMatch", getId() << " Sticking " << entity->getKey() << " into static filters.");
         m_staticFiltersByKey.insert(std::make_pair(entity->getKey(), true));
         debugMsg("FlawManager:staticMatch", 
-                 flawFilter->getName().toString() <<" excluding " << entity->getKey() << ".  Matched " << flawFilter->toString() << ".");
+                 flawFilter->getName() <<" excluding " << entity->getKey() << ".  Matched " << flawFilter->toString() << ".");
 
         return true;
       }
@@ -483,11 +483,11 @@ FlawManager::FlawManager(const TiXmlElement& configData)
           FlawFilterId dynamicFilter = *it_a;
           checkError(dynamicFilter->isDynamic(), "Must be a bug in construction code.");
 	  debugMsg("FlawManager:dynamicMatch",  "Evaluating " << entity->getKey() << ". "  <<                   
-		     dynamicFilter->getName().toString() << " excluding " << entity->toString() << " with " << dynamicFilter->toString());
+		     dynamicFilter->getName() << " excluding " << entity->toString() << " with " << dynamicFilter->toString());
 
           if(dynamicFilter->test(entity)){
             debugMsg("FlawManager:dynamicMatch",  "Excluding " << entity->getKey() << ". "  <<                   
-		     dynamicFilter->getName().toString() << " excluding " << entity->toString() << " with " << dynamicFilter->toString());
+		     dynamicFilter->getName() << " excluding " << entity->toString() << " with " << dynamicFilter->toString());
 
             condDebugMsg(!isValid(), "FlawManager:isValid", "Invalid datastructures in flaw manger.");
             return true;
@@ -510,7 +510,7 @@ FlawManager::FlawManager(const TiXmlElement& configData)
     /**
      * @brief Now we conduct a simple match where we select based on first avalaible.
      */
-    DecisionPointId FlawManager::allocateDecisionPoint(const EntityId entity, const LabelStr& explanation){
+    DecisionPointId FlawManager::allocateDecisionPoint(const EntityId entity, const std::string& explanation){
       static unsigned int sl_counter(0); // Helpful for debugging
       sl_counter++;
 
@@ -633,7 +633,7 @@ FlawManager::FlawManager(const TiXmlElement& configData)
       }
     }
 
-    bool FlawManager::betterThan(const EntityId a, const EntityId b, LabelStr& explanation){
+    bool FlawManager::betterThan(const EntityId a, const EntityId b, std::string& explanation){
       if(a.isId() && b.isId()) {
         explanation = "higherKey";
         return (a->getKey() > b->getKey());
