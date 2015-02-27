@@ -12,7 +12,6 @@
 #include <string>
 
 namespace EUROPA {
-class LabelStr;
 class TiXmlElement;
 
 #define IS_TAG(x) (strcmp (tagName, x) == 0)
@@ -20,7 +19,7 @@ class TiXmlElement;
   /**
    * @brief Utility to extract an argument from an xml element
    */
-  LabelStr extractData(const TiXmlElement& element, const LabelStr& argName);
+  std::string extractData(const TiXmlElement& element, const std::string& argName);
 
   /**
    * @brief Helper method to get the first xml element in the file

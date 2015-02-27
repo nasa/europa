@@ -3,7 +3,6 @@
 
 #include <map>
 #include "Engine.hh"
-#include "LabelStr.hh"
 
 namespace EUROPA {
 
@@ -32,17 +31,17 @@ public:
 class Factory
 {
 public:
-    Factory(const LabelStr& name);
+    Factory(const std::string& name);
     virtual ~Factory();
     
     FactoryId getId(); 
-    const LabelStr& getName() const;
+    const std::string& getName() const;
 
     virtual FactoryObjId createInstance(const FactoryArgs& args) = 0;
     
 protected:
     FactoryId m_id;
-    LabelStr m_name;
+    std::string m_name;
 };
 
 
@@ -57,13 +56,13 @@ public:
     void registerFactory(FactoryId factory);
     void purgeAll();
         
-    virtual FactoryObjId createInstance(const LabelStr& name, const FactoryArgs& args);
+    virtual FactoryObjId createInstance(const std::string& name, const FactoryArgs& args);
     
 protected:
     FactoryMgrId m_id;     
   std::map<std::string,FactoryId> m_factoryMap;   
     
-    FactoryId getFactory(const LabelStr& name);    
+    FactoryId getFactory(const std::string& name);    
 };
 
 }
