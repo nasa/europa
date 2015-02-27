@@ -7,7 +7,7 @@ class Foo extends Reservoir {
   }
 }
 
-class Bar extends Timeline {
+class Bar extends Object {
   Foo m_foo;
   Bar() {
     m_foo = new Foo();
@@ -18,6 +18,7 @@ class Bar extends Timeline {
     int reftime3;
     int reftime4;
   }
+  predicate Axel {}
 }
 
 Bar::Stuff {
@@ -29,6 +30,13 @@ Bar::Stuff {
   eq(f2.time, reftime2);
   f3.time == reftime3;
   reftime4 == f4.time;
+}
+
+Bar::Axel {
+  any(object.Stuff f);
+  f.start <= this.start - 1;
+  f.end >= this.end - 1;
+  f.state == ACTIVE;
 }
 PlannerConfig world = new PlannerConfig();
 Foo foo = new Foo();
@@ -54,3 +62,8 @@ goal(b.Stuff bb);
 bb.start > world.m_horizonStart;
 bb.end < world.m_horizonEnd;
 bb.activate();
+
+goal(b.Axel a);
+a.start > world.m_horizonStart;
+a.end < world.m_horizonEnd;
+a.activate();
