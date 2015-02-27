@@ -53,6 +53,8 @@ namespace EUROPA {
 
       ConstraintEngine* ce = new ConstraintEngine(ces->getId());
 	  new DefaultPropagator(std::string("Default"), ce->getId());
+      ce->setAllowViolations(engine->getConfig()->getProperty("ConstraintEngine.allowViolations") == "true");
+      
       engine->addComponent("ConstraintEngine",ce);
   }
 
