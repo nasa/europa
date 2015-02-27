@@ -32,7 +32,7 @@ namespace EUROPA {
     virtual ConstraintId createConstraint(
                              const ConstraintEngineId constraintEngine,
 					         const std::vector<ConstrainedVariableId>& scope,
-					         const char* violationExpl) = 0;
+					         const std::string& violationExpl) = 0;
 
     // throws an std::string error message if the specified arg types can't be used
     // to create the constraint this type represents
@@ -57,13 +57,13 @@ ConstraintId makeConstraintInstance(
     const std::string& propagatorName,
     const ConstraintEngineId constraintEngine,
     const std::vector<ConstrainedVariableId>& scope,
-    const char* violationExpl) {
+    const std::string& violationExpl) {
   check_error(constraintEngine.isValid());
   check_error(scope.size() >= 1);
   Constraint* constraint = new ConstraintInstance(name, propagatorName, constraintEngine, scope);
   check_error(constraint != 0);
   check_error(constraint->getId().isValid());
-  if (violationExpl != NULL)
+  if (!violationExpl.empty())
     constraint->setViolationExpl(violationExpl);
   
   return(constraint->getId());
@@ -90,7 +90,7 @@ class ConcreteConstraintType : public ConstraintType {
   virtual ConstraintId createConstraint(
       const ConstraintEngineId constraintEngine,
       const std::vector<ConstrainedVariableId>& scope,
-      const char* violationExpl)
+      const std::string& violationExpl)
   {
     return makeConstraintInstance<ConstraintInstance>(m_name, m_propagatorName, constraintEngine, scope, violationExpl);
   }
@@ -144,7 +144,7 @@ class RotatedNaryConstraintType : public ConstraintType {
     ConstraintId createConstraint(
                   const ConstraintEngineId constraintEngine,
 				  const std::vector<ConstrainedVariableId>& scope,
-				  const char* violationExpl)
+				  const std::string& violationExpl)
     {
       check_error(constraintEngine.isValid());
       check_error(scope.size() >= 1);
@@ -153,7 +153,7 @@ class RotatedNaryConstraintType : public ConstraintType {
       check_error(constraint != 0);
       check_error(constraint->getId().isValid());
 
-      if (violationExpl != NULL)
+      if (!violationExpl.empty())
           constraint->setViolationExpl(violationExpl);
 
       return(constraint->getId());
@@ -182,7 +182,7 @@ class RotatedNaryConstraintType : public ConstraintType {
     ConstraintId createConstraint(
                   const ConstraintEngineId constraintEngine,
 				  const std::vector<ConstrainedVariableId>& scope,
-				  const char* violationExpl) {
+				  const std::string& violationExpl) {
       check_error(constraintEngine.isValid());
       check_error(scope.size() >= 1);
       Constraint* constraint = new ConstraintInstance(m_name, m_propagatorName, constraintEngine,
@@ -190,7 +190,7 @@ class RotatedNaryConstraintType : public ConstraintType {
       check_error(constraint != 0);
       check_error(constraint->getId().isValid());
 
-      if (violationExpl != NULL)
+      if (!violationExpl.empty())
           constraint->setViolationExpl(violationExpl);
 
       return(constraint->getId());

@@ -514,10 +514,10 @@ void RuleInstance::addConstraint(const ConstraintId constr){
     check_error(m_rule.isValid());
     check_error(m_token.isValid());
     check_error(m_token->isActive(),
-		m_token->getPredicateName().toString() + " is not active");
+		m_token->getPredicateName() + " is not active");
     check_error(m_planDb->getSchema()->isA(m_token->getPredicateName(), m_rule->getName()),
 		"Cannot have rule " + m_rule->getName().toString() +
-		" on predicate " + m_token->getPredicateName().toString());
+		" on predicate " + m_token->getPredicateName());
     return true;
   }
 
@@ -615,7 +615,8 @@ ConstrainedVariableId RuleInstance::varFromObject(const ConstrainedVariableId ob
                                                   const std::string& fullName,
                                                   bool canBeSpecified){
   std::vector<std::string> names;
-  tokenize(varString, names, std::string(Schema::getDelimiter()));
+  boost::split(names, varString, boost::is_any_of("."));
+
   unsigned int varindex = 0;
 
   // First we compute the position index, and get the type of the last variable. This will then

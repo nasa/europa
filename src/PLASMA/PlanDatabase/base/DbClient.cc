@@ -54,9 +54,11 @@ DbClient::DbClient(const PlanDatabaseId db)
 
 
   ConstrainedVariableId
-  DbClient::createVariable(const char* typeName, const Domain& baseDomain, const char* name, bool isTmpVar, bool canBeSpecified)
+  DbClient::createVariable(const std::string& typeName, const Domain& baseDomain, const std::string& name, bool isTmpVar, bool canBeSpecified)
   {
-    ConstrainedVariableId variable = m_planDb->getConstraintEngine()->createVariable(typeName, baseDomain, isTmpVar, canBeSpecified, name);
+    ConstrainedVariableId variable =
+        m_planDb->getConstraintEngine()->createVariable(typeName, baseDomain, isTmpVar,
+                                                        canBeSpecified, name);
     if (m_planDb->getSchema()->isObjectType(typeName) && !variable->isClosed()) {
       m_planDb->makeObjectVariableFromType(typeName, variable);
     }
@@ -71,7 +73,7 @@ DbClient::DbClient(const PlanDatabaseId db)
   }
 
   ConstrainedVariableId
-  DbClient::createVariable(const char* typeName, const char* name, bool isTmpVar)
+  DbClient::createVariable(const std::string& typeName, const std::string& name, bool isTmpVar)
   {
     ConstrainedVariableId variable = m_planDb->getConstraintEngine()->createVariable(typeName, isTmpVar, true, name);
     if (m_planDb->getSchema()->isObjectType(typeName)) {
@@ -96,7 +98,7 @@ void DbClient::deleteVariable(const ConstrainedVariableId var) {
   delete static_cast<ConstrainedVariable*>(var);
 }
 
-ObjectId DbClient::createObject(const char* type, const char* name){
+ObjectId DbClient::createObject(const std::string& type, const std::string& name){
   static const std::vector<const Domain*> noArguments;
   ObjectId object = m_planDb->createObject(type, name, noArguments);
   debugMsg("DbClient:createObject", object->toLongString());
@@ -104,7 +106,7 @@ ObjectId DbClient::createObject(const char* type, const char* name){
   return object;
 }
 
-  ObjectId DbClient::createObject(const char* type, const char* name, const std::vector<const Domain*>& arguments){
+  ObjectId DbClient::createObject(const std::string& type, const std::string& name, const std::vector<const Domain*>& arguments){
     ObjectId object = m_planDb->createObject(type, name, arguments);
     debugMsg("DbClient:createObject", object->toLongString());
     publish(notifyObjectCreated(object, arguments));
@@ -122,15 +124,15 @@ ObjectId DbClient::createObject(const char* type, const char* name){
     publish(notifyClosed());
   }
 
-  void DbClient::close(const char* objectType) {
+  void DbClient::close(const std::string& objectType) {
 	debugMsg("DbClient:close", "Closing:"+std::string(objectType));
     m_planDb->close(objectType);
 	debugMsg("DbClient:close", "Closed:"+std::string(objectType));
     publish(notifyClosed(objectType));
   }
 
-  TokenId DbClient::createToken(const char* tokenType,
-                                const char* tokenName,
+  TokenId DbClient::createToken(const std::string& tokenType,
+                                const std::string& tokenName,
                                 bool rejectable,
                                 bool isFact) {
     TokenId token = allocateToken(tokenType, tokenName, rejectable, isFact);
@@ -226,9 +228,9 @@ void DbClient::deleteToken(const TokenId token, const std::string& name) {
     debugMsg("DbClient:cancel", token->toString());
   }
 
-  ConstraintId DbClient::createConstraint(const char* name,
+  ConstraintId DbClient::createConstraint(const std::string& name,
 				 const std::vector<ConstrainedVariableId>& scope,
-				 const char* violationExpl)
+				 const std::string& violationExpl)
   {
 
     // Use the constraint library factories to create the constraint
@@ -277,7 +279,7 @@ void DbClient::deleteToken(const TokenId token, const std::string& name) {
   }
 
 
-  ObjectId DbClient::getObject(const char* name) const {return m_planDb->getObject(name);}
+  ObjectId DbClient::getObject(const std::string& name) const {return m_planDb->getObject(name);}
 
   /**
    * @brief Traverse the path and obtain the right token
@@ -311,19 +313,19 @@ void DbClient::deleteToken(const TokenId token, const std::string& name) {
     return(rootToken);
   }
 
-  const ConstrainedVariableId DbClient::getGlobalVariable(const LabelStr& varName) const{
+  const ConstrainedVariableId DbClient::getGlobalVariable(const std::string& varName) const{
     return m_planDb->getGlobalVariable(varName);
   }
 
-  bool DbClient::isGlobalVariable(const LabelStr& varName) const {
+  bool DbClient::isGlobalVariable(const std::string& varName) const {
     return m_planDb->isGlobalVariable(varName);
   }
 
-  const TokenId DbClient::getGlobalToken(const LabelStr& name) const{
+  const TokenId DbClient::getGlobalToken(const std::string& name) const{
     return m_planDb->getGlobalToken(name);
   }
 
-  bool DbClient::isGlobalToken(const LabelStr& name) const {
+  bool DbClient::isGlobalToken(const std::string& name) const {
     return m_planDb->isGlobalToken(name);
   }
 
@@ -419,8 +421,8 @@ void DbClient::deleteToken(const TokenId token, const std::string& name) {
     return m_planDb->hasTokenTypes();
   }
 
-  TokenId DbClient::allocateToken(const char* tokenType,
-                                  const char* tokenName,
+  TokenId DbClient::allocateToken(const std::string& tokenType,
+                                  const std::string& tokenName,
                                   bool rejectable,
                                   bool isFact) {
     checkError(supportsAutomaticAllocation(), "Cannot allocate tokens from the schema.");
@@ -448,7 +450,7 @@ void DbClient::deleteToken(const TokenId token, const std::string& name) {
 
   bool DbClient::isTransactionLoggingEnabled() const { return m_transactionLoggingEnabled; }
 
-  edouble DbClient::createValue(const char* typeName, const std::string& value)
+  edouble DbClient::createValue(const std::string& typeName, const std::string& value)
   {
     return m_planDb->getConstraintEngine()->createValue(typeName,value);
   }

@@ -51,7 +51,7 @@ VoidDT::createVariable(const ConstraintEngineId,
                                 const Domain&,
                                 const bool,
                                 bool,
-                                const char*,
+                                const std::string&,
                                 const EntityId,
                                 unsigned int) const
 {
@@ -191,7 +191,7 @@ edouble SymbolDT::createValue(const std::string& value) const
   return LabelStr(value);
 }
 
-RestrictedDT::RestrictedDT(const char* name, const DataTypeId baseType,
+RestrictedDT::RestrictedDT(const std::string& name, const DataTypeId baseType,
                            const Domain& _baseDomain)
     : DataType(name)
     , m_baseType(baseType)

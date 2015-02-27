@@ -7,11 +7,11 @@
 namespace EUROPA{
 
 EventToken::EventToken(const PlanDatabaseId planDatabase,
-                       const LabelStr& predicateName,
+                       const std::string& predicateName,
                        bool rejectable,
                        bool _isFact,
                        const IntervalIntDomain& timeBaseDomain,
-                       const LabelStr& objectName,
+                       const std::string& objectName,
                        bool closed)
     :Token(planDatabase, predicateName,
 	   rejectable,
@@ -23,10 +23,10 @@ EventToken::EventToken(const PlanDatabaseId planDatabase,
 }
 
   EventToken::EventToken(const TokenId _master,
-			 const LabelStr& relation,
-			 const LabelStr& predicateName,
+			 const std::string& relation,
+			 const std::string& predicateName,
 			 const IntervalIntDomain& timeBaseDomain,
-			 const LabelStr& objectName,
+			 const std::string& objectName,
 			 bool closed)
     :Token(_master, relation, predicateName,
 	   IntervalIntDomain(0, 0),
@@ -46,7 +46,7 @@ EventToken::EventToken(const PlanDatabaseId planDatabase,
 						   timeBaseDomain,
 						   false, // TODO: fixme
 						   true,
-						   LabelStr("time")))->getId();
+						   "time"))->getId();
     m_allVariables.push_back(m_time);
   }
 }

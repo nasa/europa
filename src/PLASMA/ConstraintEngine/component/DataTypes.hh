@@ -27,7 +27,7 @@ public:
                                                  const Domain& baseDomain,
                                                  const bool internal = false,
                                                  bool canBeSpecified = true,
-                                                 const char* name = NO_VAR_NAME,
+                                                 const std::string& name = NO_VAR_NAME,
                                                  const EntityId parent = EntityId::noId(),
                                                  unsigned int index = ConstrainedVariable::NO_INDEX) const;
 
@@ -119,7 +119,7 @@ public:
 class RestrictedDT : public DataType
 {
 public:
-    RestrictedDT(const char* name, const DataTypeId baseType, const Domain& baseDomain);
+    RestrictedDT(const std::string& name, const DataTypeId baseType, const Domain& baseDomain);
     virtual ~RestrictedDT();
 
     virtual bool isNumeric() const;

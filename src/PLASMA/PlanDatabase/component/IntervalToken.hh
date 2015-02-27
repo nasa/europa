@@ -13,22 +13,22 @@ namespace EUROPA {
   public:
 
     IntervalToken(const PlanDatabaseId planDatabase, 
-		  const LabelStr& predicateName, 
+		  const std::string& predicateName, 
 		  bool rejectable,
 		  bool isFact,
 		  const IntervalIntDomain& startBaseDomain = IntervalIntDomain(),
 		  const IntervalIntDomain& endBaseDomain = IntervalIntDomain(),
 		  const IntervalIntDomain& durationBaseDomain = IntervalIntDomain(1, PLUS_INFINITY),
-		  const LabelStr& objectName = Token::noObject(),
+		  const std::string& objectName = Token::noObject(),
 		  bool closed = true);
 
     IntervalToken(const TokenId master, 
-		  const LabelStr& relation,
-		  const LabelStr& predicateName, 
+		  const std::string& relation,
+		  const std::string& predicateName, 
 		  const IntervalIntDomain& startBaseDomain = IntervalIntDomain(),
 		  const IntervalIntDomain& endBaseDomain = IntervalIntDomain(),
 		  const IntervalIntDomain& durationBaseDomain = IntervalIntDomain(1, PLUS_INFINITY),
-		  const LabelStr& objectName = Token::noObject(),
+		  const std::string& objectName = Token::noObject(),
 		  bool closed = true);
 
     const TempVarId start() const;

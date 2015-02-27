@@ -38,15 +38,15 @@ namespace EUROPA {
 		 "Given token must be part of assignment." 
 		 << m_tokenToOrder->toString() << ";" << predecessor->toString() << "; " << successor->toString());
 
-      debugMsg("SolverDecisionPoint:handleExecute", "For " << m_tokenToOrder->getPredicateName().toString() << "(" <<
-               m_tokenToOrder->getKey() << "), assigning " << predecessor->getPredicateName().toString() << "(" <<
-               predecessor->getKey() << ") to be before " << successor->getPredicateName().toString() << "(" <<
+      debugMsg("SolverDecisionPoint:handleExecute", "For " << m_tokenToOrder->getPredicateName() << "(" <<
+               m_tokenToOrder->getKey() << "), assigning " << predecessor->getPredicateName() << "(" <<
+               predecessor->getKey() << ") to be before " << successor->getPredicateName() << "(" <<
                successor->getKey() << ").");
       m_client->constrain(object, predecessor, successor);
     }
 
     void ThreatDecisionPoint::handleUndo(){
-      debugMsg("SolverDecisionPoint:handleUndo", "Retracting ordering decision on " << m_tokenToOrder->getPredicateName().toString() <<
+      debugMsg("SolverDecisionPoint:handleUndo", "Retracting ordering decision on " << m_tokenToOrder->getPredicateName() <<
                "(" << m_tokenToOrder->getKey() << ").");
       ObjectId object;
       TokenId predecessor;

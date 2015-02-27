@@ -2,7 +2,6 @@
 #define _H_TokenType
 
 #include "PlanDatabaseDefs.hh"
-#include "LabelStr.hh"
 #include "PSList.hh"
 #include <map>
 #include <vector>
@@ -49,20 +48,20 @@ class PSDataType;
    */
 class TokenType: public PSTokenType {
  public:
-  TokenType(const ObjectTypeId ot,const LabelStr& signature);
+  TokenType(const ObjectTypeId ot,const std::string& signature);
 
   virtual ~TokenType();
 
-  void addArg(const DataTypeId type, const LabelStr& name);
+  void addArg(const DataTypeId type, const std::string& name);
 
-  const LabelStr& getPredicateName() const;
+  const std::string& getPredicateName() const;
   std::string toString() const;
   std::string toLongString() const;
 
   // From PSTokenType
-  const std::string& getName() const { return getPredicateName().toString(); }
+  const std::string& getName() const { return getPredicateName(); }
   const std::map<std::string,DataTypeId>& getArgs() const;
-  const DataTypeId getArgType(const char* argName) const;
+  const DataTypeId getArgType(const std::string& argName) const;
 
   const TokenTypeId getId() const;
 
@@ -73,11 +72,11 @@ class TokenType: public PSTokenType {
   /**
    * @brief Return the type for which this type is registered.
    */
-  const LabelStr& getSignature() const;
+  const std::string& getSignature() const;
 
   /**
    * @brief Create a root token instance
-   * @see DbClient::createInstance(const LabelStr& type, const LabelStr& name)
+   * @see DbClient::createInstance(const std::string& type, const std::string& name)
    */
   virtual TokenId createInstance(const PlanDatabaseId planDb,
                                  const std::string& name,
@@ -109,8 +108,8 @@ class TokenType: public PSTokenType {
 
   TokenTypeId m_id;
   ObjectTypeId m_objType;
-  LabelStr m_signature;
-  LabelStr m_predicateName;
+  std::string m_signature;
+  std::string m_predicateName;
   int m_attributes;
   std::map<std::string,DataTypeId> m_args;
 

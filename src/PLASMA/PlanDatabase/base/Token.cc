@@ -37,27 +37,27 @@ namespace EUROPA{
 		"Attempted to construct a StateDomain with invalid type " + org.getTypeName());
   }
 
-  void StateDomain::operator>>(ostream&os) const {
-    // Now commence output
-    Domain::operator>>(os);
-    os << "{";
+void StateDomain::operator>>(ostream&os) const {
+  // Now commence output
+  Domain::operator>>(os);
+  os << "{";
 
-    // First construct a lexicographic ordering for the set of values.
-    std::set<std::string> orderedSet;
+  // First construct a lexicographic ordering for the set of values.
+  std::set<std::string> orderedSet;
 
-    for (std::set<edouble>::const_iterator it = m_values.begin(); it != m_values.end(); ++it) {
-      LabelStr value = *it;
-      orderedSet.insert(value.toString());
-    }
-
-    std::string comma = "";
-    for (std::set<std::string>::const_iterator it = orderedSet.begin(); it != orderedSet.end(); ++it) {
-      os << comma << *it;
-      comma = ",";
-    }
-
-    os << "}";
+  for (std::set<edouble>::const_iterator it = m_values.begin(); it != m_values.end(); ++it) {
+    LabelStr value = *it;
+    orderedSet.insert(value.toString());
   }
+
+  std::string comma = "";
+  for (std::set<std::string>::const_iterator it = orderedSet.begin(); it != orderedSet.end(); ++it) {
+    os << comma << *it;
+    comma = ",";
+  }
+
+  os << "}";
+}
 
   /**
    * Allocate Constants for possible state variable values
@@ -68,17 +68,17 @@ namespace EUROPA{
   const LabelStr Token::MERGED("MERGED");
   const LabelStr Token::REJECTED("REJECTED");
 
-  const LabelStr& Token::noObject(){
-    static const LabelStr sl_noObject("NO_OBJECT_ASSIGNED");
-    return sl_noObject;
-  }
+const std::string& Token::noObject(){
+  static const std::string sl_noObject("NO_OBJECT_ASSIGNED");
+  return sl_noObject;
+}
 
   Token::Token(const PlanDatabaseId planDatabase,
-	       const LabelStr& tokenTypeName,
+	       const std::string& tokenTypeName,
 	       bool rejectable,
 	       bool _isFact,
 	       const IntervalIntDomain& durationBaseDomain,
-	       const LabelStr& objectName,
+	       const std::string& objectName,
 	       bool closed)
       :Entity(),
        m_id(this),
@@ -112,10 +112,10 @@ namespace EUROPA{
 
 // Slave tokens cannot be rejectable.
 Token::Token(const TokenId _master,
-             const LabelStr& relation,
-             const LabelStr& tokenTypeName,
+             const std::string& relation,
+             const std::string& tokenTypeName,
              const IntervalIntDomain& durationBaseDomain,
-             const LabelStr& objectName,
+             const std::string& objectName,
              bool closed)
     :Entity(),
      m_id(this),
@@ -212,10 +212,10 @@ Token::Token(const TokenId _master,
     return m_master;
   }
 
-  const LabelStr& Token::getRelation() const {
-    check_error(m_master.isNoId() || m_master.isValid());
-    return m_relation; // returns "NONE" if m_master isNoId()
-  }
+const std::string& Token::getRelation() const {
+  check_error(m_master.isNoId() || m_master.isValid());
+  return m_relation; // returns "NONE" if m_master isNoId()
+}
 
   /**
    * This works because we have key based comparators which allow us to rely on positions
@@ -244,11 +244,11 @@ const std::string& Token::getBaseObjectType() const {return m_baseObjectType;}
 
 const std::string&  Token::getName() const { return m_name; }
 
-  void Token::setName(const LabelStr& name) { m_name = name; }
+void Token::setName(const std::string& name) { m_name = name; }
 
-  const LabelStr& Token::getPredicateName() const {return m_predicateName;}
+const std::string& Token::getPredicateName() const {return m_predicateName;}
 
-  const LabelStr& Token::getUnqualifiedPredicateName() const {return m_unqualifiedPredicateName;}
+const std::string& Token::getUnqualifiedPredicateName() const {return m_unqualifiedPredicateName;}
 
   const PlanDatabaseId Token::getPlanDatabase() const {
     check_error(m_planDatabase.isValid());
@@ -272,13 +272,14 @@ const std::string&  Token::getName() const { return m_name; }
   const TokenSet& Token::getMergedTokens() const {return m_mergedTokens;}
   const TokenId Token::getActiveToken() const {return m_activeToken;}
 
-  const ConstrainedVariableId Token::getVariable(const LabelStr& name, bool checkGlobalContext) const{
+const ConstrainedVariableId Token::getVariable(const std::string& name,
+                                               bool checkGlobalContext) const{
     const std::vector<ConstrainedVariableId>& vars = getVariables();
     for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin();
 	it != vars.end(); ++it){
       ConstrainedVariableId var = *it;
       checkError(var.isValid(), "Invalid variable id: " << var << " found in token: " << m_id);
-      if(var->getName() == name.toString())
+      if(var->getName() == name)
         return var;
     }
 
@@ -361,7 +362,7 @@ void Token::doMerge(const TokenId activeToken){
              "Not permitted to merge." << toString());
   check_error(getPlanDatabase()->getSchema()->isA(activeToken->getPredicateName(), m_predicateName),
               "Cannot merge tokens with different predicates: " +
-              m_predicateName.toString() + ", " + activeToken->getPredicateName().toString());
+              m_predicateName + ", " + activeToken->getPredicateName());
   checkError((isFact() && activeToken->isFact()) || true,
              "Cannot merge fact " << toString() << " onto non-fact " << 
              activeToken->toString());
@@ -547,17 +548,17 @@ void Token::doMerge(const TokenId activeToken){
   /**
    * @todo - add typechecking here
    */
-  void Token::commonInit(const LabelStr& predicateName,
+void Token::commonInit(const std::string& predicateName,
 			 bool rejectable,
 			 bool _isFact,
 			 const IntervalIntDomain& durationBaseDomain,
-			 const LabelStr& objectName,
+                       const std::string& objectName,
 			 bool closed){
     // The plan database must be valid
     check_error(m_planDatabase.isValid());
 
-    if(predicateName.countElements(".") == 2)
-      m_unqualifiedPredicateName = predicateName.getElement(1, ".");
+    if(std::count(predicateName.begin(), predicateName.end(), '.') == 1)
+      m_unqualifiedPredicateName = predicateName.substr(predicateName.find('.') + 1);
     else
       m_unqualifiedPredicateName = predicateName;
 
@@ -570,8 +571,8 @@ void Token::doMerge(const TokenId activeToken){
         makeFact();
 
     debugMsg("Token:commonInit",
-	     "Initializing token (" << getKey() << ") for predicate " << predicateName.toString()
-	     << " on object " << objectName.toString());
+	     "Initializing token (" << getKey() << ") for predicate " << predicateName
+	     << " on object " << objectName);
 
     // Allocate the state variable with initial base domain.
     StateDomain stateBaseDomain;
@@ -584,13 +585,13 @@ void Token::doMerge(const TokenId activeToken){
 					      stateBaseDomain,
 					      false, // TODO: fixme
 					      false,
-					      LabelStr("state")))->getId();
+					      "state"))->getId();
     m_allVariables.push_back(m_state);
 
     // If present the schema must be valid and the predicate must be OK.
     check_error(m_planDatabase->getSchema().isNoId() ||
 		m_planDatabase->getSchema()->isPredicate(predicateName),
-		"Invalid predicate: " + predicateName.toString());
+		"Invalid predicate: " + predicateName);
 
     // Allocate an object variable with an empty domain
     m_baseObjectType = m_planDatabase->getSchema()->getObjectTypeForPredicate(m_predicateName);
@@ -601,7 +602,7 @@ void Token::doMerge(const TokenId activeToken){
 						ObjectDomain(dt),
 						false, // TODO: fixme
 						true,
-						LabelStr("object")))->getId();
+						"object"))->getId();
 
     checkError(m_planDatabase->hasObjectInstances(m_baseObjectType),
 	       "Allocated a token with no object instance available of type " << m_baseObjectType);
@@ -627,7 +628,7 @@ void Token::doMerge(const TokenId activeToken){
 						       durationBaseDomain,
 						       false, // TODO: fixme
 						       true,
-						       LabelStr("duration")))->getId();
+						       "duration"))->getId();
 
     m_allVariables.push_back(m_duration);
 
@@ -995,14 +996,14 @@ bool Token::canBeTerminated(eint) const{
   }
 
 
-  LabelStr Token::makePseudoVarName(){
-    static int sl_varKey(0);
-    static std::string sl_prefix("PSEUDO_VARIABLE_");
-    std::stringstream ss;
-    ss << sl_prefix;
-    ss << sl_varKey++;
-    return ss.str();
-  }
+std::string Token::makePseudoVarName(){
+  static int sl_varKey(0);
+  static std::string sl_prefix("PSEUDO_VARIABLE_");
+  std::stringstream ss;
+  ss << sl_prefix;
+  ss << sl_varKey++;
+  return ss.str();
+}
 
 // PS Methods:
 const std::string& Token::getEntityType() const
@@ -1013,11 +1014,11 @@ const std::string& Token::getEntityType() const
 
 std::string Token::getTokenType() const
 {
-	return getUnqualifiedPredicateName().toString();
+	return getUnqualifiedPredicateName();
 }
 
 std::string Token::getFullTokenType() const {
-  return getPredicateName().toString();
+  return getPredicateName();
 }
 
 PSObject* Token::getOwner() const {
@@ -1114,13 +1115,12 @@ PSList<PSVariable*> Token::getPredicateParameters() const {
 }
 
 PSVariable* Token::getParameter(const std::string& name) const {
-  LabelStr realName(name);
   PSVariable* retval = NULL;
   const std::vector<ConstrainedVariableId>& vars = getVariables();
   for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
       ++it) {
     ConstrainedVariableId id = *it;
-    if((*it)->getName() == realName.toString()) {
+    if((*it)->getName() == name) {
       retval = id_cast<PSVariable>(id);
       break;
     }

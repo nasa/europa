@@ -28,7 +28,7 @@ namespace EUROPA {
     void notifyObjectCreated(const ObjectId object, const std::vector<const Domain*>& arguments);
     void notifyObjectDeleted(const ObjectId object);
     void notifyClosed();
-    void notifyClosed(const LabelStr& objectType);
+    void notifyClosed(const std::string& objectType);
     void notifyTokenCreated(const TokenId token);
     void notifyTokenDeleted(const TokenId token, const std::string& name);
     void notifyConstrained(const ObjectId object, const TokenId predecessor, const TokenId successor);

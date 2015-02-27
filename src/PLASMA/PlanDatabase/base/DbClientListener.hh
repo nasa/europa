@@ -30,7 +30,7 @@ namespace EUROPA {
     virtual void notifyObjectCreated(const ObjectId object, const std::vector<const Domain*>& arguments);
     virtual void notifyObjectDeleted(const ObjectId object);
     virtual void notifyClosed();
-    virtual void notifyClosed(const LabelStr& objectType);
+    virtual void notifyClosed(const std::string& objectType);
     virtual void notifyTokenCreated(const TokenId token);
     virtual void notifyTokenDeleted(const TokenId token, const std::string& name);
     virtual void notifyConstrained(const ObjectId object, const TokenId predecessor, const TokenId successor);

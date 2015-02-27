@@ -5,7 +5,7 @@
 
 namespace EUROPA {
 
-  ReusableObjectFactory::ReusableObjectFactory(const ObjectTypeId objType, const LabelStr& signature)
+  ReusableObjectFactory::ReusableObjectFactory(const ObjectTypeId objType, const std::string& signature)
     : NativeObjectFactory(objType,signature)
   {
   }
@@ -16,8 +16,8 @@ namespace EUROPA {
 
   ObjectId ReusableObjectFactory::makeNewObject(
 						const PlanDatabaseId planDb,
-						const LabelStr& objectType,
-						const LabelStr& objectName,
+						const std::string& objectType,
+						const std::string& objectName,
 						const std::vector<const Domain*>& arguments) const
   {
     Id<NDDL::NddlReusable>  instance = (new NDDL::NddlReusable(planDb, objectType, objectName,true))->getId();
@@ -41,7 +41,7 @@ namespace EUROPA {
     }
 
     instance->handleDefaults(false /*don't close the object yet*/);
-    debugMsg("XMLInterpreter:NativeObjectFactory","Created Native " << m_className.toString() << ":" << objectName.toString() << " type:" << objectType.toString());
+    debugMsg("XMLInterpreter:NativeObjectFactory","Created Native " << m_className << ":" << objectName << " type:" << objectType);
 
     return instance;
   }
@@ -66,7 +66,7 @@ TokenId ReusableUsesTokenType::createInstance(const TokenId master, const std::s
 }
 
 
-  CBReusableObjectFactory::CBReusableObjectFactory(const ObjectTypeId objType, const LabelStr& signature)
+  CBReusableObjectFactory::CBReusableObjectFactory(const ObjectTypeId objType, const std::string& signature)
     : NativeObjectFactory(objType,signature)
   {
   }
@@ -77,8 +77,8 @@ TokenId ReusableUsesTokenType::createInstance(const TokenId master, const std::s
 
   ObjectId CBReusableObjectFactory::makeNewObject(
                         const PlanDatabaseId planDb,
-                        const LabelStr& objectType,
-                        const LabelStr& objectName,
+                        const std::string& objectType,
+                        const std::string& objectName,
                         const std::vector<const Domain*>& arguments) const
   {
     Id<NDDL::NddlCBReusable>  instance = (new NDDL::NddlCBReusable(planDb, objectType, objectName,true))->getId();
@@ -102,12 +102,12 @@ TokenId ReusableUsesTokenType::createInstance(const TokenId master, const std::s
     }
 
     instance->handleDefaults(false /*don't close the object yet*/);
-    debugMsg("XMLInterpreter:NativeObjectFactory","Created Native " << m_className.toString() << ":" << objectName.toString() << " type:" << objectType.toString());
+    debugMsg("XMLInterpreter:NativeObjectFactory","Created Native " << m_className << ":" << objectName << " type:" << objectType);
 
     return instance;
   }
 
-  ReservoirObjectFactory::ReservoirObjectFactory(const ObjectTypeId objType, const LabelStr& signature)
+  ReservoirObjectFactory::ReservoirObjectFactory(const ObjectTypeId objType, const std::string& signature)
     : NativeObjectFactory(objType,signature)
   {
   }
@@ -118,8 +118,8 @@ TokenId ReusableUsesTokenType::createInstance(const TokenId master, const std::s
 
   ObjectId ReservoirObjectFactory::makeNewObject(
 						const PlanDatabaseId planDb,
-						const LabelStr& objectType,
-						const LabelStr& objectName,
+						const std::string& objectType,
+						const std::string& objectName,
 						const std::vector<const Domain*>& arguments) const
   {
     Id<NDDL::NddlReservoir>  instance = (new NDDL::NddlReservoir(planDb, objectType, objectName,true))->getId();
@@ -143,7 +143,7 @@ TokenId ReusableUsesTokenType::createInstance(const TokenId master, const std::s
     }
 
     instance->handleDefaults(false /*don't close the object yet*/);
-    debugMsg("XMLInterpreter:NativeObjectFactory","Created Native " << m_className.toString() << ":" << objectName.toString() << " type:" << objectType.toString());
+    debugMsg("XMLInterpreter:NativeObjectFactory","Created Native " << m_className << ":" << objectName << " type:" << objectType);
 
     return instance;
   }
@@ -190,7 +190,7 @@ TokenId ReservoirConsumeTokenType::createInstance(const TokenId master,
 }
 
 
-  UnaryObjectFactory::UnaryObjectFactory(const ObjectTypeId objType, const LabelStr& signature)
+  UnaryObjectFactory::UnaryObjectFactory(const ObjectTypeId objType, const std::string& signature)
     : NativeObjectFactory(objType,signature)
   {
   }
@@ -201,8 +201,8 @@ TokenId ReservoirConsumeTokenType::createInstance(const TokenId master,
 
   ObjectId UnaryObjectFactory::makeNewObject(
                         const PlanDatabaseId planDb,
-                        const LabelStr& objectType,
-                        const LabelStr& objectName,
+                        const std::string& objectType,
+                        const std::string& objectName,
                         const std::vector<const Domain*>& arguments) const
   {
     Id<NDDL::NddlUnary>  instance = (new NDDL::NddlUnary(planDb, objectType, objectName,true))->getId();
@@ -222,7 +222,7 @@ TokenId ReservoirConsumeTokenType::createInstance(const TokenId master,
     }
 
     instance->handleDefaults(false /*don't close the object yet*/);
-    debugMsg("XMLInterpreter:NativeObjectFactory","Created Native " << m_className.toString() << ":" << objectName.toString() << " type:" << objectType.toString());
+    debugMsg("XMLInterpreter:NativeObjectFactory","Created Native " << m_className << ":" << objectName << " type:" << objectType);
 
     return instance;
   }

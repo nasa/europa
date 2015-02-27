@@ -192,7 +192,7 @@ void Resource::init(const edouble initCapacityLb, const edouble initCapacityUb,
     check_error(results.empty());
     check_error(token.isValid());
     check_error(limit > 0);
-    debugMsg("Resource:getOrderingChoices", "Getting " << limit << " ordering choices for " << token->getPredicateName().toString() << "(" << token->getKey() << ")");
+    debugMsg("Resource:getOrderingChoices", "Getting " << limit << " ordering choices for " << token->getPredicateName() << "(" << token->getKey() << ")");
 
     if(!getPlanDatabase()->getConstraintEngine()->propagate()) {
       debugMsg("Resource:getOrderingChoices", "No ordering choices: the constraint network is inconsistent.");
@@ -253,8 +253,8 @@ void Resource::init(const edouble initCapacityLb, const edouble initCapacityUb,
             continue;
 
           debugMsg("Resource:getOrderingChoices",
-                   "Considering order <" << predecessorToken->getPredicateName().toString() << "(" << predecessorToken->getKey() << "), " <<
-                   successorToken->getPredicateName().toString() << "(" << successorToken->getKey() << ")>");
+                   "Considering order <" << predecessorToken->getPredicateName() << "(" << predecessorToken->getKey() << "), " <<
+                   successorToken->getPredicateName() << "(" << successorToken->getKey() << ")>");
 
           std::multimap<TokenId, TokenId>::iterator checkFirst = pairs.lower_bound(predecessorToken);
           //if we have an entry for the predecessor
@@ -444,7 +444,7 @@ void Resource::resetViolations(InstantId ) {
       ResourceFlaws::iterator flawIt = m_flawedTokens.find(tok);
       if(flawIt == m_flawedTokens.end()) {
         debugMsg("Resource:notifyFlawed", 
-                 toString() << " Token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ") is flawed at instant " << inst->getTime() <<
+                 toString() << " Token " << tok->getPredicateName() << "(" << tok->getKey() << ") is flawed at instant " << inst->getTime() <<
                  ".  Notifying that an ordering is required.");
         m_flawedTokens.insert(std::pair<TokenId, std::set<InstantId> >(tok, std::set<InstantId>()));
         flawIt = m_flawedTokens.find(tok);
@@ -453,7 +453,7 @@ void Resource::resetViolations(InstantId ) {
       }
       else {
         debugMsg("Resource:notifyFlawed",
-                 toString() << " Received a redundant notification of a flaw for token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ") at instant " <<
+                 toString() << " Received a redundant notification of a flaw for token " << tok->getPredicateName() << "(" << tok->getKey() << ") at instant " <<
                  inst->getTime() << ".  Adding it to the set but not notifying.");
         flawIt->second.insert(inst);
       }
@@ -488,13 +488,13 @@ void Resource::resetViolations(InstantId ) {
       std::size_t size = tokIt->second.size();
       tokIt->second.erase(inst);
       condDebugMsg(size > tokIt->second.size(),
-                   "Resource:notifyNoLongerFlawed", toString() << " Removed the flaw at time " << inst->getTime() << " for token " << tok->getPredicateName().toString() <<
+                   "Resource:notifyNoLongerFlawed", toString() << " Removed the flaw at time " << inst->getTime() << " for token " << tok->getPredicateName() <<
                    "(" << tok->getKey() << ")");
       if(size > tokIt->second.size() && !tokIt->second.empty()) {
         std::stringstream str;
         for(std::set<InstantId>::const_iterator it = tokIt->second.begin(); it != tokIt->second.end(); ++it)
           str << (*it)->getTime() << " ";
-        debugMsg("Resource:notifyNoLongerFlawed", toString() << " Remaining flaws for token " << tok->getPredicateName().toString() <<
+        debugMsg("Resource:notifyNoLongerFlawed", toString() << " Remaining flaws for token " << tok->getPredicateName() <<
                  "(" << tok->getKey() << "): " << str.str());
       }
       if(tokIt->second.empty())
@@ -504,7 +504,7 @@ void Resource::resetViolations(InstantId ) {
     for(std::set<TokenId>::const_iterator it = flawlessTokens.begin(); it != flawlessTokens.end(); ++it) {
       TokenId tok = *it;
       check_error(tok.isValid());
-      debugMsg("Resource:notifyNoLongerFlawed", toString() << " Notifying that the token " << tok->getPredicateName().toString() << "(" <<
+      debugMsg("Resource:notifyNoLongerFlawed", toString() << " Notifying that the token " << tok->getPredicateName() << "(" <<
                tok->getKey() << ") no longer requires an ordering.");
       notifyOrderingNoLongerRequired(tok);
       m_flawedTokens.erase(tok);
@@ -527,7 +527,7 @@ void Resource::notifyDeleted(const TokenId token) {Object::notifyDeleted(token);
     for(ResourceFlaws::const_iterator it = m_flawedTokens.begin(); it != m_flawedTokens.end(); ++it) {
       if(it->second.find(inst) != it->second.end()) {
         debugMsg("Resource:noFlawedTokensForInst",
-                 "Found a flaw for instant " << inst->getTime() << " in token " << it->first->getPredicateName().toString() << "(" << it->first->getKey() << ")");
+                 "Found a flaw for instant " << inst->getTime() << " in token " << it->first->getPredicateName() << "(" << it->first->getKey() << ")");
         return false;
       }
     }

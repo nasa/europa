@@ -12,9 +12,13 @@
 #include "PlanDatabase.hh"
 #include "CESchema.hh"
 
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/split.hpp>
+
 namespace EUROPA {
 
-ObjectType::ObjectType(const char* name, const ObjectTypeId parent, bool _isNative)
+ObjectType::ObjectType(const std::string& name, const ObjectTypeId parent, bool _isNative)
     : m_id(this)
     , m_varType((new ObjectDT(name))->getId())
     , m_name(name)
@@ -96,12 +100,12 @@ bool ObjectType::isNative() const
     return m_isNative;
 }
 
-void ObjectType::addMember(const DataTypeId type, const char* name)
+void ObjectType::addMember(const DataTypeId type, const std::string& name)
 {
     m_members[name] = type;
 }
 
-const DataTypeId ObjectType::getMemberType(const char* name) const
+const DataTypeId ObjectType::getMemberType(const std::string& name) const
 {
     std::map<std::string,DataTypeId>::const_iterator it = m_members.find(name);
 
@@ -131,8 +135,8 @@ void ObjectType::addTokenType(const TokenTypeId factory) {
   m_tokenTypes[factory->getSignature()] = factory;
 }
 
-const TokenTypeId ObjectType::getTokenType(const LabelStr& signature) const {
-  check_error(signature.getElement(0,".")==getName(),
+const TokenTypeId ObjectType::getTokenType(const std::string& signature) const {
+  check_error(boost::starts_with(signature, getName()),
               "Can't look for a token factory I don't own");
 
   std::map<std::string,TokenTypeId>::const_iterator it =
@@ -141,7 +145,8 @@ const TokenTypeId ObjectType::getTokenType(const LabelStr& signature) const {
     return it->second;
   
   if (m_parent.isId()) {
-    std::string parentSignature = m_parent->getName()+"."+signature.getElement(1,".").toString();
+    std::string parentSignature = m_parent->getName()+"."+
+        signature.substr(signature.find('.') + 1);
     return m_parent->getTokenType(parentSignature);
   }
 
@@ -170,7 +175,7 @@ PSList<PSTokenType*> ObjectType::getPSTokenTypesByAttr( int attrMask ) const {
 const TokenTypeId ObjectType::getParentType(const TokenTypeId type) const
 {
     if (m_parent.isId()) {
-        std::string parentSignature = m_parent->getName()+"."+type->getPredicateName().toString();
+        std::string parentSignature = m_parent->getName()+"."+type->getPredicateName();
         return m_parent->getTokenType(parentSignature);
     }
 
@@ -221,18 +226,14 @@ std::string ObjectType::toString() const {
 
   static const char* TYPE_DELIMITER = ":"; /*!< Used to delimit types in the factory signature*/
 
-  ObjectFactory::ObjectFactory(const LabelStr& signature)
-      : m_id(this), m_signature(signature), m_signatureTypes() {
+ObjectFactory::ObjectFactory(const std::string& signature)
+    : m_id(this), m_signature(signature), m_signatureTypes() {
 
-    debugMsg("ObjectFactory:ObjectFactory", "Creating factory " << signature.toString());
+  debugMsg("ObjectFactory:ObjectFactory", "Creating factory " << signature);
 
-    // Now we want to populate the signature types
-    unsigned long count = signature.countElements(TYPE_DELIMITER);
-    for(unsigned long i=0;i<count;i++){
-      LabelStr labelStr = signature.getElement(i, TYPE_DELIMITER);
-      m_signatureTypes.push_back(labelStr);
-    }
-  }
+  // Now we want to populate the signature types
+  boost::split(m_signatureTypes, signature, boost::is_any_of(TYPE_DELIMITER));
+}
 
   ObjectFactory::~ObjectFactory()
   {
@@ -241,13 +242,13 @@ std::string ObjectType::toString() const {
 
   const ObjectFactoryId ObjectFactory::getId() const {return m_id;}
 
-  const LabelStr& ObjectFactory::getSignature() const {return m_signature;}
+  const std::string& ObjectFactory::getSignature() const {return m_signature;}
 
 const std::vector<std::string>& ObjectFactory::getSignatureTypes() const {return m_signatureTypes;}
 
 ObjectId ObjectFactory::makeNewObject(const PlanDatabaseId,
-                                      const LabelStr&,
-                                      const LabelStr&,
+                                      const std::string&,
+                                      const std::string&,
                                       const std::vector<const Domain*>&) const {
   return ObjectId::noId();
 }
@@ -304,7 +305,7 @@ void ObjectTypeMgr::registerObjectType(const ObjectTypeId objType) {
            "Registered object type:" << std::endl << objType->toString());
 }
 
-const ObjectTypeId ObjectTypeMgr::getObjectType(const LabelStr& objType) const {
+const ObjectTypeId ObjectTypeMgr::getObjectType(const std::string& objType) const {
   std::map<std::string,ObjectTypeId>::const_iterator it =
       m_objTypes.find(objType);
 
@@ -321,8 +322,8 @@ std::vector<ObjectTypeId> ObjectTypeMgr::getAllObjectTypes() const {
   return retval;
 }
 
-  LabelStr ObjectTypeMgr::makeFactoryName(const LabelStr& objectType, const std::vector<const Domain*>& arguments){
-    std::string signature = objectType.toString();
+  std::string ObjectTypeMgr::makeFactoryName(const std::string& objectType, const std::vector<const Domain*>& arguments){
+    std::string signature = objectType;
 
     debugMsg("ObjectFactory:makeFactoryName", "Making factory name " << signature);
     // Iterate over the argument types and compose full signature
@@ -344,13 +345,13 @@ std::vector<ObjectTypeId> ObjectTypeMgr::getAllObjectTypes() const {
  * matches(x, x)
  */
 ObjectFactoryId ObjectTypeMgr::getFactory(const SchemaId schema,
-                                          const LabelStr& objectType,
+                                          const std::string& objectType,
                                           const std::vector<const Domain*>& arguments,
                                           const bool doCheckError) {
   // Build the full signature for the factory
-  LabelStr factoryName = makeFactoryName(objectType,arguments);
+  std::string factoryName = makeFactoryName(objectType,arguments);
 
-  debugMsg("ObjectFactory:getFactory", "looking for factory " << factoryName.toString());
+  debugMsg("ObjectFactory:getFactory", "looking for factory " << factoryName);
 
 
 
@@ -402,7 +403,7 @@ ObjectFactoryId ObjectTypeMgr::getFactory(const SchemaId schema,
 
   // At this point, we should have a hit
   if (doCheckError)
-    check_error(ALWAYS_FAILS, "Factory '" + factoryName.toString() + "' is not registered.");
+    check_error(ALWAYS_FAILS, "Factory '" + factoryName + "' is not registered.");
   return ObjectFactoryId::noId();
 }
 
@@ -410,12 +411,12 @@ void ObjectTypeMgr::registerFactory(const ObjectFactoryId factory) {
   check_error(factory.isValid());
 
   debugMsg("ObjectFactory:registerFactory",
-           "Registering factory with signature " << factory->getSignature().toString());
+           "Registering factory with signature " << factory->getSignature());
   if(m_factories.find(factory->getSignature()) != m_factories.end()){
     ObjectFactoryId oldFactory = m_factories.find(factory->getSignature())->second;
     m_factories.erase(factory->getSignature());
     delete static_cast<ObjectFactory*>(oldFactory);
-    debugMsg("ObjectFactory:registerFactory", "Over-riding registeration for factory with signature " << factory->getSignature().toString());
+    debugMsg("ObjectFactory:registerFactory", "Over-riding registeration for factory with signature " << factory->getSignature());
   }
 
   // Ensure it is not present already
@@ -438,9 +439,9 @@ void ObjectTypeMgr::registerFactory(const ObjectFactoryId factory) {
         ObjectEvalContext(EvalContext* parent, const ObjectId objInstance);
         virtual ~ObjectEvalContext();
 
-        virtual ConstrainedVariableId getVar(const char* name);
+        virtual ConstrainedVariableId getVar(const std::string& name);
 
-        virtual void* getElement(const char* name) const;
+        virtual void* getElement(const std::string& name) const;
 
     protected:
         ObjectId m_obj;
@@ -456,9 +457,9 @@ void ObjectTypeMgr::registerFactory(const ObjectFactoryId factory) {
   {
   }
 
-  ConstrainedVariableId ObjectEvalContext::getVar(const char* name)
+  ConstrainedVariableId ObjectEvalContext::getVar(const std::string& name)
   {
-    if (strcmp(name,"this") == 0)
+    if (name == "this")
         return m_obj->getThis();
 
     ConstrainedVariableId var = m_obj->getVariable(m_obj->getName()+"."+name);
@@ -473,7 +474,7 @@ void ObjectTypeMgr::registerFactory(const ObjectFactoryId factory) {
     }
   }
 
-void* ObjectEvalContext::getElement(const char* name) const {
+void* ObjectEvalContext::getElement(const std::string& name) const {
   if (std::string(name)=="PlanDatabase")
     return static_cast<PlanDatabase*>(m_obj->getPlanDatabase());
   
@@ -482,7 +483,7 @@ void* ObjectEvalContext::getElement(const char* name) const {
 
   InterpretedObjectFactory::InterpretedObjectFactory(
                              const ObjectTypeId objType,
-                             const LabelStr& signature,
+                             const std::string& signature,
                              const std::vector<std::string>& constructorArgNames,
                              const std::vector<std::string>& constructorArgTypes,
                              ExprConstructorSuperCall* superCallExpr,
@@ -522,7 +523,7 @@ void* ObjectEvalContext::getElement(const char* name) const {
 
     virtual ~ObjectFactoryEvalContext();
 
-    virtual void* getElement(const char* name) const;
+    virtual void* getElement(const std::string& name) const;
 
   protected:
     PlanDatabaseId m_planDb;
@@ -563,7 +564,7 @@ void* ObjectEvalContext::getElement(const char* name) const {
     }
   }
 
-void* ObjectFactoryEvalContext::getElement(const char* name) const {
+void* ObjectFactoryEvalContext::getElement(const std::string& name) const {
   if (std::string(name)=="PlanDatabase")
     return static_cast<PlanDatabase*>(m_planDb);
   return EvalContext::getElement(name);
@@ -571,19 +572,19 @@ void* ObjectFactoryEvalContext::getElement(const char* name) const {
 
   ObjectId InterpretedObjectFactory::createInstance(
                             const PlanDatabaseId planDb,
-                            const LabelStr& objectType,
-                            const LabelStr& objectName,
+                            const std::string& objectType,
+                            const std::string& objectName,
                             const std::vector<const Domain*>& arguments) const
   {
     check_runtime_error(checkArgs(arguments));
 
-    debugMsg("InterpretedObjectFactory:createInstance", "Creating instance for type " << objectType.toString() << " with name " << objectName.toString());
+    debugMsg("InterpretedObjectFactory:createInstance", "Creating instance for type " << objectType << " with name " << objectName);
 
     ObjectId instance = makeNewObject(planDb, objectType, objectName,arguments);
     evalConstructorBody(instance,arguments);
     instance->close();
 
-    debugMsg("InterpretedObjectFactory:createInstance", "Created instance " << instance->toString() << " for type " << objectType.toString() << " with name " << objectName.toString());
+    debugMsg("InterpretedObjectFactory:createInstance", "Created instance " << instance->toString() << " for type " << objectType << " with name " << objectName);
 
     return instance;
   }
@@ -603,19 +604,19 @@ void* ObjectFactoryEvalContext::getElement(const char* name) const {
    */
   ObjectId InterpretedObjectFactory::makeNewObject(
                            const PlanDatabaseId planDb,
-                           const LabelStr& objectType,
-                           const LabelStr& objectName,
+                           const std::string& objectType,
+                           const std::string& objectName,
                            const std::vector<const Domain*>& arguments) const
   {
     // go up the hierarchy and give the parents a chance to create the object, this allows native classes to be exported
     // TODO: some effort can be saved by keeping track of whether a class has a native ancestor different from Object.
     // If it doesn't, the object can be created right away and this traversal up the hierarchy can be skipped
     if (m_canMakeNewObject) {
-      debugMsg("Interpreter:InterpretedObject","Created Object:" << objectName.toString() << " type:" << objectType.toString());
+      debugMsg("Interpreter:InterpretedObject","Created Object:" << objectName << " type:" << objectType);
       return (new Object(planDb, objectType, objectName,true))->getId();
     }
     else {
-      check_error(m_superCallExpr != NULL, std::string("Failed to find factory for object ") + objectName.toString() + " of type "+objectType.toString());
+      check_error(m_superCallExpr != NULL, std::string("Failed to find factory for object ") + objectName + " of type "+objectType);
 
       ObjectFactoryEvalContext evalContext(
           planDb,
@@ -671,7 +672,7 @@ void* ObjectFactoryEvalContext::getElement(const char* name) const {
                   baseDomain,
                   members[i].second.c_str()
                 );
-                debugMsg("Interpreter:InterpretedObject","Used default initializer for " << m_className.toString() << "." << members[i].second);
+                debugMsg("Interpreter:InterpretedObject","Used default initializer for " << m_className << "." << members[i].second);
             }
         }
 
@@ -682,7 +683,7 @@ void* ObjectFactoryEvalContext::getElement(const char* name) const {
     /*
      * ExprConstructorSuperCall
      */
-    ExprConstructorSuperCall::ExprConstructorSuperCall(const LabelStr& superClassName, const std::vector<Expr*>& argExprs)
+    ExprConstructorSuperCall::ExprConstructorSuperCall(const std::string& superClassName, const std::vector<Expr*>& argExprs)
       : m_superClassName(superClassName)
       , m_argExprs(argExprs)
     {

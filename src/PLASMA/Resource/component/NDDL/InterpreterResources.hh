@@ -8,14 +8,14 @@ namespace EUROPA {
   class ReusableObjectFactory : public NativeObjectFactory
   {
   	public:
-  	    ReusableObjectFactory(const ObjectTypeId objType, const LabelStr& signature);
+  	    ReusableObjectFactory(const ObjectTypeId objType, const std::string& signature);
   	    virtual ~ReusableObjectFactory();
 
   	protected:
     	virtual ObjectId makeNewObject(
 	                        const PlanDatabaseId planDb,
-	                        const LabelStr& objectType,
-	                        const LabelStr& objectName,
+	                        const std::string& objectType,
+	                        const std::string& objectName,
 	                        const std::vector<const Domain*>& arguments) const;
   };
 
@@ -33,28 +33,28 @@ class ReusableUsesTokenType: public NativeTokenType {
   class CBReusableObjectFactory : public NativeObjectFactory
   {
     public:
-        CBReusableObjectFactory(const ObjectTypeId objType, const LabelStr& signature);
+        CBReusableObjectFactory(const ObjectTypeId objType, const std::string& signature);
         virtual ~CBReusableObjectFactory();
 
     protected:
         virtual ObjectId makeNewObject(
                             const PlanDatabaseId planDb,
-                            const LabelStr& objectType,
-                            const LabelStr& objectName,
+                            const std::string& objectType,
+                            const std::string& objectName,
                             const std::vector<const Domain*>& arguments) const;
   };
 
   class ReservoirObjectFactory : public NativeObjectFactory
   {
   	public:
-  	    ReservoirObjectFactory(const ObjectTypeId objType, const LabelStr& signature);
+  	    ReservoirObjectFactory(const ObjectTypeId objType, const std::string& signature);
   	    virtual ~ReservoirObjectFactory();
 
   	protected:
     	virtual ObjectId makeNewObject(
 	                        const PlanDatabaseId planDb,
-	                        const LabelStr& objectType,
-	                        const LabelStr& objectName,
+	                        const std::string& objectType,
+	                        const std::string& objectName,
 	                        const std::vector<const Domain*>& arguments) const;
   };
 
@@ -83,14 +83,14 @@ class ReservoirConsumeTokenType: public NativeTokenType {
   class UnaryObjectFactory : public NativeObjectFactory
   {
     public:
-        UnaryObjectFactory(const ObjectTypeId objType, const LabelStr& signature);
+        UnaryObjectFactory(const ObjectTypeId objType, const std::string& signature);
         virtual ~UnaryObjectFactory();
 
     protected:
         virtual ObjectId makeNewObject(
                             const PlanDatabaseId planDb,
-                            const LabelStr& objectType,
-                            const LabelStr& objectName,
+                            const std::string& objectType,
+                            const std::string& objectName,
                             const std::vector<const Domain*>& arguments) const;
   };
 

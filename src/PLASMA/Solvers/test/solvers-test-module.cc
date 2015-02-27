@@ -358,7 +358,7 @@ private:
 
     // test R3
     {
-      TokenId token = db->getClient()->createToken("D.predicateF", NULL, false);
+      TokenId token = db->getClient()->createToken("D.predicateF", "", false);
       std::vector<MatchingRuleId> rules;
       me.getMatches(token, rules);
       CPPUNIT_ASSERT_MESSAGE(toString(rules.size()), rules.size() == 2);
@@ -368,7 +368,7 @@ private:
 
     // test R4
     {
-      TokenId token = db->getClient()->createToken("D.predicateC", NULL, false);
+      TokenId token = db->getClient()->createToken("D.predicateC", "", false);
       std::vector<MatchingRuleId> rules;
       me.getMatches(token->getVariable("arg6"), rules);
       CPPUNIT_ASSERT_MESSAGE(toString(rules.size()), rules.size() == 2);
@@ -378,10 +378,10 @@ private:
 
     // test R5 & R6
     {
-      TokenId token = db->getClient()->createToken("C.predicateC", NULL, false);
+      TokenId token = db->getClient()->createToken("C.predicateC", "", false);
       std::vector<MatchingRuleId> rules;
       me.getMatches(token, rules);
-      CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getUnqualifiedPredicateName().toString(), rules.size() == 3);
+      CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getUnqualifiedPredicateName(), rules.size() == 3);
       CPPUNIT_ASSERT_MESSAGE(rules[1]->toString(), rules[1]->toString() == "[R5]C.predicateC.*.*.*.*");
       CPPUNIT_ASSERT_MESSAGE(rules[2]->toString(), rules[2]->toString() == "[R6]C.*.*.*.*.*");
       nukeToken(db->getClient(),token);
@@ -389,44 +389,44 @@ private:
 
     // test R6
     {
-      TokenId token = db->getClient()->createToken("C.predicateA", NULL, false);
+      TokenId token = db->getClient()->createToken("C.predicateA", "", false);
       std::vector<MatchingRuleId> rules;
       me.getMatches(token, rules);
-      CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getUnqualifiedPredicateName().toString(), rules.size() == 2);
+      CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getUnqualifiedPredicateName(), rules.size() == 2);
       CPPUNIT_ASSERT_MESSAGE(rules[1]->toString(), rules[1]->toString() == "[R6]C.*.*.*.*.*");
       nukeToken(db->getClient(),token);
     }
 
     // test R7
     {
-      TokenId token = db->getClient()->createToken("D.predicateF", NULL, false);
+      TokenId token = db->getClient()->createToken("D.predicateF", "", false);
       token->activate();
       TokenId E_predicateC = *(token->slaves().begin());
       std::vector<MatchingRuleId> rules;
       me.getMatches(ConstrainedVariableId(E_predicateC->duration()), rules);
-      CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getUnqualifiedPredicateName().toString(), rules.size() == 2);
+      CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getUnqualifiedPredicateName(), rules.size() == 2);
       CPPUNIT_ASSERT_MESSAGE(rules[1]->toString(), rules[1]->toString() == "[R7]*.*.duration.*.Object.*");
       nukeToken(db->getClient(),token);
     }
 
     // test R7a
     {
-      TokenId token = db->getClient()->createToken("E.predicateC", NULL, false);
+      TokenId token = db->getClient()->createToken("E.predicateC", "", false);
       std::vector<MatchingRuleId> rules;
       me.getMatches(ConstrainedVariableId(token->duration()), rules);
-      CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getPredicateName().toString(), rules.size() == 2);
+      CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getPredicateName(), rules.size() == 2);
       CPPUNIT_ASSERT_MESSAGE(rules[1]->toString(), rules[1]->toString() == "[R7a]*.*.duration.none.*.*");
       nukeToken(db->getClient(),token);
     }
 
     // test R8
     {
-      TokenId token = db->getClient()->createToken("B.predicateC", NULL, false);
+      TokenId token = db->getClient()->createToken("B.predicateC", "", false);
       token->activate();
       TokenId E_predicateC = *(token->slaves().begin());
       std::vector<MatchingRuleId> rules;
       me.getMatches(ConstrainedVariableId(E_predicateC->duration()), rules);
-      CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getPredicateName().toString(), rules.size() == 3);
+      CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getPredicateName(), rules.size() == 3);
       CPPUNIT_ASSERT_MESSAGE(rules[1]->toString(), rules[1]->toString() == "[R8]*.*.*.*.B.*");
       CPPUNIT_ASSERT_MESSAGE(rules[2]->toString(), rules[2]->toString() == "[R7]*.*.duration.*.Object.*");
       nukeToken(db->getClient(),token);
@@ -434,7 +434,7 @@ private:
 
     // test R8, R9 and R10
     {
-      TokenId token = db->getClient()->createToken("D.predicateG", NULL, false);
+      TokenId token = db->getClient()->createToken("D.predicateG", "", false);
       token->activate();
       TokenId E_predicateC = *(token->slaves().begin());
       
@@ -448,7 +448,7 @@ private:
       expectedRules.insert(LabelStr("[R10]*.*.*.before.*.*"));
       std::vector<MatchingRuleId> rules;
       me.getMatches(ConstrainedVariableId(E_predicateC->duration()), rules);
-      CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getPredicateName().toString(), rules.size() == 4);
+      CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getPredicateName(), rules.size() == 4);
       for(unsigned long i=0;i<4; i++) {//? {
         CPPUNIT_ASSERT_MESSAGE(rules[i]->toString(),
                                expectedRules.find(LabelStr(rules[i]->toString())) != expectedRules.end());
@@ -534,7 +534,7 @@ private:
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it){
       static const LabelStr excludedPredicates(":D.predicateA:D.predicateB:D.predicateC:E.predicateC:HorizonFiltered.predicate1:HorizonFiltered.predicate2:HorizonFiltered.predicate5:");
       TokenId token = *it;
-      std::string s = ":" + token->getPredicateName().toString() + ":";
+      std::string s = ":" + token->getPredicateName() + ":";
       if(excludedPredicates.contains(s))
         CPPUNIT_ASSERT_MESSAGE(token->toString() + " is in scope after all.", !fm.inScope(token));
       else
@@ -563,7 +563,7 @@ private:
       static const LabelStr excludedPredicates(":D.predicateA:D.predicateB:D.predicateC:E.predicateC:HorizonFiltered.predicate1:HorizonFiltered.predicate2:HorizonFiltered.predicate5:");
       TokenId token = *it;
       CPPUNIT_ASSERT_MESSAGE(token->toString() + " is not in scope and not active.", token->isActive() || !fm.inScope(token));
-      std::string s = ":" + token->getPredicateName().toString() + ":";
+      std::string s = ":" + token->getPredicateName() + ":";
       if(excludedPredicates.contains(s))
         CPPUNIT_ASSERT_MESSAGE(token->toString() + " is in scope after all.", !fm.inScope(token));
     }
@@ -635,7 +635,7 @@ private:
 
     // test H3
     {
-      TokenId token = db->getClient()->createToken("D.predicateG", NULL, false);
+      TokenId token = db->getClient()->createToken("D.predicateG", "", false);
       token->activate();
       TokenId E_predicateC = *(token->slaves().begin());
       std::vector<MatchingRuleId> rules;
@@ -664,7 +664,7 @@ private:
 
     // test H0
     {
-      TokenId token = db->getClient()->createToken("D.predicateG", NULL, false);
+      TokenId token = db->getClient()->createToken("D.predicateG", "", false);
       std::vector<MatchingRuleId> rules;
       me.getMatches(token, rules);
       CPPUNIT_ASSERT_MESSAGE(toString(rules.size()), rules.size() == 1);
@@ -684,7 +684,7 @@ private:
 
     // test H1
     {
-      TokenId token = db->getClient()->createToken("C.predicateA", NULL, false);
+      TokenId token = db->getClient()->createToken("C.predicateA", "", false);
       std::vector<MatchingRuleId> rules;
       me.getMatches(token, rules);
       CPPUNIT_ASSERT_MESSAGE(toString(rules.size()), rules.size() == 1);
@@ -696,7 +696,7 @@ private:
 
     // test H2
     {
-      TokenId token = db->getClient()->createToken("B.predicateC", NULL, false);
+      TokenId token = db->getClient()->createToken("B.predicateC", "", false);
       {
         std::vector<MatchingRuleId> rules;
         me.getMatches(token, rules);
@@ -750,7 +750,7 @@ private:
 
     // test basic flaw filtering and default handler access
     {
-      TokenId token = db->getClient()->createToken("D.predicateG", NULL, false);
+      TokenId token = db->getClient()->createToken("D.predicateG", "", false);
       db->getConstraintEngine()->propagate();
       // Initially the token is in scope and the variable is not
       CPPUNIT_ASSERT(solver.inScope(token));
@@ -804,11 +804,11 @@ private:
 
     // Now handle a case with increasingly restrictive filters
     {
-      TokenId master = db->getClient()->createToken("D.predicateF", NULL, false);
+      TokenId master = db->getClient()->createToken("D.predicateF", "", false);
       db->getConstraintEngine()->propagate();
       master->activate();
       TokenId slave = master->getSlave(1);
-      CPPUNIT_ASSERT_MESSAGE(slave->getPredicateName().toString(), slave->getPredicateName() == LabelStr("D.predicateC"));
+      CPPUNIT_ASSERT_MESSAGE(slave->getPredicateName(), slave->getPredicateName() == "D.predicateC");
 
       // With no guards set, we should just get the default priority
       db->getConstraintEngine()->propagate();
@@ -1957,11 +1957,11 @@ private:
       solver.solve(100,100);
 
       TokenId second = first->getSlave(0);
-      CPPUNIT_ASSERT_MESSAGE(second->getPredicateName().toString(), second->getPredicateName() == LabelStr("CommitTest.chainb"));
+      CPPUNIT_ASSERT_MESSAGE(second->getPredicateName(), second->getPredicateName() == "CommitTest.chainb");
       TokenId third = second->getSlave(0);
-      CPPUNIT_ASSERT_MESSAGE(third->getPredicateName().toString(), third->getPredicateName() == LabelStr("CommitTest.chaina"));
+      CPPUNIT_ASSERT_MESSAGE(third->getPredicateName(), third->getPredicateName() == "CommitTest.chaina");
       TokenId fourth = third->getSlave(0);
-      CPPUNIT_ASSERT_MESSAGE(fourth->getPredicateName().toString(), fourth->getPredicateName() == LabelStr("CommitTest.chainb"));
+      CPPUNIT_ASSERT_MESSAGE(fourth->getPredicateName(), fourth->getPredicateName() == "CommitTest.chainb");
 
       if(i & (1 << 0))
 				first->commit();

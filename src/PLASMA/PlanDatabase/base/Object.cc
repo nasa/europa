@@ -20,7 +20,7 @@
  */
 namespace EUROPA {
 
-Object::Object(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open)
+Object::Object(const PlanDatabaseId planDatabase, const std::string& type, const std::string& name, bool open)
     : m_id(this), m_parent(), m_type(type), m_name(name),
       m_planDatabase(planDatabase),
       m_state(INCOMPLETE),
@@ -40,10 +40,10 @@ Object::Object(const PlanDatabaseId planDatabase, const LabelStr& type, const La
       close();
   }
 
-  Object::Object(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open)
+  Object::Object(const ObjectId parent, const std::string& type, const std::string& localName, bool open)
     : m_id(this), m_parent(parent),
       m_type(type),
-      m_name(std::string(parent->getName() + "." + localName.toString())),
+      m_name(std::string(parent->getName() + "." + localName)),
       m_planDatabase(parent->getPlanDatabase()),
       m_state(INCOMPLETE),
       m_components(),
@@ -59,7 +59,7 @@ Object::Object(const PlanDatabaseId planDatabase, const LabelStr& type, const La
     check_error(m_parent.isValid());
     check_error(m_planDatabase->getSchema()->canContain(parent->getType(), type, localName),
 		"Object " + parent->getName() +
-		" cannot contain " + localName.toString() + " of type " + type.toString());
+		" cannot contain " + localName + " of type " + type);
 
     parent->add(m_id);
     if (!open)
@@ -134,8 +134,8 @@ const std::string& Object::getType() const {
   return(m_type);
 }
 
-  const LabelStr Object::getRootType() const {
-    LabelStr rootType = getType();
+  const std::string Object::getRootType() const {
+    std::string rootType = getType();
 
     while(m_planDatabase->getSchema()->hasParent(rootType))
       rootType = m_planDatabase->getSchema()->getParent(rootType);
@@ -180,7 +180,7 @@ const std::string& Object::getName() const {
 
   void Object::add(const TokenId token) {
     check_error(isComplete());
-    debugMsg("Object:add:token", "Adding token " << token->getPredicateName().toString() << "(" << token->getKey() << ")");
+    debugMsg("Object:add:token", "Adding token " << token->getPredicateName() << "(" << token->getKey() << ")");
     m_tokens.insert(token);
     m_planDatabase->notifyAdded(m_id, token);
   }
@@ -188,7 +188,7 @@ const std::string& Object::getName() const {
   void Object::remove(const TokenId token) {
     check_error(token.isValid());
 
-    debugMsg("Object:remove:token", "Removing token " << token->getPredicateName().toString() << "(" << token->getKey() << ")  from " << toString());
+    debugMsg("Object:remove:token", "Removing token " << token->getPredicateName() << "(" << token->getKey() << ")  from " << toString());
     check_error(isValid());
     check_error(!Entity::isPurging());
 
@@ -312,7 +312,7 @@ void Object::constrain(const TokenId predecessor, const TokenId successor, bool 
     vars.push_back(predecessor->end());
     vars.push_back(successor->start());
     constraint =  getPlanDatabase()->getConstraintEngine()->createConstraint(
-        LabelStr("precedes"),
+        "precedes",
         vars);
 
     // Store for bi-directional access by encoded key pair and constraint
@@ -390,12 +390,12 @@ void Object::constrain(const TokenId predecessor, const TokenId successor, bool 
     delete this;
   }
 
-  const ConstrainedVariableId Object::getVariable(const LabelStr& name) const {
+  const ConstrainedVariableId Object::getVariable(const std::string& name) const {
     for (std::vector<ConstrainedVariableId>::const_iterator it = m_variables.begin();
          it != m_variables.end(); ++it) {
       const ConstrainedVariableId var = *it;
       check_error(var.isValid());
-      if (var->getName() == name.toString())
+      if (var->getName() == name)
         return(var);
     }
     return(ConstrainedVariableId::noId());
@@ -560,13 +560,13 @@ void Object::constrain(const TokenId predecessor, const TokenId successor, bool 
     check_error(token.isValid());
     check_error(token->isActive());
     check_error(token->getObject()->lastDomain().isMember(getKey()),
-      "Cannot assign token " + token->getPredicateName().toString() + " to  object " + getName() + ", it is not part of derived domain.");
+      "Cannot assign token " + token->getPredicateName() + " to  object " + getName() + ", it is not part of derived domain.");
 
     // Place this token on the object. We use a constraint since token assignment is done by specifying
     // the object variable. This only needs to be done once, so test first if it has already been constrained
     if (!isConstrainedToThisObject(token)) {
       ConstraintId thisObject =
-          getPlanDatabase()->getConstraintEngine()->createConstraint(LabelStr("eq"),
+          getPlanDatabase()->getConstraintEngine()->createConstraint("eq",
 					    makeScope(token->getObject(), m_thisVar));
       m_constraintsByTokenKey.insert(std::make_pair(token->getKey(), thisObject));
     }
@@ -618,12 +618,12 @@ void Object::constrain(const TokenId predecessor, const TokenId successor, bool 
     return true;
   }
 
-ConstrainedVariableId Object::addVariable(const Domain& baseDomain, const char* name){
+ConstrainedVariableId Object::addVariable(const Domain& baseDomain, const std::string& name){
   std::string varTypeName = "";
   Schema::NameValueVector members = m_planDatabase->getSchema()->getMembers(m_type);
   for (unsigned int i = 0; i < members.size(); i++) {
     debugMsg("Object:typeForNewMember", "member [" << members[i].first.c_str() << ", " << members[i].second.c_str() << "]");
-    if (strcmp( members[i].second.c_str(), name) == 0 ) {
+    if (members[i].second.c_str() ==  name) {
       varTypeName = members[i].first.c_str();
     }
   }
@@ -769,13 +769,12 @@ PSList<PSVariable*> Object::getMemberVariables() {
 }
 
 PSVariable* Object::getMemberVariable(const std::string& name) {
-  LabelStr realName(name);
   PSVariable* retval = NULL;
   const std::vector<ConstrainedVariableId>& vars = getVariables();
   for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
       ++it) {
     ConstrainedVariableId id = *it;
-    if(id->getName() == realName.toString()) {
+    if(id->getName() == name) {
       retval = id_cast<PSVariable>(id);
       break;
     }
@@ -820,7 +819,7 @@ PSList<PSToken*> Object::getTokens() const {
       return dynamic_cast<PSObject*>(entity);
   }
 
-  ObjectDT::ObjectDT(const char* name)
+  ObjectDT::ObjectDT(const std::string& name)
       : DataType(name)
   {
       m_baseDomain = new ObjectDomain(getId());
@@ -837,7 +836,8 @@ PSList<PSToken*> Object::getTokens() const {
 
   edouble ObjectDT::createValue(const std::string& value) const
   {
-    return LabelStr(value);
+    checkRuntimeError(ALWAYS_FAIL, "This should never get called.");
+    return 0.0;//LabelStr(value);
   }
 
   std::string ObjectDT::toString(edouble value) const

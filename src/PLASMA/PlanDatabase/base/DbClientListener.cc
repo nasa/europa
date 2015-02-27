@@ -6,7 +6,7 @@ void DbClientListener::notifyObjectCreated(const ObjectId,
                                            const std::vector<const Domain*>&){}
 void DbClientListener::notifyObjectDeleted(const ObjectId) {}
 void DbClientListener::notifyClosed(){}
-void DbClientListener::notifyClosed(const LabelStr&){}
+void DbClientListener::notifyClosed(const std::string&){}
 void DbClientListener::notifyTokenCreated(const TokenId){}
 void DbClientListener::notifyTokenDeleted(const TokenId, const std::string&){}
 void DbClientListener::notifyConstrained(const ObjectId, const TokenId,

@@ -49,13 +49,13 @@ namespace EUROPA {
   {
   }
 
-  void EvalContext::addVar(const char* name,const ConstrainedVariableId v)
+  void EvalContext::addVar(const std::string& name,const ConstrainedVariableId v)
   {
     m_variables[name] = v;
     debugMsg("Interpreter:EvalContext","Added var:" << name << " to EvalContext");
   }
 
-  ConstrainedVariableId EvalContext::getVar(const char* name)
+  ConstrainedVariableId EvalContext::getVar(const std::string& name)
   {
     std::map<std::string,ConstrainedVariableId>::iterator it =
       m_variables.find(name);
@@ -68,12 +68,12 @@ namespace EUROPA {
       return ConstrainedVariableId::noId();
   }
 
-  void EvalContext::addToken(const char* name,const TokenId t)
+  void EvalContext::addToken(const std::string& name,const TokenId t)
   {
     m_tokens[name] = t;
   }
 
-  TokenId EvalContext::getToken(const char* name)
+  TokenId EvalContext::getToken(const std::string& name)
   {
     std::map<std::string,TokenId>::iterator it =
       m_tokens.find(name);
@@ -86,7 +86,7 @@ namespace EUROPA {
       return TokenId::noId();
   }
 
-void* EvalContext::getElement(const char*) const {return NULL;}
+void* EvalContext::getElement(const std::string&) const {return NULL;}
 
   std::string EvalContext::toString() const
   {
@@ -106,7 +106,7 @@ void* EvalContext::getElement(const char*) const {return NULL;}
     std::map<std::string,TokenId>::const_iterator tokenIt = m_tokens.begin();
     os << "    tokens {";
     for (;tokenIt != m_tokens.end();++tokenIt)
-      os << tokenIt->first << " " << tokenIt->second->getPredicateName().toString() << ",";
+      os << tokenIt->first << " " << tokenIt->second->getPredicateName() << ",";
     os << "    }"  << std::endl;
 
     if (m_parent == NULL)

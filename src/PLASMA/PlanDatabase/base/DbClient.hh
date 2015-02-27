@@ -38,7 +38,7 @@ namespace EUROPA {
      * @param name The name for the variable. Must be unique.
      * @return The Id of the variable created. Will error out rather than return a noId.
      */
-    ConstrainedVariableId createVariable(const char* typeName, const Domain& baseDomain, const char* name, bool isTmpVar = false, bool canBeSpecified=true);
+    ConstrainedVariableId createVariable(const std::string& typeName, const Domain& baseDomain, const std::string& name, bool isTmpVar = false, bool canBeSpecified=true);
 
     /**
      * @brief Create a variable
@@ -46,7 +46,8 @@ namespace EUROPA {
      * @param name The name for the variable. Must be unique.
      * @return The Id of the variable created. Will error out rather than return a noId.
      */
-    ConstrainedVariableId createVariable(const char* typeName, const char* name, bool isTmpVar = false);
+    ConstrainedVariableId createVariable(const std::string& typeName,
+                                         const std::string& name, bool isTmpVar = false);
 
     /**
      * @brief Delete a variable.  By way of symmetry with createVariable().
@@ -60,7 +61,7 @@ namespace EUROPA {
      * @param name The name for the instance. Must be unique.
      * @return The Id of the object created. Will error out rather than return a noId.
      */
-    ObjectId createObject(const char* type, const char* name);
+    ObjectId createObject(const std::string& type, const std::string& name);
 
     /**
      * @brief Create an object instance in the dabatase, with a call to a specialized constructor
@@ -70,7 +71,7 @@ namespace EUROPA {
      * @param arguments A vector of name/value pairs used to invoke a particular constructor.
      * @return The Id of the object created. Will error out rather than return a noId.
      */
-    ObjectId createObject(const char* type, const char* name, const std::vector<const Domain*>& arguments);
+    ObjectId createObject(const std::string& type, const std::string& name, const std::vector<const Domain*>& arguments);
 
     /**
      * @brief Delete an object.  By way of symmetry with createObject().
@@ -79,7 +80,7 @@ namespace EUROPA {
 
     /**
      * @brief Close the database. This will prohibit any further insertion of objects.
-     * @see close(const char* objectType)
+     * @see close(const std::string& objectType)
      */
     void close();
 
@@ -87,7 +88,7 @@ namespace EUROPA {
      * @brief Close the database for further creation of any objects of a given type. Not supported yet. There is no
      * implementation for this yet, since we are not really supporting incremental closure of objects at this time.
      */
-    void close(const char* objectType);
+    void close(const std::string& objectType);
 
     /**
      * @brief Constructs a Token instance.
@@ -95,8 +96,8 @@ namespace EUROPA {
      * schema.
      * @return The Id of the token created. Will error out rather than return a noId.
      */
-    TokenId createToken(const char* tokenType,
-                        const char* tokenName = NULL,
+    TokenId createToken(const std::string& tokenType,
+                        const std::string& tokenName = "",
                         bool rejectable = false,
                         bool isFact = false);
 
@@ -153,9 +154,9 @@ namespace EUROPA {
      * @param name The name of the constraint to be created
      * @param scope The variables to provide the scope of the constraint.
      */
-    ConstraintId createConstraint(const char* name,
+    ConstraintId createConstraint(const std::string& name,
 				  const std::vector<ConstrainedVariableId>& scope,
-				  const char* violationExpl=NULL);
+				  const std::string& violationExpl="");
 
     /**
      * @brief Construction of a unary constraint.
@@ -163,7 +164,7 @@ namespace EUROPA {
      * &param var the target variable.
      * @param domain The domain to restrict against.
      */
-    ConstraintId createConstraint(const char* name,
+    ConstraintId createConstraint(const std::string& name,
 				  const ConstrainedVariableId variable,
 				  const Domain& domain);
 
@@ -215,31 +216,31 @@ namespace EUROPA {
      * @brief Lookup an object by name. It is an error if the object is not present.
      * @return The requested object
      */
-    ObjectId getObject(const char* name) const;
+    ObjectId getObject(const std::string& name) const;
 
     /**
      * @brief Lookup a global variable by name. It is an error if not present
      * @return The requested variable.
      */
-    const ConstrainedVariableId getGlobalVariable(const LabelStr& varName) const;
+    const ConstrainedVariableId getGlobalVariable(const std::string& varName) const;
 
     /**
      * @brief Test if a global exists for a given name
      * @return true if present, otherwise false
      */
-    bool isGlobalVariable(const LabelStr& varName) const;
+    bool isGlobalVariable(const std::string& varName) const;
 
     /**
      * @brief Lookup a global token by name. It is an error if not present
      * @return The requested token.
      */
-    const TokenId getGlobalToken(const LabelStr& name) const;
+    const TokenId getGlobalToken(const std::string& name) const;
 
     /**
      * @brief Test if a global exists for a given name
      * @return true if present, otherwise false
      */
-    bool isGlobalToken(const LabelStr& name) const;
+    bool isGlobalToken(const std::string& name) const;
 
     /**
      * @brief Retrieve token defined by a particular path from a root token. Transaction Logging must be enabled.
@@ -330,7 +331,7 @@ namespace EUROPA {
     /**
      * @brief Create a value for a string
      */
-    edouble createValue(const char* typeName, const std::string& value);
+    edouble createValue(const std::string& typeName, const std::string& value);
         
     // Temporarily exposing these to remove singletons, need to review DbClient concept in general
     const CESchemaId getCESchema() const;
@@ -345,8 +346,8 @@ namespace EUROPA {
     DbClient(const DbClient&); /* NO IMPL */
 
     /*!< Helper methods */
-    TokenId allocateToken(const char* tokenType,
-                          const char* tokenName,
+    TokenId allocateToken(const std::string& tokenType,
+                          const std::string& tokenName,
                           bool rejectable,
                           bool isFact=false);
 

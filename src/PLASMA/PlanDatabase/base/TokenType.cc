@@ -7,7 +7,7 @@
 
 namespace EUROPA {
 
-  TokenType::TokenType(const ObjectTypeId ot, const LabelStr& signature)
+TokenType::TokenType(const ObjectTypeId ot, const std::string& signature)
     : m_id(this)
     , m_objType(ot)
     , m_signature(signature)
@@ -16,7 +16,7 @@ namespace EUROPA {
     , m_args()
     , m_subgoalsByAttr()
   {
-    m_predicateName = signature.getElement(1,".");
+    m_predicateName = signature.substr(signature.find('.') + 1);
   }
 
   TokenType::~TokenType()
@@ -31,16 +31,16 @@ namespace EUROPA {
 
   const ObjectTypeId TokenType::getObjectType() const { return m_objType; }
 
-  const LabelStr& TokenType::getPredicateName() const { return m_predicateName; }
+  const std::string& TokenType::getPredicateName() const { return m_predicateName; }
 
-  const LabelStr& TokenType::getSignature() const {return m_signature;}
+  const std::string& TokenType::getSignature() const {return m_signature;}
 
 const std::map<std::string,DataTypeId>& TokenType::getArgs() const { return m_args; }
 
   // TODO: this should live in one place only
   static RestrictedDT StateDT("TokenStates",SymbolDT::instance(),StateDomain());
 
-const DataTypeId TokenType::getArgType(const char* argName) const {
+const DataTypeId TokenType::getArgType(const std::string& argName) const {
   std::map<std::string,DataTypeId>::const_iterator it = m_args.find(argName);
 
   if (it != m_args.end())
@@ -65,11 +65,11 @@ const DataTypeId TokenType::getArgType(const char* argName) const {
 }
 
 
-  void TokenType::addArg(const DataTypeId type, const LabelStr& name)
+  void TokenType::addArg(const DataTypeId type, const std::string& name)
   {
     checkRuntimeError(m_args.find(name) == m_args.end(),
-		      m_objType->getName() << "." << m_predicateName.toString()
-		      << " already has a parameter called " << name.toString());
+		      m_objType->getName() << "." << m_predicateName
+		      << " already has a parameter called " << name);
     m_args[name] = type;
   }
 

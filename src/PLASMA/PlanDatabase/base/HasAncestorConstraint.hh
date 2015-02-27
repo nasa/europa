@@ -15,8 +15,8 @@ class HasAncestorConstraint: public Constraint
 {
  public:
 
-  HasAncestorConstraint(const LabelStr& name,
-			const LabelStr& propagatorName,
+  HasAncestorConstraint(const std::string& name,
+			const std::string& propagatorName,
 			const ConstraintEngineId constraintEngine,
 			const std::vector<ConstrainedVariableId>& variables);
 

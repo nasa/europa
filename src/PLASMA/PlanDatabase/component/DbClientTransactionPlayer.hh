@@ -55,9 +55,9 @@ namespace EUROPA {
     static const std::set<std::string>& STATE_TRANSACTIONS();
     static const std::set<std::string>& NO_TRANSACTIONS();
 
-    static const char* getObjectAndType(const SchemaId schema,
+    static std::string getObjectAndType(const SchemaId schema,
                                         const DbClientId client,
-                                        const char* predicate,
+                                        const std::string& predicate,
                                         ObjectId& object);
 
   protected:

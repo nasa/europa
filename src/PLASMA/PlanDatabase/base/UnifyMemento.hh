@@ -5,7 +5,6 @@
 //#include "TokenVariable.hh"
 #include "MergeMemento.hh"
 #include "StackMemento.hh"
-#include "LabelStr.hh"
 #include "Constraint.hh"
 #include "ConstrainedVariable.hh"
 

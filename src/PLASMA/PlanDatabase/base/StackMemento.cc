@@ -28,7 +28,7 @@ namespace EUROPA{
       newScope.push_back(stackVariables[i]);
       newScope.push_back(activeVariables[i]);
       ConstraintId newConstraint = m_activeToken->getPlanDatabase()->getConstraintEngine()->createConstraint(
-                                      LabelStr("eq"),
+                                      "eq",
           							  newScope);
       check_error(newConstraint.isValid());
       m_stackConstraints.push_back(newConstraint);

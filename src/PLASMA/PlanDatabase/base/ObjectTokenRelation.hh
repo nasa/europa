@@ -21,8 +21,8 @@ class ObjectDomain;
   class ObjectTokenRelation : public Constraint {
   public:
 
-    ObjectTokenRelation(const LabelStr& name,
-			const LabelStr& propagatorName,
+    ObjectTokenRelation(const std::string& name,
+			const std::string& propagatorName,
 			const ConstraintEngineId constraintEngine,
 			const std::vector<ConstrainedVariableId>& variables);
 

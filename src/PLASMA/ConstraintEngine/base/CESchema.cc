@@ -25,11 +25,11 @@ CESchema::CESchema() : m_id(this), m_dataTypes(), m_constraintTypes(), m_cfuncti
       return m_id;
   }
 
-bool CESchema::isDataType(const char* typeName) const {
-  return (m_dataTypes.find(std::string(typeName)) != m_dataTypes.end());
+bool CESchema::isDataType(const std::string& typeName) const {
+  return (m_dataTypes.find(typeName) != m_dataTypes.end());
 }
 
-DataTypeId CESchema::getDataType(const char* typeName) {
+DataTypeId CESchema::getDataType(const std::string& typeName) {
   std::map<std::string, DataTypeId>::const_iterator it =  m_dataTypes.find(typeName);
   condDebugMsg(it == m_dataTypes.end(),
                "europa:error", "no DataType found for type '" << typeName << "'");
@@ -58,12 +58,11 @@ void CESchema::registerDataType(const DataTypeId dt) {
   debugMsg("CESchema::registerDataType", "Registered data type " << dt->getName());
 }
 
-  const Domain & CESchema::baseDomain(const char* typeName)
-  {
-    DataTypeId factory = getDataType(typeName);
-    check_error(factory.isValid(), "no DataType found for type '" + std::string(typeName) + "'");
-    return factory->baseDomain();
-  }
+const Domain & CESchema::baseDomain(const std::string& typeName) {
+  DataTypeId factory = getDataType(typeName);
+  check_error(factory.isValid(), "no DataType found for type '" + typeName + "'");
+  return factory->baseDomain();
+}
   
 void CESchema::purgeDataTypes() {
   std::map<std::string, DataTypeId >::iterator it = m_dataTypes.begin();

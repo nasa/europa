@@ -289,7 +289,7 @@ bool allActiveVariables(const std::vector<ConstrainedVariableId>& vars) {
   }
 
   /** DEFINE CONSTANTS DECLARED IN COMMON DEFS **/
-  DEFINE_GLOBAL_CONST(char*, g_noVarName, "NO_NAME");
+  DEFINE_GLOBAL_CONST(std::string, g_noVarName, "NO_NAME");
 
 DomainListenerId ConstraintEngine::allocateVariableListener(const ConstrainedVariableId variable,
                                                             const ConstraintList&) const{
@@ -1140,10 +1140,10 @@ int ConstraintEngine::addLinkedVarsForRelaxation(const ConstrainedVariableId var
 }
 
 ConstrainedVariableId
-ConstraintEngine::createVariable(const char* typeName,
+ConstraintEngine::createVariable(const std::string& typeName,
                                  const bool internal,
                                  bool canBeSpecified,
-                                 const char* name,
+                                 const std::string& name,
                                  const EntityId parent,
                                  unsigned int index) {
   DataTypeId dt = getCESchema()->getDataType(typeName);
@@ -1152,11 +1152,11 @@ ConstraintEngine::createVariable(const char* typeName,
 }
 
 ConstrainedVariableId
-ConstraintEngine::createVariable(const char* typeName,
+ConstraintEngine::createVariable(const std::string& typeName,
                                  const Domain& baseDomain,
                                  const bool internal,
                                  bool canBeSpecified,
-                                 const char* name,
+                                 const std::string& name,
                                  const EntityId parent,
                                  unsigned int index) {
   DataTypeId dt = getCESchema()->getDataType(typeName);
@@ -1168,7 +1168,7 @@ ConstraintEngine::createVariable(const char* typeName,
 
 ConstraintId ConstraintEngine::createConstraint(const std::string& name,
                                                 const std::vector<ConstrainedVariableId>& scope,
-                                                const char* violationExpl) {
+                                                const std::string& violationExpl) {
   ConstraintTypeId factory = getCESchema()->getConstraintType(name);
   check_error(factory.isValid());
   ConstraintId constraint = factory->createConstraint(getId(), scope, violationExpl);
@@ -1190,7 +1190,7 @@ ConstraintId ConstraintEngine::createConstraint(const std::string& name,
   }
 
 
-  edouble ConstraintEngine::createValue(const char* typeName, const std::string& value)
+  edouble ConstraintEngine::createValue(const std::string& typeName, const std::string& value)
   {
     DataTypeId dt = getCESchema()->getDataType(typeName);
     check_error(dt.isValid(), "no DataType found for type '" + std::string(typeName) + "'");

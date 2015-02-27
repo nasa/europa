@@ -66,7 +66,7 @@ namespace EUROPA {
     /**
      * @brief Set the name
      */
-    void setName(const LabelStr& name);
+    void setName(const std::string& name);
 
     /**
      * @brief Accessor for the master token for this token.
@@ -79,7 +79,7 @@ namespace EUROPA {
      * @brief Accessor for the relation to the master token.
      * @return one of the supported allen relations (see documentation)
      */
-    const LabelStr& getRelation() const;
+    const std::string& getRelation() const;
 
     /**
      * @brief Obtain a slave token using a positional offset from this token
@@ -113,12 +113,12 @@ namespace EUROPA {
      * This information is used for type checking with respect to the schema and is essential to the semantics of the token.
      * @see Schema::isPredicateDefined, Schema::canBeAssigned, Schema::canContain
      */
-    const LabelStr& getPredicateName() const;
+    const std::string& getPredicateName() const;
 
     /**
      * @brief Access to the unqualified predicate name (if it has delimiters they are stripped).
      */
-    const LabelStr& getUnqualifiedPredicateName() const;
+    const std::string& getUnqualifiedPredicateName() const;
 
     /**
      * @brief Obtain the variable used to store reachable states. The full domain is INCOMPLETE, ACTIVE, MERGED and REJECTED.
@@ -164,7 +164,7 @@ namespace EUROPA {
     /**
      * @brief Access all variables (state, object, start, end, duration, parameters).
      */
-    const ConstrainedVariableId getVariable(const LabelStr& name, bool checkGlobalContext=true) const;
+    const ConstrainedVariableId getVariable(const std::string& name, bool checkGlobalContext=true) const;
 
     /**
      * @brief Access all tokens generated as sub-goals of this token.
@@ -365,13 +365,13 @@ namespace EUROPA {
     void removeLocalVariable(const ConstrainedVariableId var);
     const ConstrainedVariableSet& getLocalVariables();
 
-    static const LabelStr& noObject();
+    static const std::string& noObject();
 
     /**
      * @brief Utility for allocating pseudo variable names such that there are no duplicates. Duplicates can be dangerous
      * since associative maps look up variables by name and can lead to mix-ups.
      */
-    static LabelStr makePseudoVarName();
+    static std::string makePseudoVarName();
 
     /**
      * @brief Add a parameter as a member to the object. This is used when building the instance
@@ -382,14 +382,14 @@ namespace EUROPA {
      * @see Scheme::hasMember, Schema::canContain, Token::close()
      */
     template<class DomainType>
-    ConstrainedVariableId addParameter(const DomainType& baseDomain, const LabelStr& name){
+    ConstrainedVariableId addParameter(const DomainType& baseDomain, const std::string& name){
       check_error(isIncomplete(),
-		  "Cannot add parameter " + name.toString() +
+		  "Cannot add parameter " + name +
 		  " after completing token construction.");
 
       check_error(m_planDatabase->getSchema()->canContain(m_predicateName, baseDomain.getTypeName(), name),
-		  "Predicate '" + m_predicateName.toString() +
-		  "' cannot contain parameter '" + name.toString() + "'");
+		  "Predicate '" + m_predicateName +
+		  "' cannot contain parameter '" + name + "'");
 
       ConstrainedVariableId id = (new TokenVariable<DomainType>(m_id,
 								m_allVariables.size(),
@@ -450,21 +450,21 @@ namespace EUROPA {
      * @brief Constructor for master token creation.
      */
     Token(const PlanDatabaseId planDatabase,
-          const LabelStr& predicateName,
+          const std::string& predicateName,
           bool rejectable,
           bool isFact,
           const IntervalIntDomain& durationBaseDomain,
-          const LabelStr& objectName,
+          const std::string& objectName,
           bool closed);
 
     /**
      * @brief Constructor for slave token creation.
      */
     Token(const TokenId master,
-	  const LabelStr& relation,
-	  const LabelStr& predicateName,
+	  const std::string& relation,
+	  const std::string& predicateName,
           const IntervalIntDomain& durationBaseDomain,
-          const LabelStr& objectName,
+          const std::string& objectName,
           bool closed);
 
     /**
@@ -498,9 +498,9 @@ namespace EUROPA {
     TokenId m_id;
     std::string m_name;
     TokenId m_master;
-    LabelStr m_relation;
+    std::string m_relation;
     std::string m_baseObjectType;
-    LabelStr m_predicateName;
+    std::string m_predicateName;
     StateVarId m_state; /*!< state variable for token.*/
     ObjectVarId m_object; /*!< object variable for token. The set of objects it may be assigned to. */
     TempVarId m_duration; /*!< The duration of the token. [0 +inf]. */
@@ -531,11 +531,11 @@ namespace EUROPA {
      * @brief Shared initialization code across master and slave constructors
      * @see Token::Token
      */
-    void commonInit(const LabelStr& predicateName,
+    void commonInit(const std::string& predicateName,
                     bool rejectable,
                     bool isFact,
                     const IntervalIntDomain& durationBaseDomain,
-                    const LabelStr& objectName,
+                    const std::string& objectName,
                     bool closed);
 
     /**
@@ -553,7 +553,7 @@ namespace EUROPA {
     ConstrainedVariableSet m_localVariables; /*!< Variables created external to the token but related to it. They are
 					       not part of the predicate definition but may be derived from the model elsewhere
 					       such as via local rule variables.*/
-    LabelStr m_unqualifiedPredicateName;
+    std::string m_unqualifiedPredicateName;
   };
 
   class StateDomain : public EnumeratedDomain {

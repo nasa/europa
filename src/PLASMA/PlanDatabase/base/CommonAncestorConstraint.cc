@@ -4,8 +4,8 @@
 
 namespace EUROPA{
 
-CommonAncestorConstraint::CommonAncestorConstraint(const LabelStr& name,
-                                                   const LabelStr& propagatorName,
+CommonAncestorConstraint::CommonAncestorConstraint(const std::string& name,
+                                                   const std::string& propagatorName,
                                                    const ConstraintEngineId constraintEngine,
                                                    const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),

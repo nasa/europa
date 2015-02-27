@@ -7,13 +7,13 @@
 namespace EUROPA{
 
 IntervalToken::IntervalToken(const PlanDatabaseId planDatabase,
-                             const LabelStr& predicateName,
+                             const std::string& predicateName,
                              bool rejectable,
                              bool _isFact,
                              const IntervalIntDomain& startBaseDomain,
                              const IntervalIntDomain& endBaseDomain,
                              const IntervalIntDomain& durationBaseDomain,
-                             const LabelStr& objectName,
+                             const std::string& objectName,
                              bool closed)
 :Token(planDatabase,
        predicateName,
@@ -26,12 +26,12 @@ IntervalToken::IntervalToken(const PlanDatabaseId planDatabase,
 }
 
 IntervalToken::IntervalToken(const TokenId _master,
-                             const LabelStr& _relation,
-                             const LabelStr& predicateName,
+                             const std::string& _relation,
+                             const std::string& predicateName,
                              const IntervalIntDomain& startBaseDomain,
                              const IntervalIntDomain& endBaseDomain,
                              const IntervalIntDomain& durationBaseDomain,
-                             const LabelStr& objectName,
+                             const std::string& objectName,
                              bool closed)
     :Token(_master,
 	   _relation,
@@ -65,7 +65,7 @@ IntervalToken::IntervalToken(const TokenId _master,
 						    startBaseDomain,
 						    false, // TODO: fixme
 						    true,
-						    LabelStr("start")))->getId();
+						    "start"))->getId();
     m_allVariables.push_back(m_start);
 
     m_end = (new TokenVariable<IntervalIntDomain>(m_id,
@@ -74,7 +74,7 @@ IntervalToken::IntervalToken(const TokenId _master,
 						  endBaseDomain,
 						  false, // TODO: fixme
 						  true,
-						  LabelStr("end")))->getId();
+						  "end"))->getId();
     m_allVariables.push_back(m_end);
 
     std::vector<ConstrainedVariableId> temp;
@@ -83,7 +83,7 @@ IntervalToken::IntervalToken(const TokenId _master,
     temp.push_back(m_end);
 
     ConstraintId temporalRelation =
-        m_planDatabase->getConstraintEngine()->createConstraint(LabelStr("temporalDistance"),temp);
+        m_planDatabase->getConstraintEngine()->createConstraint("temporalDistance",temp);
 
     m_standardConstraints.insert(temporalRelation);
 

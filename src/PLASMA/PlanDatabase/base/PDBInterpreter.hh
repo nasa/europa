@@ -31,13 +31,13 @@ class EvalContext {
   EvalContext(EvalContext* parent);
   virtual ~EvalContext();
 
-  virtual void addVar(const char* name,const ConstrainedVariableId v);
-  virtual ConstrainedVariableId getVar(const char* name);
+  virtual void addVar(const std::string& name,const ConstrainedVariableId v);
+  virtual ConstrainedVariableId getVar(const std::string& name);
 
-  virtual void addToken(const char* name,const TokenId t);
-  virtual TokenId getToken(const char* name);
+  virtual void addToken(const std::string& name,const TokenId t);
+  virtual TokenId getToken(const std::string& name);
 
-  virtual void* getElement(const char* name) const;
+  virtual void* getElement(const std::string& name) const;
 
   virtual std::string toString() const;
 

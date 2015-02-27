@@ -8,7 +8,6 @@
 #ifndef METHOD_HH_
 #define METHOD_HH_
 
-#include "LabelStr.hh"
 #include "ConstraintEngineDefs.hh"
 #include "PDBInterpreter.hh"
 #include <vector>
@@ -26,7 +25,7 @@ public:
 
     const MethodId getId() const;
 
-    const LabelStr& getName() const;
+    const std::string& getName() const;
 
     virtual DataRef eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const = 0;
 
@@ -37,7 +36,7 @@ public:
 
 protected:
     MethodId m_id;
-    LabelStr m_name;
+    std::string m_name;
 };
 
 }

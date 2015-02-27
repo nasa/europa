@@ -183,7 +183,7 @@ namespace EUROPA {
       check_error(t.isValid());
       TempVarId st = t->start();
       os << indentation() << "\t" << timeDomain(st->lastDomain()) << std::endl;
-      os << indentation() << "\t" << t->getPredicateName().toString() << "(" ;
+      os << indentation() << "\t" << t->getPredicateName() << "(" ;
       std::vector<ConstrainedVariableId> vars = t->parameters();
       for (std::vector<ConstrainedVariableId>::const_iterator varit = vars.begin(); varit != vars.end(); ++varit) {
 	ConstrainedVariableId v = (*varit);

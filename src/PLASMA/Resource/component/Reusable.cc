@@ -49,7 +49,7 @@ Reusable::Reusable(const ObjectId parent, const LabelStr& type,
 void Reusable::getOrderingChoices(const TokenId token,
                                   std::vector<std::pair<TokenId, TokenId> >& results,
                                   unsigned long limit) {
-  checkError(m_tokensToTransactions.find(token) != m_tokensToTransactions.end(), "Token " << token->getPredicateName().toString() <<
+  checkError(m_tokensToTransactions.find(token) != m_tokensToTransactions.end(), "Token " << token->getPredicateName() <<
              "(" << token->getKey() << ") not in profile for " << toString());
   Resource::getOrderingChoices(token, results, limit);
 }
@@ -57,13 +57,13 @@ void Reusable::getOrderingChoices(const TokenId token,
   void Reusable::createTransactions(const TokenId tok) {
     if(m_tokensToTransactions.find(tok) != m_tokensToTransactions.end()) {
       debugMsg("Reusable:createTransactions",
-               toString() << " Token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ") already has transactions.");
+               toString() << " Token " << tok->getPredicateName() << "(" << tok->getKey() << ") already has transactions.");
       return;
     }
    
     ReusableTokenId t(tok);
     debugMsg("Reusable:createTransactions",
-             toString() << " Creating transactions for " << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
+             toString() << " Creating transactions for " << tok->getPredicateName() << "(" << tok->getKey() << ")");
     //here's the major difference between Reusable and Reservoir:  always consume the quantity at the start
     //and produce it again at the end
     TransactionId t1 = (new Transaction(t->start(), t->getQuantity(), true, getId()))->getId();
@@ -81,11 +81,11 @@ void Reusable::getOrderingChoices(const TokenId token,
     checkError(tok->getObject()->lastDomain().isMember(getKey()),
                toString() << " isn't in the object variable of " << tok->toString() << ": " << tok->getObject()->toLongString());
     checkError(m_tokensToTransactions.find(tok) != m_tokensToTransactions.end(),
-               "No transaction for "  << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
+               "No transaction for "  << tok->getPredicateName() << "(" << tok->getKey() << ")");
     
     std::map<TokenId, std::pair<TransactionId, TransactionId> >::const_iterator it = m_tokensToTransactions.find(tok);
     debugMsg("Reusable:addToProfile",
-             toString() << " Adding transactions for " << tok->getPredicateName().toString() << "(" << tok->getKey() << ") to the profile.");
+             toString() << " Adding transactions for " << tok->getPredicateName() << "(" << tok->getKey() << ") to the profile.");
     m_profile->addTransaction(it->second.first);
     m_profile->addTransaction(it->second.second);
   }
@@ -105,12 +105,12 @@ void Reusable::getOrderingChoices(const TokenId token,
   void Reusable::removeFromProfile(const TokenId tok) {
     if(m_tokensToTransactions.find(tok) == m_tokensToTransactions.end()) {
       debugMsg("Reusable:removeFromProfile", 
-               toString() << "Failed to find transactions for " << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
+               toString() << "Failed to find transactions for " << tok->getPredicateName() << "(" << tok->getKey() << ")");
       return;
     }
 
     debugMsg("Reusable:removeFromProfile", 
-             toString() << " Removing token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
+             toString() << " Removing token " << tok->getPredicateName() << "(" << tok->getKey() << ")");
     std::pair<TransactionId, TransactionId> trans = m_tokensToTransactions.find(tok)->second;
     debugMsg("Reusable:removeFromProfile", 
              toString() << " Removing transaction for time " << trans.first->time()->toString() << " with quantity " << 

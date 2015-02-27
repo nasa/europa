@@ -67,7 +67,7 @@ class StringDomain;
 typedef StringDomain LabelSet;
 
 /** Constants **/
-DECLARE_GLOBAL_CONST(char*, g_noVarName);
+DECLARE_GLOBAL_CONST(std::string, g_noVarName);
 #define NO_VAR_NAME (g_noVarName())
 
 } /* namespace EUROPA */

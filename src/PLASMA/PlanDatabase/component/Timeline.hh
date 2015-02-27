@@ -26,9 +26,9 @@ namespace EUROPA {
     enum Policy {EARLIEST = 0,
 		 LATEST};
 
-    Timeline(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open = false);
+    Timeline(const PlanDatabaseId planDatabase, const std::string& type, const std::string& name, bool open = false);
 
-    Timeline(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open = false);
+    Timeline(const ObjectId parent, const std::string& type, const std::string& localName, bool open = false);
 
     virtual ~Timeline();
 
@@ -116,8 +116,8 @@ namespace EUROPA {
     protected:
         virtual ObjectId makeNewObject(
                             const PlanDatabaseId planDb,
-                            const LabelStr& objectType,
-                            const LabelStr& objectName,
+                            const std::string& objectType,
+                            const std::string& objectName,
                             const std::vector<const Domain*>& arguments) const;
   };
 }

@@ -27,27 +27,27 @@ private:
 
   const PlanDatabaseId getPlanDatabase() const;
 
-  virtual void addLocalVar(const char* name,const DataTypeId type);
-  virtual void addLocalToken(const char* name,const TokenTypeId type);
+  virtual void addLocalVar(const std::string& name,const DataTypeId type);
+  virtual void addLocalToken(const std::string& name,const TokenTypeId type);
 
-  virtual DataTypeId getDataType(const char* name) const;
-  virtual ObjectTypeId getObjectType(const char* name) const;
-  virtual TokenTypeId getTokenType(const char* name) const;
+  virtual DataTypeId getDataType(const std::string& name) const;
+  virtual ObjectTypeId getObjectType(const std::string& name) const;
+  virtual TokenTypeId getTokenType(const std::string& name) const;
 
-  virtual DataTypeId getTypeForVar(const char* name);
-  virtual DataTypeId getTypeForVar(const char* qualifiedName,std::string& errorMsg);
+  virtual DataTypeId getTypeForVar(const std::string& name);
+  virtual DataTypeId getTypeForVar(const std::string& qualifiedName,std::string& errorMsg);
 
-  virtual TokenTypeId getTypeForToken(const char* name);
-  virtual TokenTypeId getTypeForToken(const char* qualifiedName,std::string& errorMsg);
+  virtual TokenTypeId getTypeForToken(const std::string& name);
+  virtual TokenTypeId getTypeForToken(const std::string& qualifiedName,std::string& errorMsg);
 
-  virtual MethodId getMethod(const char* methodName,Expr* target,const std::vector<Expr*>& args);
+  virtual MethodId getMethod(const std::string& methodName,Expr* target,const std::vector<Expr*>& args);
 
-  virtual CFunctionId getCFunction(const char* name, const std::vector<CExpr*>& args);
+  virtual CFunctionId getCFunction(const std::string& name, const std::vector<CExpr*>& args);
 
   Domain* makeNumericDomainFromLiteral(const std::string& type,const std::string& value);
 
-  void checkConstraint(const char* name,const std::vector<Expr*>& args);
-  void checkObjectFactory(const char* name,const std::vector<Expr*>& args);
+  void checkConstraint(const std::string& name,const std::vector<Expr*>& args);
+  void checkObjectFactory(const std::string& name,const std::vector<Expr*>& args);
 
   // Error reporting methods
   void reportError(void* treeWalker, const std::string& msg);
@@ -55,14 +55,14 @@ private:
   std::string getErrors() const;
 
   // EvalContext methods
-  virtual ConstrainedVariableId getVar(const char* name);
-  virtual TokenId getToken(const char* name);
-  virtual void* getElement(const char* name) const;
+  virtual ConstrainedVariableId getVar(const std::string& name);
+  virtual TokenId getToken(const std::string& name);
+  virtual void* getElement(const std::string& name) const;
 
   // Enum support methods
-  bool isEnumValue(const char* value) const;
-  const std::string& getEnumForValue(const char* value) const;
-  Expr* makeEnumRef(const char* value) const;
+  bool isEnumValue(const std::string& value) const;
+  const std::string& getEnumForValue(const std::string& value) const;
+  Expr* makeEnumRef(const std::string& value) const;
 
  protected:
   NddlSymbolTable* m_parentST;
@@ -85,10 +85,10 @@ class NddlClassSymbolTable : public NddlSymbolTable {
   NddlClassSymbolTable(NddlSymbolTable* parent, ObjectType* ot);
   virtual ~NddlClassSymbolTable();
 
-  virtual DataTypeId getDataType(const char* name) const;
-  virtual ObjectTypeId getObjectType(const char* name) const;
+  virtual DataTypeId getDataType(const std::string& name) const;
+  virtual ObjectTypeId getObjectType(const std::string& name) const;
 
-  virtual DataTypeId getTypeForVar(const char* varName);
+  virtual DataTypeId getTypeForVar(const std::string& varName);
 
  protected:
   ObjectType* m_objectType; // Object type being declared
@@ -100,10 +100,10 @@ public:
     NddlTokenSymbolTable(NddlSymbolTable* parent, const TokenTypeId tt, const ObjectTypeId ot);
     virtual ~NddlTokenSymbolTable();
 
-    virtual DataTypeId getTypeForVar(const char* varName);
-    virtual TokenTypeId getTokenType(const char* name) const;
+    virtual DataTypeId getTypeForVar(const std::string& varName);
+    virtual TokenTypeId getTokenType(const std::string& name) const;
 
-    virtual TokenTypeId getTypeForToken(const char* name);
+    virtual TokenTypeId getTypeForToken(const std::string& name);
 
 protected:
     TokenTypeId m_tokenType;
