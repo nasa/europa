@@ -23,7 +23,7 @@ void RuleSchema::registerRule(const RuleId rule) {
   m_rulesByName.insert(std::make_pair(rule->getName(), rule->getId()));      
 }
 
-void RuleSchema::getRules(const PlanDatabaseId pdb, const LabelStr& name,
+void RuleSchema::getRules(const PlanDatabaseId pdb, const std::string& name,
                           std::vector<RuleId>& results) {
   const SchemaId schema = pdb->getSchema();
 
@@ -53,14 +53,14 @@ void RuleSchema::purgeAll() {
   cleanup(m_rulesByName);
 }
 
-    Rule::Rule(const LabelStr& name)
+    Rule::Rule(const std::string& name)
         : m_id(this)
         , m_name(name)
         , m_source("noSrc")
     {
     }
 
-    Rule::Rule(const LabelStr &name, const LabelStr &source)
+    Rule::Rule(const std::string &name, const std::string &source)
         : m_id(this)
         , m_name(name)
         , m_source(source)
@@ -75,9 +75,9 @@ void RuleSchema::purgeAll() {
 
     const RuleId Rule::getId() const {return m_id;}
 
-    const LabelStr& Rule::getName() const {return m_name;}
+    const std::string& Rule::getName() const {return m_name;}
 
-    const LabelStr& Rule::getSource() const {return m_source;}
+    const std::string& Rule::getSource() const {return m_source;}
 
     std::string Rule::toString() const
     {

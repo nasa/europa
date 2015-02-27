@@ -3,13 +3,12 @@
 #include "DomainListener.hh"
 #include "ConstrainedVariable.hh"
 #include "ConstraintType.hh"
-#include "LabelStr.hh"
 #include "Rule.hh"
 
 namespace EUROPA {
 
-RuleVariableListener::RuleVariableListener(const LabelStr& name,
-                                           const LabelStr& propagatorName,
+RuleVariableListener::RuleVariableListener(const std::string& name,
+                                           const std::string& propagatorName,
                                            const ConstraintEngineId constraintEngine,
                                            const std::vector<ConstrainedVariableId>& scope)
     : Constraint(name, propagatorName, constraintEngine, scope), m_ruleInstance(), 
@@ -54,7 +53,7 @@ bool RuleVariableListener::canIgnore(const ConstrainedVariableId,
     return true;
 
   debugMsg("RuleVariableListener:canIgnore",
-           "Checking canIgnore for guard listener for rule " << getRuleInstance()->getRule()->getName().toString() <<
+           "Checking canIgnore for guard listener for rule " << getRuleInstance()->getRule()->getName() <<
            " from source " << (m_sourceConstraint.isId() ? m_sourceConstraint->getName() : "NULL"));
 
   return false;

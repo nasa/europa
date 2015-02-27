@@ -16,8 +16,8 @@ namespace EUROPA {
     checkError(getScope().size() == ARG_COUNT, toString());
   }
 
-  ProxyVariableRelation::ProxyVariableRelation(const LabelStr& name,
-					       const LabelStr& propagatorName,
+  ProxyVariableRelation::ProxyVariableRelation(const std::string& name,
+					       const std::string& propagatorName,
 					       const ConstraintEngineId constraintEngine,
 					       const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
@@ -111,7 +111,7 @@ namespace EUROPA {
   }
 
 void ProxyVariableRelation::setSource(const ConstraintId sourceConstraint) {
-  checkError(sourceConstraint->getName() == LabelStr("proxyRelation").toString(),
+  checkError(sourceConstraint->getName() == "proxyRelation",
              sourceConstraint->toString());
   checkError(m_path.empty(), "Should be empty when setting up the source from " << sourceConstraint->toString());
   m_sourceConstraint = sourceConstraint;
