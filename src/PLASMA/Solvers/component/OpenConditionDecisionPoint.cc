@@ -21,7 +21,7 @@ bool OpenConditionDecisionPoint::test(const EntityId entity){
 OpenConditionDecisionPoint::OpenConditionDecisionPoint(const DbClientId client,
                                                        const TokenId flawedToken,
                                                        const TiXmlElement&,
-                                                       const LabelStr& explanation)
+                                                       const std::string& explanation)
     : DecisionPoint(client, flawedToken->getKey(), explanation),
       m_flawedToken(flawedToken),
       m_choices(),
@@ -203,7 +203,7 @@ SupportedOCDecisionPoint::SupportedOCDecisionPoint(
     const DbClientId client,
     const TokenId flawedToken,
     const TiXmlElement&,
-    const LabelStr& explanation)
+    const std::string& explanation)
     : DecisionPoint(client, flawedToken->getKey(), explanation)
     , m_flawedToken(flawedToken)
     , m_choices()

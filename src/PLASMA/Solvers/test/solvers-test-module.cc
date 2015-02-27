@@ -128,8 +128,8 @@ public:
  */
 class LazyAllDiff: public Constraint {
 public:
-  LazyAllDiff(const LabelStr& name,
-              const LabelStr& propagatorName,
+  LazyAllDiff(const std::string& name,
+              const std::string& propagatorName,
               const ConstraintEngineId constraintEngine,
               const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
@@ -156,8 +156,8 @@ public:
  */
 class LazyAlwaysFails: public Constraint {
 public:
-  LazyAlwaysFails(const LabelStr& name,
-                  const LabelStr& propagatorName,
+  LazyAlwaysFails(const std::string& name,
+                  const std::string& propagatorName,
                   const ConstraintEngineId constraintEngine,
                   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
@@ -440,18 +440,18 @@ private:
       
       // Expect to fire R8, R9 and R10
       //TODO: Fix this test.  It claims to fire R8, but for no apparent reason.
-      std::set<LabelStr> expectedRules;
-      expectedRules.insert(LabelStr("[R0]*.*.*.*.*.*"));
-      expectedRules.insert(LabelStr("[R7]*.*.duration.*.Object.*"));
-      // expectedRules.insert(LabelStr("[R8]*.*.*.*.B.*"));
-      expectedRules.insert(LabelStr("[R9]*.*.*.meets.D.predicateG"));
-      expectedRules.insert(LabelStr("[R10]*.*.*.before.*.*"));
+      std::set<std::string> expectedRules;
+      expectedRules.insert("[R0]*.*.*.*.*.*");
+      expectedRules.insert("[R7]*.*.duration.*.Object.*");
+      // expectedRules.insert("[R8]*.*.*.*.B.*");
+      expectedRules.insert("[R9]*.*.*.meets.D.predicateG");
+      expectedRules.insert("[R10]*.*.*.before.*.*");
       std::vector<MatchingRuleId> rules;
       me.getMatches(ConstrainedVariableId(E_predicateC->duration()), rules);
       CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getPredicateName(), rules.size() == 4);
       for(unsigned long i=0;i<4; i++) {//? {
         CPPUNIT_ASSERT_MESSAGE(rules[i]->toString(),
-                               expectedRules.find(LabelStr(rules[i]->toString())) != expectedRules.end());
+                               expectedRules.find(rules[i]->toString()) != expectedRules.end());
       }
 
       nukeToken(db->getClient(),token);
@@ -482,12 +482,12 @@ private:
       ConstrainedVariableId var = *it;
 
       // Confirm temporal variables have been excluded
-      static const LabelStr excludedVariables(":start:end:duration:arg1:arg3:arg4:arg6:arg7:arg8:filterVar:");
-      static const LabelStr includedVariables(":arg2:arg5:keepVar:");
+      static const std::string excludedVariables(":start:end:duration:arg1:arg3:arg4:arg6:arg7:arg8:filterVar:");
+      static const std::string includedVariables(":arg2:arg5:keepVar:");
       std::string s = ":" + var->getName() + ":";
-      if(excludedVariables.contains(s))
+      if(excludedVariables.find(s) != std::string::npos)
         CPPUNIT_ASSERT_MESSAGE(var->toString(), !fm.inScope(var));
-      else if(includedVariables.contains(s))
+      else if(includedVariables.find(s) != std::string::npos)
         CPPUNIT_ASSERT_MESSAGE(var->toString(), fm.inScope(var));
     }
 
@@ -532,10 +532,10 @@ private:
 
     TokenSet tokens = testEngine.getPlanDatabase()->getTokens();
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it){
-      static const LabelStr excludedPredicates(":D.predicateA:D.predicateB:D.predicateC:E.predicateC:HorizonFiltered.predicate1:HorizonFiltered.predicate2:HorizonFiltered.predicate5:");
+      static const std::string excludedPredicates(":D.predicateA:D.predicateB:D.predicateC:E.predicateC:HorizonFiltered.predicate1:HorizonFiltered.predicate2:HorizonFiltered.predicate5:");
       TokenId token = *it;
       std::string s = ":" + token->getPredicateName() + ":";
-      if(excludedPredicates.contains(s))
+      if(excludedPredicates.find(s) != std::string::npos)
         CPPUNIT_ASSERT_MESSAGE(token->toString() + " is in scope after all.", !fm.inScope(token));
       else
         CPPUNIT_ASSERT_MESSAGE(token->toString() + " is not in scope and not active.", token->isActive() || fm.inScope(token));
@@ -560,11 +560,11 @@ private:
 
     TokenSet tokens = testEngine.getPlanDatabase()->getTokens();
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it){
-      static const LabelStr excludedPredicates(":D.predicateA:D.predicateB:D.predicateC:E.predicateC:HorizonFiltered.predicate1:HorizonFiltered.predicate2:HorizonFiltered.predicate5:");
+      static const std::string excludedPredicates(":D.predicateA:D.predicateB:D.predicateC:E.predicateC:HorizonFiltered.predicate1:HorizonFiltered.predicate2:HorizonFiltered.predicate5:");
       TokenId token = *it;
       CPPUNIT_ASSERT_MESSAGE(token->toString() + " is not in scope and not active.", token->isActive() || !fm.inScope(token));
       std::string s = ":" + token->getPredicateName() + ":";
-      if(excludedPredicates.contains(s))
+      if(excludedPredicates.find(s) != std::string::npos)
         CPPUNIT_ASSERT_MESSAGE(token->toString() + " is in scope after all.", !fm.inScope(token));
     }
 
@@ -1901,7 +1901,7 @@ private:
     TiXmlElement* root = initXml(xml);
     Solver solver(testEngine.getPlanDatabase(), *root);
     ContextId ctx = solver.getContext();
-    CPPUNIT_ASSERT(ctx->getName() == LabelStr(solver.getName() + "Context"));
+    CPPUNIT_ASSERT(ctx->getName() == solver.getName() + "Context");
     ctx->put("foo", 1);
     CPPUNIT_ASSERT(ctx->get("foo") == 1);
     CPPUNIT_ASSERT(solver.getContext()->get("foo") == 1);

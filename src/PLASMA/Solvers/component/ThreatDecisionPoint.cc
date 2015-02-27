@@ -21,7 +21,7 @@ namespace EUROPA {
   ThreatDecisionPoint::ThreatDecisionPoint(const DbClientId client,
                                            const TokenId tokenToOrder,
                                            const TiXmlElement&,
-                                           const LabelStr& explanation)
+                                           const std::string& explanation)
       : DecisionPoint(client, tokenToOrder->getKey(), explanation),
         m_tokenToOrder(tokenToOrder), m_choices(), m_choiceCount(0), m_index(0) {
       // Here is where we would look for custom processing for configuration of the decision point

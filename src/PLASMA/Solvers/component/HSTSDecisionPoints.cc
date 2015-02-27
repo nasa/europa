@@ -21,7 +21,7 @@ namespace HSTS {
 
 ValueEnum::ValueEnum(const DbClientId client,
                      const ConstrainedVariableId flawedVariable,
-                     const TiXmlElement& configData, const LabelStr& explanation)
+                     const TiXmlElement& configData, const std::string& explanation)
     : UnboundVariableDecisionPoint(client, flawedVariable, configData, explanation),
       m_choiceIndex(0) {
  
@@ -47,7 +47,7 @@ ValueEnum::ValueEnum(const DbClientId client,
         edouble v = readValue(*value);
         debugMsg("Solver:ValueEnum", "Read value " << v << " from " << *value << " convertToObject " << convertToObject);
         if(convertToObject) {
-          ObjectId obj = client->getObject((LabelStr(v)).c_str());
+          ObjectId obj = client->getObject(LabelStr(v));
           checkError(obj.isValid(), "No object named '" << LabelStr(v) << "' exists, which is listed in choice ordering for " 
                      << flawedVariable->toString());
           v = obj->getKey();
@@ -93,7 +93,7 @@ bool ValueEnum::hasNext() const {
 OpenConditionDecisionPoint::OpenConditionDecisionPoint(const DbClientId client, 
                                                        const TokenId flawedToken,
                                                        const TiXmlElement& configData,
-                                                       const LabelStr& explanation) 
+                                                       const std::string& explanation) 
     : SOLVERS::OpenConditionDecisionPoint(client, flawedToken, configData,
                                           explanation),
       m_action(mergeFirst),
@@ -347,7 +347,7 @@ TokenComparatorWrapper::~TokenComparatorWrapper() {
   delete m_comparator;
 }
 
-ThreatDecisionPoint::ThreatDecisionPoint(const DbClientId client, const TokenId tokenToOrder, const TiXmlElement& configData, const LabelStr& explanation)
+ThreatDecisionPoint::ThreatDecisionPoint(const DbClientId client, const TokenId tokenToOrder, const TiXmlElement& configData, const std::string& explanation)
     : SOLVERS::ThreatDecisionPoint(client, tokenToOrder, configData, explanation),
       m_comparator(NULL) {
   std::string order((configData.Attribute("order") == NULL ? "early" : configData.Attribute("order")));

@@ -126,8 +126,8 @@ void FlawHandler::refreshWeight() {
 
     std::string FlawHandler::toString(const GuardEntry& entry){
       std::stringstream sstr;
-      LabelStr varName = entry.first;
-      sstr << varName.toString() << " == ";
+      std::string varName = entry.first;
+      sstr << varName << " == ";
 
       if(LabelStr::isString(entry.second))
         sstr << LabelStr(entry.second).toString();
@@ -215,7 +215,7 @@ void FlawHandler::refreshWeight() {
       if(!m_guards.empty()){
         for (std::vector< GuardEntry >::const_iterator it = m_guards.begin(); it != m_guards.end(); ++it){
           const GuardEntry& entry = *it;
-          const LabelStr& guardName = entry.first;
+          const std::string& guardName = entry.first;
           ConstrainedVariableId guard = token->getVariable(guardName);
 
           // If it does not have the required variable, return false
@@ -235,7 +235,7 @@ void FlawHandler::refreshWeight() {
 
         for (std::vector< GuardEntry >::const_iterator it = m_masterGuards.begin(); it != m_masterGuards.end(); ++it){
           const GuardEntry& entry = *it;
-          const LabelStr& guardName = entry.first;
+          const std::string& guardName = entry.first;
           ConstrainedVariableId guard = master->getVariable(guardName);
 
           // If it does not have the required variable, return false
@@ -321,8 +321,8 @@ void FlawHandler::refreshWeight() {
 
     /** FlawHandler::VariableListener **/
 
-FlawHandler::VariableListener::VariableListener(const LabelStr& name,
-                                                const LabelStr& propagatorName,
+FlawHandler::VariableListener::VariableListener(const std::string& name,
+                                                const std::string& propagatorName,
                                                 const ConstraintEngineId constraintEngine, 
                                                 const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables), 

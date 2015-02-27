@@ -42,31 +42,31 @@ class MatchingRule: public Component {
 
   bool filteredByObjectType() const;
 
-  const LabelStr& objectTypeFilter() const;
+  const std::string& objectTypeFilter() const;
 
   bool filteredByPredicate() const;
 
-  const LabelStr& predicateFilter() const;
+  const std::string& predicateFilter() const;
 
   bool filteredByVariable() const;
 
-  const LabelStr& variableFilter() const;
+  const std::string& variableFilter() const;
 
   bool filteredByMasterObjectType() const;
 
-  const LabelStr& masterObjectTypeFilter() const;
+  const std::string& masterObjectTypeFilter() const;
 
   bool filteredByMasterPredicate() const;
 
-  const LabelStr& masterPredicateFilter() const;
+  const std::string& masterPredicateFilter() const;
 
   bool filteredByMasterRelation() const;
 
-  const LabelStr& masterRelationFilter() const;
+  const std::string& masterRelationFilter() const;
 
   bool filteredByTokenName() const;
 
-  const LabelStr& tokenNameFilter() const;
+  const std::string& tokenNameFilter() const;
 
   ContextId getContext() const {return m_context;}
   virtual void setContext(ContextId ctx) {check_error(ctx != ContextId::noId()); m_context = ctx;}
@@ -75,16 +75,16 @@ class MatchingRule: public Component {
   ContextId m_context;
  private:
   MatchingRule(const MatchingRule&); /*!< NO IMPL */
-  LabelStr m_label; /*!< Stores the label for the rule. Optional to set this. */
+  std::string m_label; /*!< Stores the label for the rule. Optional to set this. */
   std::string m_expression; /*!< Stores the matching expression as a string for display */
 
-  LabelStr m_objectType;
-  LabelStr m_predicate;
-  LabelStr m_variable;
-  LabelStr m_masterObjectType;
-  LabelStr m_masterPredicate;
-  LabelStr m_masterRelation;
-  LabelStr m_tokenName;
+  std::string m_objectType;
+  std::string m_predicate;
+  std::string m_variable;
+  std::string m_masterObjectType;
+  std::string m_masterPredicate;
+  std::string m_masterRelation;
+  std::string m_tokenName;
   unsigned int m_staticFilterCount; /*!< Count of the number of static filters on this rule */
   unsigned int m_lastCycle; /*!< The last MatchingEngine cycle */
   unsigned int m_hitCount; /*!< Count of hits in the current matching cycle */

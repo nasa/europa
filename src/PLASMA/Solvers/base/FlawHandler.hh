@@ -29,7 +29,7 @@ namespace EUROPA {
     /**
      * @brief Main factory method
      */
-    virtual DecisionPointId create(const DbClientId client, const EntityId flawedEntity, const LabelStr& explanation) const = 0;
+    virtual DecisionPointId create(const DbClientId client, const EntityId flawedEntity, const std::string& explanation) const = 0;
 
     /**
      * @brief Get the prority
@@ -109,8 +109,8 @@ namespace EUROPA {
        * @brief Standard constraint constructor must be provided to facilitate
        * creation of a copy during merging.
        */
-      VariableListener(const LabelStr& name,
-                       const LabelStr& propagatorName,
+      VariableListener(const std::string& name,
+                       const std::string& propagatorName,
                        const ConstraintEngineId constraintEngine, 
                        const std::vector<ConstrainedVariableId>& variables);
 
@@ -126,16 +126,16 @@ namespace EUROPA {
       /**
        * @brief Standard constraint name
        */
-      static const LabelStr& CONSTRAINT_NAME(){
-        static const LabelStr sl_const("FlawListener");
+      static const std::string& CONSTRAINT_NAME(){
+        static const std::string sl_const("FlawListener");
         return sl_const;
       }
 
       /**
        * @brief Standard constraint name
        */
-      static const LabelStr& PROPAGATOR_NAME(){
-        static const LabelStr sl_const("Default");
+      static const std::string& PROPAGATOR_NAME(){
+        static const std::string sl_const("Default");
         return sl_const;
       }
 	
@@ -219,7 +219,7 @@ namespace EUROPA {
       ConcreteFlawHandler(const TiXmlElement& config)
         : FlawHandler(config){}
 
-      DecisionPointId create(const DbClientId client, const EntityId flaw, const LabelStr& explanation) const {
+      DecisionPointId create(const DbClientId client, const EntityId flaw, const std::string& explanation) const {
         DecisionPoint* dp = new CLASS(client, flaw, *FlawHandler::m_configData, explanation);
         dp->setContext(m_context);
         return dp->getId();

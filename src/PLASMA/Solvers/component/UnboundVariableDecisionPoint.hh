@@ -54,7 +54,7 @@ class UnboundVariableDecisionPoint: public DecisionPoint {
  protected:
 
   UnboundVariableDecisionPoint(const DbClientId client, const ConstrainedVariableId flawedVariable, const TiXmlElement& configData,
-                               const LabelStr& explanation = "unknown");
+                               const std::string& explanation = "unknown");
 
   const ConstrainedVariableId m_flawedVariable; /*!< The Flaw to resolve */
 
@@ -84,7 +84,7 @@ private:
     class MinValue: public UnboundVariableDecisionPoint {
     public:
       MinValue(const DbClientId client, const ConstrainedVariableId flawedVariable,
-               const TiXmlElement& configData, const LabelStr& explanation = "unknown");
+               const TiXmlElement& configData, const std::string& explanation = "unknown");
       bool hasNext() const;
       edouble getNext();
 
@@ -99,7 +99,7 @@ private:
     class MaxValue: public UnboundVariableDecisionPoint {
     public:
       MaxValue(const DbClientId client, const ConstrainedVariableId flawedVariable,
-               const TiXmlElement& configData, const LabelStr& explanation = "unknown");
+               const TiXmlElement& configData, const std::string& explanation = "unknown");
       bool hasNext() const;
       edouble getNext();
 
@@ -116,7 +116,7 @@ private:
      */
     class RandomValue: public UnboundVariableDecisionPoint {
     public:
-      RandomValue(const DbClientId client, const ConstrainedVariableId flawedVariable, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
+      RandomValue(const DbClientId client, const ConstrainedVariableId flawedVariable, const TiXmlElement& configData, const std::string& explanation = "unknown");
       bool hasNext() const;
       edouble getNext();
 

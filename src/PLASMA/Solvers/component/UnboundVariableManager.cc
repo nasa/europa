@@ -167,7 +167,7 @@ UnboundVariableManager::UnboundVariableManager(const TiXmlElement& configData)
     //reordered FROM guard, key pref TO choice count, guard
     //re-reordered from choice count, guard TO guard, choice count
     //completely removed guard
-    bool UnboundVariableManager::betterThan(const EntityId a, const EntityId b, LabelStr& explanation){
+    bool UnboundVariableManager::betterThan(const EntityId a, const EntityId b, std::string& explanation){
       //we only ever get here because the priority is equal
       //Added to duplicate behavior from HTX.  This may not be the best idea ever. ~MJI
       const ConstrainedVariableId va = a;

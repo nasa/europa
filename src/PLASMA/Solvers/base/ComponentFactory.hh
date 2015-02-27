@@ -29,12 +29,12 @@ namespace EUROPA {
       virtual ~Component();
       ComponentId getId();
       const ComponentId getId() const;
-      const LabelStr& getName() const;
-      void setName(const LabelStr& name);
+      const std::string& getName() const;
+      void setName(const std::string& name);
 
     protected:
       ComponentId m_id;
-      LabelStr m_name;
+      std::string m_name;
         
       Component(const TiXmlElement& configData);
       Component();
@@ -61,7 +61,7 @@ namespace EUROPA {
     class ComponentFactory: public Factory 
     {
     public:
-      ComponentFactory(const LabelStr& name) : Factory(name) {}
+      ComponentFactory(const std::string& name) : Factory(name) {}
 
       virtual EUROPA::FactoryObjId createInstance(const EUROPA::FactoryArgs& fa) {
 	const ComponentArgs& args = dynamic_cast<const ComponentArgs&>(fa);

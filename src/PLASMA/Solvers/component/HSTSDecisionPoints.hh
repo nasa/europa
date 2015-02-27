@@ -23,7 +23,7 @@ namespace EUROPA {
       class ValueEnum : public UnboundVariableDecisionPoint {
       public:
         ValueEnum(const DbClientId client, const ConstrainedVariableId flawedVariable,
-                  const TiXmlElement& configData, const LabelStr& explanation = "unknown");
+                  const TiXmlElement& configData, const std::string& explanation = "unknown");
         edouble getNext();
         bool hasNext() const;
       private:
@@ -36,7 +36,7 @@ namespace EUROPA {
 
     class OpenConditionDecisionPoint : public SOLVERS::OpenConditionDecisionPoint {
      public:
-      OpenConditionDecisionPoint(const DbClientId client, const TokenId flawedToken, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
+      OpenConditionDecisionPoint(const DbClientId client, const TokenId flawedToken, const TiXmlElement& configData, const std::string& explanation = "unknown");
       void handleInitialize();
       ~OpenConditionDecisionPoint();
       const std::vector<LabelStr>& getStateChoices(){return m_choices;}
@@ -58,7 +58,7 @@ namespace EUROPA {
 
     class ThreatDecisionPoint : public SOLVERS::ThreatDecisionPoint {
      public:
-      ThreatDecisionPoint(const DbClientId client, const TokenId tokenToOrder, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
+      ThreatDecisionPoint(const DbClientId client, const TokenId tokenToOrder, const TiXmlElement& configData, const std::string& explanation = "unknown");
       void handleInitialize();
       ~ThreatDecisionPoint();
       const std::vector<std::pair<ObjectId, std::pair<TokenId, TokenId> > >& getOrderingChoices(){return m_choices;}

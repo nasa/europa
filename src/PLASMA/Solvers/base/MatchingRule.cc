@@ -30,7 +30,7 @@ MatchingRule::MatchingRule(const TiXmlElement& configData)
   std::string expr;
   if(configData.Attribute("label") != NULL){
     m_label = configData.Attribute("label");
-    expr = "[" + m_label.toString() + "]";
+    expr = "[" + m_label + "]";
   }
 
   if(configData.Attribute("class-match") != NULL){
@@ -53,7 +53,7 @@ MatchingRule::MatchingRule(const TiXmlElement& configData)
 
   if(configData.Attribute("var-match") != NULL){
     m_variable = configData.Attribute("var-match");
-    m_staticFilterCount++;m_variable.toString();
+    m_staticFilterCount++;
   }
   else if(configData.Attribute("variable") != NULL){
     m_variable = configData.Attribute("variable");
@@ -80,12 +80,12 @@ MatchingRule::MatchingRule(const TiXmlElement& configData)
     m_staticFilterCount++;
   }
 
-  expr = expr + m_objectType.toString() + "." +
-         m_predicate.toString() + "." +
-         m_variable.toString() + "." +
-         m_masterRelation.toString() + "." +
-         m_masterObjectType.toString() + "." +
-         m_masterPredicate.toString(); //+ "." +
+  expr = expr + m_objectType + "." +
+         m_predicate + "." +
+         m_variable + "." +
+         m_masterRelation + "." +
+         m_masterObjectType + "." +
+         m_masterPredicate; //+ "." +
   //m_tokenName.toString(); // TODO: add this and fix regresion tests
 
   setExpression(expr);
@@ -122,30 +122,30 @@ MatchingRule::MatchingRule(const TiXmlElement& configData)
 
     bool MatchingRule::filteredByObjectType() const { return m_objectType != WILD_CARD(); }
 
-    const LabelStr& MatchingRule::objectTypeFilter() const{ return m_objectType;}
+    const std::string& MatchingRule::objectTypeFilter() const{ return m_objectType;}
 
     bool MatchingRule::filteredByPredicate() const{ return m_predicate != WILD_CARD(); }
 
-    const LabelStr& MatchingRule::predicateFilter() const{ return m_predicate; }
+    const std::string& MatchingRule::predicateFilter() const{ return m_predicate; }
 
     bool MatchingRule::filteredByVariable() const{ return m_variable != WILD_CARD(); }
 
-    const LabelStr& MatchingRule::variableFilter() const { return m_variable; }
+    const std::string& MatchingRule::variableFilter() const { return m_variable; }
 
     bool MatchingRule::filteredByMasterObjectType() const{ return m_objectType != WILD_CARD(); }
 
-    const LabelStr& MatchingRule::masterObjectTypeFilter() const { return m_masterObjectType; }
+    const std::string& MatchingRule::masterObjectTypeFilter() const { return m_masterObjectType; }
 
     bool MatchingRule::filteredByMasterPredicate() const{ return m_objectType != WILD_CARD(); }
 
-    const LabelStr& MatchingRule::masterPredicateFilter() const { return m_masterPredicate; }
+    const std::string& MatchingRule::masterPredicateFilter() const { return m_masterPredicate; }
 
     bool MatchingRule::filteredByMasterRelation() const{ return m_masterRelation != WILD_CARD(); }
 
-    const LabelStr& MatchingRule::masterRelationFilter() const { return m_masterRelation; }
+    const std::string& MatchingRule::masterRelationFilter() const { return m_masterRelation; }
 
     bool MatchingRule::filteredByTokenName() const{ return m_tokenName != WILD_CARD(); }
 
-    const LabelStr& MatchingRule::tokenNameFilter() const { return m_tokenName; }
+    const std::string& MatchingRule::tokenNameFilter() const { return m_tokenName; }
   }
 }

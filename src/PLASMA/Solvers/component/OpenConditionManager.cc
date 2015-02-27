@@ -72,7 +72,7 @@ OpenConditionManager::OpenConditionManager(const TiXmlElement& configData)
 
     DecisionPointId OpenConditionManager::nextZeroCommitmentDecision()
     {
-    	static LabelStr explanation("Processing action effects first");
+    	static std::string explanation("Processing action effects first");
 
     	for(TokenSet::const_iterator it=m_flawCandidates.begin();it != m_flawCandidates.end();++it) {
     		TokenId token = *it;

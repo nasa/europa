@@ -160,22 +160,23 @@ namespace EUROPA {
 
   HorizonFilter::HorizonFilter(const TiXmlElement& configData)
       : FlawFilter(configData, true), m_policy() {
-    static const LabelStr sl_defaultPolicy("PartiallyContained");
+    static const std::string sl_defaultPolicy("PartiallyContained");
     const char* argData = NULL;
     argData = configData.Attribute("policy");
     if(argData != NULL){
-      checkError(policies().contains(argData), argData << " is not a valid policy. Choose one of " << policies().toString());
-      m_policy = LabelStr(argData);
+      checkError(policies().find(argData) != std::string::npos,
+                 argData << " is not a valid policy. Choose one of " << policies());
+      m_policy = argData;
     }
     else
       m_policy = sl_defaultPolicy;
-    setExpression(toString() + ":horizonFilter:" + m_policy.toString());
+    setExpression(toString() + ":horizonFilter:" + m_policy);
   }
 
     bool HorizonFilter::test(const EntityId entity) {
-      static const LabelStr sl_possiblyContained("PossiblyContained");
-      static const LabelStr sl_partiallyContained("PartiallyContained");
-      static const LabelStr sl_totallyContained("TotallyContained");
+      static const std::string sl_possiblyContained("PossiblyContained");
+      static const std::string sl_partiallyContained("PartiallyContained");
+      static const std::string sl_totallyContained("TotallyContained");
 
       TokenId token;
       if(ConstrainedVariableId::convertable(entity)){
@@ -206,7 +207,7 @@ namespace EUROPA {
       debugMsg("HorizonFilter:test",
                "Evaluating: " << token->toString() << 
                " Start=" << startTime.toString() << ", End=" << endTime.toString() <<
-               ", Policy='" << m_policy.toString() << "', Horizon =" << horizon.toString());
+               ", Policy='" << m_policy << "', Horizon =" << horizon.toString());
 
       if(m_policy == sl_possiblyContained)
         withinHorizon = startTime.intersects(horizon) && endTime.intersects(horizon);
@@ -226,7 +227,7 @@ namespace EUROPA {
 
     std::string HorizonFilter::toString() const {
       std::string expr = 
-          FlawFilter::toString() + " Policy='" + m_policy.toString() + "' Horizon=";
+          FlawFilter::toString() + " Policy='" + m_policy + "' Horizon=";
       if(getContext().isValid()) {
         const IntervalIntDomain horizon =
             IntervalIntDomain(static_cast<long>(getContext()->get("horizonStart")),

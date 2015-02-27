@@ -542,7 +542,7 @@ ResourceThreatDecisionPoint::ResourceThreatDecisionPoint(const DbClientId client
       TransactionId predecessor = m_choices[m_index].first;
       TransactionId successor = m_choices[m_index].second;
       debugMsg("SolverDecisionPoint:handleExecute", "For " << m_instTime << " on " << m_resName << ", assigning " <<
-               predecessor->toString() << " to be before " << successor->toString() << " because of " << getExplanation().toString() << ".");
+               predecessor->toString() << " to be before " << successor->toString() << " because of " << getExplanation() << ".");
       m_constr = m_client->createConstraint((*m_constraintIt).c_str(), makeScope(predecessor->time(), successor->time()));
     }
 
