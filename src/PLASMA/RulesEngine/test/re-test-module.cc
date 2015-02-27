@@ -32,7 +32,7 @@ using namespace EUROPA;
 class SimpleSubGoal: public Rule {
 public:
   SimpleSubGoal()
-      : Rule(LabelStr("AllObjects.Predicate"))
+      : Rule("AllObjects.Predicate")
   {
   }
 
@@ -54,8 +54,8 @@ private:
         : RuleInstance(rule, token, planDb), m_onlySlave() {}
 
     void handleExecute(){
-      m_onlySlave = addSlave(new IntervalToken(m_token, "met_by", LabelStr("AllObjects.Predicate")));
-      addConstraint(LabelStr("eq"), makeScope(m_token->end(), m_onlySlave->start()));
+      m_onlySlave = addSlave(new IntervalToken(m_token, "met_by", "AllObjects.Predicate"));
+      addConstraint("eq", makeScope(m_token->end(), m_onlySlave->start()));
     }
 
     TokenId m_onlySlave;
@@ -107,7 +107,7 @@ public:
 
 
 NestedGuards_0::NestedGuards_0()
-    : Rule(LabelStr("AllObjects.Predicate"))
+    : Rule("AllObjects.Predicate")
 {
 }
 RuleInstanceId NestedGuards_0::createInstance(const TokenId token, const PlanDatabaseId planDb,
@@ -122,8 +122,8 @@ NestedGuards_0_Root::NestedGuards_0_Root(const RuleId rule, const TokenId token,
     : RuleInstance(rule, token, planDb, makeScope(token->getObject())), m_onlySlave() {}
 
 void NestedGuards_0_Root::handleExecute(){
-  m_onlySlave = addSlave(new IntervalToken(m_token, "met_by", LabelStr("AllObjects.Predicate")));
-  addConstraint(LabelStr("eq"), makeScope(m_token->end(), m_onlySlave->start()));
+  m_onlySlave = addSlave(new IntervalToken(m_token, "met_by", "AllObjects.Predicate"));
+  addConstraint("eq", makeScope(m_token->end(), m_onlySlave->start()));
   addChildRule(new NestedGuards_0_0(m_id, m_token->start(), IntervalIntDomain(8, 12))); /*!< Add child context with guards - start == 10 */
   addChildRule(new NestedGuards_0_1(m_id, makeScope(m_onlySlave->getObject()))); /*!< Add child context with guards - object set to singleton */
 }
@@ -132,16 +132,16 @@ NestedGuards_0_0::NestedGuards_0_0(const RuleInstanceId parentInstance, const Co
     : RuleInstance(parentInstance, guard, domain), m_onlySlave() {}
 
 void NestedGuards_0_0::handleExecute(){
-  m_onlySlave = addSlave(new IntervalToken(m_token, "met_by", LabelStr("AllObjects.Predicate")));
-  addConstraint(LabelStr("eq"), makeScope(m_token->start(), m_onlySlave->end())); // Place before
+  m_onlySlave = addSlave(new IntervalToken(m_token, "met_by", "AllObjects.Predicate"));
+  addConstraint("eq", makeScope(m_token->start(), m_onlySlave->end())); // Place before
 }
 
 NestedGuards_0_1::NestedGuards_0_1(const RuleInstanceId parentInstance, const std::vector<ConstrainedVariableId>& guards)
     : RuleInstance(parentInstance, guards), m_onlySlave() {}
 
 void NestedGuards_0_1::handleExecute(){
-  m_onlySlave = addSlave(new IntervalToken(m_token, "met_by",  LabelStr("AllObjects.Predicate")));
-  addConstraint(LabelStr("eq"), makeScope(m_token->start(), m_onlySlave->end())); // Place before
+  m_onlySlave = addSlave(new IntervalToken(m_token, "met_by",  "AllObjects.Predicate"));
+  addConstraint("eq", makeScope(m_token->start(), m_onlySlave->end())); // Place before
 }
 
 class LocalVariableGuard_0: public Rule {
@@ -169,7 +169,7 @@ public:
 ConstrainedVariableId LocalVariableGuard_0_Root::s_guard;
 
 LocalVariableGuard_0::LocalVariableGuard_0()
-    : Rule(LabelStr("AllObjects.Predicate"))
+    : Rule("AllObjects.Predicate")
 {
 }
 
@@ -194,7 +194,7 @@ void LocalVariableGuard_0_Root::handleExecute(){
   baseDomain.insert(LabelStr("D"));
   baseDomain.insert(LabelStr("E"));
   baseDomain.close();
-  ConstrainedVariableId guard = addVariable(baseDomain, true, LabelStr("b"));
+  ConstrainedVariableId guard = addVariable(baseDomain, true, "b");
   s_guard = guard; // To allow it to be set
 
   // Now allocate the guard domain.
@@ -208,7 +208,7 @@ void LocalVariableGuard_0_Root::handleExecute(){
 }
 
 void LocalVariableGuard_0_0::handleExecute(){
-  addSlave(new IntervalToken(m_token, "any", LabelStr("AllObjects.Predicate")));
+  addSlave(new IntervalToken(m_token, "any", "AllObjects.Predicate"));
 }
 
 class RETestEngine : public EngineBase
@@ -245,7 +245,7 @@ RETestEngine::RETestEngine()
     sch->registerObjectType(ot->getId());
 
 
-    Object* objectPtr = new Object(getPlanDatabase(), "AllObjects", LabelStr("defaultObj"));
+    Object* objectPtr = new Object(getPlanDatabase(), "AllObjects", "defaultObj");
     assert(objectPtr != 0);
     Object& object = *objectPtr;
     assert(objectPtr->getId() == object.getId());
@@ -327,7 +327,7 @@ private:
     // Create a token of an expected type
 
     IntervalToken t0(db,
-		     LabelStr("AllObjects.Predicate"),
+		     "AllObjects.Predicate",
 		     true,
 		     false,
 		     IntervalIntDomain(0, 1000),
@@ -348,15 +348,15 @@ private:
 
   static bool testNestedGuards(){
     RE_DEFAULT_SETUP(ce, db, false);
-    Object o1(db, LabelStr("AllObjects"), LabelStr("o1"));
-    Object o2(db, LabelStr("AllObjects"), LabelStr("o2"));
+    Object o1(db, "AllObjects", "o1");
+    Object o2(db, "AllObjects", "o2");
     db->close();
 
     re->getRuleSchema()->registerRule((new NestedGuards_0())->getId());
     // Create a token of an expected type
 
     IntervalToken t0(db,
-		     LabelStr("AllObjects.Predicate"),
+		     "AllObjects.Predicate",
 		     true,
 		     false,
 		     IntervalIntDomain(0, 10),
@@ -398,15 +398,15 @@ private:
 
   static bool testNestedGuardsConstraint(){
     RE_DEFAULT_SETUP(ce, db, false);
-    Object o1(db, LabelStr("AllObjects"), LabelStr("o1"));
-    Object o2(db, LabelStr("AllObjects"), LabelStr("o2"));
+    Object o1(db, "AllObjects", "o1");
+    Object o2(db, "AllObjects", "o2");
     db->close();
 
     re->getRuleSchema()->registerRule((new NestedGuards_0())->getId());
     // Create a token of an expected type
 
     IntervalToken t0(db,
-		     LabelStr("AllObjects.Predicate"),
+		     "AllObjects.Predicate",
 		     true,
 		     false,
 		     IntervalIntDomain(0, 10),
@@ -473,7 +473,7 @@ private:
     re->getRuleSchema()->registerRule((new LocalVariableGuard_0())->getId());
 
     IntervalToken t0(db,
-		     LabelStr("AllObjects.Predicate"),
+		     "AllObjects.Predicate",
 		     true,
 		     false,
 		     IntervalIntDomain(0, 1000),
@@ -506,10 +506,10 @@ private:
     RE_DEFAULT_SETUP(ce, db, false);
     db->close();
 
-    re->getRuleSchema()->registerRule((new TestRule(LabelStr("AllObjects.Predicate")))->getId());
+    re->getRuleSchema()->registerRule((new TestRule("AllObjects.Predicate"))->getId());
 
     IntervalToken t0(db,
-		     LabelStr("AllObjects.Predicate"),
+		     "AllObjects.Predicate",
 		     true,
 		     false,
 		     IntervalIntDomain(0, 1000),
@@ -534,7 +534,7 @@ private:
     db->close();
 
     RuleSchema rs;
-    rs.registerRule((new TestRule(LabelStr("AllObjects.Predicate")))->getId());
+    rs.registerRule((new TestRule("AllObjects.Predicate"))->getId());
     rs.purgeAll();
 
     RE_DEFAULT_TEARDOWN();
@@ -551,7 +551,7 @@ private:
     {
       // Create a token of an expected type
       IntervalToken t0(db,
-		       LabelStr("AllObjects.Predicate"),
+		       "AllObjects.Predicate",
 		       true,
 		       false,
 		       IntervalIntDomain(0, 1000),
@@ -577,7 +577,7 @@ private:
       {
 	// Create a token of an expected type
 	IntervalToken t0(db,
-			 LabelStr("AllObjects.Predicate"),
+			 "AllObjects.Predicate",
 			 true,
 			 false,
 			 IntervalIntDomain(0, 1000),

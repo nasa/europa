@@ -11,7 +11,6 @@
  */
 
 #include "RulesEngineDefs.hh"
-#include "LabelStr.hh"
 #include "Engine.hh"
 #include <vector>
 #include <map>
@@ -39,7 +38,7 @@ namespace EUROPA {
        * @brief Retrieve all registered rules for the given predicate. This will include rules
        * defined in ancestors of the current predicate also.
        */
-      void getRules(const PlanDatabaseId pdb, const LabelStr& predicate, std::vector<RuleId>& results);
+      void getRules(const PlanDatabaseId pdb, const std::string& predicate, std::vector<RuleId>& results);
 
     const std::multimap<std::string, RuleId>& getRules();
 
@@ -72,9 +71,9 @@ namespace EUROPA {
        * @brief Accessor
        * @return The predicate for which this rule applies.
        */
-      const LabelStr& getName() const;
+      const std::string& getName() const;
 
-      const LabelStr& getSource() const;
+      const std::string& getSource() const;
 
       virtual RuleInstanceId createInstance(const TokenId token,
                                             const PlanDatabaseId planDb,
@@ -87,12 +86,12 @@ namespace EUROPA {
        * @brief Constructor.
        * @param name A unique name for the rule.
        */
-      Rule(const LabelStr& name);
-      Rule(const LabelStr& name, const LabelStr &src);
+      Rule(const std::string& name);
+      Rule(const std::string& name, const std::string &src);
 
       RuleId m_id; /*!< Id for reference */
-      const LabelStr m_name; /*! Unique name for the rule */
-      const LabelStr m_source;
+      const std::string m_name; /*! Unique name for the rule */
+      const std::string m_source;
   };
 }
 

@@ -123,9 +123,9 @@ namespace EUROPA{
     void setRulesEngine(const RulesEngineId &rulesEngine);
 
 
-    ConstrainedVariableId getVariable(const LabelStr& name) const;
-    TokenId getSlave(const LabelStr& name) const;
-    ConstraintId getConstraint(const LabelStr& name) const;
+    ConstrainedVariableId getVariable(const std::string& name) const;
+    TokenId getSlave(const std::string& name) const;
+    ConstraintId getConstraint(const std::string& name) const;
 
     /************** Call-backs from the rule variable listener **************/
 
@@ -195,7 +195,7 @@ namespace EUROPA{
 
     /*!< Helper methods */
     TokenId addSlave(Token* slave);
-    TokenId addSlave(Token* slave, const LabelStr& name);
+    TokenId addSlave(Token* slave, const std::string& name);
     ConstrainedVariableId varfromtok(const TokenId tok, const std::string varstring) ;
 
     /**
@@ -228,15 +228,15 @@ namespace EUROPA{
      * @param var The variable to be added to scope.
      * @param name The name of the variable to use for lookup
      */
-    void addVariable(const ConstrainedVariableId var, const LabelStr& name);
+    void addVariable(const ConstrainedVariableId var, const std::string& name);
 
     ConstrainedVariableId addVariable( const Domain& baseDomain,
 				       bool canBeSpecified,
-				       const LabelStr& name);
+				       const std::string& name);
 
-    void addConstraint(const LabelStr& name, const std::vector<ConstrainedVariableId>& scope);
+    void addConstraint(const std::string& name, const std::vector<ConstrainedVariableId>& scope);
     void addChildRule(RuleInstance* instance);
-    void clearLoopVar(const LabelStr& loopVarName);
+    void clearLoopVar(const std::string& loopVarName);
     std::string makeImplicitVariableName();
     ConstraintId constraint(const std::string& name) const;
 

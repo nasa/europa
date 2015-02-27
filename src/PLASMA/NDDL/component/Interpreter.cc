@@ -1576,7 +1576,7 @@ InterpretedRuleInstance::InterpretedRuleInstance(const RuleInstanceId parent,
     RuleInstanceEvalContext evalContext(NULL,getId());
 
     debugMsg("Interpreter:InterpretedRule",
-	     "Executing interpreted rule: " << getRule()->getName() << ":" <<  getRule()->getSource().toString() <<
+	     "Executing interpreted rule: " << getRule()->getName() << ":" <<  getRule()->getSource() <<
 	     "token: " << m_token->toString());
 
     for(std::vector<Expr*>::const_iterator it = m_body.begin(); it != m_body.end(); ++it) {
@@ -1589,7 +1589,7 @@ InterpretedRuleInstance::InterpretedRuleInstance(const RuleInstanceId parent,
     }
 
     debugMsg("Interpreter:InterpretedRule",
-	     "Executed interpreted rule: " << getRule()->getName() << ":" <<  getRule()->getSource().toString() <<
+	     "Executed interpreted rule: " << getRule()->getName() << ":" <<  getRule()->getSource() <<
 	     "token: " << m_token->toString());
   }
 
