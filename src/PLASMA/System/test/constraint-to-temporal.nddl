@@ -7,15 +7,50 @@ class Foo extends Reservoir {
   }
 }
 
+class Bar extends Timeline {
+  Foo m_foo;
+  Bar() {
+    m_foo = new Foo();
+  }
+  predicate Stuff {
+    int reftime1;
+    int reftime2;
+    int reftime3;
+    int reftime4;
+  }
+}
+
+Bar::Stuff {
+  contains(object.m_foo.consume f1);
+  contains(object.m_foo.consume f2);
+  contains(object.m_foo.consume f3);
+  contains(object.m_foo.consume f4);
+  temporalDistance(0, reftime1, f1.time);
+  eq(f2.time, reftime2);
+  f3.time == reftime3;
+  reftime4 == f4.time;
+}
 PlannerConfig world = new PlannerConfig();
 Foo foo = new Foo();
+Bar b = new Bar();
 close();
 
 goal(foo.consume bar1);
 goal(foo.consume bar2);
+goal(foo.consume bar3);
+goal(foo.consume bar4);
 
 int reftime1 = 0;
-int reftime2 = 100;
+int reftime2 = 10;
+int reftime3 = 20;
+int reftime4 = 30;
 
 temporalDistance(0, reftime1, bar1.time);
 eq(bar2.time, reftime2);
+bar3.time == reftime3;
+bar4.time == reftime4;
+
+goal(b.Stuff bb);
+bb.start > world.m_horizonStart;
+bb.end < world.m_horizonEnd;
+bb.activate();
