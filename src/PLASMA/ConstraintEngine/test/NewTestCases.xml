@@ -504,22 +504,6 @@
 			<IntervalDomain lb="-1" ub="0"/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="cardinality" test="40">
-		<Inputs>
-			<IntervalDomain lb="-inf" ub="+inf"/>
-			<IntervalDomain lb="1" ub="1"/>
-			<IntervalDomain lb="2" ub="2"/>
-			<IntervalDomain lb="0" ub="1"/>
-			<IntervalDomain lb="-inf" ub="+inf"/>
-		</Inputs>
-		<Outputs>
-			<IntervalDomain lb="2" ub="+inf"/>
-			<IntervalDomain lb="1" ub="1"/>
-			<IntervalDomain lb="2" ub="2"/>
-			<IntervalDomain lb="0" ub="1"/>
-			<IntervalDomain lb="-inf" ub="+inf"/>
-		</Outputs>
-	</Constraint>
 	<Constraint name="eqProduct" test="41">
 		<Inputs>
 			<IntervalDomain lb="-inf" ub="0"/>

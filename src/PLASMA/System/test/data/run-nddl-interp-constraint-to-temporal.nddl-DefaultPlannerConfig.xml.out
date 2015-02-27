@@ -1,9 +1,15 @@
-Created node [id_362] initially enabled
 Created node [id_363] initially enabled
-Maximum flow instance created with source [id_362] and sink [id_363]
-Created node [id_362] initially enabled
+Created node [id_364] initially enabled
+Maximum flow instance created with source [id_363] and sink [id_364]
 Created node [id_363] initially enabled
-Maximum flow instance created with source [id_362] and sink [id_363]
+Created node [id_364] initially enabled
+Maximum flow instance created with source [id_363] and sink [id_364]
+Created node [id_413] initially enabled
+Created node [id_414] initially enabled
+Maximum flow instance created with source [id_413] and sink [id_414]
+Created node [id_413] initially enabled
+Created node [id_414] initially enabled
+Maximum flow instance created with source [id_413] and sink [id_414]
 Objects *************************
 	PlannerConfig:world*************************
 		Variables *************************
@@ -17,12 +23,20 @@ Objects *************************
 		Tokens *************************
 				{0}
 				Foo.consume()
-				Key=37  Master=NONE
+				Key=60  Master=NONE
 				{0}
-				{100}
+				{10}
 				Foo.consume()
-				Key=49  Master=NONE
-				{100}
+				Key=72  Master=NONE
+				{10}
+				{20}
+				Foo.consume()
+				Key=82  Master=NONE
+				{20}
+				{30}
+				Foo.consume()
+				Key=92  Master=NONE
+				{30}
 		End Tokens *********************
 		Variables *************************
 			foo.initialCapacity=float:CLOSED[50, 50]
@@ -34,11 +48,78 @@ Objects *************************
 			foo.consumptionMax=float:CLOSED[+inf, +inf]
 		End Variables *********************
 	End Foo:foo*************************
+	Bar:b*************************
+		Tokens *************************
+				{1}
+				Bar.Stuff(reftime1=int:CLOSED[-inf, +inf]reftime2=int:CLOSED[1, 1]reftime3=int:CLOSED[1, 1]reftime4=int:CLOSED[1, 1])
+				Key=126  Master=NONE
+				[2, 99]
+				[1, 98]
+				Bar.Axel()
+				Key=251  Master=NONE
+				[2, 99]
+				[-inf, 97]
+				Bar.Stuff(reftime1=int:CLOSED[-inf, +inf]reftime2=int:CLOSED[-inf, +inf]reftime3=int:CLOSED[-inf, +inf]reftime4=int:CLOSED[-inf, +inf])
+				Key=269  Master=251 a(251)[1, 98] --> [2, 99]
+				[1, +inf]
+		End Tokens *********************
+		Variables *************************
+			b.m_foo=Foo:CLOSED{b.m_foo(42)}
+		End Variables *********************
+	End Bar:b*************************
+	Foo:b.m_foo*************************
+		Tokens *************************
+				[1, 99]
+				Foo.consume()
+				Key=148  Master=126 bb(126){1} --> [2, 99]
+				[1, 99]
+				{1}
+				Foo.consume()
+				Key=173  Master=126 bb(126){1} --> [2, 99]
+				{1}
+				{1}
+				Foo.consume()
+				Key=196  Master=126 bb(126){1} --> [2, 99]
+				{1}
+				{1}
+				Foo.consume()
+				Key=219  Master=126 bb(126){1} --> [2, 99]
+				{1}
+				[-inf, +inf]
+				Foo.consume()
+				Key=309  Master=269 Bar.Stuff(269)[-inf, 97] --> [1, +inf]
+				[-inf, +inf]
+				[-inf, +inf]
+				Foo.consume()
+				Key=326  Master=269 Bar.Stuff(269)[-inf, 97] --> [1, +inf]
+				[-inf, +inf]
+				[-inf, +inf]
+				Foo.consume()
+				Key=343  Master=269 Bar.Stuff(269)[-inf, 97] --> [1, +inf]
+				[-inf, +inf]
+				[-inf, +inf]
+				Foo.consume()
+				Key=360  Master=269 Bar.Stuff(269)[-inf, 97] --> [1, +inf]
+				[-inf, +inf]
+		End Tokens *********************
+		Variables *************************
+			b.m_foo.initialCapacity=float:CLOSED[50, 50]
+			b.m_foo.levelLimitMin=float:CLOSED[0, 0]
+			b.m_foo.levelLimitMax=float:CLOSED[0, 0]
+			b.m_foo.productionRateMax=float:CLOSED[+inf, +inf]
+			b.m_foo.productionMax=float:CLOSED[+inf, +inf]
+			b.m_foo.consumptionRateMax=float:CLOSED[+inf, +inf]
+			b.m_foo.consumptionMax=float:CLOSED[+inf, +inf]
+		End Variables *********************
+	End Foo:b.m_foo*************************
 Global Variables*************************
 	world=PlannerConfig:CLOSED{world(6)}
 	foo=Foo:CLOSED{foo(20)}
+	b=Bar:CLOSED{b(37)}
 	reftime1=int:CLOSED[0, 0]
-	reftime2=int:CLOSED[100, 100]
+	reftime2=int:CLOSED[10, 10]
+	reftime3=int:CLOSED[20, 20]
+	reftime4=int:CLOSED[30, 30]
 Objects *************************
 	PlannerConfig:world*************************
 		Variables *************************
@@ -52,12 +133,20 @@ Objects *************************
 		Tokens *************************
 				{0}
 				Foo.consume()
-				Key=37  Master=NONE
+				Key=60  Master=NONE
 				{0}
-				{100}
+				{10}
 				Foo.consume()
-				Key=49  Master=NONE
-				{100}
+				Key=72  Master=NONE
+				{10}
+				{20}
+				Foo.consume()
+				Key=82  Master=NONE
+				{20}
+				{30}
+				Foo.consume()
+				Key=92  Master=NONE
+				{30}
 		End Tokens *********************
 		Variables *************************
 			foo.initialCapacity=float:CLOSED[50, 50]
@@ -69,10 +158,77 @@ Objects *************************
 			foo.consumptionMax=float:CLOSED[+inf, +inf]
 		End Variables *********************
 	End Foo:foo*************************
+	Bar:b*************************
+		Tokens *************************
+				{1}
+				Bar.Stuff(reftime1=int:CLOSED[-inf, +inf]reftime2=int:CLOSED[1, 1]reftime3=int:CLOSED[1, 1]reftime4=int:CLOSED[1, 1])
+				Key=126  Master=NONE
+				[2, 99]
+				[1, 98]
+				Bar.Axel()
+				Key=251  Master=NONE
+				[2, 99]
+				[-inf, 97]
+				Bar.Stuff(reftime1=int:CLOSED[-inf, +inf]reftime2=int:CLOSED[-inf, +inf]reftime3=int:CLOSED[-inf, +inf]reftime4=int:CLOSED[-inf, +inf])
+				Key=269  Master=251 a(251)[1, 98] --> [2, 99]
+				[1, +inf]
+		End Tokens *********************
+		Variables *************************
+			b.m_foo=Foo:CLOSED{b.m_foo(42)}
+		End Variables *********************
+	End Bar:b*************************
+	Foo:b.m_foo*************************
+		Tokens *************************
+				[1, 99]
+				Foo.consume()
+				Key=148  Master=126 bb(126){1} --> [2, 99]
+				[1, 99]
+				{1}
+				Foo.consume()
+				Key=173  Master=126 bb(126){1} --> [2, 99]
+				{1}
+				{1}
+				Foo.consume()
+				Key=196  Master=126 bb(126){1} --> [2, 99]
+				{1}
+				{1}
+				Foo.consume()
+				Key=219  Master=126 bb(126){1} --> [2, 99]
+				{1}
+				[-inf, +inf]
+				Foo.consume()
+				Key=309  Master=269 Bar.Stuff(269)[-inf, 97] --> [1, +inf]
+				[-inf, +inf]
+				[-inf, +inf]
+				Foo.consume()
+				Key=326  Master=269 Bar.Stuff(269)[-inf, 97] --> [1, +inf]
+				[-inf, +inf]
+				[-inf, +inf]
+				Foo.consume()
+				Key=343  Master=269 Bar.Stuff(269)[-inf, 97] --> [1, +inf]
+				[-inf, +inf]
+				[-inf, +inf]
+				Foo.consume()
+				Key=360  Master=269 Bar.Stuff(269)[-inf, 97] --> [1, +inf]
+				[-inf, +inf]
+		End Tokens *********************
+		Variables *************************
+			b.m_foo.initialCapacity=float:CLOSED[50, 50]
+			b.m_foo.levelLimitMin=float:CLOSED[0, 0]
+			b.m_foo.levelLimitMax=float:CLOSED[0, 0]
+			b.m_foo.productionRateMax=float:CLOSED[+inf, +inf]
+			b.m_foo.productionMax=float:CLOSED[+inf, +inf]
+			b.m_foo.consumptionRateMax=float:CLOSED[+inf, +inf]
+			b.m_foo.consumptionMax=float:CLOSED[+inf, +inf]
+		End Variables *********************
+	End Foo:b.m_foo*************************
 Global Variables*************************
 	world=PlannerConfig:CLOSED{world(6)}
 	foo=Foo:CLOSED{foo(20)}
+	b=Bar:CLOSED{b(37)}
 	reftime1=int:CLOSED[0, 0]
-	reftime2=int:CLOSED[100, 100]
+	reftime2=int:CLOSED[10, 10]
+	reftime3=int:CLOSED[20, 20]
+	reftime4=int:CLOSED[30, 30]
 
 Finished

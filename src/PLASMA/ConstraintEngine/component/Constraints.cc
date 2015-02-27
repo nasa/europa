@@ -781,29 +781,6 @@ bool LessThanConstraint::canIgnore(const ConstrainedVariableId,
           (changeType == DomainListener::LOWER_BOUND_INCREASED)));
 }
 
-
-  AddMultEqualConstraint::AddMultEqualConstraint(const std::string& name,
-                                                 const std::string& propagatorName,
-                                                 const ConstraintEngineId constraintEngine,
-                                                 const std::vector<ConstrainedVariableId>& variables)
-    : Constraint(name, propagatorName, constraintEngine, variables),
-      m_interimVariable(constraintEngine, IntervalDomain(), true, false, std::string("InternalConstraintVariable"), getId()),
-      m_multEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine,
-			    makeScope(m_variables[B], m_variables[C], m_interimVariable.getId())),
-      m_addEqualConstraint(std::string("AddEqual"), propagatorName, constraintEngine,
-			   makeScope(m_interimVariable.getId(), m_variables[A], m_variables[D])) {
-    check_error(m_variables.size() == ARG_COUNT);
-  }
-
-  AddMultEqualConstraint::~AddMultEqualConstraint(){
-    discard(false);
-  }
-
-  void AddMultEqualConstraint::handleDiscard(){
-    Constraint::handleDiscard();
-    m_interimVariable.discard();
-  }
-
   /*********** EqualSumConstraint *************/
 EqualSumConstraint::EqualSumConstraint(const std::string& name,
                                        const std::string& propagatorName,
@@ -1041,87 +1018,6 @@ EqualSumConstraint::EqualSumConstraint(const std::string& name,
     m_product3.discard();
     m_product4.discard();
   }
-
-  /*********** LessOrEqualThanSumConstraint *************/
-LessOrEqThanSumConstraint::LessOrEqThanSumConstraint(const std::string& name,
-                                                     const std::string& propagatorName,
-                                                     const ConstraintEngineId constraintEngine,
-                                                     const std::vector<ConstrainedVariableId>& variables)
-    : Constraint(name, propagatorName, constraintEngine, variables),
-      m_interimVariable(constraintEngine, IntervalDomain(), true, false, std::string("InternalConstraintVariable"), getId()),
-      m_lessOrEqualConstraint(std::string("LessThanEq"), propagatorName, constraintEngine,
-                              makeScope(m_variables[0], m_interimVariable.getId())),
-    m_eqSumConstraint() {
-  std::vector<ConstrainedVariableId> eqSumScope = m_variables;
-  eqSumScope[0] = m_interimVariable.getId();
-  m_eqSumConstraint = (new EqualSumConstraint(std::string("EqualSum"), propagatorName,
-                                              constraintEngine, eqSumScope))->getId();
-}
-
-  LessOrEqThanSumConstraint::~LessOrEqThanSumConstraint(){
-    discard(false);
-  }
-
-  void LessOrEqThanSumConstraint::handleExecute(){}
-
-  void LessOrEqThanSumConstraint::handleDiscard(){
-    Constraint::handleDiscard();
-
-    // Discarding the variable will discard the constraints
-    m_interimVariable.discard();
-  }
-
-
-  /*********** LessThanSumConstraint *************/
-LessThanSumConstraint::LessThanSumConstraint(const std::string& name,
-                                             const std::string& propagatorName,
-                                             const ConstraintEngineId constraintEngine,
-                                             const std::vector<ConstrainedVariableId>& variables)
-    : Constraint(name, propagatorName, constraintEngine, variables),
-      m_interimVariable(constraintEngine, IntervalDomain(), true, false, std::string("InternalConstraintVariable"), getId()),
-      m_lessThanConstraint(std::string("LessThan"), propagatorName, constraintEngine,
-                           makeScope(m_variables[0], m_interimVariable.getId())),
-    m_eqSumConstraint() {
-  std::vector<ConstrainedVariableId> eqSumScope = m_variables;
-  eqSumScope[0] = m_interimVariable.getId();
-  m_eqSumConstraint = (new EqualSumConstraint(std::string("EqualSum"), propagatorName,
-                                              constraintEngine, eqSumScope))->getId();
-  check_error(m_eqSumConstraint.isValid());
-}
-
-  /*********** GreaterOrEqThanSumConstraint *************/
-GreaterOrEqThanSumConstraint::GreaterOrEqThanSumConstraint(const std::string& name,
-                                                           const std::string& propagatorName,
-                                                           const ConstraintEngineId constraintEngine,
-                                                           const std::vector<ConstrainedVariableId>& variables)
-    : Constraint(name, propagatorName, constraintEngine, variables),
-      m_interimVariable(constraintEngine, IntervalDomain(), true, false, std::string("InternalConstraintVariable"), getId()),
-      m_lessOrEqualConstraint(std::string("LessThanEqual"), propagatorName, constraintEngine,
-                              makeScope(m_interimVariable.getId(), m_variables[0])),
-  m_eqSumConstraint() {
-  std::vector<ConstrainedVariableId> eqSumScope = m_variables;
-  eqSumScope[0] = m_interimVariable.getId();
-  m_eqSumConstraint = (new EqualSumConstraint(std::string("EqualSum"), propagatorName,
-                                              constraintEngine, eqSumScope))->getId();
-}
-
-  /*********** GreaterThanSumConstraint *************/
-GreaterThanSumConstraint::GreaterThanSumConstraint(const std::string& name,
-                                                   const std::string& propagatorName,
-                                                   const ConstraintEngineId constraintEngine,
-                                                   const std::vector<ConstrainedVariableId>& variables)
-    : Constraint(name, propagatorName, constraintEngine, variables),
-      m_interimVariable(constraintEngine, constraintEngine->getCESchema()->baseDomain(m_variables[0]->baseDomain().getTypeName()),
-			true, false, std::string("InternalConstraintVariable"), getId()),
-  m_lessThanConstraint(std::string("LessThan"), propagatorName, constraintEngine,
-                       makeScope(m_interimVariable.getId(), m_variables[0])),
-  m_eqSumConstraint() {
-  std::vector<ConstrainedVariableId> eqSumScope = m_variables;
-  eqSumScope[0] = m_interimVariable.getId();
-  m_eqSumConstraint = (new EqualSumConstraint(std::string("EqualSum"), propagatorName,
-                                              constraintEngine, eqSumScope))->getId();
-  check_error(m_eqSumConstraint.isValid());
-}
 
   /*********** CondAllSameConstraint *************/
   CondAllSameConstraint::CondAllSameConstraint(const std::string& name,
@@ -1647,23 +1543,6 @@ CountNonZeroesConstraint::CountNonZeroesConstraint(const std::string& name,
                                                      propagatorName, constraintEngine, cZCScope))->getId();
 }
 
-CardinalityConstraint::CardinalityConstraint(const std::string& name,
-                                             const std::string& propagatorName,
-                                             const ConstraintEngineId constraintEngine,
-                                             const std::vector<ConstrainedVariableId>& variables)
-    : Constraint(name, propagatorName, constraintEngine, variables),
-      m_nonZeroes(constraintEngine, IntervalIntDomain(0, PLUS_INFINITY), true, false,
-                  std::string("InternalCardinalityVar"), getId()),
-      m_lessThanEqualConstraint(std::string("LessThanEqual"), propagatorName,
-                                constraintEngine, makeScope(m_nonZeroes.getId(), m_variables[0])),
-                     m_countNonZeroesConstraint()
-  {
-    std::vector<ConstrainedVariableId> cCScope = m_variables;
-    cCScope[0] = m_nonZeroes.getId();
-    check_error(m_variables.size() == cCScope.size());
-    m_countNonZeroesConstraint = (new CountNonZeroesConstraint(std::string("CountNonZeroes"),
-                                                             propagatorName, constraintEngine, cCScope))->getId();
-  }
 
   OrConstraint::OrConstraint(const std::string& name,
                              const std::string& propagatorName,
@@ -1852,31 +1731,6 @@ CardinalityConstraint::CardinalityConstraint(const std::string& name,
         return;
     }
   }
-
-CondEqualSumConstraint::CondEqualSumConstraint(const std::string& name,
-                                               const std::string& propagatorName,
-                                               const ConstraintEngineId constraintEngine,
-                                               const std::vector<ConstrainedVariableId>& variables)
-    : Constraint(name, propagatorName, constraintEngine, variables),
-      m_sumVar(constraintEngine, constraintEngine->getCESchema()->baseDomain(m_variables[1]->baseDomain().getTypeName()),
-	       true, false, std::string("InternalConstraintVariable"), getId()),
-    m_condAllSameConstraint(std::string("CondAllSame"), propagatorName, constraintEngine,
-                            makeScope(m_variables[0], m_variables[1], m_sumVar.getId())),
-    m_eqSumConstraint()
-  {
-    check_error(m_variables.size() > 2);
-    std::vector<ConstrainedVariableId> eqSumScope;
-    eqSumScope.reserve(m_variables.size() - 1);
-    eqSumScope.push_back(m_sumVar.getId());
-    std::vector<ConstrainedVariableId>::iterator it = m_variables.begin();
-    ++it; ++it;
-    eqSumScope.insert(eqSumScope.end(), it, m_variables.end());
-    check_error(m_variables.size() - 1 == eqSumScope.size());
-    m_eqSumConstraint = (new EqualSumConstraint(std::string("EqualSum"), propagatorName,
-                                                constraintEngine, eqSumScope))->getId();
-    check_error(m_eqSumConstraint.isValid());
-  }
-
 
 
 RotateScopeRightConstraint::RotateScopeRightConstraint(const std::string& name,

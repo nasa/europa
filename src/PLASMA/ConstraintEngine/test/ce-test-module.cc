@@ -815,7 +815,6 @@ public:
     EUROPA_runCETest(testDelegation);
     EUROPA_runCETest(testNotEqual);
     EUROPA_runCETest(testMultEqualConstraint);
-    EUROPA_runCETest(testAddMultEqualConstraint);
     EUROPA_runCETest(testEqualSumConstraint);
     EUROPA_runCETest(testCondAllSameConstraint);
     EUROPA_runCETest(testCondAllDiffConstraint);
@@ -1536,69 +1535,6 @@ private:
     return true;
   }
 
-  static bool testAddMultEqualConstraint() {
-    // 1 + 2 * 3 == 7
-    {
-      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 1));
-      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(2, 2));
-      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(3, 3));
-      Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(7, 7));
-      AddMultEqualConstraint c0("AddMultEqualConstraint",
-				"Default",
-				ENGINE,
-				makeScope(v0.getId(), v1.getId(), v2.getId(), v3.getId()));
-      bool res = ENGINE->propagate();
-      CPPUNIT_ASSERT(res);
-    }
-
-    // 1 + 2 * 3 == 8 => empty
-    {
-      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 1));
-      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(2, 2));
-      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(3, 3));
-      Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(8, 8));
-      AddMultEqualConstraint c0("AddMultEqualConstraint",
-				"Default",
-				ENGINE,
-				makeScope(v0.getId(), v1.getId(), v2.getId(), v3.getId()));
-      bool res = ENGINE->propagate();
-      CPPUNIT_ASSERT(!res);
-    }
-
-    // 1 + 1 * [-infty 0] = 1 -> 1 + 1 * 0 = 1
-    {
-      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 1));
-      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 1));
-      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(MINUS_INFINITY, eint(0)));
-      Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 1));
-      AddMultEqualConstraint c0("AddMultEqualConstraint",
-				"Default",
-				ENGINE,
-				makeScope(v0.getId(), v1.getId(), v2.getId(), v3.getId()));
-      bool res = ENGINE->propagate();
-      CPPUNIT_ASSERT(res);
-      CPPUNIT_ASSERT(v2.getDerivedDomain().getSingletonValue() == 0);
-    }
-
-    // [1.0 10.0] + 1.0 * [1.0 10.0] = 10.0 ->  [1.0 9.0] + 1.0 * [1.0 9.0] = 10.0
-    {
-      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
-      Variable<IntervalDomain> v1(ENGINE, IntervalDomain(1.0, 1.0));
-      Variable<IntervalDomain> v2(ENGINE, IntervalDomain(1.0, 10.0));
-      Variable<IntervalDomain> v3(ENGINE, IntervalDomain(10.0, 10.0));
-      AddMultEqualConstraint c0("AddMultEqualConstraint",
-				"Default",
-				ENGINE,
-				makeScope(v0.getId(), v1.getId(), v2.getId(), v3.getId()));
-      bool res = ENGINE->propagate();
-      CPPUNIT_ASSERT(res);
-      CPPUNIT_ASSERT(v0.getDerivedDomain() == IntervalIntDomain(1, 9));
-      CPPUNIT_ASSERT(v2.getDerivedDomain() == IntervalDomain(1.0, 9.0));
-    }
-
-
-    return true;
-  }
 
   static bool testEqualSumConstraint() {
     Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
