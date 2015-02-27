@@ -95,13 +95,10 @@ void ModuleConstraintEngine::uninitialize(EngineId engine) {
       REGISTER_CONSTRAINT_TYPE(ces,AddEqualCT, "addEq", "Default");
       REGISTER_CONSTRAINT_TYPE(ces,MultEqualCT, "multEq", "Default");
       REGISTER_CONSTRAINT_TYPE(ces,DivEqualCT, "divEq", "Default");
-      REGISTER_CONSTRAINT_TYPE(ces,AddMultEqualCT, "addMulEq", "Default");
       REGISTER_CONSTRAINT_TYPE(ces, AllDiffCT, "allDiff", "Default");
       REGISTER_CONSTRAINT_TYPE(ces, CalcDistanceCT, "calcDistance", "Default");
-      REGISTER_CONSTRAINT_TYPE(ces,CardinalityCT, "cardinality", "Default");  // cardinality not more than
       REGISTER_CONSTRAINT_TYPE(ces,CondAllDiffCT, "condAllDiff", "Default");
       REGISTER_CONSTRAINT_TYPE(ces,CondAllSameCT, "condEq", "Default");
-      REGISTER_CONSTRAINT_TYPE(ces,CondEqualSumCT, "condEqSum", "Default");
       REGISTER_CONSTRAINT_TYPE(ces,CountNonZeroesCT, "countNonZeroes", "Default");
       REGISTER_CONSTRAINT_TYPE(ces,CountZeroesCT, "countZeroes", "Default");
       REGISTER_CONSTRAINT_TYPE(ces,DistanceFromSquaresCT, "distanceSquares", "Default");
@@ -110,12 +107,8 @@ void ModuleConstraintEngine::uninitialize(EngineId engine) {
       REGISTER_CONSTRAINT_TYPE(ces,EqualMinimumCT, "eqMinimum", "Default");
       REGISTER_CONSTRAINT_TYPE(ces,EqualProductCT, "eqProduct", "Default");
       REGISTER_CONSTRAINT_TYPE(ces,EqualSumCT, "eqSum", "Default");
-      REGISTER_CONSTRAINT_TYPE(ces,GreaterThanSumCT, "greaterThanSum", "Default");
-      REGISTER_CONSTRAINT_TYPE(ces,GreaterOrEqSumCT, "greaterOrEqThanSum", "Default");
-      REGISTER_CONSTRAINT_TYPE(ces,LessOrEqThanSumCT, "lessOrEqThanSum", "Default");
       REGISTER_CONSTRAINT_TYPE(ces,LessThanCT, "lt", "Default");
       REGISTER_CONSTRAINT_TYPE(ces,LessThanEqualCT, "leq", "Default");
-      REGISTER_CONSTRAINT_TYPE(ces,LessThanSumCT, "lessThanSum", "Default");
       REGISTER_CONSTRAINT_TYPE(ces,LockCT, "lockCT", "Default");
       REGISTER_CONSTRAINT_TYPE(ces,MemberImplyCT, "memberImply", "Default");
       REGISTER_CONSTRAINT_TYPE(ces,MultEqualCT, "mulEq", "Default");
@@ -150,21 +143,12 @@ void ModuleConstraintEngine::uninitialize(EngineId engine) {
 
       REGISTER_CONSTRAINT_TYPE(ces,EqUnionCT, "eqUnion", "Default");
 
-      // Rotate scope right one (last var moves to front) to ...
-      // ... change addleq constraint to GreaterOrEqThan constraint:
-      REGISTER_ROTATED_CONSTRAINT(ces,"addLeq", "Default", "greaterOrEqThanSum", 1);
-      // ... change addlt constraint to GreaterThanSum constraint:
-      REGISTER_ROTATED_CONSTRAINT(ces,"addLt", "Default", "greaterThanSum", 1);
       // ... change allmax and max constraint to EqualMaximum constraint:
       REGISTER_ROTATED_CONSTRAINT(ces,"allMax", "Default", "eqMaximum", 1);
       REGISTER_ROTATED_CONSTRAINT(ces,"max", "Default", "eqMaximum", 1);
       // ... change allmin and min constraint to EqualMinimum constraint:
       REGISTER_ROTATED_CONSTRAINT(ces,"allMin", "Default", "eqMinimum", 1);
       REGISTER_ROTATED_CONSTRAINT(ces,"min", "Default", "eqMinimum", 1);
-
-      // But addeqcond is harder, requiring two "steps":
-      REGISTER_SWAP_TWO_VARS_CONSTRAINT(ces,"eqCondSum", "Default", "condEqSum", 0, 1);
-      REGISTER_ROTATED_CONSTRAINT(ces,"addEqCond", "Default", "eqCondSum", 2);
   }
 
   void ModuleConstraintLibrary::uninitialize(EngineId engine)

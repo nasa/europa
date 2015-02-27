@@ -159,34 +159,6 @@ class DivEqualConstraint : public Constraint {
 typedef DataTypeCheck<DivEqualConstraint, ThreeNumericEq> DivEqualCT;
 
 
-// A + (B * C) = D
-class AddMultEqualConstraint : public Constraint {
- public:
-  AddMultEqualConstraint(const std::string& name,
-                         const std::string& propagatorName,
-                         const ConstraintEngineId constraintEngine,
-                         const std::vector<ConstrainedVariableId>& variables);
-  
-  ~AddMultEqualConstraint();
- private:
-  // All the work is done by the member constraints
-  inline void handleExecute() { }
-  void handleDiscard();
-
-  static const unsigned int A = 0;
-  static const unsigned int B = 1;
-  static const unsigned int C = 2;
-  static const unsigned int D = 3;
-  static const unsigned int ARG_COUNT = 4;
-  
-  Variable<IntervalDomain> m_interimVariable;
-  MultEqualConstraint m_multEqualConstraint;
-  AddEqualConstraint m_addEqualConstraint;
-};
-//TODO: other, similar constraints check that the last be assignable from the rest rather than
-//requiring the same type all the way through.  should this do the same?
-typedef DataTypeCheck<AddMultEqualConstraint, And<NArgs<4>, All<And<Same, Numeric> > > > AddMultEqualCT;
-
 /**
  * @class AllDiff
  * @brief A != B && A != C && B != C && A != D && B != D && ...
@@ -291,43 +263,6 @@ typedef DataTypeCheck<LessThanEqualConstraint,
 LessThanEqualCT;
 
 
-/**
- * @class CardinalityConstraint
- * @brief First variable must be greater than or equal the count of the
- * other variables that are true.
- * @note Supports numeric domains for the other variables with the
- * usual C/C++ convention of false being zero and true being
- * any non-zero value.
- */
-
-class CardinalityConstraint : public Constraint {
- public:
-  CardinalityConstraint(const std::string& name,
-                        const std::string& propagatorName,
-                        const ConstraintEngineId constraintEngine,
-                        const std::vector<ConstrainedVariableId>& variables);
-  
-  ~CardinalityConstraint() {
-    discard(false);
-  }
-  
- private:
-  // All the work is done by the member constraints.
-  inline void handleExecute() { }
-  
-  void handleDiscard(){
-    Constraint::handleDiscard();
-      m_nonZeroes.discard();
-      m_lessThanEqualConstraint.discard();
-      m_countNonZeroesConstraint->discard();
-  }
-  
-  Variable<IntervalIntDomain> m_nonZeroes;
-  LessThanEqualConstraint m_lessThanEqualConstraint;
-  ConstraintId m_countNonZeroesConstraint;
-};
-typedef DataTypeCheck<CardinalityConstraint,
-                      And<AtLeastNArgs<2>, All<Numeric> > > CardinalityCT;
     /**
    * @class CondAllDiff
    * @brief If A, then B != C && B != D && C != D && ... ; if not A, then !(B != C && B != D && C != D && ...).
@@ -382,48 +317,13 @@ class CondAllSameConstraint : public Constraint {
 };
 typedef DataTypeCheck<CondAllSameConstraint, CondAllAssignableCondition> CondAllSameCT;
 
-    /**
-   * @class CondEqualSumConstraint
-   * @brief If A is true, then B = C + D ...; if A is false, B != C + D ...
-   * Converted into two constraints: CondAllSame(A, B, sum) and EqualSum(sum, C, D, ...).
-   */
 
-class CondEqualSumConstraint : public Constraint {
-  public:
-    CondEqualSumConstraint(const std::string& name,
-                           const std::string& propagatorName,
-                           const ConstraintEngineId constraintEngine,
-                           const std::vector<ConstrainedVariableId>& variables);
-
-    ~CondEqualSumConstraint() {
-      discard(false);
-    }
-
-  private:
-    // All the work is done by the member constraints.
-    inline void handleExecute() { }
-
-    void handleDiscard(){
-      Constraint::handleDiscard();
-      m_sumVar.discard();
-      m_condAllSameConstraint.discard();
-      m_eqSumConstraint->discard();
-    }
-
-    Variable<IntervalDomain> m_sumVar;
-    CondAllSameConstraint m_condAllSameConstraint;
-    ConstraintId m_eqSumConstraint;
-};
 template<typename Start = First<>, typename End = End>
 struct EqThreeNumeric : public And<AtLeastNArgs<3>, And<All<Numeric>, All<Assignable<Start>, Start, End > > > {
   EqThreeNumeric() : And<AtLeastNArgs<3>, And<All<Numeric>, All<Assignable<Start>, Start, End > > >() {}
   EqThreeNumeric(type_iterator start, type_iterator end)
       : And<AtLeastNArgs<3>, And<All<Numeric>, All<Assignable<Start>, Start, End > > >(start, end) {}
 };
-typedef DataTypeCheck<CondEqualSumConstraint,
-                      And<AtLeastNArgs<4>, And<CondCondition, EqThreeNumeric<> > > >
-CondEqualSumCT;
-
 
 class CountNonZeroesConstraint : public Constraint {
  public:
@@ -619,39 +519,6 @@ class EqualSumConstraint : public Constraint {
 };
 typedef DataTypeCheck<EqualSumConstraint, EqThreeNumeric<> > EqualSumCT;
 
-    /**
-   * @class GreaterOrEqThanSumConstraint
-   * @brief A >= B + C + ...
-   * Converted into two constraints: A >= temp and temp equal to the sum of the rest.
-   */
-
-class GreaterOrEqThanSumConstraint : public Constraint {
- public:
-  GreaterOrEqThanSumConstraint(const std::string& name,
-                               const std::string& propagatorName,
-                               const ConstraintEngineId constraintEngine,
-                               const std::vector<ConstrainedVariableId>& variables);
-
-  ~GreaterOrEqThanSumConstraint() {
-    discard(false);
-  }
-
- private:
-  // All the work is done by the member constraints
-  inline void handleExecute() { }
-
-  void handleDiscard(){
-    Constraint::handleDiscard();
-    m_interimVariable.discard();
-    m_lessOrEqualConstraint.discard();
-    m_eqSumConstraint->discard();
-  }
-
-  Variable<IntervalDomain> m_interimVariable;
-  LessThanEqualConstraint m_lessOrEqualConstraint;
-  ConstraintId m_eqSumConstraint;
-};
-typedef DataTypeCheck<GreaterOrEqThanSumConstraint, EqThreeNumeric<> > GreaterOrEqSumCT;
 
 class LessThanConstraint : public Constraint {
  public:
@@ -676,98 +543,6 @@ class LessThanConstraint : public Constraint {
 };
 typedef DataTypeCheck<LessThanConstraint, And<NArgs<2>, Mutually<Assignable<> > > > LessThanCT;
 
-/**
- * @class GreaterThanSumConstraint
- * @brief A > B + C + ...
- * Converted into two constraints: A < temp and temp equal to the sum of the rest.
- */
-
-class GreaterThanSumConstraint : public Constraint {
-  public:
-    GreaterThanSumConstraint(const std::string& name,
-                             const std::string& propagatorName,
-                             const ConstraintEngineId constraintEngine,
-                             const std::vector<ConstrainedVariableId>& variables);
-
-    ~GreaterThanSumConstraint() {
-      discard(false);
-    }
-
-  private:
-    // All the work is done by the member constraints
-    inline void handleExecute() { }
-
-    void handleDiscard(){
-      Constraint::handleDiscard();
-      m_interimVariable.discard();
-      m_lessThanConstraint.discard();
-      m_eqSumConstraint->discard();
-    }
-
-    Variable<IntervalDomain> m_interimVariable;
-    LessThanConstraint m_lessThanConstraint;
-    ConstraintId m_eqSumConstraint;
-  };
-typedef DataTypeCheck<GreaterThanSumConstraint, EqThreeNumeric<> > GreaterThanSumCT;
-
-/**
- * @class LessOrEqThanSumConstraint
- * @brief A <= B + C + ...
- * Converted into two constraints: A <= temp and temp equal to the sum of the rest.
- */
-
-class LessOrEqThanSumConstraint : public Constraint {
- public:
-  LessOrEqThanSumConstraint(const std::string& name,
-                            const std::string& propagatorName,
-                            const ConstraintEngineId constraintEngine,
-                            const std::vector<ConstrainedVariableId>& variables);
-
-  ~LessOrEqThanSumConstraint();
-
- private:
-  void handleExecute();
-  void handleDiscard();
-  Variable<IntervalDomain> m_interimVariable;
-  LessThanEqualConstraint m_lessOrEqualConstraint;
-  ConstraintId m_eqSumConstraint;
-};
-typedef DataTypeCheck<LessOrEqThanSumConstraint, EqThreeNumeric<> > LessOrEqThanSumCT;
-
-/**
- * @class LessThanSumConstraint
- * @brief A < B + C + ...
- * Converted into two constraints: A < temp and temp equal to the sum of the rest.
- */
-
-class LessThanSumConstraint : public Constraint {
- public:
-  LessThanSumConstraint(const std::string& name,
-                        const std::string& propagatorName,
-                        const ConstraintEngineId constraintEngine,
-                        const std::vector<ConstrainedVariableId>& variables);
-
-  ~LessThanSumConstraint() {
-    discard(false);
-  }
-
- private:
-
-  // All the work is done by the member constraints
-  inline void handleExecute() { }
-
-  void handleDiscard(){
-    Constraint::handleDiscard();
-    m_interimVariable.discard();
-    m_lessThanConstraint.discard();
-    m_eqSumConstraint->discard();
-  }
-
-  Variable<IntervalDomain> m_interimVariable;
-  LessThanConstraint m_lessThanConstraint;
-  ConstraintId m_eqSumConstraint;
-};
-typedef DataTypeCheck<LessThanSumConstraint, EqThreeNumeric<> > LessThanSumCT;
 
 class LockConstraint : public Constraint {
  public:
