@@ -11,7 +11,6 @@
 #include "Utils.hh"
 #include "ConstraintEngine.hh"
 #include "ConstraintType.hh"
-#include "LabelStr.hh"
 #include "Entity.hh"
 #include "Debug.hh"
 #include "Utils.hh"
@@ -176,7 +175,7 @@ namespace EUROPA{
     m_objectsByName.insert(std::make_pair(object->getName(), object));
 
     // Now cache by type
-    LabelStr type = object->getType();
+    std::string type = object->getType();
     m_objectsByType.insert(std::make_pair(type, object));
     while(m_schema->hasParent(type)){
       type = m_schema->getParent(type);
@@ -257,7 +256,7 @@ namespace EUROPA{
     publish(notifyRemoved(token));
 
     debugMsg("PlanDatabase:notifyRemoved:Token",
-             token->getPredicateName().toString()  << " (" << token->getKey() << ")");
+             token->getPredicateName()  << " (" << token->getKey() << ")");
   }
 
   void PlanDatabase::notifyAdded(const ObjectId object, const TokenId token){
@@ -328,7 +327,7 @@ bool PlanDatabase::hasObjectInstances(const std::string& objectType) const {
 }
 
   void PlanDatabase::registerGlobalVariable(const ConstrainedVariableId var){
-    const LabelStr& varName = var->getName();
+    const std::string& varName = var->getName();
     checkError(!isGlobalVariable(varName), var->toString() << " is not unique.");
     m_globalVariables.insert(var);
     m_globalVarsByName.insert(std::make_pair(varName, var));
@@ -338,7 +337,7 @@ bool PlanDatabase::hasObjectInstances(const std::string& objectType) const {
   }
 
   void PlanDatabase::unregisterGlobalVariable(const ConstrainedVariableId var) {
-    const LabelStr& varName = var->getName();
+    const std::string& varName = var->getName();
     checkError(isGlobalVariable(varName), var->toString() << " is not a global variable.");
     m_globalVariables.erase(var);
     m_globalVarsByName.erase(varName);
@@ -351,45 +350,46 @@ bool PlanDatabase::hasObjectInstances(const std::string& objectType) const {
     return m_globalVariables;
   }
 
-  const ConstrainedVariableId PlanDatabase::getGlobalVariable(const LabelStr& varName) const{
-    checkError(isGlobalVariable(varName), "No variable with name='" << varName.toString() << "' is present.");
+  const ConstrainedVariableId PlanDatabase::getGlobalVariable(const std::string& varName) const{
+    checkError(isGlobalVariable(varName),
+               "No variable with name='" << varName << "' is present.");
     return m_globalVarsByName.find(varName)->second;
   }
 
-  bool PlanDatabase::isGlobalVariable(const LabelStr& varName) const{
+  bool PlanDatabase::isGlobalVariable(const std::string& varName) const{
     return (m_globalVarsByName.find(varName) != m_globalVarsByName.end());
   }
 
   void PlanDatabase::registerGlobalToken(const TokenId t){
-    const LabelStr& name = t->getName();
-    checkError(!isGlobalToken(name), name.toString() << " is not unique. Can't register global token");
+    const std::string& name = t->getName();
+    checkError(!isGlobalToken(name), name << " is not unique. Can't register global token");
     m_globalTokens.insert(t);
     m_globalTokensByName.insert(std::make_pair(name, t));
 
     checkError(isGlobalToken(name), t->toLongString() << " is not registered after all. This cannot be!.");
-    debugMsg("PlanDatabase:registerGlobalToken", "Registered " << name.toString());
+    debugMsg("PlanDatabase:registerGlobalToken", "Registered " << name);
   }
 
   void PlanDatabase::unregisterGlobalToken(const TokenId t) {
-    const LabelStr& name = t->getName();
-    checkError(isGlobalToken(name), name.toString() << " is not a global token.");
+    const std::string& name = t->getName();
+    checkError(isGlobalToken(name), name << " is not a global token.");
     m_globalTokens.erase(t);
     m_globalTokensByName.erase(name);
-    checkError(!isGlobalToken(name), name.toString() << " failed to un-register.");
+    checkError(!isGlobalToken(name), name << " failed to un-register.");
     debugMsg("PlanDatabase:unregisterGlobalToken",
-         "Un-registered " << name.toString());
+         "Un-registered " << name);
   }
 
   const TokenSet& PlanDatabase::getGlobalTokens() const {
     return m_globalTokens;
   }
 
-  const TokenId PlanDatabase::getGlobalToken(const LabelStr& name) const{
-    checkError(isGlobalToken(name), "No global token with name='" << name.toString() << "' is registered.");
+  const TokenId PlanDatabase::getGlobalToken(const std::string& name) const{
+    checkError(isGlobalToken(name), "No global token with name='" << name << "' is registered.");
     return m_globalTokensByName.find(name)->second;
   }
 
-  bool PlanDatabase::isGlobalToken(const LabelStr& name) const{
+  bool PlanDatabase::isGlobalToken(const std::string& name) const{
     return (m_globalTokensByName.find(name) != m_globalTokensByName.end());
   }
 
@@ -429,7 +429,7 @@ bool PlanDatabase::hasObjectInstances(const std::string& objectType) const {
 
       // Validate expectation about being active and predicate being the same
       check_error(m_schema->isA(candidate->getPredicateName(), inactiveToken->getPredicateName()),
-                  candidate->getPredicateName().toString() + " is not a " + inactiveToken->getPredicateName().toString());
+                  candidate->getPredicateName() + " is not a " + inactiveToken->getPredicateName());
 
       check_error(candidate->isActive(), "Should not be trying to merge an active token.");
 
@@ -625,7 +625,7 @@ void PlanDatabase::getObjectsByPredicate(const std::string& predicate,
   }
 }
 
-  const ObjectId PlanDatabase::getObject(const LabelStr& name) const{
+  const ObjectId PlanDatabase::getObject(const std::string& name) const{
     if (m_objectsByName.find(name) == m_objectsByName.end())
       return ObjectId::noId();
     return m_objectsByName.find(name)->second;
@@ -636,7 +636,7 @@ void PlanDatabase::getObjectsByPredicate(const std::string& predicate,
   }
 
 
-const TokenSet& PlanDatabase::getActiveTokens(const LabelStr& predicate) const {
+const TokenSet& PlanDatabase::getActiveTokens(const std::string& predicate) const {
   static const TokenSet sl_noTokens;
   std::map<std::string, TokenSet>::const_iterator it =
       m_activeTokensByPredicate.find(predicate);
@@ -650,8 +650,8 @@ const TokenSet& PlanDatabase::getActiveTokens(const LabelStr& predicate) const {
     return (m_state == CLOSED);
   }
 
-  bool PlanDatabase::isClosed(const LabelStr& objectType) const {
-    check_error(m_schema->isObjectType(objectType), "Type '" + objectType.toString() + "' not defined in the model.");
+  bool PlanDatabase::isClosed(const std::string& objectType) const {
+    check_error(m_schema->isObjectType(objectType), "Type '" + objectType + "' not defined in the model.");
     return(m_state == CLOSED ||
            (m_state == OPEN &&m_closedObjectTypes.find(objectType) != m_closedObjectTypes.end()));
   }
@@ -717,7 +717,7 @@ void PlanDatabase::close(const std::string& objectType) {
     insertActiveToken(token);
 
     debugMsg("PlanDatabase:notifyActivated",
-             token->getPredicateName().toString()  << "(" << token->getKey() << "}");
+             token->getPredicateName()  << "(" << token->getKey() << "}");
     publish(notifyActivated(token));
   }
 
@@ -734,14 +734,14 @@ void PlanDatabase::close(const std::string& objectType) {
     publish(notifyDeactivated(token));
 
     debugMsg("PlanDatabase:notifyDeactivated",
-             token->getPredicateName().toString()  << "(" << token->getKey() << "}");
+             token->getPredicateName()  << "(" << token->getKey() << "}");
   }
 
   void PlanDatabase::notifyMerged(const TokenId token){
     publish(notifyMerged(token));
 
     debugMsg("PlanDatabase:notifyMerged",
-             token->getPredicateName().toString()  << "(" << token->getKey() << "}" <<
+             token->getPredicateName()  << "(" << token->getKey() << "}" <<
              " merged with (" << token->getActiveToken()->getKey() << ")");
   }
 
@@ -750,14 +750,14 @@ void PlanDatabase::close(const std::string& objectType) {
     publish(notifySplit(token));
 
     debugMsg("PlanDatabase:notifySplit",
-             token->getPredicateName().toString()  << "(" << token->getKey() << "}");
+             token->getPredicateName()  << "(" << token->getKey() << "}");
   }
 
   void PlanDatabase::notifyRejected(const TokenId token){
     publish(notifyRejected(token));
 
     debugMsg("PlanDatabase:notifyRejected",
-             token->getPredicateName().toString()  << "(" << token->getKey() << "}");
+             token->getPredicateName()  << "(" << token->getKey() << "}");
   }
 
   void PlanDatabase::notifyReinstated(const TokenId token){
@@ -765,7 +765,7 @@ void PlanDatabase::close(const std::string& objectType) {
     publish(notifyReinstated(token));
 
     debugMsg("PlanDatabase:notifyReinstated",
-             token->getPredicateName().toString()  << "(" << token->getKey() << "}");
+             token->getPredicateName()  << "(" << token->getKey() << "}");
   }
 
   void PlanDatabase::notifyCommitted(const TokenId token){
@@ -773,7 +773,7 @@ void PlanDatabase::close(const std::string& objectType) {
     publish(notifyCommitted(token));
 
     debugMsg("PlanDatabase:notifyCommitted",
-             token->getPredicateName().toString()  << "(" << token->getKey() << "}");
+             token->getPredicateName()  << "(" << token->getKey() << "}");
   }
 
   void PlanDatabase::notifyTerminated(const TokenId token){
@@ -781,7 +781,7 @@ void PlanDatabase::close(const std::string& objectType) {
     publish(notifyTerminated(token));
 
     debugMsg("PlanDatabase:notifyTerminated",
-             token->getPredicateName().toString()  << "(" << token->getKey() << "}");
+             token->getPredicateName()  << "(" << token->getKey() << "}");
   }
 
   void PlanDatabase::notifyConstrained(const ObjectId object, const TokenId predecessor, const TokenId successor) {
@@ -846,7 +846,7 @@ void PlanDatabase::close(const std::string& objectType) {
   }
 
 
-  void PlanDatabase::makeObjectVariableFromType(const LabelStr& objectType,
+  void PlanDatabase::makeObjectVariableFromType(const std::string& objectType,
 						const ConstrainedVariableId objectVar,
 						bool leaveOpen){
     std::list<ObjectId> objects;
@@ -854,7 +854,7 @@ void PlanDatabase::close(const std::string& objectType) {
     makeObjectVariable(objectType, objects, objectVar, leaveOpen);
   }
 
-  void PlanDatabase::makeObjectVariable(const LabelStr& objectType,
+  void PlanDatabase::makeObjectVariable(const std::string& objectType,
 					const std::list<ObjectId>& objects,
 					const ConstrainedVariableId objectVar,
 					bool leaveOpen){
@@ -867,7 +867,7 @@ void PlanDatabase::close(const std::string& objectType) {
       objectVar->insert(object->getKey());
       debugMsg("PlanDatabase:makeObjectVariable",
                "Inserting object " << object->getName() << " of type "
-               << object->getType() << " for base type " << objectType.toString());
+               << object->getType() << " for base type " << objectType);
     }
 
     handleObjectVariableCreation(objectType, objectVar, leaveOpen);
@@ -890,7 +890,7 @@ void PlanDatabase::handleObjectVariableDeletion(const ConstrainedVariableId obje
   }
 }
 
-  void PlanDatabase::handleObjectVariableCreation(const LabelStr& objectType,
+  void PlanDatabase::handleObjectVariableCreation(const std::string& objectType,
 						  const ConstrainedVariableId objectVar,
 						  bool leaveOpen){
     if(!isClosed(objectType)){
@@ -950,11 +950,11 @@ unsigned long PlanDatabase::archive(eint tick){
 }
 
 void PlanDatabase::insertActiveToken(const TokenId token){
-  static const LabelStr sl_objectRoot("Object");
-  static const LabelStr sl_timelineRoot("Timeline");
-  LabelStr objectType = token->getObject()->baseDomain().getTypeName();
-  LabelStr predicate = token->getPredicateName();
-  LabelStr predicateSuffix = token->getUnqualifiedPredicateName();
+  static const std::string sl_objectRoot("Object");
+  static const std::string sl_timelineRoot("Timeline");
+  std::string objectType = token->getObject()->baseDomain().getTypeName();
+  std::string predicate = token->getPredicateName();
+  std::string predicateSuffix = token->getUnqualifiedPredicateName();
 
   debugMsg("PlanDatabase:insertActiveToken", token->toString());
 
@@ -969,7 +969,7 @@ void PlanDatabase::insertActiveToken(const TokenId token){
 
     TokenSet& activeTokens = it->second;
     activeTokens.insert(token);
-    debugMsg("PlanDatabase:insertActiveToken", token->toString() << " added for " << predicate.toString());
+    debugMsg("PlanDatabase:insertActiveToken", token->toString() << " added for " << predicate);
 
     // Break if we hit a built in class
     if(objectType == sl_timelineRoot || objectType == sl_objectRoot)
@@ -977,17 +977,17 @@ void PlanDatabase::insertActiveToken(const TokenId token){
 
     objectType = getSchema()->getParent(objectType);
 
-    std::string predStr = objectType.toString() + "." + predicateSuffix.c_str();
+    std::string predStr = objectType + "." + predicateSuffix.c_str();
     predicate = predStr;
   }
 }
 
   void PlanDatabase::removeActiveToken(const TokenId token){
-    static const LabelStr sl_objectRoot("Object");
-    static const LabelStr sl_timelineRoot("Timeline");
-    LabelStr objectType = token->getObject()->baseDomain().getTypeName();
-    LabelStr predicate = token->getPredicateName();
-    LabelStr predicateSuffix = token->getUnqualifiedPredicateName();
+    static const std::string sl_objectRoot("Object");
+    static const std::string sl_timelineRoot("Timeline");
+    std::string objectType = token->getObject()->baseDomain().getTypeName();
+    std::string predicate = token->getPredicateName();
+    std::string predicateSuffix = token->getUnqualifiedPredicateName();
 
     debugMsg("PlanDatabase:removeActiveToken", token->toString());
 
@@ -996,7 +996,7 @@ void PlanDatabase::insertActiveToken(const TokenId token){
       checkError(it != m_activeTokensByPredicate.end(), token->toString() << " must be present but isn't.")
       TokenSet& activeTokens = it->second;
       activeTokens.erase(token);
-      debugMsg("PlanDatabase:removeActiveToken", token->toString() << " removed for " << predicate.toString());
+      debugMsg("PlanDatabase:removeActiveToken", token->toString() << " removed for " << predicate);
 
       // Break if we hit a built in class
       if(objectType == sl_timelineRoot || objectType == sl_objectRoot)
@@ -1004,7 +1004,7 @@ void PlanDatabase::insertActiveToken(const TokenId token){
 
       objectType = getSchema()->getParent(objectType);
 
-      std::string predStr = objectType.toString() + "." + predicateSuffix.c_str();
+      std::string predStr = objectType + "." + predicateSuffix.c_str();
 
       predicate = predStr;
     }
@@ -1039,7 +1039,7 @@ PSObject* PlanDatabase::getObjectByKey(PSEntityKey id) const {
 }
 
 PSObject* PlanDatabase::getObjectByName(const std::string& name) const {
-  ObjectId object = getObject(LabelStr(name));
+  ObjectId object = getObject(name);
   check_runtime_error(object.isValid());
   return id_cast<PSObject>(object);
 }
@@ -1074,11 +1074,11 @@ PSList<PSVariable*>  PlanDatabase::getAllGlobalVariables() const {
   return retval;
 }
 
-  ObjectId PlanDatabase::createObject(const LabelStr& objectType,
-                                      const LabelStr& objectName,
+  ObjectId PlanDatabase::createObject(const std::string& objectType,
+                                      const std::string& objectName,
                                       const std::vector<const Domain*>& arguments)
   {
-      debugMsg("PlanDatabase:createObject", "objectType " << objectType.toString() << " objectName " << objectName.toString());
+      debugMsg("PlanDatabase:createObject", "objectType " << objectType << " objectName " << objectName);
 
       ObjectFactoryId factory = getSchema()->getObjectFactory(objectType, arguments);
       ObjectId object = factory->createInstance(getId(), objectType, objectName, arguments);
@@ -1097,15 +1097,15 @@ std::string autoLabel(const char* prefix) {
 }
 }
 
-TokenId PlanDatabase::createToken(const char* tokenType,
-                                  const char* tokenName,
+TokenId PlanDatabase::createToken(const std::string& tokenType,
+                                  const std::string& tokenName,
                                   bool rejectable,
                                   bool isFact) {
-      LabelStr ttype(tokenType);
-      std::string nameStr = (tokenName != NULL ? tokenName : autoLabel("globalToken"));
-      LabelStr tname(nameStr);
+      std::string ttype =tokenType;
+      std::string nameStr = (!tokenName.empty() ? tokenName : autoLabel("globalToken"));
+      std::string tname(nameStr);
 
-      debugMsg("PlanDatabase:createToken", ttype.toString() << " " << tname.toString());
+      debugMsg("PlanDatabase:createToken", ttype << " " << tname);
 
       TokenTypeId factory = getSchema()->getTokenType(ttype);
       check_error(factory.isValid());
@@ -1125,14 +1125,14 @@ TokenId PlanDatabase::createToken(const char* tokenType,
 
       registerGlobalToken(token);
 
-      debugMsg("PlanDatabase:createToken","Created Token:" << tname.toString() << std::endl << token->toLongString());
+      debugMsg("PlanDatabase:createToken","Created Token:" << tname << std::endl << token->toLongString());
 
       return token;
   }
 
   TokenId PlanDatabase::createSlaveToken(const TokenId master,
-                const LabelStr& tokenType,
-                const LabelStr& relation)
+                const std::string& tokenType,
+                const std::string& relation)
   {
       check_error(master.isValid());
 

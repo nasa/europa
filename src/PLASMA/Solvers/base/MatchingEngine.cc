@@ -236,9 +236,9 @@ void triggerTokenByName(const LabelStr& lbl,
         debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for master object types (" << token->master()->getBaseObjectType() << ")");
         trigger(schema->getAllObjectTypes(token->master()->getBaseObjectType()),
                 m_rulesByMasterObjectType, results);
-        debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for master predicate " << token->master()->getUnqualifiedPredicateName().toString());
+        debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for master predicate " << token->master()->getUnqualifiedPredicateName());
         trigger(token->master()->getUnqualifiedPredicateName(), m_rulesByMasterPredicate, results);
-        debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for master relation " << token->getRelation().toString());
+        debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for master relation " << token->getRelation());
         trigger(token->getRelation(), m_rulesByMasterRelation, results);
       }
       else { // Trigger for those registered for 'none' explicitly

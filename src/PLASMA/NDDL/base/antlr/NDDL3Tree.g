@@ -812,7 +812,7 @@ predicateInstance returns [PredicateInstanceRef* pi]
 				(ann=tokenAnnotation { annotation = c_str($ann.text->chars); })?
 		)
 	        {
-	            pi = new PredicateInstanceRef(tokenType,tokenStr.c_str(),name,annotation);
+	            pi = new PredicateInstanceRef(tokenType,tokenStr.c_str(),(name == NULL ? "" : name),(annotation == NULL ? "" : name));
 	            if (name != NULL)
 	                CTX->SymbolTable->addLocalToken(name,tokenType);
 	        }
@@ -830,7 +830,7 @@ predicateVarRef returns [PredicateInstanceRef* pi]
             if (tokenType.isNoId()) 
                reportSemanticError(CTX,std::string(varName)+" is an undefined token");
 
-            pi = new PredicateInstanceRef(tokenType,NULL,varName,"");
+            pi = new PredicateInstanceRef(tokenType,"",varName,"");
 		}
 	;
 
@@ -1028,7 +1028,7 @@ enforceExpression returns [Expr* result]
                 con = new ExprConstant(dom->getTypeName().c_str(), dom); 
                 args.push_back(value);
                 args.push_back(con);    
-                result = new ExprConstraint("eq", args, NULL);
+                result = new ExprConstraint("eq", args, "");
             } else {
                 result = value;
             }

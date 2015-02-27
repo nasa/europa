@@ -464,7 +464,7 @@ class DataTypeCheckBase : public ConstraintType {
   
   virtual ConstraintId createConstraint(const ConstraintEngineId constraintEngine,
                                 const std::vector<ConstrainedVariableId>& scope,
-                                const char* violationExpl) = 0;
+                                const std::string& violationExpl) = 0;
 
   void checkArgTypes(const std::vector<DataTypeId>& argTypes) const {
     std::ostringstream str;
@@ -493,7 +493,7 @@ class DataTypeCheck : public DataTypeCheckBase<TypeCheck> {
   
   ConstraintId createConstraint(const ConstraintEngineId constraintEngine,
                                 const std::vector<ConstrainedVariableId>& scope,
-                                const char* violationExpl) {
+                                const std::string& violationExpl) {
     return makeConstraintInstance<Constr>(this->m_name, this->m_propagatorName,
                                           constraintEngine,scope, violationExpl);
     

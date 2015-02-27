@@ -21,39 +21,38 @@
 
 namespace EUROPA {
 
-  const char* Schema::getDelimiter(){
-    static const char* sl_delimiter = ".";
-    return sl_delimiter;
-  }
+const char Schema::getDelimiter(){
+  static const char sl_delimiter = '.';
+  return sl_delimiter;
+}
 
 const std::string& Schema::rootObject() {
   static const std::string sl_rootObject("Object");
   return sl_rootObject;
 }
 
-  const std::set<LabelStr>& Schema::getBuiltInVariableNames(){
-    static std::set<LabelStr> sl_instance;
-    static bool sl_initialized(false);
+const std::set<std::string>& Schema::getBuiltInVariableNames(){
+  static std::set<std::string> sl_instance;
+  static bool sl_initialized(false);
 
-    if(!sl_initialized){
-      sl_instance.insert(LabelStr("start"));
-      sl_instance.insert(LabelStr("end"));
-      sl_instance.insert(LabelStr("duration"));
-      sl_instance.insert(LabelStr("object"));
-      sl_instance.insert(LabelStr("state"));
-      sl_initialized = true;
-    }
-
-    return sl_instance;
+  if(!sl_initialized){
+    sl_instance.insert("start");
+    sl_instance.insert("end");
+    sl_instance.insert("duration");
+    sl_instance.insert("object");
+    sl_instance.insert("state");
+    sl_initialized = true;
   }
 
-  const LabelStr Schema::makeQualifiedName(const LabelStr& objectType,
-					   const LabelStr& unqualifiedPredicateName){
-    std::string fullName = objectType.toString() + getDelimiter() + unqualifiedPredicateName.toString();
-    return LabelStr(fullName.c_str());
-  }
+  return sl_instance;
+}
 
-Schema::Schema(const LabelStr& name, const CESchemaId ces)
+const std::string Schema::makeQualifiedName(const std::string& objectType,
+                                            const std::string& unqualifiedPredicateName){
+  return objectType + getDelimiter() + unqualifiedPredicateName;
+}
+
+Schema::Schema(const std::string& name, const CESchemaId ces)
     : m_id(this), m_name(name), m_ceSchema(ces)
     , m_objectTypeMgr((new ObjectTypeMgr())->getId())
     , m_tokenTypeMgr((new TokenTypeMgr())->getId())
@@ -63,7 +62,7 @@ Schema::Schema(const LabelStr& name, const CESchemaId ces)
     , m_predTrueCache(), m_predFalseCache(), m_hasParentCache()
   {
       reset();
-      debugMsg("Schema:constructor", "created Schema:" << name.toString());
+      debugMsg("Schema:constructor", "created Schema:" << name);
   }
 
   Schema::~Schema()
@@ -77,7 +76,7 @@ Schema::Schema(const LabelStr& name, const CESchemaId ces)
 
   const SchemaId Schema::getId() const {return m_id;}
 
-  const LabelStr& Schema::getName() const {return m_name;}
+  const std::string& Schema::getName() const {return m_name;}
 
   bool Schema::canCompare(const Domain& domx, const Domain& domy) const {
 
@@ -106,15 +105,15 @@ Schema::Schema(const LabelStr& name, const CESchemaId ces)
 	addPrimitive("string");
   }
 
-  bool Schema::isType(const LabelStr& type) const{
+  bool Schema::isType(const std::string& type) const{
     return(isPrimitive(type) || isObjectType(type) || isEnum(type) || isPredicate(type));
   }
 
-  bool Schema::isPrimitive(const LabelStr& str) const {
+  bool Schema::isPrimitive(const std::string& str) const {
     return (primitives.find(str) != primitives.end());
   }
 
-bool Schema::isPredicate(const LabelStr& predicateName) const {
+bool Schema::isPredicate(const std::string& predicateName) const {
 
   if(m_predTrueCache.find(predicateName) != m_predTrueCache.end())
     return true;
@@ -126,7 +125,7 @@ bool Schema::isPredicate(const LabelStr& predicateName) const {
 
   if(predicates.find(predicateName) != predicates.end()) // If a direct hit, then true
     result = true;
-  else if(predicateName.countElements(getDelimiter()) != 2) // If not the correct format, return false
+  else if(std::count(predicateName.begin(), predicateName.end(), getDelimiter()) != 1) // If not the correct format, return false
     result = false;
   else {
     // Call recursively if we have a parent
@@ -143,19 +142,19 @@ bool Schema::isPredicate(const LabelStr& predicateName) const {
   return result;
 }
 
-  bool Schema::isObjectType(const LabelStr& str) const {
+  bool Schema::isObjectType(const std::string& str) const {
     return objectTypes.find(str) != objectTypes.end();
   }
 
-  bool Schema::isEnum(const LabelStr& str) const {
+  bool Schema::isEnum(const std::string& str) const {
     return (enumValues.find(str) != enumValues.end());
   }
 
-  bool Schema::isEnumValue(const LabelStr& enumName, edouble value) const {
-    check_error(isEnum(enumName), enumName.toString() + " is not defined.");
+  bool Schema::isEnumValue(const std::string& enumName, edouble value) const {
+    check_error(isEnum(enumName), enumName + " is not defined.");
     debugMsg("Schema:isEnumValue",
-             "Checking to see if " << LabelStr(value).toString() <<
-             " is in enumeration " << enumName.toString());
+             "Checking to see if " << value <<
+             " is in enumeration " << enumName);
              
     const std::set<edouble>& members = enumValues.find(enumName)->second;
     return(members.find(value) != members.end());
@@ -165,10 +164,10 @@ bool Schema::isPredicate(const LabelStr& predicateName) const {
     return(enumValuesToEnums.find(value) != enumValuesToEnums.end());
   }
 
-  bool Schema::canBeAssigned(const LabelStr& objectType,
-			     const LabelStr& predicate) const {
-    check_error(isObjectType(objectType), objectType.toString() + " is not defined as an ObjectType");
-    check_error(isPredicate(predicate), predicate.toString() + " is not defined as a Predicate");
+  bool Schema::canBeAssigned(const std::string& objectType,
+			     const std::string& predicate) const {
+    check_error(isObjectType(objectType), objectType + " is not defined as an ObjectType");
+    check_error(isPredicate(predicate), predicate + " is not defined as a Predicate");
     return isA(objectType, getObjectTypeForPredicate(predicate));
   }
 
@@ -177,9 +176,9 @@ bool Schema::isPredicate(const LabelStr& predicateName) const {
    * comparable
    * @see canCompare
    */
-  bool Schema::isA(const LabelStr& descendant,
-		   const LabelStr& ancestor) const {
-    debugMsg("Schema:isA", "Checking if " << descendant.toString() << " is a " << ancestor.toString());
+  bool Schema::isA(const std::string& descendant,
+		   const std::string& ancestor) const {
+    debugMsg("Schema:isA", "Checking if " << descendant << " is a " << ancestor);
 
     // Special case if the 2 are the same, in which case we suspend any requirement that
     // they be predefined types - class, predicate, enum, primitive.
@@ -187,9 +186,9 @@ bool Schema::isPredicate(const LabelStr& predicateName) const {
       return true;
 
     checkError(isType(descendant),
-	       descendant.toString() << " is not defined.");
+	       descendant << " is not defined.");
     checkError(isType(ancestor),
-	       "Ancestor of '" << descendant.toString() << "' is '" << ancestor.toString() << "' which is not defined.");
+	       "Ancestor of '" << descendant << "' is '" << ancestor << "' which is not defined.");
 
     if(hasParent(descendant))
       return isA(getParent(descendant), ancestor);
@@ -249,7 +248,7 @@ const Schema::NameValueVector& Schema::getMembers(const std::string& objectType)
   // TODO:  Is it better to use an iterator in this loop?
 PSList<std::string> Schema::getObjectMembers(const std::string& objectType) const {
   PSList<std::string> retval;
-  const NameValueVector& members = getMembers(LabelStr(objectType));
+  const NameValueVector& members = getMembers(objectType);
   for(std::vector< std::pair<std::string, std::string> >::const_iterator it = members.begin();
       it != members.end(); ++it) {
     retval.push_back((*it).second);
@@ -257,43 +256,39 @@ PSList<std::string> Schema::getObjectMembers(const std::string& objectType) cons
   return retval;
 }
 
-  bool Schema::hasMember(const std::string& parentType, const std::string& memberName) const
-  {
-	  return hasMember(LabelStr(parentType), LabelStr(memberName));
-  }
 
-  bool Schema::hasMember(const LabelStr& parentType, const LabelStr& memberName) const{
-    check_error(isType(parentType), parentType.toString() + " is undefined.");
+bool Schema::hasMember(const std::string& parentType, const std::string& memberName) const {
+  check_error(isType(parentType), parentType + " is undefined.");
 
-    // First see if we get a hit for the parentType
-    std::map<std::string, NameValueVector>::const_iterator membershipRelation_it =
+  // First see if we get a hit for the parentType
+  std::map<std::string, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(parentType);
 
-    // If no hit, then try for the parent. There must be one since it is a valid
-    // type but no hit yet
-    if(membershipRelation_it == membershipRelation.end())
-      return hasMember(getParent(parentType), memberName);
+  // If no hit, then try for the parent. There must be one since it is a valid
+  // type but no hit yet
+  if(membershipRelation_it == membershipRelation.end())
+    return hasMember(getParent(parentType), memberName);
 
-    const NameValueVector& members = membershipRelation_it->second;
-    for(NameValueVector::const_iterator it = members.begin(); it != members.end(); ++it){
-      const LabelStr& name = it->second;
-      if(name == memberName) // Is the name equal to param
-	return true;
-    }
-
-    // Recursive call if appropriate
-    if(hasParent(parentType))
-      return hasMember(getParent(parentType), memberName);
-
-    // Otherwise, last act, see if it is built in
-    return isPredicate(parentType) && getBuiltInVariableNames().find(memberName) != getBuiltInVariableNames().end();
+  const NameValueVector& members = membershipRelation_it->second;
+  for(NameValueVector::const_iterator it = members.begin(); it != members.end(); ++it){
+    const std::string& name = it->second;
+    if(name == memberName) // Is the name equal to param
+      return true;
   }
 
-  const LabelStr Schema::getObjectTypeForPredicate(const LabelStr& predicate) const {
+  // Recursive call if appropriate
+  if(hasParent(parentType))
+    return hasMember(getParent(parentType), memberName);
+
+  // Otherwise, last act, see if it is built in
+  return isPredicate(parentType) && getBuiltInVariableNames().find(memberName) != getBuiltInVariableNames().end();
+}
+
+  const std::string Schema::getObjectTypeForPredicate(const std::string& predicate) const {
     check_error(isPredicate(predicate),
-		"Predicate "+predicate.toString() +
+		"Predicate "+predicate +
 		" is not defined, but we expect all predicates to be defined. See 'isPredicate'");
-    return predicate.getElement(0, getDelimiter());
+    return predicate.substr(0, predicate.find(getDelimiter()));
   }
 
 const std::vector<std::string>& Schema::getAllObjectTypes(const std::string& objectType) {
@@ -315,7 +310,7 @@ const std::vector<std::string>& Schema::getAllObjectTypes(const std::string& obj
   return getAllObjectTypes(objectType);
 }
 
-  bool Schema::hasParent(const LabelStr& type) const {
+  bool Schema::hasParent(const std::string& type) const {
 
     if(m_hasParentCache.find(type) != m_hasParentCache.end())
       return true;
@@ -329,7 +324,7 @@ const std::vector<std::string>& Schema::getAllObjectTypes(const std::string& obj
     else {
       std::string predStr;
       if(makeParentPredicateString(type, predStr))
-	result = predicates.find(LabelStr(predStr)) != predicates.end() || hasParent(predStr);
+	result = predicates.find(predStr) != predicates.end() || hasParent(predStr);
     }
 
     // If we get a true result, store it in the cache
@@ -339,8 +334,8 @@ const std::vector<std::string>& Schema::getAllObjectTypes(const std::string& obj
     return result;
   }
 
-  const LabelStr Schema::getParent(const LabelStr& type) const {
-    check_error(hasParent(type), type.toString() + " does not have a parent.");
+  const std::string Schema::getParent(const std::string& type) const {
+    check_error(hasParent(type), type + " does not have a parent.");
 
     // If it is an objectType. return child relation
     if(isObjectType(type))
@@ -349,7 +344,7 @@ const std::vector<std::string>& Schema::getAllObjectTypes(const std::string& obj
     // Otherwise it must be a predicate, so build the new fully qualified name
     std::string predStr;
     makeParentPredicateString(type, predStr);
-    check_error(predStr != std::string(), "Attempted to get a parent predicate for " + type.toString() + " failed.");
+    check_error(predStr != std::string(), "Attempted to get a parent predicate for " + type + " failed.");
     return predStr;
   }
 
@@ -358,31 +353,31 @@ const std::set<std::string>& Schema::getAllObjectTypes() const {
 }
 
 
-  const std::set<edouble>& Schema::getEnumValues(const LabelStr& enumName) const {
-    check_error(isEnum(enumName), enumName.toString() + " is not a defined enumeration.");
+  const std::set<edouble>& Schema::getEnumValues(const std::string& enumName) const {
+    check_error(isEnum(enumName), enumName + " is not a defined enumeration.");
 
     return enumValues.find(enumName)->second;
 
   }
 
-  void Schema::getPredicates(const LabelStr& objectType, std::set<LabelStr>& results) const {
-    check_error(isType(objectType), objectType.toString() + " is undefined");
+  void Schema::getPredicates(const std::string& objectType, std::set<std::string>& results) const {
+    check_error(isType(objectType), objectType + " is undefined");
     for(std::set<std::string>::const_iterator pred = predicates.begin(); pred != predicates.end(); ++pred) {
-      LabelStr predLbl(*pred);
-      LabelStr object((predLbl).getElement(0, getDelimiter()));
-      LabelStr predicate((predLbl).getElement(1, getDelimiter()));
+      std::string predLbl(*pred);
+      std::string object(predLbl.substr(0, predLbl.find(getDelimiter())));
+      std::string predicate(predLbl.substr(predLbl.find(getDelimiter()) + 1));
       if ((object == objectType) || isA(objectType, object))
 	results.insert(predicate);
     }
   }
 
-  void Schema::getPredicates(std::set<LabelStr>& results) const {
+  void Schema::getPredicates(std::set<std::string>& results) const {
     for(std::set<std::string>::const_iterator it = predicates.begin(); it != predicates.end(); ++it)
       results.insert(*it);
   }
 
-  bool Schema::hasPredicates(const LabelStr& objectType) {
-    check_error(isType(objectType), objectType.toString() + " is undefined");
+  bool Schema::hasPredicates(const std::string& objectType) {
+    check_error(isType(objectType), objectType + " is undefined");
 
     // Try for a quick hit
     if(typesWithNoPredicates.find(objectType) != typesWithNoPredicates.end())
@@ -390,8 +385,8 @@ const std::set<std::string>& Schema::getAllObjectTypes() const {
 
     // Otherwise, it is not conclusive, so we try in detail
     for(std::set<std::string>::const_iterator pred = predicates.begin(); pred != predicates.end(); ++pred) {
-      LabelStr predLbl(*pred);
-      LabelStr object((predLbl).getElement(0, getDelimiter()));
+      std::string predLbl(*pred);
+      std::string object(predLbl.substr(0, predLbl.find(getDelimiter())));
       if ((object == objectType) || isA(objectType, object))
 	return true;
     }
@@ -401,9 +396,9 @@ const std::set<std::string>& Schema::getAllObjectTypes() const {
     return false;
   }
 
-  const LabelStr Schema::getMemberType(const LabelStr& parentType, const LabelStr& memberName) const {
+  const std::string Schema::getMemberType(const std::string& parentType, const std::string& memberName) const {
     check_error(hasMember(parentType, memberName),
-		memberName.toString() + " is not a member of " + parentType.toString());
+		memberName + " is not a member of " + parentType);
 
     // First see if we get a hit for the parentType
     std::map<std::string, NameValueVector>::const_iterator membershipRelation_it =
@@ -416,7 +411,7 @@ const std::set<std::string>& Schema::getAllObjectTypes() const {
     // Alternately, we have to have a hit
     const NameValueVector& members = membershipRelation_it->second;
     for(NameValueVector::const_iterator it = members.begin(); it != members.end(); ++it){
-      const LabelStr& name = it->second;
+      const std::string& name = it->second;
       if(name == memberName) // Is the name equal to param
 	return it->first;
     }
@@ -425,9 +420,9 @@ const std::set<std::string>& Schema::getAllObjectTypes() const {
     return getMemberType(getParent(parentType), memberName);
   }
 
-  unsigned int Schema::getIndexFromName(const LabelStr& parentType, const LabelStr& memberName) const {
+  unsigned int Schema::getIndexFromName(const std::string& parentType, const std::string& memberName) const {
     check_error(hasMember(parentType, memberName),
-		memberName.toString() + " is not a member of " + parentType.toString());
+		memberName + " is not a member of " + parentType);
 
     // First see if we get a hit for the parentType
     std::map<std::string, NameValueVector>::const_iterator membershipRelation_it =
@@ -441,7 +436,7 @@ const std::set<std::string>& Schema::getAllObjectTypes() const {
     const NameValueVector& members = membershipRelation_it->second;
     unsigned int index = 0;
     for(NameValueVector::const_iterator it = members.begin(); it != members.end(); ++it){
-      const LabelStr& name = it->second;
+      const std::string& name = it->second;
       if(name == memberName) // Is the name equal to param
 	return index;
       else
@@ -452,7 +447,7 @@ const std::set<std::string>& Schema::getAllObjectTypes() const {
     return getIndexFromName(getParent(parentType), memberName);
   }
 
-  const LabelStr Schema::getNameFromIndex(const LabelStr& parentType, unsigned int index) const {
+  const std::string Schema::getNameFromIndex(const std::string& parentType, unsigned int index) const {
     // First see if we get a hit for the parentType
     std::map<std::string, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(parentType);
@@ -475,7 +470,7 @@ const std::set<std::string>& Schema::getAllObjectTypes() const {
 
     // If we get to here, we should pursue the parent type (and it will have to have one).
     checkError(hasParent(parentType),
-	       parentType.toString() << " has no member with index " << index);
+	       parentType << " has no member with index " << index);
 
     return getNameFromIndex(getParent(parentType), index);
   }
@@ -484,7 +479,7 @@ const std::set<std::string>& Schema::getAllObjectTypes() const {
    * @todo This may not be valid since a member name could in theory be duplicated
    * across enumerations. Look into this when we address enum scoping in a language
    */
-  const LabelStr Schema::getEnumFromMember(const LabelStr& member) const {
+  const std::string Schema::getEnumFromMember(const LabelStr& member) const {
     for(std::map<std::string, ValueSet>::const_iterator it = enumValues.begin();
         it != enumValues.end(); ++it)
       for(ValueSet::const_iterator memIt = it->second.begin(); memIt != it->second.end(); ++memIt)
@@ -492,23 +487,23 @@ const std::set<std::string>& Schema::getAllObjectTypes() const {
           return it->first;
 
     check_error(ALWAYS_FAILS, member.toString() + " is not a member of any enumeration.");
-    return LabelStr("error");
+    return "error";
   }
 
-  unsigned long Schema::getParameterCount(const LabelStr& predicate) const {
-    check_error(isPredicate(predicate), predicate.toString() + " is not defined as a Predicate");
+  unsigned long Schema::getParameterCount(const std::string& predicate) const {
+    check_error(isPredicate(predicate), predicate + " is not defined as a Predicate");
     // First see if we get a hit for the parentType
     std::map<std::string, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(predicate);
 
-    check_error(membershipRelation_it != membershipRelation.end(), predicate.toString() + " not found in the membership relation");
+    check_error(membershipRelation_it != membershipRelation.end(), predicate + " not found in the membership relation");
     const NameValueVector& members = membershipRelation_it->second;
 
     return(members.size());
   }
 
-  const LabelStr Schema::getParameterType(const LabelStr& predicate, unsigned int paramIndex) const {
-    check_error(isPredicate(predicate), predicate.toString() + " is not defined as a Predicate");
+  const std::string Schema::getParameterType(const std::string& predicate, unsigned int paramIndex) const {
+    check_error(isPredicate(predicate), predicate + " is not defined as a Predicate");
 #ifdef _MANAGED
     std::string tmp;
     System::String ^ tmpStr = paramIndex + " is not a valid index";
@@ -527,94 +522,94 @@ const std::set<std::string>& Schema::getAllObjectTypes() const {
     return(members[paramIndex].first);
   }
 
-  void Schema::addPrimitive(const LabelStr& primitiveName){
-    check_error(!isPrimitive(primitiveName), primitiveName.toString() + " is already defined.");
-    debugMsg("Schema:addPrimitive", "[" << m_name.toString() << "] " << "Adding primitive type " << primitiveName.toString());
+  void Schema::addPrimitive(const std::string& primitiveName){
+    check_error(!isPrimitive(primitiveName), primitiveName + " is already defined.");
+    debugMsg("Schema:addPrimitive", "[" << m_name << "] " << "Adding primitive type " << primitiveName);
     primitives.insert(primitiveName);
   }
 
-  void Schema::declareObjectType(const LabelStr& objectType) {
+  void Schema::declareObjectType(const std::string& objectType) {
       if (!this->isObjectType(objectType)) {
-          debugMsg("Schema:declareObjectType", "[" << m_name.toString() << "] " << "Declaring object type " << objectType.toString());
+          debugMsg("Schema:declareObjectType", "[" << m_name << "] " << "Declaring object type " << objectType);
           objectTypes.insert(objectType);
           getCESchema()->registerDataType((new ObjectDT(objectType.c_str()))->getId());
       }
       else {
-          debugMsg("Schema:declareObjectType", "[" << m_name.toString() << "] " << "Object type already declared, ignoring re-declaration for" << objectType.toString());
+          debugMsg("Schema:declareObjectType", "[" << m_name << "] " << "Object type already declared, ignoring re-declaration for" << objectType);
       }
   }
 
-  void Schema::addObjectType(const LabelStr& objectType) {
+  void Schema::addObjectType(const std::string& objectType) {
     // Enforce assumption of a singly rooted class hierarchy
     addObjectType(objectType, rootObject());
   }
 
-  void Schema::addObjectType(const LabelStr& objectType, const LabelStr& parent) {
+  void Schema::addObjectType(const std::string& objectType, const std::string& parent) {
 
-    check_error(objectType.countElements(getDelimiter()) == 1,
-                "ObjectType must not be delimited:" + objectType.toString());
+    check_error(std::count(objectType.begin(), objectType.end(), getDelimiter()) == 0,
+                "ObjectType must not be delimited:" + objectType);
 
     if (objectType != rootObject()) {
-        checkError(isObjectType(parent), objectType.toString() + " has undefined parent class : " + parent.toString());
-        checkError(childOfRelation.find(objectType) == childOfRelation.end(),objectType.toString() << " is already defined.");
-        childOfRelation.insert(std::pair<LabelStr, LabelStr>(objectType, parent));
+        checkError(isObjectType(parent), objectType + " has undefined parent class : " + parent);
+        checkError(childOfRelation.find(objectType) == childOfRelation.end(),objectType << " is already defined.");
+        childOfRelation.insert(std::pair<std::string, std::string>(objectType, parent));
     }
 
     objectTypes.insert(objectType);
-    membershipRelation.insert(std::pair<LabelStr, NameValueVector>(objectType, NameValueVector()));
+    membershipRelation.insert(std::pair<std::string, NameValueVector>(objectType, NameValueVector()));
 
     // Add type for constrained variables to be able to hold references to objects of the new type
     if (!getCESchema()->isDataType(objectType.c_str()))
         getCESchema()->registerDataType((new ObjectDT(objectType.c_str()))->getId());
 
     debugMsg("Schema:addObjectType",
-	     "[" << m_name.toString() << "] " << "Added object type " << objectType.toString() << " that extends " <<
-	     parent.toString());
+	     "[" << m_name << "] " << "Added object type " << objectType << " that extends " <<
+	     parent);
   }
 
-  void Schema::addPredicate(const LabelStr& predicate) {
-    check_error(predicate.countElements(getDelimiter()) == 2,
-		"Expect predicate names to be structured as <objectType>.<predicate>. Not found in "+
-		predicate.toString());
+void Schema::addPredicate(const std::string& predicate) {
+  check_error(std::count(predicate.begin(), predicate.end(), getDelimiter()) == 1,
+              "Expect predicate names to be structured as <objectType>.<predicate>. Not found in "+
+              predicate);
 
-    check_error(isObjectType(predicate.getElement(0, getDelimiter())),
-		"Object Type not defined for " + predicate.toString() + ".");
+  check_error(isObjectType(predicate.substr(0, predicate.find(getDelimiter()))),
+              "Object Type not defined for " + predicate + ".");
 
-    check_error(predicates.find(predicate) == predicates.end(), predicate.toString() + " already defined.");
+  check_error(predicates.find(predicate) == predicates.end(), predicate + " already defined.");
 
-    debugMsg("Schema:addPredicate",
-	     "[" << m_name.toString() << "] " << "Added predicate " << predicate.toString());
-    predicates.insert(predicate);
-    membershipRelation.insert(std::pair<LabelStr, NameValueVector>(predicate, NameValueVector()));
-  }
+  debugMsg("Schema:addPredicate",
+           "[" << m_name << "] " << "Added predicate " << predicate);
+  predicates.insert(predicate);
+  membershipRelation.insert(std::pair<std::string, NameValueVector>(predicate, NameValueVector()));
+}
 
   /**
    * @todo memberType is not checked yet. It can be a class, enum, or primitive
    */
-  unsigned long Schema::addMember(const LabelStr& parentType,
-				 const LabelStr& memberType,
-				 const LabelStr& memberName) {
-    check_error(isType(parentType), parentType.toString() + " is undefined.");
+  unsigned long Schema::addMember(const std::string& parentType,
+				 const std::string& memberType,
+				 const std::string& memberName) {
+    check_error(isType(parentType), parentType + " is undefined.");
     check_error(!canContain(parentType, memberType, memberName),
-		parentType.toString() + " already contains " + memberName.toString());
+		parentType + " already contains " + memberName);
 
     debugMsg("Schema:addMember",
-	     "[" << m_name.toString() << "] " << "Added to " << parentType.toString() << ": " << memberType.toString() << " " <<
-	     memberName.toString());
+	     "[" << m_name << "] " << "Added to " << parentType << ": " << memberType << " " <<
+	     memberName);
     // We can now assume the entry is present, so just add where appropriate
     NameValueVector& members = membershipRelation.find(parentType)->second;
     members.push_back(NameValuePair(memberType, memberName));
     return (members.size()-1);
   }
 
-  void Schema::addEnum(const LabelStr& enumName) {
-    check_error(!isEnum(enumName), enumName.toString() + " is already defined as an enumeration.");
-    check_error(!isObjectType(enumName), enumName.toString() + " is already defined as an object type.");
-    debugMsg("Schema:addEnum", "[" << m_name.toString() << "] " << "Added enumeration " << enumName.toString());
-    enumValues.insert(std::pair<LabelStr, ValueSet>(enumName, ValueSet()));
+  void Schema::addEnum(const std::string& enumName) {
+    check_error(!isEnum(enumName), enumName + " is already defined as an enumeration.");
+    check_error(!isObjectType(enumName), enumName + " is already defined as an object type.");
+    debugMsg("Schema:addEnum", "[" << m_name << "] " << "Added enumeration " << enumName);
+    enumValues.insert(std::pair<std::string, ValueSet>(enumName, ValueSet()));
   }
 
-  void Schema::registerEnum(const char* enumName, const EnumeratedDomain& domain)
+  void Schema::registerEnum(const std::string& enumName, const EnumeratedDomain& domain)
   {
       debugMsg("Schema:enumdef","Defining enum:" << enumName);
 
@@ -640,7 +635,7 @@ void Schema::addValue(const std::string& enumName, edouble enumValue) {
   check_error(enumValuesToEnums.find(enumValue) == enumValuesToEnums.end(),
               LabelStr(enumValue).toString() + " is already an enum value for " + enumValuesToEnums[enumValue]);
 
-  debugMsg("Schema:addValue", "[" << m_name.toString() << "] " << "Added " <<
+  debugMsg("Schema:addValue", "[" << m_name << "] " << "Added " <<
            (LabelStr::isString(enumValue) ? LabelStr(enumValue).toString() : toString(enumValue)) << " to " <<
            enumName);
   ValueSet& members = enumValues.find(enumName)->second;
@@ -660,28 +655,27 @@ void Schema::write(ostream& os) const {
     std::string objectName = it->first;
     os << objectName << ":{";
     for (std::set<std::string>::const_iterator pos = it->second.begin(); pos != it->second.end(); ++pos){
-      LabelStr predicate = *pos;
-      os << predicate.toString() << " ";
+      os << *pos << " ";
     }
     os << "}\n";
   }
 }
 
-  bool Schema::makeParentPredicateString(const LabelStr& predicate, std::string& predStr) const{
-    check_error(predicate.countElements(getDelimiter()) == 2,
-		"Invalid format for predicate " + predicate.toString());
+bool Schema::makeParentPredicateString(const std::string& predicate, std::string& predStr) const{
+  check_error(std::count(predicate.begin(), predicate.end(), getDelimiter()) == 1,
+              "Invalid format for predicate " + predicate);
 
-    LabelStr prefix = predicate.getElement(0, getDelimiter());
+  std::string prefix = predicate.substr(0, predicate.find(getDelimiter()));
 
-    // If not a defined class, or has no parent class, do no more and return false
-    if(!isObjectType(prefix) || !hasParent(prefix))
-      return false;
+  // If not a defined class, or has no parent class, do no more and return false
+  if(!isObjectType(prefix) || !hasParent(prefix))
+    return false;
 
-    // Otherwise we are ready to compose with the parent
-    LabelStr suffix = predicate.getElement(1, getDelimiter());
-    predStr = getParent(prefix).toString() + getDelimiter() + suffix.toString();
-    return true;
-  }
+  // Otherwise we are ready to compose with the parent
+  std::string suffix = predicate.substr(predicate.find(getDelimiter()) + 1);
+  predStr = getParent(prefix) + getDelimiter() + suffix;
+  return true;
+}
 
 void Schema::getEnumerations(std::list<std::string>& results) const {
   for(std::map<std::string, ValueSet>::const_iterator it = enumValues.begin();
@@ -715,7 +709,7 @@ const Id<ObjectFactory> createDefaultObjectFactory(
 }
 
 void Schema::registerObjectType(const ObjectTypeId objType) {
-  const char* className = objType->getName().c_str();
+  const std::string& className = objType->getName();
 
   if (objType->getName() == Schema::rootObject())
     addObjectType(className);
@@ -745,7 +739,7 @@ void Schema::registerObjectType(const ObjectTypeId objType) {
     std::map<std::string,TokenTypeId>::const_iterator it = objType->getTokenTypes().begin();
     for(;it != objType->getTokenTypes().end(); ++it) {
       const TokenTypeId tokenType = it->second;
-      LabelStr predName = tokenType->getSignature();
+      std::string predName = tokenType->getSignature();
 
       addPredicate(predName.c_str());
       std::map<std::string,DataTypeId>::const_iterator paramIt = tokenType->getArgs().begin();
@@ -759,44 +753,43 @@ void Schema::registerObjectType(const ObjectTypeId objType) {
   debugMsg("Schema:registerObjectType","Registered object type:" << std::endl << objType->toString());
 }
 
-  const ObjectTypeId Schema::getObjectType(const LabelStr& objType)
-  {
-	  return m_objectTypeMgr->getObjectType(objType);
-  }
+const ObjectTypeId Schema::getObjectType(const std::string& objType) {
+  return m_objectTypeMgr->getObjectType(objType);
+}
 
-  ObjectFactoryId Schema::getObjectFactory(const LabelStr& objectType, const std::vector<const Domain*>& arguments, const bool doCheckError)
-  {
-    return m_objectTypeMgr->getFactory(getId(),objectType,arguments,doCheckError);
-  }
+ObjectFactoryId Schema::getObjectFactory(const std::string& objectType,
+                                         const std::vector<const Domain*>& arguments,
+                                         const bool doCheckError) {
+  return m_objectTypeMgr->getFactory(getId(),objectType,arguments,doCheckError);
+}
 
   void Schema::registerTokenType(const TokenTypeId f)
   {
       m_tokenTypeMgr->registerType(f);
   }
 
-  TokenTypeId Schema::getTokenType(const LabelStr& type)
-  {
-      return m_tokenTypeMgr->getType(getId(),type);
+TokenTypeId Schema::getTokenType(const std::string& type) {
+  return m_tokenTypeMgr->getType(getId(),type);
+}
+
+
+TokenTypeId Schema::getParentTokenType(const std::string& tokenType,
+                                       const std::string& parentObjType) {
+  std::string objType = parentObjType;
+  std::string tokenName = tokenType.substr(tokenType.find(getDelimiter()) + 1);
+
+  for(;;) {
+    std::string parentName = objType+getDelimiter()+tokenName;
+    if (isPredicate(parentName))
+      return getTokenType(parentName);
+    if (hasParent(objType))
+      objType = getParent(objType);
+    else
+      break;
   }
 
-
-  TokenTypeId Schema::getParentTokenType(const LabelStr& tokenType, const LabelStr& parentObjType)
-  {
-      LabelStr objType = parentObjType;
-      std::string tokenName = tokenType.getElement(1, getDelimiter()).toString();
-
-      for(;;) {
-          std::string parentName = objType.toString()+getDelimiter()+tokenName;
-          if (isPredicate(parentName))
-              return getTokenType(parentName);
-          if (hasParent(objType))
-              objType = getParent(objType);
-          else
-              break;
-      }
-
-      return TokenTypeId::noId();
-  }
+  return TokenTypeId::noId();
+}
 
   bool Schema::hasTokenTypes() const
   {
@@ -804,14 +797,14 @@ void Schema::registerObjectType(const ObjectTypeId objType) {
   }
 
 
-  void Schema::registerMethod(const MethodId m)
-  {
-      // TODO: allow method overloading
-      check_runtime_error(m_methods.find(m->getName()) == m_methods.end(), std::string("Method ")+m->getName().toString()+" already exists");
-      m_methods[m->getName()] = m;
-  }
+void Schema::registerMethod(const MethodId m) {
+  // TODO: allow method overloading
+  check_runtime_error(m_methods.find(m->getName()) == m_methods.end(),
+                      std::string("Method ")+m->getName()+" already exists");
+  m_methods[m->getName()] = m;
+}
 
-MethodId Schema::getMethod(const LabelStr& methodName, const DataTypeId,
+MethodId Schema::getMethod(const std::string& methodName, const DataTypeId,
                            const std::vector<DataTypeId>&) {
   // TODO: use target type and arg types to resolve
   std::map<std::string,MethodId>::iterator it = m_methods.find(methodName);
@@ -819,7 +812,7 @@ MethodId Schema::getMethod(const LabelStr& methodName, const DataTypeId,
 }
 
 std::vector<TokenTypeId> Schema::getTypeSupporters( TokenTypeId type ) {
-  edouble key = type->getSignature().getKey();
+  std::string key = type->getSignature();
   std::vector<TokenTypeId> retval;
 
   PSList<PSTokenType*> actionTypes = getPSTokenTypesByAttr( PSTokenType::ACTION );
@@ -831,7 +824,7 @@ std::vector<TokenTypeId> Schema::getTypeSupporters( TokenTypeId type ) {
 
     for (long j = 0; j < effects.size(); j++ ) {
       TokenType* tt_effect = dynamic_cast<TokenType*>(effects.get(j));
-      if( tt_effect->getSignature().getKey() == key)
+      if( tt_effect->getSignature() == key)
         retval.push_back( tt->getId() );
     }
   }
@@ -843,11 +836,11 @@ std::vector<TokenTypeId> Schema::getTypeSupporters( TokenTypeId type ) {
   // PSSchema methods:
 PSList<std::string> Schema::getAllPredicates() const {
   PSList<std::string> retval;
-  std::set<LabelStr> predicates_;
+  std::set<std::string> predicates_;
   getPredicates(predicates_);
-  for(std::set<LabelStr>::const_iterator it = predicates_.begin(); it != predicates_.end();
+  for(std::set<std::string>::const_iterator it = predicates_.begin(); it != predicates_.end();
       ++it) {
-    retval.push_back((*it).toString());
+    retval.push_back((*it));
   }
   return retval;
 }

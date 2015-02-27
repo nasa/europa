@@ -11,7 +11,6 @@
 
 #include "PlanDatabaseDefs.hh"
 #include "PlanDatabaseVarDefs.hh"
-#include "LabelStr.hh"
 #include "Domains.hh"
 #include "PSPlanDatabase.hh"
 
@@ -35,9 +34,9 @@ namespace EUROPA {
                  COMPLETE /**< All variables have been added. */
     };
 
-    Object(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open = false);
+    Object(const PlanDatabaseId planDatabase, const std::string& type, const std::string& name, bool open = false);
 
-    Object(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open = false);
+    Object(const ObjectId parent, const std::string& type, const std::string& localName, bool open = false);
 
     virtual ~Object();
 
@@ -50,7 +49,7 @@ namespace EUROPA {
      * @param name The member name
      * @see Scheme::hasMember, Schema::canContain, Object::close()
      */
-    virtual ConstrainedVariableId addVariable(const Domain& baseDomain, const char* name);
+    virtual ConstrainedVariableId addVariable(const Domain& baseDomain, const std::string& name);
 
     const ObjectId getId() const;
 
@@ -72,7 +71,7 @@ namespace EUROPA {
     /**
      * @brief Access the root type in the class hierarchy starting from this instance
      */
-    const LabelStr getRootType() const;
+    const std::string getRootType() const;
 
     /**
      * @brief Access the instance name of this object.
@@ -177,7 +176,7 @@ namespace EUROPA {
      *        found.
      * @param name The name for the requested variable.
      */
-    const ConstrainedVariableId getVariable(const LabelStr& name) const;
+    const ConstrainedVariableId getVariable(const std::string& name) const;
 
     /**
      * @brief Obtain the variable by traversing a path. Requires that all contained members along the way
@@ -277,7 +276,7 @@ namespace EUROPA {
      */
     void handleDiscard();
 
-    Object(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool hasVariables, bool notify);
+    Object(const PlanDatabaseId planDatabase, const std::string& type, const std::string& name, bool hasVariables, bool notify);
 
     // Calls for managing object - token connections
     friend class ObjectTokenRelation;
@@ -355,7 +354,7 @@ namespace EUROPA {
   class ObjectDT : public DataType
   {
   public:
-      ObjectDT(const char* name);
+      ObjectDT(const std::string& name);
       virtual ~ObjectDT();
 
       virtual bool isNumeric() const;

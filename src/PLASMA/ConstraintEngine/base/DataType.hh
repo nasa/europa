@@ -24,7 +24,7 @@ public:
 class DataType: public PSDataType {
 
  public:
-  DataType(const char* name);
+  DataType(const std::string& name);
 
   virtual ~DataType();
 
@@ -123,7 +123,7 @@ class DataType: public PSDataType {
                                                const Domain& baseDomain,
                                                const bool internal = false,
                                                bool canBeSpecified = true,
-                                               const char* name = NO_VAR_NAME,
+                                               const std::string& name = NO_VAR_NAME,
                                                const EntityId parent = EntityId::noId(),
                                                unsigned int index = ConstrainedVariable::NO_INDEX) const;
 

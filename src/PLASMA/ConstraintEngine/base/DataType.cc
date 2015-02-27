@@ -12,7 +12,7 @@
 
 namespace EUROPA {
 
-DataType::DataType(const char* name)
+DataType::DataType(const std::string& name)
     : m_id(this)
     , m_name(name)
     , m_isRestricted(false)
@@ -90,7 +90,7 @@ DataType::createVariable(const ConstraintEngineId constraintEngine,
                          const Domain& _baseDomain,
                          const bool internal,
                          bool canBeSpecified,
-                         const char* name,
+                         const std::string& name,
                          const EntityId parent,
                          unsigned int index) const
 {

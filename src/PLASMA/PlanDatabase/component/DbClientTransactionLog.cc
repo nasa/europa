@@ -108,10 +108,10 @@ void DbClientTransactionLog::notifyObjectCreated(const ObjectId object,
     pushTransaction(element);
   }
 
-  void DbClientTransactionLog::notifyClosed(const LabelStr& objectType){
+  void DbClientTransactionLog::notifyClosed(const std::string& objectType){
     TiXmlElement * element = allocateXmlElement("invoke");
     element->SetAttribute("name", "close");
-    element->SetAttribute("identifier", objectType.toString());
+    element->SetAttribute("identifier", objectType);
     pushTransaction(element);
   }
 
@@ -120,7 +120,7 @@ void DbClientTransactionLog::notifyObjectCreated(const ObjectId object,
                               allocateXmlElement("goal"));
     TiXmlElement * instance = allocateXmlElement("predicateinstance");
     instance->SetAttribute("name", m_tokensCreated++);
-    instance->SetAttribute("type", token->getPredicateName().toString());
+    instance->SetAttribute("type", token->getPredicateName());
     instance->SetAttribute("path", m_client->getPathAsString(token));
     element->LinkEndChild(instance);
     pushTransaction(element);
@@ -129,7 +129,7 @@ void DbClientTransactionLog::notifyObjectCreated(const ObjectId object,
   void DbClientTransactionLog::notifyTokenDeleted(const TokenId token,
                                                   const std::string& name) {
     TiXmlElement* element = allocateXmlElement("deletetoken");
-    element->SetAttribute("type", token->getPredicateName().toString());
+    element->SetAttribute("type", token->getPredicateName());
     element->SetAttribute("path", m_client->getPathAsString(token));
     if(!name.empty())
       element->SetAttribute("name", name);
@@ -286,8 +286,7 @@ void DbClientTransactionLog::notifyConstraintDeleted(const ConstraintId constrai
         }
         return ss.str();
       } else if (LabelStr::isString(domain->getUpperBound())) {
-        const LabelStr& label = value;
-        return label.toString();
+        return LabelStr(value).toString();
       } else {
         ObjectId object = Entity::getTypedEntity<Object>(value);
         check_error(object.isValid());
@@ -298,7 +297,7 @@ void DbClientTransactionLog::notifyConstraintDeleted(const ConstraintId constrai
   TiXmlElement *
   DbClientTransactionLog::domainValueAsXml(const Domain * domain, edouble value)
   {
-    LabelStr typeName = domain->getTypeName();
+    std::string typeName = domain->getTypeName();
     if (m_client->getSchema()->isObjectType(typeName)) {
       TiXmlElement * element = allocateXmlElement("object");
       element->SetAttribute("value", domainValueAsString(domain, value));
@@ -316,13 +315,13 @@ void DbClientTransactionLog::notifyConstraintDeleted(const ConstraintId constrai
     else {
       if (domain->isNumeric()) {
         TiXmlElement * element = allocateXmlElement("value");
-        element->SetAttribute("type", typeName.toString());
+        element->SetAttribute("type", typeName);
         element->SetAttribute("name", domainValueAsString(domain, value));
         return(element);
       }
       else {
         TiXmlElement * element = allocateXmlElement("symbol");
-        element->SetAttribute("type", typeName.toString());
+        element->SetAttribute("type", typeName);
         element->SetAttribute("value", domainValueAsString(domain, value));
         return(element);
       }

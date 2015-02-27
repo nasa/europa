@@ -25,13 +25,13 @@ namespace EUROPA {
 
   /** TIMELINE IMPLEMENTATION **/
 
-Timeline::Timeline(const PlanDatabaseId planDatabase, const LabelStr& type, 
-                   const LabelStr& name, bool open)
+Timeline::Timeline(const PlanDatabaseId planDatabase, const std::string& type, 
+                   const std::string& name, bool open)
     : Object(planDatabase, type, name, true), m_tokenSequence(), m_tokenIndex() 
 {commonInit(open);}
 
-  Timeline::Timeline(const ObjectId parent, const LabelStr& type, 
-                     const LabelStr& localName, bool open)
+  Timeline::Timeline(const ObjectId parent, const std::string& type, 
+                     const std::string& localName, bool open)
       : Object(parent, type, localName, true), m_tokenSequence(), m_tokenIndex() 
 {commonInit(open);}
 
@@ -68,7 +68,7 @@ Timeline::Timeline(const PlanDatabaseId planDatabase, const LabelStr& type,
     // we trap that as an error. We could just return indicating no choices but that might lead caller to conclude
     // there is simply an inconsistency rather than force them to write code to ensure this does not happen.
     check_error(m_tokenIndex.find(token->getKey()) == m_tokenIndex.end(),
-                "Attempted to query for choices to constrain token " + token->getPredicateName().toString() +
+                "Attempted to query for choices to constrain token " + token->getPredicateName() +
                 " which has already been constrained.");
 
     // If the sequence is empty, add the case where both elements of the pair are the given token.
@@ -533,12 +533,12 @@ Timeline::Timeline(const PlanDatabaseId planDatabase, const LabelStr& type,
 
   ObjectId TimelineObjectFactory::makeNewObject(
                         const PlanDatabaseId planDb,
-                        const LabelStr& objectType,
-                        const LabelStr& objectName,
+                        const std::string& objectType,
+                        const std::string& objectName,
                         const std::vector<const Domain*>&) const
   {
     ObjectId instance =  (new Timeline(planDb, objectType, objectName,true))->getId();
-    debugMsg("Interpreter:NativeObjectFactory","Created Native " << m_className.toString() << ":" << objectName.toString() << " type:" << objectType.toString());
+    debugMsg("Interpreter:NativeObjectFactory","Created Native " << m_className << ":" << objectName << " type:" << objectType);
 
     return instance;
   }

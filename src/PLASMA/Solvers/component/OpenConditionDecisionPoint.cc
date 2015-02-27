@@ -103,29 +103,29 @@ void OpenConditionDecisionPoint::handleExecute() {
   checkError(m_choiceIndex < m_choiceCount,
              "Tried to execute past available choices:" << m_choiceIndex << ">=" << m_choiceCount);
   if(m_choices[m_choiceIndex] == Token::ACTIVE) {
-    debugMsg("SolverDecisionPoint:handleExecute", "For " << m_flawedToken->getPredicateName().toString() << "(" <<
+    debugMsg("SolverDecisionPoint:handleExecute", "For " << m_flawedToken->getPredicateName() << "(" <<
              m_flawedToken->getKey() << "), assigning ACTIVE.");
     m_client->activate(m_flawedToken);
   }
   else if(m_choices[m_choiceIndex] == Token::MERGED) {
     checkError(m_mergeIndex < m_mergeCount, "Tried to merge past available compatible tokens.");
     TokenId activeToken = m_compatibleTokens[m_mergeIndex];
-    debugMsg("SolverDecisionPoint:handleExecute", "For " << m_flawedToken->getPredicateName().toString() << "(" <<
-             m_flawedToken->getKey() << "), assigning MERGED onto " << activeToken->getPredicateName().toString() <<
+    debugMsg("SolverDecisionPoint:handleExecute", "For " << m_flawedToken->getPredicateName() << "(" <<
+             m_flawedToken->getKey() << "), assigning MERGED onto " << activeToken->getPredicateName() <<
              "(" << activeToken->getKey() << ").");
     m_client->merge(m_flawedToken, activeToken);
   }
   else {
     checkError(m_choices[m_choiceIndex] == Token::REJECTED,
                "Expect this choice to be REJECTED instead of " + m_choices[m_choiceIndex].toString());
-    debugMsg("SolverDecisionPoint:handleExecute", "For " << m_flawedToken->getPredicateName().toString() << "(" <<
+    debugMsg("SolverDecisionPoint:handleExecute", "For " << m_flawedToken->getPredicateName() << "(" <<
              m_flawedToken->getKey() << "), assigning REJECTED.");
     m_client->reject(m_flawedToken);
   }
 }
 
 void OpenConditionDecisionPoint::handleUndo() {
-  debugMsg("SolverDecisionPoint:handleUndo", "Retracting open condition decision on " << m_flawedToken->getPredicateName().toString() <<
+  debugMsg("SolverDecisionPoint:handleUndo", "Retracting open condition decision on " << m_flawedToken->getPredicateName() <<
            "(" << m_flawedToken->getKey() << ").");
   m_client->cancel(m_flawedToken);
 
@@ -170,7 +170,7 @@ std::string OpenConditionDecisionPoint::toString() const{
   std::stringstream strStream;
   strStream
       << "TOKEN STATE:"
-      << "    TOKEN=" << m_flawedToken->getPredicateName().toString()  << "(" << m_flawedToken->getKey() << "):"
+      << "    TOKEN=" << m_flawedToken->getPredicateName()  << "(" << m_flawedToken->getKey() << "):"
       << "    OBJECT=" << Object::toString(m_flawedToken->getObject()) << ":"
       << "    CHOICES(current=" << m_choiceIndex << ")=";
 

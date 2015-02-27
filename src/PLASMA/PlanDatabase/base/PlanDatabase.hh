@@ -14,7 +14,6 @@
 #include "PSPlanDatabase.hh"
 #include "PlanDatabaseListener.hh"
 #include "Schema.hh"
-#include "LabelStr.hh"
 #include "DbClient.hh"
 #include "Engine.hh"
 
@@ -94,7 +93,7 @@ namespace EUROPA {
     /**
      * @brief Returns the set of all active tokens by predicate.
      */
-    const TokenSet& getActiveTokens(const LabelStr& predicate) const;
+    const TokenSet& getActiveTokens(const std::string& predicate) const;
 
     /**
      * @brief Register an allocated global variable.
@@ -118,19 +117,19 @@ namespace EUROPA {
      * @brief Access a global variable by name.
      * @return The variable. It is an error if the variable is not present, or is corrupt in any way.
      */
-    const ConstrainedVariableId getGlobalVariable(const LabelStr& varName) const;
+    const ConstrainedVariableId getGlobalVariable(const std::string& varName) const;
 
     /**
      * @brief Test of a global exists for a given name
      * @return true of present, otherwise false.
      */
-    bool isGlobalVariable(const LabelStr& varName) const;
+    bool isGlobalVariable(const std::string& varName) const;
 
     void registerGlobalToken(const TokenId t);
     void unregisterGlobalToken(const TokenId t);
     const TokenSet& getGlobalTokens() const;
-    const TokenId getGlobalToken(const LabelStr& varName) const;
-    bool isGlobalToken(const LabelStr& varName) const;
+    const TokenId getGlobalToken(const std::string& varName) const;
+    bool isGlobalToken(const std::string& varName) const;
 
     /**
      * @brief Test if the given inactive token has any tokens with which it can merge.
@@ -248,7 +247,7 @@ namespace EUROPA {
      * @brief Lookup an object by name. It is an error if the object is not present.
      * @return The requested object
      */
-    const ObjectId getObject(const LabelStr& name) const;
+    const ObjectId getObject(const std::string& name) const;
 
     /**
      * @brief Specifies that no more objects are to be added to the database.
@@ -271,7 +270,7 @@ namespace EUROPA {
     /**
      * @brief True if close() has been called, or close(objectType) has been called
      */
-    bool isClosed(const LabelStr& objectType) const;
+    bool isClosed(const std::string& objectType) const;
 
     /**
      * @brief True if close() has not been called. This is because the schema cannot be assumed to be fixed, and we therefore
@@ -296,7 +295,7 @@ namespace EUROPA {
      * @param objectVar The variable to be populated and possibly synchronized. Must be open.
      * @param leaveOpen If true, the object var will remain open on completion.
      */
-    void makeObjectVariableFromType(const LabelStr& objectType,
+    void makeObjectVariableFromType(const std::string& objectType,
 				    const ConstrainedVariableId objectVar,
 				    bool leaveOpen = false);
 
@@ -321,18 +320,18 @@ namespace EUROPA {
 
     virtual PSList<PSVariable*> getAllGlobalVariables() const;
 
-    ObjectId createObject(const LabelStr& objectType,
-                            const LabelStr& objectName,
+    ObjectId createObject(const std::string& objectType,
+                            const std::string& objectName,
                             const std::vector<const Domain*>& arguments);
 
-    TokenId createToken(const char* tokenType,
-                        const char* tokenName,
+    TokenId createToken(const std::string& tokenType,
+                        const std::string& tokenName,
                         bool rejectable=false,
                         bool isFact=false);
 
     TokenId createSlaveToken(const TokenId master,
-                             const LabelStr& tokenType,
-                             const LabelStr& relation);
+                             const std::string& tokenType,
+                             const std::string& relation);
 
     bool hasTokenTypes() const;
 
@@ -395,13 +394,13 @@ namespace EUROPA {
      */
     void notifyOrderingNoLongerRequired(const ObjectId object, const TokenId token);
 
-    void makeObjectVariable(const LabelStr& objectType, const std::list<ObjectId>& objects,
+    void makeObjectVariable(const std::string& objectType, const std::list<ObjectId>& objects,
 			    const ConstrainedVariableId objectVar,
 			    bool leaveOpen = false);
 
     void handleObjectVariableDeletion(const ConstrainedVariableId objectVar);
 
-    void handleObjectVariableCreation(const LabelStr& objectType,
+    void handleObjectVariableCreation(const std::string& objectType,
 				      const ConstrainedVariableId objectVar,
 				      bool leaveOpen = false);
 

@@ -26,9 +26,9 @@ class CESchema : public EngineComponent
 
   // Methods to Manage Data Types
   void registerDataType(const DataTypeId dt);
-  DataTypeId getDataType(const char* typeName);
-  bool isDataType(const char* typeName) const;
-  const Domain & baseDomain(const char* typeName);
+  DataTypeId getDataType(const std::string& typeName);
+  bool isDataType(const std::string& typeName) const;
+  const Domain & baseDomain(const std::string& typeName);
   void purgeDataTypes();
 
   // Methods to Manage Constraint Factories

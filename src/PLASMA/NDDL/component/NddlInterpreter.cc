@@ -274,7 +274,7 @@ std::string NddlSymbolTable::getErrors() const
     return os.str();
 }
 
-void* NddlSymbolTable::getElement(const char* name) const
+void* NddlSymbolTable::getElement(const std::string& name) const
 {
     EngineComponent* component = engine()->getComponent(name);
 
@@ -289,7 +289,7 @@ const PlanDatabaseId NddlSymbolTable::getPlanDatabase() const
   return (reinterpret_cast<PlanDatabase*>(getElement("PlanDatabase")))->getId();
 }
 
-DataTypeId NddlSymbolTable::getDataType(const char* name) const {
+DataTypeId NddlSymbolTable::getDataType(const std::string& name) const {
   CESchemaId ces = (reinterpret_cast<CESchema*>(getElement("CESchema")))->getId();
 
   if (ces->isDataType(name))
@@ -299,7 +299,7 @@ DataTypeId NddlSymbolTable::getDataType(const char* name) const {
   return DataTypeId::noId();
 }
 
-ObjectTypeId NddlSymbolTable::getObjectType(const char* name) const {
+ObjectTypeId NddlSymbolTable::getObjectType(const std::string& name) const {
   if (m_parentST != NULL)
     return m_parentST->getObjectType(name);
   else {
@@ -312,7 +312,7 @@ ObjectTypeId NddlSymbolTable::getObjectType(const char* name) const {
   return ObjectTypeId::noId();
 }
 
-TokenTypeId NddlSymbolTable::getTokenType(const char* name) const {
+TokenTypeId NddlSymbolTable::getTokenType(const std::string& name) const {
   if (m_parentST != NULL)
     return m_parentST->getTokenType(name);
   else {
@@ -326,19 +326,19 @@ TokenTypeId NddlSymbolTable::getTokenType(const char* name) const {
 }
 
 
-void NddlSymbolTable::addLocalVar(const char* name,const DataTypeId type)
+void NddlSymbolTable::addLocalVar(const std::string& name,const DataTypeId type)
 {
     m_localVars[name]=type;
     debugMsg("NddlSymbolTable:addLocalVar","Added local var "+std::string(name));
 }
 
-void NddlSymbolTable::addLocalToken(const char* name,const TokenTypeId type)
+void NddlSymbolTable::addLocalToken(const std::string& name,const TokenTypeId type)
 {
     m_localTokens[name]=type;
     debugMsg("NddlSymbolTable:addLocalToken","Added local token "+std::string(name));
 }
 
-DataTypeId NddlSymbolTable::getTypeForVar(const char* name)
+DataTypeId NddlSymbolTable::getTypeForVar(const std::string& name)
 {
     if (m_localVars.find(name) != m_localVars.end())
         return m_localVars[name];
@@ -351,7 +351,7 @@ DataTypeId NddlSymbolTable::getTypeForVar(const char* name)
     return DataTypeId::noId();
 }
 
-DataTypeId NddlSymbolTable::getTypeForVar(const char* qualifiedName,std::string& errorMsg)
+DataTypeId NddlSymbolTable::getTypeForVar(const std::string& qualifiedName,std::string& errorMsg)
 {
     std::string parentName;
     std::vector<std::string> vars;
@@ -399,7 +399,7 @@ DataTypeId NddlSymbolTable::getTypeForVar(const char* qualifiedName,std::string&
         else {
             dt = tt->getArgType(vars[idx].c_str());
             if (dt.isNoId()) {
-                errorMsg = curVarName+"("+tt->getPredicateName().toString()+") doesn't have a parameter called "+vars[idx];
+                errorMsg = curVarName+"("+tt->getPredicateName()+") doesn't have a parameter called "+vars[idx];
                 return dt;
             }
             curVarName = vars[idx];
@@ -429,7 +429,7 @@ DataTypeId NddlSymbolTable::getTypeForVar(const char* qualifiedName,std::string&
 
 }
 
-TokenTypeId NddlSymbolTable::getTypeForToken(const char* name)
+TokenTypeId NddlSymbolTable::getTypeForToken(const std::string& name)
 {
     if (m_localTokens.find(name) != m_localTokens.end())
         return m_localTokens[name];
@@ -446,7 +446,7 @@ TokenTypeId NddlSymbolTable::getTypeForToken(const char* name)
 }
 
 
-TokenTypeId NddlSymbolTable::getTypeForToken(const char* qualifiedName,
+TokenTypeId NddlSymbolTable::getTypeForToken(const std::string& qualifiedName,
                                              std::string& errorMsg) {
   std::string parentName;
   std::string tokenType;
@@ -531,7 +531,7 @@ TokenTypeId NddlSymbolTable::getTypeForToken(const char* qualifiedName,
   }
 }
 
-MethodId NddlSymbolTable::getMethod(const char* methodName,Expr* target,
+MethodId NddlSymbolTable::getMethod(const std::string& methodName,Expr* target,
                                     const std::vector<Expr*>& args) {
   if (m_parentST != NULL)
     return m_parentST->getMethod(methodName,target,args);
@@ -544,7 +544,7 @@ MethodId NddlSymbolTable::getMethod(const char* methodName,Expr* target,
   return getPlanDatabase()->getSchema()->getMethod(methodName,targetDataType,argTypes);
 }
 
-CFunctionId NddlSymbolTable::getCFunction(const char* name,const std::vector<CExpr*>& args)
+CFunctionId NddlSymbolTable::getCFunction(const std::string& name,const std::vector<CExpr*>& args)
 {
     if (m_parentST != NULL)
         return m_parentST->getCFunction(name,args);
@@ -572,7 +572,7 @@ Domain* NddlSymbolTable::makeNumericDomainFromLiteral(const std::string& type,
   return retval;
 }
 
-ConstrainedVariableId NddlSymbolTable::getVar(const char* name)
+ConstrainedVariableId NddlSymbolTable::getVar(const std::string& name)
 {
     if (getPlanDatabase()->isGlobalVariable(name))
         return getPlanDatabase()->getGlobalVariable(name);
@@ -580,7 +580,7 @@ ConstrainedVariableId NddlSymbolTable::getVar(const char* name)
         return EvalContext::getVar(name);
 }
 
-TokenId NddlSymbolTable::getToken(const char* name)
+TokenId NddlSymbolTable::getToken(const std::string& name)
 {
     if (getPlanDatabase()->isGlobalToken(name))
         return getPlanDatabase()->getGlobalToken(name);
@@ -588,21 +588,21 @@ TokenId NddlSymbolTable::getToken(const char* name)
         return EvalContext::getToken(name);
 }
 
-const std::string& NddlSymbolTable::getEnumForValue(const char* value) const {
+const std::string& NddlSymbolTable::getEnumForValue(const std::string& value) const {
   if (m_parentST == NULL)
     return getPlanDatabase()->getSchema()->getEnumForValue(LabelStr(value));
 
   return m_parentST->getEnumForValue(value);
 }
 
-bool NddlSymbolTable::isEnumValue(const char* value) const {
+bool NddlSymbolTable::isEnumValue(const std::string& value) const {
   if (m_parentST == NULL)
     return getPlanDatabase()->getSchema()->isEnumValue(LabelStr(value));
 
   return m_parentST->isEnumValue(value);
 }
 
-Expr* NddlSymbolTable::makeEnumRef(const char* value) const {
+Expr* NddlSymbolTable::makeEnumRef(const std::string& value) const {
   const std::string& enumType = getEnumForValue(value);
   EnumeratedDomain* ad = boost::polymorphic_cast<EnumeratedDomain*>(
       getPlanDatabase()->getSchema()->getCESchema()->baseDomain(enumType.c_str()).copy());
@@ -618,7 +618,7 @@ void NddlSymbolTable::reportError(void* tw, const std::string& msg) {
   addError(getErrorLocation(treeWalker) + "\n" + msg);
 }
 
-void NddlSymbolTable::checkConstraint(const char* name,const std::vector<Expr*>& args)
+void NddlSymbolTable::checkConstraint(const std::string& name,const std::vector<Expr*>& args)
 {
     CESchemaId ceSchema = getPlanDatabase()->getSchema()->getCESchema();
     if (!ceSchema->isConstraintType(name))
@@ -632,7 +632,7 @@ void NddlSymbolTable::checkConstraint(const char* name,const std::vector<Expr*>&
     ctype->checkArgTypes(argTypes);
 }
 
-void NddlSymbolTable::checkObjectFactory(const char* name, const std::vector<Expr*>& args)
+void NddlSymbolTable::checkObjectFactory(const std::string& name, const std::vector<Expr*>& args)
 {
     if (!getPlanDatabase()->getSchema()->isObjectType(name)) {
       throw std::string(name + std::string(" is not a valid object type."));
@@ -661,7 +661,7 @@ NddlClassSymbolTable::~NddlClassSymbolTable()
 {
 }
 
-DataTypeId NddlClassSymbolTable::getDataType(const char* name) const
+DataTypeId NddlClassSymbolTable::getDataType(const std::string& name) const
 {
     if (m_objectType->getName()==name)
         return m_objectType->getVarType();
@@ -669,7 +669,7 @@ DataTypeId NddlClassSymbolTable::getDataType(const char* name) const
     return NddlSymbolTable::getDataType(name);
 }
 
-ObjectTypeId NddlClassSymbolTable::getObjectType(const char* name) const
+ObjectTypeId NddlClassSymbolTable::getObjectType(const std::string& name) const
 {
     if (m_objectType->getName()==name)
         return m_objectType->getId();
@@ -677,7 +677,7 @@ ObjectTypeId NddlClassSymbolTable::getObjectType(const char* name) const
     return NddlSymbolTable::getObjectType(name);
 }
 
-DataTypeId NddlClassSymbolTable::getTypeForVar(const char* varName)
+DataTypeId NddlClassSymbolTable::getTypeForVar(const std::string& varName)
 {
     DataTypeId dt = m_objectType->getMemberType(varName);
     if (dt.isId())
@@ -700,7 +700,7 @@ NddlTokenSymbolTable::~NddlTokenSymbolTable()
 {
 }
 
-DataTypeId NddlTokenSymbolTable::getTypeForVar(const char* varName)
+DataTypeId NddlTokenSymbolTable::getTypeForVar(const std::string& varName)
 {
     if (std::string(varName)=="object")
         return m_objectType->getVarType();
@@ -712,7 +712,7 @@ DataTypeId NddlTokenSymbolTable::getTypeForVar(const char* varName)
     return NddlSymbolTable::getTypeForVar(varName);
 }
 
-TokenTypeId NddlTokenSymbolTable::getTokenType(const char* name) const
+TokenTypeId NddlTokenSymbolTable::getTokenType(const std::string& name) const
 {
     TokenTypeId tt= NddlSymbolTable::getTokenType(name);
 
@@ -725,7 +725,7 @@ TokenTypeId NddlTokenSymbolTable::getTokenType(const char* name) const
     return tt;
 }
 
-TokenTypeId NddlTokenSymbolTable::getTypeForToken(const char* name)
+TokenTypeId NddlTokenSymbolTable::getTypeForToken(const std::string& name)
 {
     if (std::string(name)=="this")
         return m_tokenType;

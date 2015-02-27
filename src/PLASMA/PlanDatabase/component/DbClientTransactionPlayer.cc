@@ -18,6 +18,9 @@
 #include <iostream>
 #include <sstream>
 
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
+
 namespace EUROPA {
 
   const std::set<std::string>& DbClientTransactionPlayer::MODEL_TRANSACTIONS() {
@@ -446,37 +449,36 @@ CESchemaId DbClientTransactionPlayer::getCESchema() const {
     checkError(ALWAYS_FAIL, "No creation transaction to complement " << element);
   }
 
-  const char* DbClientTransactionPlayer::getObjectAndType(
-          const SchemaId schema,
-          const DbClientId client,
-          const char* predicate,
-          ObjectId& object)
-  {
-    if (!schema->isPredicate(predicate)) {
-      LabelStr typeStr(predicate);
-      unsigned long cnt = typeStr.countElements(Schema::getDelimiter());
-      LabelStr prefix = typeStr.getElement(0, Schema::getDelimiter());
-      object = client->getObject(prefix.c_str());
-      check_error(object.isValid(), "Failed to find an object named " + prefix.toString());
-      LabelStr objType = object->getType();
-      LabelStr suffix = typeStr.getElement(1, Schema::getDelimiter());
+std::string DbClientTransactionPlayer::getObjectAndType(const SchemaId schema,
+                                                        const DbClientId client,
+                                                        const std::string& predicate,
+                                                        ObjectId& object) {
+  if (!schema->isPredicate(predicate)) {
+    std::string typeStr(predicate);
+    std::vector<std::string> components;
+    boost::split(components, typeStr, boost::is_any_of("."));
+    
+    object = client->getObject(components.front().c_str());
+    check_error(object.isValid(), "Failed to find an object named " + components.front());
 
-      for (unsigned int i=2; i<cnt;i++) {
-          objType = schema->getMemberType(objType,suffix);
-          suffix = typeStr.getElement(i, Schema::getDelimiter());
-      }
-
-      std::string objName(predicate);
-      objName = objName.substr(0,objName.length()-suffix.toString().length()-1);
-      object = client->getObject(objName.c_str());
-      check_error(object.isValid(), "Failed to find an object named " + objName);
-      LabelStr newType(objType.toString() + Schema::getDelimiter() + suffix.toString());
-      return  newType.c_str();
+    std::string objType = object->getType();
+    std::string suffix = *(components.begin() + 1);
+    for(std::vector<std::string>::const_iterator it = components.begin() + 2;
+        it != components.end(); ++it) {
+      objType = schema->getMemberType(objType,suffix);
+      suffix = *it;
     }
-    else {
-    	return predicate;
-    }
+    std::string objName(predicate);
+    objName = objName.substr(0,objName.length()-suffix.length()-1);
+    object = client->getObject(objName.c_str());
+    check_error(object.isValid(), "Failed to find an object named " + objName);
+    std::string newType(objType + Schema::getDelimiter() + suffix);
+    return  newType.c_str();
   }
+  else {
+    return predicate;
+  }
+}
 
   TokenId DbClientTransactionPlayer::createToken(
                                          const char* name,
@@ -488,9 +490,9 @@ CESchemaId DbClientTransactionPlayer::getCESchema() const {
     // object and specify it. We will also have to generate the appropriate type designation
     // by extracting the class from the object
     ObjectId object;
-    const char* predicateType = getObjectAndType(getSchema(),m_client,type,object);
+    std::string predicateType = getObjectAndType(getSchema(),m_client,type,object);
 
-    TokenId token = m_client->createToken(predicateType,name,rejectable,isFact);
+    TokenId token = m_client->createToken(predicateType.c_str(),name,rejectable,isFact);
 
     if (!object.isNoId()) {
         // We restrict the base domain permanently since the name is specifically mentioned on creation
@@ -721,9 +723,9 @@ void DbClientTransactionPlayer::playTokenCreated(const TiXmlElement & element) {
     checkError(range.first != m_relations.end(),
 	       "No saved temporal constraints between " << fvar->toString() << " and " <<
 	       svar->toString());
-    LabelStr relName(name);
+    std::string relName(name);
     for(TemporalRelations::iterator it = range.first; it != range.second; ++it) {
-      if(it->second->getName() == relName.toString())
+      if(it->second->getName() == relName)
 	return it;
     }
     return m_relations.end();
@@ -1319,12 +1321,12 @@ void DbClientTransactionPlayer::playTokenCreated(const TiXmlElement & element) {
     TokenId token = m_tokens[ident];
     if (token != token.noId()) {
       std::string name = variableName.substr(ident_front + 1);
-      LabelStr nameAsLabelStr(name.c_str());
+      std::string nameAsLabelStr(name.c_str());
       const std::vector<ConstrainedVariableId> & variables = token->getVariables();
       std::vector<ConstrainedVariableId>::const_iterator iter = variables.begin();
       while (iter != variables.end()) {
         ConstrainedVariableId variable = *iter++;
-        const LabelStr& varName = variable->getName();
+        const std::string& varName = variable->getName();
         if (nameAsLabelStr == varName) {
           return variable;
         }
@@ -1335,7 +1337,7 @@ void DbClientTransactionPlayer::playTokenCreated(const TiXmlElement & element) {
     checkError(var.isValid(), "Invalid id for " << ident);
     ObjectId object = Entity::getTypedEntity<Object>(var->lastDomain().getSingletonValue());
     checkError(object.isValid(), "Invalid object for " << ident);
-    var = object->getVariable(LabelStr(varString));
+    var = object->getVariable(varString);
     checkError(var.isValid(), varString << " not found on " << object->toString());
     return var;
   }

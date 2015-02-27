@@ -3,7 +3,6 @@
 #define EUROPA_TOKENTYPE_MGR_H
 
 #include "PlanDatabaseDefs.hh"
-#include "LabelStr.hh"
 #include "TokenType.hh"
 #include "Utils.hh"
 

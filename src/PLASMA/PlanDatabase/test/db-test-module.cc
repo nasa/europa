@@ -38,8 +38,8 @@
 
 using namespace EUROPA;
 namespace {
-const char* DEFAULT_OBJECT_TYPE = "TestObject";
-const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
+const std::string DEFAULT_OBJECT_TYPE = "TestObject";
+const std::string DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
 }
 
 #define GET_DEFAULT_OBJECT_TYPE(ce) ce->getCESchema()->getDataType(DEFAULT_OBJECT_TYPE)
@@ -50,23 +50,23 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
 
   class DBFoo : public Timeline {
   public:
-    DBFoo(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name);
-    DBFoo(const ObjectId parent, const LabelStr& type, const LabelStr& name);
+    DBFoo(const PlanDatabaseId planDatabase, const std::string& type, const std::string& name);
+    DBFoo(const ObjectId parent, const std::string& type, const std::string& name);
     void handleDefaults(bool autoClose = true); // default variable initialization
 
     // test/simple-predicate.nddl:4 DBFoo
     void constructor(const std::vector<const Domain*>&) {constructor();}
     void constructor();
-    void constructor(eint arg0, LabelStr& arg1);
+    void constructor(eint arg0, const LabelStr& arg1);
     ConstrainedVariableId m_0;
     ConstrainedVariableId m_1;
   };
 
-DBFoo::DBFoo(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name)
+DBFoo::DBFoo(const PlanDatabaseId planDatabase, const std::string& type, const std::string& name)
     : Timeline(planDatabase, type, name, true), m_0(), m_1() {
 }
 
-DBFoo::DBFoo(const ObjectId parent, const LabelStr& type, const LabelStr& name)
+DBFoo::DBFoo(const ObjectId parent, const std::string& type, const std::string& name)
     : Timeline(parent, type, name, true), m_0(), m_1() {}
 
   // default initialization of member variables
@@ -83,19 +83,19 @@ DBFoo::DBFoo(const ObjectId parent, const LabelStr& type, const LabelStr& name)
     m_1 = addVariable(LabelSet(LabelStr("Hello World")), "LabelSetVar");
   }
 
-  void DBFoo::constructor(eint arg0, LabelStr&) {
+  void DBFoo::constructor(eint arg0, const LabelStr&) {
     m_0 = addVariable(IntervalIntDomain(arg0), "IntervalIntVar");
     m_1 = addVariable(LabelSet(LabelStr("Hello World")), "LabelSetVar");
   }
 
   class StandardDBFooFactory: public ObjectFactory {
   public:
-    StandardDBFooFactory(): ObjectFactory(LabelStr(DEFAULT_OBJECT_TYPE)){}
+    StandardDBFooFactory(): ObjectFactory(DEFAULT_OBJECT_TYPE){}
 
   private:
     ObjectId createInstance(const PlanDatabaseId planDb,
-                            const LabelStr& objectType,
-                            const LabelStr& objectName,
+                            const std::string& objectType,
+                            const std::string& objectName,
                             const std::vector<const Domain*>& arguments) const {
       CPPUNIT_ASSERT(arguments.empty());
       DBFooId foo = (new DBFoo(planDb, objectType, objectName))->getId();
@@ -107,15 +107,15 @@ DBFoo::DBFoo(const ObjectId parent, const LabelStr& type, const LabelStr& name)
 
   class SpecialDBFooFactory: public ObjectFactory{
   public:
-    SpecialDBFooFactory(): ObjectFactory(LabelStr(DEFAULT_OBJECT_TYPE).toString() +
+    SpecialDBFooFactory(): ObjectFactory(DEFAULT_OBJECT_TYPE +
                            ":" + IntDT::NAME() +
                            ":" + StringDT::NAME())
     {}
 
   private:
     ObjectId createInstance(const PlanDatabaseId planDb,
-                            const LabelStr& objectType,
-                            const LabelStr& objectName,
+                            const std::string& objectType,
+                            const std::string& objectName,
                             const std::vector<const Domain*>& arguments) const {
       DBFooId foo = (new DBFoo(planDb, objectType, objectName))->getId();
       // Type check the arguments
@@ -134,7 +134,7 @@ DBFoo::DBFoo(const ObjectId parent, const LabelStr& type, const LabelStr& name)
 class IntervalTokenType: public TokenType {
  public:
   IntervalTokenType(const ObjectTypeId ot)
-      : TokenType(ot,LabelStr(DEFAULT_PREDICATE)) {
+      : TokenType(ot,DEFAULT_PREDICATE) {
     addArg(FloatDT::instance(), "IntervalParam");
     addArg(IntDT::instance(), "IntervalIntParam");
     addArg(BoolDT::instance(), "BoolParam");
@@ -155,7 +155,8 @@ class IntervalTokenType: public TokenType {
 namespace {
 void initDbTestSchema(const SchemaId schema) {
   // Set up object types and compositions for testing - builds a recursive structure
-  ObjectType* objType = new ObjectType(DEFAULT_OBJECT_TYPE,schema->getObjectType(Schema::rootObject()));
+  ObjectType* objType = new ObjectType(DEFAULT_OBJECT_TYPE.c_str(),
+                                       schema->getObjectType(Schema::rootObject()));
 
   objType->addMember(objType->getVarType(), "id0");
   objType->addMember(objType->getVarType(), "id1");
@@ -284,8 +285,8 @@ PlanDatabaseId db;
    */
   class ForceFailureConstraint : public Constraint {
   public:
-    ForceFailureConstraint(const LabelStr& name,
-                           const LabelStr& propagatorName,
+    ForceFailureConstraint(const std::string& name,
+                           const std::string& propagatorName,
                            const ConstraintEngineId constraintEngine,
 			   const std::vector<ConstrainedVariableId>& variables)
       : Constraint(name, propagatorName, constraintEngine, variables){}
@@ -299,7 +300,7 @@ PlanDatabaseId db;
 class DummyTokenType : public TokenType{
 
 public:
-  DummyTokenType(const ObjectTypeId ot,const LabelStr& predicateName) : TokenType(ot, predicateName){}
+  DummyTokenType(const ObjectTypeId ot,const std::string& predicateName) : TokenType(ot, predicateName){}
   virtual ~DummyTokenType(){}
 
   virtual TokenId createInstance(const PlanDatabaseId, const std::string&, bool, bool) const{
@@ -348,22 +349,22 @@ private:
   static bool testEnumerations(){
       DEFAULT_SETUP(ce, db, true);
     schema->reset();
-    schema->addEnum(LabelStr("FooEnum"));
-    schema->addValue(LabelStr("FooEnum"), LabelStr("FOO"));
-    schema->addValue(LabelStr("FooEnum"), LabelStr("BAR"));
-    schema->addValue(LabelStr("FooEnum"), LabelStr("BAZ"));
-    schema->addEnum(LabelStr("BarEnum"));
-    schema->addValue(LabelStr("BarEnum"), 0);
-    schema->addValue(LabelStr("BarEnum"), 5);
-    schema->addValue(LabelStr("BarEnum"), 10);
+    schema->addEnum("FooEnum");
+    schema->addValue("FooEnum", LabelStr("FOO"));
+    schema->addValue("FooEnum", LabelStr("BAR"));
+    schema->addValue("FooEnum", LabelStr("BAZ"));
+    schema->addEnum("BarEnum");
+    schema->addValue("BarEnum", 0);
+    schema->addValue("BarEnum", 5);
+    schema->addValue("BarEnum", 10);
 
-    CPPUNIT_ASSERT(schema->isEnum(LabelStr("FooEnum")));
-    CPPUNIT_ASSERT(schema->isEnum(LabelStr("BarEnum")));
-    CPPUNIT_ASSERT(!schema->isEnum(LabelStr("BazEnum")));
-    CPPUNIT_ASSERT(schema->isEnumValue(LabelStr("FooEnum"), LabelStr("FOO")));
-    CPPUNIT_ASSERT(schema->isEnumValue(LabelStr("FooEnum"), LabelStr("BAZ")));
-    CPPUNIT_ASSERT(schema->isEnumValue(LabelStr("BarEnum"), 5));
-    CPPUNIT_ASSERT(!schema->isEnumValue(LabelStr("BarEnum"), 6));
+    CPPUNIT_ASSERT(schema->isEnum("FooEnum"));
+    CPPUNIT_ASSERT(schema->isEnum("BarEnum"));
+    CPPUNIT_ASSERT(!schema->isEnum("BazEnum"));
+    CPPUNIT_ASSERT(schema->isEnumValue("FooEnum", LabelStr("FOO")));
+    CPPUNIT_ASSERT(schema->isEnumValue("FooEnum", LabelStr("BAZ")));
+    CPPUNIT_ASSERT(schema->isEnumValue("BarEnum", 5));
+    CPPUNIT_ASSERT(!schema->isEnumValue("BarEnum", 6));
 
     std::list<std::string> allenums;
     schema->getEnumerations(allenums);
@@ -372,7 +373,7 @@ private:
     CPPUNIT_ASSERT(std::find(allenums.begin(), allenums.end(), "FooEnum") != allenums.end());
 
     // test getEnumValues.
-    LabelStr enumDomainName = "TestEnum";
+    std::string enumDomainName = "TestEnum";
     std::set<edouble> testEnumDomain;
     testEnumDomain.insert( 1 );
     testEnumDomain.insert( 2 );
@@ -398,39 +399,39 @@ private:
 
     unsigned long initOTcnt = schema->getAllObjectTypes().size();
 
-    schema->addObjectType(LabelStr("Foo"));
-    schema->addObjectType(LabelStr("Baz"));
+    schema->addObjectType("Foo");
+    schema->addObjectType("Baz");
     schema->addPredicate("Baz.pred");
 
-    CPPUNIT_ASSERT(schema->isObjectType(LabelStr("Foo")));
-    CPPUNIT_ASSERT(schema->isA(LabelStr("Foo"), LabelStr("Foo")));
-    CPPUNIT_ASSERT(!schema->isObjectType(LabelStr("Bar")));
-    CPPUNIT_ASSERT(!schema->isA(LabelStr("Foo"), LabelStr("Baz")));
+    CPPUNIT_ASSERT(schema->isObjectType("Foo"));
+    CPPUNIT_ASSERT(schema->isA("Foo", "Foo"));
+    CPPUNIT_ASSERT(!schema->isObjectType("Bar"));
+    CPPUNIT_ASSERT(!schema->isA("Foo", "Baz"));
 
     // Inheritance
-    schema->addObjectType(LabelStr("Bar"), LabelStr("Foo"));
-    CPPUNIT_ASSERT(schema->isObjectType(LabelStr("Bar")));
-    CPPUNIT_ASSERT(schema->isA(LabelStr("Bar"), LabelStr("Foo")));
-    CPPUNIT_ASSERT(!schema->isA(LabelStr("Foo"), LabelStr("Bar")));
-    CPPUNIT_ASSERT(schema->getAllObjectTypes(LabelStr("Bar")).size() == 3);
+    schema->addObjectType("Bar", "Foo");
+    CPPUNIT_ASSERT(schema->isObjectType("Bar"));
+    CPPUNIT_ASSERT(schema->isA("Bar", "Foo"));
+    CPPUNIT_ASSERT(!schema->isA("Foo", "Bar"));
+    CPPUNIT_ASSERT(schema->getAllObjectTypes("Bar").size() == 3);
 
     // Composition
-    schema->addMember(LabelStr("Foo"), LabelStr("float"), LabelStr("arg0"));
-    schema->addMember(LabelStr("Foo"), LabelStr("Foo"), LabelStr("arg1"));
-    schema->addMember(LabelStr("Foo"), LabelStr("Bar"), LabelStr("arg2"));
+    schema->addMember("Foo", "float", "arg0");
+    schema->addMember("Foo", "Foo", "arg1");
+    schema->addMember("Foo", "Bar", "arg2");
 
-    CPPUNIT_ASSERT(schema->canContain(LabelStr("Foo"), LabelStr("float"), LabelStr("arg0")));
-    CPPUNIT_ASSERT(schema->canContain(LabelStr("Foo"), LabelStr("Foo"), LabelStr("arg1")));
-    CPPUNIT_ASSERT(schema->canContain(LabelStr("Foo"), LabelStr("Bar"), LabelStr("arg2")));
-    CPPUNIT_ASSERT(schema->canContain(LabelStr("Foo"), LabelStr("Bar"), LabelStr("arg1"))); // isA(Bar,Foo)
+    CPPUNIT_ASSERT(schema->canContain("Foo", "float", "arg0"));
+    CPPUNIT_ASSERT(schema->canContain("Foo", "Foo", "arg1"));
+    CPPUNIT_ASSERT(schema->canContain("Foo", "Bar", "arg2"));
+    CPPUNIT_ASSERT(schema->canContain("Foo", "Bar", "arg1")); // isA(Bar,Foo)
 
-    CPPUNIT_ASSERT(!schema->canContain(LabelStr("Foo"), LabelStr("Foo"), LabelStr("arg2")));
-    CPPUNIT_ASSERT(!schema->canContain(LabelStr("Foo"), LabelStr("Foo"), LabelStr("arg3")));
-    CPPUNIT_ASSERT(!schema->canContain(LabelStr("Foo"), LabelStr("float"), LabelStr("arg1")));
+    CPPUNIT_ASSERT(!schema->canContain("Foo", "Foo", "arg2"));
+    CPPUNIT_ASSERT(!schema->canContain("Foo", "Foo", "arg3"));
+    CPPUNIT_ASSERT(!schema->canContain("Foo", "float", "arg1"));
 
-    CPPUNIT_ASSERT(schema->canContain(LabelStr("Bar"), LabelStr("float"), LabelStr("arg0")));
-    CPPUNIT_ASSERT(schema->canContain(LabelStr("Bar"), LabelStr("Foo"), LabelStr("arg1")));
-    CPPUNIT_ASSERT(schema->canContain(LabelStr("Bar"), LabelStr("Bar"), LabelStr("arg1")));
+    CPPUNIT_ASSERT(schema->canContain("Bar", "float", "arg0"));
+    CPPUNIT_ASSERT(schema->canContain("Bar", "Foo", "arg1"));
+    CPPUNIT_ASSERT(schema->canContain("Bar", "Bar", "arg1"));
 
     CPPUNIT_ASSERT(schema->getAllObjectTypes().size() == (initOTcnt+3));
 
@@ -446,68 +447,68 @@ private:
   static bool testObjectPredicateRelationships() {
       DEFAULT_SETUP(ce, db, true);
 
-    schema->addObjectType(LabelStr("Reservoir"));
-    schema->addObjectType(LabelStr("NddlReservoir"), LabelStr("Reservoir"));
-    schema->addPredicate(LabelStr("Reservoir.consume"));
-    schema->addPredicate(LabelStr("Reservoir.produce"));
-    CPPUNIT_ASSERT(schema->isPredicate(LabelStr("Reservoir.produce")));
-    CPPUNIT_ASSERT(schema->isPredicate(LabelStr("Reservoir.consume")));
+    schema->addObjectType("Reservoir");
+    schema->addObjectType("NddlReservoir", "Reservoir");
+    schema->addPredicate("Reservoir.consume");
+    schema->addPredicate("Reservoir.produce");
+    CPPUNIT_ASSERT(schema->isPredicate("Reservoir.produce"));
+    CPPUNIT_ASSERT(schema->isPredicate("Reservoir.consume"));
 
-    schema->addMember(LabelStr("Reservoir.produce"), LabelStr("float"), LabelStr("quantity"));
-    schema->addMember(LabelStr("Reservoir.consume"), LabelStr("float"), LabelStr("quantity"));
+    schema->addMember("Reservoir.produce", "float", "quantity");
+    schema->addMember("Reservoir.consume", "float", "quantity");
 
-    schema->addObjectType(LabelStr("Battery"), LabelStr("Reservoir"));
-    CPPUNIT_ASSERT(schema->hasParent(LabelStr("Battery.produce")));
-    CPPUNIT_ASSERT(schema->hasParent(LabelStr("Battery.consume")));
-    CPPUNIT_ASSERT(schema->getParent(LabelStr("Battery.consume")) == LabelStr("Reservoir.consume"));
-    CPPUNIT_ASSERT(schema->getParent(LabelStr("Battery.produce")) == LabelStr("Reservoir.produce"));
+    schema->addObjectType("Battery", "Reservoir");
+    CPPUNIT_ASSERT(schema->hasParent("Battery.produce"));
+    CPPUNIT_ASSERT(schema->hasParent("Battery.consume"));
+    CPPUNIT_ASSERT(schema->getParent("Battery.consume") == "Reservoir.consume");
+    CPPUNIT_ASSERT(schema->getParent("Battery.produce") == "Reservoir.produce");
 
-    schema->addObjectType(LabelStr("World"));
-    schema->addPredicate(LabelStr("World.initialState"));
-    CPPUNIT_ASSERT(schema->isPredicate(LabelStr("Battery.produce")));
-    CPPUNIT_ASSERT(schema->isPredicate(LabelStr("Battery.consume")));
+    schema->addObjectType("World");
+    schema->addPredicate("World.initialState");
+    CPPUNIT_ASSERT(schema->isPredicate("Battery.produce"));
+    CPPUNIT_ASSERT(schema->isPredicate("Battery.consume"));
 
-    CPPUNIT_ASSERT(schema->isPredicate(LabelStr("World.initialState")));
-    CPPUNIT_ASSERT(!schema->isPredicate(LabelStr("World.NOPREDICATE")));
-    CPPUNIT_ASSERT(schema->isObjectType(LabelStr("Reservoir")));
-    CPPUNIT_ASSERT(schema->isObjectType(LabelStr("World")));
-    CPPUNIT_ASSERT(schema->isObjectType(LabelStr("Battery")));
-    CPPUNIT_ASSERT(!schema->isObjectType(LabelStr("NOTYPE")));
+    CPPUNIT_ASSERT(schema->isPredicate("World.initialState"));
+    CPPUNIT_ASSERT(!schema->isPredicate("World.NOPREDICATE"));
+    CPPUNIT_ASSERT(schema->isObjectType("Reservoir"));
+    CPPUNIT_ASSERT(schema->isObjectType("World"));
+    CPPUNIT_ASSERT(schema->isObjectType("Battery"));
+    CPPUNIT_ASSERT(!schema->isObjectType("NOTYPE"));
 
-    CPPUNIT_ASSERT(schema->canContain(LabelStr("Reservoir.consume"), LabelStr("float"), LabelStr("quantity")));
-    CPPUNIT_ASSERT(schema->canContain(LabelStr("Reservoir.produce"), LabelStr("float"), LabelStr("quantity")));
-    CPPUNIT_ASSERT(schema->canContain(LabelStr("Battery.consume"), LabelStr("float"), LabelStr("quantity")));
-    CPPUNIT_ASSERT(schema->canContain(LabelStr("Battery.produce"), LabelStr("float"), LabelStr("quantity")));
-    CPPUNIT_ASSERT(schema->canContain(LabelStr("NddlReservoir.consume"), LabelStr("float"), LabelStr("quantity")));
-    CPPUNIT_ASSERT(schema->canContain(LabelStr("NddlReservoir.produce"), LabelStr("float"), LabelStr("quantity")));
-    CPPUNIT_ASSERT(schema->hasMember(LabelStr("Reservoir.consume"), LabelStr("quantity")));
-    CPPUNIT_ASSERT(schema->hasMember(LabelStr("Reservoir.produce"), LabelStr("quantity")));
-    CPPUNIT_ASSERT(schema->hasMember(LabelStr("NddlReservoir.consume"), LabelStr("quantity")));
-    CPPUNIT_ASSERT(schema->hasMember(LabelStr("NddlReservoir.produce"), LabelStr("quantity")));
-    CPPUNIT_ASSERT(schema->hasMember(LabelStr("Battery.consume"), LabelStr("quantity")));
-    CPPUNIT_ASSERT(schema->hasMember(LabelStr("Battery.produce"), LabelStr("quantity")));
+    CPPUNIT_ASSERT(schema->canContain("Reservoir.consume", "float", "quantity"));
+    CPPUNIT_ASSERT(schema->canContain("Reservoir.produce", "float", "quantity"));
+    CPPUNIT_ASSERT(schema->canContain("Battery.consume", "float", "quantity"));
+    CPPUNIT_ASSERT(schema->canContain("Battery.produce", "float", "quantity"));
+    CPPUNIT_ASSERT(schema->canContain("NddlReservoir.consume", "float", "quantity"));
+    CPPUNIT_ASSERT(schema->canContain("NddlReservoir.produce", "float", "quantity"));
+    CPPUNIT_ASSERT(schema->hasMember("Reservoir.consume", "quantity"));
+    CPPUNIT_ASSERT(schema->hasMember("Reservoir.produce", "quantity"));
+    CPPUNIT_ASSERT(schema->hasMember("NddlReservoir.consume", "quantity"));
+    CPPUNIT_ASSERT(schema->hasMember("NddlReservoir.produce", "quantity"));
+    CPPUNIT_ASSERT(schema->hasMember("Battery.consume", "quantity"));
+    CPPUNIT_ASSERT(schema->hasMember("Battery.produce", "quantity"));
 
-    CPPUNIT_ASSERT(schema->canBeAssigned(LabelStr("World"), LabelStr("World.initialState")));
+    CPPUNIT_ASSERT(schema->canBeAssigned("World", "World.initialState"));
 
-    CPPUNIT_ASSERT(schema->canBeAssigned(LabelStr("Reservoir"), LabelStr("Reservoir.consume")));
-    CPPUNIT_ASSERT(schema->canBeAssigned(LabelStr("Reservoir"), LabelStr("Reservoir.produce")));
-    CPPUNIT_ASSERT(schema->canBeAssigned(LabelStr("Battery"), LabelStr("Reservoir.consume")));
-    CPPUNIT_ASSERT(schema->canBeAssigned(LabelStr("Battery"), LabelStr("Reservoir.produce")));
-    CPPUNIT_ASSERT(!schema->canBeAssigned(LabelStr("World"), LabelStr("Reservoir.consume")));
-    CPPUNIT_ASSERT(!schema->canBeAssigned(LabelStr("World"), LabelStr("Reservoir.produce")));
-    CPPUNIT_ASSERT(!schema->canBeAssigned(LabelStr("Reservoir"), LabelStr("Battery.consume")));
-    CPPUNIT_ASSERT(!schema->canBeAssigned(LabelStr("Reservoir"), LabelStr("Battery.produce")));
+    CPPUNIT_ASSERT(schema->canBeAssigned("Reservoir", "Reservoir.consume"));
+    CPPUNIT_ASSERT(schema->canBeAssigned("Reservoir", "Reservoir.produce"));
+    CPPUNIT_ASSERT(schema->canBeAssigned("Battery", "Reservoir.consume"));
+    CPPUNIT_ASSERT(schema->canBeAssigned("Battery", "Reservoir.produce"));
+    CPPUNIT_ASSERT(!schema->canBeAssigned("World", "Reservoir.consume"));
+    CPPUNIT_ASSERT(!schema->canBeAssigned("World", "Reservoir.produce"));
+    CPPUNIT_ASSERT(!schema->canBeAssigned("Reservoir", "Battery.consume"));
+    CPPUNIT_ASSERT(!schema->canBeAssigned("Reservoir", "Battery.produce"));
 
-    CPPUNIT_ASSERT(!schema->isA(LabelStr("Reservoir"), LabelStr("Battery")));
-    CPPUNIT_ASSERT(schema->isA(LabelStr("Battery"), LabelStr("Reservoir")));
-    CPPUNIT_ASSERT(schema->isA(LabelStr("Battery"), LabelStr("Battery")));
-    CPPUNIT_ASSERT(schema->hasParent(LabelStr("Battery")));
-    CPPUNIT_ASSERT(schema->getParent(LabelStr("Battery")) == LabelStr("Reservoir"));
-    CPPUNIT_ASSERT(schema->getObjectTypeForPredicate(LabelStr("World.initialState")) == LabelStr("World"));
-    CPPUNIT_ASSERT(schema->getObjectTypeForPredicate(LabelStr("Battery.consume")) == LabelStr("Battery"));
-    CPPUNIT_ASSERT(schema->getObjectTypeForPredicate(LabelStr("Battery.produce")) == LabelStr("Battery"));
-    CPPUNIT_ASSERT(schema->getObjectTypeForPredicate(LabelStr("Battery.consume")) != LabelStr("Reservoir"));
-    CPPUNIT_ASSERT(schema->getObjectTypeForPredicate(LabelStr("Battery.produce")) != LabelStr("Reservoir"));
+    CPPUNIT_ASSERT(!schema->isA("Reservoir", "Battery"));
+    CPPUNIT_ASSERT(schema->isA("Battery", "Reservoir"));
+    CPPUNIT_ASSERT(schema->isA("Battery", "Battery"));
+    CPPUNIT_ASSERT(schema->hasParent("Battery"));
+    CPPUNIT_ASSERT(schema->getParent("Battery") == "Reservoir");
+    CPPUNIT_ASSERT(schema->getObjectTypeForPredicate("World.initialState") == "World");
+    CPPUNIT_ASSERT(schema->getObjectTypeForPredicate("Battery.consume") == "Battery");
+    CPPUNIT_ASSERT(schema->getObjectTypeForPredicate("Battery.produce") == "Battery");
+    CPPUNIT_ASSERT(schema->getObjectTypeForPredicate("Battery.consume") != "Reservoir");
+    CPPUNIT_ASSERT(schema->getObjectTypeForPredicate("Battery.produce") != "Reservoir");
 
     schema->addObjectType("Base");
     schema->addObjectType("Derived");
@@ -515,16 +516,16 @@ private:
     schema->addMember("Derived.Predicate", "Battery", "battery");
 
 
-    CPPUNIT_ASSERT(schema->getParameterCount(LabelStr("Reservoir.produce")) == 1);
-    CPPUNIT_ASSERT(schema->getParameterCount(LabelStr("Reservoir.consume")) == 1);
-    CPPUNIT_ASSERT(schema->getParameterType(LabelStr("Reservoir.consume"), 0) == LabelStr("float"));
-    CPPUNIT_ASSERT(schema->getParameterType(LabelStr("Reservoir.produce"), 0) == LabelStr("float"));
+    CPPUNIT_ASSERT(schema->getParameterCount("Reservoir.produce") == 1);
+    CPPUNIT_ASSERT(schema->getParameterCount("Reservoir.consume") == 1);
+    CPPUNIT_ASSERT(schema->getParameterType("Reservoir.consume", 0) == "float");
+    CPPUNIT_ASSERT(schema->getParameterType("Reservoir.produce", 0) == "float");
 
-    std::set<LabelStr> predicates;
-    schema->getPredicates(LabelStr("Battery"), predicates);
+    std::set<std::string> predicates;
+    schema->getPredicates("Battery", predicates);
     CPPUNIT_ASSERT(predicates.size() == 2);
     predicates.clear();
-    schema->getPredicates(LabelStr("Reservoir"), predicates);
+    schema->getPredicates("Reservoir", predicates);
     CPPUNIT_ASSERT(predicates.size() == 2);
 
     schema->addObjectType("One");
@@ -534,7 +535,7 @@ private:
     schema->addPredicate("One.Predicate4");
 
     predicates.clear();
-    schema->getPredicates(LabelStr("One"), predicates);
+    schema->getPredicates("One", predicates);
     CPPUNIT_ASSERT(predicates.size() == 4);
 
     DEFAULT_TEARDOWN();
@@ -544,43 +545,43 @@ private:
 
   static bool testPredicateParameterAccessors() {
       DEFAULT_SETUP(ce, db, true);
-    schema->addObjectType(LabelStr("Reservoir"));
-    schema->addObjectType(LabelStr("NddlReservoir"), LabelStr("Reservoir"));
-    schema->addPredicate(LabelStr("Reservoir.consume"));
-    schema->addPredicate(LabelStr("Reservoir.produce"));
-    schema->addObjectType(LabelStr("Battery"), LabelStr("Reservoir"));
-    schema->addMember(LabelStr("Reservoir.consume"), LabelStr("float"), LabelStr("quantity"));
-    schema->addMember(LabelStr("Reservoir.produce"), LabelStr("float"), LabelStr("quantity"));
-    schema->addMember(LabelStr("Reservoir.consume"), LabelStr("float"), LabelStr("quality"));
-    schema->addMember(LabelStr("Reservoir.produce"), LabelStr("float"), LabelStr("quality"));
-    CPPUNIT_ASSERT(schema->getIndexFromName(LabelStr("Reservoir.consume"), LabelStr("quality")) == 1);
-    CPPUNIT_ASSERT(schema->getIndexFromName(LabelStr("Reservoir.produce"), LabelStr("quality")) == 1);
-    CPPUNIT_ASSERT(schema->getNameFromIndex(LabelStr("Reservoir.consume"), 0).getKey() == LabelStr("quantity").getKey());
-    CPPUNIT_ASSERT(schema->getNameFromIndex(LabelStr("Reservoir.produce"), 0).getKey() == LabelStr("quantity").getKey());
+    schema->addObjectType("Reservoir");
+    schema->addObjectType("NddlReservoir", "Reservoir");
+    schema->addPredicate("Reservoir.consume");
+    schema->addPredicate("Reservoir.produce");
+    schema->addObjectType("Battery", "Reservoir");
+    schema->addMember("Reservoir.consume", "float", "quantity");
+    schema->addMember("Reservoir.produce", "float", "quantity");
+    schema->addMember("Reservoir.consume", "float", "quality");
+    schema->addMember("Reservoir.produce", "float", "quality");
+    CPPUNIT_ASSERT(schema->getIndexFromName("Reservoir.consume", "quality") == 1);
+    CPPUNIT_ASSERT(schema->getIndexFromName("Reservoir.produce", "quality") == 1);
+    CPPUNIT_ASSERT(schema->getNameFromIndex("Reservoir.consume", 0) == "quantity");
+    CPPUNIT_ASSERT(schema->getNameFromIndex("Reservoir.produce", 0) == "quantity");
 
-    schema->addObjectType(LabelStr("Foo"));
-    schema->addPredicate(LabelStr("Foo.Argle"));
+    schema->addObjectType("Foo");
+    schema->addPredicate("Foo.Argle");
     schema->addPrimitive("Bargle");
-    schema->addMember(LabelStr("Foo.Argle"), LabelStr("Bargle"), LabelStr("bargle"));
+    schema->addMember("Foo.Argle", "Bargle", "bargle");
     schema->addPrimitive("Targle");
-    schema->addMember(LabelStr("Foo.Argle"), LabelStr("Targle"), LabelStr("targle"));
+    schema->addMember("Foo.Argle", "Targle", "targle");
 
-    CPPUNIT_ASSERT(schema->getMemberType(LabelStr("Foo.Argle"), LabelStr("bargle")) == LabelStr("Bargle"));
-    CPPUNIT_ASSERT(schema->getMemberType(LabelStr("Foo.Argle"), LabelStr("targle")) == LabelStr("Targle"));
+    CPPUNIT_ASSERT(schema->getMemberType("Foo.Argle", "bargle") == "Bargle");
+    CPPUNIT_ASSERT(schema->getMemberType("Foo.Argle", "targle") == "Targle");
 
     // Extend attributes on a derived class. Must declare predicate with derived type qualifier
-    schema->addObjectType(LabelStr("Bar"), LabelStr("Foo"));
-    schema->addPredicate(LabelStr("Bar.Argle"));
-    CPPUNIT_ASSERT(schema->hasParent(LabelStr("Bar.Argle")));
-    schema->addMember(LabelStr("Bar.Argle"), LabelStr("float"), LabelStr("huey"));
-    CPPUNIT_ASSERT(schema->getMemberType(LabelStr("Bar.Argle"), LabelStr("huey")) == LabelStr("float"));
+    schema->addObjectType("Bar", "Foo");
+    schema->addPredicate("Bar.Argle");
+    CPPUNIT_ASSERT(schema->hasParent("Bar.Argle"));
+    schema->addMember("Bar.Argle", "float", "huey");
+    CPPUNIT_ASSERT(schema->getMemberType("Bar.Argle", "huey") == "float");
 
-    schema->addObjectType(LabelStr("Baz"), LabelStr("Bar"));
-    CPPUNIT_ASSERT(schema->getMemberType(LabelStr("Baz.Argle"), LabelStr("targle")) == LabelStr("Targle"));
+    schema->addObjectType("Baz", "Bar");
+    CPPUNIT_ASSERT(schema->getMemberType("Baz.Argle", "targle") == "Targle");
 
-    CPPUNIT_ASSERT(schema->getParameterCount(LabelStr("Foo.Argle")) == 2);
-    CPPUNIT_ASSERT(schema->getParameterType(LabelStr("Foo.Argle"), 0) == LabelStr("Bargle"));
-    CPPUNIT_ASSERT(schema->getParameterType(LabelStr("Foo.Argle"), 1) == LabelStr("Targle"));
+    CPPUNIT_ASSERT(schema->getParameterCount("Foo.Argle") == 2);
+    CPPUNIT_ASSERT(schema->getParameterType("Foo.Argle", 0) == "Bargle");
+    CPPUNIT_ASSERT(schema->getParameterType("Foo.Argle", 1) == "Targle");
 
     schema->reset();
     DEFAULT_TEARDOWN();
@@ -1826,7 +1827,7 @@ private:
     token3.close();
 
     // create a test constraint between t2 and t3
-    ce->createConstraint(LabelStr("precedes"),makeScope(token2.end(),token3.start()));
+    ce->createConstraint("precedes",makeScope(token2.end(),token3.start()));
 
     CPPUNIT_ASSERT(ce->propagate());
 
@@ -2149,7 +2150,7 @@ private:
 
     // Populate an instance of each predicate type
     IntervalToken t0(db,
-                     LabelStr("A.a"),
+                     "A.a",
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2160,7 +2161,7 @@ private:
     t0.activate();
 
     IntervalToken t1(db,
-                     LabelStr("A.b"),
+                     "A.b",
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2171,7 +2172,7 @@ private:
     t1.activate();
 
     IntervalToken t2(db,
-                     LabelStr("B.a"),
+                     "B.a",
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2182,7 +2183,7 @@ private:
     t2.activate();
 
     IntervalToken t3(db,
-                     LabelStr("C.a"),
+                     "C.a",
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2193,7 +2194,7 @@ private:
     t3.activate();
 
     IntervalToken t4(db,
-                     LabelStr("C.b"),
+                     "C.b",
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2204,7 +2205,7 @@ private:
     t4.activate();
 
     IntervalToken t5(db,
-                     LabelStr("C.c"),
+                     "C.c",
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2215,7 +2216,7 @@ private:
     t5.activate();
 
     IntervalToken t6(db,
-                     LabelStr("D.a"),
+                     "D.a",
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2226,7 +2227,7 @@ private:
     t6.activate();
 
     IntervalToken t7(db,
-                     LabelStr("D.b"),
+                     "D.b",
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2240,7 +2241,7 @@ private:
     {
       std::vector<TokenId> results;
       IntervalToken t(db,
-		      LabelStr("A.a"),
+		      "A.a",
 		      true,
 		      false,
 		      IntervalIntDomain(0, 10),
@@ -2255,14 +2256,14 @@ private:
 
       LabelStr encodedNames = encodePredicateNames(results);
       CPPUNIT_ASSERT_MESSAGE("Expected = A.a:B.a:C.a:D.a:, Actual =  " + encodedNames.toString(),
-          encodedNames == LabelStr("A.a:B.a:C.a:D.a:"));
+          encodedNames == "A.a:B.a:C.a:D.a:");
     }
 
     // A.a => A.a, B.a, C.a., D.a. This is the case for GNATS 2837
     {
       std::vector<TokenId> results;
       IntervalToken t(db,
-		      LabelStr("D.b"),
+		      "D.b",
 		      true,
 		      false,
 		      IntervalIntDomain(0, 10),
@@ -2277,7 +2278,7 @@ private:
 
       LabelStr encodedNames = encodePredicateNames(results);
       CPPUNIT_ASSERT_MESSAGE("Expected = D.b':, Actual =  " + encodedNames.toString(),
-          encodedNames == LabelStr("D.b:"));
+          encodedNames == "D.b:");
     }
 
     DEFAULT_TEARDOWN();
@@ -2289,11 +2290,11 @@ private:
       unused(ObjectId timeline) = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
 
-      TokenId master = db->createToken(DEFAULT_PREDICATE, NULL, true);
+      TokenId master = db->createToken(DEFAULT_PREDICATE, "", true);
     master->activate();
-    TokenId slave = db->createSlaveToken(master, LabelStr(DEFAULT_PREDICATE), LabelStr("any"));
+    TokenId slave = db->createSlaveToken(master, LabelStr(DEFAULT_PREDICATE), "any");
     CPPUNIT_ASSERT(slave->master() == master);
-    TokenId rejectable = db->createToken(DEFAULT_PREDICATE, NULL, false);
+    TokenId rejectable = db->createToken(DEFAULT_PREDICATE, "", false);
     rejectable->activate();
     //!!Should try rejecting master and verify inconsistency
     //!!Should try rejecting rejectable and verify consistency
@@ -2371,7 +2372,7 @@ private:
       unused(ObjectId timeline) = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
 
-    schema->addMember(LabelStr(DEFAULT_PREDICATE),"int",LabelStr("FOO"));
+    schema->addMember(LabelStr(DEFAULT_PREDICATE),"int","FOO");
 
     EnumeratedDomain zero(IntDT::instance());
     zero.insert(0); zero.close();
@@ -2388,7 +2389,7 @@ private:
                      IntervalIntDomain(1, 1000),
 										 Token::noObject(),
 										 false);
-    t0.addParameter(zero, LabelStr("FOO"));
+    t0.addParameter(zero, "FOO");
     t0.close();
 
     IntervalToken t1(db,
@@ -2400,8 +2401,8 @@ private:
                      IntervalIntDomain(1, 1000),
 										 Token::noObject(),
 										 false);
-    t1.addParameter(zero, LabelStr("FOO"));
-    t1.getVariable(LabelStr("FOO"))->open();
+    t1.addParameter(zero, "FOO");
+    t1.getVariable("FOO")->open();
     t1.close();
 
     IntervalToken t2(db,
@@ -2413,8 +2414,8 @@ private:
                      IntervalIntDomain(1, 1000),
 										 Token::noObject(),
 										 false);
-    t2.addParameter(zero, LabelStr("FOO"));
-    t2.getVariable(LabelStr("FOO"))->open();
+    t2.addParameter(zero, "FOO");
+    t2.getVariable("FOO")->open();
     t2.close();
 
     IntervalToken t3(db,
@@ -2426,8 +2427,8 @@ private:
                      IntervalIntDomain(1, 1000),
 					 Token::noObject(),
 					false);
-    t3.addParameter(one, LabelStr("FOO"));
-    t3.getVariable(LabelStr("FOO"))->open();
+    t3.addParameter(one, "FOO");
+    t3.getVariable("FOO")->open();
     t3.close();
 
     IntervalToken t4(db,
@@ -2439,8 +2440,8 @@ private:
                      IntervalIntDomain(1, 1000),
 					 Token::noObject(),
 					 false);
-    t4.addParameter(one, LabelStr("FOO"));
-    t4.getVariable(LabelStr("FOO"))->open();
+    t4.addParameter(one, "FOO");
+    t4.getVariable("FOO")->open();
     t4.close();
 
     CPPUNIT_ASSERT(t0.getObject()->isClosed());
@@ -3880,8 +3881,8 @@ private:
     LabelSet arg1(LabelStr("Label"));
     arguments.push_back(&arg0);
     arguments.push_back(&arg1);
-    LabelStr factoryName = ObjectTypeMgr::makeFactoryName(LabelStr("Foo"), arguments);
-    CPPUNIT_ASSERT(factoryName == LabelStr("Foo:int:string"));
+    LabelStr factoryName = ObjectTypeMgr::makeFactoryName("Foo", arguments);
+    CPPUNIT_ASSERT(factoryName == "Foo:int:string");
     return true;
   }
 
@@ -4090,8 +4091,8 @@ public:
     CPPUNIT_ASSERT(s_dbPlayer != 0);
 
     ObjectTypeId testClass2_OT = (new ObjectType("TestClass2",db->getSchema()->getObjectType(Schema::rootObject())))->getId();
-    testClass2_OT->addObjectFactory((new TestClass2Factory(LabelStr("TestClass2")))->getId());
-    testClass2_OT->addObjectFactory((new TestClass2Factory(LabelStr("TestClass2:string:int:float:Locations")))->getId());
+    testClass2_OT->addObjectFactory((new TestClass2Factory("TestClass2"))->getId());
+    testClass2_OT->addObjectFactory((new TestClass2Factory("TestClass2:string:int:float:Locations"))->getId());
 
     /* Token factory for predicate Sample */
     testClass2_OT->addTokenType((new TestClass2::Sample::Factory(testClass2_OT->getId()))->getId());
@@ -4263,8 +4264,8 @@ public:
     }
   private:
     ObjectId createInstance(const PlanDatabaseId planDb,
-                            const LabelStr& objectType,
-                            const LabelStr& objectName,
+                            const std::string& objectType,
+                            const std::string& objectName,
                             const std::vector<const Domain*>& arguments) const {
       CPPUNIT_ASSERT(arguments.size() == 0 || arguments.size() == 4);
       if (arguments.size() == 4) {
@@ -4830,11 +4831,11 @@ public:
    * than 'if (!cond) return(false);', making which condition failed
    * obvious.
    */
-  static bool checkToken(const TokenId token, const LabelStr& name, const LabelStr& predName,
+  static bool checkToken(const TokenId token, const std::string& name, const std::string& predName,
                          const TokenId, const StateDomain& stateDom) {
     if (token.isNoId() || !token.isValid())
       return(false);
-    if ((name.toString() != "_auto_") && (token->getName() != name.toString()))
+    if ((name != "_auto_") && (token->getName() != name))
       return(false);
     if (token->getPredicateName() != predName)
       return(false);
@@ -4850,7 +4851,7 @@ public:
     TokenSet tokens = s_db->getTokens();
     CPPUNIT_ASSERT(tokens.size() == 1);
     TokenId token = *(tokens.begin());
-    CPPUNIT_ASSERT(checkToken(token, LabelStr("sample1"), LabelStr("TestClass2.Sample"),
+    CPPUNIT_ASSERT(checkToken(token, "sample1", "TestClass2.Sample",
                           TokenId::noId(), getMandatoryStateDom()));
 
     /* Create a rejectable token. */
@@ -4863,9 +4864,9 @@ public:
       tokens.erase(tokens.begin());
       token2 = *(tokens.begin());
     }
-    CPPUNIT_ASSERT(checkToken(token2, LabelStr("sample2"),
-			  LabelStr("TestClass2.Sample"),
-			  TokenId::noId(), getRejectableStateDom()));
+    CPPUNIT_ASSERT(checkToken(token2, "sample2",
+                              "TestClass2.Sample",
+                              TokenId::noId(), getRejectableStateDom()));
 
     //!!other predicates?
   }
@@ -4884,7 +4885,7 @@ public:
       currentTokens.erase(currentTokens.begin());
       goal = *(currentTokens.begin());
     }
-    CPPUNIT_ASSERT(checkToken(goal, LabelStr("sample3"), LabelStr("TestClass2.Sample"),
+    CPPUNIT_ASSERT(checkToken(goal, "sample3", "TestClass2.Sample",
                           TokenId::noId(), getMandatoryStateDom()));
     oldTokens.insert(goal);
     /* Create a subgoal for each temporal relation. */
@@ -4906,7 +4907,7 @@ public:
       //!!Should use the master token's Id rather than TokenId::noId() here, but the player doesn't behave that way.
       //!!Is that a bug in the player or not?
       //!!  May mean that this is an inappropriate overloading of the '<goal>' XML tag per Tania and I (17 Nov 2004)
-      CPPUNIT_ASSERT(checkToken(subgoal, LabelStr("_auto_"), LabelStr("TestClass2.Sample"),
+      CPPUNIT_ASSERT(checkToken(subgoal, "_auto_", "TestClass2.Sample",
                             TokenId::noId(), getMandatoryStateDom()));
       CPPUNIT_ASSERT(verifyTokenRelation(goal, subgoal, *which));
       /* Update list of old tokens. */

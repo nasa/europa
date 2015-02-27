@@ -13,18 +13,18 @@ namespace EUROPA {
   class EventToken: public Token {
   public:
     EventToken(const PlanDatabaseId planDatabase,
-	       const LabelStr& predicateName,
+	       const std::string& predicateName,
 	       bool rejectable,
 	       bool isFact,
 	       const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
-	       const LabelStr& objectName = Token::noObject(),
+	       const std::string& objectName = Token::noObject(),
 	       bool closed = true);
 
     EventToken(const TokenId master,
-	       const LabelStr& relation,
-	       const LabelStr& predicateName,
+	       const std::string& relation,
+	       const std::string& predicateName,
 	       const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
-	       const LabelStr& objectName = Token::noObject(),
+	       const std::string& objectName = Token::noObject(),
 	       bool closed = true);
 
     const TempVarId start() const;

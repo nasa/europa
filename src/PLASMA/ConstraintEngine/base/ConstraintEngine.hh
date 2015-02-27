@@ -316,35 +316,35 @@ typedef Id<ConstraintEngineListener> ConstraintEngineListenerId;
     /**
      * @brief Create a variable
      */
-    ConstrainedVariableId createVariable(const char* typeName,
+    ConstrainedVariableId createVariable(const std::string& typeName,
                                          const bool internal = false,
                                          bool canBeSpecified = true,
-                                         const char* name = NO_VAR_NAME,
+                                         const std::string& name = NO_VAR_NAME,
                                          const EntityId parent = EntityId::noId(),
                                          unsigned int index = ConstrainedVariable::NO_INDEX);
     
     /**
      * @brief Create a variable
      */
-    ConstrainedVariableId createVariable(const char* typeName,
+    ConstrainedVariableId createVariable(const std::string& typeName,
                                          const Domain& baseDomain,
                                          const bool internal = false,
                                          bool canBeSpecified = true,
-                                         const char* name = NO_VAR_NAME,
+                                         const std::string& name = NO_VAR_NAME,
                                          const EntityId parent = EntityId::noId(),
                                          unsigned int index = ConstrainedVariable::NO_INDEX);
 
 
     ConstraintId createConstraint(const std::string& name,
                                   const std::vector<ConstrainedVariableId>& scope,
-                                  const char* violationExpl=NULL);
+                                  const std::string& violationExpl="");
 
     void deleteConstraint(const ConstraintId c);
 
     /**
      * @brief Create a value for a string
      */
-    edouble createValue(const char* typeName, const std::string& value);
+    edouble createValue(const std::string& typeName, const std::string& value);
 
     void addCallback(const PostPropagationCallbackId callback);
     void removeCallback(const PostPropagationCallbackId callback);

@@ -11,8 +11,6 @@
 #include <map>
 #include <vector>
 
-#include "LabelStr.hh"
-
 #include "PDBInterpreter.hh"
 #include "TokenType.hh"
 
@@ -42,7 +40,7 @@ public:
 class ObjectType: public PSObjectType
 {
 public:
-    ObjectType(const char* name, const ObjectTypeId parent, bool isNative=false);
+    ObjectType(const std::string& name, const ObjectTypeId parent, bool isNative=false);
     virtual ~ObjectType();
 
     const ObjectTypeId getId() const;
@@ -53,16 +51,16 @@ public:
     virtual const ObjectTypeId getParent() const;
     virtual bool isNative() const;
 
-    virtual void addMember(const DataTypeId type, const char* name); // TODO: use DataType instead
+    virtual void addMember(const DataTypeId type, const std::string& name); // TODO: use DataType instead
     virtual const std::map<std::string,DataTypeId>& getMembers() const;
-    virtual const DataTypeId getMemberType(const char* name) const;
+    virtual const DataTypeId getMemberType(const std::string& name) const;
 
     virtual void addObjectFactory(const ObjectFactoryId factory);
   virtual const std::map<std::string,ObjectFactoryId>& getObjectFactories() const;
 
     virtual void addTokenType(const TokenTypeId factory);
   virtual const std::map<std::string,TokenTypeId>& getTokenTypes() const;
-    virtual const TokenTypeId getTokenType(const LabelStr& signature) const;
+    virtual const TokenTypeId getTokenType(const std::string& signature) const;
     virtual const TokenTypeId getParentType(const TokenTypeId factory) const;
 
     virtual std::string toString() const;
@@ -103,7 +101,7 @@ public:
 	const ObjectTypeMgrId getId() const;
 
     void registerObjectType(const ObjectTypeId objType);
-    const ObjectTypeId getObjectType(const LabelStr& objType) const;
+    const ObjectTypeId getObjectType(const std::string& objType) const;
     std::vector<ObjectTypeId> getAllObjectTypes() const;
 
 	/**
@@ -112,12 +110,12 @@ public:
 	 * @param arguments The sequence of name/value pairs to be passed as arguments for construction of the object
 	 * @return A ':' deliimited string of <objectType>:<arg0.type>:..:<argn.type>
 	 */
-	static LabelStr makeFactoryName(const LabelStr& objectType, const std::vector<const Domain*>& arguments);
+	static std::string makeFactoryName(const std::string& objectType, const std::vector<const Domain*>& arguments);
 
 	/**
 	 * @brief Obtain the factory based on the type of object to create and the types of the arguments to the constructor
 	 */
-	ObjectFactoryId getFactory(const SchemaId schema, const LabelStr& objectType, const std::vector<const Domain*>& arguments, const bool doCheckError = true);
+	ObjectFactoryId getFactory(const SchemaId schema, const std::string& objectType, const std::vector<const Domain*>& arguments, const bool doCheckError = true);
 
 	/**
 	 * @brief Add a factory to provide instantiation of particular concrete types based on a label.
@@ -140,7 +138,7 @@ protected:
  */
 class ObjectFactory{
 public:
-  ObjectFactory(const LabelStr& signature);
+  ObjectFactory(const std::string& signature);
 
   virtual ~ObjectFactory();
 
@@ -149,7 +147,7 @@ public:
   /**
    * @brief Return the type for which this factory is registered.
    */
-  const LabelStr& getSignature() const;
+  const std::string& getSignature() const;
 
   /**
    * @brief Retreive the type signature as a vector of type names.
@@ -159,12 +157,12 @@ public:
 
   /**
    * @brief Create a root object instance
-   * @see DbClient::createObject(const LabelStr& type, const LabelStr& name)
+   * @see DbClient::createObject(const std::string& type, const std::string& name)
    * for the interpreted version createInstance = makeObject + evalConstructorBody
    */
   virtual ObjectId createInstance(const PlanDatabaseId planDb,
-                  const LabelStr& objectType,
-                  const LabelStr& objectName,
+                  const std::string& objectType,
+                  const std::string& objectName,
                   const std::vector<const Domain*>& arguments) const = 0;
 
 
@@ -177,8 +175,8 @@ public:
    */
  virtual ObjectId makeNewObject(
                           const PlanDatabaseId planDb,
-                          const LabelStr& objectType,
-                          const LabelStr& objectName,
+                          const std::string& objectType,
+                          const std::string& objectName,
                           const std::vector<const Domain*>& arguments) const;
   /**
    * @brief The body of the constructor after the object is created
@@ -190,7 +188,7 @@ public:
 
 private:
   ObjectFactoryId m_id;
-  LabelStr m_signature;
+  std::string m_signature;
   std::vector<std::string> m_signatureTypes;
 };
 
@@ -198,18 +196,18 @@ private:
 class ExprConstructorSuperCall : public Expr
 {
   public:
-      ExprConstructorSuperCall(const LabelStr& superClassName,
+      ExprConstructorSuperCall(const std::string& superClassName,
                                const std::vector<Expr*>& argExprs);
       virtual ~ExprConstructorSuperCall();
 
       virtual DataRef eval(EvalContext& context) const;
 
-      const LabelStr& getSuperClassName() const { return m_superClassName; }
+      const std::string& getSuperClassName() const { return m_superClassName; }
 
       void evalArgs(EvalContext& context, std::vector<const Domain*>& arguments) const;
 
   protected:
-      LabelStr m_superClassName;
+      std::string m_superClassName;
       std::vector<Expr*> m_argExprs;
 };
 
@@ -218,7 +216,7 @@ class InterpretedObjectFactory : public ObjectFactory
   public:
       InterpretedObjectFactory(
           const ObjectTypeId objType,
-          const LabelStr& signature,
+          const std::string& signature,
           const std::vector<std::string>& constructorArgNames,
           const std::vector<std::string>& constructorArgTypes,
           ExprConstructorSuperCall* superCallExpr,
@@ -232,16 +230,16 @@ class InterpretedObjectFactory : public ObjectFactory
       // createInstance = makeNewObject + evalConstructorBody
       virtual ObjectId createInstance(
                               const PlanDatabaseId planDb,
-                              const LabelStr& objectType,
-                              const LabelStr& objectName,
+                              const std::string& objectType,
+                              const std::string& objectName,
                               const std::vector<const Domain*>& arguments) const;
 
       // Any exported C++ classes must register a factory for each C++ constructor
       // and override this method to call the C++ constructor
       virtual ObjectId makeNewObject(
                           const PlanDatabaseId planDb,
-                          const LabelStr& objectType,
-                          const LabelStr& objectName,
+                          const std::string& objectType,
+                          const std::string& objectName,
                           const std::vector<const Domain*>& arguments) const;
 
       virtual void evalConstructorBody(
@@ -250,7 +248,7 @@ class InterpretedObjectFactory : public ObjectFactory
 
       bool checkArgs(const std::vector<const Domain*>& arguments) const;
 
-      LabelStr                  m_className;
+      std::string                  m_className;
       std::vector<std::string>  m_constructorArgNames;
       std::vector<std::string>  m_constructorArgTypes;
       ExprConstructorSuperCall* m_superCallExpr;
@@ -265,7 +263,7 @@ private:
 class NativeObjectFactory : public InterpretedObjectFactory
 {
   public:
-      NativeObjectFactory(const ObjectTypeId objType, const LabelStr& signature)
+      NativeObjectFactory(const ObjectTypeId objType, const std::string& signature)
           : InterpretedObjectFactory(
                 objType,                    // objType
                 signature,                  // signature
@@ -283,8 +281,8 @@ class NativeObjectFactory : public InterpretedObjectFactory
   protected:
       virtual ObjectId makeNewObject(
                           const PlanDatabaseId planDb,
-                          const LabelStr& objectType,
-                          const LabelStr& objectName,
+                          const std::string& objectType,
+                          const std::string& objectName,
                           const std::vector<const Domain*>& arguments) const = 0;
 };
 

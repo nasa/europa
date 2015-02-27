@@ -21,7 +21,7 @@ namespace EUROPA {
 
 class ExprConstant : public Expr {
  public:
-  ExprConstant(const char* type, const Domain* d);
+  ExprConstant(const std::string& type, const Domain* d);
   virtual ~ExprConstant();
 
   virtual DataRef eval(EvalContext& context) const;
@@ -45,7 +45,7 @@ class ExprVarDeclaration : public Expr {
   ExprVarDeclaration(const ExprVarDeclaration&);
   ExprVarDeclaration& operator=(const ExprVarDeclaration&);
  public:
-  ExprVarDeclaration(const char* name, const DataTypeId type, Expr* initValue, bool canBeSpecified);
+  ExprVarDeclaration(const std::string& name, const DataTypeId type, Expr* initValue, bool canBeSpecified);
   virtual ~ExprVarDeclaration();
 
   virtual DataRef eval(EvalContext& context) const;
@@ -69,7 +69,7 @@ class ExprVarDeclaration : public Expr {
 
 class ExprVarRef : public Expr {
  public:
-  ExprVarRef(const char* name, const DataTypeId type);
+  ExprVarRef(const std::string& name, const DataTypeId type);
   virtual ~ExprVarRef();
 
   virtual DataRef eval(EvalContext& context) const;
@@ -105,7 +105,7 @@ class ExprAssignment : public Expr {
   class ExprConstraint : public Expr
   {
     public:
-        ExprConstraint(const char* name,const std::vector<Expr*>& args, const char* violationExpl);
+        ExprConstraint(const std::string& name,const std::vector<Expr*>& args, const std::string& violationExpl);
         virtual ~ExprConstraint();
 
         virtual DataRef eval(EvalContext& context) const;
@@ -125,7 +125,7 @@ private:
   ExprTypedef(const ExprTypedef&);
   ExprTypedef& operator=(const ExprTypedef&);
  public:
-  ExprTypedef(const DataTypeId baseType, const char* name, Domain* baseDomain);
+  ExprTypedef(const DataTypeId baseType, const std::string& name, Domain* baseDomain);
   virtual ~ExprTypedef();
 
   virtual DataRef eval(EvalContext& context) const;
@@ -140,7 +140,7 @@ private:
   class ExprEnumdef : public Expr
   {
   public:
-      ExprEnumdef(const char* name, const std::vector<LabelStr>& values);
+      ExprEnumdef(const std::string& name, const std::vector<LabelStr>& values);
       virtual ~ExprEnumdef();
 
       virtual DataRef eval(EvalContext& context) const;
@@ -213,7 +213,7 @@ private:
   ExprVariableMethod(const ExprVariableMethod&);
   ExprVariableMethod& operator=(const ExprVariableMethod&);
  public:
-  ExprVariableMethod(const char* name, Expr* varExpr, const std::vector<Expr*>& argExprs);
+  ExprVariableMethod(const std::string& name, Expr* varExpr, const std::vector<Expr*>& argExprs);
   virtual ~ExprVariableMethod();
 
   virtual DataRef eval(EvalContext& context) const;
@@ -232,7 +232,7 @@ private:
   ExprObjectMethod(const ExprObjectMethod&);
   ExprObjectMethod& operator=(const ExprObjectMethod&);
  public:
-  ExprObjectMethod(const char* name, Expr* objExpr, const std::vector<Expr*>& argExprs);
+  ExprObjectMethod(const std::string& name, Expr* objExpr, const std::vector<Expr*>& argExprs);
   virtual ~ExprObjectMethod();
 
   virtual DataRef eval(EvalContext& context) const;
@@ -249,7 +249,7 @@ private:
   class ExprTokenMethod : public Expr
   {
   public:
-      ExprTokenMethod(const char* name, const char* tokenName, const std::vector<Expr*>& argExprs);
+      ExprTokenMethod(const std::string& name, const std::string& tokenName, const std::vector<Expr*>& argExprs);
       virtual ~ExprTokenMethod();
 
       virtual DataRef eval(EvalContext& context) const;
@@ -286,11 +286,11 @@ private:
 
 class PredicateInstanceRef {
  public:
-  PredicateInstanceRef(const TokenTypeId tokenType, const char* predInstance,
-                       const char* predName, const char* annotation);
+  PredicateInstanceRef(const TokenTypeId tokenType, const std::string& predInstance,
+                       const std::string& predName, const std::string& annotation);
   virtual ~PredicateInstanceRef();
 
-  TokenId getToken(EvalContext& ctx, const char* relationName, bool isFact=false,
+  TokenId getToken(EvalContext& ctx, const std::string& relationName, bool isFact=false,
                    bool isRejectable=false);
   int     getAttributes() const;
   const TokenTypeId getTokenType();
@@ -301,14 +301,14 @@ class PredicateInstanceRef {
   std::string m_predicateName;
   int m_attributes;
 
-  TokenId createSubgoal(EvalContext& ctx, InterpretedRuleInstance* rule, const char* relationName);
+  TokenId createSubgoal(EvalContext& ctx, InterpretedRuleInstance* rule, const std::string& relationName);
   TokenId createGlobalToken(EvalContext& context, bool isFact, bool isRejectable);
 };
 
   class ExprProblemStmt : public Expr
   {
   public:
-      ExprProblemStmt(const char* name, const std::vector<PredicateInstanceRef*>& tokens);
+      ExprProblemStmt(const std::string& name, const std::vector<PredicateInstanceRef*>& tokens);
       virtual ~ExprProblemStmt();
 
       virtual DataRef eval(EvalContext& context) const;
@@ -327,7 +327,7 @@ private:
   ExprRelation(const ExprRelation&);
   ExprRelation& operator=(const ExprRelation&);
  public:
-  ExprRelation(const char* relation,
+  ExprRelation(const std::string& relation,
                PredicateInstanceRef* origin,
                const std::vector<PredicateInstanceRef*>& targets);
   virtual ~ExprRelation();
@@ -514,14 +514,14 @@ class TokenEvalContext : public EvalContext {
   TokenEvalContext(EvalContext* parent, const TokenId tok);
   virtual ~TokenEvalContext();
 
-  virtual ConstrainedVariableId getVar(const char* name);
+  virtual ConstrainedVariableId getVar(const std::string& name);
 
-  virtual void* getElement(const char* name) const;
+  virtual void* getElement(const std::string& name) const;
 
   virtual bool isClass(const std::string& className) const;
 
   TokenId getToken();
-  TokenId getToken(const char* name);
+  TokenId getToken(const std::string& name);
 
  protected:
   TokenId m_token;
@@ -613,12 +613,12 @@ class TokenEvalContext : public EvalContext {
         RuleInstanceEvalContext(EvalContext* parent, const InterpretedRuleInstanceId ruleInstance);
         virtual ~RuleInstanceEvalContext();
 
-        virtual void* getElement(const char* name) const;
+        virtual void* getElement(const std::string& name) const;
 
-        virtual ConstrainedVariableId getVar(const char* name);
+        virtual ConstrainedVariableId getVar(const std::string& name);
         virtual InterpretedRuleInstanceId getRuleInstance() { return m_ruleInstance; }
 
-        virtual TokenId getToken(const char* name);
+        virtual TokenId getToken(const std::string& name);
 
         virtual bool isClass(const std::string& className) const;
 
@@ -650,7 +650,7 @@ private:
   ExprIfGuard(const ExprIfGuard&);
   ExprIfGuard& operator=(const ExprIfGuard&);
  public:
-  ExprIfGuard(const char* op, Expr* lhs,Expr* rhs);
+  ExprIfGuard(const std::string& op, Expr* lhs,Expr* rhs);
   virtual ~ExprIfGuard();
 
   const std::string& getOperator();
@@ -687,7 +687,7 @@ private:
   class ExprLoop : public RuleExpr
   {
   	public:
-  	    ExprLoop(const char* varName, const char* varValue,const std::vector<Expr*>& loopBody);
+  	    ExprLoop(const std::string& varName, const std::string& varValue,const std::vector<Expr*>& loopBody);
   	    virtual ~ExprLoop();
 
   	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;
