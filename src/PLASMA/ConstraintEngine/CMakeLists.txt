@@ -11,7 +11,7 @@ common_module_prepends("${base_sources}" "${component_sources}" "${test_sources}
 
 declare_module(ConstraintEngine "${root_sources}" "${base_sources}" "${component_sources}" "${test_sources}" "${internal_dependencies}" "")
 
-set(test_inputs CLibTestCases CLibTestCases.xml NewTestCases NewTestCases.xml)
+set(test_inputs CLibTestCases CLibTestCases.xml NewTestCases NewTestCases.xml violations-allowed.xml violations-missing.xml violations-unallowed.xml)
 foreach(file ${test_inputs})
   add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${file}
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/test/${file} ${CMAKE_CURRENT_BINARY_DIR}/${file})

@@ -18,6 +18,7 @@ class ConstraintEngineModuleTests : public CppUnit::TestFixture {
   CPPUNIT_TEST(constraintFactoryTests);
   CPPUNIT_TEST(equivalenceClassTests);
   CPPUNIT_TEST(typeCheckingTests);
+  CPPUNIT_TEST(configAllowViolationsTest);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -41,6 +42,7 @@ public:
   void constraintFactoryTests();
   void equivalenceClassTests();
   void typeCheckingTests();
+  void configAllowViolationsTest();
 };
 
 #endif /* H_CE_MODULE_TESTS */

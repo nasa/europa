@@ -2893,3 +2893,47 @@ void ConstraintEngineModuleTests::typeCheckingTests(void) {
   TypeCheckingTests::test();
 }
 
+class ConfigAllowViolationTestEngine : public EngineBase {
+ public:
+  ConfigAllowViolationTestEngine(const std::string& configFile);
+  virtual ~ConfigAllowViolationTestEngine();
+  const ConstraintEngineId getConstraintEngine() const;
+ protected:
+  void createModules();
+};
+
+ConfigAllowViolationTestEngine::ConfigAllowViolationTestEngine(const std::string& configFile) {
+  CPPUNIT_ASSERT(getConfig()->readFromXML(configFile.c_str(), true) == 1);
+  createModules();
+  doStart();
+}
+
+ConfigAllowViolationTestEngine::~ConfigAllowViolationTestEngine() {
+  doShutdown();
+}
+
+void ConfigAllowViolationTestEngine::createModules() {
+  addModule((new ModuleConstraintEngine())->getId());
+  addModule((new ModuleConstraintLibrary())->getId());
+
+}
+
+const ConstraintEngineId ConfigAllowViolationTestEngine::getConstraintEngine() const {
+  return (boost::polymorphic_cast<const ConstraintEngine*>(getComponent("ConstraintEngine")))->getId();
+}
+
+class ConfigAllowViolationsTest {
+ public:
+  static bool test() {
+    ConfigAllowViolationTestEngine allowed(getTestLoadLibraryPath() + "/violations-allowed.xml");
+    ConfigAllowViolationTestEngine unallowed(getTestLoadLibraryPath() + "/violations-unallowed.xml");
+    ConfigAllowViolationTestEngine none(getTestLoadLibraryPath() + "/violations-missing.xml");
+    CPPUNIT_ASSERT(allowed.getConstraintEngine()->getAllowViolations());
+    CPPUNIT_ASSERT(!unallowed.getConstraintEngine()->getAllowViolations());
+    CPPUNIT_ASSERT(!none.getConstraintEngine()->getAllowViolations());
+    return true;
+  }
+};
+void ConstraintEngineModuleTests::configAllowViolationsTest() {
+  ConfigAllowViolationsTest::test();
+}

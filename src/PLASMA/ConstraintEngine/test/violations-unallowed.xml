@@ -1,0 +1,5 @@
+<EuropaConfig>
+  <Component name="ConstraintEngine">
+    <Property name="allowViolations">false</Property>
+  </Component>
+</EuropaConfig>
