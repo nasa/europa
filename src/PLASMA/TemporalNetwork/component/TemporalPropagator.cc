@@ -35,7 +35,7 @@ namespace EUROPA {
 
   typedef Id<TimepointWrapper> TimepointWrapperId;
 
-TemporalPropagator::TemporalPropagator(const LabelStr& name, 
+TemporalPropagator::TemporalPropagator(const std::string& name, 
                                        const ConstraintEngineId constraintEngine)
     : Propagator(name, constraintEngine), m_tnet((new TemporalNetwork())->getId()),
       m_activeVariables(), m_changedVariables(), m_changedConstraints(),

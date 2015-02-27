@@ -4,8 +4,6 @@
  */
 
 #include "PSEngineImpl.hh"
-
-#include "LabelStr.hh"
 #ifdef _MSC_VER
 #include "Pdlfcn.hh"
 #endif

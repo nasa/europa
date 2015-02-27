@@ -21,14 +21,14 @@ namespace EUROPA {
     return rootInstance;
   }
 
-  TestSubgoalRule::TestSubgoalRule(const LabelStr& name) : Rule(name) {}
+  TestSubgoalRule::TestSubgoalRule(const std::string& name) : Rule(name) {}
 
   TestSubgoalRule::~TestSubgoalRule() { }
 
   void TestSubgoalRuleRoot::handleExecute() {
     TokenId slave =  (new IntervalToken(m_token,  
 				      "meets",
-				      LabelStr("Objects.PredicateB"), 
+				      "Objects.PredicateB", 
 				      IntervalIntDomain(0, 100),
 				      IntervalIntDomain(0, 100),
 				      IntervalIntDomain(1, 100),

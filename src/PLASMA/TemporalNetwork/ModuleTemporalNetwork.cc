@@ -44,11 +44,11 @@ void ModuleTemporalNetwork::initialize(EngineId engine) {
 
   PropagatorId temporalPropagator;
   if (engine->getConfig()->getProperty("TemporalNetwork.useTemporalPropagator") != "N") {
-    temporalPropagator = (new TemporalPropagator(LabelStr("Temporal"), ce->getId()))->getId();
+    temporalPropagator = (new TemporalPropagator("Temporal", ce->getId()))->getId();
     pdb->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
   }
   else {
-    temporalPropagator = (new DefaultPropagator(LabelStr("Temporal"), ce->getId()))->getId();
+    temporalPropagator = (new DefaultPropagator("Temporal", ce->getId()))->getId();
     pdb->setTemporalAdvisor((new DefaultTemporalAdvisor(ce->getId()))->getId());
   }
 }
