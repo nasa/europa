@@ -21,7 +21,7 @@ namespace EUROPA {
   class TemporalPropagator: public Propagator
   {
   public:
-    TemporalPropagator(const LabelStr& name, const ConstraintEngineId constraintEngine);
+    TemporalPropagator(const std::string& name, const ConstraintEngineId constraintEngine);
     virtual ~TemporalPropagator();
     void execute();
     bool updateRequired() const;
