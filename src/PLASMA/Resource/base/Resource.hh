@@ -54,10 +54,10 @@ namespace EUROPA {
        * @see Object
        */
       Resource(const PlanDatabaseId planDatabase,
-               const LabelStr& type,
-               const LabelStr& name,
-               const LabelStr& detectorName,
-               const LabelStr& profileName,
+               const std::string& type,
+               const std::string& name,
+               const std::string& detectorName,
+               const std::string& profileName,
 	           edouble initCapacityLb = 0,
 	           edouble initCapacityUb = 0,
 	           edouble lowerLimit = MINUS_INFINITY,
@@ -83,13 +83,13 @@ namespace EUROPA {
        * @brief Constructor
        * @see Object
        */
-      Resource(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open);
+      Resource(const PlanDatabaseId planDatabase, const std::string& type, const std::string& name, bool open);
 
       /**
        * @brief Constructor
        * @see Object
        */
-      Resource(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open);
+      Resource(const ObjectId parent, const std::string& type, const std::string& localName, bool open);
 
       virtual ~Resource();
 
@@ -203,7 +203,7 @@ namespace EUROPA {
        */
       void init(const edouble initCapacityLb, const edouble initCapacityUb, const edouble lowerLimit,
                 const edouble upperLimit, const edouble maxInstProduction, const edouble maxInstConsumption,
-                const edouble maxProduction, const edouble maxConsumption, const LabelStr& detectorName, const LabelStr& profileName);
+                const edouble maxProduction, const edouble maxConsumption, const std::string& detectorName, const std::string& profileName);
 
       /**
        * @brief Receive notification that an Instant has been removed from the profile.

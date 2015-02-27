@@ -25,9 +25,9 @@ class Reservoir : public Resource {
    * @param maxProduction The maximum amount of production possible on this resource.
    * @param maxConsumption The maximum amount of consumption possible on this resource.
    */
-  Reservoir(const PlanDatabaseId planDatabase, const LabelStr& type, 
-            const LabelStr& name, const LabelStr& detectorName, 
-            const LabelStr& profileName, 
+  Reservoir(const PlanDatabaseId planDatabase, const std::string& type, 
+            const std::string& name, const std::string& detectorName, 
+            const std::string& profileName, 
             edouble initCapacityLb = 0, edouble initCapacityUb = 0, 
             edouble lowerLimit = MINUS_INFINITY, edouble upperLimit = PLUS_INFINITY,
             edouble maxInstProduction = PLUS_INFINITY, 
@@ -39,13 +39,13 @@ class Reservoir : public Resource {
        * @brief Constructor
        * @see Resource
        */
-      Reservoir(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open);
+      Reservoir(const PlanDatabaseId planDatabase, const std::string& type, const std::string& name, bool open);
 
       /**
        * @brief Constructor
        * @see Resource
        */
-      Reservoir(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open);
+      Reservoir(const ObjectId parent, const std::string& type, const std::string& localName, bool open);
 
       //~Reservoir();
 

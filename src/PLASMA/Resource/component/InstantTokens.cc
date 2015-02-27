@@ -4,7 +4,7 @@
 
 namespace EUROPA {
     ReservoirToken::ReservoirToken(const PlanDatabaseId planDatabase,
-				   const LabelStr& predicateName,
+				   const std::string& predicateName,
 				   const IntervalIntDomain& timeBaseDomain,
 				   const IntervalDomain& quantityBaseDomain,
 				   bool _isConsumer,
@@ -21,11 +21,11 @@ namespace EUROPA {
     }
 
     ReservoirToken::ReservoirToken(const PlanDatabaseId planDatabase,
-				   const LabelStr& predicateName,
+				   const std::string& predicateName,
 				   bool rejectable,
 				   bool _isFact,
 				   const IntervalIntDomain& timeBaseDomain,
-				   const LabelStr& objectName,
+				   const std::string& objectName,
 				   bool _isConsumer,
 				   bool closed,
 				   bool _activate)
@@ -36,10 +36,10 @@ namespace EUROPA {
     }
 
     ReservoirToken::ReservoirToken(const TokenId parent,
-				   const LabelStr& relation,
-				   const LabelStr& predicateName,
+				   const std::string& relation,
+				   const std::string& predicateName,
 				   const IntervalIntDomain& timeBaseDomain,
-				   const LabelStr& objectName,
+				   const std::string& objectName,
 				   bool _isConsumer,
 				   bool closed,
 				   bool _activate)
@@ -58,7 +58,7 @@ void ReservoirToken::commonInit(bool closed, bool _activate, const IntervalDomai
   m_quantity = (new TokenVariable<IntervalDomain>(m_id, m_allVariables.size(),
                                                   m_planDatabase->getConstraintEngine(),
                                                   quantityBaseDomain,
-                                                  false, true, LabelStr("quantity")))->getId();
+                                                  false, true, "quantity"))->getId();
   m_allVariables.push_back(m_quantity);
   ConstraintId relation = (new ResourceTokenRelation(m_planDatabase->getConstraintEngine(),
                                                      makeScope(m_state, m_object),

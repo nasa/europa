@@ -97,7 +97,7 @@ DecisionOrder::DecisionOrder(const DecisionOrder& other) : m_cmps() {
 }
 
     //returns true if a is better than b
-    bool DecisionOrder::operator()(const InstantId a, const InstantId b, LabelStr& explanation) const {
+    bool DecisionOrder::operator()(const InstantId a, const InstantId b, std::string& explanation) const {
       check_error(!m_cmps.empty());
       check_error(a.isValid() && b.isValid());
       debugMsg("ResourceThreatManager:betterThan", "Comparing instant " << a->getTime() << " on " << a->getProfile()->getResource()->toString() <<
@@ -309,7 +309,7 @@ ResourceThreatManager::ResourceThreatManager(const TiXmlElement& configData)
     }
 
     //this should use data from the constructor
-    bool ResourceThreatManager::betterThan(const EntityId a, const EntityId b, LabelStr& explanation) {
+    bool ResourceThreatManager::betterThan(const EntityId a, const EntityId b, std::string& explanation) {
       check_error(InstantId::convertable(a) && InstantId::convertable(b));
       InstantId instA(a);
       InstantId instB(b);

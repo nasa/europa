@@ -57,7 +57,7 @@ private:
   DefaultChoiceFilter(const DefaultChoiceFilter&);
   DefaultChoiceFilter& operator=(const DefaultChoiceFilter&);
  public:
-  DefaultChoiceFilter(Profile* profile, const LabelStr& explanation, 
+  DefaultChoiceFilter(Profile* profile, const std::string& explanation, 
                       const InstantId inst)
       : ChoiceFilter(), m_profile(profile), m_explanation(explanation), m_inst(inst),
         m_treatAsLowerFlaw(true) {
@@ -66,13 +66,13 @@ private:
     if(m_inst->hasLowerLevelFlaw() && m_inst->hasUpperLevelFlaw()) {
       debugMsg("ResourceThreatDecisionPoint:filter", "Instant is flawed on both levels.");
       //  if we were chosen out of a lower level preference, behave like that
-      if(m_explanation == LabelStr("lowerLevelFlaw") || m_explanation.toString().find("Lower") != std::string::npos) {
-        debugMsg("ResourceThreatDecisionPoint:filter", "Treating as lower flaw because of " << m_explanation.toString());
+      if(m_explanation == "lowerLevelFlaw" || m_explanation.find("Lower") != std::string::npos) {
+        debugMsg("ResourceThreatDecisionPoint:filter", "Treating as lower flaw because of " << m_explanation);
         m_treatAsLowerFlaw = true;
       }
       //  if we were chosen out of an upper level preference, behave like that
-      else if(m_explanation == LabelStr("upperLevelFlaw") || m_explanation.toString().find("Upper") != std::string::npos) {
-        debugMsg("ResourceThreatDecisionPoint:filter", "Treating as upper flaw because of " << m_explanation.toString());
+      else if(m_explanation == "upperLevelFlaw" || m_explanation.find("Upper") != std::string::npos) {
+        debugMsg("ResourceThreatDecisionPoint:filter", "Treating as upper flaw because of " << m_explanation);
         m_treatAsLowerFlaw = false;
       }
       //  if we were chosen out of a magnitude preference
@@ -95,14 +95,14 @@ private:
   virtual std::string toString() const {return "DefaultFilter";}
  protected:
   Profile* m_profile;
-  LabelStr m_explanation;
+  std::string m_explanation;
   InstantId m_inst;
   bool m_treatAsLowerFlaw;
 };
 
 class PredecessorNotContributingChoiceFilter : public DefaultChoiceFilter {
  public:
-  PredecessorNotContributingChoiceFilter(Profile* profile, const LabelStr& explanation,
+  PredecessorNotContributingChoiceFilter(Profile* profile, const std::string& explanation,
                                          const InstantId inst)
       : DefaultChoiceFilter(profile, explanation, inst) {
     // For this ChoiceFilter, we need the profile to be a subclass of FlowProfile:
@@ -151,7 +151,7 @@ class PredecessorNotContributingChoiceFilter : public DefaultChoiceFilter {
 
 class SuccessorContributingChoiceFilter : public DefaultChoiceFilter {
  public:
-  SuccessorContributingChoiceFilter(Profile* profile, const LabelStr& explanation, const InstantId inst)
+  SuccessorContributingChoiceFilter(Profile* profile, const std::string& explanation, const InstantId inst)
       : DefaultChoiceFilter(profile, explanation, inst) {
     // For this ChoiceFilter, we need the profile to be a subclass of FlowProfile:
     FlowProfile * fProfile = boost::polymorphic_cast<FlowProfile*>(profile);
@@ -404,7 +404,7 @@ class SuccessorContributingChoiceFilter : public DefaultChoiceFilter {
 ResourceThreatDecisionPoint::ResourceThreatDecisionPoint(const DbClientId client,
                                                          const InstantId flawedInstant,
                                                          const TiXmlElement& configData,
-                                                         const LabelStr& explanation)
+                                                         const std::string& explanation)
     : DecisionPoint(client, flawedInstant->getKey(), explanation), 
       m_flawedInstant(flawedInstant), m_choices(), m_choiceCount(0), m_index(0),
       m_constr(), m_instTime(flawedInstant->getTime()), 
@@ -456,7 +456,7 @@ ResourceThreatDecisionPoint::ResourceThreatDecisionPoint(const DbClientId client
     std::string ResourceThreatDecisionPoint::toShortString() const {
       std::stringstream os;
 
-      os << "INS(" << m_instTime << ") on " << m_resName.toString();
+      os << "INS(" << m_instTime << ") on " << m_resName;
       TransactionId predecessor = m_choices[m_index].first;
       TransactionId successor = m_choices[m_index].second;
       os << " {" << predecessor->toString() << " < " << successor->toString() << "}";
@@ -466,7 +466,7 @@ ResourceThreatDecisionPoint::ResourceThreatDecisionPoint(const DbClientId client
 
     std::string ResourceThreatDecisionPoint::toString() const {
       std::stringstream os;
-      os << "INSTANT=" << m_instTime << " on " << m_resName.toString() << " : ";
+      os << "INSTANT=" << m_instTime << " on " << m_resName << " : ";
 
       if (m_choiceCount == 0) {
     	os << "NO CHOICES";
@@ -541,14 +541,14 @@ ResourceThreatDecisionPoint::ResourceThreatDecisionPoint(const DbClientId client
       checkError(m_index < m_choiceCount, "Tried to execute past available choices:" << m_index << ">=" << m_choiceCount);
       TransactionId predecessor = m_choices[m_index].first;
       TransactionId successor = m_choices[m_index].second;
-      debugMsg("SolverDecisionPoint:handleExecute", "For " << m_instTime << " on " << m_resName.toString() << ", assigning " <<
+      debugMsg("SolverDecisionPoint:handleExecute", "For " << m_instTime << " on " << m_resName << ", assigning " <<
                predecessor->toString() << " to be before " << successor->toString() << " because of " << getExplanation().toString() << ".");
       m_constr = m_client->createConstraint((*m_constraintIt).c_str(), makeScope(predecessor->time(), successor->time()));
     }
 
     void ResourceThreatDecisionPoint::handleUndo() {
       debugMsg("SolverDecisionPoint:handleUndo", "Retracting ordering decision on " << m_instTime << " on " <<
-               m_resName.toString());
+               m_resName);
       check_error(m_constr.isValid());
       m_constr->discard();
       m_constr = ConstraintId::noId();

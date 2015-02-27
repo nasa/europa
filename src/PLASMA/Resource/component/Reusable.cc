@@ -11,9 +11,9 @@
 
 namespace EUROPA {
 
-Reusable::Reusable(const PlanDatabaseId planDatabase, const LabelStr& type,
-                   const LabelStr& name, const LabelStr& detectorName, 
-                   const LabelStr& profileName,
+Reusable::Reusable(const PlanDatabaseId planDatabase, const std::string& type,
+                   const std::string& name, const std::string& detectorName, 
+                   const std::string& profileName,
                    edouble initCapacityLb, edouble initCapacityUb, edouble lowerLimit,
                    edouble maxInstConsumption,
                    edouble maxConsumption)
@@ -30,14 +30,14 @@ Reusable::Reusable(const PlanDatabaseId planDatabase, const LabelStr& type,
 {
 }
 
-Reusable::Reusable(const PlanDatabaseId planDatabase, const LabelStr& type,
-                   const LabelStr& name, bool open)
+Reusable::Reusable(const PlanDatabaseId planDatabase, const std::string& type,
+                   const std::string& name, bool open)
     : Resource(planDatabase, type, name, open), m_tokensToTransactions()
 {
 }
 
-Reusable::Reusable(const ObjectId parent, const LabelStr& type, 
-                   const LabelStr& localName, bool open)
+Reusable::Reusable(const ObjectId parent, const std::string& type, 
+                   const std::string& localName, bool open)
     : Resource(parent, type, localName, open), m_tokensToTransactions()
 {
 }
@@ -123,10 +123,10 @@ void Reusable::getOrderingChoices(const TokenId token,
     Resource::removeFromProfile(tok);
   }
 
-  UnaryTimeline::UnaryTimeline(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open)
+  UnaryTimeline::UnaryTimeline(const PlanDatabaseId planDatabase, const std::string& type, const std::string& name, bool open)
     : Reusable(planDatabase, type, name, open) {init(1, 1, 0, 1, PLUS_INFINITY, PLUS_INFINITY, PLUS_INFINITY, PLUS_INFINITY, "ClosedWorldFVDetector", "IncrementalFlowProfile");}
 
-  UnaryTimeline::UnaryTimeline(const ObjectId parent, const LabelStr& type, const LabelStr& name, bool open)
+  UnaryTimeline::UnaryTimeline(const ObjectId parent, const std::string& type, const std::string& name, bool open)
     : Reusable(parent, type, name, open) {init(1, 1, 0, 1, PLUS_INFINITY, PLUS_INFINITY, PLUS_INFINITY, PLUS_INFINITY, "ClosedWorldFVDetector", "IncrementalFlowProfile");}
 
 
@@ -135,10 +135,10 @@ void Reusable::getOrderingChoices(const TokenId token,
   }
 
 CBReusable::CBReusable(const PlanDatabaseId planDatabase,
-                       const LabelStr& type,
-                       const LabelStr& name,
-                       const LabelStr& detectorName,
-                       const LabelStr& profileName,
+                       const std::string& type,
+                       const std::string& name,
+                       const std::string& detectorName,
+                       const std::string& profileName,
                        edouble initCapacityLb,
                        edouble initCapacityUb,
                        edouble lowerLimit,
@@ -161,14 +161,14 @@ CBReusable::CBReusable(const PlanDatabaseId planDatabase,
 {
 }
 
-CBReusable::CBReusable(const PlanDatabaseId planDatabase, const LabelStr& type,
-                       const LabelStr& name, bool open)
+CBReusable::CBReusable(const PlanDatabaseId planDatabase, const std::string& type,
+                       const std::string& name, bool open)
     : Resource(planDatabase, type, name, open), m_constraintsToTransactions()
 {
 }
 
-CBReusable::CBReusable(const ObjectId parent, const LabelStr& type,
-                       const LabelStr& localName, bool open)
+CBReusable::CBReusable(const ObjectId parent, const std::string& type,
+                       const std::string& localName, bool open)
     : Resource(parent, type, localName, open), m_constraintsToTransactions()
 {
 }
@@ -340,8 +340,8 @@ edouble getUb(ConstrainedVariableId v) {
     }
   }
 
-Uses::Uses(const LabelStr& name,
-           const LabelStr& propagatorName,
+Uses::Uses(const std::string& name,
+           const std::string& propagatorName,
            const ConstraintEngineId ce,
            const std::vector<ConstrainedVariableId>& scope)
     : Constraint(name, propagatorName, ce, scope), m_resource(), m_txns(), 
@@ -475,13 +475,13 @@ bool Uses::canIgnore(const ConstrainedVariableId variable,
     Constraint::notifyNoLongerViolated();
   }
 
-  const LabelStr& Uses::CONSTRAINT_NAME() {
-    static const LabelStr sl_const("uses");
+  const std::string& Uses::CONSTRAINT_NAME() {
+    static const std::string sl_const("uses");
     return sl_const;
   }
 
-  const LabelStr& Uses::PROPAGATOR_NAME() {
-    static const LabelStr sl_const("Resource");
+  const std::string& Uses::PROPAGATOR_NAME() {
+    static const std::string sl_const("Resource");
     return sl_const;
   }
 

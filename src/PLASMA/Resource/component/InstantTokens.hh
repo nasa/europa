@@ -8,7 +8,7 @@ namespace EUROPA {
     class ReservoirToken : public EventToken {
     public:
       ReservoirToken(const PlanDatabaseId planDatabase,
-		     const LabelStr& predicateName,
+		     const std::string& predicateName,
 		     const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
 		     const IntervalDomain& quantityBaseDomain = IntervalDomain(0, PLUS_INFINITY),
 		     bool isConsumer = false,
@@ -16,20 +16,20 @@ namespace EUROPA {
 		     bool activate = true);
 
       ReservoirToken(const PlanDatabaseId planDatabase,
-		     const LabelStr& predicateName,
+		     const std::string& predicateName,
 		     bool rejectable,
 		     bool isFact,
 		     const IntervalIntDomain& timeBaseDomain,
-		     const LabelStr& objectName,
+		     const std::string& objectName,
 		     bool isConsumer,
 		     bool closed,
 		     bool activate = true);
 
       ReservoirToken(const TokenId parent,
-		     const LabelStr& relation,
-		     const LabelStr& predicateName,
+		     const std::string& relation,
+		     const std::string& predicateName,
 		     const IntervalIntDomain& timeBaseDomain,
-		     const LabelStr& objectName,
+		     const std::string& objectName,
 		     bool isConsumer,
 		     bool closed,
 		     bool activate = true);
@@ -49,7 +49,7 @@ namespace EUROPA {
 class ConsumerToken : public ReservoirToken {
  public:
   ConsumerToken(const PlanDatabaseId planDatabase,
-                const LabelStr& predicateName,
+                const std::string& predicateName,
                 const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
                 const IntervalDomain quantityBaseDomain = IntervalDomain(0, PLUS_INFINITY),
                 bool closed = true,
@@ -58,11 +58,11 @@ class ConsumerToken : public ReservoirToken {
                        quantityBaseDomain, true, closed, _activate) {
   }
   ConsumerToken(const PlanDatabaseId planDatabase,
-                const LabelStr& predicateName,
+                const std::string& predicateName,
                 bool rejectable,
                 bool _isFact,
                 const IntervalIntDomain& timeBaseDomain,
-                const LabelStr& objectName,
+                const std::string& objectName,
                 bool closed,
                 bool _activate = true)
       : ReservoirToken(planDatabase, predicateName, rejectable, _isFact,
@@ -70,10 +70,10 @@ class ConsumerToken : public ReservoirToken {
   }
 
   ConsumerToken(const TokenId parent,
-                const LabelStr& relation,
-                const LabelStr& predicateName,
+                const std::string& relation,
+                const std::string& predicateName,
                 const IntervalIntDomain& timeBaseDomain,
-                const LabelStr& objectName,
+                const std::string& objectName,
                 bool closed,
                 bool _activate = true)
       : ReservoirToken(parent, relation, predicateName, timeBaseDomain, objectName, true, closed, _activate) {
@@ -83,7 +83,7 @@ class ConsumerToken : public ReservoirToken {
 class ProducerToken : public ReservoirToken {
  public:
   ProducerToken(const PlanDatabaseId planDatabase,
-                const LabelStr& predicateName,
+                const std::string& predicateName,
                 const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
                 const IntervalDomain quantityBaseDomain = IntervalDomain(0, PLUS_INFINITY),
                 bool closed = true,
@@ -92,11 +92,11 @@ class ProducerToken : public ReservoirToken {
                        false, closed, _activate) {
   }
   ProducerToken(const PlanDatabaseId planDatabase,
-                const LabelStr& predicateName,
+                const std::string& predicateName,
                 bool rejectable,
                 bool _isFact,
                 const IntervalIntDomain& timeBaseDomain,
-                const LabelStr& objectName,
+                const std::string& objectName,
                 bool closed,
                 bool _activate = true)
       : ReservoirToken(planDatabase, predicateName, rejectable, _isFact,
@@ -104,10 +104,10 @@ class ProducerToken : public ReservoirToken {
   }
 
   ProducerToken(const TokenId parent,
-                const LabelStr& relation,
-                const LabelStr& predicateName,
+                const std::string& relation,
+                const std::string& predicateName,
                 const IntervalIntDomain& timeBaseDomain,
-                const LabelStr& objectName,
+                const std::string& objectName,
                 bool closed,
                 bool _activate = true)
       : ReservoirToken(parent, relation, predicateName, timeBaseDomain, objectName,

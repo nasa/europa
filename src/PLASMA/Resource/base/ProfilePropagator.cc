@@ -7,7 +7,7 @@
 
 namespace EUROPA {
 
-    ProfilePropagator::ProfilePropagator(const LabelStr& name,
+    ProfilePropagator::ProfilePropagator(const std::string& name,
 					 const ConstraintEngineId constraintEngine)
     : DefaultPropagator(name, constraintEngine)
     , m_profiles()

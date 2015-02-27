@@ -12,7 +12,7 @@ namespace EUROPA {
       DecisionOrder() : m_cmps() {}
       DecisionOrder(const DecisionOrder& other);
       ~DecisionOrder();
-      bool operator()(const InstantId a, const InstantId b, LabelStr& explanation) const;
+      bool operator()(const InstantId a, const InstantId b, std::string& explanation) const;
       void addOrder(InstantComparator* cmp);
     private:
       std::list<InstantComparator*> m_cmps;
@@ -26,7 +26,7 @@ namespace EUROPA {
       virtual bool staticMatch(const EntityId entity);
       virtual bool dynamicMatch(const EntityId entity);
       virtual void handleInitialize();
-      virtual bool betterThan(const EntityId a, const EntityId b, LabelStr& explanation);
+      virtual bool betterThan(const EntityId a, const EntityId b, std::string& explanation);
       virtual IteratorId createIterator();
 
       virtual void notifyAdded(const ConstraintId){}

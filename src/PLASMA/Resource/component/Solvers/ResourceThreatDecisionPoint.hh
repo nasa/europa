@@ -15,7 +15,7 @@ namespace EUROPA {
 
     class ResourceThreatDecisionPoint : public SOLVERS::DecisionPoint {
     public:
-      ResourceThreatDecisionPoint(const DbClientId client, const InstantId inst, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
+      ResourceThreatDecisionPoint(const DbClientId client, const InstantId inst, const TiXmlElement& configData, const std::string& explanation = "unknown");
       virtual ~ResourceThreatDecisionPoint();
       virtual std::string toString() const;
       virtual std::string toShortString() const;
@@ -40,7 +40,7 @@ namespace EUROPA {
       unsigned long m_index;
       ConstraintId m_constr;
       eint m_instTime;
-      LabelStr m_resName;
+      std::string m_resName;
       std::string m_order;
       std::string m_filter;
       std::string m_constraintOrder;

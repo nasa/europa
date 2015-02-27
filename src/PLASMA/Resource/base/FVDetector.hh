@@ -101,7 +101,7 @@ namespace EUROPA {
     class FVDetectorFactory : public Factory
     {
     public:
-      FVDetectorFactory(const EUROPA::LabelStr& name) : Factory(name) {}
+      FVDetectorFactory(const std::string& name) : Factory(name) {}
 
       virtual EUROPA::FactoryObjId createInstance(const EUROPA::FactoryArgs& fa) {
         const FVDetectorArgs& args = dynamic_cast<const FVDetectorArgs&>(fa);
@@ -110,7 +110,7 @@ namespace EUROPA {
     };
 
 #define REGISTER_FVDETECTOR(MGR, CLASS, NAME) \
-    (MGR->registerFactory((new EUROPA::FVDetectorFactory<CLASS>(EUROPA::LabelStr(#NAME)))->getId()));
+    (MGR->registerFactory((new EUROPA::FVDetectorFactory<CLASS>(#NAME))->getId()));
 }
 
 #endif

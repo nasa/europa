@@ -4,12 +4,12 @@
 
 namespace EUROPA {
     ReusableToken::ReusableToken(const PlanDatabaseId planDatabase,
-				 const LabelStr& predicateName,
+				 const std::string& predicateName,
 				 const IntervalIntDomain& startBaseDomain,
 				 const IntervalIntDomain& endBaseDomain,
 				 const IntervalIntDomain& durationBaseDomain,
 				 const IntervalDomain& quantityBaseDomain,
-				 const LabelStr& objectName,
+				 const std::string& objectName,
 				 bool closed,
 				 bool _activate)
       : IntervalToken(planDatabase, predicateName, false, false, startBaseDomain,
@@ -21,11 +21,11 @@ namespace EUROPA {
     }
 
     ReusableToken::ReusableToken(const PlanDatabaseId planDatabase,
-				 const LabelStr& predicateName,
+				 const std::string& predicateName,
 				 const IntervalIntDomain& startBaseDomain,
 				 const IntervalIntDomain& endBaseDomain,
 				 const IntervalIntDomain& durationBaseDomain,
-				 const LabelStr& objectName,
+				 const std::string& objectName,
 				 bool closed,
 				 bool _activate)
       : IntervalToken(planDatabase, predicateName, false, false, startBaseDomain,
@@ -35,14 +35,14 @@ namespace EUROPA {
     }
 
 ReusableToken::ReusableToken(const PlanDatabaseId planDatabase,
-                             const LabelStr& predicateName,
+                             const std::string& predicateName,
                              bool rejectable,
                              bool _isFact,
                              const IntervalIntDomain& startBaseDomain,
                              const IntervalIntDomain& endBaseDomain,
                              const IntervalIntDomain& durationBaseDomain,
                              const IntervalDomain& quantityBaseDomain,
-                             const LabelStr& objectName,
+                             const std::string& objectName,
                              bool closed,
                              bool _activate)
 : IntervalToken(planDatabase, predicateName, rejectable, _isFact, startBaseDomain,
@@ -54,13 +54,13 @@ ReusableToken::ReusableToken(const PlanDatabaseId planDatabase,
 }
 
 ReusableToken::ReusableToken(const PlanDatabaseId planDatabase,
-                             const LabelStr& predicateName,
+                             const std::string& predicateName,
                              bool rejectable,
                              bool _isFact,
                              const IntervalIntDomain& startBaseDomain,
                              const IntervalIntDomain& endBaseDomain,
                              const IntervalIntDomain& durationBaseDomain,
-                             const LabelStr& objectName,
+                             const std::string& objectName,
                              bool closed,
                              bool _activate)
 : IntervalToken(planDatabase, predicateName, rejectable, _isFact, startBaseDomain,
@@ -70,12 +70,12 @@ ReusableToken::ReusableToken(const PlanDatabaseId planDatabase,
 }
 
 ReusableToken::ReusableToken(const TokenId _master,
-                             const LabelStr& relation,
-                             const LabelStr& predicateName,
+                             const std::string& relation,
+                             const std::string& predicateName,
                              const IntervalIntDomain& startBaseDomain,
                              const IntervalIntDomain& endBaseDomain,
                              const IntervalIntDomain& durationBaseDomain,
-                             const LabelStr& objectName,
+                             const std::string& objectName,
                              bool closed,
                              bool _activate)
     : IntervalToken(_master, relation, predicateName, startBaseDomain, endBaseDomain,
@@ -85,13 +85,13 @@ ReusableToken::ReusableToken(const TokenId _master,
 }
 
 ReusableToken::ReusableToken(const TokenId _master,
-                             const LabelStr& relation,
-                             const LabelStr& predicateName,
+                             const std::string& relation,
+                             const std::string& predicateName,
                              const IntervalIntDomain& startBaseDomain,
                              const IntervalIntDomain& endBaseDomain,
                              const IntervalIntDomain& durationBaseDomain,
                              const IntervalDomain& quantityBaseDomain,
-                             const LabelStr& objectName,
+                             const std::string& objectName,
                              bool closed,
                              bool _activate)
 : IntervalToken(_master, relation, predicateName, startBaseDomain, endBaseDomain,
@@ -111,7 +111,7 @@ void ReusableToken::commonInit(bool closed, bool _activate,
   m_quantity = (new TokenVariable<IntervalDomain>(m_id, m_allVariables.size(),
                                                   m_planDatabase->getConstraintEngine(),
                                                   quantityBaseDomain,
-                                                  false, true, LabelStr("quantity")))->getId();
+                                                  false, true, "quantity"))->getId();
   m_allVariables.push_back(m_quantity);
   ConstraintId relation = (new ResourceTokenRelation(m_planDatabase->getConstraintEngine(),
                                                      makeScope(m_state, m_object),
@@ -132,11 +132,11 @@ void ReusableToken::commonInit(bool closed, bool _activate,
     }
 
 UnaryToken::UnaryToken(const PlanDatabaseId planDatabase,
-                       const LabelStr& predicateName,
+                       const std::string& predicateName,
                        const IntervalIntDomain& startBaseDomain,
                        const IntervalIntDomain& endBaseDomain,
                        const IntervalIntDomain& durationBaseDomain,
-                       const LabelStr& objectName,
+                       const std::string& objectName,
                        bool closed,
                        bool _activate)
     : ReusableToken(planDatabase, predicateName, startBaseDomain, endBaseDomain,
@@ -144,13 +144,13 @@ UnaryToken::UnaryToken(const PlanDatabaseId planDatabase,
                     _activate) {}
 
 UnaryToken::UnaryToken(const PlanDatabaseId planDatabase,
-                       const LabelStr& predicateName,
+                       const std::string& predicateName,
                        bool rejectable,
                        bool _isFact,
                        const IntervalIntDomain& startBaseDomain,
                        const IntervalIntDomain& endBaseDomain,
                        const IntervalIntDomain& durationBaseDomain,
-                       const LabelStr& objectName,
+                       const std::string& objectName,
                        bool closed,
                        bool _activate)
     : ReusableToken(planDatabase, predicateName, rejectable, _isFact, startBaseDomain,
@@ -158,12 +158,12 @@ UnaryToken::UnaryToken(const PlanDatabaseId planDatabase,
                     closed, _activate) {}
 
 UnaryToken::UnaryToken(const TokenId _master,
-                       const LabelStr& relation,
-                       const LabelStr& predicateName,
+                       const std::string& relation,
+                       const std::string& predicateName,
                        const IntervalIntDomain& startBaseDomain,
                        const IntervalIntDomain& endBaseDomain,
                        const IntervalIntDomain& durationBaseDomain,
-                       const LabelStr& objectName,
+                       const std::string& objectName,
                        bool closed,
                        bool _activate)
     : ReusableToken(_master, relation, predicateName, startBaseDomain, endBaseDomain,
