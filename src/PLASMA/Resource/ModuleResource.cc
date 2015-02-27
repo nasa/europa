@@ -45,7 +45,7 @@ namespace EUROPA {
 void ModuleResource::initialize(EngineId engine) {
   ConstraintEngine* ce = boost::polymorphic_cast<ConstraintEngine*>(engine->getComponent("ConstraintEngine"));
   Schema* schema = boost::polymorphic_cast<Schema*>(engine->getComponent("Schema"));
-  new ProfilePropagator(LabelStr("Resource"), ce->getId());
+  new ProfilePropagator("Resource", ce->getId());
 
   ObjectTypeId objectOT = schema->getObjectType(Schema::rootObject());
   ObjectType* ot;

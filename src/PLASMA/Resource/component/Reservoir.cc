@@ -10,9 +10,9 @@
 #include "TokenVariable.hh"
 
 namespace EUROPA {
-Reservoir::Reservoir(const PlanDatabaseId planDatabase, const LabelStr& type,
-                     const LabelStr& name, const LabelStr& detectorName,
-                     const LabelStr& profileName, 
+Reservoir::Reservoir(const PlanDatabaseId planDatabase, const std::string& type,
+                     const std::string& name, const std::string& detectorName,
+                     const std::string& profileName, 
                      edouble initCapacityLb, edouble initCapacityUb,
                      edouble lowerLimit, edouble upperLimit,
                      edouble maxInstProduction, edouble maxInstConsumption,
@@ -22,12 +22,12 @@ Reservoir::Reservoir(const PlanDatabaseId planDatabase, const LabelStr& type,
              maxInstProduction, maxInstConsumption, maxProduction, maxConsumption),
   m_tokensToTransactions() {}
 
-Reservoir::Reservoir(const PlanDatabaseId planDatabase, const LabelStr& type,
-                     const LabelStr& name, bool open) :
+Reservoir::Reservoir(const PlanDatabaseId planDatabase, const std::string& type,
+                     const std::string& name, bool open) :
     Resource(planDatabase, type, name, open), m_tokensToTransactions() {}
 
-Reservoir::Reservoir(const ObjectId parent, const LabelStr& type, 
-                     const LabelStr& localName, bool open) :
+Reservoir::Reservoir(const ObjectId parent, const std::string& type, 
+                     const std::string& localName, bool open) :
     Resource(parent, type, localName, open), m_tokensToTransactions() {}
 
   void Reservoir::createTransactions(const TokenId tok) {

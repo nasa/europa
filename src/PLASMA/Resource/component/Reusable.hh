@@ -10,12 +10,12 @@ namespace EUROPA {
     class Reusable : public Resource {
     public:
       //initial capacity is the upper limit, maxInstConsumption == maxInstProduction, maxConsumption == maxProduction
-      Reusable(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, const LabelStr& detectorName, const LabelStr& profileName,
+      Reusable(const PlanDatabaseId planDatabase, const std::string& type, const std::string& name, const std::string& detectorName, const std::string& profileName,
 	       edouble initCapacityLb = 0, edouble initCapacityUb = 0, edouble lowerLimit = MINUS_INFINITY,
 	       edouble maxInstConsumption = PLUS_INFINITY,
 	       edouble maxConsumption = PLUS_INFINITY);
-      Reusable(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open);
-      Reusable(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open);
+      Reusable(const PlanDatabaseId planDatabase, const std::string& type, const std::string& name, bool open);
+      Reusable(const ObjectId parent, const std::string& type, const std::string& localName, bool open);
       virtual ~Reusable();
 
       virtual void getOrderingChoices(const TokenId token,
@@ -35,8 +35,8 @@ namespace EUROPA {
 
     class UnaryTimeline : public Reusable {
     public:
-      UnaryTimeline(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open = false);
-      UnaryTimeline(const ObjectId parent, const LabelStr& type, const LabelStr& name, bool open = false);
+      UnaryTimeline(const PlanDatabaseId planDatabase, const std::string& type, const std::string& name, bool open = false);
+      UnaryTimeline(const ObjectId parent, const std::string& type, const std::string& name, bool open = false);
       virtual ~UnaryTimeline();
     };
 
@@ -49,12 +49,12 @@ namespace EUROPA {
     class CBReusable : public Resource {
     public:
       //initial capacity is the upper limit, maxInstConsumption == maxInstProduction, maxConsumption == maxProduction
-      CBReusable(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, const LabelStr& detectorName, const LabelStr& profileName,
+      CBReusable(const PlanDatabaseId planDatabase, const std::string& type, const std::string& name, const std::string& detectorName, const std::string& profileName,
            edouble initCapacityLb = 0, edouble initCapacityUb = 0, edouble lowerLimit = MINUS_INFINITY,
            edouble maxInstConsumption = PLUS_INFINITY,
            edouble maxConsumption = PLUS_INFINITY);
-      CBReusable(const PlanDatabaseId planDatabase, const LabelStr& type, const LabelStr& name, bool open);
-      CBReusable(const ObjectId parent, const LabelStr& type, const LabelStr& localName, bool open);
+      CBReusable(const PlanDatabaseId planDatabase, const std::string& type, const std::string& name, bool open);
+      CBReusable(const ObjectId parent, const std::string& type, const std::string& localName, bool open);
       virtual ~CBReusable();
 
       virtual void notifyViolated(const InstantId inst, Resource::ProblemType problem);
@@ -84,13 +84,13 @@ namespace EUROPA {
     class Uses : public Constraint
     {
     public:
-      Uses(const LabelStr& name,
-           const LabelStr& propagatorName,
+      Uses(const std::string& name,
+           const std::string& propagatorName,
            const ConstraintEngineId constraintEngine,
            const std::vector<ConstrainedVariableId>& scope);
 
-      static const LabelStr& CONSTRAINT_NAME();
-      static const LabelStr& PROPAGATOR_NAME();
+      static const std::string& CONSTRAINT_NAME();
+      static const std::string& PROPAGATOR_NAME();
 
       static const int RESOURCE_VAR = 0;
       static const int QTY_VAR = 1;

@@ -18,11 +18,11 @@ namespace NDDL {
 class NddlUnaryToken : public EUROPA::UnaryToken {
  public:
   NddlUnaryToken(const EUROPA::PlanDatabaseId planDatabase,
-                 const EUROPA::LabelStr& predicateName, const bool& rejectable = false,
+                 const std::string& predicateName, const bool& rejectable = false,
                  const bool& isFact=false, const bool& close = false);
   NddlUnaryToken(const EUROPA::TokenId master,
-                 const EUROPA::LabelStr& predicateName,
-                 const EUROPA::LabelStr& relation, const bool& close = false);
+                 const std::string& predicateName,
+                 const std::string& relation, const bool& close = false);
 
   EUROPA::StateVarId state;
   EUROPA::ObjectVarId object;
@@ -38,12 +38,12 @@ class NddlUnaryToken : public EUROPA::UnaryToken {
 class NddlUnary : public EUROPA::Reusable {
  public:
   NddlUnary(const EUROPA::PlanDatabaseId planDatabase,
-            const EUROPA::LabelStr& type,
-            const EUROPA::LabelStr& name,
+            const std::string& type,
+            const std::string& name,
             bool open);
   NddlUnary(const EUROPA::ObjectId parent,
-            const EUROPA::LabelStr& type,
-            const EUROPA::LabelStr& name,
+            const std::string& type,
+            const std::string& name,
             bool open);
 
   virtual ~NddlUnary(){}
@@ -62,10 +62,10 @@ class NddlUnary : public EUROPA::Reusable {
 
   class use : public EUROPA::ReusableToken {
    public:
-    use(const EUROPA::PlanDatabaseId planDatabase, const EUROPA::LabelStr& predicateName,
+    use(const EUROPA::PlanDatabaseId planDatabase, const std::string& predicateName,
         bool rejectable, bool isFact, bool close);
-    use(const EUROPA::TokenId master, const EUROPA::LabelStr& predicateName,
-        const EUROPA::LabelStr& relation, bool close);
+    use(const EUROPA::TokenId master, const std::string& predicateName,
+        const std::string& relation, bool close);
 
     EUROPA::StateVarId state;
     EUROPA::ObjectVarId object;
@@ -83,12 +83,12 @@ class NddlUnary : public EUROPA::Reusable {
 class NddlReusable : public EUROPA::Reusable {
  public:
   NddlReusable(const EUROPA::PlanDatabaseId planDatabase,
-               const EUROPA::LabelStr& type,
-               const EUROPA::LabelStr& name,
+               const std::string& type,
+               const std::string& name,
                bool open);
   NddlReusable(const EUROPA::ObjectId parent,
-               const EUROPA::LabelStr& type,
-               const EUROPA::LabelStr& name,
+               const std::string& type,
+               const std::string& name,
                bool open);
 
   virtual ~NddlReusable(){}
@@ -114,10 +114,10 @@ class NddlReusable : public EUROPA::Reusable {
 
   class uses : public EUROPA::ReusableToken {
    public:
-    uses(const EUROPA::PlanDatabaseId planDatabase, const EUROPA::LabelStr& predicateName,
+    uses(const EUROPA::PlanDatabaseId planDatabase, const std::string& predicateName,
          bool rejectable, bool isFact, bool close);
-    uses(const EUROPA::TokenId master, const EUROPA::LabelStr& predicateName,
-         const EUROPA::LabelStr& relation, bool close);
+    uses(const EUROPA::TokenId master, const std::string& predicateName,
+         const std::string& relation, bool close);
 
     EUROPA::StateVarId state;
     EUROPA::ObjectVarId object;
@@ -136,12 +136,12 @@ class NddlReusable : public EUROPA::Reusable {
 class NddlCBReusable : public EUROPA::CBReusable {
  public:
   NddlCBReusable(const EUROPA::PlanDatabaseId planDatabase,
-                 const EUROPA::LabelStr& type,
-                 const EUROPA::LabelStr& name,
+                 const std::string& type,
+                 const std::string& name,
                  bool open);
   NddlCBReusable(const EUROPA::ObjectId parent,
-                 const EUROPA::LabelStr& type,
-                 const EUROPA::LabelStr& name,
+                 const std::string& type,
+                 const std::string& name,
                  bool open);
 
   virtual ~NddlCBReusable(){}
@@ -169,13 +169,13 @@ class NddlCBReusable : public EUROPA::CBReusable {
 class NddlReservoir : public EUROPA::Reservoir {
  public:
   NddlReservoir(const EUROPA::PlanDatabaseId planDatabase,
-                const EUROPA::LabelStr& type,
-                const EUROPA::LabelStr& name,
+                const std::string& type,
+                const std::string& name,
                 bool open);
 
   NddlReservoir(const EUROPA::ObjectId parent,
-                const EUROPA::LabelStr& type,
-                const EUROPA::LabelStr& name,
+                const std::string& type,
+                const std::string& name,
                 bool open);
 
   virtual ~NddlReservoir(){}
@@ -212,9 +212,9 @@ class NddlReservoir : public EUROPA::Reservoir {
   class produce : public EUROPA::ProducerToken {
    public:
     produce(const EUROPA::PlanDatabaseId planDatabase,
-            const EUROPA::LabelStr& predicateName, bool rejectable, bool isFact, bool close);
-    produce(const EUROPA::TokenId master, const EUROPA::LabelStr& predicateName,
-            const EUROPA::LabelStr& relation, bool close);
+            const std::string& predicateName, bool rejectable, bool isFact, bool close);
+    produce(const EUROPA::TokenId master, const std::string& predicateName,
+            const std::string& relation, bool close);
 
     /* Access to primitives of a token as public members. */
     EUROPA::StateVarId state;
@@ -238,9 +238,9 @@ class NddlReservoir : public EUROPA::Reservoir {
   class consume : public EUROPA::ConsumerToken {
    public:
     consume(const EUROPA::PlanDatabaseId planDatabase,
-            const EUROPA::LabelStr& predicateName, bool rejectable, bool isFact, bool close);
-    consume(const EUROPA::TokenId master, const EUROPA::LabelStr& predicateName,
-            const EUROPA::LabelStr& relation, bool close);
+            const std::string& predicateName, bool rejectable, bool isFact, bool close);
+    consume(const EUROPA::TokenId master, const std::string& predicateName,
+            const std::string& relation, bool close);
 
     /* Access to primitives of a token as public members. */
     EUROPA::StateVarId state;

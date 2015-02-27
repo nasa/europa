@@ -12,7 +12,7 @@ private:
   ProfilePropagator(const ProfilePropagator&);
   ProfilePropagator& operator=(const ProfilePropagator&);
  public:
-  ProfilePropagator(const LabelStr& name,
+  ProfilePropagator(const std::string& name,
                     const ConstraintEngineId constraintEngine);
 
   virtual ~ProfilePropagator();

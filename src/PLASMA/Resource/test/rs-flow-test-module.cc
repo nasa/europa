@@ -260,9 +260,9 @@ private:
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(1), false, true, "qt-");    
     Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(1), false, true, "qt+");
 
-    LessThanEqualConstraint c0(LabelStr("precedes"), LabelStr("Temporal"), ce.getId(),
+    LessThanEqualConstraint c0("precedes", "Temporal", ce.getId(),
                                makeScope(t1.getId(), t2.getId()));
-    LessThanEqualConstraint c1(LabelStr("precedes"), LabelStr("Temporal"), ce.getId(),
+    LessThanEqualConstraint c1("precedes", "Temporal", ce.getId(),
                                makeScope(t3.getId(), t4.getId()));
 
     ce.propagate();
@@ -409,7 +409,7 @@ private:
     Transaction trans1( t1.getId(),  q1.getId(),  false, EntityId::noId());
     Transaction trans2( t2.getId(),  q2.getId(),  true , EntityId::noId());
 
-    EqualConstraint c0(LabelStr("concurrent"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), t2.getId()));
+    EqualConstraint c0("concurrent", "Temporal", ce.getId() , makeScope(t1.getId(), t2.getId()));
 
     ce.propagate();
 
@@ -581,7 +581,7 @@ private:
      */
     debugMsg("ResourceTest","    Case 5");
 
-    EqualConstraint c0(LabelStr("concurrent"), LabelStr("Temporal"), ce.getId() ,
+    EqualConstraint c0("concurrent", "Temporal", ce.getId() ,
                        makeScope( t3.getId(), t4.getId()));
 
     ce.propagate();
@@ -611,7 +611,7 @@ private:
     Transaction trans1( t1.getId(),  q1.getId(),  false, EntityId::noId());
     Transaction trans2( t2.getId(),  q2.getId(),  true , EntityId::noId());
 
-    EqualConstraint c0(LabelStr("concurrent"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), t2.getId()));
+    EqualConstraint c0("concurrent", "Temporal", ce.getId() , makeScope(t1.getId(), t2.getId()));
 
     ce.propagate();
 
@@ -635,7 +635,7 @@ private:
     Transaction trans1( t1.getId(),  q1.getId(),  false, EntityId::noId());
     Transaction trans2( t2.getId(),  q2.getId(),  true , EntityId::noId());
 
-    EqualConstraint c0(LabelStr("concurrent"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), t2.getId()));
+    EqualConstraint c0("concurrent", "Temporal", ce.getId() , makeScope(t1.getId(), t2.getId()));
 
     ce.propagate();
 
@@ -704,7 +704,7 @@ private:
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(3, 3), false, true, "q2" );
     Transaction trans2( t2.getId(),  q2.getId(),  false , EntityId::noId());
 
-    LessThanEqualConstraint c0(LabelStr("precedes"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), t2.getId()));
+    LessThanEqualConstraint c0("precedes", "Temporal", ce.getId() , makeScope(t1.getId(), t2.getId()));
 
     Variable<IntervalIntDomain> t3( ce.getId(), IntervalIntDomain(10, 10), false, true, "t3" );
     Variable<IntervalDomain> q3( ce.getId(), IntervalDomain(2, 2), false, true, "q3" );
@@ -714,7 +714,7 @@ private:
     Variable<IntervalDomain> q4( ce.getId(), IntervalDomain(2, 2), false, true, "q4" );
     Transaction trans4( t4.getId(),  q4.getId(),  false , EntityId::noId());
 
-    LessThanEqualConstraint c1(LabelStr("precedes"), LabelStr("Temporal"), ce.getId() , makeScope(t3.getId(), t4.getId()));
+    LessThanEqualConstraint c1("precedes", "Temporal", ce.getId() , makeScope(t3.getId(), t4.getId()));
 
     Variable<IntervalIntDomain> t5( ce.getId(), IntervalIntDomain(11, 100), false, true, "t5" );
     Variable<IntervalDomain> q5( ce.getId(), IntervalDomain(3, 3), false, true, "q5" );
@@ -724,10 +724,10 @@ private:
     Variable<IntervalDomain> q6( ce.getId(), IntervalDomain(3, 3), false, true, "q6" );
     Transaction trans6( t6.getId(),  q6.getId(),  false , EntityId::noId());
 
-    LessThanEqualConstraint c2(LabelStr("precedes"), LabelStr("Temporal"), ce.getId() , makeScope(t5.getId(), t6.getId()));
+    LessThanEqualConstraint c2("precedes", "Temporal", ce.getId() , makeScope(t5.getId(), t6.getId()));
 
-    LessThanEqualConstraint c3(LabelStr("precedes"), LabelStr("Temporal"), ce.getId() , makeScope(t2.getId(), t3.getId()));
-    LessThanEqualConstraint c4(LabelStr("precedes"), LabelStr("Temporal"), ce.getId() , makeScope(t2.getId(), t5.getId()));
+    LessThanEqualConstraint c3("precedes", "Temporal", ce.getId() , makeScope(t2.getId(), t3.getId()));
+    LessThanEqualConstraint c4("precedes", "Temporal", ce.getId() , makeScope(t2.getId(), t5.getId()));
 
     ce.propagate();
 
@@ -772,7 +772,7 @@ private:
     Transaction trans1( t1.getId(),  q1.getId(),  true, EntityId::noId());
     Transaction trans2( t2.getId(),  q2.getId(),  false , EntityId::noId());
 
-    LessThanEqualConstraint c1(LabelStr("precedes"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), t2.getId()));
+    LessThanEqualConstraint c1("precedes", "Temporal", ce.getId() , makeScope(t1.getId(), t2.getId()));
 
     ce.propagate();
 
@@ -811,7 +811,7 @@ private:
 
 
     Variable<IntervalIntDomain> distance( ce.getId(), IntervalIntDomain( 1, PLUS_INFINITY ), false, true, "distance" );
-    AddEqualConstraint c1(LabelStr("temporalDistance"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), distance.getId(), t2.getId()));
+    AddEqualConstraint c1("temporalDistance", "Temporal", ce.getId() , makeScope(t1.getId(), distance.getId(), t2.getId()));
 
     ce.propagate();
 
@@ -884,7 +884,7 @@ private:
     Transaction trans3( t3.getId(),  q3.getId(),  true , EntityId::noId());
 
     Variable<IntervalIntDomain> distance( ce.getId(), IntervalIntDomain( 1, PLUS_INFINITY ), false, true, "distance" );
-    AddEqualConstraint c1(LabelStr("temporalDistance"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), distance.getId(), t2.getId()));
+    AddEqualConstraint c1("temporalDistance", "Temporal", ce.getId() , makeScope(t1.getId(), distance.getId(), t2.getId()));
 
     ce.propagate();
 
@@ -1515,32 +1515,32 @@ private:
   static bool testReusableDetector() {
     RESOURCE_DEFAULT_SETUP(ce, db, false);
 
-    Reusable res(db.getId(), LabelStr("Reusable"), LabelStr("res1"), 
-                 LabelStr("ClosedWorldFVDetector"), LabelStr("IncrementalFlowProfile"),
+    Reusable res(db.getId(), "Reusable", "res1", 
+                 "ClosedWorldFVDetector", "IncrementalFlowProfile",
                  1, 1, 0);
 
     //create a token that violates the limit (i.e. consumes 2)
-    ReusableToken tok1(db.getId(), LabelStr("Reusable.uses"), 
+    ReusableToken tok1(db.getId(), "Reusable.uses", 
                        IntervalIntDomain(1), IntervalIntDomain(10),
                        IntervalIntDomain(9), IntervalDomain(2));
     CPPUNIT_ASSERT(!ce.propagate());
     tok1.discard(false);
 
     //create a token that doesn't
-    ReusableToken tok2(db.getId(), LabelStr("Reusable.uses"), 
+    ReusableToken tok2(db.getId(), "Reusable.uses", 
                        IntervalIntDomain(1, 3), IntervalIntDomain(10, 12),
                        IntervalIntDomain(9),
 		       IntervalDomain(1));
     CPPUNIT_ASSERT(ce.propagate());
         //create a token that doesn't, but must start during the previous token, causing a violation
-    ReusableToken tok3(db.getId(), LabelStr("Reusable.uses"), IntervalIntDomain(9),
+    ReusableToken tok3(db.getId(), "Reusable.uses", IntervalIntDomain(9),
                        IntervalIntDomain(11), IntervalIntDomain(2),
 		       IntervalDomain(1));
     CPPUNIT_ASSERT(!ce.propagate());
     tok3.discard(false);
     CPPUNIT_ASSERT(ce.propagate());
     //create a token that doesn't, and may start afterwards, creating a flaw
-    ReusableToken tok4(db.getId(), LabelStr("Reusable.uses"), IntervalIntDomain(10, 13), IntervalIntDomain(15, 18), IntervalIntDomain(5),
+    ReusableToken tok4(db.getId(), "Reusable.uses", IntervalIntDomain(10, 13), IntervalIntDomain(15, 18), IntervalIntDomain(5),
 		       IntervalDomain(1));
     CPPUNIT_ASSERT(ce.propagate());
     CPPUNIT_ASSERT(db.hasOrderingChoice(tok4.getId()));

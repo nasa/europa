@@ -34,9 +34,9 @@ struct select2nd : public std::unary_function<Pair, typename Pair::second_type> 
 namespace EUROPA {
 
 Resource::Resource(const PlanDatabaseId planDatabase,
-                   const LabelStr& type, const LabelStr& name,
-                   const LabelStr& detectorName,
-                   const LabelStr& profileName,
+                   const std::string& type, const std::string& name,
+                   const std::string& detectorName,
+                   const std::string& profileName,
                    edouble initCapacityLb, edouble initCapacityUb,
                    edouble lowerLimit, edouble upperLimit,
                    edouble maxInstProduction, edouble maxInstConsumption,
@@ -55,16 +55,16 @@ Resource::Resource(const PlanDatabaseId planDatabase,
        );
 }
 
-Resource::Resource(const PlanDatabaseId planDatabase, const LabelStr& type,
-                   const LabelStr& name, bool open)
+Resource::Resource(const PlanDatabaseId planDatabase, const std::string& type,
+                   const std::string& name, bool open)
     : Object(planDatabase, type, name, open),
       m_detector(), m_capacityProfile(), m_limitProfile(), m_profile(), 
       m_transactionsToTokens(), m_flawedTokens(), m_flawedInstants(), 
       m_maxInstProduction(), m_maxInstConsumption(),
       m_maxProduction(), m_maxConsumption() {}
 
-Resource::Resource(const ObjectId parent, const LabelStr& type, 
-                   const LabelStr& localName, bool open)
+Resource::Resource(const ObjectId parent, const std::string& type, 
+                   const std::string& localName, bool open)
     : Object(parent, type, localName, open),
       m_detector(), m_capacityProfile(), m_limitProfile(), m_profile(), 
       m_transactionsToTokens(), m_flawedTokens(), m_flawedInstants(), 
@@ -88,8 +88,8 @@ void Resource::init(const edouble initCapacityLb, const edouble initCapacityUb,
                     const edouble lowerLimit, const edouble upperLimit,
                     const edouble maxInstProduction, const edouble maxInstConsumption,
                     const edouble maxProduction, const edouble maxConsumption,
-                    const LabelStr& detectorName,
-                    const LabelStr& profileName) {
+                    const std::string& detectorName,
+                    const std::string& profileName) {
   debugMsg("Resource:init", "In base init function.");
 
   m_maxInstProduction = (maxInstProduction == PLUS_INFINITY ? maxProduction : maxInstProduction);

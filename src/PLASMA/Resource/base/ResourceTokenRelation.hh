@@ -7,7 +7,6 @@
 #include "PlanDatabaseDefs.hh"
 #include "ResourceDefs.hh"
 #include "Resource.hh"
-#include "LabelStr.hh"
 
 #include <vector>
 
@@ -25,8 +24,8 @@ namespace EUROPA {
 	static const std::string sl_const("ResourceObjectRelation");
 	return sl_const;
       }
-      static const LabelStr& PROPAGATOR_NAME() {
-	static const LabelStr sl_const("Resource");
+      static const std::string& PROPAGATOR_NAME() {
+	static const std::string sl_const("Resource");
 	return sl_const;
       }
       static const int STATE_VAR = 0;

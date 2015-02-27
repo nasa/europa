@@ -17,7 +17,6 @@
 #include "CommonDefs.hh"
 #include "ResourceDefs.hh"
 #include "FVDetector.hh"
-#include "LabelStr.hh"
 #include "Debug.hh"
 #include "Engine.hh"
 #include "Factory.hh"
@@ -129,8 +128,8 @@ class Profile : public FactoryObj {
       static const std::string sl_const("ProfileVariableListener");
       return sl_const;
     }
-    static const LabelStr& PROPAGATOR_NAME() {
-      static const LabelStr sl_const("Resource");
+    static const std::string& PROPAGATOR_NAME() {
+      static const std::string sl_const("Resource");
       return sl_const;
     }
     ProfileId getProfile() const {return m_profile;}
@@ -431,7 +430,7 @@ class ProfileIterator {
     template<class ProfileType>
     class ProfileFactory : public Factory {
     public:
-      ProfileFactory(const LabelStr& name) : Factory(name) {}
+      ProfileFactory(const std::string& name) : Factory(name) {}
 
       virtual EUROPA::FactoryObjId createInstance(const EUROPA::FactoryArgs& fa)
       {
