@@ -2,7 +2,6 @@
 #include "Error.hh"
 #include "Engine.hh"
 #include "Debug.hh"
-#include "LabelStr.hh"
 #include "Entity.hh"
 #include "Module.hh"
 #include "tinyxml.h"
@@ -451,7 +450,7 @@ EngineComponent* EngineBase::removeComponent(const std::string& name) {
   EngineComponent* c = getComponent(name);
   
   if (c != NULL) {
-    getComponents().erase(LabelStr(name));
+    getComponents().erase(name);
     c->setEngine(s_nullEngineId);
   }
   return c;

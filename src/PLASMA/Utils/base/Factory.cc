@@ -5,7 +5,7 @@
 namespace EUROPA 
 {
 
-Factory::Factory(const LabelStr& name)
+Factory::Factory(const std::string& name)
     : m_id(this)
     , m_name(name)
 {    
@@ -22,7 +22,7 @@ FactoryId Factory::getId()
 
 }
 
-const LabelStr& Factory::getName() const
+const std::string& Factory::getName() const
 {
     return m_name;
 }
@@ -48,7 +48,7 @@ void FactoryMgr::registerFactory(FactoryId factory) {
   if(it != m_factoryMap.end()) {
     delete (static_cast<Factory*>(it->second));
     m_factoryMap.erase(it);
-    debugMsg("FactoryMgr:registerFactory","Registered new factory for " << factory->getName().toString());
+    debugMsg("FactoryMgr:registerFactory","Registered new factory for " << factory->getName());
   }
   m_factoryMap.insert(std::make_pair(factory->getName(), factory));
 }
@@ -58,23 +58,23 @@ void FactoryMgr::purgeAll()
   std::map<std::string,FactoryId>::iterator factories_iter = m_factoryMap.begin();
     while (factories_iter != m_factoryMap.end()) {
       Factory* factory = static_cast<Factory*>((factories_iter++)->second);
-      debugMsg("FactoryMgr:purgeAll","Removing factory for " << factory->getName().toString());
+      debugMsg("FactoryMgr:purgeAll","Removing factory for " << factory->getName());
       delete factory;
     }
     m_factoryMap.clear();
 }
 
-FactoryObjId FactoryMgr::createInstance(const LabelStr& name, const FactoryArgs& args) 
+FactoryObjId FactoryMgr::createInstance(const std::string& name, const FactoryArgs& args) 
 {
   FactoryId factory = getFactory(name);
   return factory->createInstance(args);
 }
 
-FactoryId FactoryMgr::getFactory(const LabelStr& name)
+FactoryId FactoryMgr::getFactory(const std::string& name)
 {   
   std::map<std::string,FactoryId>::iterator it = m_factoryMap.find(name);
   checkError(it != m_factoryMap.end(),
-             "No factory registered for '" << name.toString() << "'");    
+             "No factory registered for '" << name << "'");    
   return it->second;
 }
 

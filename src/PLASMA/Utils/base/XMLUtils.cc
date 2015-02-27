@@ -12,9 +12,9 @@
 
 namespace EUROPA {
 
-  LabelStr extractData(const TiXmlElement& configData, const LabelStr& argName){
-    const char * data = configData.Attribute(argName.c_str());
-    checkError(data != NULL, "No attribute '" << argName.toString() << "' in " << configData);
+  std::string extractData(const TiXmlElement& configData, const std::string& argName){
+    const char * data = configData.Attribute(argName);
+    checkError(data != NULL, "No attribute '" << argName << "' in " << configData);
     return data;
   }
 
