@@ -52,6 +52,11 @@ TemporalNetwork::TemporalNetwork() : consistent(true),
       TemporalConstraintId constraint = *it;
       check_error(constraint);
       constraint->discard();
+      //TODO: remove this--it's just to work around things
+#ifndef EUROPA_FAST
+      if(IdTable::getKey(reinterpret_cast<unsigned long int>(constraint)) != 0)
+         IdTable::remove(reinterpret_cast<unsigned long int>(constraint));
+#endif
     }
 
   }
