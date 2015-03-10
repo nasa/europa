@@ -48,7 +48,7 @@ DnodeId DispatchGraph::makeNode()
 DispatchNode* DispatchGraph::createNode(Referent name)
 {
   //this line can't possibly be right.  dispatchgraph appears to be broken
-  DispatchNode* node = id_cast<DispatchNode>(DistanceGraph::createNode());
+  DispatchNode* node = boost::polymorphic_cast<DispatchNode*>(DistanceGraph::createNode());
   node->name = name;
   node->isSccMember = false;
   return node;
@@ -77,7 +77,7 @@ void DispatchGraph::filter( void (*keepEdge)(DispatchNode*, DispatchNode*,
   this->sccLeaders = std::vector<DispatchNode*>();
   // Set initial distances to same as potential
   for (std::vector<DnodeId>::const_iterator it=nodes.begin(); it != nodes.end(); ++it) {
-    DispatchNode* node = id_cast<DispatchNode>(*it);
+    DispatchNode* node = boost::polymorphic_cast<DispatchNode*>(*it);
     node->distance = node->potential;
   }
 
@@ -151,7 +151,7 @@ void DispatchGraph::predGraphDfs (DispatchNode* node, Int& position) {
   node->mark();
   for (Int i=0; i < node->outCount; i++) {
     Dedge* edge = node->outArray[i];
-    DispatchNode* next = id_cast<DispatchNode>(edge->to);
+    DispatchNode* next = boost::polymorphic_cast<DispatchNode*>(edge->to);
     if (!next->isMarked() && node->distance + edge->length == next->distance)
       this->predGraphDfs (next, position);
   }
@@ -174,7 +174,7 @@ void DispatchGraph::predGraphTraceScc (DispatchNode* node, DispatchNode* scc[],
 
   for (Int i=0; i< node->inCount; i++) {
     Dedge* edge = node->inArray[i];
-    DispatchNode* parent = id_cast<DispatchNode>(edge->from);
+    DispatchNode* parent = boost::polymorphic_cast<DispatchNode*>(edge->from);
     if (!parent->isMarked()
         && parent->distance + edge->length == node->distance)
       predGraphTraceScc (parent, scc, sccSize, nodeCount);
@@ -301,9 +301,9 @@ void DispatchGraph::sccMoveDirectional (DispatchNode* node,
 void DispatchGraph::sccMoveDirectional (DispatchNode* node,
                                         DispatchNode* leader,
                                         Time offset,
-                                        DedgeId* Dnode::*ins,
+                                        std::vector<DedgeId> Dnode::*ins,
                                         int Dnode::*inCount,
-                                        DedgeId* Dnode::*outs,
+                                        std::vector<DedgeId> Dnode::*outs,
                                         int Dnode::*outCount,
                                         int Dnode::*outSize,
                                         DnodeId Dedge::*to,
@@ -316,7 +316,7 @@ void DispatchGraph::sccMoveDirectional (DispatchNode* node,
 
   for (Int i=0; i< node->*outCount; i++) {
     Dedge* edge = (node->*outs)[i];
-    DispatchNode* next = id_cast<DispatchNode>(edge->*to);
+    DispatchNode* next = boost::polymorphic_cast<DispatchNode*>(edge->*to);
     if (next == leader)  // Delink from leader
       detachEdge (leader->*ins, leader->*inCount, edge);
     if (next->isSccMember == false) {   // next is not in the SCC.
@@ -328,7 +328,7 @@ void DispatchGraph::sccMoveDirectional (DispatchNode* node,
       Dedge* leaderEdge = 0;
       for (Int j=0; j < leader->*outCount; j++) {
         Dedge* e = (leader->*outs)[j];
-        Dnode* eTo = id_cast<Dnode>(e->*to);
+        Dnode* eTo = boost::polymorphic_cast<Dnode*>(e->to);
         if (eTo == next)
           leaderEdge = e;
       }
@@ -336,13 +336,13 @@ void DispatchGraph::sccMoveDirectional (DispatchNode* node,
         // Move the constraint to the leaderEdge and delink edge.
         if (movedDistance < leaderEdge->length)
           leaderEdge->length = movedDistance;
-        detachEdge (next->*ins, next->*inCount, edge);
+        detachEdge (next->*ins, next->inCount, edge);
       }
       else {
         // Modify and redirect the edge.
         edge->length = movedDistance;
-        edge->*from = leader;
-        attachEdge (leader->*outs, leader->*outSize, leader->*outCount, edge);
+        edge->from = leader;
+        this->attachEdge (leader->*outs, leader->*outSize, leader->*outCount, edge);
       }
       // No need to remove edge from node->*outs because
       // node will be unreachable from sccLeaders.
@@ -378,7 +378,7 @@ void DispatchGraph::findKeptEdges (DispatchNode* source,
     if ( node->isMarked() ) {
       for (Int j=0; j < node->outCount; j++) {
         Dedge* edge = node->outArray[j];
-        DispatchNode* child = id_cast<DispatchNode>(edge->to);
+        DispatchNode* child = boost::polymorphic_cast<DispatchNode*>(edge->to);
         if ( node->distance + edge->length == child->distance )
           child->mark();
       }
@@ -392,7 +392,7 @@ void DispatchGraph::findKeptEdges (DispatchNode* source,
     Time minDistance = POS_INFINITY;
     for (Int k=0; k < node->inCount; k++) {
       Dedge* edge = node->inArray[k];
-      DispatchNode* parent = id_cast<DispatchNode>(edge->from);
+      DispatchNode* parent = boost::polymorphic_cast<DispatchNode*>(edge->from);
       if ( parent->distance + edge->length == node->distance  // Pred graph
            && parent->minDistance < minDistance)
         minDistance = parent->minDistance;

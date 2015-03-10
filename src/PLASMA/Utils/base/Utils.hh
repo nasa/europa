@@ -212,6 +212,12 @@ namespace EUROPA {
     }
     objects.clear();
   }
+
+template <typename Iterator>
+void cleanup(Iterator start, Iterator end) {
+  for(; start != end; ++start)
+    delete *start;
+}
 }
 
 #endif

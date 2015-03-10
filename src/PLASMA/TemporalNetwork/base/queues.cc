@@ -34,7 +34,7 @@ namespace EUROPA {
 
 void Dqueue::reset()
 {
-  this->first = DnodeId::noId();
+  this->first = NULL;
   Dnode::unmarkAll();
 }
 
@@ -43,11 +43,11 @@ void Dqueue::addToQueue (DnodeId node)
   // FIFO queue add to last.
   if (!node->isMarked()) {
     // If not already in queue...
-    if (this->first.isNoId())  // queue is empty
+    if (this->first == NULL)  // queue is empty
       this->first = node;
     else                      // splice in node
       this->last->link = node;
-    node->link = DnodeId::noId();
+    node->link = NULL;
     this->last = node;
     node->mark();
   }
@@ -57,7 +57,7 @@ DnodeId Dqueue::popFromQueue ()
 {
   // FIFO queue pop from first.
   DnodeId node = this->first;
-  if (node.isNoId())
+  if (node == NULL)
     return node;
   this->first = node->link;
   node->unmark();
@@ -66,7 +66,7 @@ DnodeId Dqueue::popFromQueue ()
 
 Bool Dqueue::isEmpty()
 {
-  return (this->first.isNoId());
+  return (this->first == NULL);
 }
 
 
@@ -107,12 +107,12 @@ DnodeId BucketQueue::popMinFromQueue()
 		}
 	}
 	
-	return DnodeId::noId();
+	return NULL;
 }
 
 void BucketQueue::insertInQueue(DnodeId node, eint::basis_type key)
 {
-	if(node.isNoId())
+	if(node == NULL)
 		return;
 
 	if(node->isMarked() && node->getKey() > -key )
@@ -128,7 +128,7 @@ void BucketQueue::insertInQueue(DnodeId node, eint::basis_type key)
 
 void BucketQueue::insertInQueue(DnodeId node)
 {
-  if(node.isNoId())
+  if(node == NULL)
     return;
 
   insertInQueue(node, node->distance - node->potential);
