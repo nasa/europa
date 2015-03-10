@@ -206,5 +206,22 @@ namespace EUROPA{
     bool operator==(const EntityComparator&){return true;}
   };
 
+template<typename T>
+class EntityComparator<T*> {
+ public:
+  bool operator() (const T* t1, const T* t2) const {
+    checkError(t1);
+    checkError(t2);
+    return t1->getKey() < t2->getKey();
+  }
+};
+
+/** 
+ * @struct Discard
+ * Custom deallocator for shared pointers of Entity instances.
+ */
+struct Discard {
+  void operator()(Entity* e) const {e->discard();}
+};
 }
 #endif

@@ -128,11 +128,11 @@ namespace EUROPA {
     bool isConsistentWithConstraintNetwork();
 
     inline static const TimepointId getTimepoint(const ConstrainedVariableId var) {
-      static const TimepointId sl_noId;
+      static const TimepointId sl_noId = NULL;
       check_error(var->getExternalEntity().isNoId() || var->getExternalEntity().isValid());
       const TimepointWrapperId wrapper(var->getExternalEntity());
 
-      if(wrapper.isNoId())
+      if(wrapper == NULL)
 	return sl_noId;
 
       return wrapper->getTimepoint();
@@ -211,7 +211,7 @@ namespace EUROPA {
     typedef std::set<ConstraintId, EntityComparator<EntityId> > ConstraintsSet;
     ConstraintsSet m_changedConstraints; /*!< Constraint Agenda */
 
-    typedef  std::set<TemporalConstraintId, EntityComparator<EntityId> > TemporalConstraintsSet;
+    typedef  std::set<TemporalConstraintId> TemporalConstraintsSet;
     TemporalConstraintsSet m_constraintsForDeletion; /*!< Buffer deletions till you have to propagate. */
 
     std::set<TimepointId> m_variablesForDeletion; /*!< Buffer timepoints for deletion till we propagate. */

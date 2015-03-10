@@ -68,9 +68,9 @@ private:
   void sccMoveFluids (DispatchNode* node, DispatchNode* leader);
   void sccMoveDirectional (DispatchNode* node, DispatchNode* leader,
                            Time offset,
-                           DedgeId* Dnode::*ins,
+                           std::vector<DedgeId> Dnode::*ins,
                            int Dnode::*inCount,
-                           DedgeId* Dnode::*outs,
+                           std::vector<DedgeId> Dnode::*outs,
                            int Dnode::*outCount,
                            int Dnode::*outSize,
                            DnodeId Dedge::*to,

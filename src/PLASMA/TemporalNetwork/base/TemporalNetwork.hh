@@ -28,9 +28,8 @@ namespace EUROPA {
 
   class DispatchNode;
 
-  typedef Id<Tnode> TimepointId;
 
-  const TimepointId noTimepointId;
+  const TimepointId noTimepointId = NULL;
 
     /**
      * @class  TemporalNetwork
@@ -356,7 +355,7 @@ namespace EUROPA {
      * used for preferred time calculations. Use noId() to turn off
      * such calculations. (PHM: Support for reftime calculations)
      */
-    void setReferenceTimepoint (TimepointId refpoint = TimepointId::noId());
+    void setReferenceTimepoint (TimepointId refpoint = NULL);
     TimepointId getReferenceTimepoint () { return m_refpoint; }
  
   private:
@@ -578,17 +577,14 @@ private:
     virtual ~Tspec();
 
     /**
-     * @brief return the temporal network that this Tspec is associated with
-     * @return the temporal network id
-     */
-    const TemporalConstraintId getId() const;
-
-    /**
      * @brief get the upper and lower bounds of this Tspec
      * @param lb returns the lower bound
      * @param ub returns the upper bound
      */
     inline void getBounds(Time& lb, Time& ub) const {lb = lowerBound; ub = upperBound;}
+
+    inline Time getLowerBound() const {return lowerBound;}
+    inline Time getUpperBound() const {return upperBound;}
 
     /**
      * @brief test if Tspec is complete

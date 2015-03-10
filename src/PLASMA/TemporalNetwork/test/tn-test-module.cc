@@ -316,13 +316,24 @@ private:
     CPPUNIT_ASSERT(t1.end()->getDerivedDomain().getUpperBound() == 17);
 
     DbClientId client = db.getClient();
-    
+    ce.setAutoPropagation(false);
     client->reset(t1.start());
     client->specify(t1.start(), 0);
     ce.propagate();
 
     client->reset(t1.start());
     client->specify(t1.start(), 5);
+    
+    client->reset(t1.start());
+    ce.propagate();
+    client->specify(t1.start(), 7);
+    ce.propagate();
+    client->reset(t1.start());
+    client->specify(t1.start(), 9);
+    ce.propagate();
+    client->specify(t1.start(), 8);
+    ce.propagate();
+    client->reset(t1.start());
     ce.propagate();
 
     TN_DEFAULT_TEARDOWN();
@@ -833,14 +844,12 @@ private:
     ConstrainedVariableId v6 = (new Variable<IntervalIntDomain> (ce.getId(), domEnd, false, true, "v6"))->getId();
 
     v2->restrictBaseDomain(IntervalIntDomain(5, 7));
-
     std::vector<ConstrainedVariableId> temp;
     temp.push_back(v1);
     temp.push_back(v2);
     temp.push_back(v3);
     ConstraintId duration1 =
         ce.getId()->createConstraint("temporalDistance", temp);
-
     CPPUNIT_ASSERT(!duration1.isNoId());
 
     temp.clear();
@@ -868,6 +877,7 @@ private:
     CPPUNIT_ASSERT(v4->derivedDomain().getUpperBound() == 10);
     CPPUNIT_ASSERT(v6->derivedDomain().getLowerBound() == 6);
     CPPUNIT_ASSERT(v6->derivedDomain().getUpperBound() == 20);
+
 
     delete static_cast<Constraint*>(beforeConstraint);
     delete static_cast<Constraint*>(duration1);
@@ -971,6 +981,7 @@ private:
     CPPUNIT_ASSERT(newRefTimes[0] == 20);
     CPPUNIT_ASSERT(newRefTimes[1] == 21);
 
+    delete static_cast<Constraint*>(infConstr1);
     DEFAULT_TEARDOWN_CE_ONLY();
     return true;
   }

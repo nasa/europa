@@ -100,8 +100,13 @@ protected:
   Dqueue* dqueue;
   BucketQueue* bqueue;
   std::list<DedgeId> edgeNogoodList;
+
+  Void attachEdge(std::vector<DedgeId>& edgeArray, Int& size, Int& count, DedgeId edge);
+  Void detachEdge(std::vector<DedgeId>& edgeArray, Int& count, DedgeId edge);
+
 public:
 
+  void addNode(DnodeId node);
   /**
    * @brief Create a new node and add it to the network
    * @return the new network node
@@ -175,7 +180,7 @@ public:
    * @param source start node
    * @param destination terminal node (optional)
    */
-  Void dijkstra(DnodeId source, DnodeId destination = DnodeId::noId());
+  Void dijkstra(DnodeId source, DnodeId destination = NULL);
 
    /**
    * @brief Incremental version of Dijkstra's algorithum
@@ -283,6 +288,7 @@ protected:
   virtual void handleNodeUpdate(const DnodeId node);
 
 private:
+  
   DistanceGraph(const DistanceGraph&);
   DistanceGraph& operator=(const DistanceGraph&);
   Void deleteEdge(DedgeId edge);
@@ -311,19 +317,13 @@ class Dnode : public Entity {
 protected:
 
   void handleDiscard(){
-    if (inArray != nullptr)
-      delete[] inArray;
-    if (outArray != nullptr)
-      delete[] outArray;
-
     Entity::handleDiscard();
   }
 
-  DnodeId m_id;
-  DedgeId* inArray;
+  std::vector<DedgeId> inArray;
   Int inArraySize;
   Int inCount;
-  DedgeId* outArray;
+  std::vector<DedgeId> outArray;
   Int outArraySize;
   Int outCount;
   std::map<DnodeId,DedgeId> edgemap;
@@ -335,11 +335,7 @@ private:
   Dnode(const Dnode&);
   Dnode& operator=(const Dnode&);
 public:
-  /**
-   * @brief get node's id
-   * @return node's id
-   */
-  inline const DnodeId getId() const {return m_id;}
+
   DnodeId link;        // For creating linked-list of nodes (for Dqueue)
 protected:
   DedgeId predecessor;      // For reconstructing negative cycles.
@@ -349,13 +345,12 @@ private:
   Int generation;     // Used for obsoleting Dijkstra-calculated distances.
 public:
 
-  Dnode() : m_id(this), inArray(NULL), inArraySize(0), inCount(0), outArray(NULL),
+  Dnode() : inArray(), inArraySize(0), inCount(0), outArray(),
             outArraySize(0), outCount(0), edgemap(), distance(0), potential(0), depth(0),
             key(0), link(), predecessor(), markLocal(0), generation(0) {
   }
   virtual ~Dnode() {
     discard(false);
-    m_id.remove();
   }
 
   Time getTimeKey() { return distance - potential; }  // Used in Dijkstra
@@ -383,7 +378,6 @@ public:
 class Dedge {
   friend class DistanceGraph;
   std::vector<Time> lengthSpecs;
-  DedgeId m_id;
 
 public:
   DnodeId to;
@@ -392,16 +386,11 @@ public:
   /**
    * @brief constructor
    */
-  Dedge ():lengthSpecs(), m_id(this), to(), from(), length(0) {}
+  Dedge ():lengthSpecs(), to(), from(), length(0) {}
   /**
    * @brief destructor
    */
-  ~Dedge(){m_id.remove();}
-  /**
-   * @brief get id of edge
-   * @return id of edge
-   */
-  const DedgeId getId() const {return m_id;}
+  ~Dedge(){}
 };
 
  /**
@@ -530,8 +519,6 @@ public:
   Bool isEmpty();
 };
 
-Void attachEdge (DedgeId*& edgeArray, Int& size, Int& count, DedgeId edge);
-Void detachEdge (DedgeId*& edgeArray, Int& count, DedgeId edge);
 } /* namespace Europa */
 
 #endif

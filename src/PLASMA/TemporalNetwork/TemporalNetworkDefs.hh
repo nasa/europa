@@ -16,28 +16,28 @@ namespace EUROPA {
   //turns out this is the case
 
   class Dnode;
-  typedef Id<Dnode> DnodeId;
+  typedef Dnode* DnodeId;
 
   class Dedge;
-  typedef Id<Dedge> DedgeId;
+  typedef Dedge* DedgeId;
 
   class Tnode;
-  typedef Id< Tnode > TimepointId;
+  typedef  Tnode * TimepointId;
 
   class Tspec;
-  typedef Id<Tspec> TemporalConstraintId;
+  typedef Tspec* TemporalConstraintId;
 
   class TemporalNetwork;
-  typedef Id<TemporalNetwork> TemporalNetworkId; 
+  typedef TemporalNetwork* TemporalNetworkId; 
 
   class TemporalPropagator;
-  typedef Id<TemporalPropagator> TemporalPropagatorId;
+  typedef TemporalPropagator* TemporalPropagatorId;
 
   class TemporalNetworkListener;
-  typedef Id<TemporalNetworkListener> TemporalNetworkListenerId;
+  typedef TemporalNetworkListener* TemporalNetworkListenerId;
 
   class TimepointWrapper;
-  typedef Id<TimepointWrapper> TimepointWrapperId;
+  typedef TimepointWrapper* TimepointWrapperId;
 
   #define noIndex -1;
 
