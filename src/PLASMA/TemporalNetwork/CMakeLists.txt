@@ -1,7 +1,7 @@
 include(EuropaModule)
 set(internal_dependencies RulesEngine PlanDatabase ConstraintEngine Utils)
 set(root_sources ModuleTemporalNetwork.cc)
-set(base_sources DispatchGraph.cc DistanceGraph.cc TemporalNetwork.cc queues.cc)
+set(base_sources DistanceGraph.cc TemporalNetwork.cc queues.cc)
 set(component_sources STNTemporalAdvisor.cc TemporalNetworkListener.cc TemporalPropagator.cc TimepointWrapper.cc)
 set(test_sources TestSubgoalRule.cc module-tests.cc tn-test-module.cc)
 

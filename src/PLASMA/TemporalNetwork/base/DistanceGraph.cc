@@ -21,6 +21,8 @@
 #include "Utils.hh"
 //#include "Debug.hh"
 
+#include <boost/make_shared.hpp>
+
 namespace EUROPA {
 
 
@@ -37,20 +39,15 @@ void deleteIfEqual(std::vector<ELEMENT>& elements, ELEMENT element){
 // Global value overridden only for Rax-derived system test.
 // Bool IsOkToRemoveConstraintTwice = false;
 
-DistanceGraph::DistanceGraph() : edges(), dijkstraGeneration(0), nodes(), dqueue(NULL),
-                                 bqueue(NULL), edgeNogoodList()
+DistanceGraph::DistanceGraph() : edges(), dijkstraGeneration(0), nodes(),
+                                 dqueue(new Dqueue()),
+                                 bqueue(new BucketQueue(100)), edgeNogoodList()
 {
-  dqueue= new Dqueue();
-  bqueue= new BucketQueue(100);
 }
 
 DistanceGraph::~DistanceGraph()
 {
   cleanup(edges.begin(), edges.end());
-  for(std::vector<DnodeId>::const_iterator it = nodes.begin(); it != nodes.end(); ++it)
-    (*it)->discard();
-  delete dqueue;
-  delete bqueue;
 }
 
 void DistanceGraph::addNode(DnodeId node) {
@@ -61,7 +58,7 @@ void DistanceGraph::addNode(DnodeId node) {
 
 DnodeId DistanceGraph::makeNode()
 {
-  return new Dnode();
+  return boost::make_shared<Dnode>();
 }
 
 
@@ -107,7 +104,6 @@ Void DistanceGraph::deleteNode(DnodeId node)
   node->inCount = node->outCount = 0;
   node->potential = 99;  // A clue for debugging purposes
   deleteIfEqual(nodes, node);
-  node->discard();
 }
 
 DedgeId DistanceGraph::findEdge(DnodeId from, DnodeId to)
@@ -166,8 +162,8 @@ Void DistanceGraph::eraseEdge(DedgeId edge)
 {
   //deleteIfEqual(edges, edge);
   edges.erase(edge);
-  edge->from = NULL;
-  edge->to = NULL;
+  edge->from.reset();
+  edge->to.reset();
   edge->length = 99;  // A clue for debugging purposes
   delete static_cast<Dedge*>(edge);
 }
@@ -220,7 +216,7 @@ Void DistanceGraph::removeEdgeSpec(DnodeId from, DnodeId to, Time length)
 
 Bool DistanceGraph::bellmanFord()
 {
-  BucketQueue* queue = initializeBqueue();
+  BucketQueue& queue = initializeBqueue();
   for (std::vector<DnodeId>::const_iterator it = nodes.begin(); it != nodes.end(); ++it) {
     DnodeId node = *it;
     Time oldPotential = node->potential;
@@ -230,11 +226,11 @@ Bool DistanceGraph::bellmanFord()
     node->depth = 0;
     // Use diff from oldPotential as priority ordering.  This
     // minimizes the amount of wasted superseded propagations.
-    queue->insertInQueue (node, -oldPotential);
+    queue.insertInQueue (node, -oldPotential);
   }
   Int BFbound = static_cast<int>(nodes.size());
   while (true) {
-    DnodeId node = queue->popMinFromQueue();
+    DnodeId node = queue.popMinFromQueue();
     if (node == NULL)
       break;
     // Cache node vars -- Chucko 22 Apr 2002
@@ -263,7 +259,7 @@ Bool DistanceGraph::bellmanFord()
           Time oldPotential = next->distance; // See earlier in function
           // Use diff from oldPotential as priority ordering.  This
           // minimizes the amount of wasted superseded propagations.
-          queue->insertInQueue (next, potential - oldPotential);
+          queue.insertInQueue (next, potential - oldPotential);
 	}
       }
     }
@@ -274,14 +270,12 @@ Bool DistanceGraph::bellmanFord()
 Bool DistanceGraph::incBellmanFord()
 {
   Int BFbound = static_cast<Int>(nodes.size());
-  //Dqueue* queue = dqueue;
-  BucketQueue* queue = bqueue;
 
   preventGenerationOverflow();
   ++dijkstraGeneration;
 
   while (true) {
-    DnodeId node = queue->popMinFromQueue();
+    DnodeId node = bqueue->popMinFromQueue();
     if (node == NULL)
       break;
     // Cache node vars -- Chucko 22 Apr 2002
@@ -322,7 +316,7 @@ Bool DistanceGraph::incBellmanFord()
 	  }
           // Give priority to "stronger" propagations.  This minimizes
           // the amount of wasted superseded propagations.
-          queue->insertInQueue (next, potential - oldPotential);
+          bqueue->insertInQueue (next, potential - oldPotential);
 	}
       }
     }
@@ -348,13 +342,13 @@ Void DistanceGraph::dijkstra (DnodeId source, DnodeId destination)
   preventGenerationOverflow();
   Int generation = ++(this->dijkstraGeneration);
   source->generation = generation;
-  BucketQueue* queue = initializeBqueue();
-  queue->insertInQueue (source);
+  BucketQueue& queue = initializeBqueue();
+  queue.insertInQueue (source);
 #ifndef EUROPA_FAST
   Int BFbound = static_cast<Int>(this->nodes.size());
 #endif
   while (true) {
-    DnodeId node = queue->popMinFromQueue();
+    DnodeId node = queue.popMinFromQueue();
     //debugMsg("DistanceGraph:dijkstra", "Visiting " << node);
     if (node == NULL || node == destination)
       return;
@@ -387,7 +381,7 @@ Void DistanceGraph::dijkstra (DnodeId source, DnodeId destination)
                 TempNetErr::TempNetInternalError());
 	  next->distance = newDistance;
 	  next->predecessor = edge;
-	  queue->insertInQueue (next);
+	  queue.insertInQueue (next);
 	  //debugMsg("DistanceGraph:dijkstra", "New distance of " << newDistance << " through node " << next);
 	  handleNodeUpdate(next);
 	}
@@ -480,7 +474,7 @@ Bool DistanceGraph::isPropagationPath(DnodeId src, DnodeId targ, Time pot)
   src->mark();
   src->distance = pot;
   DnodeId propQ = src; 
-  propQ->link = NULL;
+  propQ->link.reset();
   while (propQ != NULL) {
     DnodeId node = propQ; propQ = propQ->link;
     // Cache node vars -- Chucko 22 Apr 2002
@@ -577,20 +571,19 @@ Void DistanceGraph::preventGenerationOverflow()
   }
 }
 
-Dqueue* DistanceGraph::initializeDqueue()
+//TODO: Clean this up?  Seems like it's never called.
+Dqueue& DistanceGraph::initializeDqueue()
 {
   preventNodeMarkOverflow();
-  Dqueue* queue = this->dqueue;
-  queue->reset();
-  return queue;
+  dqueue->reset();
+  return *dqueue;
 }
 
-BucketQueue* DistanceGraph::initializeBqueue()
+BucketQueue& DistanceGraph::initializeBqueue()
 {
   preventNodeMarkOverflow();
-  BucketQueue* queue = this->bqueue;
-  queue->reset();
-  return queue;
+  bqueue->reset();
+  return *bqueue;
 }
 
 bool DistanceGraph::hasNode(const DnodeId node) const {
@@ -623,12 +616,12 @@ Void DistanceGraph::boundedDijkstra (const DnodeId source,
   preventGenerationOverflow();
   Int generation = ++(this->dijkstraGeneration);
   source->generation = generation;
-  BucketQueue* queue = initializeBqueue();
-  queue->insertInQueue (source);
+  BucketQueue& queue = initializeBqueue();
+  queue.insertInQueue (source);
 
   check_error_variable(Int BFbound = static_cast<Int>(this->nodes.size()));
   while (true) {
-    DnodeId node = queue->popMinFromQueue();
+    DnodeId node = queue.popMinFromQueue();
     if (node == NULL)
       return;
     Int nodeCount = (direction == -1) ? node->inCount : node->outCount;
@@ -657,7 +650,7 @@ Void DistanceGraph::boundedDijkstra (const DnodeId source,
                       "Dijkstra propagation in inconsistent network",
                       TempNetErr::TempNetInternalError());
           next->distance = newDistance;
-          queue->insertInQueue (next, newDistance + toGo);
+          queue.insertInQueue (next, newDistance + toGo);
         }
       }
     }

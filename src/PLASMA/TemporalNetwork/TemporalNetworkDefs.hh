@@ -3,6 +3,7 @@
 
 #include "Error.hh"
 #include "Id.hh"
+#include <boost/shared_ptr.hpp>
 
 /*!< Type definitions to map for ht ones we were using in Europa */
 namespace EUROPA {
@@ -16,22 +17,26 @@ namespace EUROPA {
   //turns out this is the case
 
   class Dnode;
-  typedef Dnode* DnodeId;
+  // typedef Dnode* DnodeId;
+typedef boost::shared_ptr<Dnode> DnodeId;
 
   class Dedge;
   typedef Dedge* DedgeId;
 
-  class Tnode;
-  typedef  Tnode * TimepointId;
+class Tnode;
+  // typedef  Tnode * TimepointId;
+typedef Tnode Timepoint;
+typedef boost::shared_ptr<Tnode> TimepointId;
 
-  class Tspec;
-  typedef Tspec* TemporalConstraintId;
+class Tspec;
+typedef Tspec TemporalConstraint;
+typedef Tspec* TemporalConstraintId;
 
   class TemporalNetwork;
   typedef TemporalNetwork* TemporalNetworkId; 
 
-  class TemporalPropagator;
-  typedef TemporalPropagator* TemporalPropagatorId;
+class TemporalPropagator;
+typedef TemporalPropagator* TemporalPropagatorId;
 
   class TemporalNetworkListener;
   typedef TemporalNetworkListener* TemporalNetworkListenerId;

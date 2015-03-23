@@ -17,6 +17,7 @@
 #include "Debug.hh"
 
 #include <boost/cast.hpp>
+#include <boost/make_shared.hpp>
 
 namespace EUROPA {
 
@@ -64,7 +65,7 @@ TemporalNetwork::TemporalNetwork() : consistent(true),
   DnodeId TemporalNetwork::makeNode()
   {
     // Overrides the definition in DistanceGraph class.
-    TimepointId node = new Tnode(this);
+    TimepointId node = boost::make_shared<Tnode>(this);
     // PHM Support for reftime calculations
     node->prev_reftime = TIME_MAX; // will never == reftime
     if (m_refpoint != NULL) {
@@ -266,17 +267,17 @@ TemporalNetwork::TemporalNetwork() : consistent(true),
   Void TemporalNetwork::propagateBoundsFrom (const TimepointId src)
   {
     for(std::vector<DnodeId>::const_iterator it = nodes.begin(); it != nodes.end(); ++it){
-      const TimepointId node = boost::polymorphic_cast<const TimepointId>(*it);
+      const TimepointId node = boost::dynamic_pointer_cast<Timepoint>(*it);
       node->upperBound = POS_INFINITY;
       node->lowerBound = NEG_INFINITY;
     }
     src->upperBound = 0;
     src->lowerBound = 0;
     src->depth = 0;
-    BucketQueue* queue = initializeBqueue();
-    queue->insertInQueue(src);
+    BucketQueue& queue = initializeBqueue();
+    queue.insertInQueue(src);
     incDijkstraForward();
-    queue->insertInQueue(src);
+    queue.insertInQueue(src);
     incDijkstraBackward();
   }
 
@@ -558,7 +559,7 @@ TemporalConstraintId TemporalNetwork::addTemporalConstraint(const TimepointId sr
 TimepointId TemporalNetwork::addTimepoint() {
   //this seems terrible.  ~MJI
   //TimepointId node = boost::polymorphic_cast<TimepointId>(createNode());
-  TimepointId node = new Tnode(this);
+  TimepointId node = boost::make_shared<Tnode>(this);
   addNode(node);
   node->ordinal=++(this->nodeCounter);
   return node;
@@ -591,7 +592,7 @@ TimepointId TemporalNetwork::addTimepoint() {
     for (std::list<DedgeId>::const_iterator it=edgeNogoodList.begin();
 	 it != edgeNogoodList.end(); ++it) {
       DedgeId edge = *it;
-      TimepointId node = boost::polymorphic_cast<TimepointId>(edge->to);
+      TimepointId node = boost::dynamic_pointer_cast<Timepoint>(edge->to);
       ans.push_back(node);
     }
     return ans;
@@ -612,14 +613,14 @@ TimepointId TemporalNetwork::addTimepoint() {
   }
 
   TimepointId TemporalNetwork::getOriginNode() const {
-    return boost::polymorphic_cast<TimepointId>(this->nodes.front());
+    return boost::dynamic_pointer_cast<Timepoint>(this->nodes.front());
   }
 
   Void TemporalNetwork::fullPropagate()
   {
     debugMsg("TemporalNetwork:fullPropagate", "fullPropagate started");
     m_updatedTimepoints.clear();
-    this->incrementalSource = NULL;   // Not applicable to a full prop.
+    this->incrementalSource.reset();   // Not applicable to a full prop.
     setConsistency(bellmanFord());
     this->hasDeletions = false;
     if (this->consistent == false)
@@ -629,7 +630,7 @@ TimepointId TemporalNetwork::addTimepoint() {
     // and backward directions to update the lower/upper bounds.
     // Note: these could be done lazily on request for bounds.
     for(std::vector<DnodeId>::const_iterator it = nodes.begin(); it != nodes.end(); ++it){
-      TimepointId node = boost::polymorphic_cast<TimepointId>(*it);
+      TimepointId node = boost::dynamic_pointer_cast<Timepoint>(*it);
       node->upperBound = POS_INFINITY;
       node->lowerBound = NEG_INFINITY;
     }
@@ -639,10 +640,10 @@ TimepointId TemporalNetwork::addTimepoint() {
     origin->lowerBound = 0;
     origin->depth = 0;
 
-    BucketQueue* queue = initializeBqueue();
-    queue->insertInQueue(origin);
+    BucketQueue& queue = initializeBqueue();
+    queue.insertInQueue(origin);
     incDijkstraForward();
-    queue->insertInQueue(origin);
+    queue.insertInQueue(origin);
     incDijkstraBackward();
 
     // PHM 6/29/2010 Changes to support reftime calculations
@@ -655,12 +656,12 @@ TimepointId TemporalNetwork::addTimepoint() {
 	(m_refpoint->inCount == 0) ? POS_INFINITY : NEG_INFINITY;
 
       for (unsigned i=0; i < nodes.size(); i++) {
-	TimepointId node = boost::polymorphic_cast<TimepointId>(nodes[i]);
+	TimepointId node = boost::dynamic_pointer_cast<Timepoint>(nodes[i]);
 	node->reftime = initref;
       }
       m_refpoint->reftime = 0;
       m_refpoint->depth = 0;
-      queue->insertInQueue(m_refpoint);
+      queue.insertInQueue(m_refpoint);
 
       if (m_refpoint->inCount == 0)
 	incDijkstraReftime();
@@ -682,16 +683,16 @@ TimepointId TemporalNetwork::addTimepoint() {
     check_error(isValidId(src));
     check_error(isValidId(targ));
 
-    BucketQueue* queue = initializeBqueue();
+    BucketQueue& queue = initializeBqueue();
     TimepointId next;
 
-    next = dynamic_cast<TimepointId>(startNode(src, src->potential, targ, targ->potential));
+    next = boost::dynamic_pointer_cast<Timepoint>(startNode(src, src->potential, targ, targ->potential));
     if (next != NULL) {
       TimepointId start = (next == src) ? targ : src;
       incrementalSource = start;  // Used in specialized cycle detection
       next->predecessor = findEdge(start,next);  // Used to trace nogood
       handleNodeUpdate(next);
-      queue->insertInQueue(next);
+      queue.insertInQueue(next);
       setConsistency(incBellmanFord());
     }
 
@@ -702,12 +703,12 @@ TimepointId TemporalNetwork::addTimepoint() {
     // Now we need to do specialized Dijkstras in the forward
     // and backward directions to update the lower/upper bounds.
 
-    BucketQueue* queue1 = initializeBqueue();
+    BucketQueue& queue1 = initializeBqueue();
 
     next =
-        dynamic_cast<TimepointId>(startNode(src, src->upperBound, targ, targ->upperBound));
+        boost::dynamic_pointer_cast<Timepoint>(startNode(src, src->upperBound, targ, targ->upperBound));
     if (next != NULL) {
-      queue1->insertInQueue(next);
+      queue1.insertInQueue(next);
       handleNodeUpdate(next);
       incDijkstraForward();
     }
@@ -720,14 +721,15 @@ TimepointId TemporalNetwork::addTimepoint() {
     Time footDistance = -(targ->lowerBound);
 
     // Backwards propagation, so call with "forward" flag false.
-    next = dynamic_cast<TimepointId>(startNode(src, headDistance, targ, footDistance, false));
+    next = boost::dynamic_pointer_cast<Timepoint>(startNode(src, headDistance, targ,
+                                                            footDistance, false));
     if (next != NULL) {
 
       // Store propagated locals back to proper locations
       src->lowerBound = -(headDistance);
       targ->lowerBound = -(footDistance);
 
-      queue1->insertInQueue(next);
+      queue1.insertInQueue(next);
       handleNodeUpdate(next);
       incDijkstraBackward();
     }
@@ -736,9 +738,10 @@ TimepointId TemporalNetwork::addTimepoint() {
     // Adjust to either case of all lb or all ub constraints.
     if (m_refpoint) {
       if (m_refpoint->inCount == 0) { // all ub constraints
-	next = dynamic_cast<TimepointId>(startNode(src, src->reftime, targ, targ->reftime));
+	next = boost::dynamic_pointer_cast<Timepoint>(startNode(src, src->reftime,
+                                                                targ, targ->reftime));
 	if (next != NULL) {
-	  queue1->insertInQueue(next);
+	  queue1.insertInQueue(next);
 	  handleNodeUpdate(next);
 	  incDijkstraReftime();
 	}
@@ -746,11 +749,12 @@ TimepointId TemporalNetwork::addTimepoint() {
       else { // all lb constraints
 	headDistance = -(src->reftime);
 	footDistance = -(targ->reftime);
-	next = dynamic_cast<TimepointId>(startNode(src, headDistance, targ, footDistance, false));
+	next = boost::dynamic_pointer_cast<Timepoint>(startNode(src, headDistance,
+                                                                targ, footDistance, false));
 	if (next != NULL) {
 	  src->reftime = -(headDistance);
 	  targ->reftime = -(footDistance);
-	  queue1->insertInQueue(next);
+	  queue1.insertInQueue(next);
 	  handleNodeUpdate(next);
 	  incDijkstraRefBack(); // Backwards propagation
 	}
@@ -791,24 +795,24 @@ TimepointId TemporalNetwork::addTimepoint() {
       return head;  // Continue propagation from head
     }
 
-    return NULL;
+    return DnodeId();
   }
 
 Void TemporalNetwork::incDijkstraForward() {
 
-  BucketQueue* queue = this->bqueue;
+  BucketQueue& queue = *this->bqueue;
   check_error_variable(unsigned long BFbound = this->nodes.size());
 
   while (true) {
-    DnodeId dnode = queue->popMinFromQueue();
+    DnodeId dnode = queue.popMinFromQueue();
     if (dnode == NULL)
       return;
 
-    TimepointId node = boost::polymorphic_cast<TimepointId>(dnode);
+    TimepointId node = boost::dynamic_pointer_cast<Timepoint>(dnode);
 
     for (int i=0; i< node->outCount; i++) {
       DedgeId edge = node->outArray[i];
-      TimepointId next = boost::polymorphic_cast<TimepointId>(edge->to);
+      TimepointId next = boost::dynamic_pointer_cast<Timepoint>(edge->to);
       Time newDistance = node->upperBound + edge->length;
       if (newDistance < next->upperBound) {
         check_error(!(newDistance > MAX_DISTANCE || newDistance < MIN_DISTANCE),
@@ -820,7 +824,7 @@ Void TemporalNetwork::incDijkstraForward() {
                     TempNetErr::TempNetInternalError());
         next->upperBound = newDistance;
         // Appropriate priority key as derived from Johnson's algorithm
-        queue->insertInQueue (next, newDistance - next->potential);
+        queue.insertInQueue (next, newDistance - next->potential);
 
         // Store in set of updated timepoints
         handleNodeUpdate(next);
@@ -832,19 +836,19 @@ Void TemporalNetwork::incDijkstraForward() {
   Void TemporalNetwork::incDijkstraBackward()
   {
 
-    BucketQueue* queue = this->bqueue;
+    BucketQueue& queue = *(this->bqueue);
     check_error_variable(unsigned long BFbound = this->nodes.size());
 
     while (true) {
-      DnodeId dnode =  queue->popMinFromQueue();
+      DnodeId dnode =  queue.popMinFromQueue();
       if(dnode == NULL)
 	return;
 
-      TimepointId node = boost::polymorphic_cast<TimepointId>(dnode);
+      TimepointId node = boost::dynamic_pointer_cast<Timepoint>(dnode);
 
       for (int i=0; i< node->inCount; i++) {
 	DedgeId edge = node->inArray[i];
-	TimepointId next = boost::polymorphic_cast<TimepointId>(edge->from);
+	TimepointId next = boost::dynamic_pointer_cast<Timepoint>(edge->from);
 	Time newDistance = -(node->lowerBound) + edge->length;
 	if (newDistance < -(next->lowerBound)) {
     check_error(!(newDistance > MAX_DISTANCE || newDistance < MIN_DISTANCE),
@@ -858,7 +862,7 @@ Void TemporalNetwork::incDijkstraForward() {
 	  next->lowerBound = -newDistance;
 	  // 12/13/2002 Fix queue key computation.  Correct formula for
 	  // backward prop is key = (distance + potential).
-	  queue->insertInQueue (next, newDistance + next->potential);
+	  queue.insertInQueue (next, newDistance + next->potential);
 
 	  // Store in set of updated timepoints
 	  handleNodeUpdate(next);
@@ -870,17 +874,17 @@ Void TemporalNetwork::incDijkstraForward() {
   Void TemporalNetwork::incDijkstraReftime()
   {
     // PHM New function to support reftime calculations
-    BucketQueue* queue = this->bqueue;
+    BucketQueue& queue = *(this->bqueue);
     check_error_variable(unsigned long BFbound = this->nodes.size());
 
     while (true) {
-      DnodeId dnode = queue->popMinFromQueue();
+      DnodeId dnode = queue.popMinFromQueue();
       if (dnode == NULL)
 	return;
-      TimepointId node = boost::polymorphic_cast<TimepointId>(dnode);
+      TimepointId node = boost::dynamic_pointer_cast<Timepoint>(dnode);
       for (int i=0; i< node->outCount; i++) {
 	DedgeId edge = node->outArray[i];
-	TimepointId next = boost::polymorphic_cast<TimepointId>(edge->to);
+	TimepointId next = boost::dynamic_pointer_cast<Timepoint>(edge->to);
 	Time newDistance = node->reftime + edge->length;
 	if (newDistance < next->reftime) {
 	  check_error(!(newDistance > MAX_DISTANCE || newDistance < MIN_DISTANCE),
@@ -892,7 +896,7 @@ Void TemporalNetwork::incDijkstraForward() {
 		      TempNetErr::TempNetInternalError());
 	  next->reftime = newDistance;
 	  // Appropriate priority key as derived from Johnson's algorithm
-	  queue->insertInQueue (next, newDistance - next->potential);
+	  queue.insertInQueue (next, newDistance - next->potential);
 
 	  // Store in set of updated timepoints
 	  handleNodeUpdate(next);
@@ -904,18 +908,18 @@ Void TemporalNetwork::incDijkstraForward() {
   Void TemporalNetwork::incDijkstraRefBack()
   {
     // PHM New function to support reftime calculations
-    BucketQueue* queue = this->bqueue;
+    BucketQueue& queue = *(this->bqueue);
 
     check_error_variable(unsigned long BFbound = this->nodes.size());
 
     while (true) {
-      DnodeId dnode =  queue->popMinFromQueue();
+      DnodeId dnode =  queue.popMinFromQueue();
       if(dnode == NULL)
 	return;
-      TimepointId node = boost::polymorphic_cast<TimepointId>(dnode);
+      TimepointId node = boost::dynamic_pointer_cast<Timepoint>(dnode);
       for (int i=0; i< node->inCount; i++) {
 	DedgeId edge = node->inArray[i];
-	TimepointId next = boost::polymorphic_cast<TimepointId>(edge->from);
+	TimepointId next = boost::dynamic_pointer_cast<Timepoint>(edge->from);
 	Time newDistance = -(node->reftime) + edge->length;
 	if (newDistance < -(next->reftime)) {
     check_error(!(newDistance > MAX_DISTANCE || newDistance < MIN_DISTANCE),
@@ -927,7 +931,7 @@ Void TemporalNetwork::incDijkstraForward() {
                 TempNetErr::TempNetInternalError());
 	  next->reftime = -newDistance;
 	  // For backward prop correct key = (distance + potential).
-	  queue->insertInQueue (next, newDistance + next->potential);
+	  queue.insertInQueue (next, newDistance + next->potential);
 
 	  // Store in set of updated timepoints
 	  handleNodeUpdate(next);
@@ -942,8 +946,7 @@ Void TemporalNetwork::incDijkstraForward() {
     check_error(tpId,
                 "TemporalNetwork:: accessing invalid timepoint.",
                 TempNetErr::TempNetInvalidTimepointError());
-    Tnode* tpt = tpId;
-    TimepointId ringLeader = tpt->ringLeader;
+    TimepointId ringLeader = tpId->ringLeader;
     if (ringLeader == NULL)
       return tpId;   // Trivial TEQ, timepoint is own leader.
     else
@@ -955,8 +958,7 @@ Void TemporalNetwork::incDijkstraForward() {
     check_error(tpId,
                 "TemporalNetwork:: accessing invalid timepoint.",
                 TempNetErr::TempNetInvalidTimepointError());
-    Tnode* tpt = tpId;
-    TimepointId ringLeader = tpt->ringLeader;
+    TimepointId ringLeader = tpId->ringLeader;
     if (ringLeader == NULL)
       return std::list<TimepointId>();   // Trivial TEQ, no followers.
     else
@@ -968,10 +970,9 @@ Void TemporalNetwork::incDijkstraForward() {
     check_error(tpId,
                 "TemporalNetwork:: accessing invalid timepoint.",
                 TempNetErr::TempNetInvalidTimepointError());
-    Tnode* tpoint = tpId;
-    Tnode* tpt = dynamic_cast<Tnode*>(tpoint->ringLeader);
-    if (tpt == 0)
-      tpt = tpoint;   // Trivial TEQ, timepoint is own leader.
+    TimepointId tpt = boost::dynamic_pointer_cast<Timepoint>(tpId->ringLeader);
+    if (!tpt)
+      tpt = tpId;   // Trivial TEQ, timepoint is own leader.
 
     // Predecessors are computed dynamically.
     // Might be possible to cache these too.
@@ -981,9 +982,9 @@ Void TemporalNetwork::incDijkstraForward() {
     for (int i=0; i<numedges; i++) {
       Dedge* e = static_cast<Dedge*>(tpt->outArray[i]);
       Time length = e->length;
-      Tnode* next = static_cast<Tnode*>(e->to);
+      Tnode* next = static_cast<Tnode*>(e->to.get());
       if (length < 0)   // Negative predecessors are enabling.
-	ans.push_back (next);
+	ans.push_back(TimepointId(next));
 
       else if (length == 0) {
 	// [0,<pos>] predecessors were requested to be also enabling.
@@ -1002,7 +1003,7 @@ Void TemporalNetwork::incDijkstraForward() {
 	// precede B.
 
 	if (next->ringLeader != tpt)
-	  ans.push_back (next);
+	  ans.push_back (TimepointId(next));
       }
     }
     return ans;
@@ -1045,7 +1046,7 @@ Void TemporalNetwork::incDijkstraForward() {
     if (tpt->ringLeader == tpt) {
       // It's a leader
       for(std::list<TimepointId>::const_iterator it = tpt->ringFollowers.begin(); it != tpt->ringFollowers.end(); ++it)
-	(*it)->ringLeader = NULL;
+	(*it)->ringLeader.reset();
     }
     else if (tpt->ringLeader != NULL) // It's a follower
       tpt->ringLeader->ringFollowers.remove(tpt);
@@ -1060,7 +1061,7 @@ Void TemporalNetwork::incDijkstraForward() {
   }
 
   void TemporalNetwork::handleNodeUpdate(const DnodeId node){
-    const TimepointId tnode = dynamic_cast<const TimepointId>(node);
+    const TimepointId tnode = boost::dynamic_pointer_cast<Timepoint>(node);
     checkError(tnode, node);
     if(node != getOrigin())
       m_updatedTimepoints.insert(tnode);
@@ -1078,7 +1079,7 @@ Void TemporalNetwork::incDijkstraForward() {
 Tnode::Tnode(TemporalNetwork* t) :
     Dnode(), lowerBound(NEG_INFINITY), upperBound(POS_INFINITY), reftime(0),
     prev_reftime(0), ordinal(0), m_baseDomainConstraint(NULL), m_deletionMarker(true),
-    index(0), ringLeader(NULL), ringFollowers(), owner(t) {}
+    index(0), ringLeader(), ringFollowers(), owner(t) {}
 
   Tnode::~Tnode(){
     discard(false);

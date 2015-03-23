@@ -24,6 +24,7 @@
 #include <queue>
 #include <string>
 #include <limits>
+#include <boost/scoped_ptr.hpp>
 
 namespace EUROPA {
 
@@ -97,8 +98,10 @@ class DistanceGraph {
   Int dijkstraGeneration;
 protected:
   std::vector<DnodeId> nodes;
-  Dqueue* dqueue;
-  BucketQueue* bqueue;
+  //Dqueue* dqueue;
+  // BucketQueue* bqueue;
+  boost::scoped_ptr<Dqueue> dqueue;
+  boost::scoped_ptr<BucketQueue> bqueue;
   std::list<DedgeId> edgeNogoodList;
 
   Void attachEdge(std::vector<DedgeId>& edgeArray, Int& size, Int& count, DedgeId edge);
@@ -180,7 +183,7 @@ public:
    * @param source start node
    * @param destination terminal node (optional)
    */
-  Void dijkstra(DnodeId source, DnodeId destination = NULL);
+  Void dijkstra(DnodeId source, DnodeId destination = DnodeId(static_cast<Dnode*>(NULL)));
 
    /**
    * @brief Incremental version of Dijkstra's algorithum
@@ -256,9 +259,9 @@ protected:
    */
   bool hasNode(const DnodeId node) const;
 
-  Dqueue* initializeDqueue();
+  Dqueue& initializeDqueue();
 
-  BucketQueue* initializeBqueue();
+  BucketQueue& initializeBqueue();
 
   /**
    * @brief If a subclass does not need EdgeSpec maintenance, it can call

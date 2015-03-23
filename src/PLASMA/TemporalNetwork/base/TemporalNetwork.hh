@@ -29,7 +29,7 @@ namespace EUROPA {
   class DispatchNode;
 
 
-  const TimepointId noTimepointId = NULL;
+const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
 
     /**
      * @class  TemporalNetwork
@@ -355,7 +355,7 @@ namespace EUROPA {
      * used for preferred time calculations. Use noId() to turn off
      * such calculations. (PHM: Support for reftime calculations)
      */
-    void setReferenceTimepoint (TimepointId refpoint = NULL);
+    void setReferenceTimepoint (TimepointId refpoint = TimepointId());
     TimepointId getReferenceTimepoint () { return m_refpoint; }
  
   private:
