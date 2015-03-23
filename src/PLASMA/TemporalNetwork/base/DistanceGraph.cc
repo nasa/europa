@@ -47,7 +47,6 @@ DistanceGraph::DistanceGraph() : edges(), dijkstraGeneration(0), nodes(),
 
 DistanceGraph::~DistanceGraph()
 {
-  cleanup(edges.begin(), edges.end());
 }
 
 void DistanceGraph::addNode(DnodeId node) {
@@ -125,7 +124,7 @@ DedgeId DistanceGraph::findEdge(DnodeId from, DnodeId to)
     // PHM 06/20/2007 Speedup by using map instead.
     return from->edgemap[to];
   }
-  return NULL;
+  return DedgeId();
 }
 
 DedgeId DistanceGraph::createEdge(DnodeId from, DnodeId to, Time length) {
@@ -134,7 +133,7 @@ DedgeId DistanceGraph::createEdge(DnodeId from, DnodeId to, Time length) {
   check_error(isValid(to), "node is not defined in this graph");
 
 
-  DedgeId edge = new Dedge();
+  DedgeId edge = boost::make_shared<Dedge>();
   check_error(edge, "Memory allocation failed for TemporalNetwork edge",
               TempNetErr::TempNetMemoryError());
 
@@ -165,7 +164,6 @@ Void DistanceGraph::eraseEdge(DedgeId edge)
   edge->from.reset();
   edge->to.reset();
   edge->length = 99;  // A clue for debugging purposes
-  delete static_cast<Dedge*>(edge);
 }
 
 Void DistanceGraph::addEdgeSpec(DnodeId from, DnodeId to, Time length)

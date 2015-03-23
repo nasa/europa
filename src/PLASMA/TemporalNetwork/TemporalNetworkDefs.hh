@@ -16,15 +16,14 @@ namespace EUROPA {
   //door and let the tnet only deal with longs/ints internally
   //turns out this is the case
 
-  class Dnode;
-  // typedef Dnode* DnodeId;
+class Dnode;
 typedef boost::shared_ptr<Dnode> DnodeId;
 
-  class Dedge;
-  typedef Dedge* DedgeId;
+class Dedge;
+//typedef Dedge* DedgeId;
+typedef boost::shared_ptr<Dedge> DedgeId;
 
 class Tnode;
-  // typedef  Tnode * TimepointId;
 typedef Tnode Timepoint;
 typedef boost::shared_ptr<Tnode> TimepointId;
 
@@ -32,32 +31,29 @@ class Tspec;
 typedef Tspec TemporalConstraint;
 typedef Tspec* TemporalConstraintId;
 
-  class TemporalNetwork;
-  typedef TemporalNetwork* TemporalNetworkId; 
+class TemporalNetwork;
+typedef TemporalNetwork* TemporalNetworkId; 
 
 class TemporalPropagator;
 typedef TemporalPropagator* TemporalPropagatorId;
 
-  class TemporalNetworkListener;
-  typedef TemporalNetworkListener* TemporalNetworkListenerId;
+class TemporalNetworkListener;
+typedef TemporalNetworkListener* TemporalNetworkListenerId;
 
-  class TimepointWrapper;
-  typedef TimepointWrapper* TimepointWrapperId;
+#define noIndex -1;
 
-  #define noIndex -1;
-
-  class TempNetErr {
-  public:
-    DECLARE_ERROR(DistanceGraphInconsistentError);
-    DECLARE_ERROR(TempNetMemoryError);
-    DECLARE_ERROR(TempNetInternalError);
-    DECLARE_ERROR(TimeOutOfBoundsError);
-    DECLARE_ERROR(TempNetInconsistentError);
-    DECLARE_ERROR(TempNetInvalidTimepointError);
-    DECLARE_ERROR(TempNetEmptyConstraintError);
-    DECLARE_ERROR(TempNetInvalidConstraintError);
-    DECLARE_ERROR(TempNetDeletingOriginError);
-    DECLARE_ERROR(TempNetNoInconsistencyError);
-  };
+class TempNetErr {
+ public:
+  DECLARE_ERROR(DistanceGraphInconsistentError);
+  DECLARE_ERROR(TempNetMemoryError);
+  DECLARE_ERROR(TempNetInternalError);
+  DECLARE_ERROR(TimeOutOfBoundsError);
+  DECLARE_ERROR(TempNetInconsistentError);
+  DECLARE_ERROR(TempNetInvalidTimepointError);
+  DECLARE_ERROR(TempNetEmptyConstraintError);
+  DECLARE_ERROR(TempNetInvalidConstraintError);
+  DECLARE_ERROR(TempNetDeletingOriginError);
+  DECLARE_ERROR(TempNetNoInconsistencyError);
+};
 }
 #endif

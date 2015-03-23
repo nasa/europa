@@ -98,8 +98,6 @@ class DistanceGraph {
   Int dijkstraGeneration;
 protected:
   std::vector<DnodeId> nodes;
-  //Dqueue* dqueue;
-  // BucketQueue* bqueue;
   boost::scoped_ptr<Dqueue> dqueue;
   boost::scoped_ptr<BucketQueue> bqueue;
   std::list<DedgeId> edgeNogoodList;
