@@ -32,7 +32,7 @@
 
 #define TRACE_GRAPH 0
 
-#ifdef TRACE_GRAPH
+#if TRACE_GRAPH
 
 #define graphDebug( msg )  { \
     std::stringstream sstr; \

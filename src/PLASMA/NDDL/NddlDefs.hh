@@ -16,7 +16,6 @@ namespace NDDL {
 class NddlToken;
 typedef EUROPA::Id<NddlToken> NddlTokenId;
 
-#define inf PLUS_INFINITY
 
 } // namespace NDDL
 

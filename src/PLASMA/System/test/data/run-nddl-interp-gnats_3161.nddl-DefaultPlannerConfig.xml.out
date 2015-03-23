@@ -32,11 +32,11 @@ Global Variables*************************
 	x=Foo:CLOSED{x(8)}
 	y=Foo:CLOSED{y(15)}
 	b=Bar:CLOSED{b(20)}
-	world=PlannerTestConfig:CLOSED{world(84)}
+	world=PlannerTestConfig:CLOSED{world(80)}
 Rejected Tokens: *************************
 		{0}
 		Bar.otherPred()
-		Key=55  Master=NONE
+		Key=53  Master=NONE
 		{1}
 Objects *************************
 	Foo:x*************************
@@ -72,11 +72,11 @@ Global Variables*************************
 	x=Foo:CLOSED{x(8)}
 	y=Foo:CLOSED{y(15)}
 	b=Bar:CLOSED{b(20)}
-	world=PlannerTestConfig:CLOSED{world(84)}
+	world=PlannerTestConfig:CLOSED{world(80)}
 Rejected Tokens: *************************
 		{0}
 		Bar.otherPred()
-		Key=55  Master=NONE
+		Key=53  Master=NONE
 		{1}
 
 Finished

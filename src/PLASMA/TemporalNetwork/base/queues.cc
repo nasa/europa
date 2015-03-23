@@ -34,7 +34,7 @@ namespace EUROPA {
 
 void Dqueue::reset()
 {
-  this->first = NULL;
+  this->first.reset();
   Dnode::unmarkAll();
 }
 
@@ -47,7 +47,7 @@ void Dqueue::addToQueue (DnodeId node)
       this->first = node;
     else                      // splice in node
       this->last->link = node;
-    node->link = NULL;
+    node->link.reset();
     this->last = node;
     node->mark();
   }
@@ -107,7 +107,7 @@ DnodeId BucketQueue::popMinFromQueue()
 		}
 	}
 	
-	return NULL;
+	return DnodeId();
 }
 
 void BucketQueue::insertInQueue(DnodeId node, eint::basis_type key)

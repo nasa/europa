@@ -4,14 +4,13 @@
 #include "ConstrainedVariable.hh"
 #include "Propagator.hh"
 #include "TemporalNetworkDefs.hh"
-#include "TimepointWrapper.hh"
 #include "Domains.hh"
 #include "Token.hh"
 
 #include <set>
+#include <map>
 
 namespace EUROPA {
-
   /**
    * @class TemporalPropagator
    * @author Conor McGann & Sailesh Ramakrishnan
@@ -109,13 +108,13 @@ namespace EUROPA {
     void handleConstraintDeactivated(const ConstraintId constraint);
     void handleVariableDeactivated(const ConstrainedVariableId var);
     void handleVariableActivated(const ConstrainedVariableId var);
+    void handleVariableRemoved(const ConstrainedVariableId var);
     void handleNotification(const ConstrainedVariableId variable,
 			    unsigned int argIndex,
 			    const ConstraintId constraint,
 			    const DomainListener::ChangeType& changeType);
 
   private:
-    friend class TimepointWrapper;
 
     TemporalConstraintId addSpecificationConstraint(const TemporalConstraintId tc, const TimepointId tp, const Time lb, const Time ub);
 
@@ -127,15 +126,10 @@ namespace EUROPA {
     bool isEqualToConstraintNetwork();
     bool isConsistentWithConstraintNetwork();
 
-    inline static const TimepointId getTimepoint(const ConstrainedVariableId var) {
-      static const TimepointId sl_noId = NULL;
-      check_error(var->getExternalEntity().isNoId() || var->getExternalEntity().isValid());
-      const TimepointWrapperId wrapper(var->getExternalEntity());
-
-      if(wrapper == NULL)
-	return sl_noId;
-
-      return wrapper->getTimepoint();
+    inline const TimepointId getTimepoint(const ConstrainedVariableId var) {
+      std::map<ConstrainedVariableId, TimepointId>::const_iterator it =
+          m_varToTimepoint.find(var);
+      return (it == m_varToTimepoint.end() ? TimepointId() : it->second);
     }
 
     void handleTemporalAddition(const ConstraintId constraint);
@@ -201,6 +195,16 @@ namespace EUROPA {
     void handleViolations();
     void collectViolations(ConstrainedVariableId var);
 
+    void mapVariable(const ConstrainedVariableId var, const TimepointId tp);
+    void unmap(const ConstrainedVariableId var);
+    void unmap(const TimepointId tp);
+    void mapConstraint(const ConstraintId constr, const TemporalConstraintId temp);
+    void unmap(const ConstraintId constr);
+    void unmap(const TemporalConstraintId temp);
+    
+    void incrementRefCount(const ConstrainedVariableId var);
+    void decrementRefCount(const ConstrainedVariableId var);
+
     TemporalNetworkId m_tnet; /*!< Temporal Network does all the propagation */
 
     /*!< Synchronization data structures */
@@ -217,6 +221,12 @@ namespace EUROPA {
     std::set<TimepointId> m_variablesForDeletion; /*!< Buffer timepoints for deletion till we propagate. */
     std::set<EntityId> m_wrappedTimepoints;
     std::set<TemporalNetworkListenerId> m_listeners;
+    std::map<ConstrainedVariableId, TimepointId> m_varToTimepoint;
+    std::map<TimepointId, ConstrainedVariableId> m_timepointToVar;
+    std::map<ConstraintId, TemporalConstraintId> m_constrToTempConstr;
+    std::map<TemporalConstraintId, ConstraintId> m_tempConstrToConstr;
+    std::map<ConstrainedVariableId, unsigned int> m_refCount;
+    
     unsigned int m_mostRecentRepropagation;
   };
 }

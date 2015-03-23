@@ -10,6 +10,8 @@
 #include "Instant.hh"
 #include "Profile.hh"
 
+#define inf PLUS_INFINITY
+
 using namespace EUROPA;
 namespace NDDL {
 

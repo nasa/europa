@@ -13,7 +13,7 @@ namespace EUROPA {
 
   void TimepointWrapper::handleDiscard(){
     if(!Entity::isPurging())
-      m_propagator->notifyDeleted(m_tempVar, m_timepoint);
+      // m_propagator->notifyDeleted(m_tempVar, m_timepoint);
 
     Entity::handleDiscard();
   }

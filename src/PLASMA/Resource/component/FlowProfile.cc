@@ -338,6 +338,7 @@ Order FlowProfile::getOrdering( const TransactionId t1, const TransactionId t2 )
 
       if( ite != m_orderedAt.end() )
 	{
+          debugMsg("FlowProfile:getOrdering", "Cached " << t1 << " = " << t2);
 	  return (*ite).second;
 	}
 
@@ -345,6 +346,8 @@ Order FlowProfile::getOrdering( const TransactionId t1, const TransactionId t2 )
 
       if( ite != m_orderings.end() )
 	{
+          debugMsg("FlowProfile:getOrdering",
+                   "Cached " << t1 << " " << ite->second << " " << t2);
 	  return (*ite).second;
 	}
 
@@ -354,6 +357,8 @@ Order FlowProfile::getOrdering( const TransactionId t1, const TransactionId t2 )
 
       if( ite != m_orderings.end() )
 	{
+          debugMsg("FlowProfile:getOrdering",
+                   "Cached " << t2 << " " << ite->second << " " << t1 << ", reversing");
 	  if( (*ite).second == BEFORE_OR_AT )
 	    return AFTER_OR_AT;
 
@@ -387,7 +392,7 @@ Order FlowProfile::getOrdering( const TransactionId t1, const TransactionId t2 )
       else
 	{
 	  const IntervalIntDomain distance = m_planDatabase->getTemporalAdvisor()->getTemporalDistanceDomain( t1->time(), t2->time(), true );
-
+          debugMsg("FlowProfile:getOrdering", "Got a distance of " << distance.toString());
 	  if( distance.getLowerBound() == 0 && distance.getUpperBound() == 0 )
 	    {
 	      returnValue = STRICTLY_AT;
