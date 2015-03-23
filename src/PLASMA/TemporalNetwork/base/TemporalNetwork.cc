@@ -980,11 +980,11 @@ Void TemporalNetwork::incDijkstraForward() {
     std::list<TimepointId> ans;
     int numedges = tpt->outCount;
     for (int i=0; i<numedges; i++) {
-      Dedge* e = static_cast<Dedge*>(tpt->outArray[i]);
+      DedgeId e = tpt->outArray[i];
       Time length = e->length;
-      Tnode* next = static_cast<Tnode*>(e->to.get());
+      TimepointId next = boost::dynamic_pointer_cast<Tnode>(e->to);
       if (length < 0)   // Negative predecessors are enabling.
-	ans.push_back(TimepointId(next));
+	ans.push_back(next);
 
       else if (length == 0) {
 	// [0,<pos>] predecessors were requested to be also enabling.
