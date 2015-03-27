@@ -1,6 +1,6 @@
 
-#ifndef _H_ModuleTemporalNetwork
-#define _H_ModuleTemporalNetwork
+#ifndef H_ModuleTemporalNetwork
+#define H_ModuleTemporalNetwork
 
 #include "Module.hh"
 
@@ -29,4 +29,4 @@ namespace EUROPA {
 }  
 
 
-#endif /* #ifndef _H_ModuleTemporalNetwork */
+#endif /* #ifndef H_ModuleTemporalNetwork */

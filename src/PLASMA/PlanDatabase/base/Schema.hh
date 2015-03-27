@@ -5,8 +5,8 @@
  * @author Conor McGann, Andrew Bachmann
  */
 
-#ifndef _H_Schema
-#define _H_Schema
+#ifndef H_Schema
+#define H_Schema
 
 #include "PlanDatabaseDefs.hh"
 #include "PSPlanDatabase.hh"

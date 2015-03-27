@@ -1,5 +1,5 @@
-#ifndef _H_Context
-#define _H_Context
+#ifndef H_Context
+#define H_Context
 
 #include "SolverDefs.hh"
 

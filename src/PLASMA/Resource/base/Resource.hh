@@ -1,5 +1,5 @@
-#ifndef _H_Resource
-#define _H_Resource
+#ifndef H_Resource
+#define H_Resource
 
 /**
  * @file Resource.hh

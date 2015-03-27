@@ -1,5 +1,5 @@
-#ifndef _H_ResourceTokenRelation
-#define _H_ResourceTokenRelation
+#ifndef H_ResourceTokenRelation
+#define H_ResourceTokenRelation
 
 #include "ConstraintEngineDefs.hh"
 #include "Constraint.hh"

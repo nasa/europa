@@ -1,5 +1,5 @@
-#ifndef _H_Propagator
-#define _H_Propagator
+#ifndef H_Propagator
+#define H_Propagator
 
 /**
  * @file Propagator.hh

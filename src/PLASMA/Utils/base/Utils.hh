@@ -1,5 +1,5 @@
-#ifndef _H_Utils
-#define _H_Utils
+#ifndef H_Utils
+#define H_Utils
 
 /**
  * @file   Utils.hh

@@ -18,8 +18,8 @@
    @brief Numerous declarations related to testing.
 */
 
-#ifndef _H_TestData
-#define _H_TestData
+#ifndef H_TestData
+#define H_TestData
 
 /* $Id: TestData.hh,v 1.1 2006-08-17 00:52:59 meboyce Exp $ */
 
@@ -40,7 +40,7 @@
   } \
 }
 
-#ifdef _NO_ERROR_EXCEPTIONS
+#ifdef NO_ERROR_EXCEPTIONS
 /* Since no exceptions are thrown by this variant, we cannot test for them. */
 
 /**
@@ -74,7 +74,7 @@
  */
 #define __z__(exception, expectedException, good)
 
-#else /* _NO_ERROR_EXCEPTIONS */
+#else /* NO_ERROR_EXCEPTIONS */
 /* This variant does throw exceptions, so check they are the correct ones. */
 
 #define __x__(exception) { \
@@ -154,6 +154,6 @@ public:
                                const Error& caughtException);
 };
 
-#endif /* _NO_ERROR_EXCEPTIONS */
+#endif /* NO_ERROR_EXCEPTIONS */
 
-#endif /* _H_TestData */
+#endif /* H_TestData */

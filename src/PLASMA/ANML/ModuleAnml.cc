@@ -39,7 +39,6 @@ namespace EUROPA {
   void ModuleAnml::uninitialize(EngineId engine)
   {
 	  LanguageInterpreter *old = engine->removeLanguageInterpreter("anml");
-	  if (old)
-		  delete old;
+          delete old;
   }
 }

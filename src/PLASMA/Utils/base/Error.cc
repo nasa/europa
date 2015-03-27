@@ -18,7 +18,7 @@
    @brief Numerous declarations related to error generation and handling.
 */
 
-#ifndef _NO_ERROR_EXCEPTIONS_
+#ifndef NO_ERROR_EXCEPTIONS_
 /* Contains the rest of this file */
 
 #include "Error.hh"

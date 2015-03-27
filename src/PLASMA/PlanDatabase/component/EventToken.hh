@@ -1,5 +1,5 @@
-#ifndef _H_EventToken
-#define _H_EventToken
+#ifndef H_EventToken
+#define H_EventToken
 
 #include "PlanDatabaseDefs.hh"
 #include "IntervalToken.hh"

@@ -1,5 +1,5 @@
-#ifndef _H_Instant
-#define _H_Instant
+#ifndef H_Instant
+#define H_Instant
 
 /**
  * @file Instant.hh

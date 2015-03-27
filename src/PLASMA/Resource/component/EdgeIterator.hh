@@ -1,5 +1,5 @@
-#ifndef _EDGE_ITERATOR_HEADER_
-#define _EDGE_ITERATOR_HEADER_
+#ifndef EDGE_ITERATOR_HEADER_
+#define EDGE_ITERATOR_HEADER_
 
 /**
  * @file EdgeIterator.hh

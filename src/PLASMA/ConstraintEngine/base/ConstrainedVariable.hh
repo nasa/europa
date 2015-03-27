@@ -1,5 +1,5 @@
-#ifndef _H_ConstrainedVariable
-#define _H_ConstrainedVariable
+#ifndef H_ConstrainedVariable
+#define H_ConstrainedVariable
 
 /**
  * @file ConstrainedVariable.hh

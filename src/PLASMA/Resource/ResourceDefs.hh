@@ -1,5 +1,5 @@
-#ifndef _H_ResourceDefs
-#define _H_ResourceDefs
+#ifndef H_ResourceDefs
+#define H_ResourceDefs
 
 #include "ConstraintEngineDefs.hh"
 #include "PlanDatabaseDefs.hh"

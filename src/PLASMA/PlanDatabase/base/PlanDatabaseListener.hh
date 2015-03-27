@@ -1,5 +1,5 @@
-#ifndef _H_PlanDatabaseListener
-#define _H_PlanDatabaseListener
+#ifndef H_PlanDatabaseListener
+#define H_PlanDatabaseListener
 
 #include "PlanDatabaseDefs.hh"
 

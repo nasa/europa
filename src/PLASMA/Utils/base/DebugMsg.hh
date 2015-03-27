@@ -1,5 +1,5 @@
-#ifndef _PLASMA_DEBUG_MSG
-#define _PLASMA_DEBUG_MSG
+#ifndef PLASMA_DEBUG_MSG
+#define PLASMA_DEBUG_MSG
 #include <iostream>
 #include <string>
 #include <list>
@@ -440,4 +440,4 @@ inline std::ostream& operator<<(std::ostream& os, const DebugMessage& dm) {
   dm.print(&os);
   return(os);
 }
-#endif // _PLASMA_DEBUG_MSG
+#endif // PLASMA_DEBUG_MSG

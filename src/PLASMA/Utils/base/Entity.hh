@@ -1,5 +1,5 @@
-#ifndef _H_Entity
-#define _H_Entity
+#ifndef H_Entity
+#define H_Entity
 
 #include "Id.hh"
 #include "LabelStr.hh"

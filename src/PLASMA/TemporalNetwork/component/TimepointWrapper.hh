@@ -1,5 +1,5 @@
-#ifndef _H_TimePointWrapper
-#define _H_TimePointWrapper
+#ifndef H_TimePointWrapper
+#define H_TimePointWrapper
 
 #include "TemporalNetwork.hh"
 #include "TemporalNetworkDefs.hh"

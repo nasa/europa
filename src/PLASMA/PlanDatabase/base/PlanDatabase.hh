@@ -1,5 +1,5 @@
-#ifndef _H_PlanDatabase
-#define _H_PlanDatabase
+#ifndef H_PlanDatabase
+#define H_PlanDatabase
 /**
  * @file   PlanDatabase.hh
  * @author Conor McGann

@@ -1,5 +1,5 @@
-#ifndef _PATHDEFS_H_
-#define _PATHDEFS_H_
+#ifndef PATHDEFS_H_
+#define PATHDEFS_H_
 
 #include <string>
 
@@ -15,4 +15,4 @@ static const std::string PATH_STR("/");
 static const char PATH_CHR('/');
 #endif
 
-#endif /* _PATHDEFS_H_ */
+#endif /* PATHDEFS_H_ */

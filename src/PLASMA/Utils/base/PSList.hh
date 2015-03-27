@@ -1,5 +1,5 @@
-#ifndef _H_PSUtils
-#define _H_PSUtils
+#ifndef H_PSUtils
+#define H_PSUtils
 
 #include <vector>
 #include <algorithm>

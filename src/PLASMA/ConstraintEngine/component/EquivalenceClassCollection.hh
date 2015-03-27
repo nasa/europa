@@ -1,5 +1,5 @@
-#ifndef _H_EquivalenceClassCollection
-#define _H_EquivalenceClassCollection
+#ifndef H_EquivalenceClassCollection
+#define H_EquivalenceClassCollection
 
 /**
  * @file EquivalenceClassCollection.hh

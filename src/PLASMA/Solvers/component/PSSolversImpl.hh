@@ -1,5 +1,5 @@
-#ifndef _H_PSSolversImpl
-#define _H_PSSolversImpl
+#ifndef H_PSSolversImpl
+#define H_PSSolversImpl
 
 #include "PSSolvers.hh"
 #include "ConstraintEngineDefs.hh"

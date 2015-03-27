@@ -1,5 +1,5 @@
-#ifndef _H_ResourceThreatManager
-#define _H_ResourceThreatManager
+#ifndef H_ResourceThreatManager
+#define H_ResourceThreatManager
 
 #include "FlawManager.hh"
 #include "Instant.hh"

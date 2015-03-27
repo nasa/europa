@@ -1,5 +1,5 @@
-#ifndef _H_FVDetector
-#define _H_FVDetector
+#ifndef H_FVDetector
+#define H_FVDetector
 
 /**
  * @file FVDetector.hh

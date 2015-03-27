@@ -1,5 +1,5 @@
-#ifndef _H_PSPlanDatabase
-#define _H_PSPlanDatabase
+#ifndef H_PSPlanDatabase
+#define H_PSPlanDatabase
 
 #include "PSConstraintEngine.hh"
 #include "ConstraintEngineDefs.hh"

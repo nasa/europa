@@ -12,8 +12,8 @@
 //  ownership of the software is hereby transferred.  This notice shall
 //  remain on all copies of the software.
 
-#ifndef _H_DistGraph
-#define _H_DistGraph
+#ifndef H_DistGraph
+#define H_DistGraph
 
 #include "TemporalNetworkDefs.hh"
 #include "Entity.hh"

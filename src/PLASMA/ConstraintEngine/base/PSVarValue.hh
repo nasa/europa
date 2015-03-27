@@ -1,5 +1,5 @@
-#ifndef _H_PSVarValue
-#define _H_PSVarValue
+#ifndef H_PSVarValue
+#define H_PSVarValue
 
 #include "PSConstraintEngine.hh"
 #include "LabelStr.hh"

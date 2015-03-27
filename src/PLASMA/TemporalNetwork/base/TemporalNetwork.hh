@@ -10,8 +10,8 @@
 //  which it was acquired from the U.S. Government.  Neither title to nor
 //  ownership of the software is hereby transferred.  This notice shall
 //  remain on all copies of the software.
-#ifndef _H_TemporalNetwork
-#define _H_TemporalNetwork
+#ifndef H_TemporalNetwork
+#define H_TemporalNetwork
 
 #include "TemporalNetworkDefs.hh"
 #include "DistanceGraph.hh"

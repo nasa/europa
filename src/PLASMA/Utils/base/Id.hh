@@ -11,8 +11,8 @@
 //  ownership of the software is hereby transferred.  This notice shall
 //  remain on all copies of the software.
 
-#ifndef _H_ID
-#define _H_ID
+#ifndef H_ID
+#define H_ID
 
 #include "IdTable.hh"
 #include "Error.hh"
