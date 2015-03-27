@@ -555,7 +555,6 @@ private:
     TimepointId head;
     TimepointId foot;
     TemporalNetwork* owner;
-    TemporalConstraintId m_id;
     unsigned int m_edgeCount;
     void handleDiscard();
 
@@ -570,7 +569,7 @@ private:
      * @param edgeCount edge count
      */
     Tspec(TemporalNetwork* t, TimepointId src,TimepointId targ,Time lb,Time ub, unsigned short edgeCount)
-        : lowerBound(lb), upperBound(ub), head(src), foot(targ), owner(t), m_id(this),
+        : lowerBound(lb), upperBound(ub), head(src), foot(targ), owner(t),
           m_edgeCount(edgeCount)
     {}
 

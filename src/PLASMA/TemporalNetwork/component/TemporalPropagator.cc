@@ -41,7 +41,7 @@ TemporalPropagator::TemporalPropagator(const std::string& name,
                                        const ConstraintEngineId constraintEngine)
     : Propagator(name, constraintEngine), m_tnet((new TemporalNetwork())->getId()),
       m_activeVariables(), m_changedVariables(), m_changedConstraints(),
-      m_constraintsForDeletion(), m_variablesForDeletion(), m_wrappedTimepoints(),
+      m_constraintsForDeletion(), m_variablesForDeletion(),
       m_listeners(), m_mostRecentRepropagation(1){}
 
   TemporalPropagator::~TemporalPropagator() {
@@ -49,8 +49,7 @@ TemporalPropagator::TemporalPropagator(const std::string& name,
   }
 
   void TemporalPropagator::handleDiscard(){
-    check_error(Entity::isPurging() || m_wrappedTimepoints.empty());
-    Entity::discardAll(m_wrappedTimepoints);
+    check_error(Entity::isPurging());
     check_error(m_tnet);
     delete static_cast<TemporalNetwork*>(m_tnet);
 
@@ -999,7 +998,7 @@ bool TemporalPropagator::isValidForPropagation() const {
   if(!allValid(m_activeVariables) ||
      !allValid(m_changedVariables) ||
      !allValid(m_changedConstraints) ||
-     std::find(m_constraintsForDeletion.begin(), m_constraintsForDeletion.end(), static_cast<TemporalConstraintId>(NULL)) != m_constraintsForDeletion.end() ||
+     std::find(m_constraintsForDeletion.begin(), m_constraintsForDeletion.end(), TemporalConstraintId()) != m_constraintsForDeletion.end() ||
      std::find(m_variablesForDeletion.begin(), m_variablesForDeletion.end(), TimepointId()) != m_variablesForDeletion.end() ||
      std::find(m_listeners.begin(), m_listeners.end(), static_cast<TemporalNetworkListenerId>(NULL)) != m_listeners.end()) {
     debugMsg("TemporalPropagator:isValidForPropagation", "buffers have something invalid");
@@ -1015,7 +1014,7 @@ bool TemporalPropagator::isValidForPropagation() const {
     condDebugMsg(!allValid(m_changedConstraints), "TemporalPropagator:isValidForPropagation",
                  "changed constraint");
     condDebugMsg(std::find(m_constraintsForDeletion.begin(), m_constraintsForDeletion.end(),
-                           static_cast<TemporalConstraintId>(NULL)) != m_constraintsForDeletion.end(),
+                           TemporalConstraintId()) != m_constraintsForDeletion.end(),
                  "TemporalPropagator:isValidForPropagation",
                  "constraint for deletion");
     condDebugMsg(std::find(m_variablesForDeletion.begin(), m_variablesForDeletion.end(), TimepointId()) != m_variablesForDeletion.end(),

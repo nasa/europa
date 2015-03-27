@@ -219,7 +219,6 @@ namespace EUROPA {
     TemporalConstraintsSet m_constraintsForDeletion; /*!< Buffer deletions till you have to propagate. */
 
     std::set<TimepointId> m_variablesForDeletion; /*!< Buffer timepoints for deletion till we propagate. */
-    std::set<EntityId> m_wrappedTimepoints;
     std::set<TemporalNetworkListenerId> m_listeners;
     std::map<ConstrainedVariableId, TimepointId> m_varToTimepoint;
     std::map<TimepointId, ConstrainedVariableId> m_timepointToVar;
