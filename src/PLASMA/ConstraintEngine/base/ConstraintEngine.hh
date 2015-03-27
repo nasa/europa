@@ -1,5 +1,5 @@
-#ifndef _H_ConstraintEngine
-#define _H_ConstraintEngine
+#ifndef H_ConstraintEngine
+#define H_ConstraintEngine
 
 /**
  * @file ConstraintEngine.hh

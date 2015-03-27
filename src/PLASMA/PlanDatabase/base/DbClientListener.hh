@@ -1,5 +1,5 @@
-#ifndef _H_DbClientListener
-#define _H_DbClientListener
+#ifndef H_DbClientListener
+#define H_DbClientListener
 
 #include "PlanDatabaseDefs.hh"
 #include "DbClient.hh"

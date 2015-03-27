@@ -1,5 +1,5 @@
-#ifndef _H_Domain
-#define _H_Domain
+#ifndef H_Domain
+#define H_Domain
 
 /**
  * @file Domain.hh

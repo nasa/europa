@@ -1,6 +1,6 @@
 
-#ifndef _H_ModuleResource
-#define _H_ModuleResource
+#ifndef H_ModuleResource
+#define H_ModuleResource
 
 #include "Module.hh"
 
@@ -29,4 +29,4 @@ namespace EUROPA {
 }  
 
 
-#endif /* #ifndef _H_ModuleResource */
+#endif /* #ifndef H_ModuleResource */

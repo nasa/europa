@@ -1,5 +1,5 @@
-#ifndef _H_GroundedProfile
-#define _H_GroundedProfile
+#ifndef H_GroundedProfile
+#define H_GroundedProfile
 
 #include "ResourceDefs.hh"
 #include "Profile.hh"

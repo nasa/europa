@@ -1,5 +1,5 @@
-#ifndef _H_TemporalPropagator
-#define _H_TemporalPropagator
+#ifndef H_TemporalPropagator
+#define H_TemporalPropagator
 
 #include "ConstrainedVariable.hh"
 #include "Propagator.hh"

@@ -1,5 +1,5 @@
-#ifndef _H_PSConstraintEngine
-#define _H_PSConstraintEngine
+#ifndef H_PSConstraintEngine
+#define H_PSConstraintEngine
 
 #include "Engine.hh"
 #include "PSEntity.hh"

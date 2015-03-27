@@ -1,5 +1,5 @@
-#ifndef _H_Constraint
-#define _H_Constraint
+#ifndef H_Constraint
+#define H_Constraint
 
 /**
  * @file Constraint.hh

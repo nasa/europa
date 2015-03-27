@@ -1,5 +1,5 @@
-#ifndef _NUMBERHASH_H_
-#define _NUMBERHASH_H_
+#ifndef NUMBERHASH_H_
+#define NUMBERHASH_H_
 
 #include "Number.hh"
 #include <boost/unordered_map.hpp>
@@ -23,4 +23,4 @@ size_t hash<EUROPA::eint>::operator()(EUROPA::eint __x) const {return reinterpre
 }
 
 
-#endif /* _NUMBERHASH_H_ */
+#endif /* NUMBERHASH_H_ */

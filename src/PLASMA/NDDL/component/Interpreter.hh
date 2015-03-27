@@ -1,5 +1,5 @@
-#ifndef _H_Interpreter
-#define _H_Interpreter
+#ifndef H_Interpreter
+#define H_Interpreter
 
 #include <vector>
 
@@ -711,4 +711,4 @@ void getVariableReferences(const Expr* expr, EvalContext& ctx, std::vector<Const
 
 }
 
-#endif // _H_Interpreter
+#endif // H_Interpreter

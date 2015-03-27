@@ -1,5 +1,5 @@
-#ifndef _H_MergeMemento
-#define _H_MergeMemento
+#ifndef H_MergeMemento
+#define H_MergeMemento
 
 #include "ConstraintEngineDefs.hh"
 #include "PlanDatabaseDefs.hh"

@@ -1,5 +1,5 @@
-#ifndef _H_TemporalAdvisor
-#define _H_TemporalAdvisor
+#ifndef H_TemporalAdvisor
+#define H_TemporalAdvisor
 
 #include "PlanDatabaseDefs.hh"
 #include "PlanDatabaseVarDefs.hh"

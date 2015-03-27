@@ -1,5 +1,5 @@
-#ifndef _H_CommonDefs
-#define _H_CommonDefs
+#ifndef H_CommonDefs
+#define H_CommonDefs
 
 /**
  * @def DECLARE_GLOBAL_CONST(TYPE,NAME)

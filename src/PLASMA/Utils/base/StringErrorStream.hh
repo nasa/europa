@@ -6,8 +6,8 @@
    of engine/parser could be captured and passed through Swig interfaces.
 */
 
-#ifndef _H_String_Error
-#define _H_String_Error
+#ifndef H_String_Error
+#define H_String_Error
 
 #include "Error.hh"
 #include "Mutex.hh"
@@ -45,5 +45,5 @@ class StringErrorStream {
 std::stringstream StringErrorStream::stringStream;
 pthread_mutex_t StringErrorStream::s_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-#endif /* _H_String_Error */
+#endif /* H_String_Error */
 

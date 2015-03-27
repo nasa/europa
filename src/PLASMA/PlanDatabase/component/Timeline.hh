@@ -1,5 +1,5 @@
-#ifndef _H_Timeline
-#define _H_Timeline
+#ifndef H_Timeline
+#define H_Timeline
 
 /**
  * @file Timeline.hh

@@ -1,5 +1,5 @@
-#ifndef _H_NDDL_TEST_ENGINE_
-#define _H_NDDL_TEST_ENGINE_
+#ifndef H_NDDL_TEST_ENGINE_
+#define H_NDDL_TEST_ENGINE_
 
 #include "Engine.hh"
 
@@ -16,4 +16,4 @@ class NddlTestEngine : public EUROPA::EngineBase {
   virtual void createModules();
 };
 
-#endif // _H_NDDL_TEST_ENGINE_
+#endif // H_NDDL_TEST_ENGINE_

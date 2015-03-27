@@ -1,5 +1,5 @@
-#ifndef _H_TemporalNetworkDefs
-#define _H_TemporalNetworkDefs
+#ifndef H_TemporalNetworkDefs
+#define H_TemporalNetworkDefs
 
 #include "Error.hh"
 #include "Id.hh"

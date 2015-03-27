@@ -1,5 +1,5 @@
-#ifndef _H_PlanDatabaseWriter
-#define _H_PlanDatabaseWriter
+#ifndef H_PlanDatabaseWriter
+#define H_PlanDatabaseWriter
 
 #include "PlanDatabaseDefs.hh"
 #include <sstream>
@@ -41,4 +41,4 @@ namespace EUROPA {
 
 }
 
-#endif /* #ifndef _H_PlanDatabaseWriter */
+#endif /* #ifndef H_PlanDatabaseWriter */

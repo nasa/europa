@@ -1,5 +1,5 @@
-#ifndef _H_ConstraintEngineDefs
-#define _H_ConstraintEngineDefs
+#ifndef H_ConstraintEngineDefs
+#define H_ConstraintEngineDefs
 
 /**
  * Just provide forward declarations of classes and certain global declarations related to error handling.
@@ -72,4 +72,4 @@ DECLARE_GLOBAL_CONST(std::string, g_noVarName);
 
 } /* namespace EUROPA */
 
-#endif /* #ifndef _H_ConstraintEngineDefs */
+#endif /* #ifndef H_ConstraintEngineDefs */

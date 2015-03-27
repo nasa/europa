@@ -1,5 +1,5 @@
-#ifndef _H_ResourceThreatDecisionPoint
-#define _H_ResourceThreatDecisionPoint
+#ifndef H_ResourceThreatDecisionPoint
+#define H_ResourceThreatDecisionPoint
 
 #include "SolverDecisionPoint.hh"
 #include "ResourceDefs.hh"

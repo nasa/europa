@@ -1,5 +1,5 @@
-#ifndef _H_RulesEngine
-#define _H_RulesEngine
+#ifndef H_RulesEngine
+#define H_RulesEngine
 
 /**
  * @file RulesEngine.hh

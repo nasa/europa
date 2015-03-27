@@ -1,5 +1,5 @@
-#ifndef _H_Db
-#define _H_Db
+#ifndef H_Db
+#define H_Db
 
 #include "PlanDatabaseDefs.hh"
 #include "Timeline.hh"

@@ -1,5 +1,5 @@
-#ifndef _H_GroundedFVDetector
-#define _H_GroundedFVDetector
+#ifndef H_GroundedFVDetector
+#define H_GroundedFVDetector
 
 #include "GenericFVDetector.hh"
 namespace EUROPA {

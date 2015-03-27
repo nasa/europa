@@ -1,5 +1,5 @@
-#ifndef _H_TokenType
-#define _H_TokenType
+#ifndef H_TokenType
+#define H_TokenType
 
 #include "PlanDatabaseDefs.hh"
 #include "PSList.hh"

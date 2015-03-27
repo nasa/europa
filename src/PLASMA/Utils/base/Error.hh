@@ -32,8 +32,8 @@
    "prototypes" and documentation as well as the "production" variant.
 */
 
-#ifndef _H_Error
-#define _H_Error
+#ifndef H_Error
+#define H_Error
 
 /* $Id: Error.hh,v 1.6 2007-04-29 04:36:18 miatauro Exp $ */
 #include <iostream>
@@ -41,8 +41,8 @@
 #include <sstream>
 #include <cassert>
 
-#define _ARG3(_0, _1, _2, _3, ...) _3
-#define NARG3(...) _ARG3(__VA_ARGS__, 3, 2, 1, 0)
+#define ARG3(_0, _1, _2, _3, ...) _3
+#define NARG3(...) ARG3(__VA_ARGS__, 3, 2, 1, 0)
 
 /**
  * @def ALWAYS_FAIL
@@ -537,4 +537,4 @@ inline std::ostream& operator<<(std::ostream& os, const Error& err) {
   return(os);
 }
 
-#endif /* _H_Error */
+#endif /* H_Error */

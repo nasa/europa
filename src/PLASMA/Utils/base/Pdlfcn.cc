@@ -1,5 +1,5 @@
-#ifndef _H_Pdlfcn
-#define _H_Pdlfcn
+#ifndef H_Pdlfcn
+#define H_Pdlfcn
 
 /**   Pdlfcn.hh
  * @author Patrick Daley
@@ -17,10 +17,10 @@
 #  include <mach-o/dyld.h>
 #elif defined(__MINGW32__ )
 #  include <windows.h>
-#  define _WINDOWS_BUILD
+#  define WINDOWS_BUILD
 #elif defined( _MSC_VER ) 
 #  include <windows.h>
-#  define _WINDOWS_BUILD
+#  define WINDOWS_BUILD
 #else
 #  include <dlfcn.h>
 #endif
@@ -110,7 +110,7 @@ int p_dlclose(void * handle) {
   }
   return 0;
 }
-#elif defined( _WINDOWS_BUILD )
+#elif defined( WINDOWS_BUILD )
 
 static DWORD dlerror_last = ERROR_SUCCESS;
 

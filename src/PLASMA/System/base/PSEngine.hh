@@ -1,5 +1,5 @@
-#ifndef _H_PSEngine
-#define _H_PSEngine
+#ifndef H_PSEngine
+#define H_PSEngine
 
 #include "PSConstraintEngine.hh"
 #include "PSPlanDatabase.hh"

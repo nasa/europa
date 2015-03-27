@@ -1,5 +1,5 @@
-#ifndef _H_TemporalNetworkListener
-#define _H_TemporalNetworkListener
+#ifndef H_TemporalNetworkListener
+#define H_TemporalNetworkListener
 
 #include "TemporalNetworkDefs.hh"
 #include "TemporalNetwork.hh"

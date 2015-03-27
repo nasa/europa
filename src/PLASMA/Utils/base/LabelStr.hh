@@ -1,5 +1,5 @@
-#ifndef _H_LabelStr
-#define _H_LabelStr
+#ifndef H_LabelStr
+#define H_LabelStr
 
 /**
  * @file LabelStr.hh

@@ -1,5 +1,5 @@
-#ifndef _TESTUTILS_H_
-#define _TESTUTILS_H_
+#ifndef TESTUTILS_H_
+#define TESTUTILS_H_
 
 namespace EUROPA {
   void setTestLoadLibraryPath(std::string path);
@@ -19,4 +19,4 @@ namespace EUROPA {
    }
 
 
-#endif /* _TESTUTILS_H_ */
+#endif /* TESTUTILS_H_ */

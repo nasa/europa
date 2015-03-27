@@ -1,5 +1,5 @@
-#ifndef _H_RuleInstance
-#define _H_RuleInstance
+#ifndef H_RuleInstance
+#define H_RuleInstance
 
 /**
  * @file RuleInstance.hh

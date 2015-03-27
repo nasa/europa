@@ -1,5 +1,5 @@
-#ifndef _H_DbClientTransactionLog
-#define _H_DbClientTransactionLog
+#ifndef H_DbClientTransactionLog
+#define H_DbClientTransactionLog
 
 #include "DbClientListener.hh"
 #include <list>

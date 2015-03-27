@@ -1,5 +1,5 @@
-#ifndef _TYPES_HEADER_FILE_
-#define _TYPES_HEADER_FILE_
+#ifndef TYPES_HEADER_FILE_
+#define TYPES_HEADER_FILE_
 
 /**
  * @file Types.hh
@@ -109,7 +109,7 @@ class NodeHash
     
   };
 
-//TODO: Do we need to keep this _MSC_VER branch?
+//TODO: Do we need to keep this MSC_VER branch?
 #ifdef _MSC_VER
   typedef map< Node*, bool > Node2Bool;
   typedef map< Node*, eint > Node2Int;

@@ -1,6 +1,6 @@
 
-#ifndef _H_ModuleRulesEngine
-#define _H_ModuleRulesEngine
+#ifndef H_ModuleRulesEngine
+#define H_ModuleRulesEngine
 
 #include "Module.hh"
 
@@ -29,4 +29,4 @@ namespace EUROPA {
 }  
 
 
-#endif /* #ifndef _H_ModuleRulesEngine */
+#endif /* #ifndef H_ModuleRulesEngine */

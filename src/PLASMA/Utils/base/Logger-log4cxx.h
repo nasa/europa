@@ -64,7 +64,7 @@ public:
 	    //TODO - mcr - iterate through and delete loggers
 	}
 	delete loggers;
-	if( instance != NULL ) {delete instance;}
+	delete instance;
     }
 
     void readConfiguration( string configFilename ) {

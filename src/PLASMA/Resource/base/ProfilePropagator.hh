@@ -1,5 +1,5 @@
-#ifndef _H_ProfilePropagator
-#define _H_ProfilePropagator
+#ifndef H_ProfilePropagator
+#define H_ProfilePropagator
 
 #include "Propagators.hh"
 #include "ConstraintEngineDefs.hh"

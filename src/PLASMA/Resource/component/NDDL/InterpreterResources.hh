@@ -1,5 +1,5 @@
-#ifndef _H_TransactionInterpreterResources
-#define _H_TransactionInterpreterResources
+#ifndef H_TransactionInterpreterResources
+#define H_TransactionInterpreterResources
 
 #include "Interpreter.hh"
 

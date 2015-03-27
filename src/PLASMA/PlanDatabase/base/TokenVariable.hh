@@ -1,5 +1,5 @@
-#ifndef _H_TokenVariable
-#define _H_TokenVariable
+#ifndef H_TokenVariable
+#define H_TokenVariable
 
 #include "Token.hh"
 #include "PlanDatabaseDefs.hh"

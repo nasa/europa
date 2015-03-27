@@ -1,5 +1,5 @@
-#ifndef _H_EUROPA_MUTEX
-#define _H_EUROPA_MUTEX
+#ifndef H_EUROPA_MUTEX
+#define H_EUROPA_MUTEX
 
 #include <pthread.h>
 

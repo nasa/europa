@@ -1,5 +1,5 @@
-#ifndef _H_TestRule
-#define _H_TestRule
+#ifndef H_TestRule
+#define H_TestRule
 
 #include "Rule.hh"
 #include "Domains.hh"

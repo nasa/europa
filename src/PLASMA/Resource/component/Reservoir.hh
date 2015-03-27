@@ -1,5 +1,5 @@
-#ifndef _H_Reservoir
-#define _H_Reservoir
+#ifndef H_Reservoir
+#define H_Reservoir
 
 #include "ResourceDefs.hh"
 #include "Resource.hh"

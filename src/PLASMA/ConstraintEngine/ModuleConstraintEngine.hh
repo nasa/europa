@@ -1,6 +1,6 @@
 
-#ifndef _H_ModuleConstraintEngine
-#define _H_ModuleConstraintEngine
+#ifndef H_ModuleConstraintEngine
+#define H_ModuleConstraintEngine
 
 #include "Module.hh"
 
@@ -51,4 +51,4 @@ namespace EUROPA {
 }  
 
 
-#endif /* #ifndef _H_ModuleConstraintEngine */
+#endif /* #ifndef H_ModuleConstraintEngine */

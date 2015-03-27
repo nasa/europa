@@ -11,8 +11,8 @@
 //  ownership of the software is hereby transferred.  This notice shall
 //  remain on all copies of the software.
 
-#ifndef _H_IdTable
-#define _H_IdTable
+#ifndef H_IdTable
+#define H_IdTable
 
 #include <map>
 #include <iosfwd>

@@ -1,5 +1,5 @@
-#ifndef _H_CESchema
-#define _H_CESchema
+#ifndef H_CESchema
+#define H_CESchema
 
 #include "ConstraintEngineDefs.hh"
 #include "Engine.hh"
@@ -56,4 +56,4 @@ class CESchema : public EngineComponent
 
 } // namespace EUROPA
 
-#endif // _H_CESchema
+#endif // H_CESchema

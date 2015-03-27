@@ -1,5 +1,5 @@
-#ifndef _H_PlanDatabaseDefs
-#define _H_PlanDatabaseDefs
+#ifndef H_PlanDatabaseDefs
+#define H_PlanDatabaseDefs
 
 #include "ConstraintEngineDefs.hh"
 #include "Entity.hh"
