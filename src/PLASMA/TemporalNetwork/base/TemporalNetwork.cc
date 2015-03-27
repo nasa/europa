@@ -52,12 +52,7 @@ TemporalNetwork::TemporalNetwork() : consistent(true),
     for(std::set<TemporalConstraintId>::const_iterator it = m_constraints.begin(); it != m_constraints.end(); ++it){
       TemporalConstraintId constraint = *it;
       check_error(constraint);
-      constraint->discard();
-      //TODO: remove this--it's just to work around things
-#ifndef EUROPA_FAST
-      if(IdTable::getKey(reinterpret_cast<unsigned long int>(constraint)) != 0)
-         IdTable::remove(reinterpret_cast<unsigned long int>(constraint));
-#endif
+      constraint->discard(false);
     }
 
   }
@@ -373,9 +368,8 @@ TemporalNetwork::TemporalNetwork() : consistent(true),
                   TempNetErr::TempNetInvalidConstraintError());
     }
 
-    Tspec* spec = id;
-    result.push_back(spec->head);
-    result.push_back(spec->foot);
+    result.push_back(id->head);
+    result.push_back(id->foot);
     return(result);
   }
 
@@ -383,9 +377,8 @@ TemporalNetwork::TemporalNetwork() : consistent(true),
                                            TimepointId& source,
                                            TimepointId& target) const{
     check_error(constraint != NULL);
-    Tspec* spec = boost::polymorphic_cast<Tspec*>(constraint);
-    source = spec->head;
-    target = spec->foot;
+    source = constraint->head;
+    target = constraint->foot;
   }
 
   Time
@@ -395,8 +388,7 @@ TemporalNetwork::TemporalNetwork() : consistent(true),
                    "Cannot get scope of invalid constraint.",
                    TempNetErr::TempNetInvalidConstraintError());
 
-    Tspec* spec = id;
-    return(spec->upperBound);
+    return(id->upperBound);
   }
 
 
@@ -406,8 +398,7 @@ TemporalNetwork::TemporalNetwork() : consistent(true),
       check_error(id == NULL,
                    "Cannot get scope of invalid constraint.",
                    TempNetErr::TempNetInvalidConstraintError());
-    Tspec* spec = id;
-    return(spec->lowerBound);
+    return(id->lowerBound);
   }
 
 #ifdef _EUROPA_NO_ERROR_CHECKS_
@@ -441,7 +432,7 @@ TemporalConstraintId TemporalNetwork::addTemporalConstraint(const TimepointId sr
   const Time lb = mapToInternalInfinity(_lb);
   const Time ub = mapToInternalInfinity(_ub);
   if (!checkBoundsValidity(lb, ub))
-    return NULL;
+    return TemporalConstraintId();
 
   check_error(isValidId(src),
               "addTemporalConstraint:  Invalid source timepoint",
@@ -466,7 +457,7 @@ TemporalConstraintId TemporalNetwork::addTemporalConstraint(const TimepointId sr
     addEdgeSpec(targ, src, -lb);
   }
 
-  Tspec* spec = new Tspec (this, src, targ, lb, ub, edgeCount);
+  TemporalConstraintId spec = boost::make_shared<Tspec>(this, src, targ, lb, ub, edgeCount);
 
   m_constraints.insert(spec);
 
@@ -478,18 +469,17 @@ TemporalConstraintId TemporalNetwork::addTemporalConstraint(const TimepointId sr
   return(spec);
 }
 
-  Void TemporalNetwork::narrowTemporalConstraint(const TemporalConstraintId tcId,
+  Void TemporalNetwork::narrowTemporalConstraint(const TemporalConstraintId spec,
 						 const Time newLb, const Time newUb)
   {
-    check_error(tcId);
+    check_error(spec);
     if (!checkBoundsValidity(newLb, newUb))
       return;
 
-    check_error(isValidId(tcId),
+    check_error(isValidId(spec),
                 "narrowTemporalConstraint:  Invalid TemporalConstraint",
                 TempNetErr::TempNetInvalidConstraintError());
 
-    Tspec* spec = tcId;
     Time oldLb = spec->lowerBound;
     Time oldUb = spec->upperBound;
 
@@ -528,12 +518,12 @@ TemporalConstraintId TemporalNetwork::addTemporalConstraint(const TimepointId sr
       incPropagate(src, targ);
   }
 
-  Void TemporalNetwork::removeTemporalConstraint(const TemporalConstraintId tcId, bool markDeleted) {
+  Void TemporalNetwork::removeTemporalConstraint(const TemporalConstraintId spec,
+                                                 bool markDeleted) {
     // Make sure it is valid, including belonging to this id manager
-    check_error(isValidId(tcId),
+    check_error(isValidId(spec),
                 "removeTemporalConstraint: invalid Id",
                 TempNetErr::TempNetInvalidConstraintError());
-    Tspec* spec = tcId;
     Time lb = spec->lowerBound;
     Time ub = spec->upperBound;
     TimepointId src = spec->head;
@@ -547,7 +537,6 @@ TemporalConstraintId TemporalNetwork::addTemporalConstraint(const TimepointId sr
       removeEdgeSpec(targ, src, -lb);
     this->hasDeletions = this->hasDeletions || markDeleted;
     m_constraints.erase(spec);
-    spec->discard();
   }
 
   TimepointId TemporalNetwork::getOrigin()
@@ -1078,7 +1067,7 @@ Void TemporalNetwork::incDijkstraForward() {
 
 Tnode::Tnode(TemporalNetwork* t) :
     Dnode(), lowerBound(NEG_INFINITY), upperBound(POS_INFINITY), reftime(0),
-    prev_reftime(0), ordinal(0), m_baseDomainConstraint(NULL), m_deletionMarker(true),
+    prev_reftime(0), ordinal(0), m_baseDomainConstraint(), m_deletionMarker(true),
     index(0), ringLeader(), ringFollowers(), owner(t) {}
 
   Tnode::~Tnode(){

@@ -20,7 +20,6 @@ class Dnode;
 typedef boost::shared_ptr<Dnode> DnodeId;
 
 class Dedge;
-//typedef Dedge* DedgeId;
 typedef boost::shared_ptr<Dedge> DedgeId;
 
 class Tnode;
@@ -29,7 +28,8 @@ typedef boost::shared_ptr<Tnode> TimepointId;
 
 class Tspec;
 typedef Tspec TemporalConstraint;
-typedef Tspec* TemporalConstraintId;
+//typedef Tspec* TemporalConstraintId;
+typedef boost::shared_ptr<Tspec> TemporalConstraintId;
 
 class TemporalNetwork;
 typedef TemporalNetwork* TemporalNetworkId; 
