@@ -14,7 +14,7 @@ Welcome!  EUROPA is a framework to model and tackle problems in Planning, Schedu
 - **A Problem Solver:** A core solver to automatically find and fix flaws in the plan database. It can be configured to plan, schedule or both. It can be easily customized to integrate specialized heuristics and resolution operations.
 - **A Tool Box:** Europa includes a debugger for instrumentation and visualization of applications. It also includes a very high-level, declarative modeling language for describing problem domains and partial-plans.
 
-[Learn more...](What-Is-Europa)
+[Learn more...](//github.com/nasa/europa/wiki/What-Is-Europa)
 
 EUROPA was developed at NASA's Ames Research Center and is available under NASA's open source agreement [(NOSA)](http://opensource.arc.nasa.gov/page/nosa-software-agreement) 
 
