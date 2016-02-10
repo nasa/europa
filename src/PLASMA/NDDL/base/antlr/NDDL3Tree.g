@@ -812,7 +812,7 @@ predicateInstance returns [PredicateInstanceRef* pi]
 				(ann=tokenAnnotation { annotation = c_str($ann.text->chars); })?
 		)
 	        {
-	            pi = new PredicateInstanceRef(tokenType,tokenStr.c_str(),(name == NULL ? "" : name),(annotation == NULL ? "" : name));
+	            pi = new PredicateInstanceRef(tokenType,tokenStr.c_str(),(name == NULL ? "" : name),(annotation == NULL ? "" : annotation));
 	            if (name != NULL)
 	                CTX->SymbolTable->addLocalToken(name,tokenType);
 	        }
