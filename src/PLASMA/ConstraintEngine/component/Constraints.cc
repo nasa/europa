@@ -32,7 +32,7 @@ namespace EUROPA {
    * @brief Destructor will initiate custom discard.
    */
   UnaryConstraint::~UnaryConstraint(){
-    discard(false);
+    handleDiscard();
   }
 
   void UnaryConstraint::handleExecute() {
@@ -41,7 +41,6 @@ namespace EUROPA {
   }
 
   void UnaryConstraint::handleDiscard() {
-    Constraint::handleDiscard();
     delete m_x;
     m_x = 0;
   }
@@ -886,18 +885,23 @@ EqualSumConstraint::EqualSumConstraint(const std::string& name,
 }
 
   EqualSumConstraint::~EqualSumConstraint() {
-    discard(false);
+    handleDiscard();
   }
 
   void EqualSumConstraint::handleDiscard(){
     // Process for this constraint first
-    Constraint::handleDiscard();
-
-    // Further unwind for contained variables    Constraint::handleDiscard();
-    m_sum1.discard();
-    m_sum2.discard();
-    m_sum3.discard();
-    m_sum4.discard();
+    // Further unwind for contained variables
+    if(m_eqSumC1.isId())
+      delete static_cast<Constraint*>(m_eqSumC1);
+    if(m_eqSumC2.isId())
+      delete static_cast<Constraint*>(m_eqSumC2);
+    if(m_eqSumC3.isId())
+      delete static_cast<Constraint*>(m_eqSumC3);
+    if(m_eqSumC4.isId())
+      delete static_cast<Constraint*>(m_eqSumC4);
+    if(m_eqSumC5.isId())
+      delete static_cast<Constraint*>(m_eqSumC5);
+    
   }
 
   /*********** EqualProductConstraint *************/
@@ -920,16 +924,16 @@ EqualSumConstraint::EqualSumConstraint(const std::string& name,
     switch (ARG_COUNT) {
     case 3: // A = B * C
       scope.push_back(m_variables[0]); // ... = A
-      m_eqProductC1 = (new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+      m_eqProductC1.reset(new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope));
       break;
     case 4: // A = (B * C) * D
       scope.push_back(m_product1.getId()); // ... = (B * C)
-      m_eqProductC1 = (new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+      m_eqProductC1.reset(new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope));
       scope.clear();
       scope.push_back(m_product1.getId()); // (B * C) ...
       scope.push_back(m_variables[3]); // ... * D = ...
       scope.push_back(m_variables[0]); // ... A
-      m_eqProductC2 = (new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+      m_eqProductC2.reset(new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope));
       break;
     case 5: case 6: case 7:
       // 5: A = (B * C) * (D * E)
@@ -937,42 +941,42 @@ EqualSumConstraint::EqualSumConstraint(const std::string& name,
       // 7: A = (B * C) * (D * E * F * G)
       // So, do (B * C) and (D * E ...) for all three:
       scope.push_back(m_product1.getId()); // (B * C)
-      m_eqProductC1 = (new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+      m_eqProductC1.reset(new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope));
       scope.clear();
       scope.push_back(m_product1.getId()); // (B * C) * ...
       scope.push_back(m_product2.getId()); // (D * E ...) = ...
       scope.push_back(m_variables[0]); // A
-      m_eqProductC2 = (new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+      m_eqProductC2.reset(new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope));
       scope.clear();
       scope.push_back(m_variables[3]); // D * ...
       scope.push_back(m_variables[4]); // E ...
       switch (ARG_COUNT) {
       case 5:
         scope.push_back(m_product2.getId()); // ... = (D * E)
-        m_eqProductC3 = (new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+        m_eqProductC3.reset(new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope));
         break;
       case 6:
         scope.push_back(m_product3.getId()); // ... = (D * E)
-        m_eqProductC3 = (new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+        m_eqProductC3.reset(new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope));
         scope.clear();
         scope.push_back(m_product3.getId()); // (D * E) * ...
         scope.push_back(m_variables[5]); // ... F = ...
         scope.push_back(m_product2.getId()); // ... (D * E * F)
-        m_eqProductC4 = (new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+        m_eqProductC4.reset(new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope));
         break;
       case 7:
         scope.push_back(m_product3.getId()); // ... = (D * E)
-        m_eqProductC3 = (new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+        m_eqProductC3.reset(new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope));
         scope.clear();
         scope.push_back(m_product3.getId()); // (D * E) * ...
         scope.push_back(m_product4.getId()); // ... (F * G) = ...
         scope.push_back(m_product2.getId()); // (D * E * F * G)
-        m_eqProductC4 = (new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+        m_eqProductC4.reset(new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope));
         scope.clear();
         scope.push_back(m_variables[5]); // F * ...
         scope.push_back(m_variables[6]); // ... G = ...
         scope.push_back(m_product4.getId()); // ... (F * G)
-        m_eqProductC5 = (new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+        m_eqProductC5.reset(new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope));
         break;
       default:
         check_error(ALWAYS_FAILS);
@@ -986,37 +990,34 @@ EqualSumConstraint::EqualSumConstraint(const std::string& name,
         scope.push_back(m_product1.getId()); // first_half * ...
         scope.push_back(m_product2.getId()); // ... second_half = ...
         scope.push_back(m_variables[0]); // ... A
-        m_eqProductC1 = (new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+        m_eqProductC1.reset(new MultEqualConstraint(std::string("MultEqual"), propagatorName, constraintEngine, scope));
         scope.clear();
         scope.push_back(m_product1.getId()); // first_half = ...
         unsigned long half = ARG_COUNT/2;
         unsigned long i = 1;
         for ( ; i <= half; i++)
           scope.push_back(m_variables[i]); // ... X * ...
-        m_eqProductC2 = (new EqualProductConstraint(std::string("EqualProduct"), propagatorName, constraintEngine, scope))->getId();
+        m_eqProductC2.reset(new EqualProductConstraint(std::string("EqualProduct"), propagatorName, constraintEngine, scope));
         scope.clear();
         scope.push_back(m_product2.getId()); // second_half = ...
         for ( ; i < ARG_COUNT; i++)
           scope.push_back(m_variables[i]); // ... Y * ...
-        m_eqProductC3 = (new EqualProductConstraint(std::string("EqualProduct"), propagatorName, constraintEngine, scope))->getId();
+        m_eqProductC3.reset(new EqualProductConstraint(std::string("EqualProduct"), propagatorName, constraintEngine, scope));
         break;
       }
     }
   }
 
   EqualProductConstraint::~EqualProductConstraint(){
-    discard(false);
+    handleDiscard();
   }
 
   void EqualProductConstraint::handleDiscard(){
-    // Process for this constraint first
-    Constraint::handleDiscard();
-
     // Further unwind for contained variables
-    m_product1.discard();
-    m_product2.discard();
-    m_product3.discard();
-    m_product4.discard();
+    // m_product1.discard();
+    // m_product2.discard();
+    // m_product3.discard();
+    // m_product4.discard();
   }
 
   /*********** CondAllSameConstraint *************/

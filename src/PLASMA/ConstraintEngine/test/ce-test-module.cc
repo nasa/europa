@@ -879,13 +879,14 @@ private:
   static bool testUnaryConstraint(){
     {
       Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(-10, 10));
-      UnaryConstraint c0(IntervalDomain(4, 6), v0.getId());
-      CPPUNIT_ASSERT_MESSAGE(v0.toString(), v0.getDerivedDomain() == IntervalIntDomain(4, 6));
-      v0.specify(5);
-      CPPUNIT_ASSERT(v0.constraintConsistent());
-      v0.reset();
-      CPPUNIT_ASSERT_MESSAGE(v0.toString(), v0.getDerivedDomain() == IntervalIntDomain(4, 6));
-      c0.discard();
+      {
+	UnaryConstraint c0(IntervalDomain(4, 6), v0.getId());
+	CPPUNIT_ASSERT_MESSAGE(v0.toString(), v0.getDerivedDomain() == IntervalIntDomain(4, 6));
+	v0.specify(5);
+	CPPUNIT_ASSERT(v0.constraintConsistent());
+	v0.reset();
+	CPPUNIT_ASSERT_MESSAGE(v0.toString(), v0.getDerivedDomain() == IntervalIntDomain(4, 6));
+      }
       CPPUNIT_ASSERT_MESSAGE(v0.toString(), v0.lastDomain() == IntervalIntDomain(-10, 10));
     }
 

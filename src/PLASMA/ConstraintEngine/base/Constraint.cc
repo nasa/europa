@@ -75,7 +75,7 @@ Constraint::Constraint(const std::string& name,
 
   Constraint::~Constraint(){
     debugMsg("Constraint:~Constraint", Entity::toString() << " Id=" << m_id);
-    discard(false);
+    handleDiscard();
     m_id.remove();
   }
 
@@ -95,8 +95,6 @@ Constraint::Constraint(const std::string& name,
     }
 
     m_constraintEngine->remove(m_id);
-
-    Entity::handleDiscard();
   }
 
   double Constraint::getViolation() const {

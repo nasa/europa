@@ -37,17 +37,6 @@ namespace EUROPA{
   public:
     DECLARE_ENTITY_TYPE(Entity);
 
-    template<class COLLECTION>
-    static void discardAll(COLLECTION& objects){
-      typedef typename COLLECTION::iterator object_iterator;
-      for(object_iterator it = objects.begin(); it != objects.end(); ++it){
-	check_error((*it).isValid());
-	Entity* elem = static_cast<Entity*>(*it);
-	elem->discard();
-      }
-      objects.clear();
-    }
-
     virtual ~Entity();
 
     inline eint getKey() const {return m_key;}
@@ -64,26 +53,6 @@ namespace EUROPA{
 
     
     virtual bool canBeCompared(const EntityId) const;
-
-    /**
-     * @brief Set an external entity reference, indicating an external entity is shadowing this entity.
-     */
-    void setExternalEntity(const EntityId externalEntity);
-    void setExternalPSEntity(const PSEntity* externalEntity);
-
-    /**
-     * @brief Special case to reset the external entity to a noId.
-     */
-    void clearExternalEntity();
-    void clearExternalPSEntity();
-
-    /**
-     * @brief Retrieve an external entity reference, if present.
-     * @return Will return EntityId::noId() if not assigned.
-     */
-    const EntityId getExternalEntity() const;
-    const PSEntity* getExternalPSEntity() const;
-
     /**
      * @brief Get the number of outstanding references
      */
@@ -103,17 +72,6 @@ namespace EUROPA{
      * @brief Test of the entity can be deleted. RefCount == 0
      */
     bool canBeDeleted() const;
-
-    /**
-     * @brief Discard the entity.
-     * @param pool If true it will be pooled for garbage colection
-     */
-    void discard(bool pool = true);
-
-    /**
-     * @brief Test of the class has already been discarded.
-     */
-    bool isDiscarded() const;
 
     /**
      * @brief Add a dependent entity. It will be notified when this is discarded
@@ -160,34 +118,13 @@ namespace EUROPA{
      */
     static bool isPooled(Entity* entity);
 
-    /**
-     * @brief Garbage collect discarded entities
-     * @return The number of entities deleted
-     */
-    static unsigned int garbageCollect();
-
-
   protected:
     Entity();
-
-    /**
-     * @brief Over-ride to custmize deallocation
-     */
-    virtual void handleDiscard();
-
-    EntityId m_externalEntity; /*!< Helfpul to make synchronization with other data structures easy */
-
   private:
-
-    /**
-     * @brief Subclasses should over-ride this to handle special data structure management.
-     */
-    virtual void notifyDiscarded(const Entity* entity);
 
     eint m_key;
     
     unsigned int m_refCount;
-    bool m_discarded;
     std::set<Entity*> m_dependents;
   };
 
@@ -216,12 +153,5 @@ class EntityComparator<T*> {
   }
 };
 
-/** 
- * @struct Discard
- * Custom deallocator for shared pointers of Entity instances.
- */
-struct Discard {
-  void operator()(Entity* e) const {e->discard();}
-};
 }
 #endif

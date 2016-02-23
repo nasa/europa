@@ -8,6 +8,8 @@
 #include "ConstraintType.hh"
 #include "ConstraintTypeChecking.hh"
 
+#include <boost/smart_ptr/scoped_ptr.hpp>
+
 namespace EUROPA {
 
 #define CREATE_FUNCTION_CONSTRAINT(cname)				\
@@ -172,17 +174,11 @@ class AllDiffConstraint : public Constraint {
                     const std::vector<ConstrainedVariableId>& variables);
   
   ~AllDiffConstraint() {
-    discard(false);
+    delete static_cast<Constraint*>(m_condAllDiffConstraint);
   }
 
  private:
   void handleExecute() { }
-
-  void handleDiscard(){
-    Constraint::handleDiscard();
-    m_condVar.discard();
-    m_condAllDiffConstraint->discard();
-  }
 
   Variable<BoolDomain> m_condVar;
   ConstraintId m_condAllDiffConstraint;
@@ -333,21 +329,12 @@ class CountNonZeroesConstraint : public Constraint {
                            const std::vector<ConstrainedVariableId>& variables);
 
   ~CountNonZeroesConstraint() {
-    discard(false);
+    delete static_cast<Constraint*>(m_countZeroesConstraint);
+    delete static_cast<Constraint*>(m_subsetConstraint);
   }
 
   // All the work is done by the member constraints.
   inline void handleExecute() { }
-
-  void handleDiscard(){
-    Constraint::handleDiscard();
-    m_zeroes.discard();
-    m_otherVars.discard();
-    m_superset.discard();
-    m_addEqualConstraint.discard();
-    m_countZeroesConstraint->discard();
-    m_subsetConstraint->discard();
-  }
 
  private:
   Variable<IntervalDomain> m_zeroes, m_otherVars,  m_superset;
@@ -486,7 +473,8 @@ class EqualProductConstraint : public Constraint {
 
   const unsigned long ARG_COUNT;
 
-  ConstraintId m_eqProductC1, m_eqProductC2, m_eqProductC3, m_eqProductC4, m_eqProductC5;
+  //ConstraintId m_eqProductC1, m_eqProductC2, m_eqProductC3, m_eqProductC4, m_eqProductC5;
+  boost::scoped_ptr<Constraint> m_eqProductC1, m_eqProductC2, m_eqProductC3, m_eqProductC4, m_eqProductC5;
   Variable<IntervalDomain> m_product1, m_product2, m_product3, m_product4;
 };
 typedef DataTypeCheck<EqualProductConstraint, EqThreeNumeric<> > EqualProductCT;
@@ -645,20 +633,13 @@ class OrConstraint : public Constraint {
                const std::vector<ConstrainedVariableId>& variables);
 
   ~OrConstraint() {
-    discard(false);
+    delete static_cast<Constraint*>(m_subsetConstraint);
+    delete static_cast<Constraint*>(m_countNonZeroesConstraint);
   }
 
  private:
   // All the work is done by the member constraints.
   inline void handleExecute() { }
-
-  void handleDiscard(){
-    Constraint::handleDiscard();
-    m_nonZeroes.discard();
-    m_superset.discard();
-    m_subsetConstraint->discard();
-    m_countNonZeroesConstraint->discard();
-  }
 
   Variable<IntervalIntDomain> m_nonZeroes;
   Variable<IntervalIntDomain> m_superset;
@@ -710,16 +691,11 @@ class RotateScopeRightConstraint : public Constraint {
                              const int& rotateCount);
 
   ~RotateScopeRightConstraint() {
-    discard(false);
+    delete static_cast<Constraint*>(m_otherConstraint);
   }
 
  private:
   void handleExecute() { }
-
-  void handleDiscard(){
-    Constraint::handleDiscard();
-    m_otherConstraint->discard();
-  }
 
   ConstraintId m_otherConstraint;
 };
@@ -830,16 +806,11 @@ class SwapTwoVarsConstraint : public Constraint {
                           int firstIndex, int secondIndex);
 
     ~SwapTwoVarsConstraint() {
-      discard(false);
+      delete static_cast<Constraint*>(m_otherConstraint);
     }
 
   private:
     void handleExecute() { }
-
-    void handleDiscard(){
-      Constraint::handleDiscard();
-      m_otherConstraint->discard();
-    }
 
     ConstraintId m_otherConstraint;
   };

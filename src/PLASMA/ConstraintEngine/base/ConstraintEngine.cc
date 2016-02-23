@@ -217,11 +217,10 @@ PSList<PSConstraint*> ViolationMgrImpl::getAllViolations() const {
     // The underlying memory will not be deallocated until garbage collection occurs.
     while(!m_emptyVariables.empty()) {
     	ConstrainedVariableId v = *(m_emptyVariables.begin());
-    	if (!v->isDiscarded()) {
-    		check_error(!v.isNoId(),"Tried to relax ConstrainedVariableId::noId()");
-    		v->relax();
-    		debugMsg("ConstraintEngine:ViolationMgr", "Relaxed empty variable : " << v->toLongString());
-    	}
+	check_error(!v.isNoId(),"Tried to relax ConstrainedVariableId::noId()");
+	v->relax();
+	debugMsg("ConstraintEngine:ViolationMgr",
+		 "Relaxed empty variable : " << v->toLongString());
     	m_emptyVariables.erase(v);
     }
 
@@ -372,7 +371,7 @@ DomainListenerId ConstraintEngine::allocateVariableListener(const ConstrainedVar
     while(!m_constraints.empty()){
       ConstraintId constraint = * m_constraints.begin();
       check_error(constraint.isValid());
-      constraint->discard();
+      delete static_cast<Constraint*>(constraint);
     }
 
     // Iteratively delete variables. Note that each deletion will update the set
@@ -381,7 +380,7 @@ DomainListenerId ConstraintEngine::allocateVariableListener(const ConstrainedVar
     while(!m_variables.empty()){
       ConstrainedVariableId var = * m_variables.begin();
       check_error(var.isValid());
-      var->discard();
+      delete static_cast<ConstrainedVariable*>(var);
     }
 
     // Always delete the propagators when we purge
@@ -508,8 +507,8 @@ void ConstraintEngine::add(const ConstraintId constraint, const std::string& pro
     	const std::vector<ConstrainedVariableId>& scope = constraint->getModifiedVariables();
     	for(std::vector<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it){
     		ConstrainedVariableId id(*it);
-    		if(!id->isDiscarded() && id->lastRelaxed() < m_cycleCount)
-    			id->relax();
+    		if(id->lastRelaxed() < m_cycleCount)
+		  id->relax();
     	}
     }
     getViolationMgr().handleRemoved(constraint);
@@ -526,7 +525,7 @@ void ConstraintEngine::add(const PropagatorId propagator){
   if(it != m_propagatorsByName.end()) {
     europaWarn("Overwriting propagator named " + propagator->getName());
     m_propagators.erase(std::find(m_propagators.begin(), m_propagators.end(), it->second));
-    it->second->discard();
+    delete static_cast<Propagator*>(it->second);
     m_propagatorsByName.erase(it);
   }
   size_t before = m_propagators.size();
@@ -727,7 +726,6 @@ void ConstraintEngine::add(const PropagatorId propagator){
 
       // Clean up now that we are in a quiescent state
       processRedundantConstraints();
-      Entity::garbageCollect();
       checkError(constraintConsistent(),
 		 "Must be a bug in cleaning up constraints since we have regressed through garbage collection." <<
 		 " See discard and handleDiscard.");
@@ -794,7 +792,7 @@ void ConstraintEngine::notify(const ConstrainedVariableId source,
     const ConstraintId constraint = it->first;
     checkError(constraint.isValid(), "Constraint is invalid on " << source->toLongString());
     unsigned int argIndex = it->second;
-    if(constraint->isActive() && !constraint->isDiscarded() &&
+    if(constraint->isActive() &&
        changeType != DomainListener::EMPTIED &&
        !constraint->canIgnore(source, argIndex, changeType))
       constraint->getPropagator()->handleNotification(source, argIndex, constraint, changeType);

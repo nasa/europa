@@ -142,7 +142,6 @@ unsigned long IdTable::size() {
   }
 
 void IdTable::checkResult(bool result, unsigned long id_count) {
-  Entity::garbageCollect();
 
   if (result && IdTable::size() <= id_count) {
     debugMsg("Test"," PASSED.");
