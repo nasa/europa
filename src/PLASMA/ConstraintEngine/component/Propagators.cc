@@ -52,7 +52,6 @@ DefaultPropagator::DefaultPropagator(const std::string& name,
 					     unsigned int,
 					     const ConstraintId constraint,
 					     const DomainListener::ChangeType& changeType){
-    checkError(!constraint->isDiscarded(), constraint);
     if(constraint->getKey() != m_activeConstraint) {
       debugMsg("DefaultPropagator:handleNotification",
           "Adding to the agenda: " << constraint->getName() << "(" << constraint->getKey() << ")"
@@ -101,8 +100,6 @@ DefaultPropagator::DefaultPropagator(const std::string& name,
     for(ConstraintSet::const_iterator it = m_agenda.begin(); it != m_agenda.end(); ++it){
       ConstraintId constraint = *it;
       checkError(constraint.isValid(), constraint);
-      checkError(!constraint->isDiscarded(),
-		 constraint->getName() << "(" << constraint->getKey() << ") Id=" << constraint);
     }
     return true;
   }

@@ -20,7 +20,6 @@ Propagator::Propagator(const std::string& name, const ConstraintEngineId constra
 }
 
   Propagator::~Propagator(){
-    discard(false);
     m_id.remove();
   }
 
@@ -47,7 +46,6 @@ const std::string& Propagator::getName() const {return m_name;}
 
   void Propagator::addConstraint(const ConstraintId constraint){
     check_error(constraint->getPropagator().isNoId());
-    checkError(!constraint->isDiscarded(), constraint);
     m_constraints.insert(constraint);
     handleConstraintAdded(constraint);
   }

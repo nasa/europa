@@ -58,7 +58,7 @@ ConstrainedVariable::ConstrainedVariable(const ConstraintEngineId constraintEngi
     debugMsg("ConstrainedVariable:~ConstrainedVariable",
 	     "NAME=" << getName() << " KEY=" << getKey() << " ID=" << m_id);
 
-    discard(false);
+    handleDiscard();
 
     delete static_cast<DomainListener*>(m_listener);
 
@@ -101,12 +101,17 @@ ConstrainedVariable::ConstrainedVariable(const ConstraintEngineId constraintEngi
     check_error(m_constraintEngine.isValid());
     m_deleted = true;
     // Remove constraints if they apply and we are not purging
+    //TODO This seems wrong.  Variables don't own constraints.  It should be
+    //an error to delete a variable with constraints on it.
+    checkRuntimeError(Entity::isPurging() || m_constraints.empty(),
+		      "Entered destructor for " << getEntityName() <<
+		      " with constraints remaining.");
     if(!Entity::isPurging()){
       for (ConstraintList::const_iterator it = m_constraints.begin(); it != m_constraints.end(); ++it){
 	ConstraintId constraint = it->first;
 	debugMsg("ConstrainedVariable:handleDiscard", "Discarding constraint " << constraint->getKey());
 	checkError(constraint.isValid(), constraint);
-	constraint->discard();
+	delete static_cast<Constraint*>(constraint);
 	checkError(constraint.isValid(), constraint << " should remain valid");
       }
     }
@@ -120,8 +125,6 @@ ConstrainedVariable::ConstrainedVariable(const ConstraintEngineId constraintEngi
     {
     	(*m_listeners.begin())->notifyDiscard();
     }
-
-    Entity::handleDiscard();
   }
 
   const ConstrainedVariableId ConstrainedVariable::getId() const {

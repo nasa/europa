@@ -262,7 +262,6 @@ void EngineBase::uninitializeModules() {
     		uninitializeByModules();
             uninitializeModules();
             Entity::purgeEnded();
-            Entity::garbageCollect();
     		m_started = false;
     	}
     }
