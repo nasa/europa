@@ -271,11 +271,6 @@ namespace EUROPA {
 
   protected:
 
-    /**
-     * @brief Handle deallocation
-     */
-    void handleDiscard();
-
     Object(const PlanDatabaseId planDatabase, const std::string& type, const std::string& name, bool hasVariables, bool notify);
 
     // Calls for managing object - token connections
@@ -342,6 +337,10 @@ namespace EUROPA {
     ConstrainedVariableId m_thisVar; /**< Used to constrain against */
 
   private:
+    /**
+     * @brief Handle deallocation
+     */
+    void handleDiscard();
 
     void clean(const TokenId token);
     void clean(const ConstraintId constraint, eint tokenKey);

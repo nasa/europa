@@ -69,7 +69,7 @@ Object::Object(const PlanDatabaseId planDatabase, const std::string& type, const
   Object::~Object() {
     check_error(m_id.isValid());
 
-    discard(false);
+    handleDiscard();
 
     m_id.remove();
   }
@@ -97,15 +97,18 @@ void Object::constructor(const std::vector<const Domain*>&) {}
 
       check_error(isValid());
 
+      for(TokenSet::const_iterator it = m_tokens.begin(); it != m_tokens.end(); ++it)
+	clean(*it);
+      
       // Remove thisVar
       check_error(m_thisVar.isValid());
-      m_thisVar->discard();
+      delete static_cast<ConstrainedVariable*>(m_thisVar);
 
       // Remove object variables
       std::vector<ConstrainedVariableId>::iterator itVCV = m_variables.begin();
       for ( ; itVCV != m_variables.end(); ++itVCV) {
 	ConstrainedVariableId variable = *itVCV;
-	variable->discard();
+	delete static_cast<ConstrainedVariable*>(variable);
       }
 
       // Do cascaded delete on components
@@ -118,8 +121,6 @@ void Object::constructor(const std::vector<const Domain*>&) {}
 
       m_planDatabase->notifyRemoved(m_id);
     }
-
-    Entity::handleDiscard();
   }
 
   const ObjectId Object::getId() const {
@@ -187,6 +188,7 @@ const std::string& Object::getName() const {
 
   void Object::remove(const TokenId token) {
     check_error(token.isValid());
+    check_error(isValid());
 
     debugMsg("Object:remove:token", "Removing token " << token->getPredicateName() << "(" << token->getKey() << ")  from " << toString());
     check_error(isValid());
@@ -207,18 +209,19 @@ const std::string& Object::getName() const {
       // Obtain and store the constraint
       ConstraintId constraint = it->second;
       check_error(constraint.isValid());
-      constraints.insert(constraint);
       m_constraintsByTokenKey.erase(it++);
 
-      debugMsg("Object:remove:token", "Also removing " << constraint->toString());
+      debugMsg("Object:remove:token", "Also removing directly " << constraint->toString());
 
       // If the constraint is a precedence constraint, the additional cleanup required
       std::map<eint, std::pair<eint, eint> >::iterator pos =
           m_keyPairsByConstraintKey.find(constraint->getKey());
       if(pos != m_keyPairsByConstraintKey.end())
 	removePrecedenceConstraint(constraint);
+      else
+	constraints.insert(constraint);
     }
-
+    check_error(isValid());
 
     // If there are constraints to delete, we must go through one
     // more passof constraintsByTokenKey as there could be dangling
@@ -229,14 +232,15 @@ const std::string& Object::getName() const {
       while(it != m_constraintsByTokenKey.end()){
 	ConstraintId constraint = it->second;
 	if(constraints.find(constraint) != constraints.end()){
-	  debugMsg("Object:remove:token", "Also removing " << constraint->toString());
+	  debugMsg("Object:remove:token", "Also removing indirectly " << constraint->toString());
 	  m_constraintsByTokenKey.erase(it++);
 	}
 	else
 	  ++it;
       }
 
-      Entity::discardAll(constraints);
+      //Entity::discardAll(constraints);
+      cleanup(constraints);
     }
 
     m_planDatabase->notifyRemoved(m_id, token);
@@ -448,7 +452,7 @@ void Object::constrain(const TokenId predecessor, const TokenId successor, bool 
        && !hasExplicitConstraint(token)){ // Then there is only one, so clean it
       --it;
       m_constraintsByTokenKey.erase(it);
-      candidateForRemoval->discard();
+      delete static_cast<Constraint*>(candidateForRemoval);
     }
   }
 
@@ -548,12 +552,16 @@ void Object::constrain(const TokenId predecessor, const TokenId successor, bool 
   }
 
   void Object::clean(const ConstraintId constraint, eint tokenKey) {
+    typedef std::multimap<eint, ConstraintId> ConstraintMap;
     // Remove the entry in the predecessor list if necessary
-    std::multimap<eint, ConstraintId>::iterator it = m_constraintsByTokenKey.find(tokenKey);
-    while(it != m_constraintsByTokenKey.end() && it->first == tokenKey && it->second != constraint)
-      ++it;
-    if(it != m_constraintsByTokenKey.end() && it->second == constraint)
-      m_constraintsByTokenKey.erase(it);
+    std::pair<ConstraintMap::iterator, ConstraintMap::iterator> range =
+      m_constraintsByTokenKey.equal_range(tokenKey);
+    while(range.first != range.second) {
+      if(range.first->second == constraint)
+	m_constraintsByTokenKey.erase(range.first++);
+      else
+	++range.first;
+    }
   }
 
   void Object::constrainToThisObjectAsNeeded(const TokenId token) {
@@ -741,7 +749,8 @@ ConstrainedVariableId Object::addVariable(const Domain& baseDomain, const std::s
     clean(constraint, successor->getKey());
 
       // Delete the actual constraint
-    constraint->discard();
+    delete static_cast<Constraint*>(constraint);
+    check_error(isValid());
   }
 
 // PS Methods:

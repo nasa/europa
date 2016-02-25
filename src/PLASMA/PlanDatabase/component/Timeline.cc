@@ -36,7 +36,6 @@ Timeline::Timeline(const PlanDatabaseId planDatabase, const std::string& type,
 {commonInit(open);}
 
   Timeline::~Timeline(){
-    discard(false);
   }
 
   void Timeline::commonInit(bool open){

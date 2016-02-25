@@ -129,7 +129,7 @@ namespace EUROPA{
           masterTokens.insert(token);
       }
 
-      Entity::discardAll(masterTokens);
+      cleanup(masterTokens);
 
       // Retrieve only the objects at the root
       std::set<ObjectId> rootObjects;
@@ -141,17 +141,14 @@ namespace EUROPA{
       }
 
       // Now clean up root objects - which will cascade delete to the children
-      Entity::discardAll(rootObjects);
+      cleanup(rootObjects);
     }
     else { // Just cleanup by blasting through the tokens and objects
-      Entity::discardAll(m_tokens);
-      Entity::discardAll(m_objects);
+      cleanup(m_tokens);
+      cleanup(m_objects);
     }
     // Purge global variables
-    Entity::discardAll(m_globalVariables);
-
-    // Finally, run the garbage collector
-    Entity::garbageCollect();
+    cleanup(m_globalVariables);
   }
 
   void PlanDatabase::notifyAdded(const ObjectId object){
@@ -943,7 +940,7 @@ unsigned long PlanDatabase::archive(eint tick){
   for(std::multimap<eint, TokenId>::const_iterator it = tokensToRemove.begin(); it != tokensToRemove.end(); ++it){
     TokenId token = it->second;
     token->terminate();
-    token->discard();
+    delete static_cast<Token*>(token);
   }
 
   return initialCount-getTokens().size();

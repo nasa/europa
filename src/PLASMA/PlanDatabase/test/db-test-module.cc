@@ -1827,7 +1827,8 @@ private:
     token3.close();
 
     // create a test constraint between t2 and t3
-    ce->createConstraint("precedes",makeScope(token2.end(),token3.start()));
+    ConstraintId p =
+      ce->createConstraint("precedes",makeScope(token2.end(),token3.start()));
 
     CPPUNIT_ASSERT(ce->propagate());
 
@@ -1904,6 +1905,7 @@ private:
     token3.cancel();
     CPPUNIT_ASSERT(!token3.isMerged());
 
+    delete static_cast<Constraint*>(p);
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -2680,7 +2682,7 @@ private:
     // Now delete the master and expect the uncommitted slave to be discarded but the committed slave to
     // be retained.
     delete static_cast<Token*>(master);
-    CPPUNIT_ASSERT(slaveA->isDiscarded());
+    //CPPUNIT_ASSERT(slaveA->isDiscarded());
     CPPUNIT_ASSERT(slaveB->isCommitted());
 
     delete static_cast<Token*>(slaveB);
@@ -2750,8 +2752,8 @@ private:
 
     // Now delete the master - should force slaves A and B to be deleted
     delete static_cast<Token*>(master);
-    CPPUNIT_ASSERT(slaveA->isDiscarded());
-    CPPUNIT_ASSERT(slaveB->isDiscarded());
+    //CPPUNIT_ASSERT(slaveA->isDiscarded());
+    //CPPUNIT_ASSERT(slaveB->isDiscarded());
     CPPUNIT_ASSERT(slaveC->isCommitted());
     CPPUNIT_ASSERT(orphan->isMerged());
 
@@ -2807,17 +2809,18 @@ private:
     Timeline o1(db, LabelStr(DEFAULT_OBJECT_TYPE), "tl1");
     db->close();
 
-    TokenId master = (new IntervalToken(db,
-				       LabelStr(DEFAULT_PREDICATE),
-				       true,
-				       false,
-				       IntervalIntDomain(0, 10),
-				       IntervalIntDomain(0, 20),
-				       IntervalIntDomain(1, 1000)))->getId();
-
-    master->start()->restrictBaseDomain(IntervalIntDomain(1, 1));
-    CPPUNIT_ASSERT(master->start()->specifiedFlag());
-    master->discard();
+    {
+      IntervalToken master(db,
+			   LabelStr(DEFAULT_PREDICATE),
+			   true,
+			   false,
+			   IntervalIntDomain(0, 10),
+			   IntervalIntDomain(0, 20),
+			   IntervalIntDomain(1, 1000));
+      
+      master.start()->restrictBaseDomain(IntervalIntDomain(1, 1));
+      CPPUNIT_ASSERT(master.start()->specifiedFlag());
+    }
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -2828,40 +2831,38 @@ private:
    * variable will be grounded). Also want to ensure that if we delete the constraint, it will be removed safely.
    */
   static bool testGNATS_3193(){
-      DEFAULT_SETUP(ce, db, false);
+    DEFAULT_SETUP(ce, db, false);
     Timeline o1(db, LabelStr(DEFAULT_OBJECT_TYPE), "tl1");
     db->close();
-
-    TokenId t0 = (new IntervalToken(db,
-				       LabelStr(DEFAULT_PREDICATE),
-				       true,
-				       false,
-				       IntervalIntDomain(0, 10),
-				       IntervalIntDomain(0, 20),
-				       IntervalIntDomain(1, 1000)))->getId();
-    t0->activate();
-
-    TokenId t1 = (new IntervalToken(db,
-				       LabelStr(DEFAULT_PREDICATE),
-				       true,
-				       false,
-				       IntervalIntDomain(0, 10),
-				       IntervalIntDomain(0, 20),
-				       IntervalIntDomain(1, 1000)))->getId();
+    
     {
-      StateDomain dom;
-      dom.insert(Token::MERGED);
-      dom.close();
-
-      Variable<StateDomain> v(ce, dom);
-      EqualConstraint c0("eq", "Default", ce, makeScope(t1->getState(), v.getId()));
-
-      t1->doMerge(t0);
+      IntervalToken t0(db,
+		       LabelStr(DEFAULT_PREDICATE),
+		       true,
+		       false,
+		       IntervalIntDomain(0, 10),
+		       IntervalIntDomain(0, 20),
+		       IntervalIntDomain(1, 1000));
+      t0.activate();
+      
+      IntervalToken t1(db,
+		       LabelStr(DEFAULT_PREDICATE),
+		       true,
+		       false,
+		       IntervalIntDomain(0, 10),
+		       IntervalIntDomain(0, 20),
+		       IntervalIntDomain(1, 1000));
+      {
+	StateDomain dom;
+	dom.insert(Token::MERGED);
+	dom.close();
+	
+	Variable<StateDomain> v(ce, dom);
+	EqualConstraint c0("eq", "Default", ce, makeScope(t1.getState(), v.getId()));
+	
+	t1.doMerge(t0.getId());
+      }
     }
-
-    t1->discard();
-    t0->discard();
-
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -3858,7 +3859,7 @@ private:
     //CPPUNIT_ASSERT(tokenB->canBeTerminated());
 
     tokenA->terminate();
-    tokenA->discard();
+    delete static_cast<Token*>(tokenA);
     ce->propagate();
     DEFAULT_TEARDOWN();
     return true;

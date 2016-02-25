@@ -70,7 +70,7 @@ namespace EUROPA{
 
     // If the active token is committed, and the merged token is being terminated, then we leave the new constraints.
     // othwreiwse we can nuke them
-    discardAll(m_newConstraints);
+    cleanup(m_newConstraints);
 
     // Clear the deactivated ocnstraints
     m_deactivatedConstraints.clear();
@@ -123,7 +123,8 @@ namespace EUROPA{
 
 	// Now delete the new constraint which arose from migration, if it was migrated
 	if(!newConstraint.isNoId())
-	  newConstraint->discard();
+	  delete static_cast<Constraint*>(newConstraint);
+	  //newConstraint->discard();
 
 	return;
       }

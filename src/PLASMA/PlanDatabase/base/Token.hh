@@ -517,12 +517,12 @@ namespace EUROPA {
                                                              externally. */
     const PlanDatabaseId m_planDatabase;
 
+
+  private:
     /**
      * @brief Handle deallocation
      */
     void handleDiscard();
-
-  private:
 
 
     bool isValid() const;
