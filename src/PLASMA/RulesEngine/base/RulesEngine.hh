@@ -15,6 +15,8 @@
 #include <vector>
 #include"Engine.hh"
 
+#include <boost/smart_ptr/scoped_ptr.hpp>
+
 namespace EUROPA {
 
   /**
@@ -34,6 +36,9 @@ namespace EUROPA {
     void notifyActivated(const TokenId token);
     void notifyDeactivated(const TokenId token);
     void notifyTerminated(const TokenId token);
+    void notifyRemoved(const TokenId token);
+    void notifyRemoved(const ConstrainedVariableId var);
+    void notifyRemoved(const ConstraintId constr);
 
     std::set<RuleInstanceId> getRuleInstances() const;
     void getRuleInstances(const TokenId token,std::set<RuleInstanceId>& results) const;
@@ -60,7 +65,7 @@ namespace EUROPA {
     RulesEngineId m_id;
     RuleSchemaId m_schema;
     const PlanDatabaseId m_planDb;
-    PlanDatabaseListenerId m_planDbListener;
+    boost::scoped_ptr<PlanDatabaseListener> m_planDbListener;
     PostPropagationCallbackId m_callback;
     std::multimap<eint, RuleInstanceId> m_ruleInstancesByToken;
     std::set<RulesEngineListenerId> m_listeners;

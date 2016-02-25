@@ -132,7 +132,7 @@ RuleInstance::RuleInstance(const RuleInstanceId parent,
    * @brief Clean up all the allocated elements
    */
   RuleInstance::~RuleInstance(){
-    discard(false);
+    handleDiscard();
 
     // We do not delete the guard, since we NEVER allocate it. Always allocated in the parent.
     m_id.remove();
@@ -154,12 +154,9 @@ RuleInstance::RuleInstance(const RuleInstanceId parent,
     // will have been undone appropriately.
     if(!m_guardListener.isNoId() && !Entity::isPurging()){
       checkError(m_guardListener.isValid(), m_guardListener);
-      m_guardListener->removeDependent(this);
       m_guardListener->deactivate();
-      m_guardListener->discard();
+      delete static_cast<Constraint*>(m_guardListener);
     }
-
-    Entity::handleDiscard();
   }
 
   const RuleInstanceId RuleInstance::getId() const{return m_id;}
@@ -285,7 +282,8 @@ void RuleInstance::undo() {
   check_error(isExecuted(), "Cannot undo a rule if not already executed.");
 
   // Clear child rules before destroying local entities. This is the reverse order of allocation
-  discardAll(m_childRules);
+  //discardAll(m_childRules);
+  cleanup(m_childRules);
 
   if(!Entity::isPurging()){
     m_rulesEngine->notifyUndone(getId());
@@ -313,10 +311,8 @@ void RuleInstance::undo() {
       if(connectedToToken(constr, m_token)){
         debugMsg("RuleInstance:undo",
                  "Removing connected constraint " << constr->toLongString());
-        constr->discard();
+	delete static_cast<Constraint*>(constr);
       }
-      else // If we are not removing the constraint, we must remove the dependency on it
-        constr->removeDependent(this);
     }
 
     m_constraints.clear();
@@ -330,9 +326,6 @@ void RuleInstance::undo() {
       checkError(slave.isValid(), slave);
       TokenId master = slave->master();
       checkError(master.isNoId() || master == m_token, master);
-
-      // Remove the dependent since the slave MAY NOT GO AWAY
-      slave->removeDependent(this);
 
       if(master.isId())
         slave->removeMaster(m_token);
@@ -351,10 +344,11 @@ void RuleInstance::undo() {
       debugMsg("RuleInstance:undo", "Removing " << var->toLongString());
       getToken()->removeLocalVariable(var);
 
-      if(var->parent() == m_id)
-        var->discard();
+      if(var->parent() == m_id) {
+	delete static_cast<ConstrainedVariable*>(var);
+      }
 
-      checkError(var.isValid(), var << " should still be valid after a discard.");
+      //checkError(var.isValid(), var << " should still be valid after a discard.");
     }
     m_variables.clear();
     m_isExecuted = false;
@@ -365,7 +359,6 @@ void RuleInstance::undo() {
     check_error(m_guards.empty());
     m_guards = guards;
     m_guardListener = (new RuleVariableListener(m_planDb->getConstraintEngine(), m_id, m_guards))->getId();
-    m_guardListener->addDependent(this);
     debugMsg("RuleInstance:setGuard", "Added guard: " << m_guardListener->toLongString());
   }
 
@@ -378,7 +371,6 @@ void RuleInstance::undo() {
 					      " with " + domain.getTypeName());
     m_guardDomain = domain.copy();
     m_guardListener = (new RuleVariableListener(m_planDb->getConstraintEngine(), m_id, m_guards))->getId();
-    m_guardListener->addDependent(this);
     debugMsg("RuleInstance:setGuard", "Added guard: " << m_guardListener->toLongString());
   }
 
@@ -395,13 +387,11 @@ void RuleInstance::setGuard(const ConstrainedVariableId guard, const Domain& dom
   m_guardDomain = domain.copy();
   m_guardListener = (new RuleVariableListener(m_planDb->getConstraintEngine(), m_id, 
                                               m_guards))->getId();
-  m_guardListener->addDependent(this);
   debugMsg("RuleInstance:setGuard", "Added guard: " << m_guardListener->toLongString());
 }
 
 TokenId RuleInstance::addSlave(Token* slave){
   m_slaves.push_back(slave->getId());
-  slave->addDependent(this);
   return slave->getId();
 }
 
@@ -500,7 +490,6 @@ void RuleInstance::addConstraint(const ConstraintId constr){
   const std::string& name = constr->getName();
   m_constraintsByName.erase(name);
   m_constraintsByName.insert(std::make_pair(name, constr));
-  constr->addDependent(this);
   debugMsg("RuleInstance:addConstraint",
            "added constraint:" << constr->toString());
 }

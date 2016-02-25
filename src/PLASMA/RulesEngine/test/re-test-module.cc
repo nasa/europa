@@ -568,7 +568,6 @@ private:
 
       t0.commit();
       delete static_cast<Token*>(slaveToken);
-      Entity::garbageCollect();
     }
 
     // Case now where the slave remains and master is deleted. Make sure we disconnext dependents
@@ -596,7 +595,6 @@ private:
 	slaveToken->commit();
       }
 
-      Entity::garbageCollect();
       delete static_cast<Token*>(slaveToken);
     }
 

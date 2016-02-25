@@ -24,7 +24,6 @@ RuleVariableListener::RuleVariableListener(const ConstraintEngineId constraintEn
               "A Rule Instance should never be already executed when we construct the constraint!");
 
   // Add rule variable listener as a dependent of the rule instance to receive discard notifications
-  m_ruleInstance->addDependent(this);
 }
 
   /**
@@ -69,10 +68,6 @@ bool RuleVariableListener::canIgnore(const ConstrainedVariableId,
 
       checkError(m_ruleInstance.isNoId() || m_ruleInstance.isValid(), m_sourceConstraint->toString());
 
-      // It is possible that this constraint is being migrated even though the master has been terminated. If that were the case then the rule
-      // instance may have been cleared. So we have to check for that.
-      if(!m_ruleInstance.isNoId())
-	m_ruleInstance->addDependent(this);
     }
   
     return m_ruleInstance;
@@ -101,10 +96,7 @@ bool RuleVariableListener::canIgnore(const ConstrainedVariableId,
   }
 
   void RuleVariableListener::handleDiscard(){
-    if(!Entity::isPurging() && m_ruleInstance.isId())
-      m_ruleInstance->removeDependent(this);
 
-    Constraint::handleDiscard();
   }
 
   /**

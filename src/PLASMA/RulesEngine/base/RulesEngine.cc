@@ -10,21 +10,26 @@
 #include "RuleVariableListener.hh"
 #include "ProxyVariableRelation.hh"
 #include "ConstraintType.hh"
+#include "ConstraintEngineListener.hh"
 #include <list>
 #include <algorithm>
 
 namespace EUROPA{
 
-  class DbRuleEngineConnector: public PlanDatabaseListener {
+  class DbRuleEngineConnector: public PlanDatabaseListener, ConstraintEngineListener {
 
   private:
     friend class RulesEngine;
 
     DbRuleEngineConnector(const PlanDatabaseId planDatabase, const RulesEngineId rulesEngine)
-      : PlanDatabaseListener(planDatabase), m_rulesEngine(rulesEngine){}
+      : PlanDatabaseListener(planDatabase), ConstraintEngineListener(planDatabase->getConstraintEngine()),
+	m_rulesEngine(rulesEngine){}
     void notifyActivated(const TokenId token){m_rulesEngine->notifyActivated(token);}
     void notifyDeactivated(const TokenId token){m_rulesEngine->notifyDeactivated(token);}
     void notifyTerminated(const TokenId token){m_rulesEngine->notifyDeactivated(token);}
+    void notifyRemoved(const TokenId token){m_rulesEngine->notifyRemoved(token);}
+    void notifyRemoved(const ConstrainedVariableId var){m_rulesEngine->notifyRemoved(var);}
+    void notifyRemoved(const ConstraintId constr){m_rulesEngine->notifyRemoved(constr);}
     const RulesEngineId m_rulesEngine;
   };
 
@@ -47,7 +52,7 @@ namespace EUROPA{
     : m_id(this)
     , m_schema(schema)
     , m_planDb(planDatabase)
-    , m_planDbListener()
+    , m_planDbListener(new DbRuleEngineConnector(m_planDb, m_id))
     , m_callback()
     , m_ruleInstancesByToken()
     , m_listeners()
@@ -56,13 +61,11 @@ namespace EUROPA{
     , m_deleted(false)
     , m_executing(false)
   {
-    m_planDbListener = (new DbRuleEngineConnector(m_planDb, m_id))->getId();
     m_callback = (new RulesEngineCallback(m_planDb->getConstraintEngine(), m_id))->getId();
     check_error(m_planDb->getTokens().empty());
   }
 
 RulesEngine::~RulesEngine(){
-  check_error(m_planDbListener.isValid());
 
   // If we are not purging, then events should have propagated removal of all rule instances
   check_error(Entity::isPurging() || m_ruleInstancesByToken.empty());
@@ -72,10 +75,10 @@ RulesEngine::~RulesEngine(){
   for(std::multimap<eint, RuleInstanceId>::const_iterator it=m_ruleInstancesByToken.begin();it!=m_ruleInstancesByToken.end();++it){
     RuleInstanceId ruleInstance = it->second;
     check_error(ruleInstance.isValid());
-    ruleInstance->discard();
+    delete static_cast<RuleInstance*>(ruleInstance);
+    
   }
 
-  delete static_cast<PlanDatabaseListener*>(m_planDbListener);  // removes itself from the plan database set of listeners
   delete static_cast<PostPropagationCallback*>(m_callback);
   m_id.remove();
 }
@@ -146,6 +149,27 @@ RulesEngine::~RulesEngine(){
     cleanupRuleInstances(token);
   }
 
+  void RulesEngine::notifyRemoved(const TokenId token) {
+    for(std::multimap<eint, RuleInstanceId>::iterator it = m_ruleInstancesByToken.begin();
+	it != m_ruleInstancesByToken.end(); ++it) {
+      it->second->notifyDiscarded(static_cast<const Entity*>(token));
+    }
+  }
+
+  void RulesEngine::notifyRemoved(const ConstrainedVariableId var) {
+    // for(std::multimap<eint, RuleInstanceId>::iterator it = m_ruleInstancesByToken.begin();
+    // 	it != m_ruleInstancesByToken.end(); ++it) {
+    //   it->second->notifyDiscarded(static_cast<const Entity*>(var));
+    // }
+  }
+
+  void RulesEngine::notifyRemoved(const ConstraintId constr) {
+    for(std::multimap<eint, RuleInstanceId>::iterator it = m_ruleInstancesByToken.begin();
+	it != m_ruleInstancesByToken.end(); ++it) {
+      it->second->notifyDiscarded(static_cast<const Entity*>(constr));
+    }
+  }
+
   void RulesEngine::cleanupRuleInstances(const TokenId token){
     check_error(token.isValid());
 
@@ -153,7 +177,7 @@ RulesEngine::~RulesEngine(){
     while(it!=m_ruleInstancesByToken.end() && it->first == token->getKey()){
       RuleInstanceId ruleInstance = it->second;
       check_error(ruleInstance.isValid());
-      ruleInstance->discard();
+      delete static_cast<RuleInstance*>(ruleInstance);
       m_ruleInstancesByToken.erase(it++);
     }
 

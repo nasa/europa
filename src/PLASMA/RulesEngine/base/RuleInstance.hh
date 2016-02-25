@@ -184,11 +184,6 @@ namespace EUROPA{
   protected:
 
     /**
-     * @brief Handle rule related deallocations
-     */
-    virtual void handleDiscard();
-
-    /**
      * @brief provide implementatin for this method for firing the rule
      */
     virtual void handleExecute() = 0;
@@ -249,6 +244,12 @@ namespace EUROPA{
     RuleInstanceId m_parent;
 
   private:
+    friend class RulesEngine;
+    /**
+     * @brief Handle rule related deallocations
+     */
+    virtual void handleDiscard();
+
     RuleInstance(const RuleInstance&);
     RuleInstance& operator=(const RuleInstance&);
     /**
