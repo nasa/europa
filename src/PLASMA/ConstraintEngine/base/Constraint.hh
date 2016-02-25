@@ -280,17 +280,17 @@ namespace EUROPA {
      */
     virtual void handleDeactivate(){}
 
-    /**
-     * @brief Handle De-allocation
-     */
-    virtual void handleDiscard();
-
     const std::string m_name; /**< Name used on stratup to bind to the correct factory and then present as a debugging aid. */
     const ConstraintEngineId m_constraintEngine; /**< The owner ConstraintEngine */
     std::vector<ConstrainedVariableId> m_variables; /**< The variable scope of the Constraint. */
     std::string m_violationExpl; /**< optional explanation string, typically coming from the model */
 
   private:
+    /**
+     * @brief Handle De-allocation
+     */
+    void handleDiscard();
+
     /**
      * @brief Called by the ConstraintEngine during the construction hand-shaking that goes on to set up the correct
      * relationships.

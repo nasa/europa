@@ -68,10 +68,10 @@ bool DefaultTemporalAdvisor::canBeConcurrent(const TokenId, const TokenId){
 const IntervalIntDomain DefaultTemporalAdvisor::getTemporalDistanceDomain(const TimeVarId first, 
                                                                           const TimeVarId second,
                                                                           const bool){ 
-  if( first->getExternalEntity().isNoId() 
-      ||
-      second->getExternalEntity().isNoId() )
-  {
+  // if( first->getExternalEntity().isNoId() 
+  //     ||
+  //     second->getExternalEntity().isNoId() )
+  // {
     eint f_lb = cast_int(first->getDerivedDomain().getLowerBound());
     eint f_ub = cast_int(first->getDerivedDomain().getUpperBound());
 	
@@ -93,9 +93,9 @@ const IntervalIntDomain DefaultTemporalAdvisor::getTemporalDistanceDomain(const 
     }
 
     return(IntervalIntDomain( min_distance, max_distance ));
-  }
+  // }
 
-  return(IntervalIntDomain(MINUS_INFINITY, PLUS_INFINITY));
+  // return(IntervalIntDomain(MINUS_INFINITY, PLUS_INFINITY));
 }
 
   void DefaultTemporalAdvisor::getTemporalDistanceDomains(const ConstrainedVariableId first,

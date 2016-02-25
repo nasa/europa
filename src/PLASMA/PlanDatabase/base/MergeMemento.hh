@@ -37,8 +37,8 @@ namespace EUROPA{
     const TokenId m_inactiveToken;
     const TokenId m_activeToken;
 
-    std::list<ConstraintId> m_deactivatedConstraints;
-    std::list<ConstraintId> m_newConstraints;
+    std::list<ConstraintId> m_deactivatedConstraints; 
+    std::list<ConstraintId> m_newConstraints;//TODO: turn this into a ptr_container
     bool m_undoing;
   };
 }

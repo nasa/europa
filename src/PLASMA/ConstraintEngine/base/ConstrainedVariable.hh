@@ -404,11 +404,6 @@ namespace EUROPA {
     virtual void handleRestrictBaseDomain(const Domain& baseDomain) = 0;
 
     /**
-     * @brief Handle De-allocation
-     */
-    void handleDiscard();
-
-    /**
      * @brief Derived classes implement this to impose additional validation checks for correct semantics of a variable.
      * @return true if the derived class semantics are complied with. Otherwise false.
      */
@@ -481,6 +476,11 @@ namespace EUROPA {
     ConstraintId m_propagatingConstraint;
 
   private:
+    /**
+     * @brief Handle De-allocation
+     */
+    void handleDiscard();
+
     /**
      * @brief An internal utility to ensure the relationship between the constraints and the variable are valid.
      * @param constraint The constraint to ensure is a member of the constraint list.

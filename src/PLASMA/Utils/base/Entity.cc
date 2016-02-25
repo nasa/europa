@@ -78,7 +78,7 @@ internals_accessor internals() {
 }
 
 
-Entity::Entity(): m_key(0), m_refCount(1), m_dependents() {
+Entity::Entity(): m_key(0), m_refCount(1) {
   internals_accessor i(internals());
   m_key = i.second.get().allocateKey(this);
   debugMsg("Entity:Entity", "Allocating " << m_key);

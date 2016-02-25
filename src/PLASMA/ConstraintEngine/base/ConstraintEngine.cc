@@ -383,18 +383,20 @@ DomainListenerId ConstraintEngine::allocateVariableListener(const ConstrainedVar
       delete static_cast<ConstrainedVariable*>(var);
     }
 
-    // Always delete the propagators when we purge
-    for(PropagatorSet::const_iterator it = m_propagators.begin(); it != m_propagators.end(); ++it){
-      PropagatorId prop = *it;
-      check_error(prop.isValid());
-      prop->decRefCount();
-    }
-
     for(std::list<PostPropagationCallbackId>::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it) {
       PostPropagationCallbackId callback = *it;
       check_error(callback.isValid());
       delete static_cast<PostPropagationCallback*>(callback);
     }
+
+    // Always delete the propagators when we purge
+    for(PropagatorSet::const_iterator it = m_propagators.begin(); it != m_propagators.end(); ++it){
+      PropagatorId prop = *it;
+      check_error(prop.isValid());
+      //prop->decRefCount();
+      delete static_cast<Propagator*>(prop);
+    }
+
   }
 
   bool ConstraintEngine::provenInconsistent() const {

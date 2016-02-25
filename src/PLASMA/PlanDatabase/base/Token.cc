@@ -152,7 +152,7 @@ Token::Token(const TokenId _master,
 }
 
   Token::~Token(){
-    discard(false);
+    handleDiscard();
     m_id.remove();
   }
 
@@ -170,6 +170,9 @@ Token::Token(const TokenId _master,
       check_error(!isIncomplete());
       check_error(isValid());
 
+      // if(!m_unifyMemento.isNoId())
+      // 	m_unifyMemento.release();
+
       // If it has been merged or activated then cancel it. This allows events to flow to unlink the implications
       // to dependent entities.
       if (!isInactive())
@@ -182,24 +185,27 @@ Token::Token(const TokenId _master,
 	object->notifyDeleted(m_id);
       }
 
+      m_planDatabase->notifyRemoved(m_id);
+
       // Notify master of removal if appropriate - won't be done if this has arisen out of cascaded delete.
       if(!m_master.isNoId())
 	m_master->remove(m_id);
 
+      cleanup(m_standardConstraints); //TODO: is this the right thing?
+
       // Now remove all the variables
-      discardAll(m_allVariables);
+      cleanup(m_allVariables);
 
       // Now also remove all pseudoVariabls
-      discardAll(m_pseudoVariables);
+      cleanup(m_pseudoVariables);
 
-      m_planDatabase->notifyRemoved(m_id);
+      
+    }
+    else { //TODO: does this work?
+      if(!m_unifyMemento.isNoId())
+	m_unifyMemento.release();
     }
 
-    if(!m_unifyMemento.isNoId())
-      m_unifyMemento.release();
-
-    // Delegate to super class
-    Entity::handleDiscard();
   }
 
   const TokenId Token::getId() const {
@@ -467,7 +473,10 @@ void Token::doMerge(const TokenId activeToken){
     // since the slave may make a call back and remove itself from this buffer.
     while(!m_slaves.empty()){
       TokenId slave = *(m_slaves.begin());
-      slave->removeMaster(m_id);
+      //TODO: clarify slave ownership so this can't leave dangling pointers outside
+      if(slave->removeMaster(m_id)) { 
+	delete static_cast<Token*>(slave);
+      }
     }
 
     // Must wait till now to reset since mergedTokens would otherwise be included in the new spec domain.
@@ -536,6 +545,13 @@ void Token::doMerge(const TokenId activeToken){
     else if(isMerged()){
       result = (m_mergedTokens.empty() && m_unifyMemento.isValid() && m_activeToken.isValid() && m_slaves.empty());
       condDebugMsg(!result, "Token:isValid", "Not correctly merged");
+      condDebugMsg(!result && !m_mergedTokens.empty(), "Token:isValid",
+		   "No merged tokens");
+      condDebugMsg(!result && !m_unifyMemento.isValid(), "Token:isValid",
+		   "Unify memento is invalid");
+      condDebugMsg(!result && !m_activeToken.isValid(), "Token:isValid",
+		   "Active token is invalid.");
+      condDebugMsg(!result && !m_slaves.empty(), "Token:isValid", "Has slaves.");
     }
     else {// Otherwise - REJECTED or INACTIVE
       result = (m_mergedTokens.empty() && m_unifyMemento.isNoId() && m_activeToken.isNoId() && m_slaves.empty());

@@ -74,17 +74,6 @@ namespace EUROPA{
     bool canBeDeleted() const;
 
     /**
-     * @brief Add a dependent entity. It will be notified when this is discarded
-     * @see notifyDiscarded
-     */
-    void addDependent(Entity* entity);
-
-    /**
-     * @brief Remove a dependent entity.
-     */
-    void removeDependent(Entity* entity);
-
-    /**
      * @brief Retrieve an Entity by key.
      * @return The Id of the requested Entity if present, otherwise a noId;
      */
@@ -125,7 +114,6 @@ namespace EUROPA{
     eint m_key;
     
     unsigned int m_refCount;
-    std::set<Entity*> m_dependents;
   };
 
   /**

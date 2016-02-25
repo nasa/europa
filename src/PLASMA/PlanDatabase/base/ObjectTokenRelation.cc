@@ -27,7 +27,7 @@ namespace EUROPA {
   }
 
   ObjectTokenRelation::~ObjectTokenRelation(){
-    discard(false);
+    handleDiscard();
   }
 
   void ObjectTokenRelation::handleDiscard(){
@@ -35,8 +35,6 @@ namespace EUROPA {
       check_error(m_token.isValid());
       notifyRemovals();
     }
-
-    Constraint::handleDiscard();
   }
 
   void ObjectTokenRelation::handleExecute(){
