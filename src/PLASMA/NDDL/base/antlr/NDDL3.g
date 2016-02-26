@@ -496,10 +496,10 @@ INCLUDE :	'#include' WS+ file=STRING
                             // Create a new input stream and take advantage of built in stream stacking
                             // in C target runtime.
 
-                            pANTLR3_STRING_FACTORY factory = antlr3StringFactoryNew();
+                            pANTLR3_STRING_FACTORY factory = antlr3StringFactoryNew(ANTLR3_ENC_8BIT);
                             pANTLR3_STRING fName = factory->newStr(factory,(ANTLR3_UINT8 *)fullName.c_str());
                         
-                            pANTLR3_INPUT_STREAM in = antlr3AsciiFileStreamNew(fName->chars);
+                            pANTLR3_INPUT_STREAM in = antlr3FileStreamNew(fName->chars, ANTLR3_ENC_8BIT);
                             PUSHSTREAM(in);
                             CTX->parserObj->addInputStream(in);
                             factory->destroy(factory,fName);

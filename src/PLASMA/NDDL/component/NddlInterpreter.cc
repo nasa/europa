@@ -42,13 +42,14 @@ pANTLR3_INPUT_STREAM getInputStream(std::istream& input, const std::string& sour
       strInput = is->str(); // This makes a copy of the original string that could be avoided
       
       debugMsg("NddlInterpreter", "INPUT SCRIPT:" << std::endl << strInput);
-      return antlr3NewAsciiStringInPlaceStream(reinterpret_cast<pANTLR3_UINT8>(const_cast<char*>(strInput.c_str())),
-                                               static_cast<ANTLR3_UINT32>(strInput.size()),
-                                               reinterpret_cast<pANTLR3_UINT8>(const_cast<char*>(source.c_str())));
+      return antlr3StringStreamNew(reinterpret_cast<pANTLR3_UINT8>(const_cast<char*>(strInput.c_str())),
+				   ANTLR3_ENC_8BIT,
+				   static_cast<ANTLR3_UINT32>(strInput.size()),
+				   reinterpret_cast<pANTLR3_UINT8>(const_cast<char*>(source.c_str())));
     }
   }
   else {
-    return antlr3AsciiFileStreamNew(reinterpret_cast<pANTLR3_UINT8>(const_cast<char*>(source.c_str())));
+    return antlr3FileStreamNew(reinterpret_cast<pANTLR3_UINT8>(const_cast<char*>(source.c_str())), ANTLR3_ENC_8BIT);
   }
   return NULL;
 }
