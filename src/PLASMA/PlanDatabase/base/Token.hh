@@ -266,7 +266,9 @@ namespace EUROPA {
      * might be considered already commited. Such a token would not transition into the active state, but would begin
      * with the base domain of the state being active.
      */
+  private:
     void commit();
+  public:
 
     /**
      * @brief Restrict base domains to current derived domains. Applies to all token and extended token variables.
