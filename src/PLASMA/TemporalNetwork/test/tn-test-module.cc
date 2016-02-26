@@ -777,7 +777,7 @@ private:
     std::vector<ConstrainedVariableId> scope;
     scope.push_back(slave->end());
     scope.push_back(t1.parameters()[0]);
-    ce.getId()->createConstraint("leq", scope);
+    ConstraintId c = ce.createConstraint("leq", scope);
 
     CPPUNIT_ASSERT (!ce.propagate());
 
@@ -789,7 +789,7 @@ private:
     CPPUNIT_ASSERT(slave->start()->derivedDomain().getUpperBound() == -2);
     CPPUNIT_ASSERT(slave->end()->derivedDomain().getLowerBound() == 3);
     CPPUNIT_ASSERT(slave->end()->derivedDomain().getUpperBound() == -2);
-
+    delete static_cast<Constraint*>(c);
     t1.cancel();
 
     CPPUNIT_ASSERT(ce.propagate());

@@ -45,15 +45,13 @@ TemporalPropagator::TemporalPropagator(const std::string& name,
       m_listeners(), m_mostRecentRepropagation(1){}
 
   TemporalPropagator::~TemporalPropagator() {
-    discard(false);
+    handleDiscard();
   }
 
   void TemporalPropagator::handleDiscard(){
     check_error(Entity::isPurging());
     check_error(m_tnet);
     delete static_cast<TemporalNetwork*>(m_tnet);
-
-    Propagator::handleDiscard();
   }
 
   void TemporalPropagator::notifyDeleted(const ConstrainedVariableId tempVar, const TimepointId tp) {
