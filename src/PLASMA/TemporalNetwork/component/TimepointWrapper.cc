@@ -7,14 +7,14 @@ namespace EUROPA {
     :m_propagator(prop), m_tempVar(tempVar), m_timepoint(point), m_id(this) {}
 
   TimepointWrapper::~TimepointWrapper() {
-    discard(false);
+    handleDiscard();
     m_id.remove();
   }
 
   void TimepointWrapper::handleDiscard(){
-    if(!Entity::isPurging())
+    //if(!Entity::isPurging())
       // m_propagator->notifyDeleted(m_tempVar, m_timepoint);
 
-    Entity::handleDiscard();
+    //Entity::handleDiscard();
   }
 }

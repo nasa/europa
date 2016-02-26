@@ -317,10 +317,6 @@ class Dnode : public Entity {
 
 protected:
 
-  void handleDiscard(){
-    Entity::handleDiscard();
-  }
-
   std::vector<DedgeId> inArray;
   Int inArraySize;
   Int inCount;
@@ -351,7 +347,6 @@ public:
             key(0), link(), predecessor(), markLocal(0), generation(0) {
   }
   virtual ~Dnode() {
-    discard(false);
   }
 
   Time getTimeKey() { return distance - potential; }  // Used in Dijkstra

@@ -49,12 +49,6 @@ TemporalNetwork::TemporalNetwork() : consistent(true),
 
   TemporalNetwork::~TemporalNetwork()
   {
-    for(std::set<TemporalConstraintId>::const_iterator it = m_constraints.begin(); it != m_constraints.end(); ++it){
-      TemporalConstraintId constraint = *it;
-      check_error(constraint);
-      constraint->discard(false);
-    }
-
   }
 
   DnodeId TemporalNetwork::makeNode()
@@ -1071,14 +1065,12 @@ Tnode::Tnode(TemporalNetwork* t) :
     index(0), ringLeader(), ringFollowers(), owner(t) {}
 
   Tnode::~Tnode(){
-    discard(false);
+    handleDiscard();
   }
 
   void Tnode::handleDiscard(){
     // Should always be cleared by now if we have synchronized correctly
-    check_error(Entity::isPurging() || getExternalEntity().isNoId());
-
-    Dnode::handleDiscard();
+    //check_error(Entity::isPurging() || getExternalEntity().isNoId());
   }
 
   const TemporalConstraintId Tnode::getBaseDomainConstraint() const { return m_baseDomainConstraint;}
@@ -1086,13 +1078,12 @@ Tnode::Tnode(TemporalNetwork* t) :
   void Tnode::setBaseDomainConstraint(const TemporalConstraintId constraint) {m_baseDomainConstraint = constraint;}
 
   Tspec::~Tspec() {
-    discard(false);
+    handleDiscard();
   }
 
   void Tspec::handleDiscard(){
     // Should always be cleared by now if we have synchronized correctly
-    check_error(Entity::isPurging() || getExternalEntity().isNoId());
-    Entity::handleDiscard();
+    //check_error(Entity::isPurging() || getExternalEntity().isNoId());
   }
 
   Time mapToInternalInfinity(const Time t) {
