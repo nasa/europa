@@ -306,7 +306,6 @@ const ConstrainedVariableId Token::getVariable(const std::string& name,
   void Token::remove(const TokenId slave){
     check_error(!Entity::isPurging());
     check_error(!isIncomplete());
-
     m_slaves.erase(slave);
   }
 
@@ -469,21 +468,22 @@ void Token::doMerge(const TokenId activeToken){
     }
 
 
+    // Must wait till now to reset since mergedTokens would otherwise be included in the new spec domain.
+    m_state->resetSpecified();
+
+    // Notify of deactivation, which may impact the set of slaves.
+    m_planDatabase->notifyDeactivated(m_id);
+
     // If it has any remaining slaves, remove them. Keep pulling from the beginning
     // since the slave may make a call back and remove itself from this buffer.
     while(!m_slaves.empty()){
       TokenId slave = *(m_slaves.begin());
       //TODO: clarify slave ownership so this can't leave dangling pointers outside
       if(slave->removeMaster(m_id)) { 
-	delete static_cast<Token*>(slave);
+      	delete static_cast<Token*>(slave);
       }
     }
 
-    // Must wait till now to reset since mergedTokens would otherwise be included in the new spec domain.
-    m_state->resetSpecified();
-
-    // Notify of deactivation, which may impact the set of slaves.
-    m_planDatabase->notifyDeactivated(m_id);
   }
 
   void Token::addStandardConstraint(const ConstraintId constraint)

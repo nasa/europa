@@ -327,8 +327,10 @@ void RuleInstance::undo() {
       TokenId master = slave->master();
       checkError(master.isNoId() || master == m_token, master);
 
-      if(master.isId())
-        slave->removeMaster(m_token);
+      if(master.isId()) {
+        if(slave->removeMaster(m_token))
+	  delete static_cast<Token*>(slave);
+      }
     }
 
     m_slaves.clear();
