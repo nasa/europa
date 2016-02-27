@@ -224,7 +224,7 @@ const std::string& Solver::getName() const { return m_name;}
           // If we get a decision back, it trumps our current best decisions so update the bestDecision
           if(!candidate.isNoId()){
             if(!m_activeDecision.isNoId())
-              m_activeDecision->discard();
+              delete static_cast<DecisionPoint*>(m_activeDecision);
 
             m_activeDecision = candidate;
           }
@@ -408,7 +408,7 @@ const std::string& Solver::getName() const { return m_name;}
         if(backtracking){
           publish(notifyRetractNotDone,m_activeDecision);
           publish(notifyDeleted,m_activeDecision);
-          m_activeDecision->discard();
+          delete static_cast<DecisionPoint*>(m_activeDecision);
           m_activeDecision = DecisionPointId::noId();
         }
         else {
@@ -431,7 +431,7 @@ const std::string& Solver::getName() const { return m_name;}
           m_activeDecision->undo();
         }
 
-        m_activeDecision->discard();
+        delete static_cast<DecisionPoint*>(m_activeDecision);
         m_activeDecision = DecisionPointId::noId();
       }
 
@@ -458,7 +458,7 @@ const std::string& Solver::getName() const { return m_name;}
         }
 
         publish(notifyDeleted,node);
-        node->discard();
+        delete static_cast<DecisionPoint*>(node);
         depth--;
       }
 
@@ -476,7 +476,7 @@ const std::string& Solver::getName() const { return m_name;}
           m_activeDecision->undo();
         }
 
-        m_activeDecision->discard();
+        delete static_cast<DecisionPoint*>(m_activeDecision);
         m_activeDecision = DecisionPointId::noId();
         stepCount--;
       }
@@ -510,17 +510,17 @@ const std::string& Solver::getName() const { return m_name;}
 
     void Solver::cleanupDecisions(){
       if(m_activeDecision.isId()){
-        m_activeDecision->discard();
+        delete static_cast<DecisionPoint*>(m_activeDecision);
         m_activeDecision = DecisionPointId::noId();
       }
 
-      discardAll(m_decisionStack);
+      cleanup(m_decisionStack);
     }
 
     void Solver::cleanup(DecisionStack& decisionStack){
       for(DecisionStack::const_iterator it = decisionStack.begin(); it != decisionStack.end(); ++it){
         DecisionPointId node = *it;
-        node->discard();
+        delete static_cast<DecisionPoint*>(node);
       }
       decisionStack.clear();
     }
