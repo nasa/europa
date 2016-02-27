@@ -189,7 +189,7 @@ FlawManager::FlawManager(const TiXmlElement& configData)
         debugMsg("FlawManager:erase:guards", " [" << __FILE__ << ":" << __LINE__ << "] removing entry with key " << var->getKey() << " from m_flawHandlerGuards");
         m_flawHandlerGuards.erase(it++);
         debugMsg("FlawManager:discard", " [" << __FILE__ << ":" << __LINE__ << "] discarding a constraint in m_flawHandlerGuards: " << cid->toString());
-        cid->discard();
+        delete static_cast<Constraint*>(cid);
       }
       condDebugMsg(m_flawHandlerGuards.find(var->getKey()) != m_flawHandlerGuards.end(), "FlawManager:erase:guards", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << var->getKey() << " from m_flawHandlerGuards");
       m_flawHandlerGuards.erase(var->getKey());
@@ -252,7 +252,7 @@ FlawManager::FlawManager(const TiXmlElement& configData)
           debugMsg("FlawManager:erase:guards", " [" << __FILE__ << ":" << __LINE__ << "] removing entry with key " << var->parent()->getKey() << " from m_flawHandlerGuards");
           m_flawHandlerGuards.erase(it++);
           debugMsg("FlawManager:discard", " [" << __FILE__ << ":" << __LINE__ << "] discarding a constraint in m_flawHandlerGuards: " << cid->toString());
-          cid->discard();
+          delete static_cast<Constraint*>(cid);
         }
         condDebugMsg(m_flawHandlerGuards.find(var->parent()->getKey()) != m_flawHandlerGuards.end(), "FlawManager:erase:guards", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << var->parent()->getKey() << " from m_flawHandlerGuards");
         m_flawHandlerGuards.erase(var->parent()->getKey());
@@ -283,7 +283,7 @@ FlawManager::FlawManager(const TiXmlElement& configData)
         debugMsg("FlawManager:erase:guards", " [" << __FILE__ << ":" << __LINE__ << "] removing entry with key " << token->getKey() << " from m_flawHandlerGuards");
         m_flawHandlerGuards.erase(it++);
         debugMsg("FlawManager:discard", " [" << __FILE__ << ":" << __LINE__ << "] discarding a constraint in m_flawHandlerGuards: " << cid->toString());
-        cid->discard();
+        delete static_cast<Constraint*>(cid);
       }
       condDebugMsg(m_flawHandlerGuards.find(token->getKey()) != m_flawHandlerGuards.end(), "FlawManager:erase:guards", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << token->getKey() << " from m_flawHandlerGuards");
       m_flawHandlerGuards.erase(token->getKey());
@@ -605,7 +605,6 @@ FlawManager::FlawManager(const TiXmlElement& configData)
 
     void FlawManager::notifyActivated(const EntityId target, const FlawHandlerId flawHandler){
       check_error(target.isValid());
-      check_error(!target->isDiscarded());
       condDebugMsg(!isValid(), "FlawManager:isValid", "Invalid datastructures in flaw manger.");
       std::map<eint, FlawHandlerEntry>::iterator it = m_activeFlawHandlersByKey.find(target->getKey());
       checkError(it != m_activeFlawHandlersByKey.end(), 
