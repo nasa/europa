@@ -20,7 +20,7 @@ namespace EUROPA
 
     SOLVERS::SolverId solver =
     	(new SOLVERS::Solver(m_pdb, *(doc->RootElement())))->getId();
-    return new PSSolverImpl(solver,configurationFile);
+    return new PSSolverImpl(solver,configurationFile));
   }
 
   PSSolverImpl::PSSolverImpl(const SOLVERS::SolverId solver, const std::string& configFilename)
