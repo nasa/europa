@@ -100,6 +100,7 @@ ConstrainedVariable::ConstrainedVariable(const ConstraintEngineId constraintEngi
 
     check_error(m_constraintEngine.isValid());
     m_deleted = true;
+    m_constraintEngine->remove(m_id);
     // Remove constraints if they apply and we are not purging
     //TODO This seems wrong.  Variables don't own constraints.  It should be
     //an error to delete a variable with constraints on it.
@@ -115,8 +116,6 @@ ConstrainedVariable::ConstrainedVariable(const ConstraintEngineId constraintEngi
 	checkError(constraint.isValid(), constraint << " should remain valid");
       }
     }
-
-    m_constraintEngine->remove(m_id);
 
     // Let listeners know the variable is about to be discarded.
     // NOTE:  We don't just iterate through here, because when a listener is notified, it should be deleted, which

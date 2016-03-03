@@ -85,7 +85,7 @@ Entity::Entity(): m_key(0), m_refCount(1) {
 }
 
 Entity::~Entity(){
-  check_runtime_error(decRefCount());
+  check_runtime_error(decRefCount() || Entity::isPurging());
   internals_accessor i = internals();
   i.second.get().erase(m_key); //Is there a good way to RAII this?
 }
