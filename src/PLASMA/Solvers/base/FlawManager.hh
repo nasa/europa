@@ -15,6 +15,8 @@
 #include "MatchingEngine.hh"
 #include "FlawHandler.hh"
 
+#include <boost/smart_ptr/shared_ptr.hpp>
+
 #if 0
 #ifdef _MSC_VER
   using namespace stdext;
@@ -186,7 +188,7 @@ namespace EUROPA {
       std::map<eint, bool> m_staticFiltersByKey; /*!< Summary of static filter outcome for the entity */
       /*std::map<unsigned int, std::vector<FlawFilterId> > m_dynamicFiltersByKey;*/ /*!< Dynamic conditions for the entity */
       Eint2FlawFilterVectorMap m_dynamicFiltersByKey;
-      std::multimap<eint, ConstraintId> m_flawHandlerGuards; /*!< Flaw Handler Guard constraints by Entity Key */
+      std::multimap<eint, boost::shared_ptr<Constraint> > m_flawHandlerGuards; /*!< Flaw Handler Guard constraints by Entity Key */
       std::map<eint, FlawHandlerEntry> m_activeFlawHandlersByKey; /*!< Applicable Flaw Handlers for each entity */
       unsigned int m_timestamp; /*!< Used for testing for stale iterators */
       ContextId m_context;

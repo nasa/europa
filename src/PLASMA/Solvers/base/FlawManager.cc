@@ -181,7 +181,8 @@ FlawManager::FlawManager(const TiXmlElement& configData)
      * variable also remove for the token.
      */
     void FlawManager::notifyRemoved(const ConstrainedVariableId var){
-      debugMsg("FlawManager:notifyRemoved", getId() << " Removing active flaw handlers and guards for " << var->toString());
+      debugMsg("FlawManager:notifyRemoved", getId() << " Removing active flaw handlers and guards for " << var->getName() << "(" << var->getKey() << ")");
+      
       for(std::multimap<eint, ConstraintId>::iterator it = m_flawHandlerGuards.find(var->getKey());
           it != m_flawHandlerGuards.end() && it->first == var->getKey();) {
         debugMsg("FlawManager:notifyRemoved", getId() << " Removing a " << typeid(it->second).name());
@@ -240,7 +241,7 @@ FlawManager::FlawManager(const TiXmlElement& configData)
 
       if(Token::isStateVariable(var)){
         debugMsg("FlawManager:notifyRemoved", 
-                 getId() << " Variable " << var->toString() << " is a state variable.  Removing flaw handlers and guards for " <<
+                 getId() << " Variable " << var->getName() << "(" << var->getKey() << ") is a state variable.  Removing flaw handlers and guards for " <<
                  id_cast<Token>(var->parent())->getPredicateName());
         eint parentKey = var->parent()->getKey();
         debugMsg("FlawManager:notifyRemoved", "Parent Key: " << parentKey);
