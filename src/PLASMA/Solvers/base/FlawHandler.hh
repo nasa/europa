@@ -11,9 +11,30 @@
 #include <vector>
 
 namespace EUROPA {
-  namespace SOLVERS {
+namespace SOLVERS {
   
-  
+class FlawHandlerWorker {
+ public:
+  FlawHandlerWorker(const EntityId target,
+                    const FlawManagerId flawManager,
+                    const FlawHandlerId flawHandler,
+                    const std::vector<ConstrainedVariableId>& scope);
+
+  const FlawHandlerId getHandler() const {return m_flawHandler;}
+  const EntityId getTarget() const {return m_target;}
+  void doWork();
+  bool isApplied() const {return m_isApplied;}
+  void apply();
+  void undo();
+  const std::vector<ConstrainedVariableId>& scope() const {return m_scope;}
+ private:
+  const EntityId m_target;
+  const FlawManagerId m_flawManager;
+  const FlawHandlerId m_flawHandler;
+  bool m_isApplied;
+  std::vector<ConstrainedVariableId> m_scope;
+};
+
     typedef std::multimap<double, FlawHandlerId> FlawHandlerEntry;
 
     /**
@@ -103,7 +124,7 @@ namespace EUROPA {
     friend class FlawManager;
       
     // This constraint notifies the FlawManager when a Guard on a FlawHandler is satisfied
-    class VariableListener: public Constraint {
+    class VariableListener: public Constraint, private FlawHandlerWorker {
      public:
       /**
        * @brief Standard constraint constructor must be provided to facilitate
@@ -139,18 +160,10 @@ namespace EUROPA {
         return sl_const;
       }
 	
-      const FlawHandlerId getHandler() const {return m_flawHandler;}
-      const EntityId getTarget() const {return m_target;}
+      const FlawHandlerId getHandler() const {return FlawHandlerWorker::getHandler();}
+      const EntityId getTarget() const {return FlawHandlerWorker::getTarget();}
      private:
       void handleExecute();
-      bool isApplied() const;
-      void apply();
-      void undo();
-
-      const EntityId m_target;
-      const FlawManagerId m_flawManager;
-      const FlawHandlerId m_flawHandler;
-      bool m_isApplied;
     };
 
 

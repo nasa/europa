@@ -235,6 +235,14 @@ void nukeToken(const DbClientId dbClient,const TokenId token) {
     checkError(token->isInactive(),"Couldn't make inactive:" << token->toLongString());
     dbClient->deleteToken(token);
 }
+
+struct NukeToken {
+  DbClientId m_dbClient;
+  NukeToken(const DbClientId dbClient) : m_dbClient(dbClient) {}
+  void operator()(Token* t) {
+    nukeToken(m_dbClient, t->getId());
+  }
+};
 }
 
 class FilterTests {
@@ -751,6 +759,7 @@ private:
     // test basic flaw filtering and default handler access
     {
       TokenId token = db->getClient()->createToken("D.predicateG", "", false);
+      boost::shared_ptr<Token> ptr(&*token, NukeToken(db->getClient()));
       db->getConstraintEngine()->propagate();
       // Initially the token is in scope and the variable is not
       CPPUNIT_ASSERT(solver.inScope(token));
@@ -799,12 +808,13 @@ private:
       CPPUNIT_ASSERT(solver.getFlawHandler(token->start()).isNoId());
 
       solver.reset();
-      nukeToken(db->getClient(),token);
+      // nukeToken(db->getClient(),token);
     }
 
     // Now handle a case with increasingly restrictive filters
     {
       TokenId master = db->getClient()->createToken("D.predicateF", "", false);
+      boost::shared_ptr<Token> ptr(&*master, NukeToken(db->getClient()));
       db->getConstraintEngine()->propagate();
       master->activate();
       TokenId slave = master->getSlave(1);
@@ -839,7 +849,7 @@ private:
       db->getConstraintEngine()->propagate();
       CPPUNIT_ASSERT(solver.getFlawHandler(slave)->getPriority() == 99999);
 
-      nukeToken(db->getClient(),master);
+      // nukeToken(db->getClient(),master);
     }
 
     return true;
