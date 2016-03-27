@@ -44,7 +44,7 @@ class LabelStr;
     /**
      * @brief Retrieve the delimiter for separating elements in schema element names.
      */
-    static const char getDelimiter();
+    static char getDelimiter();
 
     /**
      * @brief Creates a fully qualifiedName for a predicate

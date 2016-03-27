@@ -26,6 +26,7 @@
 #endif //0
 
 namespace EUROPA {
+class ConstraintEngineListener;
   namespace SOLVERS {
 
 //     class EintHash:
@@ -60,7 +61,7 @@ namespace EUROPA {
 
       virtual ~FlawManager();
 
-      const std::multimap<eint, ConstraintId> getFlawHandlerGuards() const {return m_flawHandlerGuards;}
+      const std::multimap<eint, boost::shared_ptr<FlawHandlerWorker> > getFlawHandlerGuards() const {return m_flawHandlerGuards;}
 
       const PlanDatabaseId getPlanDatabase() const {return m_db;}
       /**
@@ -179,6 +180,8 @@ namespace EUROPA {
       PlanDatabaseId m_db;
 
     private:
+      class Listener;
+      void updateGuards(const ConstrainedVariable& variable);
       bool staticallyExcluded(const EntityId entity) const;
       bool isValid() const;
 
@@ -188,10 +191,11 @@ namespace EUROPA {
       std::map<eint, bool> m_staticFiltersByKey; /*!< Summary of static filter outcome for the entity */
       /*std::map<unsigned int, std::vector<FlawFilterId> > m_dynamicFiltersByKey;*/ /*!< Dynamic conditions for the entity */
       Eint2FlawFilterVectorMap m_dynamicFiltersByKey;
-      std::multimap<eint, boost::shared_ptr<Constraint> > m_flawHandlerGuards; /*!< Flaw Handler Guard constraints by Entity Key */
+      std::multimap<eint, boost::shared_ptr<FlawHandlerWorker> > m_flawHandlerGuards; /*!< Flaw Handler Guard constraints by Entity Key */
       std::map<eint, FlawHandlerEntry> m_activeFlawHandlersByKey; /*!< Applicable Flaw Handlers for each entity */
       unsigned int m_timestamp; /*!< Used for testing for stale iterators */
       ContextId m_context;
+      boost::shared_ptr<ConstraintEngineListener> m_ceListener;
       //static const Priority BEST_CASE_PRIORITY = 0;
     };
 

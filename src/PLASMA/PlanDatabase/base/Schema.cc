@@ -21,7 +21,7 @@
 
 namespace EUROPA {
 
-const char Schema::getDelimiter(){
+char Schema::getDelimiter(){
   static const char sl_delimiter = '.';
   return sl_delimiter;
 }

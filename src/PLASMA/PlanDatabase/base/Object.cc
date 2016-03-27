@@ -843,7 +843,7 @@ PSList<PSToken*> Object::getTokens() const {
   bool ObjectDT::isString() const  { return false; }
   bool ObjectDT::isEntity() const  { return true; }
 
-  edouble ObjectDT::createValue(const std::string& value) const
+  edouble ObjectDT::createValue(const std::string&) const
   {
     checkRuntimeError(ALWAYS_FAIL, "This should never get called.");
     return 0.0;//LabelStr(value);
