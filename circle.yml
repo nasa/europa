@@ -2,6 +2,9 @@ dependencies:
   pre:
     - sudo apt-get update; sudo pip install cpp-coveralls; sudo add-apt-repository --yes ppa:kalakris/cmake && sudo apt-get update -qq && sudo apt-get install cmake libboost-dev libcppunit-dev libantlr3c-dev antlr swig; sudo apt-get install jam doxygen libantlr3c-3.2-0 libcppunit-1.13-0 ant subversion gcc-4.8 swig; 
   post:
-    - mkdir build && cd build && cmake -DOPTIMIZE=0 -DCOVERAGE=1 .. && make -j2  && ctest;
+    - mkdir build && cd build && cmake -DOPTIMIZE=0 -DCOVERAGE=1 .. && make -j2  
+test:
+  override:
+    - ctest
 
 
