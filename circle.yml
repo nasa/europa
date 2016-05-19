@@ -4,3 +4,6 @@ dependencies:
   post:
     - mkdir build && cd build && cmake -DOPTIMIZE=0 -DCOVERAGE=1 .. && make -j2  && ctest;
 
+  override:
+    ant init
+    
