@@ -5,6 +5,6 @@ dependencies:
     - mkdir build && cd build && cmake -DOPTIMIZE=0 -DCOVERAGE=1 .. && make -j2  
 test:
   override:
-    - ctest
+    - cd build && ctest;
 
 
