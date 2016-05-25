@@ -84,7 +84,7 @@ FlawManager::FlawManager(const TiXmlElement& configData)
                      " in m_dynamicFiltersByKey");
       }
     }
-    for(std::multimap<eint, boost::shared_ptr<FlawHandlerWorker> >::const_iterator it = m_flawHandlerGuards.begin(); it != m_flawHandlerGuards.end();
+    for(std::multimap<eint, boost::shared_ptr<FlawHandler::VariableListener> >::const_iterator it = m_flawHandlerGuards.begin(); it != m_flawHandlerGuards.end();
         ++it) {
       EntityId entity = Entity::getEntity(it->first);
       condDebugMsg(!entity.isValid(), "FlawManager:isValid", getId() << " Invalid id in m_flawHandlerGuards.  Entity key:" << it->first);
@@ -202,10 +202,10 @@ FlawManager::FlawManager(const TiXmlElement& configData)
     void FlawManager::notifyRemoved(const ConstrainedVariableId var){
       debugMsg("FlawManager:notifyRemoved", getId() << " Removing active flaw handlers and guards for " << var->getName() << "(" << var->getKey() << ")");
       
-      for(std::multimap<eint, boost::shared_ptr<FlawHandlerWorker> >::iterator it = m_flawHandlerGuards.find(var->getKey());
+      for(std::multimap<eint, boost::shared_ptr<FlawHandler::VariableListener> >::iterator it = m_flawHandlerGuards.find(var->getKey());
           it != m_flawHandlerGuards.end() && it->first == var->getKey();) {
         debugMsg("FlawManager:notifyRemoved", getId() << " Removing a " << typeid(it->second).name());
-	boost::shared_ptr<FlawHandlerWorker>& cid = it->second;
+	boost::shared_ptr<FlawHandler::VariableListener>& cid = it->second;
         debugMsg("FlawManager:erase:guards", " [" << __FILE__ << ":" << __LINE__ << "] removing entry with key " << var->getKey() << " from m_flawHandlerGuards");
 	debugMsg("FlawManager:discard", " [" << __FILE__ << ":" << __LINE__ << "] discarding a constraint in m_flawHandlerGuards: " << cid);
 
@@ -225,12 +225,12 @@ FlawManager::FlawManager(const TiXmlElement& configData)
       m_dynamicFiltersByKey.erase(var->getKey());
 
       // Handle a guard variable getting removed before the flawed variable does.
-      for(std::multimap<eint, boost::shared_ptr<FlawHandlerWorker> >::iterator it = m_flawHandlerGuards.begin(); it != m_flawHandlerGuards.end();) {
+      for(std::multimap<eint, boost::shared_ptr<FlawHandler::VariableListener> >::iterator it = m_flawHandlerGuards.begin(); it != m_flawHandlerGuards.end();) {
         debugMsg("FlawManager:notifyRemoved", "Removing from a guard in m_flawHandlerGuards.");
         if(std::find(it->second->scope().begin(),it->second->scope().end(),var) != it->second->scope().end()) {
           debugMsg("FlawManager:nonexecuting", "This doesn't/shouldn't execute (According to MJI)");
 
-	  boost::shared_ptr<FlawHandlerWorker>& listener = it->second;
+	  boost::shared_ptr<FlawHandler::VariableListener>& listener = it->second;
           // As the target of a FlawHandler::VariableListener is only set by its constructor,
           // copying such a constraint (as in a merge) will leave its target set to NULL.
           if(listener->getTarget().isValid()) {
@@ -266,10 +266,10 @@ FlawManager::FlawManager(const TiXmlElement& configData)
         eint parentKey = var->parent()->getKey();
         debugMsg("FlawManager:notifyRemoved", "Parent Key: " << parentKey);
         debugMsg("FlawManager:notifyRemoved", "m_flawHandlerGuards.size() == " << m_flawHandlerGuards.size());
-        for(std::multimap<eint, boost::shared_ptr<FlawHandlerWorker> >::iterator it = m_flawHandlerGuards.find(parentKey);
+        for(std::multimap<eint, boost::shared_ptr<FlawHandler::VariableListener> >::iterator it = m_flawHandlerGuards.find(parentKey);
             it != m_flawHandlerGuards.end() && it->first == parentKey;) {
           check_error(it->second);
-	  boost::shared_ptr<FlawHandlerWorker>& cid = it->second;
+	  boost::shared_ptr<FlawHandler::VariableListener>& cid = it->second;
           debugMsg("FlawManager:erase:guards", " [" << __FILE__ << ":" << __LINE__ << "] removing entry with key " << var->parent()->getKey() << " from m_flawHandlerGuards");
 	  debugMsg("FlawManager:discard", " [" << __FILE__ << ":" << __LINE__ << "] discarding a constraint in m_flawHandlerGuards: " << cid);
 
@@ -301,9 +301,9 @@ FlawManager::FlawManager(const TiXmlElement& configData)
     void FlawManager::notifyRemoved(const TokenId token) {
       debugMsg("FlawManager:notifyRemoved", getId() << " Removing active flaw handlers and guards for " << token->getPredicateName() <<
                "(" << token->getKey() << ")");
-      for(std::multimap<eint, boost::shared_ptr<FlawHandlerWorker> >::iterator it = m_flawHandlerGuards.find(token->getKey());
+      for(std::multimap<eint, boost::shared_ptr<FlawHandler::VariableListener> >::iterator it = m_flawHandlerGuards.find(token->getKey());
           it != m_flawHandlerGuards.end() && it->first == token->getKey();) {
-	boost::shared_ptr<FlawHandlerWorker>& cid = it->second;
+	boost::shared_ptr<FlawHandler::VariableListener>& cid = it->second;
         debugMsg("FlawManager:erase:guards", " [" << __FILE__ << ":" << __LINE__ << "] removing entry with key " << token->getKey() << " from m_flawHandlerGuards");
 	debugMsg("FlawManager:discard", " [" << __FILE__ << ":" << __LINE__ << "] discarding a constraint in m_flawHandlerGuards: " << cid);
         m_flawHandlerGuards.erase(it++);
@@ -590,11 +590,13 @@ FlawManager::FlawManager(const TiXmlElement& configData)
           if(!candidate->makeConstraintScope(entity, guards))
             continue;
 
-	  boost::shared_ptr<FlawHandlerWorker> guardListener =
-	    boost::make_shared<FlawHandlerWorker>(entity,
-						  getId(),
-						  candidate,
-						  guards);
+	  boost::shared_ptr<FlawHandler::VariableListener> guardListener =
+	    //boost::make_shared<FlawHandlerWorker>(entity,
+	    boost::make_shared<FlawHandler::VariableListener>(m_db->getConstraintEngine(),
+							      entity,
+							      getId(),
+							      candidate,
+							      guards);
           requiresPropagation = true;
           debugMsg("FlawManager:getFlawHandler", getId() << " Sticking " << entity->getKey() <<
                    " into flaw handler guards (Guard listener: " << guardListener <<").");
@@ -732,7 +734,7 @@ FlawIterator::FlawIterator(FlawManager& manager)
     }
 
 void FlawManager::updateGuards(const ConstrainedVariable& var) {
-  typedef std::multimap<eint, boost::shared_ptr<FlawHandlerWorker> > WorkerMap;
+  typedef std::multimap<eint, boost::shared_ptr<FlawHandler::VariableListener> > WorkerMap;
   for(std::pair<WorkerMap::iterator,
           WorkerMap::iterator> range = m_flawHandlerGuards.equal_range(var.getKey());
       range.first != range.second;

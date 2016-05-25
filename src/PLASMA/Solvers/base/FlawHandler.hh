@@ -124,7 +124,7 @@ class FlawHandlerWorker {
     friend class FlawManager;
       
     // This constraint notifies the FlawManager when a Guard on a FlawHandler is satisfied
-    class VariableListener: public Constraint, private FlawHandlerWorker {
+    class VariableListener: public Constraint, public FlawHandlerWorker {
      public:
       /**
        * @brief Standard constraint constructor must be provided to facilitate
