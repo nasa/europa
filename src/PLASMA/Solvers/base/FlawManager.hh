@@ -61,7 +61,7 @@ class ConstraintEngineListener;
 
       virtual ~FlawManager();
 
-      const std::multimap<eint, boost::shared_ptr<FlawHandlerWorker> > getFlawHandlerGuards() const {return m_flawHandlerGuards;}
+      const std::multimap<eint, boost::shared_ptr<FlawHandler::VariableListener> > getFlawHandlerGuards() const {return m_flawHandlerGuards;}
 
       const PlanDatabaseId getPlanDatabase() const {return m_db;}
       /**
@@ -191,7 +191,7 @@ class ConstraintEngineListener;
       std::map<eint, bool> m_staticFiltersByKey; /*!< Summary of static filter outcome for the entity */
       /*std::map<unsigned int, std::vector<FlawFilterId> > m_dynamicFiltersByKey;*/ /*!< Dynamic conditions for the entity */
       Eint2FlawFilterVectorMap m_dynamicFiltersByKey;
-      std::multimap<eint, boost::shared_ptr<FlawHandlerWorker> > m_flawHandlerGuards; /*!< Flaw Handler Guard constraints by Entity Key */
+      std::multimap<eint, boost::shared_ptr<FlawHandler::VariableListener> > m_flawHandlerGuards; /*!< Flaw Handler Guard constraints by Entity Key */
       std::map<eint, FlawHandlerEntry> m_activeFlawHandlersByKey; /*!< Applicable Flaw Handlers for each entity */
       unsigned int m_timestamp; /*!< Used for testing for stale iterators */
       ContextId m_context;
