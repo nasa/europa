@@ -353,25 +353,18 @@ void FlawHandler::refreshWeight() {
     
 
     /** FlawHandler::VariableListener **/
-
-FlawHandler::VariableListener::VariableListener(const std::string& name,
-                                                const std::string& propagatorName,
-                                                const ConstraintEngineId constraintEngine, 
-                                                const std::vector<ConstrainedVariableId>& variables)
-    : Constraint(name, propagatorName, constraintEngine, variables),
-      FlawHandlerWorker(EntityId(), FlawManagerId(), FlawHandlerId(), variables) {
-}
-
 FlawHandler::VariableListener::VariableListener(const ConstraintEngineId ce,
                                                 const EntityId target,
                                                 const FlawManagerId flawManager,
                                                 const FlawHandlerId flawHandler,
                                                 const std::vector<ConstrainedVariableId>& scope)
-    : Constraint(CONSTRAINT_NAME(), PROPAGATOR_NAME(), ce, scope),
-      FlawHandlerWorker(target, flawManager, flawHandler, scope) {}
-
-void FlawHandler::VariableListener::handleExecute() {
-  doWork();
+  : ConstraintEngineListener(ce),
+    FlawHandlerWorker(target, flawManager, flawHandler, scope) {}
+  
+void FlawHandler::VariableListener::notifyChanged(const ConstrainedVariableId variable,
+						  const DomainListener::ChangeType&) {
+  if(std::find(scope().begin(), scope().end(), variable) != scope().end())
+    doWork();
 }
 
 
