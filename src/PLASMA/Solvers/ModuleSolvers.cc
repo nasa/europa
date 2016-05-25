@@ -55,8 +55,6 @@ void ModuleSolvers::initialize(EngineId engine) {
   PSSolverManager* sm = new PSSolverManagerImpl(pdb->getId());
   engine->addComponent("PSSolverManager",sm);
 
-  REGISTER_SYSTEM_CONSTRAINT(ce->getCESchema(),SOLVERS::FlawHandler::VariableListener,SOLVERS::FlawHandler::VariableListener::CONSTRAINT_NAME(),SOLVERS::FlawHandler::VariableListener::PROPAGATOR_NAME());
-
   EUROPA::SOLVERS::ComponentFactoryMgr* cfm = new EUROPA::SOLVERS::ComponentFactoryMgr();
   engine->addComponent("ComponentFactoryMgr",cfm);
   REGISTER_COMPONENT_FACTORY(cfm,SOLVERS::FlawFilter, FlawFilter);

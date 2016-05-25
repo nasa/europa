@@ -7,7 +7,7 @@
 
 #include "MatchingRule.hh"
 #include "SolverDecisionPoint.hh"
-#include "Constraint.hh"
+#include "ConstraintEngineListener.hh"
 #include <vector>
 
 namespace EUROPA {
@@ -124,16 +124,8 @@ class FlawHandlerWorker {
     friend class FlawManager;
       
     // This constraint notifies the FlawManager when a Guard on a FlawHandler is satisfied
-    class VariableListener: public Constraint, public FlawHandlerWorker {
+    class VariableListener: public ConstraintEngineListener, public FlawHandlerWorker {
      public:
-      /**
-       * @brief Standard constraint constructor must be provided to facilitate
-       * creation of a copy during merging.
-       */
-      VariableListener(const std::string& name,
-                       const std::string& propagatorName,
-                       const ConstraintEngineId constraintEngine, 
-                       const std::vector<ConstrainedVariableId>& variables);
 
       /**
        * @brief Specilized constructor also provided to create from the Heuristics Engine
@@ -144,26 +136,12 @@ class FlawHandlerWorker {
                        const FlawHandlerId flawHandler,
                        const std::vector<ConstrainedVariableId>& scope);
 
-      /**
-       * @brief Standard constraint name
-       */
-      static const std::string& CONSTRAINT_NAME(){
-        static const std::string sl_const("FlawListener");
-        return sl_const;
-      }
-
-      /**
-       * @brief Standard constraint name
-       */
-      static const std::string& PROPAGATOR_NAME(){
-        static const std::string sl_const("Default");
-        return sl_const;
-      }
 	
       const FlawHandlerId getHandler() const {return FlawHandlerWorker::getHandler();}
       const EntityId getTarget() const {return FlawHandlerWorker::getTarget();}
      private:
-      void handleExecute();
+      void notifyChanged(const ConstrainedVariableId variable,
+			 const DomainListener::ChangeType& changeType);
     };
 
 
