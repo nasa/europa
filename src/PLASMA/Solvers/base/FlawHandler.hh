@@ -13,28 +13,6 @@
 namespace EUROPA {
 namespace SOLVERS {
   
-class FlawHandlerWorker {
- public:
-  FlawHandlerWorker(const EntityId target,
-                    const FlawManagerId flawManager,
-                    const FlawHandlerId flawHandler,
-                    const std::vector<ConstrainedVariableId>& scope);
-
-  const FlawHandlerId getHandler() const {return m_flawHandler;}
-  const EntityId getTarget() const {return m_target;}
-  void doWork();
-  bool isApplied() const {return m_isApplied;}
-  void apply();
-  void undo();
-  const std::vector<ConstrainedVariableId>& scope() const {return m_scope;}
- private:
-  const EntityId m_target;
-  const FlawManagerId m_flawManager;
-  const FlawHandlerId m_flawHandler;
-  bool m_isApplied;
-  std::vector<ConstrainedVariableId> m_scope;
-};
-
     typedef std::multimap<double, FlawHandlerId> FlawHandlerEntry;
 
     /**
@@ -124,7 +102,7 @@ class FlawHandlerWorker {
     friend class FlawManager;
       
     // This constraint notifies the FlawManager when a Guard on a FlawHandler is satisfied
-    class VariableListener: public ConstraintEngineListener, public FlawHandlerWorker {
+    class VariableListener: public ConstraintEngineListener {
      public:
 
       /**
@@ -137,11 +115,21 @@ class FlawHandlerWorker {
                        const std::vector<ConstrainedVariableId>& scope);
 
 	
-      const FlawHandlerId getHandler() const {return FlawHandlerWorker::getHandler();}
-      const EntityId getTarget() const {return FlawHandlerWorker::getTarget();}
+      const FlawHandlerId getHandler() const {return m_flawHandler;}
+      const EntityId getTarget() const {return m_target;}
+      void doWork();
+      bool isApplied() const {return m_isApplied;}
+      void apply();
+      void undo();
+      const std::vector<ConstrainedVariableId>& scope() const {return m_scope;}
      private:
       void notifyChanged(const ConstrainedVariableId variable,
 			 const DomainListener::ChangeType& changeType);
+      const EntityId m_target;
+      const FlawManagerId m_flawManager;
+      const FlawHandlerId m_flawHandler;
+      bool m_isApplied;
+      std::vector<ConstrainedVariableId> m_scope;
     };
 
 
