@@ -19,38 +19,6 @@
 namespace EUROPA {
 namespace SOLVERS {
 
-FlawHandlerWorker::FlawHandlerWorker(const EntityId target,
-                                     const FlawManagerId flawManager,
-                                     const FlawHandlerId flawHandler,
-                                     const std::vector<ConstrainedVariableId>& scope)
-    : m_target(target), m_flawManager(flawManager), m_flawHandler(flawHandler), m_scope(scope) {}
-
-void FlawHandlerWorker::doWork() {
-  // If the handler is not set, we can ignore this.
-  if(m_flawHandler.isNoId())
-    return;
-
-  checkError(m_flawHandler.isValid(), m_flawHandler);
-
-  // If a Reset has occurred, and the rule has been fired, we may have to do something right now
-  bool shouldBeApplied = m_flawHandler->test(m_scope);
-  if(isApplied() && !shouldBeApplied)
-    undo();
-  else if(!isApplied() && shouldBeApplied)
-    apply();
-}
-
-void FlawHandlerWorker::apply() {
-  checkError(m_target.isValid(),"Target is invalid: " << m_target);
-  m_isApplied = true;
-  m_flawManager->notifyActivated(m_target, m_flawHandler);
-}
-
-void FlawHandlerWorker::undo() {
-  checkError(m_target.isValid(),"Target is invalid: " << m_target);
-  m_isApplied = false;
-  m_flawManager->notifyDeactivated(m_target, m_flawHandler);
-}
 
 FlawHandler::FlawHandler(const TiXmlElement& configData): 
     MatchingRule(configData),
@@ -359,7 +327,7 @@ FlawHandler::VariableListener::VariableListener(const ConstraintEngineId ce,
                                                 const FlawHandlerId flawHandler,
                                                 const std::vector<ConstrainedVariableId>& scope)
   : ConstraintEngineListener(ce),
-    FlawHandlerWorker(target, flawManager, flawHandler, scope) {}
+    m_target(target), m_flawManager(flawManager), m_flawHandler(flawHandler), m_scope(scope) {}
   
 void FlawHandler::VariableListener::notifyChanged(const ConstrainedVariableId variable,
 						  const DomainListener::ChangeType&) {
@@ -367,6 +335,33 @@ void FlawHandler::VariableListener::notifyChanged(const ConstrainedVariableId va
     doWork();
 }
 
+
+void FlawHandler::VariableListener::doWork() {
+  // If the handler is not set, we can ignore this.
+  if(m_flawHandler.isNoId())
+    return;
+
+  checkError(m_flawHandler.isValid(), m_flawHandler);
+
+  // If a Reset has occurred, and the rule has been fired, we may have to do something right now
+  bool shouldBeApplied = m_flawHandler->test(m_scope);
+  if(isApplied() && !shouldBeApplied)
+    undo();
+  else if(!isApplied() && shouldBeApplied)
+    apply();
+}
+
+void FlawHandler::VariableListener::apply() {
+  checkError(m_target.isValid(),"Target is invalid: " << m_target);
+  m_isApplied = true;
+  m_flawManager->notifyActivated(m_target, m_flawHandler);
+}
+
+void FlawHandler::VariableListener::undo() {
+  checkError(m_target.isValid(),"Target is invalid: " << m_target);
+  m_isApplied = false;
+  m_flawManager->notifyDeactivated(m_target, m_flawHandler);
+}
 
 }
 }
