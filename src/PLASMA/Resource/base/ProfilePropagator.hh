@@ -22,6 +22,12 @@ private:
   virtual void exitBatchMode();
   virtual bool inBatchMode() const { return m_inBatchMode; }
 
+  static const std::string& PROPAGATOR_NAME() {
+    static const std::string sl_const("Resource");
+    return sl_const;
+  }
+  void addProfile(const ProfileId profile);
+  void removeProfile(const ProfileId profile);
  protected:
   friend class Profile;
   void setUpdateRequired(const bool update) {m_updateRequired = update;}

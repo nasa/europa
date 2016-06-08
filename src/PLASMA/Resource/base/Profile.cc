@@ -8,6 +8,8 @@
 #include "PlanDatabase.hh"
 #include "Debug.hh"
 
+#include <boost/smart_ptr/make_shared.hpp>
+
 #include <algorithm>
 #include <functional>
 
@@ -39,12 +41,12 @@ Profile::~Profile() {
   debugMsg("Profile:~Profile", "Cleaning up instants...");
       
   cleanup(m_instants);
-  debugMsg("Profile:~Profile", "Cleaning up variable listeners...");
-  for(std::multimap<TransactionId, ConstraintId>::iterator it = m_variableListeners.begin();
-      it != m_variableListeners.end(); ++it)
-    it->second->discard();
-  debugMsg("Profile:~Profile", "Cleaning up constraint addition listeners...");
-  cleanup(m_otherListeners);
+  // debugMsg("Profile:~Profile", "Cleaning up variable listeners...");
+  // for(std::multimap<TransactionId, ConstraintId>::iterator it = m_variableListeners.begin();
+  //     it != m_variableListeners.end(); ++it)
+  //   it->second->discard();
+  // debugMsg("Profile:~Profile", "Cleaning up constraint addition listeners...");
+  // cleanup(m_otherListeners);
 
   if(m_recomputeInterval.isValid()) {
     debugMsg("Profile:~Profile", "Deleting profile iterator " << m_recomputeInterval->getId() );
@@ -81,9 +83,12 @@ InstantId Profile::getInstant(const eint time) const {
 
 
       //add listener
-      m_variableListeners.insert(std::pair<TransactionId, ConstraintId>(t, (new VariableListener(m_planDatabase->getConstraintEngine(), m_id, t, makeScope(t->time())))->getId()));
-      m_variableListeners.insert(std::pair<TransactionId, ConstraintId>(t, (new VariableListener(m_planDatabase->getConstraintEngine(), m_id, t, makeScope(t->quantity()), true))->getId()));
-      m_otherListeners.insert(std::pair<TransactionId, ConstrainedVariableListenerId>(t, (new ConstraintAdditionListener(t->time(), t, m_id))->getId()));
+      m_variableListeners.insert(std::make_pair(t,
+						boost::make_shared<VariableListener>(m_planDatabase->getConstraintEngine(), m_id, t, makeScope(t->time()))));
+      m_variableListeners.insert(std::make_pair(t,
+						boost::make_shared<VariableListener>(m_planDatabase->getConstraintEngine(), m_id, t, makeScope(t->quantity()), true)));
+      m_otherListeners.insert(std::make_pair(t,
+					     boost::make_shared<ConstraintAdditionListener>(t->time(), t, m_id)));
 
       m_transactions.insert(t);
       m_transactionsByTime.insert(std::make_pair(t->time(), t));
@@ -160,11 +165,9 @@ void Profile::removeTransaction(const TransactionId t) {
   //remove the listeners
   checkError(m_variableListeners.find(t) != m_variableListeners.end(),
              "Bizarre.  No listeners for transaction.");
-  for(std::multimap<TransactionId, ConstraintId>::iterator it = m_variableListeners.find(t);
-      it != m_variableListeners.end() && it->first == t; ++it) {
-    debugMsg("Profile:removeTransaction", "Discarding " << it->second->toString());
-    it->second->discard();
-  }
+  typedef std::multimap<TransactionId, boost::shared_ptr<VariableListener> > ListenerMap;
+  std::pair<ListenerMap::iterator, ListenerMap::iterator> range = m_variableListeners.equal_range(t);
+  m_variableListeners.erase(range.first, range.second);
 
   m_variableListeners.erase(t);
   handleTransactionVariableDeletion(t);
@@ -182,7 +185,7 @@ void Profile::removeTransaction(const TransactionId t) {
     condDebugMsg(!containsChange(inst), "Profile:removeTransaction", "because it does not mark a change.");
     m_instants.erase(*it);
     m_detector->notifyDeleted(inst);
-    inst->discard();;
+    delete static_cast<Instant*>(inst);
   }
   m_changeCount++;
   m_needsRecompute = true;
@@ -429,7 +432,7 @@ void Profile::handleConstraintMessage(const ConstraintId c,
 
   if(m_needsRecompute)
     id_cast<ProfilePropagator>(m_planDatabase->getConstraintEngine()->
-                               getPropagatorByName(VariableListener::PROPAGATOR_NAME()))->
+                               getPropagatorByName(ProfilePropagator::PROPAGATOR_NAME()))->
         setUpdateRequired(true);
 }
 
@@ -464,13 +467,12 @@ void Profile::handleTemporalConstraintRemoved(const TransactionId, const unsigne
       */
 
 void Profile::handleTransactionVariableDeletion(const TransactionId t){
-  std::map<TransactionId, ConstrainedVariableListenerId>::iterator listIt =
+  std::map<TransactionId, boost::shared_ptr<ConstraintAdditionListener> >::iterator listIt =
       m_otherListeners.find(t);
   checkError(listIt != m_otherListeners.end(),
              "Attempted to remove variable listener for transaction at time " <<
              t->time()->toString() << " with quantity " << 
              t->quantity()->toString() << ".");
-  delete id_cast<ConstraintAdditionListener>(listIt->second);
   m_otherListeners.erase(t);
 }
 
@@ -701,32 +703,34 @@ void Profile::removeInstant(const eint time) {
       results.insert(results.end(), inst->getTransactions().begin(), inst->getTransactions().end());
     }
 
-    Profile::VariableListener::VariableListener(const ConstraintEngineId constraintEngine,
-                                                const ProfileId profile,
-                                                const TransactionId trans,
-                                                const std::vector<ConstrainedVariableId>& scope, const bool isQuantity)
-      : Constraint(CONSTRAINT_NAME(), PROPAGATOR_NAME(), constraintEngine, scope), m_profile(profile), m_trans(trans), m_isQuantity(isQuantity) {
+  Profile::VariableListener::VariableListener(const ConstraintEngineId constraintEngine,
+					      const ProfileId profile,
+					      const TransactionId trans,
+					      const std::vector<ConstrainedVariableId>& scope,
+					      const bool isQuantity)
+      : ConstraintEngineListener(constraintEngine), m_profile(profile), m_trans(trans),
+	m_scope(scope), m_isQuantity(isQuantity) {
       check_error(profile.isValid());
       check_error(trans.isValid());
-      debugMsg("Profile:VariableListener", "Created listener for profile " << m_profile << " and transaction " << m_trans << std::endl << toString());
+      debugMsg("Profile:VariableListener", "Created listener for profile " << m_profile << " and transaction " << m_trans);
     }
 
-bool Profile::VariableListener::canIgnore(const ConstrainedVariableId variable,
-                                          unsigned int,
-                                          const DomainListener::ChangeType& changeType) {
-      check_error(variable.isValid(), toString());
-      check_error(m_profile.isValid(), toString());
-      check_error(m_trans.isValid(), toString());
-      if(m_isQuantity) {
-        debugMsg("Profile:VariableListener", "Notifying profile " << m_profile << " of change to quantity variable " << variable->toString());
-        m_profile->transactionQuantityChanged(m_trans, changeType);
-      }
-      else {
-        debugMsg("Profile:VariableListener", "Notifying profile " << m_profile << " of change to time variable " << variable->toString());
-        m_profile->transactionTimeChanged(m_trans, changeType);
-      }
-      return false;
-    }
+void Profile::VariableListener::notifyChanged(const ConstrainedVariableId variable,
+					      const DomainListener::ChangeType& changeType) {
+  if(std::find(m_scope.begin(), m_scope.end(), variable) == m_scope.end())
+    return;
+  check_error(variable.isValid());
+  check_error(m_profile.isValid());
+  check_error(m_trans.isValid());
+  if(m_isQuantity) {
+    debugMsg("Profile:VariableListener", "Notifying profile " << m_profile << " of change to quantity variable " << variable->toString());
+    m_profile->transactionQuantityChanged(m_trans, changeType);
+  }
+  else {
+    debugMsg("Profile:VariableListener", "Notifying profile " << m_profile << " of change to time variable " << variable->toString());
+    m_profile->transactionTimeChanged(m_trans, changeType);
+  }
+}
 
     Profile::ConstraintAdditionListener::ConstraintAdditionListener(const ConstrainedVariableId var, TransactionId tid, ProfileId profile)
       : ConstrainedVariableListener(var), m_profile(profile), m_tid(tid) {}
