@@ -24,6 +24,8 @@
 #include <map>
 #include <utility>
 
+#include <boost/smart_ptr/shared_ptr.hpp>
+
 namespace EUROPA {
 
     /**
@@ -118,28 +120,21 @@ class Profile : public FactoryObj {
    * @class VariableListener
    * @brief Informs the profile of a change in either a quantity or time variable.
    */
-  class VariableListener : public Constraint {
+  class VariableListener : public ConstraintEngineListener {
    public:
     VariableListener(const ConstraintEngineId constraintEngine,
                      const ProfileId profile,
                      const TransactionId trans,
-                     const std::vector<ConstrainedVariableId>& scope, const bool isQuantity = false);
-    static const std::string& CONSTRAINT_NAME() {
-      static const std::string sl_const("ProfileVariableListener");
-      return sl_const;
-    }
-    static const std::string& PROPAGATOR_NAME() {
-      static const std::string sl_const("Resource");
-      return sl_const;
-    }
+                     const std::vector<ConstrainedVariableId>& scope,
+		     const bool isQuantity = false);
+    
     ProfileId getProfile() const {return m_profile;}
    private:
-    bool canIgnore(const ConstrainedVariableId variable,
-                   unsigned int argIndex,
+    void notifyChanged(const ConstrainedVariableId variable,
                    const DomainListener::ChangeType& changeType);
-    void handleExecute(){};
     ProfileId m_profile;
     TransactionId m_trans;
+    std::vector<ConstrainedVariableId> m_scope;
     bool m_isQuantity;
   };
 
@@ -189,8 +184,8 @@ class Profile : public FactoryObj {
   PlanDatabaseId m_planDatabase; /**< The plan database.  Used for creating the variable listeners. */
   FVDetectorId m_detector; /**< The flaw and violation detector. */
   std::set<TransactionId> m_transactions; /**< The set of Transactions that impact this profile. */
-  std::multimap<TransactionId, ConstraintId> m_variableListeners; /**< The listeners on the Transactions. */
-  std::map<TransactionId, ConstrainedVariableListenerId> m_otherListeners;
+  std::multimap<TransactionId, boost::shared_ptr<VariableListener> > m_variableListeners; /**< The listeners on the Transactions. */
+  std::map<TransactionId, boost::shared_ptr<ConstraintAdditionListener> > m_otherListeners;
   std::map<ConstrainedVariableId, TransactionId> m_transactionsByTime;
   ConstraintSet m_temporalConstraints;
   ConstraintEngineListenerId m_removalListener;

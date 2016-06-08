@@ -56,6 +56,7 @@
 
 #include <boost/cast.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 
 using namespace EUROPA;
 
@@ -212,6 +213,16 @@ private:
 
   void notifyDeleted(const InstantId ) {}
   void notifyNoLongerFlawed(const InstantId ){}
+};
+
+class ClientVariableDeleter {
+public:
+  ClientVariableDeleter(DbClient& client) : m_client(client) {}
+  void operator()(ConstrainedVariable* v) {
+    m_client.deleteVariable(v->getId());
+  }
+private:
+  DbClient& m_client;
 };
 
 class BareTransactionDeleter {
@@ -460,14 +471,14 @@ private:
     ConstraintId constr = db.getClient()->createConstraint("precedes", makeScope(t1.getId(), t2.getId()));
     CPPUNIT_ASSERT(profile.gotNotified() == 1);
     profile.resetNotified();
-    constr->discard();
+    delete static_cast<Constraint*>(constr);
     CPPUNIT_ASSERT(profile.gotNotified() == 1);
 
     profile.resetNotified();
     Variable<IntervalIntDomain> temp(ce.getId(), IntervalIntDomain(-1, -1));
     ConstraintId constr2 = db.getClient()->createConstraint("precedes", makeScope(temp.getId(), t1.getId()));
     CPPUNIT_ASSERT(profile.gotNotified() == 0);
-    constr2->discard();
+    delete static_cast<Constraint*>(constr2);
     CPPUNIT_ASSERT(profile.gotNotified() == 0);
     return true;
   }
@@ -1202,16 +1213,15 @@ private:
                      IntervalIntDomain(),
                      IntervalDomain(1.0));
 
+    ClientVariableDeleter deleter(*db.getClient());
+    typedef boost::shared_ptr<ConstrainedVariable> VariablePtr;
+    VariablePtr d1(static_cast<ConstrainedVariable*>(db.getClient()->createVariable("int", IntervalIntDomain(120000), "d1")), deleter);
+    boost::scoped_ptr<Constraint> constr1(static_cast<Constraint*>(db.getClient()->createConstraint("temporalDistance",
+											       makeScope(p1.getTime(), d1->getId(), c1.getTime()))));
 
-    ConstrainedVariableId d1 = 
-        db.getClient()->createVariable("int", IntervalIntDomain(120000), "d1");
-    db.getClient()->createConstraint("temporalDistance",
-                                     makeScope(p1.getTime(), d1, c1.getTime()));
-
-    ConstrainedVariableId d2 = 
-        db.getClient()->createVariable("int", IntervalIntDomain(1200), "d2");
-    db.getClient()->createConstraint("temporalDistance",
-                                     makeScope(c2.getTime(), d2, p2.getTime()));
+    VariablePtr d2(static_cast<ConstrainedVariable*>(db.getClient()->createVariable("int", IntervalIntDomain(1200), "d2")), deleter);
+    boost::scoped_ptr<Constraint> constr2(static_cast<Constraint*>(db.getClient()->createConstraint("temporalDistance",
+												    makeScope(c2.getTime(), d2->getId(), p2.getTime()))));
 
     CPPUNIT_ASSERT(ce.propagate());
     
@@ -1307,11 +1317,12 @@ private:
     ProfileIterator it6(res2.getProfile());
     CPPUNIT_ASSERT(it6.done());
 
-    ConsumerToken throwaway(db.getId(), "Reservoir.consume", IntervalIntDomain(10),
-				  IntervalDomain(5));
-
-    res1.constrain(throwaway.getId(), throwaway.getId());
-    throwaway.discard(false);
+    {
+      ConsumerToken throwaway(db.getId(), "Reservoir.consume", IntervalIntDomain(10),
+			      IntervalDomain(5));
+      
+      res1.constrain(throwaway.getId(), throwaway.getId());
+    }
 
     //test flaws and violations once we have a decent profile and detector
     RESOURCE_DEFAULT_TEARDOWN();
@@ -1388,8 +1399,9 @@ private:
     }
     CPPUNIT_ASSERT(instCount == 2);
 
-    ReusableToken throwaway(db.getId(), "Reusable.uses", IntervalIntDomain(50), IntervalIntDomain(51), IntervalIntDomain(1), IntervalDomain(1));
-    throwaway.discard(false);
+    {
+      ReusableToken throwaway(db.getId(), "Reusable.uses", IntervalIntDomain(50), IntervalIntDomain(51), IntervalIntDomain(1), IntervalDomain(1));
+    }
 
     RESOURCE_DEFAULT_TEARDOWN();
     return true;

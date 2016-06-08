@@ -550,7 +550,7 @@ ResourceThreatDecisionPoint::ResourceThreatDecisionPoint(const DbClientId client
       debugMsg("SolverDecisionPoint:handleUndo", "Retracting ordering decision on " << m_instTime << " on " <<
                m_resName);
       check_error(m_constr.isValid());
-      m_constr->discard();
+      delete static_cast<Constraint*>(m_constr);
       m_constr = ConstraintId::noId();
       //advance constraints before advancing pairs
       if(m_constraintOrder == "constraintFirst") {

@@ -24,19 +24,17 @@ ResourceTokenRelation::ResourceTokenRelation(const ConstraintEngineId constraint
 		safeConnect();
 	}
 
-	ResourceTokenRelation::~ResourceTokenRelation()
-	{
-		discard(false);
-	}
+ResourceTokenRelation::~ResourceTokenRelation() {
+  handleDiscard();
+}
 
-	void ResourceTokenRelation::handleDiscard() {
-		if(!Entity::isPurging()) {
-			check_error(m_token.isValid());
-			if(m_resource.isId())
-				disconnect();
-		}
-		Constraint::handleDiscard();
-	}
+void ResourceTokenRelation::handleDiscard() {
+  if(!Entity::isPurging()) {
+    check_error(m_token.isValid());
+    if(m_resource.isId())
+      disconnect();
+  }
+}
 
 	void ResourceTokenRelation::safeConnect()
 	{

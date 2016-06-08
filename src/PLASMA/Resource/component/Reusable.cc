@@ -385,7 +385,7 @@ Uses::Uses(const std::string& name,
     }
     m_txns.clear();
 
-    Constraint::handleDiscard();
+    //Constraint::handleDiscard();
   }
 
 bool Uses::canIgnore(const ConstrainedVariableId variable,
