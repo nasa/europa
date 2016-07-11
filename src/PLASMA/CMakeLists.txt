@@ -7,7 +7,8 @@ if(OPTIMIZE)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_OPTIMIZATION_FLAGS}")
   add_definitions(-DEUROPA_FAST=1)
 else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_DEBUG_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_DEBUG_FLAGS} -Wall -fno-omit-frame-pointer")
+
 endif(OPTIMIZE)
 
 if(COVERAGE)
