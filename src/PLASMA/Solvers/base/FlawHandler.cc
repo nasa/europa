@@ -327,7 +327,7 @@ FlawHandler::VariableListener::VariableListener(const ConstraintEngineId ce,
                                                 const FlawHandlerId flawHandler,
                                                 const std::vector<ConstrainedVariableId>& scope)
   : ConstraintEngineListener(ce),
-    m_target(target), m_flawManager(flawManager), m_flawHandler(flawHandler), m_scope(scope) {}
+    m_target(target), m_flawManager(flawManager), m_flawHandler(flawHandler), m_isApplied(false), m_scope(scope) {}
   
 void FlawHandler::VariableListener::notifyChanged(const ConstrainedVariableId variable,
 						  const DomainListener::ChangeType&) {
