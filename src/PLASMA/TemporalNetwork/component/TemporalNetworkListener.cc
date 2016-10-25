@@ -12,25 +12,25 @@ namespace EUROPA{
   }
 
 void TemporalNetworkListener::notifyTimepointAdded(const ConstrainedVariableId,
-                                                   const TimepointId) {}
+                                                   Timepoint* const) {}
 
-void TemporalNetworkListener::notifyTimepointDeleted(const TimepointId) {}
+void TemporalNetworkListener::notifyTimepointDeleted(Timepoint* const) {}
 
 void TemporalNetworkListener::notifyBaseDomainConstraintAdded(const ConstrainedVariableId,
-                                                              const TemporalConstraintId,
+                                                              TemporalConstraint* const,
                                                               Time, Time) {}
 void TemporalNetworkListener::notifyConstraintAdded(const ConstraintId,
-                                                    const TemporalConstraintId,
+                                                    TemporalConstraint* const,
                                                     Time , Time) {}
 
 void TemporalNetworkListener::notifyConstraintDeleted(eint,
-                                                      const TemporalConstraintId) {}
+                                                      TemporalConstraint* const) {}
 
 void TemporalNetworkListener::notifyBoundsRestricted(const ConstrainedVariableId,
                                                      Time, Time) {}
 
 void TemporalNetworkListener::notifyBoundsSame(const ConstrainedVariableId,
-                                               const TimepointId) {}
+                                               Timepoint* const) {}
 
 
 }

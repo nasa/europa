@@ -3,7 +3,7 @@
 
 #include "Error.hh"
 #include "Id.hh"
-#include <boost/shared_ptr.hpp>
+#include <boost/smart_ptr/shared_ptr.hpp>
 
 /*!< Type definitions to map for ht ones we were using in Europa */
 namespace EUROPA {
@@ -39,6 +39,17 @@ typedef TemporalPropagator* TemporalPropagatorId;
 
 class TemporalNetworkListener;
 typedef TemporalNetworkListener* TemporalNetworkListenerId;
+
+//TODO: figure out why this has to be here.
+//why the remove call isn't picking up operator==
+template<typename T>
+struct ptr_compare {
+  const T* const n;
+  ptr_compare(const T* const _n) : n(_n) {}
+  bool operator()(const boost::shared_ptr<T>& node) {
+    return node.get() == n;
+  }
+};
 
 #define noIndex -1;
 

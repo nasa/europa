@@ -26,13 +26,13 @@ namespace EUROPA{
      * @param timepoint new timepoint 
      */
     virtual void notifyTimepointAdded(const ConstrainedVariableId var,
-                                      const TimepointId timepoint);
+                                      Timepoint* const timepoint);
 
     /**
      * @brief Inform listeners that timpoint has been deleted
      * @param timepoint deleted
      */
-    virtual void notifyTimepointDeleted(const TimepointId timepoint);
+    virtual void notifyTimepointDeleted(Timepoint* const timepoint);
 
     /**
      * @brief Inform listeners that a constraint has been added to the base domain
@@ -42,7 +42,7 @@ namespace EUROPA{
      * @param ub upper bound 
      */
     virtual void notifyBaseDomainConstraintAdded(const ConstrainedVariableId c,
-                                                 const TemporalConstraintId constraint,
+                                                 TemporalConstraint* const constraint,
                                                  Time lb, Time ub);
 
     /**
@@ -53,7 +53,7 @@ namespace EUROPA{
      * @param ub upper bound 
      */
     virtual void notifyConstraintAdded(const ConstraintId c,
-                                       const TemporalConstraintId constraint,
+                                       TemporalConstraint* const constraint,
                                        Time lb, Time ub);
 
     /**
@@ -61,7 +61,7 @@ namespace EUROPA{
      * @param key The key of the deleted constraint
      * @param constraint constraint deleted 
      */
-    virtual void notifyConstraintDeleted(eint key, const TemporalConstraintId constraint);
+    virtual void notifyConstraintDeleted(eint key, TemporalConstraint* const constraint);
 
     /**
      * @brief Inform listeners that bounds have been restricted
@@ -76,13 +76,14 @@ namespace EUROPA{
      * @param v constrained variable where bounds remain the same
      * @param timepoint The corresponding timepoint
      */
-    virtual void notifyBoundsSame(const ConstrainedVariableId v,  const TimepointId timepoint);
+    virtual void notifyBoundsSame(const ConstrainedVariableId v,
+                                  Timepoint* const timepoint);
 
     /**
      * @brief Get unique id of listener.
      * @return unique id of listener.
      */
-    const TemporalNetworkListenerId getId() const;
+    TemporalNetworkListenerId getId() const;
 
   protected:
     /**
