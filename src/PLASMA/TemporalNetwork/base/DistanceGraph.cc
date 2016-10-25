@@ -22,18 +22,30 @@
 //#include "Debug.hh"
 
 #include <boost/make_shared.hpp>
+#include <boost/ref.hpp>
 
 namespace EUROPA {
 
 
+namespace {
 template <class ELEMENT>
-void deleteIfEqual(std::vector<ELEMENT>& elements, ELEMENT element){
+void deleteFirstIfEqual(std::vector<ELEMENT>& elements, ELEMENT element){
   for(typename std::vector<ELEMENT>::iterator it = elements.begin(); it != elements.end(); ++it){
     if((*it) == element){
       elements.erase(it);
-      return;
+      break;
+      // return;
     }
   }
+  //elements.erase(std::remove(elements.begin(), elements.end(), element), elements.end());
+}
+
+template <typename ELEMENT>
+void deleteIfEqual(std::vector<ELEMENT>& elements, ELEMENT element){
+  elements.erase(std::remove(elements.begin(), elements.end(), element), elements.end());
+}
+
+
 }
 
 // Global value overridden only for Rax-derived system test.
@@ -47,12 +59,13 @@ DistanceGraph::DistanceGraph() : edges(), dijkstraGeneration(0), nodes(),
 
 DistanceGraph::~DistanceGraph()
 {
+  this->nodes.clear();
 }
 
 void DistanceGraph::addNode(DnodeId node) {
   node->potential = 0;
   this->nodes.push_back(node);
-
+  
 }
 
 DnodeId DistanceGraph::makeNode()
@@ -70,48 +83,51 @@ DnodeId DistanceGraph::createNode()
   return node;
 }
 
-Void DistanceGraph::attachEdge(std::vector<DedgeId>& edgeArray, Int& size, Int& count, DedgeId edge) {
+Void DistanceGraph::attachEdge(std::vector<Dedge*>& edgeArray, Int& size, Int& count,
+                               Dedge& edge) {
   check_error(!(count > size), "Corrupted edge-array in TemporalNetwork",
               TempNetErr::TempNetInternalError());
 
-  edgeArray.push_back(edge);
+  edgeArray.push_back(&edge);
   count = edgeArray.size();
   size = edgeArray.capacity();
 }
 
 
-Void DistanceGraph::detachEdge (std::vector<DedgeId>& edgeArray, Int& count, DedgeId edge)
+Void DistanceGraph::detachEdge(std::vector<Dedge*>& edgeArray, Int& count,
+                               const Dedge& edge)
 {
-  edgeArray.erase(std::find(edgeArray.begin(), edgeArray.end(), edge));
+  edgeArray.erase(std::find(edgeArray.begin(), edgeArray.end(), &edge));
   count = edgeArray.size();
 }
 
-Void DistanceGraph::deleteNode(DnodeId node)
+Void DistanceGraph::deleteNode(Dnode& node)
 {
   check_error(isValid(node), "node is not defined in this graph");
 
-  for (Int i=0; i < node->outCount; i++) {
-    DedgeId edge = node->outArray[i];
-    detachEdge(edge->to->inArray, edge->to->inCount, edge);
-    eraseEdge(edge);
+  for (Int i=0; i < node.outCount; i++) {
+    Dedge* edge = node.outArray[i];
+    detachEdge(edge->to.inArray, edge->to.inCount, *edge);
+    eraseEdge(*edge);
   }
-  for (Int j=0; j < node->inCount; j++) {
-    DedgeId edge = node->inArray[j];
-    detachEdge(edge->from->outArray, edge->from->outCount, edge);
-    eraseEdge(edge);
+  for (Int j=0; j < node.inCount; j++) {
+    Dedge* edge = node.inArray[j];
+    detachEdge(edge->from.outArray, edge->from.outCount, *edge);
+    eraseEdge(*edge);
   }
-  node->inCount = node->outCount = 0;
-  node->potential = 99;  // A clue for debugging purposes
-  deleteIfEqual(nodes, node);
+  node.inCount = node.outCount = 0;
+  node.potential = 99;  // A clue for debugging purposes
+  nodes.erase(std::remove_if(nodes.begin(), nodes.end(), ptr_compare<Dnode>(&node)),
+              nodes.end());
 }
 
-DedgeId DistanceGraph::findEdge(DnodeId from, DnodeId to)
+Dedge* DistanceGraph::findEdge(Dnode& from, Dnode& to)
 {
  check_error(isValid(from), "node is not defined in this graph");
  check_error(isValid(to),   "node is not defined in this graph");
 
   // Cache node vars -- Chucko 22 Apr 2002 
-  Int fromOutCount = from->outCount; 
+  Int fromOutCount = from.outCount; 
   if (fromOutCount > 0) {
     /*
     DedgeId* fromOutArray = from->outArray;
@@ -122,58 +138,56 @@ DedgeId DistanceGraph::findEdge(DnodeId from, DnodeId to)
     }
     */
     // PHM 06/20/2007 Speedup by using map instead.
-    return from->edgemap[to];
+    return from.edgemap[&to];
   }
-  return DedgeId();
+  return NULL;//DedgeId();
 }
 
-DedgeId DistanceGraph::createEdge(DnodeId from, DnodeId to, Time length) {
-
+Dedge* DistanceGraph::createEdge(Dnode& from, Dnode& to, Time length) {
+  using boost::ref;
   check_error(isValid(from), "node is not defined in this graph");
   check_error(isValid(to), "node is not defined in this graph");
 
 
-  DedgeId edge = boost::make_shared<Dedge>();
+  DedgeId edge = boost::make_shared<Dedge>(ref(from), ref(to));
   check_error(edge, "Memory allocation failed for TemporalNetwork edge",
               TempNetErr::TempNetMemoryError());
 
-  edge->from = from;
-  edge->to = to;
   edge->length = length;
   this->edges.insert(edge);
-  attachEdge (from->outArray, from->outArraySize, from->outCount, edge);
-  attachEdge (to->inArray, to->inArraySize, to->inCount, edge);
-  from->edgemap[to] = edge;
-  return edge;
+  attachEdge (from.outArray, from.outArraySize, from.outCount, *edge.get());
+  attachEdge (to.inArray, to.inArraySize, to.inCount, *edge.get());
+  from.edgemap[&to] = edge.get();
+  return edge.get();
 }
 
-void DistanceGraph::handleNodeUpdate(const DnodeId) {}
+void DistanceGraph::handleNodeUpdate(const Dnode&) {}
 
-Void DistanceGraph::deleteEdge(DedgeId edge)
+Void DistanceGraph::deleteEdge(Dedge& edge)
 {
-  detachEdge (edge->from->outArray, edge->from->outCount, edge);
-  detachEdge (edge->to->inArray, edge->to->inCount, edge);
-  edge->from->edgemap.erase(edge->to);
+  detachEdge (edge.from.outArray, edge.from.outCount, edge);
+  detachEdge (edge.to.inArray, edge.to.inCount, edge);
+  edge.from.edgemap.erase(&edge.to);
   eraseEdge(edge);
 }
 
-Void DistanceGraph::eraseEdge(DedgeId edge)
+Void DistanceGraph::eraseEdge(Dedge& edge)
 {
   //deleteIfEqual(edges, edge);
-  edges.erase(edge);
-  edge->from.reset();
-  edge->to.reset();
-  edge->length = 99;  // A clue for debugging purposes
+
+  // edges.erase(edge);
+  edge.length = 99;  // A clue for debugging purposes
+  edges.erase(std::find_if(edges.begin(), edges.end(), ptr_compare<Dedge>(&edge)));
 }
 
-Void DistanceGraph::addEdgeSpec(DnodeId from, DnodeId to, Time length)
+Void DistanceGraph::addEdgeSpec(Dnode& from, Dnode& to, Time length)
 {
 
   check_error(!(length > MAX_LENGTH || length < MIN_LENGTH), 
               "addEdgeSpec with length too large or too small",
               TempNetErr::TempNetInternalError());
 
-  DedgeId edge = findEdge (from,to);
+  Dedge* edge = findEdge(from,to);
   if (edge == NULL)
     edge = createEdge(from,to,length);
   edge->lengthSpecs.push_back(length);
@@ -181,7 +195,7 @@ Void DistanceGraph::addEdgeSpec(DnodeId from, DnodeId to, Time length)
     edge->length = length;
 }
 
-Void DistanceGraph::removeEdgeSpec(DnodeId from, DnodeId to, Time length)
+Void DistanceGraph::removeEdgeSpec(Dnode& from, Dnode& to, Time length)
 {
 
  check_error(isValid(from), "node is not defined in this graph");
@@ -191,24 +205,18 @@ Void DistanceGraph::removeEdgeSpec(DnodeId from, DnodeId to, Time length)
               "removeEdgeSpec with length too large or too small",
               TempNetErr::TempNetInternalError());
 
-  DedgeId edge = findEdge (from,to);
+  Dedge* edge = findEdge (from,to);
   check_error(edge, "Removing spec from non-existent edge",
               TempNetErr::TempNetInternalError());
 
   std::vector<Time>& lengthSpecs = edge->lengthSpecs;
 
-  deleteIfEqual(lengthSpecs, length);
+  deleteFirstIfEqual(lengthSpecs, length);
 
   if (lengthSpecs.empty())
-    deleteEdge(edge);
+    deleteEdge(*edge);
   else {
-    Time min = lengthSpecs.front();
-    for(std::vector<Time>::const_iterator it = lengthSpecs.begin(); it != lengthSpecs.end(); ++it){
-      Time current = *it;
-      if (current < min)
-        min = current;
-    }
-    edge->length = min;
+    edge->length = *std::min_element(lengthSpecs.begin(), lengthSpecs.end());
   }  
 }
 
@@ -224,40 +232,40 @@ Bool DistanceGraph::bellmanFord()
     node->depth = 0;
     // Use diff from oldPotential as priority ordering.  This
     // minimizes the amount of wasted superseded propagations.
-    queue.insertInQueue (node, -oldPotential);
+    queue.insertInQueue (node.get(), -oldPotential);
   }
   Int BFbound = static_cast<int>(nodes.size());
   while (true) {
-    DnodeId node = queue.popMinFromQueue();
+    Dnode* node = queue.popMinFromQueue();
     if (node == NULL)
       break;
     // Cache node vars -- Chucko 22 Apr 2002
     Int nodeOutCount = node->outCount;
     if (nodeOutCount > 0) {
-      std::vector<DedgeId>& nodeOutArray = node->outArray;
+      std::vector<Dedge*>& nodeOutArray = node->outArray;
       Time nodePotential = node->potential;
       for (Int i=0; i< nodeOutCount; i++) {
-	DedgeId edge = nodeOutArray[i];
+	Dedge* edge = nodeOutArray[i];
 	check_error(edge); 
-	DnodeId next = edge->to;
+	Dnode& next = edge->to;
 	Time potential = nodePotential + edge->length;
-	if (potential < next->potential) {
-	  next->potential = potential;
-	  next->predecessor = edge;
+	if (potential < next.potential) {
+	  next.potential = potential;
+	  next.predecessor = edge;
 	  handleNodeUpdate(next);
 	  // In following cycleDetected() is a no-op hook to allow
 	  // specialized cycle detectors to be defined in subclasses
 	  // ** Try to keep results in registers for speed.
 	  // Chucko 23 Apr 2002
-	  if ((next->depth = node->depth + 1) > BFbound  // Exceeded BF limit.
+	  if ((next.depth = node->depth + 1) > BFbound  // Exceeded BF limit.
 	      || cycleDetected (next)) {
 	    updateNogoodList(next);
 	    return false;
 	  }
-          Time oldPotential = next->distance; // See earlier in function
+          Time oldPotential = next.distance; // See earlier in function
           // Use diff from oldPotential as priority ordering.  This
           // minimizes the amount of wasted superseded propagations.
-          queue.insertInQueue (next, potential - oldPotential);
+          queue.insertInQueue (&next, potential - oldPotential);
 	}
       }
     }
@@ -273,48 +281,48 @@ Bool DistanceGraph::incBellmanFord()
   ++dijkstraGeneration;
 
   while (true) {
-    DnodeId node = bqueue->popMinFromQueue();
+    Dnode* node = bqueue->popMinFromQueue();
     if (node == NULL)
       break;
     // Cache node vars -- Chucko 22 Apr 2002
     Int nodeOutCount = node->outCount;
     if (nodeOutCount > 0) {
-      std::vector<DedgeId>& nodeOutArray = node->outArray;
+      std::vector<Dedge*>& nodeOutArray = node->outArray;
       Time nodePotential = node->potential;
       for (Int i=0; i< nodeOutCount; i++) {
-	DedgeId edge = nodeOutArray[i];
+	Dedge* edge = nodeOutArray[i];
 	check_error(edge);
-	DnodeId next = edge->to;
+	Dnode& next = edge->to;
 	Time potential = nodePotential + edge->length;
 
-	if (potential < next->potential) {
+	if (potential < next.potential) {
   check_error(!(potential < MIN_DISTANCE),
               "Potential underflow during distance propagation",
               TempNetErr::TimeOutOfBoundsError());
 
           // Cache the beginning potential in next->distance
-          if (next->generation < this->dijkstraGeneration) {
-            next->generation = this->dijkstraGeneration;
-            next->distance = next->potential;
+          if (next.generation < this->dijkstraGeneration) {
+            next.generation = this->dijkstraGeneration;
+            next.distance = next.potential;
           }
-          Time oldPotential = next->distance;
+          Time oldPotential = next.distance;
    
-	  next->potential = potential;
-	  next->predecessor = edge;
+	  next.potential = potential;
+	  next.predecessor = edge;
 	  handleNodeUpdate(next);
 
 	  // In following cycleDetected() is a no-op hook to allow
 	  // specialized cycle detectors to be defined in subclasses
 	  // ** Try to keep results in registers for speed.
 	  // Chucko 23 Apr 2002
-	  if ((next->depth = node->depth + 1) > BFbound  // Exceeded BF limit.
+	  if ((next.depth = node->depth + 1) > BFbound  // Exceeded BF limit.
 	      || cycleDetected (next)) {
 	    updateNogoodList(next);
 	    return false;
 	  }
           // Give priority to "stronger" propagations.  This minimizes
           // the amount of wasted superseded propagations.
-          bqueue->insertInQueue (next, potential - oldPotential);
+          bqueue->insertInQueue(&next, potential - oldPotential);
 	}
       }
     }
@@ -322,7 +330,7 @@ Bool DistanceGraph::incBellmanFord()
   return true;
 }
 
-Void DistanceGraph::dijkstra (DnodeId source, DnodeId destination)
+Void DistanceGraph::dijkstra(Dnode& source, Dnode* destination)
 {
  check_error(isValid(source), "node is not defined in this graph");
 
@@ -331,33 +339,33 @@ Void DistanceGraph::dijkstra (DnodeId source, DnodeId destination)
  // case dijkstra computes the distance to ALL nodes in the graph.
  // (See DistanceGraph.hh, which has destination = noId() as default!)
 
- check_error(destination == NULL || isValid(destination),
+ check_error(destination == NULL || isValid(*destination),
              "node is not null or defined in this graph");
 
  //debugMsg("DistanceGraph:dijkstra", "from " << source << " to " << destination);
-  source->distance = 0;
-  source->depth=0;
+  source.distance = 0;
+  source.depth=0;
   preventGenerationOverflow();
   Int generation = ++(this->dijkstraGeneration);
-  source->generation = generation;
+  source.generation = generation;
   BucketQueue& queue = initializeBqueue();
-  queue.insertInQueue (source);
+  queue.insertInQueue(&source);
 #ifndef EUROPA_FAST
   Int BFbound = static_cast<Int>(this->nodes.size());
 #endif
   while (true) {
-    DnodeId node = queue.popMinFromQueue();
+    Dnode* node = queue.popMinFromQueue();
     //debugMsg("DistanceGraph:dijkstra", "Visiting " << node);
     if (node == NULL || node == destination)
       return;
     // Cache node vars -- Chucko 22 Apr 2002
     Int nodeOutCount = node->outCount;
     if (nodeOutCount > 0) {
-      std::vector<DedgeId>& nodeOutArray = node->outArray;
+      std::vector<Dedge*>& nodeOutArray = node->outArray;
       Time nodeDistance = node->distance;
       for (Int i=0; i< nodeOutCount; i++) {
-	DedgeId edge = nodeOutArray[i];
-	DnodeId next = edge->to;
+	Dedge* edge = nodeOutArray[i];
+	Dnode& next = edge->to;
 	Time newDistance = nodeDistance + edge->length;
 	/*
 	condDebugMsg(next->generation >= generation, 
@@ -368,18 +376,18 @@ Void DistanceGraph::dijkstra (DnodeId source, DnodeId destination)
 	*/
 	if (newDistance > MAX_DISTANCE)
 	  continue;
-	if (next->generation < generation || newDistance < next->distance) {
-	  next->generation = generation;
+	if (next.generation < generation || newDistance < next.distance) {
+	  next.generation = generation;
     check_error(!(newDistance < MIN_DISTANCE),
                 "Potential underflow during distance propagation",
                 TempNetErr::TimeOutOfBoundsError());
 	  // Next check is a failsafe to prevent infinite propagation.
-    check_error(!((next->depth = node->depth + 1) > BFbound),
+    check_error(!((next.depth = node->depth + 1) > BFbound),
                 "Dijkstra propagation in inconsistent network",
                 TempNetErr::TempNetInternalError());
-	  next->distance = newDistance;
-	  next->predecessor = edge;
-	  queue.insertInQueue (next);
+	  next.distance = newDistance;
+	  next.predecessor = edge;
+	  queue.insertInQueue (&next);
 	  //debugMsg("DistanceGraph:dijkstra", "New distance of " << newDistance << " through node " << next);
 	  handleNodeUpdate(next);
 	}
@@ -388,16 +396,16 @@ Void DistanceGraph::dijkstra (DnodeId source, DnodeId destination)
   }
 }
 
-Time DistanceGraph::getDistance(DnodeId node)
+Time DistanceGraph::getDistance(const Dnode& node)
 {
   check_error(isValid(node), "node is not defined in this graph");
-  if (node->generation == this->dijkstraGeneration)
-    return node->distance;
+  if (node.generation == this->dijkstraGeneration)
+    return node.distance;
   else
     return POS_INFINITY;
 }
 
-Bool DistanceGraph::isDistanceLessThan (DnodeId src, DnodeId targ, Time bound)
+Bool DistanceGraph::isDistanceLessThan (Dnode& src, Dnode& targ, Time bound)
 {
  check_error(isValid(src), "node is not defined in this graph");
  check_error(isValid(targ), "node is not defined in this graph");
@@ -409,7 +417,7 @@ Bool DistanceGraph::isDistanceLessThan (DnodeId src, DnodeId targ, Time bound)
 
   preventNodeMarkOverflow();
   Dnode::unmarkAll();
-  Time newPotential = targ->potential - bound;
+  Time newPotential = targ.potential - bound;
 
   if (bound == 1) {
     // In this case, the call is always from isSlotDurationZero().
@@ -421,30 +429,30 @@ Bool DistanceGraph::isDistanceLessThan (DnodeId src, DnodeId targ, Time bound)
   return isPropagationPath(src, targ, newPotential);
 }
 
-Bool DistanceGraph::isValid(DnodeId node) {
+Bool DistanceGraph::isValid(const Dnode& node) {
   return hasNode(node);
 }
 
-Bool DistanceGraph::isAllZeroPropagationPath(DnodeId node, DnodeId targ,
-						 Time potential)
+Bool DistanceGraph::isAllZeroPropagationPath(Dnode& node, Dnode& targ,
+                                             Time potential)
 {
 
  check_error(isValid(node), "node is not defined in this graph");
  check_error(isValid(targ), "node is not defined in this graph");
 
-  if (potential >= node->potential)  // propagation is ineffective
+  if (potential >= node.potential)  // propagation is ineffective
     return false;
-  if (node == targ)
+  if (&node == &targ)
     return true;
-  if (node->isMarked())
+  if (node.isMarked())
     return false;
-  node->mark();
+  node.mark();
   // Cache node vars -- Chucko 22 Apr 2002
-  Int nodeOutCount = node->outCount;
+  Int nodeOutCount = node.outCount;
   if (nodeOutCount > 0) {
-    std::vector<DedgeId>& nodeOutArray = node->outArray;
+    std::vector<Dedge*>& nodeOutArray = node.outArray;
     for (int i=0; i< nodeOutCount; i++) {
-      DedgeId edge = nodeOutArray[i];
+      Dedge* edge = nodeOutArray[i];
       Time length = edge->length;
       if (length == 0)
 	if (isAllZeroPropagationPath(edge->to, targ, potential))
@@ -454,11 +462,10 @@ Bool DistanceGraph::isAllZeroPropagationPath(DnodeId node, DnodeId targ,
   return false;
 }
 
-Bool DistanceGraph::isPropagationPath(DnodeId src, DnodeId targ, Time pot)
-{
+Bool DistanceGraph::isPropagationPath(Dnode& src, Dnode& targ, Time pot) {
 
- check_error(isValid(src), "node is not defined in this graph");
- check_error(isValid(targ), "node is not defined in this graph");
+  check_error(isValid(src), "node is not defined in this graph");
+  check_error(isValid(targ), "node is not defined in this graph");
 
 
   // Even though this seems like a full search, it is actually an
@@ -467,32 +474,32 @@ Bool DistanceGraph::isPropagationPath(DnodeId src, DnodeId targ, Time pot)
   // previously been propagated across.  Would need a Dijkstra-like
   // priority queue to do a full search, but this seems a good enough
   // approximation to satisfy the calls from the zigzag check.
-  if (pot >= src->potential)  // propagation is ineffective
+  if (pot >= src.potential)  // propagation is ineffective
     return false;
-  src->mark();
-  src->distance = pot;
-  DnodeId propQ = src; 
-  propQ->link.reset();
+  src.mark();
+  src.distance = pot;
+  Dnode* propQ = &src; 
+  propQ->link = NULL;
   while (propQ != NULL) {
-    DnodeId node = propQ; propQ = propQ->link;
+    Dnode* node = propQ; propQ = propQ->link;
     // Cache node vars -- Chucko 22 Apr 2002
     Int nodeOutCount = node->outCount;
-    std::vector<DedgeId>& nodeOutArray = node->outArray;
+    std::vector<Dedge*>& nodeOutArray = node->outArray;
     // We iterate downwards to simulate the behavior of the previous
     // recursive version of this function (to satisfy make tests).
     for (int i=nodeOutCount-1; i>=0 ; i--) {
-      DedgeId edge = nodeOutArray[i];
-      DnodeId next = edge->to;
-      if (next->isMarked())
+      Dedge* edge = nodeOutArray[i];
+      Dnode& next = edge->to;
+      if (next.isMarked())
         continue;
       Time newPotential = node->distance + edge->length;
-      if (newPotential >= next->potential)  // propagation is ineffective
+      if (newPotential >= next.potential)  // propagation is ineffective
         continue;  // Don't mark---may be later effective propagation
-      if (next == targ)
+      if (&next == &targ)
         return true;
-      next->mark();
-      next->distance = newPotential;
-      next->link = propQ; propQ = next;
+      next.mark();
+      next.distance = newPotential;
+      next.link = propQ; propQ = &next;
     }
   }
   return false;
@@ -518,29 +525,29 @@ Void Dnode::mark () { markLocal = Dnode::markGlobal; }
 Bool Dnode::isMarked() { return (markLocal == Dnode::markGlobal); }
 Void Dnode::unmark () { markLocal = Dnode::markGlobal - 1; }
 
-Void DistanceGraph::updateNogoodList(DnodeId start)
+Void DistanceGraph::updateNogoodList(Dnode& start)
 {
 
   preventNodeMarkOverflow();
   Dnode::unmarkAll();
-  DnodeId node = start;
+  Dnode* node = &start;
   // Search for predecessor cycle
   while (! node->isMarked()) {
     node->mark ();
-    DedgeId predEdge = node->predecessor;
+    Dedge* predEdge = node->predecessor;
     check_error(predEdge,
                 "Broken predecessor chain",
                 TempNetErr::TempNetInternalError());
-    node = predEdge->from;
+    node = &predEdge->from;
   }
   // Now trace out the cycle into edgeNogoodList
   edgeNogoodList.clear();
-  DnodeId node1 = node;
-  DedgeId edge;
+  Dnode* node1 = node;
+  Dedge* edge;
   do {
     edge = node1->predecessor;
     edgeNogoodList.push_back(edge);
-    node1 = edge->from;
+    node1 = &edge->from;
   }
   while (node1 != node);
 }
@@ -584,13 +591,9 @@ BucketQueue& DistanceGraph::initializeBqueue()
   return *bqueue;
 }
 
-bool DistanceGraph::hasNode(const DnodeId node) const {
-  for(std::vector<DnodeId>::const_iterator it = nodes.begin(); it != nodes.end(); ++it){
-    DnodeId dn = *it;
-    if(node == dn)
-      return true;
-  }
-  return false;
+bool DistanceGraph::hasNode(const Dnode& node) const {
+  return std::find_if(nodes.begin(), nodes.end(), ptr_compare<Dnode>(&node)) !=
+      nodes.end();
 }
 
 std::string DistanceGraph::toString() const {
@@ -598,57 +601,56 @@ std::string DistanceGraph::toString() const {
 
  for (std::set<DedgeId>::const_iterator it = edges.begin(); it != edges.end(); ++it){
    DedgeId edge = *it;
-   sstr << edge->from << " " << edge->to << " " << edge->length << std::endl;
+   sstr << &edge->from << " " << &edge->to << " " << edge->length << std::endl;
  }
 
  return sstr.str();
 }
 
-Void DistanceGraph::boundedDijkstra (const DnodeId source,
+Void DistanceGraph::boundedDijkstra (Dnode& source,
                                      Time bound,
                                      Time destPotential,
-                                     int direction)
-{
-  source->distance = 0;
-  source->depth=0;
+                                     int direction) {
+  source.distance = 0;
+  source.depth=0;
   preventGenerationOverflow();
   Int generation = ++(this->dijkstraGeneration);
-  source->generation = generation;
+  source.generation = generation;
   BucketQueue& queue = initializeBqueue();
-  queue.insertInQueue (source);
+  queue.insertInQueue (&source);
 
   check_error_variable(Int BFbound = static_cast<Int>(this->nodes.size()));
   while (true) {
-    DnodeId node = queue.popMinFromQueue();
+    Dnode* node = queue.popMinFromQueue();
     if (node == NULL)
       return;
     Int nodeCount = (direction == -1) ? node->inCount : node->outCount;
     if (nodeCount > 0) {
-      std::vector<DedgeId>& nodeArray = (direction == -1) ? node->inArray : node->outArray;
+      std::vector<Dedge*>& nodeArray = (direction == -1) ? node->inArray : node->outArray;
       Time nodeDistance = node->distance;
       for (Int i=0; i< nodeCount; i++) {
-        DedgeId edge = nodeArray[i];
-        DnodeId next = (direction == -1) ? edge->from : edge->to;
+        Dedge* edge = nodeArray[i];
+        Dnode& next = (direction == -1) ? edge->from : edge->to;
         Time newDistance = nodeDistance + edge->length;
 
         // Admissible estimate of remaining distance to go
-        Time toGo = direction * (destPotential - next->potential);
+        Time toGo = direction * (destPotential - next.potential);
 
         if (newDistance + toGo >= bound)
           continue;
 
-        if (next->generation < generation || newDistance < next->distance) {
-          next->generation = generation;
+        if (next.generation < generation || newDistance < next.distance) {
+          next.generation = generation;
           check_error(!(newDistance > MAX_DISTANCE ||
                         newDistance < MIN_DISTANCE),
                       "Out of bounds during distance propagation",
                       TempNetErr::TimeOutOfBoundsError());
           // Next check is a failsafe to prevent infinite propagation.
-          check_error(!((next->depth = node->depth + 1) > BFbound),
+          check_error(!((next.depth = node->depth + 1) > BFbound),
                       "Dijkstra propagation in inconsistent network",
                       TempNetErr::TempNetInternalError());
-          next->distance = newDistance;
-          queue.insertInQueue (next, newDistance + toGo);
+          next.distance = newDistance;
+          queue.insertInQueue(&next, newDistance + toGo);
         }
       }
     }

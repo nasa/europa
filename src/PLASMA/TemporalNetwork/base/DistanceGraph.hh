@@ -97,13 +97,13 @@ class DistanceGraph {
   std::set<DedgeId> edges;
   Int dijkstraGeneration;
 protected:
-  std::vector<DnodeId> nodes;
+  std::vector<DnodeId> nodes; //TODO: should this be a ptr_container instead?
   boost::scoped_ptr<Dqueue> dqueue;
   boost::scoped_ptr<BucketQueue> bqueue;
-  std::list<DedgeId> edgeNogoodList;
+  std::list<Dedge*> edgeNogoodList;
 
-  Void attachEdge(std::vector<DedgeId>& edgeArray, Int& size, Int& count, DedgeId edge);
-  Void detachEdge(std::vector<DedgeId>& edgeArray, Int& count, DedgeId edge);
+  Void attachEdge(std::vector<Dedge*>& edgeArray, Int& size, Int& count, Dedge& edge);
+  Void detachEdge(std::vector<Dedge*>& edgeArray, Int& count, const Dedge& edge);
 
 public:
 
@@ -120,9 +120,11 @@ public:
    * Detach the node's edges from all other nodes, and erase the edges.
    *          Cleanup the node's fields. Remove the node from the network's global list of edges.
    *          Call the node destructor (takes care of the edge arrays).
+   * Note: this API dangerous, because whomever calls deleteNode will be holding a
+   * dangling reference.
    * @param node node to remove from the network
    */
-  Void deleteNode(DnodeId node);
+  Void deleteNode(Dnode& node);
 
   /**
   * @brief Add edge to the network
@@ -130,7 +132,7 @@ public:
   * @param to end of the edge
   * @param length length of the edge
   */
-  Void addEdgeSpec(DnodeId from, DnodeId to, Time length);
+  Void addEdgeSpec(Dnode& from, Dnode& to, Time length);
 
  /**
   * @brief  Remove the constraint length from the edge lengthSpecs.
@@ -140,7 +142,7 @@ public:
   * @param to end of the edge
   * @param length length of the edge
   */
-  Void removeEdgeSpec(DnodeId from, DnodeId to, Time length);
+  Void removeEdgeSpec(Dnode& from, Dnode& to, Time length);
 
  /**
   * @brief Constructor
@@ -181,7 +183,7 @@ public:
    * @param source start node
    * @param destination terminal node (optional)
    */
-  Void dijkstra(DnodeId source, DnodeId destination = DnodeId(static_cast<Dnode*>(NULL)));
+  Void dijkstra(Dnode& source, Dnode* destination = NULL);
 
    /**
    * @brief Incremental version of Dijkstra's algorithum
@@ -193,29 +195,29 @@ public:
    * algorithm. Propagation limited to reach nodes within a bound
    * distance from source with given min/max potential.
    */
-  Void boundedDijkstraForward (const DnodeId source,
-                                              Time bound,
-                                              Time minPotential) {
+  Void boundedDijkstraForward (Dnode& source,
+                               Time bound,
+                               Time minPotential) {
     boundedDijkstra (source, bound, minPotential, +1);
   }
 
-  Void boundedDijkstraBackward (const DnodeId source,
-                                              Time bound,
-                                              Time maxPotential) {
+  Void boundedDijkstraBackward (Dnode& source,
+                                Time bound,
+                                Time maxPotential) {
     boundedDijkstra (source, bound, maxPotential, -1);
   }
 private:
-  Void boundedDijkstra (const DnodeId source,
-                                       Time bound,
-                                       Time destPotential,
-                                       int direction);
+  Void boundedDijkstra (Dnode& source,
+                        Time bound,
+                        Time destPotential,
+                        int direction);
 public:
 
    /**
    * @brief compute distance from node to all other nodes in network
    * @param node start node.
    */
-  Time getDistance(DnodeId node);
+  Time getDistance(const Dnode& node);
 
    /**
    * @brief Determine if distance between nodes is less than bound
@@ -224,14 +226,14 @@ public:
    * @param bound time bound
    * @return true iff distance (from, to) < bound
    */
-   Bool isDistanceLessThan (DnodeId from, DnodeId to, Time bound);
+   Bool isDistanceLessThan (Dnode& from, Dnode& to, Time bound);
 
 
    /**
    * @brief test if node is a member of the network.
    * @return true iff node is valid, false otherwise.
    */
-  Bool isValid(DnodeId node);
+  Bool isValid(const Dnode& node);
 
   /**
    * @brief Produce a string representation of the network
@@ -248,14 +250,14 @@ protected:
    * @return return the edge that connects from to to if such an edge exists.
    *         returns a null edge otherwise.
    */
-  DedgeId findEdge(DnodeId from, DnodeId to);
+  Dedge* findEdge(Dnode& from, Dnode& to);
 
   /**
    * @brief test if network contain node
    * @param node to test membership
    * @return true iff network contains node, false otherwise.
    */
-  bool hasNode(const DnodeId node) const;
+  bool hasNode(const Dnode& node) const;
 
   Dqueue& initializeDqueue();
 
@@ -268,7 +270,7 @@ protected:
    * @param to to node
    * @param length duration of edge
    */
-   DedgeId createEdge(DnodeId from, DnodeId to, Time length);
+   Dedge* createEdge(Dnode& from, Dnode& to, Time length);
 
   /**
    * @brief virtual method to allows specialized Dnodes in subclasses
@@ -280,25 +282,25 @@ protected:
    * detecting cycles in graphs.
    * return false always. Specialization should return true if cycle is detected.
    */
-  virtual Bool cycleDetected (DnodeId next) { next=next; return false; }
+  virtual Bool cycleDetected (const Dnode&) { return false; }
 
   /**
    * @brief Allow subclass to take action when a node is updated
    * @param node node updated
    */
-  virtual void handleNodeUpdate(const DnodeId node);
+  virtual void handleNodeUpdate(const Dnode& node);
 
 private:
   
   DistanceGraph(const DistanceGraph&);
   DistanceGraph& operator=(const DistanceGraph&);
-  Void deleteEdge(DedgeId edge);
-  Void eraseEdge(DedgeId edge);
+  Void deleteEdge(Dedge& edge);
+  Void eraseEdge(Dedge& edge);
   Void preventNodeMarkOverflow();
   Void preventGenerationOverflow();
-  Void updateNogoodList(DnodeId);
-  Bool isAllZeroPropagationPath(DnodeId node, DnodeId targ, Time potential);
-  Bool isPropagationPath(DnodeId node, DnodeId targ, Time potential);
+  Void updateNogoodList(Dnode&);
+  Bool isAllZeroPropagationPath(Dnode& node, Dnode& targ, Time potential);
+  Bool isPropagationPath(Dnode& node, Dnode& targ, Time potential);
 };
 
 
@@ -317,13 +319,16 @@ class Dnode : public Entity {
 
 protected:
 
-  std::vector<DedgeId> inArray;
+  // std::vector<DedgeId> inArray;
+  std::vector<Dedge*> inArray;
   Int inArraySize;
   Int inCount;
-  std::vector<DedgeId> outArray;
+  // std::vector<DedgeId> outArray;
+  std::vector<Dedge*> outArray;
   Int outArraySize;
   Int outCount;
-  std::map<DnodeId,DedgeId> edgemap;
+  // std::map<DnodeId,DedgeId> edgemap;
+  std::map<Dnode*, Dedge*> edgemap;  //TODO: Why is this at the node level and not in the graph?
   Time distance;      // Distance from any source of propagation.
   Time potential;     // Distance from Johnson-type external source.
   Int depth;  // Depth of propagation for testing against the BF limit.
@@ -333,9 +338,9 @@ private:
   Dnode& operator=(const Dnode&);
 public:
 
-  DnodeId link;        // For creating linked-list of nodes (for Dqueue)
+  Dnode* link;        // For creating linked-list of nodes (for Dqueue)
 protected:
-  DedgeId predecessor;      // For reconstructing negative cycles.
+  Dedge* predecessor;      // For reconstructing negative cycles.
 private:
   Int markLocal;               // Used for obsoletable marking of nodes.
   static Int markGlobal;       // Global obsolescence number for marks.
@@ -359,8 +364,8 @@ public:
   inline Time getKey() const {return key;}
   inline void setKey(Time t) {key = t;}
 
-  inline DedgeId getPredecessor() const { return predecessor;}
-  inline void setPredecessor(DedgeId edge) {predecessor = edge;}
+  inline Dedge* getPredecessor() const { return predecessor;}
+  inline void setPredecessor(Dedge* edge) {predecessor = edge;}
 };
 
  /**
@@ -376,13 +381,13 @@ class Dedge {
   std::vector<Time> lengthSpecs;
 
 public:
-  DnodeId to;
-  DnodeId from;
+  Dnode& from;
+  Dnode& to;
   Time length;
   /**
    * @brief constructor
    */
-  Dedge ():lengthSpecs(), to(), from(), length(0) {}
+  Dedge (Dnode& _from, Dnode& _to):lengthSpecs(), from(_from), to(_to), length(0) {}
   /**
    * @brief destructor
    */
@@ -399,11 +404,11 @@ public:
 class Bucket 
 {
 public:
-  DnodeId node;
+  const Dnode* node;
   Time key;
 
 private:
-  Bucket (const DnodeId n, Time distance) : node(n), key(distance) {}
+  Bucket (const Dnode* n, Time distance) : node(n), key(distance) {}
 
   friend class BucketQueue;
 };
@@ -433,7 +438,7 @@ class BucketQueue {
 private:
   BucketQueue(const BucketQueue&);
   BucketQueue& operator=(const BucketQueue&);
-  DnodePriorityQueue* buckets;
+  DnodePriorityQueue buckets;
 public:
 
   /**
@@ -456,20 +461,20 @@ public:
    * Return first marked node found.  Pop all the nodes until
    * it is found.
    */
-  DnodeId popMinFromQueue();
+  Dnode* popMinFromQueue();
 
   /**
    * @brief insert node into queue
    * @param node node to insert
    * @param key key attached to node
    */
-  Void insertInQueue(DnodeId node, eint::basis_type key);
+  Void insertInQueue(Dnode* node, eint::basis_type key);
 
   /**
    * @brief insert node into queue. Use (distance - potential) as key
    * @param node node to insert.
    */
-  Void insertInQueue(DnodeId node);
+  Void insertInQueue(Dnode* node);
 
   /**
    * @brief test if bucket is empty
@@ -487,8 +492,8 @@ public:
  * @ingroup TemporalNetwork
  */
 class Dqueue {
-  DnodeId first;
-  DnodeId last;
+  Dnode* first;
+  Dnode* last;
 public:
   Dqueue() : first(), last() {}
   /**
@@ -500,13 +505,13 @@ public:
    * @brief insert node into queue
    * @param node node to insert
    */
-  Void addToQueue (DnodeId node);
+  Void addToQueue (Dnode* node);
 
   /**
    * @brief pop first element from queue following first in first out strategy (FIFO).
    * @return head of the queue
    */
-  DnodeId popFromQueue ();
+  Dnode* popFromQueue ();
 
   /**
    * @brief test if queue is empty

@@ -37,3 +37,5 @@ src/PLASMA/Utils/test/writeTest.xml
 src/Java/PSEngine/generated/*
 \#*#
 PSEngineAdditionalClasses
+documentation/html
+src/PLASMA/classes

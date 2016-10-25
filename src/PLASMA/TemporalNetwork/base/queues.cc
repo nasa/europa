@@ -34,11 +34,11 @@ namespace EUROPA {
 
 void Dqueue::reset()
 {
-  this->first.reset();
+  this->first = NULL;
   Dnode::unmarkAll();
 }
 
-void Dqueue::addToQueue (DnodeId node)
+void Dqueue::addToQueue (Dnode* node)
 {
   // FIFO queue add to last.
   if (!node->isMarked()) {
@@ -47,16 +47,16 @@ void Dqueue::addToQueue (DnodeId node)
       this->first = node;
     else                      // splice in node
       this->last->link = node;
-    node->link.reset();
+    node->link = NULL;
     this->last = node;
     node->mark();
   }
 }
 
-DnodeId Dqueue::popFromQueue ()
+Dnode* Dqueue::popFromQueue ()
 {
   // FIFO queue pop from first.
-  DnodeId node = this->first;
+  Dnode* node = this->first;
   if (node == NULL)
     return node;
   this->first = node->link;
@@ -73,43 +73,38 @@ Bool Dqueue::isEmpty()
 /* BucketQueue functions */
 
 
-BucketQueue::BucketQueue (int) : buckets(NULL) {
-  buckets = new DnodePriorityQueue();
+BucketQueue::BucketQueue (int) : buckets() {
 }
 
 BucketQueue::~BucketQueue ()
 {
-    delete buckets;
 }
 
 void BucketQueue::reset()
 {
-  if(buckets != 0)
-    delete buckets;
-
-  buckets = new DnodePriorityQueue();
+  buckets = DnodePriorityQueue();
   Dnode::unmarkAll();
 }
 
-DnodeId BucketQueue::popMinFromQueue()
+Dnode* BucketQueue::popMinFromQueue()
 {
-	DnodeId node;
+  Dnode* node = NULL;
 	
-	while (!buckets->empty()){
-		const Bucket& b = buckets->top();
-		node = b.node;
-		buckets->pop();
+  while (!buckets.empty()){
+    const Bucket& b = buckets.top();
+    node = const_cast<Dnode*>(b.node);
+    buckets.pop();
 
-		if (node->isMarked()){
-			node->unmark();
-			return node;
-		}
-	}
+    if (node->isMarked()){
+      node->unmark();
+      return node;
+    }
+  }
 	
-	return DnodeId();
+  return NULL;
 }
 
-void BucketQueue::insertInQueue(DnodeId node, eint::basis_type key)
+void BucketQueue::insertInQueue(Dnode* node, eint::basis_type key)
 {
 	if(node == NULL)
 		return;
@@ -120,12 +115,12 @@ void BucketQueue::insertInQueue(DnodeId node, eint::basis_type key)
 	node->setKey(-key); // Reverse since we want effective lowest priority first
 	node->mark();
 	Bucket b(node,-key);
-	this->buckets->push(b);
+	this->buckets.push(b);
 
 	//debugMsg("BucketQueue:insertInQueue", "Enqueueing " << node << " with key " << -key);
 }
 
-void BucketQueue::insertInQueue(DnodeId node)
+void BucketQueue::insertInQueue(Dnode* node)
 {
   if(node == NULL)
     return;

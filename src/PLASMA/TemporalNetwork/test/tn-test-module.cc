@@ -109,13 +109,14 @@ public:
     EUROPA_runTest(testTemporalConstraints);
     EUROPA_runTest(testFixForReversingEndpoints);
     EUROPA_runTest(testMemoryCleanups);
+    EUROPA_runTest(testMemoryCleanupSimple);
     return true;
   }
 
 private:
   static bool testBasicAllocation(){
     TemporalNetwork tn;
-    TimepointId origin = tn.getOrigin();
+    Timepoint& origin = tn.getOrigin();
     Time delta(0);
     Time epsilon(0);
     tn.getTimepointBounds(origin, delta, epsilon);
@@ -128,13 +129,13 @@ private:
 
   static bool testTemporalConstraints(){
     TemporalNetwork tn;
-    TimepointId a_end = tn.addTimepoint();
-    TimepointId b_start = tn.addTimepoint();
-    TimepointId b_end = tn.addTimepoint();
-    TimepointId c_start = tn.addTimepoint();
-    TemporalConstraintId a_before_b = tn.addTemporalConstraint(a_end, b_start, 0, cast_basis(PLUS_INFINITY));
-    TemporalConstraintId start_before_end = tn.addTemporalConstraint(b_start, b_end, 1, cast_basis(PLUS_INFINITY));
-    TemporalConstraintId a_meets_c = tn.addTemporalConstraint(a_end, c_start, 0, 0);
+    Timepoint& a_end = tn.addTimepoint();
+    Timepoint&  b_start = tn.addTimepoint();
+    Timepoint& b_end = tn.addTimepoint();
+    Timepoint& c_start = tn.addTimepoint();
+    TemporalConstraint* a_before_b = tn.addTemporalConstraint(a_end, b_start, 0, cast_basis(PLUS_INFINITY));
+    TemporalConstraint* start_before_end = tn.addTemporalConstraint(b_start, b_end, 1, cast_basis(PLUS_INFINITY));
+    TemporalConstraint* a_meets_c = tn.addTemporalConstraint(a_end, c_start, 0, 0);
     bool res = tn.propagate();
     CPPUNIT_ASSERT(res);
 
@@ -143,15 +144,15 @@ private:
     CPPUNIT_ASSERT(dist_lb > 0);
 
     // Force failure where b meets c
-    TemporalConstraintId b_meets_c = tn.addTemporalConstraint(b_end, c_start, 0, 0);
+    TemporalConstraint*b_meets_c = tn.addTemporalConstraint(b_end, c_start, 0, 0);
     res = tn.propagate();
     CPPUNIT_ASSERT(!res);
 
     // Cleanup
-    tn.removeTemporalConstraint(b_meets_c);
-    tn.removeTemporalConstraint(a_meets_c);
-    tn.removeTemporalConstraint(start_before_end);
-    tn.removeTemporalConstraint(a_before_b);
+    tn.removeTemporalConstraint(*b_meets_c);
+    tn.removeTemporalConstraint(*a_meets_c);
+    tn.removeTemporalConstraint(*start_before_end);
+    tn.removeTemporalConstraint(*a_before_b);
     tn.deleteTimepoint(c_start);
     tn.deleteTimepoint(b_end);
     tn.deleteTimepoint(b_start);
@@ -163,36 +164,36 @@ private:
     TemporalNetwork tn;
 
     // Allocate timepoints
-    TimepointId x = tn.getOrigin();
-    TimepointId y = tn.addTimepoint();
-    TimepointId z = tn.addTimepoint();
+    Timepoint& x = tn.getOrigin();
+    Timepoint& y = tn.addTimepoint();
+    Timepoint& z = tn.addTimepoint();
 
-    TemporalConstraintId fromage = tn.addTemporalConstraint(x, y, 0,
-                                                            cast_basis(PLUS_INFINITY));
-    TemporalConstraintId tango = tn.addTemporalConstraint(y, x, 200, 200);
+    TemporalConstraint* fromage = tn.addTemporalConstraint(x, y, 0,
+                                                           cast_basis(PLUS_INFINITY));
+    TemporalConstraint* tango = tn.addTemporalConstraint(y, x, 200, 200);
 
     bool res = tn.propagate();
     CPPUNIT_ASSERT(!res);
 
-    tn.removeTemporalConstraint(fromage);
-    tn.removeTemporalConstraint(tango);
+    tn.removeTemporalConstraint(*fromage);
+    tn.removeTemporalConstraint(*tango);
 
     res = tn.propagate();
     CPPUNIT_ASSERT(res); // Consistency restored
 
-    TemporalConstraintId c0 = tn.addTemporalConstraint(y, x, -200, cast_basis(PLUS_INFINITY));
-    TemporalConstraintId c1 = tn.addTemporalConstraint(x, z, 0, cast_basis(PLUS_INFINITY));
-    TemporalConstraintId c2 = tn.addTemporalConstraint(z, y, 0, cast_basis(PLUS_INFINITY));
-    TemporalConstraintId c3 = tn.addTemporalConstraint(x, y, 200, cast_basis(PLUS_INFINITY));
+    TemporalConstraint* c0 = tn.addTemporalConstraint(y, x, -200, cast_basis(PLUS_INFINITY));
+    TemporalConstraint* c1 = tn.addTemporalConstraint(x, z, 0, cast_basis(PLUS_INFINITY));
+    TemporalConstraint* c2 = tn.addTemporalConstraint(z, y, 0, cast_basis(PLUS_INFINITY));
+    TemporalConstraint* c3 = tn.addTemporalConstraint(x, y, 200, cast_basis(PLUS_INFINITY));
 
     res = tn.propagate();
     CPPUNIT_ASSERT(res);
 
     // Clean up
-    tn.removeTemporalConstraint(c0);
-    tn.removeTemporalConstraint(c1);
-    tn.removeTemporalConstraint(c2);
-    tn.removeTemporalConstraint(c3);
+    tn.removeTemporalConstraint(*c0);
+    tn.removeTemporalConstraint(*c1);
+    tn.removeTemporalConstraint(*c2);
+    tn.removeTemporalConstraint(*c3);
     tn.deleteTimepoint(y);
     tn.deleteTimepoint(z);
     return true;
@@ -201,11 +202,11 @@ private:
   static bool testMemoryCleanups(){
     for(int i=0;i<10;i++){
       TemporalNetwork tn;
-      TimepointId origin = tn.getOrigin();
+      Timepoint& origin = tn.getOrigin();
 
       for(Time j=0;j<100;j++){
-	TimepointId x = tn.addTimepoint();
-	TimepointId y = tn.addTimepoint();
+	Timepoint& x = tn.addTimepoint();
+	Timepoint& y = tn.addTimepoint();
 	tn.addTemporalConstraint(origin, x, j, j+1);
 	tn.addTemporalConstraint(x, y, j, j+1);
 	Time delta(0);
@@ -213,6 +214,18 @@ private:
 	tn.calcDistanceBounds(x, y, delta, epsilon);
       }
     }
+    return true;
+  }
+  static bool testMemoryCleanupSimple() {
+    TemporalNetwork tn;
+    Timepoint& origin = tn.getOrigin();
+    Timepoint& x = tn.addTimepoint();
+    Timepoint& y = tn.addTimepoint();
+    tn.addTemporalConstraint(origin, x, 0, 1);
+    tn.addTemporalConstraint(x, y, 0, 1);
+    Time delta(0);
+    Time epsilon(0);
+    tn.calcDistanceBounds(x, y, delta, epsilon);
     return true;
   }
 };

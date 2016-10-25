@@ -4498,7 +4498,8 @@ public:
       case 2: {
           Locations* ld2 = new Locations(LocationsBaseDomain());
           ld2->set(LabelStr("Hill"));
-        CPPUNIT_ASSERT(var->lastDomain() == *ld2);
+	  CPPUNIT_ASSERT(var->lastDomain() == *ld2);
+	  delete ld2;
         break;
       }
       default:

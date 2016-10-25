@@ -116,9 +116,11 @@ namespace EUROPA {
 
   private:
 
-    TemporalConstraintId addSpecificationConstraint(const TemporalConstraintId tc, const TimepointId tp, const Time lb, const Time ub);
+    TemporalConstraint*
+    addSpecificationConstraint(TemporalConstraint* const tc, Timepoint* const tp,
+                               const Time lb, const Time ub);
 
-    void notifyDeleted(const ConstrainedVariableId tempVar, const TimepointId tp);
+    void notifyDeleted(const ConstrainedVariableId tempVar, Timepoint* const tp);
 
     void addTimepoint(const ConstrainedVariableId var);
     void addTemporalConstraint(const ConstraintId constraint);
@@ -126,10 +128,10 @@ namespace EUROPA {
     bool isEqualToConstraintNetwork();
     bool isConsistentWithConstraintNetwork();
 
-    inline const TimepointId getTimepoint(const ConstrainedVariableId var) {
-      std::map<ConstrainedVariableId, TimepointId>::const_iterator it =
+    inline Timepoint* getTimepoint(const ConstrainedVariableId var) {
+      std::map<ConstrainedVariableId, Timepoint*>::const_iterator it =
           m_varToTimepoint.find(var);
-      return (it == m_varToTimepoint.end() ? TimepointId() : it->second);
+      return (it == m_varToTimepoint.end() ? NULL : it->second);
     }
 
     void handleTemporalAddition(const ConstraintId constraint);
@@ -168,10 +170,10 @@ namespace EUROPA {
      * @return TemporalConstraintId::noId() if the constrant is not deleted. Otherwise it
      * will return the new replacement constraint.
      */
-    TemporalConstraintId updateConstraint(const ConstrainedVariableId var,
-					  const TemporalConstraintId tnetConstraint,
-					  Time lb,
-					  Time ub);
+    TemporalConstraint* updateConstraint(const ConstrainedVariableId var,
+                                         TemporalConstraint* const tnetConstraint,
+                                         Time lb,
+                                         Time ub);
 
     /**
      * @brief Buffer the variable in either the new variable buffer or the change variable buffer
@@ -195,12 +197,12 @@ namespace EUROPA {
     void handleViolations();
     void collectViolations(ConstrainedVariableId var);
 
-    void mapVariable(const ConstrainedVariableId var, const TimepointId tp);
+    void mapVariable(const ConstrainedVariableId var, Timepoint* const tp);
     void unmap(const ConstrainedVariableId var);
-    void unmap(const TimepointId tp);
-    void mapConstraint(const ConstraintId constr, const TemporalConstraintId temp);
+    void unmap(Timepoint* const tp);
+    void mapConstraint(const ConstraintId constr, TemporalConstraint* const temp);
     void unmap(const ConstraintId constr);
-    void unmap(const TemporalConstraintId temp);
+    void unmap(TemporalConstraint* const temp);
     
     void incrementRefCount(const ConstrainedVariableId var);
     void decrementRefCount(const ConstrainedVariableId var);
@@ -215,15 +217,15 @@ namespace EUROPA {
     typedef std::set<ConstraintId, EntityComparator<EntityId> > ConstraintsSet;
     ConstraintsSet m_changedConstraints; /*!< Constraint Agenda */
 
-    typedef  std::set<TemporalConstraintId> TemporalConstraintsSet;
+    typedef  std::set<TemporalConstraint*> TemporalConstraintsSet;
     TemporalConstraintsSet m_constraintsForDeletion; /*!< Buffer deletions till you have to propagate. */
 
-    std::set<TimepointId> m_variablesForDeletion; /*!< Buffer timepoints for deletion till we propagate. */
+    std::set<Timepoint*> m_variablesForDeletion; /*!< Buffer timepoints for deletion till we propagate. */
     std::set<TemporalNetworkListenerId> m_listeners;
-    std::map<ConstrainedVariableId, TimepointId> m_varToTimepoint;
-    std::map<TimepointId, ConstrainedVariableId> m_timepointToVar;
-    std::map<ConstraintId, TemporalConstraintId> m_constrToTempConstr;
-    std::map<TemporalConstraintId, ConstraintId> m_tempConstrToConstr;
+    std::map<ConstrainedVariableId, Timepoint*> m_varToTimepoint;
+    std::map<Timepoint*, ConstrainedVariableId> m_timepointToVar;
+    std::map<ConstraintId, TemporalConstraint*> m_constrToTempConstr;
+    std::map<TemporalConstraint*, ConstraintId> m_tempConstrToConstr;
     std::map<ConstrainedVariableId, unsigned int> m_refCount;
     
     unsigned int m_mostRecentRepropagation;

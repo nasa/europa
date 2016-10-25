@@ -1087,6 +1087,7 @@ void DbClientTransactionPlayer::playTokenCreated(const TiXmlElement & element) {
     }
     else
       m_client->restrict(var, *value);
+    delete value;
   }
 
   void DbClientTransactionPlayer::playVariableRestricted(const TiXmlElement & element) {

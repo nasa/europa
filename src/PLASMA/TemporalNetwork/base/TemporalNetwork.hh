@@ -29,8 +29,6 @@ namespace EUROPA {
   class DispatchNode;
 
 
-const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
-
     /**
      * @class  TemporalNetwork
      * @author Paul H. Morris (with mods by Conor McGann)
@@ -57,9 +55,8 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
     /**
      * @brief Used for specialized cycle detection
      */
-    TimepointId incrementalSource;
+    Timepoint* incrementalSource;
 
-    friend Void keepEdge (DispatchNode* x, DispatchNode* y, Time d);
     public:
 
    // The following are provided for backward compatibility with previous
@@ -107,7 +104,7 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
      * @param lb return result giving lower bound of id.
      * @param ub return result giving upper bound of id.
      */
-    Void getTimepointBounds(const TimepointId id, Time& lb, Time& ub);
+    Void getTimepointBounds(const Timepoint& id, Time& lb, Time& ub);
 
   /**
      * @brief Accessor for the upper and lower bound times of a timepoint. The method
@@ -116,7 +113,7 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
      * @param lb return result giving lower bound of id.
      * @param ub return result giving upper bound of id.
      */
-    Void getLastTimepointBounds(const TimepointId id, Time& lb, Time& ub);
+    Void getLastTimepointBounds(const Timepoint& id, Time& lb, Time& ub);
 
    /**
      * @brief Accessor for the Lower Timepoint bound. The method
@@ -124,7 +121,7 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
      * @param id the timepoint for which you require this information.
      * @return lower bound of timepoint.
      */
-    Time getLowerTimepointBound(const TimepointId id);
+    Time getLowerTimepointBound(const Timepoint& id);
 
     /**
      * @brief Accessor for the Upper Timepoint bound. The method
@@ -132,7 +129,7 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
      * @param id the timepoint for which you require this information.
      * @return upper bound of timepoint.
      */
-    Time getUpperTimepointBound(const TimepointId id);
+    Time getUpperTimepointBound(const Timepoint& id);
 
     /**
      * @brief Test if the STN is consistent
@@ -160,7 +157,8 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
      * @param ub returns the upper bound of the distnace between src and targ
      * @param exact if true use Dijkstra's algorithim to compute exact distnace. Approximate if false
      */
-    Void calcDistanceBounds(const TimepointId src, const TimepointId targ, Time& lb, Time& ub, Bool exact=true);
+    Void calcDistanceBounds(Timepoint& src, Timepoint& targ,
+                            Time& lb, Time& ub, Bool exact=true);
 
     /**
      * @brief Calculate the (exact) temporal distance from one timepoint to others.  Much more efficient when many targs.
@@ -169,8 +167,8 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
      * @param lbs returns the lower bounds of the distances
      * @param ubs returns the upper bounds of the distances
      */
-    Void calcDistanceBounds(const TimepointId src,
-                            const std::vector<TimepointId>& targs,
+    Void calcDistanceBounds(Timepoint& src,
+                            const std::vector<Timepoint*>& targs,
                             std::vector<Time>& lbs, std::vector<Time>& ubs);
 
      /**
@@ -178,8 +176,8 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
      * but only the signs of the "bounds" (that indicate precedences)
      * are meaningful.
      */
-    Void calcDistanceSigns(const TimepointId src,
-                           const std::vector<TimepointId>& targs,
+    Void calcDistanceSigns(Timepoint& src,
+                           const std::vector<Timepoint*>& targs,
                            std::vector<Time>& lbs, std::vector<Time>& ubs);
 
 
@@ -188,21 +186,21 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
      * @param id temporal constraint of interest.
      * @result two time points - the head and foot of the constraint (in that order).
      */
-    std::list<TimepointId> getConstraintScope(const TemporalConstraintId id);
+    std::vector<Timepoint*> getConstraintScope(TemporalConstraint& id);
 
     /**
      * @brief Get the upperbound on the time of a temporal constraint.
      * @param id temporal constraint of interest.
      * @result Upperbound time on constraint.
      */
-    Time getConstraintUpperBound(const TemporalConstraintId id);
+    Time getConstraintUpperBound(const TemporalConstraint& id);
 
     /**
      * @brief Get the lowerbound on the time of a temporal constraint.
      * @param id temporal constraint of interest.
      * @result Lowerbound time on constraint.
      */
-    Time getConstraintLowerBound(const TemporalConstraintId id);
+    Time getConstraintLowerBound(const TemporalConstraint& id);
 
     /**
      * @brief Identify the timepoints that mark the head and foot of a temporal constraint.
@@ -210,8 +208,8 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
      * @param source head of temporal constraint
      * @param target foot of temporal constraint
      */
-    void getConstraintScope(const TemporalConstraintId constraint,
-                            TimepointId& source, TimepointId& target) const;
+    void getConstraintScope(const TemporalConstraint& constraint,
+                            Timepoint*& source, Timepoint*& target) const;
 
     /**
      * @brief Add temporal constraint to the network
@@ -221,51 +219,55 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
      * @param ub upper bound time
      * @param propagate iff true this constraint will be included in propagation.
      */
-    TemporalConstraintId addTemporalConstraint(const TimepointId src, const TimepointId targ,
-						const Time lb, const Time ub, bool propagate = true);
+    TemporalConstraint* addTemporalConstraint(Timepoint& src,
+                                              Timepoint& targ,
+                                              const Time lb, const Time ub,
+                                              bool propagate = true);
     /**
      * @brief Tighten the temporal constraint to new bounds iff they are tighter.
      * @param tcId Constraint to tighten
      * @param newLb New lower bound
      * @param newUb New Upper bound
      */
-    Void narrowTemporalConstraint(const TemporalConstraintId tcId, const Time newLb, const Time newUb);
+    Void narrowTemporalConstraint(TemporalConstraint& tcId,
+                                  const Time newLb, const Time newUb);
 
     /**
      * @brief Remove a constraint from the temporal network
      * @param tcId Constraint to remove
      * @param markDeleted set to true iff you want the STN's state updated to indicate a deleteation has occured. False otherwise.
      */
-    Void removeTemporalConstraint(const TemporalConstraintId tcId, bool markDeleted = true);
+    Void removeTemporalConstraint(TemporalConstraint& tcId,
+                                  bool markDeleted = true);
 
     /**
      * @brief get the TimePointId of the origin of the STN.
      * @return the TimePointId of the origin of the STN.
      */
-    TimepointId getOrigin();
+    Timepoint& getOrigin();
 
     /**
      * @brief Create a new timepoint in the STN.
      * @return The TimepointId of the new timepoin.
      */
-    TimepointId addTimepoint();
+    Timepoint& addTimepoint();
 
     /**
      * @brief Delete a timepoint from the STN. Note: this must not be the origin and it must be a valid timepoint.
      */
-    Void deleteTimepoint(const TimepointId tpId);
+    Void deleteTimepoint(Timepoint& tpId);
 
     /**
      * @brief Identify the set of timepoints that lead to an inconsistent network. Note the network must be inconsistent to call this method.
      * @return The set of timepoints behind the inconsistency.
      */
-    std::list<TimepointId> getInconsistencyReason();
+    std::list<Timepoint*> getInconsistencyReason();
 
      /**
      * @brief Identify the set of edges that lead to an inconsistent network.
      * @return The set of edges behind the inconsistency if the network is inconsistent. An empty list if the network is consistent.
      */
-    std::list<DedgeId> getEdgeNogoodList();
+    std::list<Dedge*> getEdgeNogoodList();
 
     /**
      * @brief Check if distance between two timepoints is less than a time bound
@@ -274,7 +276,7 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
      * @param bound distance bound
      * @return true iff distance(form, to) < bound. False otherwise.
      */
-    Bool isDistanceLessThan (const TimepointId from, const TimepointId to, Time bound);
+    Bool isDistanceLessThan(Timepoint& from, Timepoint& to, Time bound);
 
     /**
      * @brief Check if distance between two timepoints is less or equal to a time bound
@@ -283,8 +285,8 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
      * @param bound distance bound
      * @return true iff distance(form, to) <= bound. False otherwise.
      */
-    Bool isDistanceLessThanOrEqual (const TimepointId from, const TimepointId to,
-				    Time bound);
+    Bool isDistanceLessThanOrEqual(Timepoint& from, Timepoint& to,
+                                   Time bound);
 
   /**
      * @brief An efficent approimate verion of isDistanceLessThan. It performans an
@@ -295,7 +297,7 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
      * @param bound distance bound
      * @return true if distance(form, to) ~< bound. False otherwise.
      */
-    Bool isDistancePossiblyLessThan (const TimepointId from, const TimepointId to,
+    Bool isDistancePossiblyLessThan (const Timepoint& from, const Timepoint& to,
 				     Time bound);
 
      /**
@@ -307,13 +309,13 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
      * @brief Add node to set of updated timepoints.
      * @param node node to add.
      */
-    void handleNodeUpdate(const DnodeId node);
+    void handleNodeUpdate(const Dnode& node);
 
     /**
      * @brief Returns the set of updated timepoints.
      * @return the set of updated timepoints.
      */
-     const std::set<TimepointId>& getUpdatedTimepoints() const;
+     const std::set<Timepoint*>& getUpdatedTimepoints() const;
 
     /**
      * @brief Identify if timepoint is connected to the origin of the STN through edges in the network
@@ -321,24 +323,21 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
      * @return true iff timepoint has edge to the origin. False, otherwise.
      * @todo make const when we constify methods in the DistanceGraph
      */
-    bool hasEdgeToOrigin(const TimepointId timepoint);
+    bool hasEdgeToOrigin(Timepoint& timepoint);
 
     /**
      * @brief Get unique identifier for this STN instance
      * @return unique STN identifier
      */
-    const TemporalNetworkId getId() const;
+    TemporalNetworkId getId() const;
 
-    // For Dispatchability Processing
-
-    std::list<TemporalConstraintId>    addDispatchConstraints();
     // Additional exec-oriented functions
 
-    TimepointId getRingLeader(TimepointId tpId);
+    Timepoint* getRingLeader(const Timepoint& tpId);
 
-    std::list<TimepointId> getRingFollowers (TimepointId tpId);
+    std::vector<Timepoint*> getRingFollowers(const Timepoint& tpId);
 
-    std::list<TimepointId> getRingPredecessors (TimepointId tpId);
+    std::vector<Timepoint*> getRingPredecessors (const Timepoint& tpId);
 
     /**
      * @brief Constructor creates and empty STN
@@ -355,15 +354,15 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
      * used for preferred time calculations. Use noId() to turn off
      * such calculations. (PHM: Support for reftime calculations)
      */
-    void setReferenceTimepoint (TimepointId refpoint = TimepointId());
-    TimepointId getReferenceTimepoint () { return m_refpoint; }
+    void setReferenceTimepoint (Timepoint* refpoint = NULL);
+    Timepoint* getReferenceTimepoint () { return m_refpoint; }
  
   private:
     /**
      * @brief Get the origin of the STN
      * @return  origin timepointId in the STN
      */
-    TimepointId getOriginNode() const;
+    Timepoint* getOriginNode() const;
 
     /**
     * @brief propagate the entire STN
@@ -375,7 +374,7 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
      * @param src start point for propagation
      * @param targ end point for propagation
      */
-    Void incPropagate(TimepointId src, TimepointId targ);
+    Void incPropagate(Timepoint& src, Timepoint& targ);
 
     /**
      * @brief For incremental propagation, determines whether a propagation
@@ -391,9 +390,9 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
      *         (or noId if the first prop is ineffective)
      */
     //(PHM: 06/21/2007 Recoded for efficiency.)
-    DnodeId startNode (TimepointId head, Time& headDistance,
-                       TimepointId foot, Time& footDistance,
-                       bool forwards = true);
+    Dnode* startNode (Timepoint& head, Time& headDistance,
+                      Timepoint& foot, Time& footDistance,
+                      bool forwards = true);
 
     /**
      * @brief Similar to the DistanceGraph Dijkstra, but propagates the
@@ -420,22 +419,24 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
      * @brief Propagates lower/upper distance bounds from src
      * using backward and forward Dijkstra propagations.
      */
-    Void propagateBoundsFrom (const TimepointId src);
+    Void propagateBoundsFrom (Timepoint& src);
 
-    Void maintainTEQ (Time lb, Time ub, TimepointId src, TimepointId targ);
+    Void maintainTEQ (Time lb, Time ub, Timepoint& src, Timepoint& targ);
 
-    Void cleanupTEQ(TimepointId tpt);
+    Void cleanupTEQ(Timepoint& tpt);
 
     /**
      * @brief check if node is valid
      * @return true iff node is valid.
      */
-    Bool isValidId(const TimepointId id);
+    Bool isValidId(const Timepoint* const id);
+    Bool isValidId(const Timepoint& id);
 
     /**
      * @brief check if constraint is valid
      */
-    Bool isValidId(const TemporalConstraintId id);
+    Bool isValidId(const TemporalConstraint* const id);
+    Bool isValidId(const TemporalConstraint& id);
 
     /**
      * @brief set the consistency flag.
@@ -458,7 +459,7 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
      * Set by setReferenceTimepoint function. Initially null
      * (i.e. noId()).  (PHM: Support for reftime calculations.)
      */
-    TimepointId m_refpoint;
+    Timepoint* m_refpoint;
 
    protected:                          // Overridden virtual functions
 
@@ -472,12 +473,12 @@ const TimepointId noTimepointId(static_cast<Tnode*>(NULL));
      * @brief Identify if the network has cycles.
      * @return returns true iff network contains cycles, false otherwise.
      */
-    Bool cycleDetected (DnodeId next);
+    Bool cycleDetected (const Dnode& next);
 
     /**
      * @brief Stores the changes made to nodes during propogation for more efficent incremental update
      */
-    std::set<TimepointId> m_updatedTimepoints;
+    std::set<Timepoint*> m_updatedTimepoints;
   };
 
 
@@ -494,7 +495,6 @@ private:
   Tnode(const Tnode&);
   Tnode& operator=(const Tnode&);
     friend class TemporalNetwork;
-    friend Void keepEdge (DispatchNode* x, DispatchNode* y, Time d);
     // PHM Support for reftime calculations
   protected:
     Time lowerBound;
@@ -503,19 +503,19 @@ private:
     Time prev_reftime;
   private:
     Int ordinal;
-    TemporalConstraintId m_baseDomainConstraint; /*!< Constraint used to enforce timepoint bounds input.*/
+    TemporalConstraint* m_baseDomainConstraint; /*!< Constraint used to enforce timepoint bounds input.*/
     bool m_deletionMarker;
     void handleDiscard();
   public:
     Int index;          // PHM 5/9/2000 Used for matching TPs to dispatch nodes.
-    TimepointId ringLeader;  // PHM 9/8/2000: Ptr to leading member of TEQ.
-    std::list<TimepointId> ringFollowers;  // Does not include ringLeader.
+    Timepoint* ringLeader;  // PHM 9/8/2000: Ptr to leading member of TEQ.
+    std::vector<Timepoint*> ringFollowers;  // Does not include ringLeader.
     TemporalNetwork* owner;
   public:
     Tnode(TemporalNetwork* t);
     virtual ~Tnode();
-    const TemporalConstraintId getBaseDomainConstraint() const;
-    void setBaseDomainConstraint(const TemporalConstraintId constraint);
+    TemporalConstraint* getBaseDomainConstraint() const;
+    void setBaseDomainConstraint(TemporalConstraint* constraint);
     inline void clearDeletionMarker() {m_deletionMarker = false;}
     inline bool getDeletionMarker() const { return m_deletionMarker; }
     inline const Time& getLowerBound() const {return lowerBound;}
@@ -552,8 +552,8 @@ private:
     friend class TemporalNetwork;
     Time lowerBound;
     Time upperBound;
-    TimepointId head;
-    TimepointId foot;
+    Timepoint& head;
+    Timepoint& foot;
     TemporalNetwork* owner;
     unsigned int m_edgeCount;
     void handleDiscard();
@@ -568,7 +568,7 @@ private:
      * @param ub upper bound
      * @param edgeCount edge count
      */
-    Tspec(TemporalNetwork* t, TimepointId src,TimepointId targ,Time lb,Time ub, unsigned short edgeCount)
+    Tspec(TemporalNetwork* t, Timepoint& src,Timepoint& targ,Time lb,Time ub, unsigned short edgeCount)
         : lowerBound(lb), upperBound(ub), head(src), foot(targ), owner(t),
           m_edgeCount(edgeCount)
     {}

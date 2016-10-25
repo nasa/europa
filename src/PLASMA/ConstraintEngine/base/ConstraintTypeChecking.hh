@@ -193,7 +193,7 @@ struct Nth {
 template<int N>
 struct Nth<N, None> {
   Nth() {}
-  type_iterator operator()(type_iterator start, type_iterator end) const {
+  type_iterator operator()(type_iterator start, type_iterator) const {
     std::advance(start, N);
     return start;
   }
@@ -240,7 +240,7 @@ struct Last<None> {
 };
 
 struct End {
-  type_iterator operator()(type_iterator start, type_iterator end) const {
+  type_iterator operator()(type_iterator, type_iterator end) const {
     return end;
   }
 };
