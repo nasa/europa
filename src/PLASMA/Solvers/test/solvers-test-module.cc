@@ -200,8 +200,8 @@ private:
   static bool testBasicAllocation(){
     TestEngine testEngine(true);
 
-    TiXmlElement* configXml = 
-        initXml((getTestLoadLibraryPath() + "/ComponentFactoryTest.xml").c_str());
+    boost::scoped_ptr<TiXmlElement> configXml( 
+        initXml((getTestLoadLibraryPath() + "/ComponentFactoryTest.xml").c_str()));
 
     for (TiXmlElement * child = configXml->FirstChildElement();
          child != NULL;
@@ -209,14 +209,11 @@ private:
 
       ComponentFactoryMgr* cfm = 
           dynamic_cast<ComponentFactoryMgr*>(testEngine.getComponent("ComponentFactoryMgr"));
-      TestComponent * testComponent = 
-          static_cast<TestComponent*>(cfm->createComponentInstance(*child));
-      delete testComponent;
+      boost::scoped_ptr<TestComponent> testComponent(
+          static_cast<TestComponent*>(cfm->createComponentInstance(*child)));
     }
 
     CPPUNIT_ASSERT(TestComponent::counter() == 5);
-
-    delete configXml;
 
     return true;
   }
@@ -857,7 +854,7 @@ private:
 
   static bool testDefaultVariableOrdering(){
     TestEngine testEngine;
-    TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "DefaultVariableOrdering");
+    boost::scoped_ptr<TiXmlElement> root(initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "DefaultVariableOrdering"));
     TiXmlElement* child = root->FirstChildElement();
     {
       CPPUNIT_ASSERT(testEngine.playTransactions( (getTestLoadLibraryPath() + "/StaticCSP.nddl").c_str()));

@@ -343,8 +343,10 @@ public:
         boost::polymorphic_cast<ConstraintEngine*>(engine.getComponent("ConstraintEngine"))->getId();
 
     int postProp = 0;
-    PropagationCounter* counter = new PropagationCounter(ce);
-    TwicePropagator* callback = new TwicePropagator(postProp);
+    // boost::scoped_ptr<PropagationCounter> counter(new PropagationCounter(ce));
+    // boost::scoped_ptr<TwicePropagator> callback(new TwicePropagator(postProp));
+    PropagationCounter* counter(new PropagationCounter(ce));
+    TwicePropagator* callback(new TwicePropagator(postProp));
     ce->addCallback(callback->getId());
     
     // Set up a base domain

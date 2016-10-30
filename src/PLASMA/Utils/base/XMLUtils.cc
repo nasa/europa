@@ -18,6 +18,8 @@ namespace EUROPA {
     return data;
   }
 
+//NOTE: this leaks memory if the XML structure is changed.  The document lives
+//even if the element is deleted
 TiXmlElement* initXml(const char* sourceFile, const char* element) {
   TiXmlDocument* doc = new TiXmlDocument(sourceFile);
   doc->LoadFile();

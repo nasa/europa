@@ -67,6 +67,7 @@ Schema::Schema(const std::string& name, const CESchemaId ces)
 
   Schema::~Schema()
   {
+    debugMsg("Schema:~Schema", "Destructing");
     delete static_cast<TokenTypeMgr*>(m_tokenTypeMgr);
     delete static_cast<ObjectTypeMgr*>(m_objectTypeMgr);
 

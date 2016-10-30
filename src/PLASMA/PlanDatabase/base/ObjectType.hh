@@ -13,6 +13,7 @@
 
 #include "PDBInterpreter.hh"
 #include "TokenType.hh"
+#include <boost/smart_ptr/shared_ptr.hpp>
 
 namespace EUROPA {
 
