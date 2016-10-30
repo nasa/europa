@@ -11,11 +11,11 @@ namespace EUROPA {
 RuleSchema::RuleSchema()
     : m_id(this), m_rulesByName() {}
 
-    RuleSchema::~RuleSchema()
-    {
-        purgeAll();
-        m_id.remove();
-    }
+RuleSchema::~RuleSchema() {
+  debugMsg("RuleSchema:~RuleSchema", "Destructing");
+  purgeAll();
+  m_id.remove();
+}
 
     const RuleSchemaId RuleSchema::getId() const {return m_id;}
 
@@ -50,6 +50,7 @@ const std::multimap<std::string, RuleId>& RuleSchema::getRules() {
 }
 
 void RuleSchema::purgeAll() {
+  debugMsg("RuleSchema:purgeAll", "Purging all");
   cleanup(m_rulesByName);
 }
 

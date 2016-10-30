@@ -1,5 +1,6 @@
 #include "TokenTypeMgr.hh"
 #include "Schema.hh"
+#include "Debug.hh"
 
 namespace EUROPA
 {
@@ -16,8 +17,9 @@ TokenTypeMgr::TokenTypeMgr()
 
 TokenTypeMgr::~TokenTypeMgr()
 {
-	cleanup(m_types);
-	m_id.remove();
+  debugMsg("TokenTypeMgr:~TokenTypeMgr", "Destructing");
+  cleanup(m_types);
+  m_id.remove();
 }
 
 const TokenTypeMgrId TokenTypeMgr::getId() const {return m_id;}
