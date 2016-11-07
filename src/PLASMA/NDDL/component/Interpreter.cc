@@ -33,10 +33,19 @@
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/smart_ptr/make_shared.hpp>
 
 namespace EUROPA {
 
 namespace {
+
+template <typename T>
+struct PtrGetter {
+  T* operator()(const boost::shared_ptr<T>& p) const {
+    checkError(p.get() != NULL);
+    return p.get();
+  }
+};
 // TODO: keep using pdbClient?
 const DbClientId getPDB(EvalContext& context)
 {
@@ -347,18 +356,18 @@ DataRef ExprVarRef::eval(EvalContext& context) const {
   {
       char buff[15];
       SPRINTF_FUNC(buff, "%u", m_count);
-      std::string variable = std::string("implicit_var_" + std::string(buff) + "_" + toString()).c_str();
+      std::string variable = std::string("implicit_var_" + std::string(buff));// + "_" + toString()).c_str();
 
       //Detect if the variable contains illegal characters and rewrite it if it does.
-      for (unsigned int i = 0; i < variable.size(); i++) {
-          if ((variable[i] > '9' || variable[i] < '0') && (variable[i] < 'A' || variable[i] > 'Z')
-                  && (variable[i] < 'a' || variable[i] > 'z') && (variable[i] != '_')) {
-              debugMsg("Interpreter","Bad var name generated : " << variable);
-              debugMsg("NddlInterpreter","Bad var name generated : " << variable);
-              variable = "implicit_var_" + std::string(buff) + "_generation_failure";
-              break;
-          }
-      }
+      // for (unsigned int i = 0; i < variable.size(); i++) {
+      //     if ((variable[i] > '9' || variable[i] < '0') && (variable[i] < 'A' || variable[i] > 'Z')
+      //             && (variable[i] < 'a' || variable[i] > 'z') && (variable[i] != '_')) {
+      //         debugMsg("Interpreter","Bad var name generated : " << variable);
+      //         debugMsg("NddlInterpreter","Bad var name generated : " << variable);
+      //         variable = "implicit_var_" + std::string(buff) + "_generation_failure";
+      //         break;
+      //     }
+      // }
       return variable;
   }
 
@@ -377,44 +386,55 @@ DataRef ExprVarRef::eval(EvalContext& context) const {
       return m_value->eval(context);
   }
 
-  CExprFunction::CExprFunction(const CFunctionId func, const std::vector<CExpr*>& args)
+CExprFunction::CExprFunction(const CFunctionId func, const std::vector<CExpr*>& args)
     : m_func(func)
-    , m_args(args)
-  {
-    checkError(func.isValid(), "Constructed with invalid function pointer.");
-    for(std::vector<CExpr*>::const_iterator it = m_args.begin(); 
-        it != m_args.end(); ++it) {
-      checkError((*it) != NULL, "Constructed CFunction " << func->getName() << 
-                 " with a null argument at position " << 
-                 std::distance<std::vector<CExpr*>::const_iterator>(m_args.begin(), it));
-    }
+    , m_args(args.begin(), args.end()) {
+  checkError(func.isValid(), "Constructed with invalid function pointer.");
+  for(std::vector<CExpr*>::const_iterator it = args.begin(); 
+      it != args.end(); ++it) {
+    checkError((*it) != NULL, "Constructed CFunction " << func->getName() << 
+               " with a null argument at position " << 
+               std::distance<std::vector<CExpr*>::const_iterator>(args.begin(), it));
+    checkError(*(m_args.begin() + std::distance(args.begin(), it)),
+               "Constructed CFunction " << func->getName() << 
+               " stored a null argument at position " << 
+               std::distance<std::vector<CExpr*>::const_iterator>(args.begin(), it));
   }
+}
+
+std::vector<CExpr*> CExprFunction::getArgs() const {
+  std::vector<CExpr*> retval;
+  std::transform(m_args.begin(), m_args.end(), std::back_inserter(retval),
+                 PtrGetter<CExpr>());
+  return retval;
+}
 
   void CExprFunction::checkType()
   {
       // TODO: Have function type check arg types?, it's already done by the parser
   }
 
-  DataRef CExprFunction::eval(EvalContext& context) const
-  {
-      //Create the variable name
-      std::string variable = createVariableName();
+DataRef CExprFunction::eval(EvalContext& context) const {
+  //Create the variable name
+  std::string variable = createVariableName();
 
-      // TODO: CFunction should know how to eval itself
-      ExprVarDeclaration* var = new ExprVarDeclaration(variable, getDataType(), NULL, false);
-      DataRef output = var->eval(context);
+  // TODO: CFunction should know how to eval itself
+  boost::scoped_ptr<ExprVarDeclaration> var(new ExprVarDeclaration(variable, getDataType(), NULL, false));
+  DataRef output = var->eval(context);
 
-      Expr* varRef = new ExprVarRef(variable.c_str(), getDataType());
-      std::vector<Expr*> args;
-      args.push_back(varRef);
-      for (unsigned int i = 0; i < m_args.size(); i++)
-          args.push_back(m_args[i]);
+  boost::shared_ptr<Expr> varRef =
+      boost::make_shared<ExprVarRef>(variable.c_str(), getDataType());
+  std::vector<boost::shared_ptr<Expr> > args;
+  args.push_back(varRef);
+  for (unsigned int i = 0; i < m_args.size(); i++)
+    args.push_back(m_args[i]);
 
-      Expr* con = new ExprConstraint(m_func->getConstraint(), args, m_violationMsg.c_str());
-
-      con->eval(context);
-      return output;
-  }
+  m_con.reset(new ExprConstraint(m_func->getConstraint(), args,
+                                 m_violationMsg.c_str()));
+      
+  m_con->eval(context);
+  return output;
+}
 
   std::string CExprFunction::toString() const
   {
@@ -644,21 +664,37 @@ bool isTimepoint(DataRef var) {
     return "BadExpression";
   }
 
-  ExprConstraint::ExprConstraint(const std::string& name,const std::vector<Expr*>& args, const std::string& violationExpl)
+ExprConstraint::ExprConstraint(const std::string& name,
+                               const std::vector<Expr*>& args,
+                               const std::string& violationExpl)
     : m_name(name)
-    , m_args(args)
+    , m_args(args.begin(), args.end())
+    , m_violationExpl("")
+  {
+      if (!violationExpl.empty())
+          m_violationExpl = violationExpl;
+  }
+ExprConstraint::ExprConstraint(const std::string& name,
+                               const std::vector<boost::shared_ptr<Expr> >& args,
+                               const std::string& violationExpl)
+    : m_name(name)
+    , m_args(args.begin(), args.end())
     , m_violationExpl("")
   {
       if (!violationExpl.empty())
           m_violationExpl = violationExpl;
   }
 
-  ExprConstraint::~ExprConstraint()
-  {
-      for (unsigned int i=0; i < m_args.size(); i++)
-          delete m_args[i];
-      m_args.clear();
-  }
+ExprConstraint::~ExprConstraint() {
+}
+
+
+std::vector<Expr*> ExprConstraint::getArgs() const {
+  std::vector<Expr*> retval;
+  std::transform(m_args.begin(), m_args.end(), std::back_inserter(retval),
+                 PtrGetter<Expr>());
+  return retval;
+}
 
 DataRef ExprConstraint::eval(EvalContext& context) const
 {
@@ -1743,20 +1779,34 @@ InterpretedRuleFactory::InterpretedRuleFactory(const std::string& predicate,
     }
   }
 
-  InterpretedRuleFactory::~InterpretedRuleFactory()
-  {
-      for (unsigned int i=0;i<m_body.size();i++)
-          delete m_body[i];
-      m_body.clear();
+InterpretedRuleFactory::~InterpretedRuleFactory() {
+  debugMsg("InterpretedRuleFactory:~InterpretedRuleFactory",
+           "Instantiating rule for " << m_source);
+  for(std::vector<Expr*>::const_iterator it = m_body.begin(); it != m_body.end(); ++it) {
+    debugMsg("InterpretedRuleFactory:~InterpretedRuleFactory",
+             (*it)->toString());
+      
   }
+    
+  for (unsigned int i=0;i<m_body.size();i++)
+    delete m_body[i];
+  m_body.clear();
+}
 
-  RuleInstanceId InterpretedRuleFactory::createInstance(
-							const TokenId token,
-							const PlanDatabaseId planDb,
-							const RulesEngineId &rulesEngine) const
-  {
-    InterpretedRuleInstance *foo = new InterpretedRuleInstance(m_id, token, planDb, m_body);
-    foo->setRulesEngine(rulesEngine);
+RuleInstanceId InterpretedRuleFactory::createInstance(const TokenId token,
+                                                      const PlanDatabaseId planDb,
+                                                      const RulesEngineId &rulesEngine) const {
+
+  InterpretedRuleInstance *foo = new InterpretedRuleInstance(m_id, token, planDb, m_body);
+    //TODO: Fix this once we start using smart pointers more.  setRulesEngine can throw,
+    //      leaking foo
+    try {
+      foo->setRulesEngine(rulesEngine);
+    }
+    catch(...) {
+      delete foo;
+      throw;
+    }
     return foo->getId();
   }
 
@@ -2019,16 +2069,14 @@ ConstrainedVariableId ExprVarDeclaration::makeRuleVar(RuleInstanceEvalContext& c
 
   ExprAssignment::~ExprAssignment()
   {
-      delete m_lhs;
-      delete m_rhs;
   }
 
   DataRef ExprAssignment::eval(EvalContext& context) const
   {
       DataRef lhs;
 
-      std::string varNameStr = m_lhs->toString();
-      const std::string& varName = varNameStr.c_str(); // TODO: this is a hack!
+      std::string varName = m_lhs->toString();
+      //const std::string& varName = varNameStr.c_str(); // TODO: this is a hack!
 
       ConstrainedVariableId thisVar = context.getVar("this");
       // TODO: modify interpreted object constructor to add vars upfront so that this if stmt isn't necessary
@@ -2453,6 +2501,7 @@ void getVariableReferences(const Expr* expr, EvalContext& ctx,
     const ExprList* e = dynamic_cast<const ExprList*>(expr);
     for(std::vector<Expr*>::const_iterator it = e->getChildren().begin();
         it != e->getChildren().end(); ++it) {
+      checkError(*it != NULL, "Member of list " << e->toString() << " is NULL.");
       getVariableReferences(*it, ctx, dest);
     }
   }
@@ -2469,8 +2518,10 @@ void getVariableReferences(const Expr* expr, EvalContext& ctx,
   //ExprAssignment -> ?
   else if(dynamic_cast<const ExprConstraint*>(expr) != NULL) {
     const ExprConstraint* e = dynamic_cast<const ExprConstraint*>(expr);
-    for(std::vector<Expr*>::const_iterator it = e->getArgs().begin();
-        it != e->getArgs().end(); ++it) {
+    std::vector<Expr*> args = e->getArgs();
+    for(std::vector<Expr*>::const_iterator it = args.begin();
+        it != args.end(); ++it) {
+      checkError(*it != NULL, "Argument to constraint " << e->toString() << " is NULL.");
       getVariableReferences(*it, ctx, dest);
     }
   }
@@ -2483,6 +2534,7 @@ void getVariableReferences(const Expr* expr, EvalContext& ctx,
     const ExprMethodCall* e = dynamic_cast<const ExprMethodCall*>(expr);
     for(std::vector<Expr*>::const_iterator it = e->getArgs().begin();
         it != e->getArgs().end(); ++it) {
+      checkError(*it != NULL, "Argument to method " << e->toString() << " is NULL.");
       getVariableReferences(*it, ctx, dest);
     }
   }
@@ -2495,8 +2547,10 @@ void getVariableReferences(const Expr* expr, EvalContext& ctx,
   else if(dynamic_cast<const CExpr*>(expr) != NULL) {
     if(dynamic_cast<const CExprFunction*>(expr) != NULL) {
       const CExprFunction* e = dynamic_cast<const CExprFunction*>(expr);
-      for(std::vector<CExpr*>::const_iterator it = e->getArgs().begin();
-          it != e->getArgs().end(); ++it) {
+      std::vector<CExpr*> args = e->getArgs();
+      for(std::vector<CExpr*>::const_iterator it = args.begin();
+          it != args.end(); ++it) {
+        checkError(*it != NULL, "Argument to function " << e->toString() << " is NULL.");
         getVariableReferences(*it, ctx, dest);
       }
     }
@@ -2506,6 +2560,8 @@ void getVariableReferences(const Expr* expr, EvalContext& ctx,
     }
     else if(dynamic_cast<const CExprBinary*>(expr) != NULL) {
       const CExprBinary* e = dynamic_cast<const CExprBinary*>(expr);
+      checkError(e->getLhs() != NULL, "LHS for " << e->toString() << " is NULL.");
+      checkError(e->getRhs() != NULL, "RHS for " << e->toString() << " is NULL.");
       getVariableReferences(e->getLhs(), ctx, dest);
       getVariableReferences(e->getRhs(), ctx, dest);
     }
@@ -2519,6 +2575,8 @@ void getVariableReferences(const Expr* expr, EvalContext& ctx,
   //RuleExpr -> ?
   else if(dynamic_cast<const ExprIfGuard*>(expr) != NULL) {
     const ExprIfGuard* e = dynamic_cast<const ExprIfGuard*>(expr);
+    checkError(e->getLhs() != NULL, "LHS for " << e->toString() << " is NULL.");
+    checkError(e->getRhs() != NULL, "RHS for " << e->toString() << " is NULL.");
     getVariableReferences(e->getLhs(), ctx, dest);
     getVariableReferences(e->getRhs(), ctx, dest);
   }

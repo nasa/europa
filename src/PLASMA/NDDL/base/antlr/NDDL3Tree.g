@@ -19,7 +19,8 @@ options {
 #include "Domains.hh"
 #include "NddlInterpreter.hh"
 #include "PathDefs.hh"
-
+#include "Utils.hh"
+#include "Error.hh"
 #include <boost/cast.hpp>
 using namespace EUROPA;
 
@@ -100,13 +101,14 @@ nddl
 		  ) 
 		  {
 		      if (child != NULL) { 
+                  boost::scoped_ptr<Expr> c(child);
 		          debugMsg("NddlInterpreter:nddl","Evaluating:" << child->toString());
                   evalExpr(CTX,child);
-
+		          debugMsg("NddlInterpreter:nddl","Done evaluating:" << child->toString());
+                  CTX->SymbolTable->popFromCleanupStack();
+                  checkError(CTX->SymbolTable->cleanupStackSize() == 0,
+                             CTX->SymbolTable->cleanupStackSize());
 		          // TODO!!: systematically deal with memory mgmt for all Exprs.
-		          delete child;
-		          child = NULL; 
-		          
                   CTX->SymbolTable->getPlanDatabase()->getConstraintEngine()->propagate();
 		      }
               CTX->SymbolTable->getPlanDatabase()->getConstraintEngine()->propagate();
@@ -125,6 +127,7 @@ enumDefinition returns [Expr* result]
         {
             const char* enumName = c_str($name.text->chars);
             result = new ExprEnumdef(enumName,values);
+            CTX->SymbolTable->pushToCleanupStack(result);
         }
     ;
 
@@ -141,6 +144,7 @@ typeDefinition returns [Expr* result]
         {
             const char* newName = c_str($name.text->chars);
 	        result = new ExprTypedef(dataType->getId(),newName,domain);
+            CTX->SymbolTable->pushToCleanupStack(result);
 		}
 	;
 
@@ -165,7 +169,9 @@ type returns [DataType* result]
 baseDomain[const DataType* baseType] returns [Domain* result]
     :   child=baseDomainValues
     {
-        DataRef data=evalExpr(CTX,child); 
+        DataRef data=evalExpr(CTX,child);
+        CTX->SymbolTable->popFromCleanupStack();
+        delete child;
         ConstrainedVariableId value = data.getValue();
         if (!baseType->isAssignableFrom(value->getDataType())) {
             reportSemanticError(CTX,
@@ -173,7 +179,6 @@ baseDomain[const DataType* baseType] returns [Domain* result]
         }
        
         result = value->lastDomain().copy(); 
-        delete child;
     }        
     ;       
 
@@ -188,16 +193,21 @@ baseDomainValues returns [Expr* result]
      
 variableDeclarations returns [ExprList* result]
 @init {
-    result = new ExprList();    
+    result = new ExprList();
+    CTX->SymbolTable->pushToCleanupStack(result);
 }
     :   ^(VARIABLE 
             dataType=type 
             (child=variableInitialization[dataType->getId()]
             {
                 result->addChild(child);
+                CTX->SymbolTable->popFromCleanupStack();
             }
             )+
         )
+    {
+        
+    }
     ;
         
 variableInitialization[const DataTypeId& dataType] returns [Expr* result]
@@ -208,6 +218,8 @@ variableInitialization[const DataTypeId& dataType] returns [Expr* result]
         |   ^('=' name=IDENT  { varName = c_str($name.text->chars); } initExpr=initializer[varName])
         )
         {
+            if(initExpr != NULL)
+              CTX->SymbolTable->popFromCleanupStack();
             // TODO: type check initExpr;
             result = new ExprVarDeclaration(
                  varName,
@@ -216,6 +228,7 @@ variableInitialization[const DataTypeId& dataType] returns [Expr* result]
                  true // canBeSpecified
             ); 
             CTX->SymbolTable->addLocalVar(varName,dataType);
+            CTX->SymbolTable->pushToCleanupStack(result);
         }
         ;       
 
@@ -256,11 +269,11 @@ valueSet returns [Expr* result]
             (element=setElement
             {
                 DataRef elemValue = evalExpr(CTX,element);
+                CTX->SymbolTable->popFromCleanupStack();
+                delete element;
                 const Domain& ev = elemValue.getValue()->lastDomain();
                 edouble v = ev.getSingletonValue();
                               
-                delete element;
-                             
                 if (elementType.isNoId())
                     elementType = ev.getDataType();
                 else {
@@ -276,6 +289,7 @@ valueSet returns [Expr* result]
                 }
                              
                 values.push_back(v);
+                CTX->SymbolTable->popFromCleanupStack();
             }
             )*
         )
@@ -285,6 +299,7 @@ valueSet returns [Expr* result]
                 elementType->getName().c_str(),
                 newDomain                       
             );
+            CTX->SymbolTable->pushToCleanupStack(result);
         }
     ;
 
@@ -297,13 +312,14 @@ literalValue returns [Expr* result]
             result = new ExprConstant(
                 child->getTypeName().c_str(),
                 child
-            ); 
+            );
+            CTX->SymbolTable->pushToCleanupStack(result);
         }
     ;
     
 booleanLiteral returns [Domain* result]
-    :   'true'  { result = new BoolDomain(true); }            
-    |   'false' { result = new BoolDomain(false); }
+    :   ('true'  { result = new BoolDomain(true); }            
+    |   'false' { result = new BoolDomain(false); } )
     ;
 
 stringLiteral returns [Domain* result]
@@ -351,7 +367,7 @@ numericInterval returns [Expr* result]
                         lower->getTypeName().c_str(),
                         baseDomain
                     );
-                    
+            CTX->SymbolTable->pushToCleanupStack(result);     
             delete lower;
             delete upper;
         }
@@ -373,18 +389,21 @@ allocation[const char* name] returns [Expr* result]
                     catch (const std::string& errorMsg) {
                         reportSemanticError(CTX,errorMsg);
                     }*/
+                    CTX->SymbolTable->popFromCleanupStack(args.size());
                     result = new ExprNewObject(
                         c_str($objType.text->chars), // objectType
                         objName.c_str(),
                         args
                     );
+                    args.clear();
+                    CTX->SymbolTable->pushToCleanupStack(result);
                 }
         ;
 
 variableArgumentList[std::vector<Expr*>& result]
         :       '('
         |       ^('('
-                        (arg=initializer[NULL] {result.push_back(arg);})*
+                        (arg=initializer[NULL] {checkError(arg != NULL); result.push_back(arg);})*
                 )
         ;
 
@@ -405,14 +424,19 @@ constraintInstantiation returns [ExprConstraint* result]
                         (violationMsg[vmsg])?
                 )
                 {
+                    CTX->SymbolTable->popFromCleanupStack(args.size());
                     const char* cname = c_str($name.text->chars);
                     try {
                         CTX->SymbolTable->checkConstraint(cname,args);
                     }
                     catch (const std::string& errorMsg) {
+                        cleanup(args.begin(), args.end());
                         reportSemanticError(CTX,errorMsg);
                     }
+                    
                     result = new ExprConstraint(cname,args,vmsg.c_str());
+                    CTX->SymbolTable->pushToCleanupStack(result);
+                    args.clear();
                 }
                 
         ;
@@ -450,17 +474,21 @@ classDeclaration returns [Expr* result]
                    
            (
 		       classBlock[objType] 
-		       { 
+		       {
+                   dynamic_cast<NddlClassSymbolTable*>(CTX->SymbolTable)->saveObjectType();
 		           result = new ExprObjectTypeDefinition(objType->getId()); 
 		       } 
 		       | ';' 
 		         { 
 		             result = new ExprObjectTypeDeclaration(objType->getName());
-		             delete objType; 
+		             //delete objType;
 		         }
 	       )
 	       {
+               checkError(CTX->SymbolTable->cleanupStackSize() == 0,
+                          CTX->SymbolTable->cleanupStackSize());
                popContext(CTX);            
+               CTX->SymbolTable->pushToCleanupStack(result);
 	       }
 		)
 	;
@@ -506,7 +534,9 @@ constructor[ObjectType* objType]
 		    
 		    for (unsigned int i=0;i<argTypes.size();i++)
 		        signature << ":" << argTypes[i];
-		        
+            if(superCallExpr != NULL)
+                CTX->SymbolTable->popFromCleanupStack();
+            CTX->SymbolTable->popFromCleanupStack(body.size());
             objType->addObjectFactory(
                         (new InterpretedObjectFactory(
                             objType->getId(),
@@ -518,6 +548,9 @@ constructor[ObjectType* objType]
                         )->getId()
                     );
             
+
+            checkError(CTX->SymbolTable->cleanupStackSize() == 0,
+                       CTX->SymbolTable->cleanupStackSize());
             popContext(CTX);
 		}
 	;
@@ -543,7 +576,10 @@ constructorSuper[ObjectType* objType] returns [ExprConstructorSuperCall* result]
 			variableArgumentList[args]
 		)
 		{
-		    result = new ExprConstructorSuperCall(objType->getParent()->getName(),args);  
+            CTX->SymbolTable->popFromCleanupStack(args.size());
+		    result = new ExprConstructorSuperCall(objType->getParent()->getName(),args);
+            CTX->SymbolTable->pushToCleanupStack(result);
+            args.clear();
             /*try {
                 CTX->SymbolTable->checkObjectFactory(objType->getParent()->getName().c_str(),args);
             }
@@ -559,7 +595,10 @@ assignment returns [ExprAssignment* result]
 			rhs=initializer[lhs->toString().c_str()]
 		)
 		{
+            CTX->SymbolTable->popFromCleanupStack();
+            CTX->SymbolTable->popFromCleanupStack();
 		    result = new ExprAssignment(lhs,rhs);
+            CTX->SymbolTable->pushToCleanupStack(result);
 		}
 	;
 
@@ -571,14 +610,16 @@ tokenType[ObjectType* objType]
 	:	^(kind=('predicate' | 'action')
 			ttName=IDENT 
 			{ 
-			    tokenTypeName = objType->getName() + "." + c_str($ttName.text->chars);   
-			    tokenType = new InterpretedTokenType(objType->getId(),tokenTypeName,c_str($kind.text->chars));
+			    tokenTypeName = objType->getName() + "." + c_str($ttName.text->chars);
+			    tokenType = new InterpretedTokenType(objType->getId(),tokenTypeName,c_str($kind.text->chars)); //NOTE: This can leak if one of the tokenStatements throws
 			    pushContext(CTX,new NddlTokenSymbolTable(CTX->SymbolTable,tokenType->getId(),objType->getId())); 
 			}
 			tokenStatements[tokenType]
 		)
 		{
             objType->addTokenType(tokenType->getId());
+            checkError(CTX->SymbolTable->cleanupStackSize() == 0,
+                       CTX->SymbolTable->cleanupStackSize());
             popContext(CTX);
 		}
 	;
@@ -594,6 +635,7 @@ tokenStatements[InterpretedTokenType* tokenType]
                 )
                 {
                     tokenType->addBodyExpr(child);
+                    CTX->SymbolTable->popFromCleanupStack();
                 }
 		    )*
 		)
@@ -607,9 +649,11 @@ tokenParameter[InterpretedTokenType* tokenType] returns [Expr* result]
             const std::vector<Expr*>& vars=child->getChildren();
             for (unsigned int i=0;i<vars.size();i++) {
                 ExprVarDeclaration* vd = boost::polymorphic_cast<ExprVarDeclaration*>(vars[i]);
+                CTX->SymbolTable->popFromCleanupStack();
                 tokenType->addArg(vd->getDataType(),vd->getName());
             }
-            result = child;            
+            result = child;
+            CTX->SymbolTable->pushToCleanupStack(result);
         }
         ;       
 
@@ -669,11 +713,15 @@ rule returns [Expr* result]
             }
 		    std::string source="\"" + filename + "," + std::string(buff) + "\"";
 		    InterpretedRuleFactory* rf = new InterpretedRuleFactory(predName,source,ruleBody);
+            CTX->SymbolTable->popFromCleanupStack(ruleBody.size());
 		    if (iTokenType != NULL) 
 		        iTokenType->addRule(rf);
 		    
 		    result = new ExprRuleTypeDefinition(rf->getId());
+            checkError(CTX->SymbolTable->cleanupStackSize() == 0,
+                       CTX->SymbolTable->cleanupStackSize());
 		    popContext(CTX);
+            CTX->SymbolTable->pushToCleanupStack(result);
 		}
 	;
 
@@ -709,7 +757,10 @@ std::vector<Expr*> elseBody;
 			ruleBlock[elseBody]?
 		)
 		{
+            //The + 1 covers the guard expression
+            CTX->SymbolTable->popFromCleanupStack(ifBody.size() + elseBody.size() + 1);
 		    result = new ExprIf(guard,ifBody,elseBody);
+            CTX->SymbolTable->pushToCleanupStack(result);
 		}
   ;
 
@@ -725,11 +776,14 @@ guardExpression returns [ExprIfGuard* result]
           | lhs=anyValue
           | ^(EXPRESSION_RETURN lhs=expressionCleanReturn
                 { dom = new BoolDomain(true); 
-                  rhs = new ExprConstant(dom->getTypeName().c_str(), dom); 
+                  rhs = new ExprConstant(dom->getTypeName().c_str(), dom);
+                  CTX->SymbolTable->pushToCleanupStack(rhs);
                 } )
           )
           {
               result = new ExprIfGuard(relopStr,lhs,rhs);
+              CTX->SymbolTable->popFromCleanupStack(2);
+              CTX->SymbolTable->pushToCleanupStack(result);
           }
         ;
 
@@ -754,6 +808,8 @@ loopStatement returns [Expr* result]
 		{
 		    // TODO : modify ExprLoop to take val Expr instead, otherwise delete val.
 		    result = new ExprLoop(loopVarName,val->toString().c_str(),loopBody); 
+            CTX->SymbolTable->popFromCleanupStack(loopBody.size());
+            CTX->SymbolTable->pushToCleanupStack(result);
 		    delete val;
 		}
 	;
@@ -766,6 +822,7 @@ problemStmt returns [Expr* result]
         :       ^(t=problemStmtType predicateInstanceList[tokens])
                 {
                     result = new ExprProblemStmt(c_str($t.text->chars),tokens);
+                    CTX->SymbolTable->pushToCleanupStack(result);
                 }   
         ;
         
@@ -788,6 +845,7 @@ relation returns [Expr* result]
 		)
 		{		   
 		    result = new ExprRelation(relationType,source,targets);
+            CTX->SymbolTable->pushToCleanupStack(result);
 		}
 	;
 
@@ -862,10 +920,12 @@ qualified returns [Expr* result]
 
                 if (CTX->SymbolTable->isEnumValue(varName.c_str())) {
                    result = CTX->SymbolTable->makeEnumRef(varName.c_str());
+                   CTX->SymbolTable->pushToCleanupStack(result);
                    isEnum = true;
                 } else if (secondPart != "") {
                    if (CTX->SymbolTable->isEnumValue(secondPart.c_str())) {
                       result = CTX->SymbolTable->makeEnumRef(secondPart.c_str());
+                      CTX->SymbolTable->pushToCleanupStack(result);
                       isEnum = true;
                    }
                 }
@@ -875,6 +935,7 @@ qualified returns [Expr* result]
         		if (ot.isId())  { // is a class reference
             		LabelStr value(varName);
             		result = new ExprConstant("string",new StringDomain((edouble)value,StringDT::instance()));
+                    CTX->SymbolTable->pushToCleanupStack(result);
         		}        		
                 else if (!isEnum) {
                 	std::string errorMsg;
@@ -882,7 +943,8 @@ qualified returns [Expr* result]
                 	// TODO!!: do type checking at each "."
                 	if (dt.isNoId())
                     	reportSemanticError(CTX,errorMsg);
-                   	result = new ExprVarRef(varName.c_str(),dt);
+                   	result = new ExprVarRef(varName,dt);
+                    CTX->SymbolTable->pushToCleanupStack(result);
                 }
         }
     ;
@@ -944,9 +1006,17 @@ methodInvocation returns [Expr* result]
         }
             
         MethodId method = CTX->SymbolTable->getMethod(mName.c_str(),v,args);
-        if (method.isNoId())
+        if (method.isNoId()) {
+            delete v;
+            cleanup(args.begin(), args.end());
+            args.clear();
             reportSemanticError(CTX,"Method "+mName+" is not defined");
+        }   
         result = new ExprMethodCall(method,v,args);
+        //the +1 accounts for the "qualified" v
+        CTX->SymbolTable->popFromCleanupStack(args.size() + 1); 
+        CTX->SymbolTable->pushToCleanupStack(result);
+        args.clear();
     }
     |	^(CLOSE CLOSE)
     {
@@ -954,6 +1024,9 @@ methodInvocation returns [Expr* result]
         Expr* varExpr = NULL;
         MethodId method = CTX->SymbolTable->getMethod("pdb_close",varExpr,args);
         result = new ExprMethodCall(method,varExpr,args);
+        CTX->SymbolTable->popFromCleanupStack(args.size());
+        CTX->SymbolTable->pushToCleanupStack(result);
+        args.clear();
     }
 	;
 
@@ -963,7 +1036,7 @@ methodName
 	;
 
 cexpressionList [std::vector<CExpr*> &args]
-	:  (expr=cexpression { args.push_back(expr); })* 
+	:  (expr=cexpression { checkError(expr != NULL); args.push_back(expr); })* 
 	;
 
 cexpression returns [CExpr* result]
@@ -974,20 +1047,37 @@ cexpression returns [CExpr* result]
         {
            std::string op = c_str($cop.text->chars);
            result = new CExprBinary(op, leftValue, rightValue);
+           CTX->SymbolTable->popFromCleanupStack(2);
+           CTX->SymbolTable->pushToCleanupStack(result);
         }
 	|	r=anyValue
         {
            result = new CExprValue(r);
+           CTX->SymbolTable->popFromCleanupStack();
+           CTX->SymbolTable->pushToCleanupStack(result);
         }
 	|	^(FUNCTION_CALL name=IDENT ^('(' cexpressionList[args]))
         {
             std::string fName = c_str($name.text->chars);
             CFunctionId func = CTX->SymbolTable->getCFunction(fName.c_str(),args);
-
-            if (func.isNoId()) 
+            
+            if (func.isNoId())  {
+                cleanup(args.begin(), args.end());
+                args.clear();
                 reportSemanticError(CTX, "CFunction does not exist: " + fName);
-                        
+            }
+            try {
+                CTX->SymbolTable->checkCFunction(fName, args);
+            }
+            catch(const std::string& errorMsg) {
+                cleanup(args.begin(), args.end());
+                args.clear();
+                reportSemanticError(CTX, errorMsg);
+            }
             result = new CExprFunction(func, args);
+            CTX->SymbolTable->popFromCleanupStack(args.size());
+            CTX->SymbolTable->pushToCleanupStack(result);
+            args.clear();
         }
 	;
 
@@ -1029,8 +1119,13 @@ enforceExpression returns [Expr* result]
                 args.push_back(value);
                 args.push_back(con);    
                 result = new ExprConstraint("eq", args, "");
+                CTX->SymbolTable->popFromCleanupStack();
+                CTX->SymbolTable->pushToCleanupStack(result);
+                args.clear();
             } else {
                 result = value;
+                //No change to cleanup stack--value is already on the stack
+                //CTX->SymbolTable->pushToCleanupStack(result);
             }
         } ;
 

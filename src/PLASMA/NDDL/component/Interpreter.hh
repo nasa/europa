@@ -16,6 +16,8 @@
 #include "RuleInstance.hh"
 
 #include <boost/cast.hpp>
+#include <boost/smart_ptr/scoped_ptr.hpp>
+#include <boost/smart_ptr/shared_ptr.hpp>
 
 namespace EUROPA {
 
@@ -91,34 +93,37 @@ class ExprAssignment : public Expr {
   ExprAssignment(Expr* lhs, Expr* rhs);
   virtual ~ExprAssignment();
 
-  Expr* getLhs() { return m_lhs; }
-  Expr* getRhs() { return m_rhs; }
+  Expr* getLhs() { return m_lhs.get(); }
+  Expr* getRhs() { return m_rhs.get(); }
 
   virtual DataRef eval(EvalContext& context) const;
   virtual std::string toString() const;
 
  protected:
-  Expr* m_lhs;
-  Expr* m_rhs;
+  boost::scoped_ptr<Expr> m_lhs;
+  boost::scoped_ptr<Expr> m_rhs;
 };
 
-  class ExprConstraint : public Expr
-  {
-    public:
-        ExprConstraint(const std::string& name,const std::vector<Expr*>& args, const std::string& violationExpl);
-        virtual ~ExprConstraint();
+class ExprConstraint : public Expr {
+ public:
+  ExprConstraint(const std::string& name,const std::vector<Expr*>& args,
+                 const std::string& violationExpl);
+  ExprConstraint(const std::string& name,
+                 const std::vector<boost::shared_ptr<Expr> >& args,
+                 const std::string& violationExpl);
+  virtual ~ExprConstraint();
 
-        virtual DataRef eval(EvalContext& context) const;
+  virtual DataRef eval(EvalContext& context) const;
 
-        const std::string getName() const { return m_name; }
-        const std::vector<Expr*>& getArgs() const { return m_args; }
-        virtual std::string toString() const;
+  const std::string getName() const { return m_name; }
+  std::vector<Expr*> getArgs() const;// { return m_args; }
+  virtual std::string toString() const;
 
-    protected:
-        std::string m_name;
-        std::vector<Expr*> m_args;
-        std::string m_violationExpl;
-  };
+ protected:
+  std::string m_name;
+  std::vector<boost::shared_ptr<Expr> > m_args;
+  std::string m_violationExpl;
+};
 
 class ExprTypedef : public Expr {
 private:
@@ -371,34 +376,34 @@ private:
   CExpr *m_returnArgument; // TODO: generalize this to output node (ask JRB)
 };
 
-  class CExprFunction : public CExpr
-  {
-    public:
-        CExprFunction(const CFunctionId func, const std::vector<CExpr*>& args);
-        virtual ~CExprFunction() { /* TODO: release memory */ }
+class CExprFunction : public CExpr {
+ public:
+  CExprFunction(const CFunctionId func, const std::vector<CExpr*>& args);
+  virtual ~CExprFunction() { /* TODO: release memory */ }
 
-        // Expr methods
-        virtual DataRef eval(EvalContext& context) const;
+  // Expr methods
+  virtual DataRef eval(EvalContext& context) const;
 
-        virtual const DataTypeId getDataType() const { return m_func->getReturnType(); }
+  virtual const DataTypeId getDataType() const { return m_func->getReturnType(); }
 
-        virtual std::string toString() const;
+  virtual std::string toString() const;
 
-        // CExpr methods
-        virtual bool hasReturnValue() const { return true; }
-        virtual bool isSingleton() { return false; }
-        virtual bool isSingletonOptimizable() { return false; }
+  // CExpr methods
+  virtual bool hasReturnValue() const { return true; }
+  virtual bool isSingleton() { return false; }
+  virtual bool isSingletonOptimizable() { return false; }
 
-        virtual void checkType();
+  virtual void checkType();
 
-    virtual const std::vector<CExpr*>& getArgs() const {return m_args;}
+  virtual std::vector<CExpr*> getArgs() const;// const {return m_args;}
 
-    protected:
-        CFunctionId m_func;
-        std::vector<CExpr*> m_args;
-   private:
-    CExprFunction() : m_func(), m_args() {}
-  };
+ protected:
+  CFunctionId m_func;
+  std::vector<boost::shared_ptr<CExpr> > m_args;
+  mutable boost::scoped_ptr<ExprConstraint> m_con;
+ private:
+  CExprFunction() : m_func(), m_args() {}
+};
 
 class CExprValue : public CExpr {
 private:
@@ -406,7 +411,7 @@ private:
   CExprValue& operator=(const CExprValue&);
  public:
   CExprValue(Expr* value);
-  virtual ~CExprValue() { /* TODO: release memory */ }
+  virtual ~CExprValue() {  }
 
   // Expr methods
   virtual DataRef eval(EvalContext& context) const;
@@ -423,7 +428,7 @@ private:
   virtual void checkType();
 
  protected:
-  Expr* m_value;
+  boost::scoped_ptr<Expr> m_value;
 };
 
   // TODO: this still needs to be broken down more into cleaner pieces
@@ -707,7 +712,8 @@ private:
 	  virtual TokenId createInstance(const TokenId master, const std::string& name, const std::string& relation) const = 0;
   };
 
-void getVariableReferences(const Expr* expr, EvalContext& ctx, std::vector<ConstrainedVariableId>& dest);
+void getVariableReferences(const Expr* expr, EvalContext& ctx,
+                           std::vector<ConstrainedVariableId>& dest);
 
 }
 

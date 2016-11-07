@@ -83,7 +83,7 @@ std::string readLine(std::ifstream& inFile)
     std::string retval;
     while(!inFile.eof()) {
         getline(inFile,retval);
-        if (retval.size()>0)
+        if (retval.size()>0 && retval[0] != '#')
             return retval;
     }
 
