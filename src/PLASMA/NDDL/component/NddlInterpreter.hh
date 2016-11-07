@@ -8,6 +8,9 @@
 #ifndef NDDLINTERPRETER_H_
 #define NDDLINTERPRETER_H_
 
+#include <stack>
+#include <typeinfo>
+
 #include <antlr3.h>
 #include <antlr3interfaces.h>
 #include "Interpreter.hh"
@@ -48,7 +51,7 @@ private:
 
   void checkConstraint(const std::string& name,const std::vector<Expr*>& args);
   void checkObjectFactory(const std::string& name,const std::vector<Expr*>& args);
-
+  void checkCFunction(const std::string& name, const std::vector<CExpr*>& args);
   // Error reporting methods
   void reportError(void* treeWalker, const std::string& msg);
   void addError(const std::string& msg);
@@ -64,6 +67,23 @@ private:
   const std::string& getEnumForValue(const std::string& value) const;
   Expr* makeEnumRef(const std::string& value) const;
 
+
+  void pushToCleanupStack(Expr* expr) {m_cleanupStack.push(expr);
+    debugMsg("NddlSymbolTable:pushToCleanupStack",
+             "Pushed " << typeid(*expr).name() << " " << expr->toString() << " " << m_cleanupStack.size());}
+  void popFromCleanupStack(size_t number = 1) {
+    checkError(m_cleanupStack.size() >= number, m_cleanupStack.size());
+    debugMsg("NddlSymbolTable:popFromCleanupStack", "Popping " << number);
+    while(number--){m_cleanupStack.pop();}
+    debugMsg("NddlSymbolTable:popFromCleanupStack",
+             "Popped -> " << m_cleanupStack.size());
+    condDebugMsg(!m_cleanupStack.empty(),
+                 "NddlSymbolTable:popFromCleanupStack",
+                 "Top: " << typeid(*m_cleanupStack.top()).name() << " " <<
+                 m_cleanupStack.top()->toString());
+  }
+  void cleanStack();
+  size_t cleanupStackSize() const {return m_cleanupStack.size();}
  protected:
   NddlSymbolTable* m_parentST;
 
@@ -71,7 +91,7 @@ private:
   std::vector<std::string> m_errors;
   std::map<std::string,DataTypeId> m_localVars;
   std::map<std::string,TokenTypeId> m_localTokens;
-
+  std::stack<Expr*> m_cleanupStack;
   const EngineId engine() const;
   std::vector<std::string>& errors();
   const std::vector<std::string>& errors() const;
@@ -89,9 +109,10 @@ class NddlClassSymbolTable : public NddlSymbolTable {
   virtual ObjectTypeId getObjectType(const std::string& name) const;
 
   virtual DataTypeId getTypeForVar(const std::string& varName);
-
+  void saveObjectType();
  protected:
   ObjectType* m_objectType; // Object type being declared
+  bool m_saveObjectType;
 };
 
 class NddlTokenSymbolTable : public NddlSymbolTable
@@ -127,7 +148,7 @@ public:
 protected:
     EngineId m_engine;
     std::vector<std::string> m_filesread;
-    std::vector<pANTLR3_INPUT_STREAM> m_inputstreams;
+  std::vector<pANTLR3_INPUT_STREAM> m_inputstreams;
 };
 
 // An Interpreter that just returns the AST

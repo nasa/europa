@@ -31,6 +31,7 @@ NddlInterpreter::NddlInterpreter(EngineId engine)
 
 NddlInterpreter::~NddlInterpreter()
 {
+  checkError(m_inputstreams.empty(), "Interpreter still has open input streams.");
 }
 
 pANTLR3_INPUT_STREAM getInputStream(std::istream& input, const std::string& source,
@@ -79,7 +80,7 @@ void NddlInterpreter::addInclude(const std::string &f)
 
 void NddlInterpreter::addInputStream(pANTLR3_INPUT_STREAM in)
 {
-    m_inputstreams.push_back(in);
+  m_inputstreams.push_back(in);
 }
 
 std::vector<std::string> NddlInterpreter::getIncludePath() {
@@ -134,98 +135,122 @@ std::string NddlInterpreter::getFilename(const std::string& f)
 }
 
 
+template <typename T>
+struct CallClose {
+  CallClose(T t) : m_t(t) {}
+  ~CallClose() { m_t->close(m_t);}
+  T m_t;
+};
+template <typename T>
+struct CallFree {
+  CallFree(T t) : m_t(t) {}
+  ~CallFree() { m_t->free(m_t);}
+  T m_t;
+};
 
-std::string NddlInterpreter::interpret(std::istream& ins, const std::string& source)
-{
-    if (queryIncludeGuard(source))
-    {
-      debugMsg("NddlInterpreter:error", "Ignoring root file: " << source << ". Bug?");
-        return "";
+struct CleanUpInputStreams {
+  CleanUpInputStreams(std::vector<pANTLR3_INPUT_STREAM>& t) : m_t(t) {}
+  ~CleanUpInputStreams() {
+    for(std::vector<pANTLR3_INPUT_STREAM>::iterator it = m_t.begin();
+      it != m_t.end(); ++it)
+    (*it)->close(*it);
+    m_t.clear();
+  }
+  std::vector<pANTLR3_INPUT_STREAM>& m_t;
+};
+
+struct CleanUpSymbolTable {
+  CleanUpSymbolTable(pNDDL3Tree treeWalker, NddlSymbolTable* end) :
+      m_treeWalker(treeWalker), m_end(end) {}
+  ~CleanUpSymbolTable() {
+    while(m_treeWalker->SymbolTable != m_end) {
+      NddlSymbolTable* st = m_treeWalker->SymbolTable;
+      m_treeWalker->SymbolTable = st->getParentST();
+      delete st;
     }
-    addInclude(source);
+  }
+  pNDDL3Tree m_treeWalker;
+  NddlSymbolTable* m_end;
+};
 
-	std::string strInput;
-    pANTLR3_INPUT_STREAM input = getInputStream(ins,source,strInput);
+std::string NddlInterpreter::interpret(std::istream& ins, const std::string& source) {
+  if (queryIncludeGuard(source))
+  {
+    debugMsg("NddlInterpreter:error", "Ignoring root file: " << source << ". Bug?");
+    return "";
+  }
+  addInclude(source);
 
-    pNDDL3Lexer lexer = NDDL3LexerNew(input);
-    lexer->parserObj = this;
-    pANTLR3_COMMON_TOKEN_STREAM tstream = antlr3CommonTokenStreamSourceNew(ANTLR3_SIZE_HINT, TOKENSOURCE(lexer));
-    pNDDL3Parser parser = NDDL3ParserNew(tstream);
+  std::string strInput;
+  pANTLR3_INPUT_STREAM input = getInputStream(ins,source,strInput);
+  CallClose<pANTLR3_INPUT_STREAM> closeInput(input);
 
-    // Build he AST
-    NDDL3Parser_nddl_return result = parser->nddl(parser);
-    unsigned int errorCount = parser->pParser->rec->state->errorCount +
-        lexer->pLexer->rec->state->errorCount;
-    if (errorCount > 0) {
-        // Since errors are no longer printed during parsing, print them here
-        // to debugMsg
-        std::vector<PSLanguageException> *lerrors = lexer->lexerErrors;
-        std::vector<PSLanguageException> *perrors = parser->parserErrors;
-        for (std::vector<PSLanguageException>::const_iterator it = lerrors->begin(); it != lerrors->end(); ++it) {
-        	debugMsg("NddlInterpreter:interpret", it->asString());
-        }
-        for (std::vector<PSLanguageException>::const_iterator it = perrors->begin(); it != perrors->end(); ++it) {
-        	debugMsg("NddlInterpreter:interpret", it->asString());
-        }
-        // Copy errors over
-        std::vector<PSLanguageException> all(*lerrors);
-        for (std::vector<PSLanguageException>::const_iterator it = perrors->begin(); it != perrors->end(); ++it)
-        	all.push_back(*it);
+  pNDDL3Lexer lexer = NDDL3LexerNew(input);
+  CallFree<pNDDL3Lexer> freeLexer(lexer);
+  lexer->parserObj = this;
+  pANTLR3_COMMON_TOKEN_STREAM tstream = antlr3CommonTokenStreamSourceNew(ANTLR3_SIZE_HINT, TOKENSOURCE(lexer));
+  CallFree<pANTLR3_COMMON_TOKEN_STREAM> freeTstream(tstream);
+  pNDDL3Parser parser = NDDL3ParserNew(tstream);
+  CallFree<pNDDL3Parser> freeParser(parser);
 
-        // Close everything nicely
-        parser->free(parser);
-        tstream->free(tstream);
-        lexer->free(lexer);
-        input->close(input);
-
-        debugMsg("NddlInterpreter:interpret", "Interpreter returned errors");
-
-        // Now throw the whole thing
-        throw PSLanguageExceptionList(all);
+  // Build he AST
+  NDDL3Parser_nddl_return result = parser->nddl(parser);
+  unsigned int errorCount = parser->pParser->rec->state->errorCount +
+                            lexer->pLexer->rec->state->errorCount;
+  if (errorCount > 0) {
+    // Since errors are no longer printed during parsing, print them here
+    // to debugMsg
+    std::vector<PSLanguageException> *lerrors = lexer->lexerErrors;
+    std::vector<PSLanguageException> *perrors = parser->parserErrors;
+    for (std::vector<PSLanguageException>::const_iterator it = lerrors->begin(); it != lerrors->end(); ++it) {
+      debugMsg("NddlInterpreter:interpret", it->asString());
     }
-    else {
-		condDebugMsg(result.tree->toStringTree(result.tree) != NULL, "NddlInterpreter:interpret",
-					 "NDDL AST:\n" << result.tree->toStringTree(result.tree)->chars);
-		condDebugMsg(result.tree->toStringTree(result.tree) == NULL, "NddlInterpreter:interpret", "Empty NDDL AST.");
+    for (std::vector<PSLanguageException>::const_iterator it = perrors->begin(); it != perrors->end(); ++it) {
+      debugMsg("NddlInterpreter:interpret", it->asString());
     }
+    // Copy errors over
+    std::vector<PSLanguageException> all(*lerrors);
+    for (std::vector<PSLanguageException>::const_iterator it = perrors->begin(); it != perrors->end(); ++it)
+      all.push_back(*it);
 
-    // Walk the AST to create nddl expr to evaluate
-    pANTLR3_COMMON_TREE_NODE_STREAM nodeStream = antlr3CommonTreeNodeStreamNewTree(result.tree, ANTLR3_SIZE_HINT);
-    pNDDL3Tree treeParser = NDDL3TreeNew(nodeStream);
+    debugMsg("NddlInterpreter:interpret", "Interpreter returned errors");
 
-    NddlSymbolTable symbolTable(m_engine);
-    treeParser->SymbolTable = &symbolTable;
+    // Now throw the whole thing
+    throw PSLanguageExceptionList(all);
+  }
+  else {
+    condDebugMsg(result.tree->toStringTree(result.tree) != NULL, "NddlInterpreter:interpret",
+                 "NDDL AST:\n" << result.tree->toStringTree(result.tree)->chars);
+    condDebugMsg(result.tree->toStringTree(result.tree) == NULL, "NddlInterpreter:interpret", "Empty NDDL AST.");
+  }
 
-    try {
-        treeParser->nddl(treeParser);
-        // TODO: report treeParser antlr errors the same way we do it for tree builder lexer and parser
-    }
-    catch (const std::string&) {
-        debugMsg("NddlInterpreter:error",
-                 "nddl parser halted on error:" << symbolTable.getErrors());
-        return symbolTable.getErrors();
-    }
-    catch (const Error& internalError) {
-        symbolTable.reportError(treeParser,internalError.getMsg());
-        debugMsg("NddlInterpreter:error",
-                 "nddl parser halted on error:" << symbolTable.getErrors());
-        return symbolTable.getErrors();
-    }
+  // Walk the AST to create nddl expr to evaluate
+  pANTLR3_COMMON_TREE_NODE_STREAM nodeStream = antlr3CommonTreeNodeStreamNewTree(result.tree, ANTLR3_SIZE_HINT);
+  CallFree<pANTLR3_COMMON_TREE_NODE_STREAM> freeNodeStream(nodeStream);
+  pNDDL3Tree treeParser = NDDL3TreeNew(nodeStream);
+  CallFree<pNDDL3Tree> freeTreeParser(treeParser);
 
-    // Free everything
-    treeParser->free(treeParser);
-    nodeStream->free(nodeStream);
-
-    while(!m_inputstreams.empty()) {
-      m_inputstreams[0]->close(m_inputstreams[0]);
-      m_inputstreams.erase(m_inputstreams.begin());
-    }
-
-    parser->free(parser);
-    tstream->free(tstream);
-    lexer->free(lexer);
-    input->close(input);
+  NddlSymbolTable symbolTable(m_engine);
+  treeParser->SymbolTable = &symbolTable;
+  CleanUpSymbolTable cleanUpSymbolTable(treeParser, &symbolTable);
+  try {
+    CleanUpInputStreams cleanInputStreams(m_inputstreams);
+    treeParser->nddl(treeParser);
+    // TODO: report treeParser antlr errors the same way we do it for tree builder lexer and parser
+  }
+  catch (const std::string&) {
+    debugMsg("NddlInterpreter:error",
+             "nddl parser halted on error:" << symbolTable.getErrors());
     return symbolTable.getErrors();
+  }
+  catch (const Error& internalError) {
+    symbolTable.reportError(treeParser,internalError.getMsg());
+    debugMsg("NddlInterpreter:error",
+             "nddl parser halted on error:" << symbolTable.getErrors());
+    return symbolTable.getErrors();
+  }
+
+  return symbolTable.getErrors();
 }
 
 
@@ -236,6 +261,7 @@ NddlSymbolTable::NddlSymbolTable(NddlSymbolTable* parent)
     , m_errors()
     , m_localVars()
     , m_localTokens()
+    , m_cleanupStack()
 {
 }
 
@@ -246,11 +272,22 @@ NddlSymbolTable::NddlSymbolTable(const EngineId _engine)
     , m_errors()
     , m_localVars()
     , m_localTokens()
+    , m_cleanupStack()
 {
 }
 
 NddlSymbolTable::~NddlSymbolTable()
 {
+  cleanStack();
+}
+
+void NddlSymbolTable::cleanStack() {
+  while(!m_cleanupStack.empty()) {
+    debugMsg("NddlSymbolTable:cleanStack",
+             "Cleaning " << m_cleanupStack.top()->toString());
+    delete m_cleanupStack.top();
+    m_cleanupStack.pop();
+  }
 }
 
 NddlSymbolTable* NddlSymbolTable::getParentST() { return m_parentST; }
@@ -652,16 +689,29 @@ void NddlSymbolTable::checkObjectFactory(const std::string& name, const std::vec
     }
 }
 
+void NddlSymbolTable::checkCFunction(const std::string& name,
+                                     const std::vector<CExpr*>& args) {
+  CFunctionId func = getCFunction(name, args);
+  std::vector<DataTypeId> argTypes;
+  for(std::vector<CExpr*>::const_iterator it = args.begin(); it != args.end(); ++it)
+    argTypes.push_back((*it)->getDataType());
+  func->checkArgTypes(argTypes);
+}
+
 NddlClassSymbolTable::NddlClassSymbolTable(NddlSymbolTable* parent, ObjectType* ot)
     : NddlSymbolTable(parent)
     , m_objectType(ot)
+    , m_saveObjectType(false)
 {
 }
 
 NddlClassSymbolTable::~NddlClassSymbolTable()
 {
+  if(!m_saveObjectType)
+    delete m_objectType;
 }
 
+void NddlClassSymbolTable::saveObjectType() {m_saveObjectType = true;}
 DataTypeId NddlClassSymbolTable::getDataType(const std::string& name) const
 {
     if (m_objectType->getName()==name)

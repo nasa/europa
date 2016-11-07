@@ -154,11 +154,11 @@ ExprList::ExprList() : m_children() {}
   std::string ExprList::toString() const
   {
       std::ostringstream os;
-
+      os << "[" << std::endl;
       for(std::vector<Expr*>::const_iterator it = m_children.begin(); 
           it != m_children.end(); ++it)
         os << (*it)->toString() << std::endl;
-
+      os << "]" << std::endl;
       return os.str();
   }
 
