@@ -999,7 +999,7 @@ Void TemporalNetwork::cleanupTEQ(Timepoint& tpt) {
     tpt.ringLeader = NULL;
   }
   else if (tpt.ringLeader != NULL) {// It's a follower
-    std::vector<Timepoint*>::const_iterator it =
+    std::vector<Timepoint*>::iterator it =  //TODO: make this const sometime
         std::find(tpt.ringLeader->ringFollowers.begin(),
                   tpt.ringLeader->ringFollowers.end(),
                   &tpt);
