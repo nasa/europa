@@ -16,7 +16,7 @@ install:
 install:
   - wget http://www.antlr3.org/download/C/libantlr3c-3.4.tar.gz -O /tmp/libantlr3c-3.4.tar.gz
   - tar -zxf /tmp/libantlr3c-3.4.tar.gz
-  - pushd libantlr3c-3.4 && ./configure --prefix=/usr && make && sudo make install && popd
+  - pushd libantlr3c-3.4 && ./configure --prefix=/usr --enable-64bit && make && sudo make install && popd
 script: mkdir build && cd build && cmake -DOPTIMIZE=$OPTIMIZE -DCOVERAGE=$COVERAGE .. && make -j2 && ctest
 after_success:
   - coveralls --gcov-options '\-lp'
