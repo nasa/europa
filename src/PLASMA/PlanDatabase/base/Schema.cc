@@ -406,8 +406,12 @@ const std::set<std::string>& Schema::getAllObjectTypes() const {
       membershipRelation.find(parentType);
 
     // At this point we know if we do not have a hit, then try a parent
-    if(membershipRelation_it == membershipRelation.end() && hasParent(parentType))
-      return getMemberType(getParent(parentType), memberName);
+    if(membershipRelation_it == membershipRelation.end()) {
+      if(hasParent(parentType))
+        return getMemberType(getParent(parentType), memberName);
+      else
+        return "";
+    }
 
     // Alternately, we have to have a hit
     const NameValueVector& members = membershipRelation_it->second;
@@ -421,7 +425,7 @@ const std::set<std::string>& Schema::getAllObjectTypes() const {
     return getMemberType(getParent(parentType), memberName);
   }
 
-  unsigned int Schema::getIndexFromName(const std::string& parentType, const std::string& memberName) const {
+int Schema::getIndexFromName(const std::string& parentType, const std::string& memberName) const {
     check_error(hasMember(parentType, memberName),
 		memberName + " is not a member of " + parentType);
 
@@ -430,8 +434,13 @@ const std::set<std::string>& Schema::getAllObjectTypes() const {
       membershipRelation.find(parentType);
 
     // At this point we know if we do not have a hit, then try a parent
-    if(membershipRelation_it == membershipRelation.end() && hasParent(parentType))
-      return getIndexFromName(getParent(parentType), memberName);
+    if(membershipRelation_it == membershipRelation.end()) {
+      if(hasParent(parentType))
+        return getIndexFromName(getParent(parentType), memberName);
+      else
+        return -1;
+    }
+
 
     // Alternately, we have to have a hit
     const NameValueVector& members = membershipRelation_it->second;

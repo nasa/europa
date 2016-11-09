@@ -491,7 +491,10 @@ void SupportToken::execute()
       if (slave->getFullTokenType() == m_token->getFullTokenType()) { // TODO: use ids
         if (effectCnt == m_effectIndex) {
           // TODO: eliminate the need for the dynamic cast below
-          TokenId slaveId = dynamic_cast<Token*>(slave)->getId();
+          Token* tok = dynamic_cast<Token*>(slave);
+          checkError(tok != NULL,
+                     "Failed to cast " << slave->toString() << " to a token.");
+          TokenId slaveId = tok->getId();
           m_targetEffect = slaveId;
           m_dbClient->merge(m_targetEffect,m_token);
           break;

@@ -54,7 +54,7 @@ class EntityInternals {
 
   std::map<eint, unsigned long int> m_entitiesByKey;
   std::set<Entity*> m_discardedEntities;
-  bool m_purgeStatus, m_gcActive, m_gcRequired;
+  bool m_purgeStatus;
   int m_key;
 };
 

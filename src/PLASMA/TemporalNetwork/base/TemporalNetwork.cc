@@ -766,11 +766,9 @@ Void TemporalNetwork::incDijkstraForward() {
   check_error_variable(unsigned long BFbound = this->nodes.size());
 
   while (true) {
-    Dnode* dnode = queue.popMinFromQueue();
-    if (dnode == NULL)
+    Timepoint* node = dynamic_cast<Timepoint*>(queue.popMinFromQueue());
+    if (node == NULL)
       return;
-
-    Timepoint* node = dynamic_cast<Timepoint*>(dnode);
 
     for (int i=0; i< node->outCount; i++) {
       Dedge* edge = node->outArray[i];
@@ -801,11 +799,10 @@ Void TemporalNetwork::incDijkstraBackward() {
   check_error_variable(unsigned long BFbound = this->nodes.size());
 
   while (true) {
-    Dnode* dnode =  queue.popMinFromQueue();
-    if(dnode == NULL)
-      return;
 
-    Timepoint* node = dynamic_cast<Timepoint*>(dnode);
+    Timepoint* node = dynamic_cast<Timepoint*>(queue.popMinFromQueue());
+    if(node == NULL)
+      return;
 
     for (int i=0; i< node->inCount; i++) {
       Dedge* edge = node->inArray[i];
@@ -839,10 +836,10 @@ Void TemporalNetwork::incDijkstraBackward() {
     check_error_variable(unsigned long BFbound = this->nodes.size());
 
     while (true) {
-      Dnode* dnode = queue.popMinFromQueue();
-      if (dnode == NULL)
+      Timepoint* node = dynamic_cast<Timepoint*>(queue.popMinFromQueue());
+      if (node == NULL)
 	return;
-      Timepoint* node = dynamic_cast<Timepoint*>(dnode);
+
       for (int i=0; i< node->outCount; i++) {
 	Dedge* edge = node->outArray[i];
 	Timepoint& next = dynamic_cast<Timepoint&>(edge->to);
@@ -874,10 +871,9 @@ Void TemporalNetwork::incDijkstraBackward() {
     check_error_variable(unsigned long BFbound = this->nodes.size());
 
     while (true) {
-      Dnode* dnode =  queue.popMinFromQueue();
-      if(dnode == NULL)
+      Timepoint* node = dynamic_cast<Timepoint*>(queue.popMinFromQueue());
+      if(node == NULL)
 	return;
-      Timepoint* node = dynamic_cast<Timepoint*>(dnode);
       for (int i=0; i< node->inCount; i++) {
 	Dedge* edge = node->inArray[i];
 	Timepoint& next = dynamic_cast<Timepoint&>(edge->from);
