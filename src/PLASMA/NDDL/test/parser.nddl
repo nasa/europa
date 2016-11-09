@@ -131,6 +131,41 @@ eq(pos, 23);
 positive b;
 
 addEq(40, 90, b);
+
+class PlannerConfig {
+ // Horizon information
+ int m_horizonStart;
+ int m_horizonEnd;
+
+ // Inputs to the planner
+ int m_maxPlannerSteps;
+ int m_maxPlannerDepth;
+
+ PlannerConfig(int start, int end, int maxPlannerSteps, int maxPlannerDepth){
+  m_horizonStart = start;
+  m_horizonEnd = end;
+  m_maxPlannerSteps = maxPlannerSteps;
+  m_maxPlannerDepth = maxPlannerDepth;
+ }
+
+ PlannerConfig(int start, int end, int maxPlannerSteps){
+  m_horizonStart = start;
+  m_horizonEnd = end;
+  m_maxPlannerSteps = maxPlannerSteps;
+  m_maxPlannerDepth = +inf;
+ }
+
+ PlannerConfig(){
+  m_horizonStart = 0;
+  m_horizonEnd = 100;
+  m_maxPlannerSteps = 200;
+  m_maxPlannerDepth = +inf;
+ }
+}
+
+// Allocate a world to populate the planner context
+PlannerConfig world = new PlannerConfig(0, 100, 500);
+
 close();
 
 fact(foo.p fact1);
@@ -206,6 +241,22 @@ class AClass {
   ;;
 }
 
+enum Fruit {apple, orange, grape, banana};
+Fruit f4 = {orange, grape, banana};
+
+class Rover extends Timeline {
+ predicate At{
+  Location m_location;
+  eq(duration, 1);
+ }
+
+ predicate Going{
+  Location m_from, m_to;
+  eq(duration, 1);
+  neq(m_from, m_to);
+ }
+}
+
 class BClass extends AClass {
   BClass(int b) {
     super(b);
@@ -218,6 +269,11 @@ class BClass extends AClass {
   }
 }
 
+somefoos loopVar;
+
+foreach(f in loopVar) {
+  eq(f,f);
+}
 
 // rule tests:
 BClass::q {
@@ -254,12 +310,12 @@ BClass::q {
     eq(d,d);
   }
 
-  //somefoos loopVar;
+  somefoos loopVar;
 
-  //foreach(f in loopVar) {
-  //  eq(f,f);
-  //}
+  foreach(f in loopVar) {
+   eq(f,f);
+  }
 
-  ;;
 }
+//For some reason, NDDL stops parsing after this
 

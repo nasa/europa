@@ -21,6 +21,7 @@ options {
 #include "PathDefs.hh"
 #include "Utils.hh"
 #include "Error.hh"
+#include <iostream>
 #include <boost/cast.hpp>
 using namespace EUROPA;
 
@@ -196,7 +197,7 @@ variableDeclarations returns [ExprList* result]
     result = new ExprList();
     CTX->SymbolTable->pushToCleanupStack(result);
 }
-    :   ^(VARIABLE 
+    :   ^(VARIABLE
             dataType=type 
             (child=variableInitialization[dataType->getId()]
             {
@@ -289,7 +290,6 @@ valueSet returns [Expr* result]
                 }
                              
                 values.push_back(v);
-                CTX->SymbolTable->popFromCleanupStack();
             }
             )*
         )
@@ -649,10 +649,10 @@ tokenParameter[InterpretedTokenType* tokenType] returns [Expr* result]
             const std::vector<Expr*>& vars=child->getChildren();
             for (unsigned int i=0;i<vars.size();i++) {
                 ExprVarDeclaration* vd = boost::polymorphic_cast<ExprVarDeclaration*>(vars[i]);
-                CTX->SymbolTable->popFromCleanupStack();
                 tokenType->addArg(vd->getDataType(),vd->getName());
             }
             result = child;
+            CTX->SymbolTable->popFromCleanupStack();
             CTX->SymbolTable->pushToCleanupStack(result);
         }
         ;       
@@ -717,10 +717,10 @@ rule returns [Expr* result]
 		    if (iTokenType != NULL) 
 		        iTokenType->addRule(rf);
 		    
-		    result = new ExprRuleTypeDefinition(rf->getId());
             checkError(CTX->SymbolTable->cleanupStackSize() == 0,
                        CTX->SymbolTable->cleanupStackSize());
 		    popContext(CTX);
+		    result = new ExprRuleTypeDefinition(rf->getId());
             CTX->SymbolTable->pushToCleanupStack(result);
 		}
 	;
@@ -735,16 +735,18 @@ ruleStatement returns [Expr* result]
 	: (	child=constraintInstantiation
       | child=enforceExpression
 	  |	child=assignment
-	  |	child=variableDeclarations
+	  | child=relation
 	  |	child=ifStatement
 	  |	child=loopStatement
-	  | child=relation
+	  |	child=variableDeclarations
+      | child=dummyRuleForExprType
 	  )
 	  {
 	      result = child;
 	  }
 	;
 
+dummyRuleForExprType returns [Expr* result] : ('CAN\'T MATCH') ;
 
 ifStatement returns [Expr* result]
 @init {
@@ -808,7 +810,7 @@ loopStatement returns [Expr* result]
 		{
 		    // TODO : modify ExprLoop to take val Expr instead, otherwise delete val.
 		    result = new ExprLoop(loopVarName,val->toString().c_str(),loopBody); 
-            CTX->SymbolTable->popFromCleanupStack(loopBody.size());
+            CTX->SymbolTable->popFromCleanupStack(loopBody.size() + 1); //the +1 accounts for the val above
             CTX->SymbolTable->pushToCleanupStack(result);
 		    delete val;
 		}
