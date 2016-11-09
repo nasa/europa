@@ -233,8 +233,8 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
   NddlSymbolTable symbolTable(m_engine);
   treeParser->SymbolTable = &symbolTable;
   CleanUpSymbolTable cleanUpSymbolTable(treeParser, &symbolTable);
+  CleanUpInputStreams cleanInputStreams(m_inputstreams);
   try {
-    CleanUpInputStreams cleanInputStreams(m_inputstreams);
     treeParser->nddl(treeParser);
     // TODO: report treeParser antlr errors the same way we do it for tree builder lexer and parser
   }
