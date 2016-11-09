@@ -118,6 +118,8 @@ void Resource::init(const edouble initCapacityLb, const edouble initCapacityUb,
   checkRuntimeError(prop.isValid(),
 		    "Failed to get Resource propagator.  Can't register profiles.");
   ProfilePropagator* profileProp = dynamic_cast<ProfilePropagator*>(static_cast<Propagator*>(prop));
+  checkRuntimeError(profileProp != NULL,
+                    "Failed to get Resource propagator.  Can't register profiles.");
   //TODO: have the capacity and limit profiles extend the Profile class and get added
   //correctly
   // profileProp->addProfile(m_capacityProfile);

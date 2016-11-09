@@ -2512,12 +2512,12 @@ void getVariableReferences(const Expr* expr, EvalContext& ctx,
   }
   //ExprVarDeclaration -> ?
   else if(dynamic_cast<const ExprVarRef*>(expr) != NULL) {
-    dest.push_back(dynamic_cast<const ExprVarRef*>(expr)->eval(ctx).getValue());
+    dest.push_back(static_cast<const ExprVarRef*>(expr)->eval(ctx).getValue());
   }
   //ExprVarRef -> ?
   //ExprAssignment -> ?
   else if(dynamic_cast<const ExprConstraint*>(expr) != NULL) {
-    const ExprConstraint* e = dynamic_cast<const ExprConstraint*>(expr);
+    const ExprConstraint* e = static_cast<const ExprConstraint*>(expr);
     std::vector<Expr*> args = e->getArgs();
     for(std::vector<Expr*>::const_iterator it = args.begin();
         it != args.end(); ++it) {
@@ -2531,7 +2531,7 @@ void getVariableReferences(const Expr* expr, EvalContext& ctx,
   //ExprObjectTypeDefinition -> nothing
   //ExprRuleTypeDefinition -> nothing
   else if(dynamic_cast<const ExprMethodCall*>(expr) != NULL) {
-    const ExprMethodCall* e = dynamic_cast<const ExprMethodCall*>(expr);
+    const ExprMethodCall* e = static_cast<const ExprMethodCall*>(expr);
     for(std::vector<Expr*>::const_iterator it = e->getArgs().begin();
         it != e->getArgs().end(); ++it) {
       checkError(*it != NULL, "Argument to method " << e->toString() << " is NULL.");
@@ -2546,7 +2546,7 @@ void getVariableReferences(const Expr* expr, EvalContext& ctx,
   //ExprRelation -> ?
   else if(dynamic_cast<const CExpr*>(expr) != NULL) {
     if(dynamic_cast<const CExprFunction*>(expr) != NULL) {
-      const CExprFunction* e = dynamic_cast<const CExprFunction*>(expr);
+      const CExprFunction* e = static_cast<const CExprFunction*>(expr);
       std::vector<CExpr*> args = e->getArgs();
       for(std::vector<CExpr*>::const_iterator it = args.begin();
           it != args.end(); ++it) {
@@ -2556,10 +2556,10 @@ void getVariableReferences(const Expr* expr, EvalContext& ctx,
     }
     else if(dynamic_cast<const CExprValue*>(expr) != NULL) {
       //not sure this is right
-      dest.push_back(dynamic_cast<const CExprValue*>(expr)->eval(ctx).getValue());
+      dest.push_back(static_cast<const CExprValue*>(expr)->eval(ctx).getValue());
     }
     else if(dynamic_cast<const CExprBinary*>(expr) != NULL) {
-      const CExprBinary* e = dynamic_cast<const CExprBinary*>(expr);
+      const CExprBinary* e = static_cast<const CExprBinary*>(expr);
       checkError(e->getLhs() != NULL, "LHS for " << e->toString() << " is NULL.");
       checkError(e->getRhs() != NULL, "RHS for " << e->toString() << " is NULL.");
       getVariableReferences(e->getLhs(), ctx, dest);
@@ -2574,7 +2574,7 @@ void getVariableReferences(const Expr* expr, EvalContext& ctx,
   }
   //RuleExpr -> ?
   else if(dynamic_cast<const ExprIfGuard*>(expr) != NULL) {
-    const ExprIfGuard* e = dynamic_cast<const ExprIfGuard*>(expr);
+    const ExprIfGuard* e = static_cast<const ExprIfGuard*>(expr);
     checkError(e->getLhs() != NULL, "LHS for " << e->toString() << " is NULL.");
     checkError(e->getRhs() != NULL, "RHS for " << e->toString() << " is NULL.");
     getVariableReferences(e->getLhs(), ctx, dest);

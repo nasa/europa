@@ -247,7 +247,7 @@ class LabelStr;
      * @param type the type to search
      * @param memberName the name of the member
      */
-    unsigned int getIndexFromName(const std::string& type, const std::string& memberName) const;
+    int getIndexFromName(const std::string& type, const std::string& memberName) const;
 
     /**
      * @brief Gets the name of a member from a types member list.

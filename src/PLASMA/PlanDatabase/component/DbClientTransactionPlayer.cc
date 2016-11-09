@@ -486,13 +486,14 @@ std::string DbClientTransactionPlayer::getObjectAndType(const SchemaId schema,
                                          bool rejectable,
                                          bool isFact)
   {
+    std::string sname(name ? name : "");
     // The type may be qualified with an object name, in which case we should get the
     // object and specify it. We will also have to generate the appropriate type designation
     // by extracting the class from the object
     ObjectId object;
     std::string predicateType = getObjectAndType(getSchema(),m_client,type,object);
 
-    TokenId token = m_client->createToken(predicateType.c_str(),name,rejectable,isFact);
+    TokenId token = m_client->createToken(predicateType.c_str(),sname,rejectable,isFact);
 
     if (!object.isNoId()) {
         // We restrict the base domain permanently since the name is specifically mentioned on creation
@@ -500,8 +501,7 @@ std::string DbClientTransactionPlayer::getObjectAndType(const SchemaId schema,
     }
 
     if (name != NULL) {
-      std::string std_name = name;
-      m_tokens[std_name] = token;
+      m_tokens[sname] = token;
     }
     else {
     	name = "NO_NAME_DBCTP";
