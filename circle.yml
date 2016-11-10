@@ -1,6 +1,6 @@
 dependencies:
   pre:
-    - sudo apt-get update; sudo pip install cpp-coveralls; sudo add-apt-repository --yes ppa:kalakris/cmake && sudo apt-get update -qq && sudo apt-get install cmake libboost-dev libcppunit-dev swig; sudo apt-get install jam doxygen libantlr3c-3.2-0 libcppunit-1.13-0 ant subversion gcc-4.8 swig; 
+    - sudo apt-get update; sudo pip install cpp-coveralls; sudo add-apt-repository --yes ppa:kalakris/cmake && sudo apt-get update -qq && sudo apt-get install cmake libboost-dev libcppunit-dev antlr swig; sudo apt-get install jam doxygen libantlr3c-3.2-0 libcppunit-1.13-0 ant subversion gcc-4.8 swig; 
     - wget http://www.antlr3.org/download/C/libantlr3c-3.4.tar.gz -O /tmp/libantlr3c-3.4.tar.gz
     - tar -zxf /tmp/libantlr3c-3.4.tar.gz
     - pushd libantlr3c-3.4 && ./configure --prefix=/usr --enable-64bit && make && sudo make install && popd
