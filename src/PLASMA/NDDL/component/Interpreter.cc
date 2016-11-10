@@ -2498,7 +2498,7 @@ void getVariableReferences(const Expr* expr, EvalContext& ctx,
   checkError(expr != NULL, "Weird.  Expression pointer is null.");
   debugMsg("getVariableReferences", "Getting refs from " << expr->toString());
   if(dynamic_cast<const ExprList*>(expr) != NULL) {
-    const ExprList* e = dynamic_cast<const ExprList*>(expr);
+    const ExprList* e = static_cast<const ExprList*>(expr);
     for(std::vector<Expr*>::const_iterator it = e->getChildren().begin();
         it != e->getChildren().end(); ++it) {
       checkError(*it != NULL, "Member of list " << e->toString() << " is NULL.");
