@@ -42,8 +42,6 @@ else()
   else()
     message(FATAL_ERROR "Failed to find boost libraries")
   endif()
-else()
-    message(FATAL_ERROR "Failed to find boost libraries")
 endif()
 
 add_subdirectory(TinyXml)
