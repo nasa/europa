@@ -64,6 +64,7 @@ static void newNDDL3ParserFree(pNDDL3Parser ctx) {
 {
 #include "NddlInterpreter.hh"
 #include "PathDefs.hh"
+#include <cstring>
 
 using namespace EUROPA;
 
