@@ -12,7 +12,7 @@ matrix:
       env: OPTIMIZE=0 COVERAGE=1
 before_install: sudo pip install cpp-coveralls
 install:
-  - sudo add-apt-repository --yes ppa:kalakris/cmake && sudo apt-get update -qq && sudo apt-get install cmake libboost-dev libcppunit-dev antlr swig
+  - sudo apt-get update -qq && sudo apt-get install libboost-dev libcppunit-dev antlr swig
   - wget http://www.antlr3.org/download/C/libantlr3c-3.4.tar.gz -O /tmp/libantlr3c-3.4.tar.gz
   - tar -zxf /tmp/libantlr3c-3.4.tar.gz
   - pushd libantlr3c-3.4 && ./configure --prefix=/usr --enable-64bit && make && sudo make install && popd
