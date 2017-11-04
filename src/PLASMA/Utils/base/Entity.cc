@@ -72,8 +72,8 @@ internals_accessor;
 internals_accessor internals() {
   MutexGrabber grabber(entityMutex);
   return std::make_pair<MutexGrabber,
-                        boost::reference_wrapper<EntityInternals> >(grabber, 
-                                                                       boost::ref(entityInternals));
+                        boost::reference_wrapper<EntityInternals> >(std::move(grabber), 
+                                                                       boost::reference_wrapper<EntityInternals>(entityInternals));
 }
 }
 
