@@ -315,9 +315,7 @@ internals_accessor;
 
 internals_accessor internals() {
   EUROPA::MutexGrabber grabber(debugMutex);
-  return std::make_pair<EUROPA::MutexGrabber,
-                        boost::reference_wrapper<DebugMessage::DebugInternals> >(grabber,
-                                                                                    boost::ref(debugInternals));
+  return std::make_pair(grabber, boost::ref(debugInternals));
 }
 
 }

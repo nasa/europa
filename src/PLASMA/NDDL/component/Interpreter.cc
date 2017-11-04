@@ -32,6 +32,9 @@
 #include <iterator>
 
 #include <boost/algorithm/string/classification.hpp>
+#ifdef before
+#undef before
+#endif
 #include <boost/algorithm/string/split.hpp>
 #include <boost/smart_ptr/make_shared.hpp>
 
