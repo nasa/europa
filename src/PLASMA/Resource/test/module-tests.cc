@@ -7,7 +7,7 @@ using namespace EUROPA;
 CPPUNIT_TEST_SUITE_REGISTRATION( ResourceModuleTests );
 CPPUNIT_TEST_SUITE_REGISTRATION( FlowProfileModuleTests );
 
-int main(int argc, const char** argv)
+int main(int , const char**)
 {
     // Init data types so that id counts don't fail
     VoidDT::instance();

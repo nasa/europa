@@ -186,7 +186,6 @@ namespace EUROPA {
    * @note Incomplete, but should allow tests to pass.
    */
   static void readDomains(ConstraintEngineId ce, const TiXmlElement & element, std::list<Domain*> & domains) {
-    if(&element == NULL) return;
     check_error_variable(const char * name = element.Value());
     checkError(strcmp(name,"Inputs") == 0 || strcmp(name,"Outputs") == 0,
                "unexpected element type \"" << name << "\"");

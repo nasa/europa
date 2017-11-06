@@ -77,9 +77,10 @@ private:
     while(number--){m_cleanupStack.pop();}
     debugMsg("NddlSymbolTable:popFromCleanupStack",
              "Popped -> " << m_cleanupStack.size());
+    Expr& e = *m_cleanupStack.top();
     condDebugMsg(!m_cleanupStack.empty(),
                  "NddlSymbolTable:popFromCleanupStack",
-                 "Top: " << typeid(*m_cleanupStack.top()).name() << " " <<
+                 "Top: " << typeid(e).name() << " " <<
                  m_cleanupStack.top()->toString());
   }
   void cleanStack();
