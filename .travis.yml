@@ -10,7 +10,7 @@ matrix:
   exclude:
     - compiler: clang
       env: OPTIMIZE=0 COVERAGE=1
-before_install: sudo pip install cpp-coveralls
+before_install: sudo pip install -U cpp-coveralls
 install:
   - wget -O - http://cpanmin.us | sudo perl - --self-upgrade
   - sudo cpanm Algorithm::Diff
