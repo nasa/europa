@@ -28,8 +28,15 @@ namespace EUROPA{
     void notifyDeactivated(const TokenId token){m_rulesEngine->notifyDeactivated(token);}
     void notifyTerminated(const TokenId token){m_rulesEngine->notifyDeactivated(token);}
     void notifyRemoved(const TokenId token){m_rulesEngine->notifyRemoved(token);}
+    void notifyActivated(const ConstraintId c) {ConstraintEngineListener::notifyActivated(c);}
+    void notifyActivated(const ConstrainedVariableId v) {ConstraintEngineListener::notifyActivated(v);}
+    void notifyDeactivated(const ConstraintId c) {ConstraintEngineListener::notifyDeactivated(c);}
+    void notifyDeactivated(const ConstrainedVariableId v) {ConstraintEngineListener::notifyDeactivated(v);}
     void notifyRemoved(const ConstrainedVariableId var){m_rulesEngine->notifyRemoved(var);}
     void notifyRemoved(const ConstraintId constr){m_rulesEngine->notifyRemoved(constr);}
+    void notifyRemoved(const ObjectId o){PlanDatabaseListener::notifyRemoved(o);}
+    void notifyRemoved(const ObjectId o, const TokenId t){PlanDatabaseListener::notifyRemoved(o, t);}
+    
     const RulesEngineId m_rulesEngine;
   };
 
@@ -156,7 +163,7 @@ RulesEngine::~RulesEngine(){
     }
   }
 
-  void RulesEngine::notifyRemoved(const ConstrainedVariableId var) {
+  void RulesEngine::notifyRemoved(const ConstrainedVariableId) {
     // for(std::multimap<eint, RuleInstanceId>::iterator it = m_ruleInstancesByToken.begin();
     // 	it != m_ruleInstancesByToken.end(); ++it) {
     //   it->second->notifyDiscarded(static_cast<const Entity*>(var));

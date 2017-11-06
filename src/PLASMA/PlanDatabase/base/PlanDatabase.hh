@@ -473,7 +473,8 @@ void PlanDatabase::getObjectsByType(const std::string& type, std::list<ID>& resu
     debugMsg("PlanDatabase:getObjectsByType",
              "Adding object '" << it->second->getName() << "' of type '" <<
              it->second->getType() << "' for type '" << type << "'");
-    debugMsg("PlanDatabase:getObjectsByType", "Typeid for object: " << typeid((*(it->second))).name());
+    const Object& o = *(it->second);
+    debugMsg("PlanDatabase:getObjectsByType", "Typeid for object: " << typeid(o).name());
     results.push_back(ID(it->second));
   }
 }

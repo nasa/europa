@@ -510,12 +510,12 @@ public:
         /// Returns true if this node has no children.
         bool NoChildren() const                                         { return !firstChild; }
 
-  TiXmlDocument* ToDocument()   const           { return ( this && type == DOCUMENT ) ? boost::polymorphic_cast<TiXmlDocument*>(const_cast<TiXmlNode*>(this)) : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
-  TiXmlElement*  ToElement() const              { return ( this && type == ELEMENT  ) ? boost::polymorphic_cast<TiXmlElement*>(  const_cast<TiXmlNode*>(this)) : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
-  TiXmlComment*  ToComment() const              { return ( this && type == COMMENT  ) ? boost::polymorphic_cast<TiXmlComment*>(  const_cast<TiXmlNode*>(this)) : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
-  TiXmlUnknown*  ToUnknown() const              { return ( this && type == UNKNOWN  ) ? boost::polymorphic_cast<TiXmlUnknown*>(  const_cast<TiXmlNode*>(this)) : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
-  TiXmlText*       ToText()    const            { return ( this && type == TEXT     ) ? boost::polymorphic_cast<TiXmlText*>(     const_cast<TiXmlNode*>(this)) : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
-  TiXmlDeclaration* ToDeclaration() const       { return ( this && type == DECLARATION ) ? boost::polymorphic_cast<TiXmlDeclaration*>( const_cast<TiXmlNode*>(this)) : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
+  TiXmlDocument* ToDocument()   const           { return ( type == DOCUMENT ) ? boost::polymorphic_cast<TiXmlDocument*>(const_cast<TiXmlNode*>(this)) : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
+  TiXmlElement*  ToElement() const              { return ( type == ELEMENT  ) ? boost::polymorphic_cast<TiXmlElement*>(  const_cast<TiXmlNode*>(this)) : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
+  TiXmlComment*  ToComment() const              { return ( type == COMMENT  ) ? boost::polymorphic_cast<TiXmlComment*>(  const_cast<TiXmlNode*>(this)) : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
+  TiXmlUnknown*  ToUnknown() const              { return ( type == UNKNOWN  ) ? boost::polymorphic_cast<TiXmlUnknown*>(  const_cast<TiXmlNode*>(this)) : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
+  TiXmlText*       ToText()    const            { return ( type == TEXT     ) ? boost::polymorphic_cast<TiXmlText*>(     const_cast<TiXmlNode*>(this)) : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
+  TiXmlDeclaration* ToDeclaration() const       { return ( type == DECLARATION ) ? boost::polymorphic_cast<TiXmlDeclaration*>( const_cast<TiXmlNode*>(this)) : 0; } ///< Cast to a more defined type. Will return null not of the requested type.
 
         virtual TiXmlNode* Clone() const = 0;
 
