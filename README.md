@@ -6,7 +6,7 @@
 </a>
 [![Coverage Status](https://coveralls.io/repos/nasa/europa/badge.png)](https://coveralls.io/r/nasa/europa)
 
-**EUROPA is available under [NASA's Open Source Agreement (NOSA) ](http://opensource.arc.nasa.gov/page/nosa-software-agreement)**
+**EUROPA is available under [NASA's Open Source Agreement (NOSA)](https://ti.arc.nasa.gov/opensource/nosa)**
 
 Welcome!  EUROPA is a framework to model and tackle problems in Planning, Scheduling and Constraint Programming. EUROPA is typically embedded in a host application. It is designed to be expressive, efficient, extendable and configurable. It includes:
  
@@ -16,7 +16,7 @@ Welcome!  EUROPA is a framework to model and tackle problems in Planning, Schedu
 
 [Learn more...](//github.com/nasa/europa/wiki/What-Is-Europa)
 
-EUROPA was developed at NASA's Ames Research Center and is available under NASA's open source agreement [(NOSA)](http://opensource.arc.nasa.gov/page/nosa-software-agreement) 
+EUROPA was developed at NASA's Ames Research Center and is available under NASA's open source agreement [(NOSA)](https://ti.arc.nasa.gov/opensource/nosa) 
 
 |**Getting Started**|**Documentation**|**Development**|
 |-------------------|-----------------|---------------|
