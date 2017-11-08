@@ -77,11 +77,13 @@ private:
     while(number--){m_cleanupStack.pop();}
     debugMsg("NddlSymbolTable:popFromCleanupStack",
              "Popped -> " << m_cleanupStack.size());
-    Expr& e = *m_cleanupStack.top();
-    condDebugMsg(!m_cleanupStack.empty(),
-                 "NddlSymbolTable:popFromCleanupStack",
-                 "Top: " << typeid(e).name() << " " <<
-                 m_cleanupStack.top()->toString());
+    if(!m_cleanupStack.empty()) {
+      Expr& e = *m_cleanupStack.top();
+      condDebugMsg(!m_cleanupStack.empty(),
+                   "NddlSymbolTable:popFromCleanupStack",
+                   "Top: " << typeid(e).name() << " " <<
+                   m_cleanupStack.top()->toString());
+    }
   }
   void cleanStack();
   size_t cleanupStackSize() const {return m_cleanupStack.size();}
