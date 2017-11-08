@@ -20,6 +20,7 @@ namespace EUROPA {
   public:
     DefaultPropagator(const std::string& name, const ConstraintEngineId constraintEngine, int priority=USER_PRIORITY);
     virtual void execute();
+    virtual void execute(const ConstraintId constraint) {Propagator::execute(constraint);}
     virtual bool updateRequired() const;
   protected:
     virtual void handleConstraintAdded(const ConstraintId constrain);
@@ -60,7 +61,7 @@ namespace EUROPA {
     ~EqualityConstraintPropagator();
 
     void execute();
-
+    void execute(const ConstraintId constraint) {Propagator::execute(constraint);}
     bool updateRequired() const;
 
   private:

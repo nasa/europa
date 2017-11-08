@@ -68,6 +68,8 @@ namespace EUROPA {
     /** Over-ride base class implementations to add extra handling **/
     void add(const TokenId token);
     void remove(const TokenId token);
+    void add(const ObjectId object) {Object::add(object);}
+    void remove(const ObjectId object) {Object::remove(object);}
 
     void insertToIndex(const TokenId token, const std::list<TokenId>::iterator& position);
     void removeFromIndex(const TokenId token);

@@ -30,6 +30,8 @@ class UnboundVariableManager: public FlawManager {
 
   void notifyRemoved(const ConstrainedVariableId var);
   void notifyChanged(const ConstrainedVariableId variable, const DomainListener::ChangeType& changeType);
+  void notifyRemoved(const ConstraintId c) {FlawManager::notifyRemoved(c);}
+  void notifyRemoved(const TokenId t) {FlawManager::notifyRemoved(t);}
   void handleInitialize();
   void addFlaw(const ConstrainedVariableId var);
   void removeFlaw(const ConstrainedVariableId var);

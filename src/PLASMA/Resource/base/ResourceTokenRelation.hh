@@ -63,6 +63,9 @@ namespace EUROPA {
 		     unsigned int argIndex,
 		     const DomainListener::ChangeType& changeType);
       void handleExecute(){}
+      void handleExecute(const ConstrainedVariableId variable,
+			 unsigned int argIndex,
+			 const DomainListener::ChangeType& changeType) {Constraint::handleExecute(variable, argIndex, changeType);}
       TokenId m_token;
       ResourceId m_resource;
 

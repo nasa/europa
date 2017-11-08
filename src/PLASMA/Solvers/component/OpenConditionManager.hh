@@ -35,6 +35,8 @@ namespace SOLVERS {
     private:
       friend class OpenConditionIterator;
       void notifyRemoved(const ConstrainedVariableId variable);
+      void notifyRemoved(const ConstraintId c) {FlawManager::notifyRemoved(c);}
+      void notifyRemoved(const TokenId t) {FlawManager::notifyRemoved(t);}
       void notifyChanged(const ConstrainedVariableId variable, const DomainListener::ChangeType& changeType);
 
       TokenSet m_flawCandidates; /*!< The set of candidate token flaws */

@@ -23,6 +23,7 @@ namespace EUROPA {
     TemporalPropagator(const std::string& name, const ConstraintEngineId constraintEngine);
     virtual ~TemporalPropagator();
     void execute();
+    void execute(const ConstraintId constr) {Propagator::execute(constr);}
     bool updateRequired() const;
 
     /**

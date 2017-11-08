@@ -399,6 +399,7 @@ namespace EUROPA {
 
     bool isMember(const ObjectId obj) const;
     bool isMember(edouble value) const; //because of the reference-casting rules...
+    Domain& operator=(const Domain& o) {return EnumeratedDomain::operator=(o);}
   };
 }
 

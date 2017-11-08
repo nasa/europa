@@ -31,7 +31,7 @@ namespace EUROPA {
   private:
 
     void handleExecute();
-
+    void handleExecute(const ConstrainedVariableId var, unsigned int index, const DomainListener::ChangeType& change) {Constraint::handleExecute(var, index, change);}
     /**
      * @brief Used to only track set and reset events. Will not be subject to propagation
      */

@@ -80,6 +80,9 @@ namespace EUROPA
 		   const DomainListener::ChangeType& changeType);
 
     void handleExecute();
+    void handleExecute(const ConstrainedVariableId variable,
+		       unsigned int argIndex,
+		       const DomainListener::ChangeType& changeType) {Constraint::handleExecute(variable, argIndex, changeType);}
 
     RuleInstanceId m_ruleInstance;
     ConstraintId m_sourceConstraint;

@@ -52,6 +52,10 @@ class Reservoir : public Resource {
       void getOrderingChoices(const TokenId token,
 			      std::vector<std::pair<TokenId, TokenId> >& results,
 			      unsigned long limit = std::numeric_limits<unsigned long>::max());
+      void getOrderingChoices(const InstantId token,
+			      std::vector<std::pair<TransactionId, TransactionId> >& results,
+			      unsigned long limit = std::numeric_limits<unsigned long>::max()) {Resource::getOrderingChoices(token, results, limit);}
+  PSList<PSEntityKey> getOrderingChoices(TimePoint t) {return Resource::getOrderingChoices(t);}
 
 //       void getTokensToOrder(std::vector<TokenId>& results);
 

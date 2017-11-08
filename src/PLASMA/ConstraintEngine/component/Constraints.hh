@@ -20,6 +20,11 @@ namespace EUROPA {
 		const ConstraintEngineId constraintEngine,		\
 		const std::vector<ConstrainedVariableId>& variables);	\
   void handleExecute();							\
+  void handleExecute(const ConstrainedVariableId variable,              \
+                     unsigned int argIndex,                             \
+                     const DomainListener::ChangeType& changeType) {    \
+    Constraint::handleExecute(variable, argIndex, changeType);          \
+  }                                                                     \
   private:								\
   };
 
@@ -90,6 +95,11 @@ class AbsoluteValue : public Constraint {
                 const ConstraintEngineId constraintEngine,
           const std::vector<ConstrainedVariableId>& variables);
   void handleExecute();
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
  private:
   IntervalDomain& m_x;
   IntervalDomain& m_y;
@@ -106,7 +116,11 @@ class AddEqualConstraint : public Constraint {
                      const std::vector<ConstrainedVariableId>& variables);
 
   void handleExecute();
-
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
  private:
   // X + Y = Z
   Domain& m_x;
@@ -132,7 +146,11 @@ class MultEqualConstraint : public Constraint {
                       const std::vector<ConstrainedVariableId>& variables);
   
   void handleExecute();
-  
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }  
  private:
   static const unsigned int X = 0;
   static const unsigned int Y = 1;
@@ -151,7 +169,11 @@ class DivEqualConstraint : public Constraint {
                      const std::vector<ConstrainedVariableId>& variables);
 
   void handleExecute();
-
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
  private:
   static const unsigned int X = 0;
   static const unsigned int Y = 1;
@@ -179,7 +201,11 @@ class AllDiffConstraint : public Constraint {
 
  private:
   void handleExecute() { }
-
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
   Variable<BoolDomain> m_condVar;
   ConstraintId m_condAllDiffConstraint;
 };
@@ -197,7 +223,11 @@ class CalcDistanceConstraint : public Constraint {
                          const std::vector<ConstrainedVariableId>& variables);
 
   void handleExecute();
-
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
   /**
    * Calculates the actual distance
    */
@@ -238,7 +268,11 @@ class LessThanEqualConstraint : public Constraint {
 			    const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
-
+    void handleExecute(const ConstrainedVariableId variable,
+                       unsigned int argIndex,
+                       const DomainListener::ChangeType& changeType) {
+      Constraint::handleExecute(variable, argIndex, changeType);
+    }
     bool canIgnore(const ConstrainedVariableId variable,
 		   unsigned int argIndex,
 		   const DomainListener::ChangeType& changeType);
@@ -274,7 +308,11 @@ class CondAllDiffConstraint : public Constraint {
     ~CondAllDiffConstraint() { }
   
   void handleExecute();
-  
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
  private:
   const unsigned long ARG_COUNT;
 };
@@ -307,7 +345,11 @@ class CondAllSameConstraint : public Constraint {
   ~CondAllSameConstraint() { }
 
   void handleExecute();
-
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
  private:
   const unsigned long ARG_COUNT;
 };
@@ -335,7 +377,11 @@ class CountNonZeroesConstraint : public Constraint {
 
   // All the work is done by the member constraints.
   inline void handleExecute() { }
-
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
  private:
   Variable<IntervalDomain> m_zeroes, m_otherVars,  m_superset;
   AddEqualConstraint m_addEqualConstraint;
@@ -363,6 +409,11 @@ class CountZeroesConstraint : public Constraint {
   ~CountZeroesConstraint() { }
 
   void handleExecute();
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
 };
 typedef DataTypeCheck<CountZeroesConstraint, AtLeastTwoNumericFirstAssignable> CountZeroesCT;
 
@@ -381,7 +432,11 @@ class DistanceFromSquaresConstraint : public Constraint {
                                 const std::vector<ConstrainedVariableId>& variables);
 
   void handleExecute();
-
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
  private:
   static const unsigned int V1 = 0;
   static const unsigned int V2 = 1;
@@ -400,7 +455,11 @@ class EqualConstraint : public Constraint {
                   const std::vector<ConstrainedVariableId>& variables);
   
   void handleExecute();
-  
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
   /**
    * @brief Accessor required for EqualityConstraintPropagator.
    */
@@ -428,6 +487,11 @@ class EqualMaximumConstraint : public Constraint {
   ~EqualMaximumConstraint() { }
   
   void handleExecute();
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
 };
 typedef DataTypeCheck<EqualMaximumConstraint, EqThreeNumeric<> > EqualMaximumCT;
 
@@ -446,6 +510,11 @@ class EqualMinimumConstraint : public Constraint {
   ~EqualMinimumConstraint() { }
   
   void handleExecute();
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
 };
 typedef DataTypeCheck<EqualMinimumConstraint, EqThreeNumeric<> > EqualMinimumCT;
 
@@ -468,7 +537,11 @@ class EqualProductConstraint : public Constraint {
 
   // All the work is done by the member constraints
   inline void handleExecute() { }
-
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
   void handleDiscard();
 
   const unsigned long ARG_COUNT;
@@ -497,7 +570,11 @@ class EqualSumConstraint : public Constraint {
 
   // All the work is done by the member constraints
   inline void handleExecute() { }
-
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
   void handleDiscard();
 
   const unsigned long ARG_COUNT;
@@ -517,6 +594,11 @@ class LessThanConstraint : public Constraint {
 
 
   void handleExecute();
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
 
   bool canIgnore(const ConstrainedVariableId variable,
                  unsigned int argIndex,
@@ -542,6 +624,11 @@ class LockConstraint : public Constraint {
   ~LockConstraint();
 
   void handleExecute();
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
 
   const Domain& getDomain() const;
 
@@ -559,6 +646,11 @@ class NegateConstraint : public Constraint {
                    const std::vector<ConstrainedVariableId>& variables);
   
   void handleExecute();
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
  private:
   static const unsigned int X=0;
   static const unsigned int Y=1;
@@ -573,6 +665,11 @@ class NotEqualConstraint : public Constraint {
                      const std::vector<ConstrainedVariableId>& variables);
 
   void handleExecute();
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
 
   bool canIgnore(const ConstrainedVariableId variable,
                  unsigned int argIndex,
@@ -607,7 +704,11 @@ class MemberImplyConstraint : public Constraint {
   ~MemberImplyConstraint() { }
   
   void handleExecute();
-  
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }  
  private:
   const unsigned long ARG_COUNT;
 };
@@ -640,6 +741,11 @@ class OrConstraint : public Constraint {
  private:
   // All the work is done by the member constraints.
   inline void handleExecute() { }
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
 
   Variable<IntervalIntDomain> m_nonZeroes;
   Variable<IntervalIntDomain> m_superset;
@@ -656,6 +762,11 @@ class RandConstraint : public Constraint {
                  const ConstraintEngineId constraintEngine,
                  const std::vector<ConstrainedVariableId>& variables);
   void handleExecute();
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
  private:
   unsigned int m_rvalue;
 };
@@ -696,6 +807,11 @@ class RotateScopeRightConstraint : public Constraint {
 
  private:
   void handleExecute() { }
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
 
   ConstraintId m_otherConstraint;
 };
@@ -718,7 +834,11 @@ class SineFunction : public Constraint {
                const std::vector<ConstrainedVariableId>& variables);
 
   void handleExecute();
-
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
  private:
   static const unsigned int ARG_COUNT = 2;
   Domain& m_target;
@@ -743,7 +863,11 @@ class SquareOfDifferenceConstraint : public Constraint {
                                const std::vector<ConstrainedVariableId>& variables);
   
   void handleExecute();
-  
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }  
  private:
   static const unsigned int V1 = 0;
   static const unsigned int V2 = 1;
@@ -770,6 +894,11 @@ class SubsetOfConstraint : public Constraint {
   ~SubsetOfConstraint();
 
   void handleExecute();
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
 
   bool canIgnore(const ConstrainedVariableId variable,
                  unsigned int argIndex,
@@ -811,7 +940,11 @@ class SwapTwoVarsConstraint : public Constraint {
 
   private:
     void handleExecute() { }
-
+    void handleExecute(const ConstrainedVariableId variable,
+                       unsigned int argIndex,
+                       const DomainListener::ChangeType& changeType) {
+      Constraint::handleExecute(variable, argIndex, changeType);
+    }
     ConstraintId m_otherConstraint;
   };
 
@@ -824,7 +957,11 @@ class TestAnd : public Constraint {
           const std::vector<ConstrainedVariableId>& variables);
 
   void handleExecute();
-
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
  private:
   Domain& m_test;
   Domain& m_arg1;
@@ -848,7 +985,11 @@ class TestEQ : public Constraint {
          const std::vector<ConstrainedVariableId>& variables);
 
   void handleExecute();
-
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
  private:
   Domain& m_test;
   Domain& m_arg1;
@@ -867,7 +1008,11 @@ class TestLessThan : public Constraint {
                const std::vector<ConstrainedVariableId>& variables);
 
   void handleExecute();
-
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
  private:
   Domain& m_test;
   Domain& m_arg1;
@@ -884,7 +1029,11 @@ class TestLEQ : public Constraint {
           const std::vector<ConstrainedVariableId>& variables);
 
   void handleExecute();
-
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
  private:
   Domain& m_test;
   Domain& m_arg1;
@@ -901,7 +1050,11 @@ class TestNEQ : public Constraint {
           const std::vector<ConstrainedVariableId>& variables);
 
   void handleExecute();
-
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
  private:
   Domain& m_test;
   Domain& m_arg1;
@@ -918,7 +1071,11 @@ class TestOr : public Constraint {
          const std::vector<ConstrainedVariableId>& variables);
 
   void handleExecute();
-
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
  private:
   Domain& m_test;
   Domain& m_arg1;
@@ -935,7 +1092,15 @@ class TestSingleton : public Constraint {
                 const std::vector<ConstrainedVariableId>& variables);
 
   void handleExecute();
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
   const std::vector<ConstrainedVariableId>& getModifiedVariables() const;
+  const std::vector<ConstrainedVariableId>& getModifiedVariables(const ConstrainedVariableId v) const {
+    return Constraint::getModifiedVariables(v);
+  }
 
  private:
   Domain& m_test;
@@ -953,7 +1118,11 @@ class TestSpecified : public Constraint {
                 const std::vector<ConstrainedVariableId>& variables);
 
   void handleExecute();
-
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
  private:
   Domain& m_test;
   Domain& m_arg1;
@@ -982,6 +1151,11 @@ class UnaryConstraint : public Constraint {
   UnaryConstraint(const UnaryConstraint&);
   UnaryConstraint& operator=(const UnaryConstraint&);
   void handleExecute();
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
 
   void handleDiscard();
 
@@ -1010,7 +1184,11 @@ class WithinBounds : public Constraint {
                const std::vector<ConstrainedVariableId>& variables);
 
   void handleExecute();
-
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
  private:
   IntervalDomain& m_x;
   IntervalDomain& m_y;
@@ -1031,6 +1209,11 @@ class EqUnionConstraint : public Constraint {
                     const std::vector<ConstrainedVariableId>& variables);
 
   void handleExecute();
+  void handleExecute(const ConstrainedVariableId variable,
+                     unsigned int argIndex,
+                     const DomainListener::ChangeType& changeType) {
+    Constraint::handleExecute(variable, argIndex, changeType);
+  }
   void handleExecuteInterval(IntervalDomain& dest,
                              std::vector<ConstrainedVariableId>::const_iterator start,
                              const std::vector<ConstrainedVariableId>::const_iterator end);

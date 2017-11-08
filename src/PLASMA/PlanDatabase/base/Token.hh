@@ -563,6 +563,7 @@ namespace EUROPA {
     StateDomain();
     StateDomain(const Domain& org);
     virtual void operator>>(ostream& os) const;
+    Domain& operator=(const Domain& o) {return EnumeratedDomain::operator=(o);}
   };
 }
 

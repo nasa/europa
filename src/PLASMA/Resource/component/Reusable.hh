@@ -21,7 +21,10 @@ namespace EUROPA {
       virtual void getOrderingChoices(const TokenId token,
 				      std::vector<std::pair<TokenId, TokenId> >& results,
 				      unsigned long limit = std::numeric_limits<unsigned long>::max());
-
+      void getOrderingChoices(const InstantId token,
+			      std::vector<std::pair<TransactionId, TransactionId> >& results,
+			      unsigned long limit = std::numeric_limits<unsigned long>::max()) {Resource::getOrderingChoices(token, results, limit);}
+      PSList<PSEntityKey> getOrderingChoices(TimePoint t) {return Resource::getOrderingChoices(t);}
     protected:
       void createTransactions(const TokenId tok);
       void removeTransactions(const TokenId tok);
@@ -124,6 +127,9 @@ namespace EUROPA {
                              const DomainListener::ChangeType& changeType);
 
       virtual void handleExecute();
+      void handleExecute(const ConstrainedVariableId variable,
+			 unsigned int argIndex,
+			 const DomainListener::ChangeType& changeType) {Constraint::handleExecute(variable, argIndex, changeType);}
 
       friend class CBReusable;
     };
