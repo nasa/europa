@@ -21,7 +21,7 @@ before_install:
 install:
   - wget -O - http://cpanmin.us | sudo perl - --self-upgrade
   - sudo cpanm Algorithm::Diff
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install libboost-dev libcppunit-dev antlr swig; else sudo apt-get update -qq && sudo apt-get install libboost-dev libcppunit-dev antlr swig; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install boost cppunit antlr@3 swig; else sudo apt-get update -qq && sudo apt-get install libboost-dev libcppunit-dev antlr swig; fi
   - wget http://www.antlr3.org/download/C/libantlr3c-3.4.tar.gz -O /tmp/libantlr3c-3.4.tar.gz
   - tar -zxf /tmp/libantlr3c-3.4.tar.gz
   - pushd libantlr3c-3.4 && ./configure --prefix=/usr --enable-64bit && make && sudo make install && popd
