@@ -159,6 +159,7 @@ private:
       constraint->deactivate();
     }
   }
+  void notifyAdded(const ConstrainedVariableId var) {ConstraintEngineListener::notifyAdded(var);}
 
  protected:
   ProfilePropagator* m_propagator;

@@ -295,6 +295,7 @@ class Solver {
    public:
     CeListener(const ConstraintEngineId ce, Solver& dm);
 
+    void notifyAdded(const ConstrainedVariableId variable) {ConstraintEngineListener::notifyAdded(variable);}
     void notifyRemoved(const ConstrainedVariableId variable);
     void notifyChanged(const ConstrainedVariableId variable, const DomainListener::ChangeType& changeType);
     void notifyAdded(const ConstraintId constraint);
@@ -317,6 +318,10 @@ class Solver {
     DbListener(const PlanDatabaseId db, Solver& dm);
     void notifyRemoved(const TokenId token);
     void notifyAdded(const TokenId token);
+    void notifyRemoved(const ObjectId o) {PlanDatabaseListener::notifyRemoved(o);}
+    void notifyAdded(const ObjectId o) {PlanDatabaseListener::notifyAdded(o);}
+    void notifyRemoved(const ObjectId o, const TokenId t) {PlanDatabaseListener::notifyRemoved(o, t);}
+    void notifyAdded(const ObjectId o, const TokenId t) {PlanDatabaseListener::notifyAdded(o, t);}
    private:
     Solver& m_solver;
   };

@@ -134,6 +134,7 @@ namespace EUROPA {
       void setLimit(const eint& time, const edouble& lb, const edouble &ub);
 
       virtual void add(const TokenId token);
+      void add(const ObjectId o) {Object::add(o);}
 
       /** 
        * @brief Remove a token from the resource.
@@ -146,6 +147,7 @@ namespace EUROPA {
        * @param token The token to remove.
        */      
       virtual void remove(const TokenId token);
+      void remove(const ObjectId o) {Object::remove(o);}
 
       virtual void getOrderingChoices(const TokenId token,
 				      std::vector<std::pair<TokenId, TokenId> >& results,

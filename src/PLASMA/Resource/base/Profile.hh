@@ -170,6 +170,7 @@ class Profile : public FactoryObj {
    public:
     ConstraintRemovalListener(const ConstraintEngineId ce, ProfileId profile);
     void notifyRemoved(const ConstraintId constr);
+    void notifyRemoved(const ConstrainedVariableId v) {ConstraintEngineListener::notifyRemoved(v);}
    private:
     ProfileId m_profile;
   };

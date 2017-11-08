@@ -132,6 +132,8 @@ namespace EUROPA {
         NearTokenComparator(const TiXmlElement& configData) : TokenComparator(configData) {};
         NearTokenComparator(TokenId tok) : TokenComparator(tok) {}
         virtual bool compare(const TokenId x, const TokenId y);
+        virtual bool compare(const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
+                             const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2) {return TokenComparator::compare(p1, p2);}
         virtual TokenComparator* copy();
         static eint absoluteDistance(const TokenId a, const TokenId b);
         static eint midpoint(const TokenId token);
@@ -142,6 +144,8 @@ namespace EUROPA {
         FarTokenComparator(const TiXmlElement& configData) : NearTokenComparator(configData) {};
         FarTokenComparator(TokenId tok) : NearTokenComparator(tok) {}
         bool compare(const TokenId x, const TokenId y);
+        virtual bool compare(const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
+                             const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2) {return NearTokenComparator::compare(p1, p2);}
         TokenComparator* copy();
       };
 

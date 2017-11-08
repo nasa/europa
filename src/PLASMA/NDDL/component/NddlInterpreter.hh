@@ -110,6 +110,10 @@ class NddlClassSymbolTable : public NddlSymbolTable {
   virtual ObjectTypeId getObjectType(const std::string& name) const;
 
   virtual DataTypeId getTypeForVar(const std::string& varName);
+  virtual DataTypeId getTypeForVar(const std::string& varName,
+				   std::string& errorMsg) {
+    return NddlSymbolTable::getTypeForVar(varName, errorMsg);
+  }
   void saveObjectType();
  protected:
   ObjectType* m_objectType; // Object type being declared
@@ -123,10 +127,17 @@ public:
     virtual ~NddlTokenSymbolTable();
 
     virtual DataTypeId getTypeForVar(const std::string& varName);
+  virtual DataTypeId getTypeForVar(const std::string& varName,
+				   std::string& errorMsg) {
+    return NddlSymbolTable::getTypeForVar(varName, errorMsg);
+  }
     virtual TokenTypeId getTokenType(const std::string& name) const;
 
     virtual TokenTypeId getTypeForToken(const std::string& name);
-
+  virtual TokenTypeId getTypeForToken(const std::string& tokenName,
+                                     std::string& errorMsg) {
+    return NddlSymbolTable::getTypeForToken(tokenName, errorMsg);
+  }
 protected:
     TokenTypeId m_tokenType;
     ObjectTypeId m_objectType;

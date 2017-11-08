@@ -597,6 +597,7 @@ namespace EUROPA {
     void insert(const char* value) {insert(LabelStr(value));}
     void insert(edouble value);
     void insert(const std::list<edouble>& values) {EnumeratedDomain::insert(values);}
+    Domain& operator=(const Domain& o) {return EnumeratedDomain::operator=(o);}
   };
 
   /**
@@ -610,7 +611,7 @@ namespace EUROPA {
     SymbolDomain(double value,const DataTypeId dt = SymbolDT::instance());
     SymbolDomain(const std::list<edouble>& values,const DataTypeId dt = SymbolDT::instance());
     SymbolDomain(const Domain& org);
-
+    Domain& operator=(const Domain& o) {return EnumeratedDomain::operator=(o);}
     virtual SymbolDomain *copy() const;
   };
 
@@ -622,7 +623,7 @@ namespace EUROPA {
     NumericDomain(double value, const DataTypeId dt = FloatDT::instance());
     NumericDomain(const std::list<edouble>& values, const DataTypeId dt = FloatDT::instance());
     NumericDomain(const Domain& org);
-
+    Domain& operator=(const Domain& o) {return EnumeratedDomain::operator=(o);}
     virtual NumericDomain *copy() const;
   };
 
@@ -662,6 +663,7 @@ namespace EUROPA {
      * since it uses minDelta().
      */
     virtual void insert(edouble value);
+    void insert(const std::list<edouble>& values) {IntervalDomain::insert(values);}
 
     /**
      * @brief Fill the given list with the contents of the set.
@@ -681,6 +683,7 @@ namespace EUROPA {
 
     virtual bool intersect(const Domain& dom);
 
+    Domain& operator=(const Domain& o) {return IntervalDomain::operator=(o);}
   protected:
 
     /**
@@ -729,6 +732,7 @@ namespace EUROPA {
 
     bool intersect(edouble lb, edouble ub);
 
+    Domain& operator=(const Domain& o) {return IntervalDomain::operator=(o);}
   private:
     virtual void testPrecision(const edouble& value) const;
   };

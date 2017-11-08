@@ -50,6 +50,7 @@ public:
 
 protected:
     virtual DataRef eval(EvalContext& context, ConstrainedVariableId var, const std::vector<ConstrainedVariableId>& args) const;
+  DataRef eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const {return VariableMethod::eval(context, args);}
 };
 
 class ResetVariable : public VariableMethod
@@ -60,6 +61,7 @@ public:
 
 protected:
     virtual DataRef eval(EvalContext& context, ConstrainedVariableId var, const std::vector<ConstrainedVariableId>& args) const;
+  DataRef eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const {return VariableMethod::eval(context, args);}
 };
 
 class CloseVariable : public VariableMethod
@@ -70,6 +72,7 @@ public:
 
 protected:
     virtual DataRef eval(EvalContext& context, ConstrainedVariableId var, const std::vector<ConstrainedVariableId>& args) const;
+  DataRef eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const {return VariableMethod::eval(context, args);}
 };
 
 
@@ -96,6 +99,7 @@ public:
 
 protected:
     virtual DataRef eval(EvalContext& context, ObjectId obj, const std::vector<ConstrainedVariableId>& args) const;
+  virtual DataRef eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const {return ObjectMethod::eval(context, args);}
 };
 
 class FreeToken : public ObjectMethod
@@ -106,6 +110,7 @@ public:
 
 protected:
     virtual DataRef eval(EvalContext& context, ObjectId obj, const std::vector<ConstrainedVariableId>& args) const;
+  virtual DataRef eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const {return ObjectMethod::eval(context, args);}
 };
 
 
@@ -132,6 +137,7 @@ public:
 
 protected:
     virtual DataRef eval(EvalContext& context, TokenId tok, const std::vector<ConstrainedVariableId>& args) const;
+  virtual DataRef eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const {return TokenMethod::eval(context, args);}
 };
 
 class MergeToken : public TokenMethod
@@ -142,6 +148,7 @@ public:
 
 protected:
     virtual DataRef eval(EvalContext& context, TokenId tok, const std::vector<ConstrainedVariableId>& args) const;
+  virtual DataRef eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const {return TokenMethod::eval(context, args);}
 };
 
 class RejectToken : public TokenMethod
@@ -152,6 +159,7 @@ public:
 
 protected:
     virtual DataRef eval(EvalContext& context, TokenId tok, const std::vector<ConstrainedVariableId>& args) const;
+  virtual DataRef eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const {return TokenMethod::eval(context, args);}
 };
 
 class CancelToken : public TokenMethod
@@ -162,6 +170,7 @@ public:
 
 protected:
     virtual DataRef eval(EvalContext& context, TokenId tok, const std::vector<ConstrainedVariableId>& args) const;
+  virtual DataRef eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const {return TokenMethod::eval(context, args);}
 };
 
 class CloseClass : public Method
