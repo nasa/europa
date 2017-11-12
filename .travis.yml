@@ -24,8 +24,7 @@ install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install antlr@3 swig; else sudo apt-get update -qq && sudo apt-get install libboost-dev antlr swig; fi
   - wget https://github.com/shridharmishra4/europa-pso/raw/master/ThirdParty/trunk/cppunit-1.12.1.tar.bz2 -O /tmp/cppunit-1.12.1.tar.bz2
   - tar -jxf /tmp/cppunit-1.12.1.tar.bz2
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then pushd cppunit-1.12.1 && ./configure --disable-dependency-tracking --disable-doxygen --prefix=/usr/local && make && sudo make install && popd; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then pushd cppunit-1.12.1 && LDFLAGS="-Wl,--no-as-needed" ./configure --disable-dependency-tracking --disable-doxygen --prefix=/usr/local && make && sudo make install && popd; fi
+  - pushd cppunit-1.12.1 && ./configure --disable-dependency-tracking --disable-doxygen --disable-shared --prefix=/usr/local && make && sudo make install && popd
   - wget http://www.antlr3.org/download/C/libantlr3c-3.4.tar.gz -O /tmp/libantlr3c-3.4.tar.gz
   - tar -zxf /tmp/libantlr3c-3.4.tar.gz
   - pushd libantlr3c-3.4 && ./configure --prefix=/usr/local --enable-64bit && make && sudo make install && popd
