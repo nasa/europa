@@ -421,7 +421,7 @@ public abstract class InputHandler extends KeyAdapter {
 
       if(console.getCaretPosition() < console.getCommandStart())
         console.setCaretPosition(console.getDocumentLength());
-      else if(console.getCaretPosition() < console.getCommandStart()) {
+      else if(console.getCaretPosition() == console.getCommandStart()) {
         console.getToolkit().beep();
         return;
       }
