@@ -8,7 +8,7 @@ if(${APPLE})
 
   if(DARWIN_VERSION VERSION_GREATER 14)
     message(STATUS "Shooting in the dark about where jni.h is")
-    set(JNI_INCLUDE_DIRS $ENV{JAVA_HOME}/include)
+    set(JNI_INCLUDE_DIRS "$ENV{JAVA_HOME}/include;$ENV{JAVA_HOME}/include/darwin")
   elseif(DARWIN_VERSION VERSION_EQUAL 14)
     message(STATUS "Setting Yosemite include")
     set(JNI_INCLUDE_DIRS /Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/include)
