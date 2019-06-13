@@ -32,7 +32,14 @@ include(${SWIG_USE_FILE})
 set(CMAKE_SWIG_OUTDIR ${CMAKE_SOURCE_DIR})
 set_source_files_properties(${PROJECT}.i PROPERTIES CPLUSPLUS ON)
 set_source_files_properties(${PROJECT}.i PROPERTIES SWIG_FLAGS "-package;psengine;-includeall")
-swig_add_module(${PROJECT} java ${PROJECT}.i)
+if(${CMAKE_VERSION} VERSION_LESS "3.8.0")
+  swig_add_module(${PROJECT} java ${PROJECT}.i)
+else()
+  swig_add_library(${PROJECT}
+	LANGUAGE java
+	SOURCES ${PROJECT}.i)
+endif(${CMAKE_VERSION} VERSION_LESS "3.8.0")
+	
 
 
 #project-lib
