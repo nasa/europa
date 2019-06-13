@@ -224,6 +224,8 @@ function(declare_module name root_srcs base_srcs component_srcs test_srcs module
   set(libname "${name}${EUROPA_SUFFIX}")
   set(testname ${name}-test${EUROPA_SUFFIX})
 
+  list(APPEND EUROPA_MODULE_INCLUDE_DIRS "${name}" "${name}/base" "${name}/component")
+  
   set(full_dependencies ${module_dependencies})
   foreach(mod ${module_dependencies})
     list(APPEND full_dependencies ${${mod}_FULL_DEPENDENCIES})
@@ -238,6 +240,7 @@ function(declare_module name root_srcs base_srcs component_srcs test_srcs module
   add_common_local_include_deps(${libname})
   foreach(dep ${module_components})
     append_target_property(${libname} INCLUDE_DIRECTORIES ";${CMAKE_CURRENT_SOURCE_DIR}/component/${dep}")
+    list(APPEND EUROPA_MODULE_INCLUDE_DIRS "${name}/component/${dep}")
   endforeach(dep)
 
   #add_common_module_deps(${libname} "${module_dependencies}")
