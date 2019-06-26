@@ -79,3 +79,8 @@ file(COPY test/parser DESTINATION .)
 file(COPY test/parser.nddl DESTINATION .)
 file(GLOB nddl_core base/*.nddl)
 file(COPY ${nddl_core} DESTINATION .)
+
+#TODO: finish this
+install(FILES ${nddl_core}
+  DESTINATION ${EUROPA_ROOT}/dist/europa/NDDL
+  )
