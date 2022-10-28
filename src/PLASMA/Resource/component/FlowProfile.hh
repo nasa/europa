@@ -96,13 +96,11 @@ private:
    */
   template<typename FlowGraphType>
   void initializeGraphs() {
-    if(m_lowerLevelGraph != NULL)
-      delete m_lowerLevelGraph;
+    delete m_lowerLevelGraph;
     m_lowerLevelGraph = new FlowGraphType(m_dummySourceTransaction,
                                           m_dummySinkTransaction, true);
 
-    if(m_upperLevelGraph != NULL)
-      delete m_upperLevelGraph;
+    delete m_upperLevelGraph;
     m_upperLevelGraph = new FlowGraphType(m_dummySourceTransaction,
                                           m_dummySinkTransaction, false);
   }

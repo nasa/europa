@@ -25,8 +25,7 @@ DataType::~DataType()
 {
     m_id.remove();
 
-    if (m_baseDomain != NULL)
-        delete m_baseDomain;
+    delete m_baseDomain;
 }
 
 const DataTypeId DataType::getId() const { return m_id; }
