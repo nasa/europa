@@ -506,8 +506,7 @@ void* ObjectEvalContext::getElement(const std::string& name) const {
 
   InterpretedObjectFactory::~InterpretedObjectFactory()
   {
-    if (m_superCallExpr != NULL)
-      delete m_superCallExpr;
+    delete m_superCallExpr;
 
     for (unsigned int i=0; i < m_constructorBody.size(); i++)
       delete m_constructorBody[i];
@@ -655,8 +654,7 @@ void* ObjectFactoryEvalContext::getElement(const std::string& name) const {
         );
         ObjectEvalContext evalContext(&factoryEvalContext,instance);
 
-        if (m_superCallExpr != NULL)
-            m_superCallExpr->eval(evalContext);
+        m_superCallExpr->eval(evalContext);
 
         for (unsigned int i=0; i < m_constructorBody.size(); i++)
             m_constructorBody[i]->eval(evalContext);

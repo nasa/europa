@@ -219,8 +219,7 @@ SupportedOCDecisionPoint::~SupportedOCDecisionPoint()
 
   m_choices.clear();
 
-  if (m_heuristic != NULL)
-    delete m_heuristic;
+  delete m_heuristic;
 }
 
 std::string SupportedOCDecisionPoint::toString() const
